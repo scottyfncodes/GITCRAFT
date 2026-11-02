@@ -11,7 +11,10 @@ Licence gate: the Community License excludes the EU, UK and South Korea and need
 licence above 1M MAU, so ForgeCraft refuses to run it until FORGECRAFT_HUNYUAN_LICENSE=accepted.
 Tencent Cloud's paid Hunyuan 3D API is deliberately not wired in (no surprise costs)."""
 import json, os, subprocess, time
-import hardware
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import _gitcraft3d  # noqa: F401
+from gitcraft3d import hardware
 
 LOCAL_SCRIPT = r'''
 import sys, json, torch
@@ -65,7 +68,7 @@ shutil.copy(mesh, a["out"]); print(json.dumps({"out": a["out"], "endpoint": name
 def run(work, log, prompt=None, image=None, seed=1234, texture=True, timeout=None):
     st = hardware.hunyuan3d()
     if not st["available"]: raise RuntimeError("Hunyuan3D unavailable: " + st["reason"])
-    py = os.path.join(hardware.MC_HOME, "ai-venv", "bin", "python")
+    py = os.path.join(hardware.FORGE_HOME, "ai-venv", "bin", "python")
     out = os.path.join(work, "hunyuan3d.glb")
     mode = "local" if st["local"]["available"] else "remote"
     args = {"prompt": prompt, "image": image, "seed": seed, "out": out, "texture": texture and st["local"]["texture_ok"]}
