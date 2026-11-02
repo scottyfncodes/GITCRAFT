@@ -43,6 +43,13 @@ done
 native=(--automation-read-root "$root" --automation-write-root "$root")
 # LightCraft locks its library to one process; GITCRAFT_LIGHTCRAFT_LIBRARY lets tests use their own.
 lc_library="${GITCRAFT_LIGHTCRAFT_LIBRARY:-$GITCRAFT_HOME/lightcraft-library}"
+# Another session (e.g. one in a different project) holding the shared library would stop this one
+# from starting; in that case this project gets its own library instead of failing.
+if [[ "$name" == lightcraft && -z "${GITCRAFT_LIGHTCRAFT_LIBRARY:-}" && -e "$lc_library/catalog.lock" ]] &&
+   ! python3 -c 'import fcntl,sys; fcntl.flock(open(sys.argv[1]), fcntl.LOCK_EX | fcntl.LOCK_NB)' "$lc_library/catalog.lock" 2>/dev/null; then
+  lc_library="$GITCRAFT_HOME/lightcraft-libraries/$(basename "$root")-$(printf %s "$root" | sha256sum | cut -c1-8)"
+  echo "gitcraft: the shared LightCraft library is open in another session; using $lc_library for this project" >&2
+fi
 # The 3D library ($GITCRAFT_3D_LIBRARY, from tools.sh) is shared by meshcraft and forgecraft, outside the workspace like LightCraft's
 case "$name" in
   photocraft)  cmd=("$bin" mcp "${native[@]}") ;;

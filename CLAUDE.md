@@ -6,9 +6,12 @@ This repo gives Claude Code seven creative tools from the ArtCraft suite
 Meshroom, TripoSR and Hunyuan3D, then engine-checks, records and hands off) and
 MeshCraft (the specialist: headless Blender for every modelling, cleanup, bake,
 rig, export and validation step), each running as a headless MCP server. When this repo is
-attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`
-and registers them at user scope, so they work no matter which repo you're
-working in.
+attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`;
+`scripts/install-global.sh` (run by install.sh, the hook and `scripts/setup-env.sh`)
+copies the launcher and tool code to `~/.gitcraft/runtime`, registers every
+server at user scope from there, and installs a GITCRAFT block in
+`~/.claude/CLAUDE.md` plus the `gitcraft` skill, so the tools work in every
+project without this repo attached. Sources: `global/`.
 
 ## The tools
 
@@ -98,6 +101,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 
 - `tests/test_policy.py` must pass after any change to the launcher, guard or
   sandbox.
+- `tests/test_global.sh` must pass after any change to install, registration,
+  `global/` or the launcher (it installs into a fresh HOME and uses the tools
+  from a separate project; it tests the committed branch).
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
   `scripts/mcp.sh` need updating to match if you add one.
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`

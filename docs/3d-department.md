@@ -131,6 +131,6 @@ scripts/doctor.sh                        # every 3D backend, why any is unavaila
 
 **From Claude Code:** `hardware_probe` or `route` first; `generate {"brief": …}` for anything; `compose_scene`, `photogrammetry`, `process_mesh`, `mixamo_*` for the specific paths; `library_export` to hand off. Use MeshCraft directly (`run_pipeline` with a brief) when you want full control of a template build, its profiles and the project manifest; the result lands in the same library.
 
-**From a terminal:** `python3 forgecraft/cli.py generate "small tropical island"`, `cli.py jobs`, `cli.py retry <job>`, `cli.py serve`.
+**From a terminal:** `python3 forgecraft/cli.py generate "small tropical island"`, `cli.py jobs`, `cli.py retry <job>`. In a browser: the GITCRAFT control room (`scripts/ui.sh`); ForgeCraft has no live web server.
 
 **Tests:** `tests/test_policy.py` (sandbox, all nine tools), `tests/test_meshcraft.py`, `tests/test_forgecraft.py` (`--slow` adds Meshroom), `tests/test_fresh_install.sh` (install into an empty home), `tests/acceptance_tidebreakers.py` (the TIDEBREAKERS package).

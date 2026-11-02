@@ -7,8 +7,8 @@ PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft 
 ## How it works
 
 1. A GitHub Action builds each app's CLI (which includes its MCP server) and publishes them to the `bin` branch. It reruns weekly to pick up upstream changes, or on demand from the Actions tab.
-2. Attach this repo to a Claude Code session. A SessionStart hook downloads the prebuilt binaries and registers all seven tools, so they're available in whatever repo the session is working on.
-3. Ask Claude to use them: "make a poster in DesignCraft", "merge these PDFs", "cut this clip down to 30 seconds".
+2. One setup script installs the tools and makes them **global**: every Claude Code project can use them, without GITCRAFT being attached, cloned or opened there (see below).
+3. Claude considers them by itself for creative work in any project (a global instruction and skill tell it to), or you ask directly: "make a poster in DesignCraft", "merge these PDFs", "cut this clip down to 30 seconds".
 
 ## 3D: MeshCraft
 
@@ -26,13 +26,59 @@ ForgeCraft orchestrates the 3D Department. It routes each request to the best av
 
 `scripts/ui.sh` opens a local, phone-friendly web UI for every tool: health, discovery, MeshCraft pipelines, jobs with their retries, the versioned 3D library with fingerprints and verified exports, and routing advice. It listens on 127.0.0.1 only, needs its one-time link, and acts only through `scripts/mcp.sh`, so the sandbox and guard apply. See [docs/ui.md](docs/ui.md).
 
-## Install before your session (recommended)
+## Use GITCRAFT in every project (global install)
 
-Use this as the cloud environment's setup script so the tools are ready in every session, whichever repos are attached:
+### Fresh cloud environment (recommended)
+
+Paste this one line into the environment's **Setup script** (cloud environment menu in the session's title bar ▸ Edit ▸ Setup script):
 
 ```
 curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
 ```
+
+Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all nine tools connected** and the GITCRAFT instructions loaded. Nothing has to be attached. It takes a few minutes on a new container (the tools are ~400 MB prebuilt; MeshCraft's Blender is another ~400 MB, skip it with `GITCRAFT_MESHCRAFT=0`).
+
+### Workstation
+
+Run the same line once in a terminal. `~/.claude.json` and `~/.claude/` persist, so every later session in every project inherits it; run it again to update. Requirements: Linux x86_64 (prebuilt binaries), Python 3 (3.11/3.13 for MeshCraft), Node/npm (optional, for the 3D engine check), Linux 5.13+ for the kernel sandbox.
+
+### What the setup installs, and how Claude Code finds it
+
+| Piece | Where | Purpose |
+|---|---|---|
+| GITCRAFT clone | `~/.gitcraft/repo` | Source the setup installs from (`GITCRAFT_REF=<branch>` for another branch, `GITCRAFT_REPO_URL` for a fork) |
+| Tool binaries, Blender venv | `~/.gitcraft/bin`, `~/.gitcraft/meshcraft` | The nine tools |
+| **Runtime** | `~/.gitcraft/runtime` | Copy of the launcher, guard, sandbox and tool code. The servers start from here, never from a checkout, so they work when no GITCRAFT checkout exists |
+| **MCP registration** | `~/.claude.json` → `mcpServers` (user scope) | Claude Code connects user-scope servers in **every** project. Each entry runs `~/.gitcraft/runtime/scripts/mcp.sh <tool>` |
+| **Global instructions** | a managed block in `~/.claude/CLAUDE.md` | Loaded in every project: consider GITCRAFT for creative work, pick tools that fit, hand files between them, integrate into the current project, validate, keep projects isolated. Your own text in that file is kept |
+| **`gitcraft` skill** | `~/.claude/skills/gitcraft/` | The tool-selection guide Claude loads on demand |
+
+Project configuration still wins: a project's `.mcp.json`, `.claude/settings.json` and `CLAUDE.md` work as before, and a project-scope server with the same name overrides the user-scope one. GITCRAFT adds nothing to your projects.
+
+**Project isolation:** each tool's kernel sandbox is limited to the session's workspace (in cloud sessions, the project folder; in multi-repo sessions, their parent folder; on a workstation `$HOME` unless you set `GITCRAFT_ROOTS`), so it cannot write into GITCRAFT or other folders. GITCRAFT registers the tools with no environment variables of their own and the sandbox gives them no network, so they cannot send a project's files or secrets anywhere; the instructions also tell Claude never to pass one project's secrets or private paths into work for another. The global instructions tell Claude to land outputs in the current project's asset folders, never overwrite assets without a reason, and follow the project's art direction.
+
+### Verify
+
+```
+~/.gitcraft/runtime/scripts/doctor.sh      # tools, registration (all from the runtime?), instructions, skill, sandbox
+cd <any project> && claude mcp list         # nine *craft servers: Connected
+tests/test_global.sh                        # full cross-repository acceptance test (fresh HOME + separate project)
+```
+
+In a session, `/mcp` lists the servers; asking Claude "which GITCRAFT tools and skills do you have?" should name the nine servers and the `gitcraft` skill.
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| No `*craft` tools in a session | `~/.gitcraft/runtime/scripts/doctor.sh`. Not installed: run the setup line. Installed but the session started first: `/mcp` to reconnect, or a new session |
+| Cloud: tools gone in a new session | The container is new; the setup script isn't set for that environment. Add the line above to its Setup script |
+| `doctor` says registrations are not from the runtime | They point at an old checkout: `~/.gitcraft/runtime/scripts/install-global.sh` (or any checkout's `scripts/install-global.sh`) |
+| One tool missing | `~/.gitcraft/repo/scripts/install.sh <tool>`, then `/mcp`. `cat ~/.gitcraft/logs/install.log` shows why it failed |
+| `GITCRAFT policy:` refusal | The file is outside the workspace: copy it into the project rather than widening `GITCRAFT_ROOTS` |
+| LightCraft says its library is open elsewhere | Another session holds the shared library; the launcher now gives this project its own (`~/.gitcraft/lightcraft-libraries/`). Set `GITCRAFT_LIGHTCRAFT_LIBRARY` to choose one |
+| Don't want the global instructions | `GITCRAFT_GLOBAL_INSTRUCTIONS=0` when running the setup, and delete the GITCRAFT block from `~/.claude/CLAUDE.md` and `~/.claude/skills/gitcraft` |
+| Setup script failed when the container was built | Its output is in `~/.gitcraft/logs/install.log`; fix the cause and edit the environment's Setup script. New sessions run the fixed script |
 
 ## Security
 
@@ -49,12 +95,14 @@ scripts/doctor.sh             # health report
 tests/test_policy.py          # end-to-end security test
 tests/test_meshcraft.py       # MeshCraft pipeline + sandbox test
 tests/test_forgecraft.py      # ForgeCraft: routing, delegation to MeshCraft, jobs, library, refusals
+tests/test_global.sh          # global install used from a separate project
+scripts/install-global.sh     # refresh the runtime, user-scope registration and global instructions
 scripts/ui.sh                     # the GITCRAFT control room (all tools, incl. ForgeCraft) on 127.0.0.1
 ```
 
 Files are limited to `$GITCRAFT_ROOTS` (default `$GITCRAFT_ROOT`: `$HOME`, or the session workspace when it is outside `$HOME`), enforced by the kernel sandbox. Set them before starting a session to narrow or widen that.
 
-If several repos are attached to a session, this repo's SessionStart hook doesn't run (the session starts in their parent folder). Run `scripts/install.sh` yourself, then `/mcp` to connect.
+When this repo is the session's only repo, its SessionStart hook also installs anything missing and refreshes the runtime, registration and instructions from this checkout. With several repos attached the hook doesn't run (the session starts in their parent folder); the global install above covers that case.
 
 ## Credits
 

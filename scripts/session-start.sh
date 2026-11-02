@@ -11,7 +11,7 @@ for entry in "${GITCRAFT_TOOLS[@]}"; do
   [[ -x "$GITCRAFT_BIN/$pkg" ]] || missing+=("$name")
 done
 
-"$here/register.sh" >/dev/null 2>&1
+"$here/install-global.sh" >/dev/null 2>&1   # keeps ~/.gitcraft/runtime, user-scope registration and global instructions current
 
 if ((${#missing[@]} == 0)); then
   "$here/doctor.sh" --brief
