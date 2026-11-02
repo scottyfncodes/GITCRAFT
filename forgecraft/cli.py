@@ -9,7 +9,7 @@
   forgecraft/cli.py jobs | job <id> | retry <id>
   forgecraft/cli.py search [query] | get <asset> | export <asset> <dest_dir>
   forgecraft/cli.py snapshot <dir>                                            # copy the library (no scratch) for publishing
-  forgecraft/cli.py serve [--port 8765]                                      # the UI, live
+  forgecraft/cli.py serve                                                    # removed: use scripts/ui.sh (see below)
 """
 import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -33,8 +33,8 @@ def main(a):
     elif cmd == "export": r = server.call("library_export", {"asset": rest[0], "dest": rest[1]})
     elif cmd == "snapshot":
         from gitcraft3d import hardware, library; r = library.snapshot(rest[0], hardware.probe())
-    elif cmd == "serve":
-        os.execv(sys.executable, [sys.executable, os.path.join(HERE, "ui_server.py"), *rest])
+    elif cmd == "serve":   # the live web server was removed for security; point at the supported routes
+        import ui_server; print(ui_server.NO_LIVE, file=sys.stderr); return 2
     else: print(__doc__); return 2
     print(json.dumps(r, indent=1, default=str))
     return 1 if isinstance(r, dict) and r.get("status") in ("failed", "blocked") else 0

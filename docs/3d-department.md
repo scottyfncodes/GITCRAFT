@@ -69,7 +69,7 @@ One implementation per capability. "Entry points" are the MCP tools; tools marke
 | Image/text → 3D (AI) | ForgeCraft (generator) → MeshCraft (cleanup) | `forgecraft/backends/triposr.py`, `hunyuan3d.py` | forgecraft `generate` |
 | Licence, provenance, deliverable validation records | ForgeCraft | `forgecraft/pipeline.py` → `library.annotate` | `generate` and every ForgeCraft job |
 | Hand-off to games and other GITCRAFT tools | shared | `library.export` (hash-verified) | `library_export`, `handoff_dir` |
-| Department UI | ForgeCraft | `forgecraft/ui/`, `ui_server.py` | `ui_server.py`, `cli.py serve` |
+| Department UI | ForgeCraft | `forgecraft/ui/`, `ui_server.py` | `ui_server.py --publish` (static snapshot only) |
 
 ## 3. The pipeline
 
@@ -118,7 +118,7 @@ Routes are tried in that order; the first whose condition matches decides. On a 
 - **Asset Library:** search, a 3D viewer, files with hashes, provenance, licence, validation and engine check, versions.
 - **Pipeline Monitor:** ForgeCraft jobs with the MeshCraft jobs they started ("Delegated to MeshCraft"), stage timelines, attempts, errors, retry, and machine/backend availability.
 
-Live (`python3 forgecraft/ui_server.py`, 127.0.0.1 only) buttons run real jobs. The published snapshot (`ui_server.py --publish <library> <dist>`, deployed to Vercel from `acceptance/tidebreakers-3d/library`) shows the real assets and job records of the acceptance run; there, action buttons show the exact MCP call instead.
+There is no live mode: it was removed for security (it ran jobs outside the guard and Landlock sandbox and accepted unauthenticated, cross-site and DNS-rebinding requests; `tests/test_forgecraft_web.py`). Run jobs through the MCP tools, `forgecraft/cli.py`, or the GITCRAFT control room (`scripts/ui.sh`: 127.0.0.1, per-launch token, Origin/Host checks, every call through `scripts/mcp.sh`). The published snapshot (`ui_server.py --publish <library> <dist>`, deployed to Vercel from `acceptance/tidebreakers-3d/library`) shows the real assets and job records of the acceptance run; there, action buttons show the exact MCP call instead.
 
 ## 6. Operating the department
 
@@ -131,6 +131,6 @@ scripts/doctor.sh                        # every 3D backend, why any is unavaila
 
 **From Claude Code:** `hardware_probe` or `route` first; `generate {"brief": …}` for anything; `compose_scene`, `photogrammetry`, `process_mesh`, `mixamo_*` for the specific paths; `library_export` to hand off. Use MeshCraft directly (`run_pipeline` with a brief) when you want full control of a template build, its profiles and the project manifest; the result lands in the same library.
 
-**From a terminal:** `python3 forgecraft/cli.py generate "small tropical island"`, `cli.py jobs`, `cli.py retry <job>`, `cli.py serve`.
+**From a terminal:** `python3 forgecraft/cli.py generate "small tropical island"`, `cli.py jobs`, `cli.py retry <job>`. In a browser: the GITCRAFT control room (`scripts/ui.sh`); ForgeCraft has no live web server.
 
 **Tests:** `tests/test_policy.py` (sandbox, all nine tools), `tests/test_meshcraft.py`, `tests/test_forgecraft.py` (`--slow` adds Meshroom), `tests/test_fresh_install.sh` (install into an empty home), `tests/acceptance_tidebreakers.py` (the TIDEBREAKERS package).

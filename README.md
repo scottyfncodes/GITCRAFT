@@ -97,7 +97,7 @@ tests/test_meshcraft.py       # MeshCraft pipeline + sandbox test
 tests/test_forgecraft.py      # ForgeCraft: routing, delegation to MeshCraft, jobs, library, refusals
 tests/test_global.sh          # global install used from a separate project
 scripts/install-global.sh     # refresh the runtime, user-scope registration and global instructions
-python3 forgecraft/ui_server.py   # the 3D Department UI, live on http://127.0.0.1:8765
+scripts/ui.sh                     # the GITCRAFT control room (all tools, incl. ForgeCraft) on 127.0.0.1
 ```
 
 Files are limited to `$GITCRAFT_ROOTS` (default `$GITCRAFT_ROOT`: `$HOME`, or the session workspace when it is outside `$HOME`), enforced by the kernel sandbox. Set them before starting a session to narrow or widen that.
