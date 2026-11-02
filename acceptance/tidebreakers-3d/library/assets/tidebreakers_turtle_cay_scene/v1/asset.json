@@ -1,0 +1,365 @@
+{
+ "id": "tidebreakers_turtle_cay_scene",
+ "version": 1,
+ "created": "2026-11-02T21:36:38Z",
+ "tool": "compose_scene",
+ "template": "scene",
+ "tags": [
+  "island",
+  "meshcraft_scene",
+  "tidebreakers"
+ ],
+ "brief": {
+  "asset_id": "tidebreakers_turtle_cay_scene",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft",
+  "parent_job": "job-20261102-213609-6659ae",
+  "items": [
+   {
+    "asset": "turtle_cay",
+    "name": "turtle_cay"
+   },
+   {
+    "asset": "tidebreakers_coastal_sloop",
+    "name": "player_sloop",
+    "location": [
+     9,
+     -27,
+     0.15
+    ],
+    "rotation": [
+     0,
+     0,
+     28
+    ]
+   },
+   {
+    "asset": "upgrade_lashed_cargo_crates",
+    "name": "upg_cargo_crate",
+    "attach_to": "player_sloop:socket_storage"
+   },
+   {
+    "asset": "upgrade_brass_compass",
+    "name": "upg_compass_brass",
+    "attach_to": "player_sloop:socket_navigation"
+   },
+   {
+    "asset": "upgrade_ship_s_wheel_ash_rudder",
+    "name": "upg_rudder_ash",
+    "attach_to": "player_sloop:socket_steering"
+   },
+   {
+    "asset": "upgrade_copper_banded_hull",
+    "name": "upg_hull_copper",
+    "attach_to": "player_sloop:socket_hull"
+   },
+   {
+    "asset": "floating_salvage",
+    "name": "salvage",
+    "location": [
+     -7,
+     -30,
+     0
+    ]
+   },
+   {
+    "asset": "deckhand_pip",
+    "name": "deckhand",
+    "attach_to": "turtle_cay:socket_dock"
+   },
+   {
+    "asset": "reef_crab_blockbench",
+    "name": "crab",
+    "attach_to": "turtle_cay:socket_spawn"
+   }
+  ],
+  "tags": [
+   "tidebreakers"
+  ],
+  "camera": [
+   30,
+   -62,
+   14
+  ],
+  "look_at": [
+   0,
+   -20,
+   2
+  ],
+  "samples": 48
+ },
+ "job": "job-20261102-213610-58ab9b",
+ "same_as": null,
+ "inputs": [],
+ "validation": {
+  "status": "pass",
+  "summary": {
+   "pass": 3,
+   "warn": 1,
+   "fail": 0,
+   "info": 1
+  }
+ },
+ "triangles": null,
+ "clips": [
+  "Attack",
+  "Idle",
+  "Interact",
+  "Jump",
+  "Run",
+  "Sneak_Walk",
+  "Walk",
+  "Walking",
+  "float_bob"
+ ],
+ "contract": {
+  "root": "tidebreakers_turtle_cay_scene",
+  "ground": false,
+  "mixed_materials": true
+ },
+ "files": [
+  {
+   "path": "source/tidebreakers_turtle_cay_scene.blend",
+   "kind": "blend",
+   "bytes": 2950689,
+   "sha256": "c5c469030e0650580887518aa345ebe784016de6a32a72651662843b0ce44e50",
+   "content": "c5c469030e0650580887518aa345ebe784016de6a32a72651662843b0ce44e50",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/source/tidebreakers_turtle_cay_scene.blend"
+  },
+  {
+   "path": "exports/tidebreakers_turtle_cay_scene.scene.glb",
+   "kind": "export",
+   "bytes": 3924944,
+   "sha256": "927db82456e64d6cfe054c94dac63273f044c6f88e56ce7c97e41425cb63fde2",
+   "content": "13d4c33004523b0092bea183e613390b2a741c23ac518e010f88f584f0e72cee",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/exports/tidebreakers_turtle_cay_scene.scene.glb"
+  },
+  {
+   "path": "previews/tidebreakers_turtle_cay_scene_hero.png",
+   "kind": "preview",
+   "bytes": 895387,
+   "sha256": "1efd5564e537fef7a7104b408196aa5231f9afb18bc2b922c1101deae611c5c1",
+   "content": "1efd5564e537fef7a7104b408196aa5231f9afb18bc2b922c1101deae611c5c1",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/previews/tidebreakers_turtle_cay_scene_hero.png"
+  },
+  {
+   "path": "previews/tidebreakers_turtle_cay_scene_three_quarter.png",
+   "kind": "preview",
+   "bytes": 252925,
+   "sha256": "4cb953757908b24d9b8ccf7b6efd02c09bb61f43fa930acaaefae24d02a2a8f7",
+   "content": "4cb953757908b24d9b8ccf7b6efd02c09bb61f43fa930acaaefae24d02a2a8f7",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/previews/tidebreakers_turtle_cay_scene_three_quarter.png"
+  }
+ ],
+ "title": "TIDEBREAKERS Turtle Cay Scene",
+ "kind": "island",
+ "source_tool": "meshcraft",
+ "route": {
+  "route": "meshcraft_scene",
+  "chosen": "meshcraft_scene",
+  "preferred": "meshcraft_scene",
+  "fallback_used": false,
+  "explanation": "compose a scene: MeshCraft compose_scene"
+ },
+ "license": {
+  "asset": "Owned by the project that commissioned it",
+  "tools": [
+   {
+    "tool": "MeshCraft (GITCRAFT, Blender 5.2 bpy)",
+    "license": "GITCRAFT code; Blender GPL-2.0-or-later (wheel GPL-3.0) does not extend to models, renders or .blend content"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "forgecraft_job": "job-20261102-213609-6659ae",
+  "meshcraft_job": "job-20261102-213610-58ab9b",
+  "inputs": [
+   {
+    "asset": "turtle_cay",
+    "version": 1
+   },
+   {
+    "asset": "tidebreakers_coastal_sloop",
+    "version": 1
+   },
+   {
+    "asset": "upgrade_lashed_cargo_crates",
+    "version": 1
+   },
+   {
+    "asset": "upgrade_brass_compass",
+    "version": 1
+   },
+   {
+    "asset": "upgrade_ship_s_wheel_ash_rudder",
+    "version": 1
+   },
+   {
+    "asset": "upgrade_copper_banded_hull",
+    "version": 1
+   },
+   {
+    "asset": "floating_salvage",
+    "version": 1
+   },
+   {
+    "asset": "deckhand_pip",
+    "version": 2
+   },
+   {
+    "asset": "reef_crab_blockbench",
+    "version": 1
+   }
+  ],
+  "blender": "5.2.3",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "recorded": "2026-11-02T21:36:40Z"
+ },
+ "generation": {
+  "method": "scene composition",
+  "items": [
+   {
+    "name": "turtle_cay.001",
+    "asset": "turtle_cay",
+    "objects": 4,
+    "attach_to": null
+   },
+   {
+    "name": "player_sloop",
+    "asset": "tidebreakers_coastal_sloop",
+    "objects": 8,
+    "attach_to": null
+   },
+   {
+    "name": "upg_cargo_crate",
+    "asset": "upgrade_lashed_cargo_crates",
+    "objects": 2,
+    "attach_to": "player_sloop:socket_storage"
+   },
+   {
+    "name": "upg_compass_brass",
+    "asset": "upgrade_brass_compass",
+    "objects": 2,
+    "attach_to": "player_sloop:socket_navigation"
+   },
+   {
+    "name": "upg_rudder_ash",
+    "asset": "upgrade_ship_s_wheel_ash_rudder",
+    "objects": 2,
+    "attach_to": "player_sloop:socket_steering"
+   },
+   {
+    "name": "upg_hull_copper",
+    "asset": "upgrade_copper_banded_hull",
+    "objects": 2,
+    "attach_to": "player_sloop:socket_hull"
+   },
+   {
+    "name": "salvage",
+    "asset": "floating_salvage",
+    "objects": 2,
+    "attach_to": null
+   },
+   {
+    "name": "deckhand",
+    "asset": "deckhand_pip",
+    "objects": 3,
+    "attach_to": "turtle_cay:socket_dock"
+   },
+   {
+    "name": "crab",
+    "asset": "reef_crab_blockbench",
+    "objects": 19,
+    "attach_to": "turtle_cay:socket_spawn"
+   }
+  ],
+  "request": "TIDEBREAKERS Turtle Cay Scene scene"
+ },
+ "rig": {
+  "armatures": 1,
+  "convention": "MeshCraft rig"
+ },
+ "geometry": {
+  "triangles": 26742,
+  "size_m": [
+   160.0,
+   160.0,
+   12.0
+  ],
+  "meshes": null
+ },
+ "animations": [
+  {
+   "name": "Attack"
+  },
+  {
+   "name": "Idle"
+  },
+  {
+   "name": "Interact"
+  },
+  {
+   "name": "Jump"
+  },
+  {
+   "name": "Run"
+  },
+  {
+   "name": "Sneak_Walk"
+  },
+  {
+   "name": "Walk"
+  },
+  {
+   "name": "Walking"
+  },
+  {
+   "name": "float_bob"
+  }
+ ],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/tidebreakers_turtle_cay_scene_three_quarter.png",
+  "views": [
+   "previews/tidebreakers_turtle_cay_scene_hero.png",
+   "previews/tidebreakers_turtle_cay_scene_three_quarter.png"
+  ]
+ },
+ "engine_check": {
+  "status": "passed",
+  "glb": "exports/tidebreakers_turtle_cay_scene.scene.glb",
+  "three": null,
+  "checks": [
+   {
+    "check": "engine_load",
+    "level": "pass",
+    "detail": "GLTFLoader (three@0.170) loaded the file"
+   },
+   {
+    "check": "engine_mixed_materials",
+    "level": "pass",
+    "detail": "26 textured + 0 vertex-coloured of 27 meshes (scene)"
+   }
+  ],
+  "screenshot": "previews/tidebreakers_turtle_cay_scene_engine_check.png"
+ },
+ "deliverable_validation": {
+  "status": "passed-with-warnings",
+  "meshcraft": {
+   "pass": 3,
+   "warn": 1,
+   "fail": 0,
+   "info": 1
+  },
+  "engine_check": "passed"
+ },
+ "orchestration": {
+  "forgecraft_job": "job-20261102-213609-6659ae",
+  "route": "meshcraft_scene",
+  "tool": "meshcraft_scene"
+ }
+}

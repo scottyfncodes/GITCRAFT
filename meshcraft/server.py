@@ -26,10 +26,17 @@ only, no network). Tools:
   mixamo_guide       the supported Mixamo workflow (Mixamo has no API; a person uses the site)
   mixamo_prepare_upload  character → mesh-only FBX for Mixamo's auto-rigger
   mixamo_apply       merge Mixamo animation downloads onto a Mixamo-skeleton character (+ optional exports)
-  route              which MeshCraft path fits a request on this machine (advice only)
+  process_mesh       import a mesh made elsewhere (scan, AI, file): clean, decimate, rescale, bake, export, validate
+  compose_scene      assemble finished assets (files or library ids) into a scene: sockets, ocean, sun, hero render, scene GLB
+  route              which path fits a request on this machine (advice only; the 3D Department router decides)
   jobs_list / job_get / job_retry          job records: attempts, fallbacks, errors (run_pipeline,
-                                           blockbench_import and mixamo_apply each run as a job)
+                                           blockbench_import, mixamo_apply, compose_scene each run as a job)
   library_search / library_get / library_export   the versioned asset library (every job adds a version)
+
+MeshCraft is the 3D Department's modelling specialist; ForgeCraft (forgecraft/) orchestrates it.
+The library, job store, hardware probe and router are shared with ForgeCraft (gitcraft3d/).
+`python server.py --call <tool> <json or @file>` runs one tool in-process and prints its JSON
+result: that is how ForgeCraft calls MeshCraft (same code path as MCP, no second Blender).
 
 run_pipeline, blockbench_import and mixamo_apply return what they always did, plus `job` and
 `library` keys. A brief with "library": false skips the library.
@@ -38,6 +45,7 @@ import io, json, os, subprocess, sys, traceback, contextlib, runpy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.dirname(HERE))   # gitcraft3d: the department's shared library, jobs, probe and router
 os.environ.setdefault("BLENDER_USER_CONFIG", os.path.join(os.environ.get("XDG_CONFIG_HOME", "/tmp"), "blender"))
 ROOTS = [os.path.realpath(r) for r in os.environ.get("GITCRAFT_ROOTS", os.environ.get("GITCRAFT_ROOT", os.getcwd())).split(":") if r]
 
@@ -47,7 +55,9 @@ ROOTS = [os.path.realpath(r) for r in os.environ.get("GITCRAFT_ROOTS", os.enviro
 # Blender, so they are answered at once even while a cold import (session start, page
 # cache empty, other servers starting) would outlast the client's connect timeout.
 import queue, threading
-from engine import blockbench, hardware, mixamo, library, jobs, route   # standard library only: usable before Blender loads
+from engine import blockbench, mixamo              # standard library only: usable before Blender loads
+import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
+from gitcraft3d import hardware, library, jobs, routing
 bpy = core = kit = Palette = None
 _import_error = []
 
@@ -127,21 +137,26 @@ def _asset_id(a):
     return aid
 
 
-def _finish(blend, profiles, contract=None):
-    """Optional exports for imported assets, with the same checks run_pipeline makes."""
+def _finish(blend, profiles, contract=None, preview=None):
+    """Optional exports for imported assets, with the same checks run_pipeline makes, plus the
+    same preview renders (so every library version has a thumbnail)."""
     if not profiles: return {}
+    pv = preview if isinstance(preview, dict) else {"size": 512, "views": ["three_quarter", "front", "side"]}
+    previews = [] if preview is False else core.render_views(blend, os.path.join(os.path.dirname(os.path.dirname(blend)), "previews"),
+                                                              pv.get("size", 512), tuple(pv.get("views", ("three_quarter",))))
     exports = core.export(blend, profiles)
     b, r = core.open_blend(blend)
     checks = core.validate_scene(b, r, profiles)
     for e in exports:
         if e["format"] in ("glb", "gltf"):
             checks += [dict(c, file=os.path.basename(e["path"])) for c in core.validate_gltf(e["path"], contract or r.get("contract")) + core.khronos_validate(e["path"])]
-    return {"exports": exports, "validation": {"checks": checks, "summary": core.summarize(checks)}}
+    return {"exports": exports, "previews": previews, "validation": {"checks": checks, "summary": core.summarize(checks)}}
 
 
 def _as_job(tool, args, fn, asset_id, ladder=(), meta=None, job_id=None, manual=False, to_library=True):
     """Run a producing tool as a job; add its result to the library; annotate the result."""
-    res, rec = jobs.run(tool, args, fn, asset_id=asset_id, ladder=ladder, job_id=job_id, manual=manual)
+    b = args.get("brief"); parent = args.get("parent_job") or (b.get("parent_job") if isinstance(b, dict) else None)
+    res, rec = jobs.run(tool, args, fn, asset_id=asset_id, ladder=ladder, job_id=job_id, manual=manual, parent=parent)
     info = {"id": rec["id"], "status": rec["status"], "attempts": len(rec["attempts"])}
     if rec.get("fallback"): info["fallback"] = rec["fallback"]
     if to_library:
@@ -169,7 +184,7 @@ def _blockbench_import(a):
     out_dir = _need(a["out_dir"], True)
     r = bbimport.import_bbmodel(_need(a["path"]), _asset_id(a), out_dir, a.get("material_prefix", "BB"),
                                 _need(a["palette"]) if a.get("palette") else None, a.get("roles"))
-    r.update(_finish(r["blend"], a.get("profiles", [])))
+    r.update(_finish(r["blend"], a.get("profiles", []), preview=a.get("preview")))
     return r
 
 
@@ -183,9 +198,29 @@ def mixamo_apply(a, job_id=None, manual=False):
     return _as_job("mixamo_apply", a, _mixamo_apply, _asset_id(a), (), meta, job_id, manual, a.get("library", True) is not False)
 
 
+def process_mesh(a, job_id=None, manual=False):
+    """Import a mesh made elsewhere through the mesh_import template (a run_pipeline job)."""
+    brief = {"asset_id": _asset_id(a), "template": "mesh_import", "out_dir": a["out_dir"], "title": a.get("title"),
+             "params": {"path": _need(a["path"]), **{k: a[k] for k in ("crop", "crop_floor", "target_size", "max_tris", "recenter") if k in a}},
+             "profiles": a.get("profiles") or ["web-pbr", "unity-fbx", "obj-static"], "preview": a.get("preview", {"size": 512, "views": ["three_quarter", "front", "side"]}),
+             "tags": a.get("tags", []), "library": a.get("library", True)}
+    if a.get("parent_job"): brief["parent_job"] = a["parent_job"]
+    return run_pipeline({"brief": brief}, job_id, manual)
+
+
+def compose_scene(a, job_id=None, manual=False):
+    from engine import scene
+    _need(a["out_dir"], True)
+    for it in a["items"]:
+        if it.get("file"): _need(it["file"])
+    meta = {"tool": "compose_scene", "template": "scene", "brief": a, "tags": a.get("tags", []),
+            "inputs": [it.get("file") for it in a["items"] if it.get("file")]}
+    return _as_job("compose_scene", a, lambda x: scene.compose(x), _asset_id(a), (), meta, job_id, manual, a.get("library", True) is not False)
+
+
 def job_retry(a):
     rec = jobs.get(a["job"])
-    fn = {"run_pipeline": run_pipeline, "blockbench_import": blockbench_import, "mixamo_apply": mixamo_apply}.get(rec["tool"])
+    fn = {"run_pipeline": run_pipeline, "blockbench_import": blockbench_import, "mixamo_apply": mixamo_apply, "compose_scene": compose_scene}.get(rec["tool"])
     if fn is None: raise ValueError(f"job {rec['id']} ran {rec['tool']}, which cannot be retried")
     return fn(rec["request"], job_id=rec["id"], manual=True)
 
@@ -197,7 +232,7 @@ def library_export(a):
 def _mixamo_apply(a):
     anims = [_need(p) for p in a.get("animations", [])]
     r = mixamo.apply(_need(a["character"]), anims, _need(a["out_dir"], True), _asset_id(a), a.get("material_prefix", "MX"))
-    r.update(_finish(r["blend"]["path"], a.get("profiles", [])))
+    r.update(_finish(r["blend"]["path"], a.get("profiles", []), preview=a.get("preview")))
     return r
 
 
@@ -249,6 +284,12 @@ TOOLS = {
                   lambda a: core.inspect_file(_need(a["path"]))),
  "hardware_probe": ("What this machine can do for 3D: CPU, RAM, NVIDIA GPUs, free disk at the roots, sandbox/network, and each capability (Blender, texture bake, Blockbench, Mixamo, engine check, photogrammetry, image-to-3D) with the reason when unavailable. Answers without loading Blender.",
                     S({}), lambda a: hardware.probe(ROOTS)),
+ "process_mesh": ("Import a mesh made elsewhere (photogrammetry scan, AI generation, download: GLB/glTF/FBX/OBJ/STL/PLY) through the mesh_import template: optional scan crop (floor, fragments, floating outliers), cleanup, decimation to max_tris, grounding at the origin, rescale to target_size metres; its own materials/textures/vertex colours are kept and baked by web-pbr. Then previews, validation, exports, library version.",
+                  S({"path": STR, "asset_id": STR, "out_dir": STR, "crop": NUM, "crop_floor": BOOL, "target_size": NUM, "max_tris": NUM,
+                     "profiles": STRS, "title": STR, "tags": STRS}, ["path", "asset_id", "out_dir"]), lambda a: process_mesh(a)),
+ "compose_scene": ("Assemble finished assets into one scene: items [{file | asset (library id) [+ version], name, location[x,y,z], rotation[deg], scale, attach_to:'<item name>:<socket_*>'}], ocean plane, sun (elevation, tilt, azimuth), sky, camera/look_at, Cycles hero render; saves the .blend and exports a scene GLB with every clip, validated (Khronos).",
+                   S({"asset_id": STR, "out_dir": STR, "items": ARR, "camera": ARR, "look_at": ARR, "lens": NUM, "sun": ARR, "sky": STR,
+                      "samples": NUM, "resolution": ARR, "frame": NUM, "ocean_size": NUM, "tags": STRS}, ["asset_id", "out_dir", "items"]), lambda a: compose_scene(a)),
  "blockbench_build": ("Write an editable Blockbench project (.bbmodel, format 5.0) from a cube template: " + ", ".join(sorted(blockbench.TEMPLATES)) + ". "
                       "Colours come from the project's palette via `roles` {role: palette name or hex} (roles per template: see blockbench_inspect output or the error message). Open it in Blockbench to edit; bring it back with blockbench_import.",
                       S({"template": {"type": "string", "enum": sorted(blockbench.TEMPLATES)}, "out": STR, "name": STR, "palette": STR, "roles": OBJ, "seed": NUM}, ["template", "out"]),
@@ -271,7 +312,7 @@ TOOLS = {
                   mixamo_apply),
  "route": ("Advice only: which MeshCraft path fits a request on this machine (template, Blockbench, Mixamo, run_script, photogrammetry, image-to-3D), the tools to call, and why. "
            "Unavailable capabilities are reported as unavailable; alternatives are labelled when they would not be derived from the photos or image.",
-           S({"request": STR, "images": NUM}, ["request"]), lambda a: route.route(a["request"], int(a.get("images", 0)))),
+           S({"request": STR, "images": NUM}, ["request"]), lambda a: routing.advice(a["request"], int(a.get("images", 0)), hardware.probe(ROOTS))),
  "jobs_list": ("Recent MeshCraft jobs (run_pipeline, blockbench_import, mixamo_apply): status (done, done_with_fallback, failed), attempts, library version.",
                S({"limit": NUM, "status": STR}), lambda a: jobs.list_jobs(a.get("limit", 20), a.get("status"))),
  "job_get": ("One job record: the request, every attempt (what was changed for it, timing, error), the pipeline steps and the library version.",
@@ -299,7 +340,26 @@ def send(msg):
     sys.__stdout__.write(json.dumps(msg, default=str) + "\n"); sys.__stdout__.flush()
 
 
+def call(name, args):
+    """Run one tool in this process (ForgeCraft's bridge): same code path as tools/call."""
+    if name not in TOOLS: raise ValueError(f"unknown tool {name}")
+    if name not in NO_BLENDER:
+        _load()
+        if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0])
+    with contextlib.redirect_stdout(sys.stderr):
+        return TOOLS[name][2](args)
+
+
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--call":
+        raw = sys.argv[3] if len(sys.argv) > 3 else "{}"
+        args = json.load(open(raw[1:])) if raw.startswith("@") else json.loads(raw)
+        try:
+            out = {"ok": True, "result": call(sys.argv[2], args)}
+        except Exception as e:
+            out = {"ok": False, "error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc(limit=4)[-1500:]}
+        sys.__stdout__.write("\n" + json.dumps(out, default=str) + "\n"); sys.__stdout__.flush()
+        return
     inbox = queue.Queue()
     def reader():
         for line in sys.stdin: inbox.put(line)

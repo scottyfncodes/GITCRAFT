@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Install the GITCRAFT 3D Department (ForgeCraft) runtimes into ~/.gitcraft/forgecraft.
+# Install the 3D Department's orchestrator runtimes (ForgeCraft: Meshroom, AI venv, weights) into
+# ~/.gitcraft/forgecraft. Blender and the engine check are MeshCraft's (scripts/install.sh meshcraft).
 #
-#   scripts/install-3d.sh                 core: Blender (MeshCraft's bpy 5.2 venv) + engine check (three.js, glTF validator)
+#   scripts/install-3d.sh                 core: makes sure MeshCraft (Blender bpy 5.2, engine check) is installed
 #   scripts/install-3d.sh meshroom        + Meshroom 2023.3 / AliceVision (GitHub release, ~1.2 GB download, 2.1 GB on disk)
 #   scripts/install-3d.sh ai              + TripoSR code, PyTorch and Hunyuan3D-2 client libraries in a separate venv (~5 GB)
 #   scripts/install-3d.sh all
@@ -27,14 +28,8 @@ core() {
     GITCRAFT_MESHCRAFT=1 "$here/install.sh" meshcraft || { echo "gitcraft-3d: Blender (meshcraft) install failed" >&2; return 1; }
   fi
   echo "gitcraft-3d: Blender $("$GITCRAFT_HOME/meshcraft/venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null | tail -1) (shared with MeshCraft)"
-  if command -v npm >/dev/null; then
-    (cd "$repo/forgecraft/web-check" && npm ci -q --no-audit --no-fund >/dev/null 2>&1) \
-      && echo "gitcraft-3d: engine check ready (three.js r170 + Khronos glTF-Validator)" \
-      || echo "gitcraft-3d: npm ci for forgecraft/web-check failed; validation will skip the engine check" >&2
-  else
-    echo "gitcraft-3d: npm not found; validation will skip the three.js / glTF-Validator check" >&2
-  fi
-  node -e "require('playwright')" 2>/dev/null || echo "gitcraft-3d: playwright not found; the three.js load check needs it (npm i -g playwright && npx playwright install chromium)" >&2
+  # the engine check (three@0.170 + Khronos validator) is MeshCraft's: installed with it by install.sh
+  [[ -d "$repo/meshcraft/engine_check/node_modules/three" ]] || echo "gitcraft-3d: MeshCraft's engine check is not installed (npm ci in meshcraft/engine_check)" >&2
   echo "forgecraft $(cd "$repo" && git rev-parse --short HEAD 2>/dev/null) $(date -u +%F)" > "$GITCRAFT_BIN/forgecraft.version"
 }
 
@@ -70,7 +65,7 @@ for w in "${want[@]}"; do
   case "$w" in core|meshroom|ai|weights) "$w" || fail=1 ;; *) echo "unknown component $w" >&2; fail=1 ;; esac
 done
 "$here/register.sh" >/dev/null 2>&1
-python3 "$repo/forgecraft/hardware.py" > "$MC/probe.json" 2>/dev/null && python3 - "$MC/probe.json" <<'PY'
+python3 "$repo/gitcraft3d/hardware.py" > "$MC/probe.json" 2>/dev/null && python3 - "$MC/probe.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 for k, v in d["backends"].items():

@@ -90,7 +90,8 @@ def build(brief):
     t0 = time.time()
     res = mod.build(ctx)
     for o in bpy.context.scene.objects:
-        if o.type == "MESH" and o.data.materials:
+        # palette-role meshes get painted vertex colours; imported meshes (mesh_import) keep their own colours/textures
+        if o.type == "MESH" and o.data.materials and any(m and m.get("gitcraft_role") for m in o.data.materials):
             kit.bake_vertex_colors(o, mats, jitter=brief.get("color_jitter", 0.04), seed=zlib.crc32(o.name.encode()) & 0xffff)  # stable across runs (hash() is salted per process)
     for i, ref in enumerate(brief.get("references", [])):
         kit.add_reference(ref, f"ref_{i}_{os.path.basename(ref)}", loc=(0, 3 + i, 1), size=2.0)

@@ -22,7 +22,7 @@ const md = (a, v) => a.versions[v ?? a.latest];
 const url = (m, rel) => (rel ? m.base + rel.split("/").map(encodeURIComponent).join("/") : null);
 const allLatest = () => S.assets.map((a) => md(a)).sort((x, y) => (y.provenance?.created || "").localeCompare(x.provenance?.created || ""));
 const isChar = (m) => !!m.rig;
-const isScene = (m) => m.kind === "scene" || (m.tags || []).includes("blender_scene");
+const isScene = (m) => m.kind === "scene" || m.template === "scene" || (m.tags || []).includes("meshcraft_scene");
 
 // ---------------------------------------------------------------- viewer
 class Viewer {
@@ -89,6 +89,7 @@ function viewerBox(m, { clips = true } = {}) {
 
 // ---------------------------------------------------------------- routing (same rules file as forgecraft/routing.py)
 const has = (t, words) => words.some((w) => new RegExp(`(?<![a-z])${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![a-z])`).test(t));
+// a port of gitcraft3d/routing.py over the same rules.json (owner: ForgeCraft)
 function parse(brief, images) {
   const R = S.rules, t = (brief || "").toLowerCase();
   const intents = Object.entries(R.intents).filter(([, v]) => has(t, v.words)).map(([k]) => k).sort();
@@ -99,8 +100,9 @@ function parse(brief, images) {
   const params = {};
   if (kind === "upgrade") params.upgrade = Object.entries(R.upgrade_words).find(([, w]) => has(t, w))?.[0] || "cargo_crate";
   if (kind === "prop") params.prop = Object.entries(R.prop_words).find(([, w]) => has(t, w))?.[0] || "barrel";
-  if (t.includes("crab")) params.bb_template = "crab";
-  return { brief, intents, kind, params, images };
+  const named = kind === null || kind === "prop" ? Object.entries(R.meshcraft_templates).find(([, w]) => has(t, w))?.[0] ?? null : null;
+  const template = named || R.kind_templates[kind] || null;
+  return { brief, intents, kind, template, params, images };
 }
 function cond(expr, q) {
   return expr.split(" or ").some((cl) => cl.split(" and ").every((a) => {
@@ -108,30 +110,34 @@ function cond(expr, q) {
     let m = a.match(/^images>=(\d+)$/); if (m) return q.images >= +m[1];
     if (a.startsWith("intent:")) return q.intents.includes(a.slice(7));
     if (a === "kind:known") return q.kind != null;
+    if (a === "template:any") return !!q.template;
     if (a.startsWith("kind:")) return q.kind === a.slice(5);
     return false;
   }));
 }
 function bbTemplate(q) {
-  if (S.bb_templates.includes(q.params.bb_template)) return q.params.bb_template;
+  const bb = S.rules.blockbench_templates;
+  if (bb.includes(q.template)) return q.template;
   if (q.kind === "boat") return "boat"; if (q.kind === "salvage") return "crate";
-  if (q.kind === "prop") return { crate: "crate", chest: "chest", barrel: "crate" }[q.params.prop];
-  return S.bb_templates.find((n) => (q.brief || "").toLowerCase().includes(n)) || null;
+  if (q.kind === "prop") return { crate: "crate", barrel: "crate" }[q.params.prop] || null;
+  return bb.find((n) => (q.brief || "").toLowerCase().includes(n)) || null;
 }
 function route(brief, images = 0, prefer = "", kind = null) {
   const R = S.rules, q = parse(brief, images), be = S.probe.backends;
-  if (kind) q.kind = kind;
+  if (kind) { q.kind = kind; q.template = R.kind_templates[kind] || null; }
+  prefer = R.aliases[prefer] || prefer;
   const rt = R.routes.find((r) => cond(r.when, q));
   let order = [...rt.tools]; if (prefer && R.tools[prefer]) order = [prefer, ...order.filter((x) => x !== prefer)];
   const cands = order.map((tool) => {
     const spec = R.tools[tool], b = be[spec.backend] || {};
     let ok = !!b.available, why = b.reason || (ok ? spec.compute : `${spec.backend} not installed`);
-    if (ok && tool === "blender_procedural" && !spec.kinds.includes(q.kind)) { ok = false; why = `no procedural template for '${q.kind || "this description"}'`; }
+    if (ok && tool === "meshcraft_template" && !q.template) { ok = false; why = "no MeshCraft template matches this request"; }
+    if (ok && tool === "meshcraft_template" && q.template && !(be.meshcraft.templates || []).includes(q.template)) { ok = false; why = `MeshCraft has no \`${q.template}\` template`; }
     if (ok && tool === "blockbench" && !bbTemplate(q)) { ok = false; why = "no Blockbench template for this kind of object"; }
     if (ok && tool === "triposr" && q.images < 1) { ok = false; why = "TripoSR needs a reference image"; }
     if (ok && tool === "meshroom" && q.images < 3) { ok = false; why = "photogrammetry needs several overlapping photos (≥8 recommended)"; }
-    if (ok) why = spec.compute;
-    return { tool, label: spec.label, ok, why };
+    if (ok) why = spec.compute + (tool === "meshcraft_template" ? ` · template ${q.template}` : "");
+    return { tool, label: spec.label, owner: spec.owner, ok, why };
   });
   const chosen = cands.find((c) => c.ok);
   return { q, rt, cands, chosen, fallback: chosen && chosen.tool !== order[0] };
@@ -168,13 +174,13 @@ const pages = {};
 
 pages.factory = (main) => {
   const items = allLatest().filter((m) => !isScene(m));
-  main.innerHTML = `<div class="hero"><div><h1>3D Asset Factory</h1><p>Describe an object or add reference images. The router picks the best tool available on this machine, explains why, and falls back when a tool is missing. It never substitutes a 2D image.</p></div></div>
+  main.innerHTML = `<div class="hero"><div><h1>3D Asset Factory</h1><p>Describe an object or add reference images. ForgeCraft's router picks the best capability available on this machine, explains why, and falls back when a tool is missing. It never substitutes a 2D image.</p></div></div>
   <div class="grid2"><section class="panel"><h2>New asset</h2>
     <label for="brief">Brief</label><textarea id="brief" placeholder="e.g. stylized low-poly boat with a red hull">stylized low-poly boat with a red hull</textarea>
     <div class="chips" id="ex">${["stylized low-poly boat with a red hull", "detailed ship from concept art", "object from photograph", "animated human pirate character", "reconstructed real-world environment", "blocky voxel treasure chest", "floating salvage debris", "small tropical island", "complete game-ready scene"].map((x) => `<span class="chip">${x}</span>`).join("")}</div>
     <div class="row"><div><label for="imgs">Reference images</label><input id="imgs" type="file" accept="image/*" multiple title="On a snapshot, images are listed in the MCP call; run it from Claude Code or the control room"></div>
       <div><label for="nimg">…or count (planning)</label><input id="nimg" type="number" min="0" value="0"></div>
-      <div><label for="tool">Tool</label><select id="tool"><option value="">Automatic</option>${Object.entries(S.rules.tools).filter(([k]) => !["import", "mixamo"].includes(k)).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("")}</select></div></div>
+      <div><label for="tool">Tool</label><select id="tool"><option value="">Automatic</option>${Object.entries(S.rules.tools).filter(([k]) => !["meshcraft_import", "mixamo", "meshcraft_scene"].includes(k)).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("")}</select></div></div>
     <div class="row"><div><label for="nm">Asset name</label><input id="nm" placeholder="optional"></div><div><label for="tris">Triangle budget</label><input id="tris" type="number" value="20000"></div><div><label for="bake">Texture bake</label><select id="bake"><option>1024</option><option>2048</option><option>512</option><option value="0">none</option></select></div></div>
     <div class="row" style="margin-top:14px"><button class="btn primary" id="go">Generate 3D asset</button></div>
     <h3 style="margin-top:18px">Routing plan</h3><div id="plan"></div>
@@ -196,11 +202,11 @@ pages.factory = (main) => {
 pages.characters = (main, arg) => {
   const chars = allLatest().filter(isChar);
   const sel = chars.find((m) => m.id === arg) || chars[0];
-  main.innerHTML = `<div class="hero"><div><h1>3D Character Studio</h1><p>Characters are built and rigged in Blender on a 22-bone skeleton that uses Mixamo's bone names, so clips downloaded from mixamo.com apply by name. Each clip exports as its own glTF animation.</p></div></div>
+  main.innerHTML = `<div class="hero"><div><h1>3D Character Studio</h1><p>Characters are built and rigged by MeshCraft (deckhand template) on a 22-bone skeleton that uses Mixamo's bone names, so clips downloaded from mixamo.com apply by name. Each clip exports as its own glTF animation.</p></div></div>
   <div class="grid2"><section class="panel">${sel ? `<h2>${esc(sel.name)} <span class="pill kind">v${sel.version}</span></h2><div id="cv"></div>
-    <dl class="kv" style="margin-top:12px"><dt>Rig</dt><dd>${sel.rig.bones} bones · ${esc(sel.rig.convention || "")} naming</dd><dt>Clips</dt><dd>${sel.animations.map((a) => `${esc(a.name)} <small>(${a.seconds}s${a.loop ? ", loop" : ""})</small>`).join(" · ")}</dd>
+    <dl class="kv" style="margin-top:12px"><dt>Rig</dt><dd>${esc(sel.rig.convention || "rigged")}</dd><dt>Clips</dt><dd>${sel.animations.map((a) => esc(a.name) + (a.seconds ? ` <small>(${a.seconds}s${a.loop ? ", loop" : ""})</small>` : "")).join(" · ")}</dd>
     <dt>Geometry</dt><dd>${num(sel.geometry.triangles)} triangles · ${sel.geometry.dimensions_m.join(" × ")} m</dd><dt>Source</dt><dd>${esc(sel.source_tool)}</dd></dl>
-    <details style="margin-top:10px"><summary>Bones</summary><p><small>${sel.rig.bone_names.map(esc).join(", ")}</small></p></details>` : "<p>No characters yet.</p>"}
+    ${sel.rig.bone_names ? `<details style="margin-top:10px"><summary>Bones</summary><p><small>${sel.rig.bone_names.map(esc).join(", ")}</small></p></details>` : ""}` : "<p>No characters yet.</p>"}
     <h3 style="margin-top:16px">All characters</h3><div class="cards">${chars.map((m) => card(m, m === sel)).join("")}</div></section>
   <section><div class="panel"><h2>Create a character</h2>
     <div class="row"><div><label for="cn">Name</label><input id="cn" value="Deckhand"></div><div><label for="cb">Bandana</label><select id="cb">${COLORS.map((c) => `<option ${c === "coral" ? "selected" : ""}>${c}</option>`).join("")}</select></div>
@@ -214,9 +220,9 @@ pages.characters = (main, arg) => {
   if (sel) $("#cv").append(viewerBox(sel));
   bindCards(main, (id) => (location.hash = "#characters/" + id));
   $("#clips").querySelectorAll(".chip").forEach((c) => (c.onclick = () => c.classList.toggle("on")));
-  $("#mk").onclick = () => act("generate", { brief: `animated pirate character ${$("#cn").value}`, name: $("#cn").value, kind: "character", tool: "blender_character",
-    params: { colors: { bandana: $("#cb").value, vest: $("#cvst").value, pants: $("#cp").value }, weapon: $("#cw").checked },
-    clips: [...$("#clips").querySelectorAll(".chip.on")].map((c) => c.textContent) }, "Create character");
+  $("#mk").onclick = () => act("generate", { brief: `animated pirate character ${$("#cn").value}`, name: $("#cn").value, kind: "character", tool: "meshcraft_template", template: "deckhand",
+    template_params: { colors: { bandana: $("#cb").value, vest: $("#cvst").value, pants: $("#cp").value }, weapon: $("#cw").checked,
+                       clips: [...$("#clips").querySelectorAll(".chip.on")].map((c) => c.textContent) } }, "Create character");
   if (sel) {
     $("#mxu").onclick = () => dialog(`<h2>Prepare Mixamo upload</h2><pre>forgecraft · mixamo_prepare_upload\n{"asset": "${esc(sel.id)}", "out": "&lt;workspace&gt;/${esc(sel.slug)}_mixamo_upload.fbx"}</pre>`);
     $("#mxa").onclick = () => dialog(`<h2>Apply Mixamo clips</h2><p>Put the downloaded FBX files inside a GITCRAFT root, then:</p><pre>forgecraft · mixamo_apply\n{"character": "${esc(sel.id)}", "animations": ["&lt;root&gt;/mixamo/Walking.fbx", "&lt;root&gt;/mixamo/Jump.fbx"]}</pre><p>Clips are matched on the ${sel.rig.bones} <code>mixamorig:*</code> bones and added as version ${sel.version + 1}.</p>`);
@@ -226,7 +232,7 @@ pages.characters = (main, arg) => {
 pages.world = (main) => {
   const scenes = allLatest().filter(isScene), env = allLatest().filter((m) => ["island", "lighthouse"].includes(m.kind));
   const parts = allLatest().filter((m) => !isScene(m));
-  main.innerHTML = `<div class="hero"><div><h1>3D World Builder</h1><p>Terrain, structures and full scenes. Scenes are assembled in Blender from library GLBs, including attaching upgrades to a boat's sockets. They get an ocean, a sun and sky, and a hero render, then export as one scene GLB plus a .blend file.</p></div></div>
+  main.innerHTML = `<div class="hero"><div><h1>3D World Builder</h1><p>Terrain, structures and full scenes. Scenes are assembled by MeshCraft from library GLBs, including attaching upgrades to a boat's sockets. They get an ocean, a sun and sky, and a hero render, then export as one scene GLB plus a .blend file.</p></div></div>
   ${scenes.map((m) => `<section class="panel"><h2>${esc(m.name)} <span class="pill ${esc(m.validation.status)}">${esc(m.validation.status)}</span></h2>
     <div class="grid2"><img class="scene-hero" alt="Hero render of ${esc(m.name)}" src="${esc(url(m, m.previews.hero || m.previews.thumbnail))}"><div><div data-sv="${esc(m.id)}"></div>
     <dl class="kv" style="margin-top:10px"><dt>Placed assets</dt><dd>${(m.generation.items || []).map((i) => esc(i.name)).join(", ")}</dd><dt>Triangles</dt><dd>${num(m.geometry.triangles)}</dd><dt>Animations</dt><dd>${m.animations.map((a) => esc(a.name)).join(", ") || "none"}</dd></dl>
@@ -244,8 +250,8 @@ pages.world = (main) => {
   main.querySelectorAll("[data-sv]").forEach((el) => el.append(viewerBox(S.assets.map((a) => md(a)).find((m) => m.id === el.dataset.sv), { clips: false })));
   bindCards(main, (id) => (location.hash = "#library/" + id));
   $("#pick").querySelectorAll(".chip").forEach((c) => (c.onclick = () => c.classList.toggle("on")));
-  $("#mki").onclick = () => act("generate", { brief: "tropical island terrain", kind: "island", tool: "blender_procedural", name: "Island " + $("#isd").value, params: { radius: +$("#isz").value, palms: +$("#ipm").value, seed: +$("#isd").value }, bake: 2048, max_tris: 40000 }, "Generate island");
-  $("#mkl").onclick = () => act("generate", { brief: "lighthouse on a rock", kind: "lighthouse", tool: "blender_procedural", name: "Lighthouse" }, "Generate lighthouse");
+  $("#mki").onclick = () => act("generate", { brief: "tropical island terrain", kind: "island", tool: "meshcraft_template", template: "island", name: "Island " + $("#isd").value, template_params: { radius: +$("#isz").value, palms: +$("#ipm").value, seed: +$("#isd").value }, bake: 2048, max_tris: 40000 }, "Generate island");
+  $("#mkl").onclick = () => act("generate", { brief: "lighthouse on a rock", kind: "lighthouse", tool: "meshcraft_template", template: "lighthouse", name: "Lighthouse" }, "Generate lighthouse");
   $("#cmp").onclick = () => {
     const chosen = [...$("#pick").querySelectorAll(".chip.on")].map((c) => ({ id: c.dataset.id, kind: c.dataset.kind }));
     const SOCK = { sail_canvas: "socket_sail", cargo_crate: "socket_storage", compass_brass: "socket_navigation", rudder_ash: "socket_steering", hull_copper: "socket_hull" };
@@ -287,9 +293,9 @@ pages.library = (main, arg, ver) => {
   $("#dv").append(viewerBox(m));
   const tabs = {
     overview: () => `<dl class="kv"><dt>Brief</dt><dd>${esc(m.brief)}</dd><dt>Source tool</dt><dd>${esc(m.source_tool)}</dd><dt>Routing</dt><dd>${esc(m.route?.chosen || "")}${m.route?.fallback_used ? " (fallback)" : ""}: ${esc(m.route?.explanation || "")}</dd>
-      <dt>Triangles</dt><dd>${num(m.geometry.triangles)} (${num(m.geometry.vertices)} vertices)</dd><dt>Size</dt><dd>${(m.geometry.dimensions_m || []).join(" × ")} m (Blender X×Y×Z; glTF is Y-up, forward +Z)</dd>
-      <dt>Materials</dt><dd>${m.materials.map(esc).join(", ")}</dd><dt>Textures</dt><dd>${m.textures.map((t) => `${esc(t.name)} ${t.size.join("×")} (${esc(t.colorspace)})`).join("<br>") || "none"}</dd>
-      <dt>Rig</dt><dd>${m.rig ? `${m.rig.bones} bones (${esc(m.rig.convention)})` : "none"}</dd><dt>Animations</dt><dd>${m.animations.map((x) => `${esc(x.name)} ${x.seconds}s`).join(", ") || "none"}</dd>
+      <dt>Triangles</dt><dd>${num(m.geometry.triangles)}</dd><dt>Size</dt><dd>${(m.geometry.dimensions_m || []).join(" × ")} m (Blender X×Y×Z; glTF is Y-up, forward +Z)</dd>
+      <dt>Materials</dt><dd>${m.materials.map(esc).join(", ")}</dd><dt>Textures</dt><dd>${m.textures.map((t) => esc(t.name)).join("<br>") || "vertex colours (toon) / per-profile atlas"}</dd>
+      <dt>Rig</dt><dd>${m.rig ? esc(m.rig.convention) : "none"}</dd><dt>Animations</dt><dd>${m.animations.map((x) => esc(x.name) + (x.seconds ? ` ${x.seconds}s` : "")).join(", ") || "none"}</dd>
       <dt>Sockets</dt><dd>${m.sockets.map((s) => esc(s.name)).join(", ") || "none"}</dd><dt>Generation</dt><dd><pre>${esc(JSON.stringify(m.generation, null, 1))}</pre></dd></dl>
       ${m.previews.turntable?.length ? `<h3>Turntable</h3><div class="turn">${m.previews.turntable.map((p) => `<img loading="lazy" alt="" src="${esc(url(m, p))}">`).join("")}</div>` : ""}`,
     files: () => `<div class="files">${Object.entries(m.files).map(([f, v]) => `<a href="${esc(url(m, v.path))}" download><b>${esc(f)}</b><small>${fmtB(v.bytes)}</small></a>`).join("")}
@@ -309,7 +315,7 @@ pages.library = (main, arg, ver) => {
 pages.monitor = (main, arg) => {
   const jobs = S.jobs, j = jobs.find((x) => x.id === arg) || jobs[0];
   const pb = S.probe;
-  main.innerHTML = `<div class="hero"><div><h1>Pipeline Monitor</h1><p>Every job's routing decision, stage-by-stage timing, errors, retries and the compute it needs. Failed Blender stages retry automatically with lighter settings; blocked jobs explain what is missing.</p></div></div>
+  main.innerHTML = `<div class="hero"><div><h1>Pipeline Monitor</h1><p>ForgeCraft orchestration jobs and the MeshCraft jobs they start: routing decisions, stage timing, errors, retries and compute. MeshCraft retries failed bakes with lighter settings; blocked jobs explain what is missing.</p></div></div>
   <div class="stat"><div><b>${jobs.filter((x) => x.status === "done").length}</b><span>done</span></div><div><b>${jobs.filter((x) => x.status === "running" || x.status === "queued").length}</b><span>running</span></div>
   <div><b>${jobs.filter((x) => x.status === "failed").length}</b><span>failed</span></div><div><b>${jobs.filter((x) => x.status === "blocked").length}</b><span>blocked (tool unavailable)</span></div></div>
   <div class="grid2"><section class="panel" style="overflow:auto"><table class="jobs"><thead><tr><th>Status</th><th>Job</th><th class="hide-s">Tool</th><th class="hide-s">Stages</th></tr></thead><tbody>
@@ -329,6 +335,8 @@ pages.monitor = (main, arg) => {
     ${j.plan ? `<h3>Routing</h3><p style="font-size:13.5px">${esc(j.plan.explanation)}</p>` : ""}
     <h3>Stages (attempt ${att + 1})</h3><div class="timeline">${st.map((s) => { const v = secs(s); return `<div class="tl ${esc(s.state)}"><span>${esc(s.stage)} <span class="pill ${esc(s.state)}">${esc(s.state)}</span></span><div><div class="bar" style="width:${Math.max(1, (100 * v) / Math.max(mx, ...st.map(secs)))}%"></div>${s.error ? `<div class="err">${esc(s.error)}</div>` : ""}</div><small>${v ? v.toFixed(1) + "s" : ""}</small></div>`; }).join("")}</div>
     ${j.attempts.length > 1 ? `<h3>Earlier attempts</h3>${j.attempts.slice(0, -1).map((a, i) => `<p style="font-size:13px">#${i + 1}: <span class="pill ${esc(a.status)}">${esc(a.status)}</span> ${esc(a.error || "")}</p>`).join("")}` : ""}
+    ${j.children?.length ? `<h3>Delegated to MeshCraft</h3><p style="font-size:13.5px">${j.children.map((c) => `<a href="#monitor/${esc(c)}">${esc(c)}</a>`).join("<br>")}</p>` : ""}
+    ${j.parent ? `<h3>Ordered by</h3><p style="font-size:13.5px"><a href="#monitor/${esc(j.parent)}">${esc(j.parent)}</a> (ForgeCraft)</p>` : ""}
     ${j.compute ? `<h3>Compute</h3><p style="font-size:13.5px">${esc(j.compute.tool)}: ${esc(j.compute.needs || "")}</p>` : ""}
     <div class="row" style="margin-top:10px"><button class="btn ${/failed|blocked/.test(j.status) ? "primary" : ""}" id="rt">Retry job</button></div>`;
   $("#rt").onclick = () => act("retry", { job: j.id }, "Retry " + j.id);

@@ -49,7 +49,8 @@ def _crab():
               (f"claw_{s}", [min(s * 8, s * 12), 2, -10], [max(s * 8, s * 12), 7, -5], "crimson"),
               (f"pincer_{s}", [min(s * 8, s * 10), 4, -12], [max(s * 8, s * 10), 6, -10], "crimson")]
         for i, z in enumerate((-2, 1, 4)):
-            c.append((f"leg_{s}_{i}", [min(s * 6, s * 10), 0, z - 0.75], [max(s * 6, s * 10), 2, z + 0.75], "coral", [s * 6, 2, z], [0, 0, -20 * s]))
+            # legs splay 20° downwards from the body; raised 1.25 px so the tips land exactly on the ground (y = 0)
+            c.append((f"leg_{s}_{i}", [min(s * 6, s * 10), 1.25, z - 0.75], [max(s * 6, s * 10), 3.25, z + 0.75], "coral", [s * 6, 3.25, z], [0, 0, -20 * s]))
     return c
 
 

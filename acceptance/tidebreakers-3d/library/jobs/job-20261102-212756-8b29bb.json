@@ -1,0 +1,91 @@
+{
+ "id": "job-20261102-212756-8b29bb",
+ "tool": "run_pipeline",
+ "asset_id": "floating_salvage",
+ "request": {
+  "brief": {
+   "asset_id": "floating_salvage",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft",
+   "parent_job": "job-20261102-212756-9ccc9e",
+   "template": "salvage",
+   "params": {
+    "seed": 752
+   },
+   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Floating Salvage",
+   "tags": [
+    "tidebreakers"
+   ],
+   "profiles": [
+    "three-web-toon",
+    "web-pbr",
+    "unity-fbx"
+   ],
+   "preview": {
+    "size": 512,
+    "views": [
+     "three_quarter",
+     "front",
+     "side",
+     "top"
+    ]
+   },
+   "bake": {
+    "resolution": 1024,
+    "fallbacks": [
+     512
+    ]
+   }
+  }
+ },
+ "status": "done",
+ "created": "2026-11-02T21:27:56Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:27:56Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 24.2,
+   "steps": [
+    {
+     "step": "build",
+     "ok": true,
+     "seconds": 0.18
+    },
+    {
+     "step": "preview",
+     "ok": true,
+     "seconds": 20.97
+    },
+    {
+     "step": "validate_scene",
+     "ok": true,
+     "seconds": 0.0
+    },
+    {
+     "step": "export",
+     "ok": true,
+     "seconds": 2.34
+    },
+    {
+     "step": "contact_sheet",
+     "ok": true,
+     "seconds": 0.25
+    }
+   ],
+   "finished": "2026-11-02T21:28:20Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261102-212756-9ccc9e",
+ "updated": "2026-11-02T21:28:20Z",
+ "library": {
+  "asset": "floating_salvage",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/floating_salvage/v1",
+  "same_as": null,
+  "files": 16
+ }
+}

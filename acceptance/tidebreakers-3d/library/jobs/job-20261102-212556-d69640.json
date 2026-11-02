@@ -1,0 +1,170 @@
+{
+ "id": "job-20261102-212556-d69640",
+ "tool": "generate",
+ "asset_id": "upgrade_canvas_mainsail",
+ "request": {
+  "brief": "boat upgrade component: Canvas Mainsail",
+  "name": "Upgrade: Canvas Mainsail",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "sail_canvas"
+  },
+  "bake": 512,
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T21:25:56Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:25:56Z",
+   "change": null,
+   "manual": false,
+   "stages": [
+    {
+     "stage": "route",
+     "state": "done",
+     "started": "2026-11-02T21:25:56Z",
+     "info": {
+      "chosen": "meshcraft_template",
+      "route": "template",
+      "fallback_used": false,
+      "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+     },
+     "finished": "2026-11-02T21:25:56Z",
+     "seconds": 0.0
+    },
+    {
+     "stage": "generate",
+     "state": "done",
+     "started": "2026-11-02T21:25:56Z",
+     "info": {
+      "meshcraft_job": "job-20261102-212557-b9062c",
+      "meshcraft_status": "done",
+      "fallback": null,
+      "validation": {
+       "pass": 17,
+       "warn": 1,
+       "fail": 0,
+       "info": 3
+      },
+      "library": {
+       "asset": "upgrade_canvas_mainsail",
+       "version": 1
+      }
+     },
+     "finished": "2026-11-02T21:26:16Z",
+     "seconds": 19.45
+    },
+    {
+     "stage": "engine_check",
+     "state": "done",
+     "started": "2026-11-02T21:26:16Z",
+     "info": {
+      "status": "passed"
+     },
+     "finished": "2026-11-02T21:26:18Z",
+     "seconds": 2.05
+    },
+    {
+     "stage": "record",
+     "state": "done",
+     "started": "2026-11-02T21:26:18Z",
+     "info": {
+      "asset": "upgrade_canvas_mainsail",
+      "version": 1,
+      "validation": "passed-with-warnings"
+     },
+     "finished": "2026-11-02T21:26:18Z",
+     "seconds": 0.01
+    }
+   ],
+   "status": "done",
+   "finished": "2026-11-02T21:26:18Z",
+   "error": null
+  }
+ ],
+ "error": null,
+ "children": [
+  "job-20261102-212557-b9062c"
+ ],
+ "updated": "2026-11-02T21:26:18Z",
+ "plan": {
+  "request": {
+   "brief": "boat upgrade component: Canvas Mainsail",
+   "intents": [],
+   "kind": "upgrade",
+   "template": "boat_upgrade",
+   "params": {
+    "seed": 812,
+    "upgrade": "sail_canvas"
+   },
+   "images": 0,
+   "name": "boat upgrade component: Canvas Mainsail"
+  },
+  "route": "template",
+  "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
+  "candidates": [
+   {
+    "tool": "meshcraft_template",
+    "label": "MeshCraft template (Blender)",
+    "owner": "meshcraft",
+    "available": true,
+    "detail": "CPU, seconds to a minute with previews"
+   },
+   {
+    "tool": "blockbench",
+    "label": "Blockbench .bbmodel \u2192 MeshCraft",
+    "owner": "meshcraft",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh) \u2192 MeshCraft",
+    "owner": "forgecraft",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+ },
+ "compute": {
+  "tool": "meshcraft_template",
+  "needs": "CPU, seconds to a minute with previews",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "asset": {
+  "id": "upgrade_canvas_mainsail",
+  "version": 1,
+  "name": "Upgrade: Canvas Mainsail",
+  "validation": "passed-with-warnings"
+ }
+}

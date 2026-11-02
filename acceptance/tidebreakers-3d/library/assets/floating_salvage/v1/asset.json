@@ -1,0 +1,309 @@
+{
+ "id": "floating_salvage",
+ "version": 1,
+ "created": "2026-11-02T21:28:20Z",
+ "tool": "run_pipeline",
+ "template": "salvage",
+ "tags": [
+  "meshcraft_template",
+  "salvage",
+  "tidebreakers"
+ ],
+ "brief": {
+  "asset_id": "floating_salvage",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft",
+  "parent_job": "job-20261102-212756-9ccc9e",
+  "template": "salvage",
+  "params": {
+   "seed": 752
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Floating Salvage",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 1024,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "job": "job-20261102-212756-8b29bb",
+ "same_as": null,
+ "inputs": [
+  {
+   "path": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "sha256": "768522f8d4b53b21428a6244f92de5a16f8e5a2bf1fe84fd634beb4a93934d3f"
+  }
+ ],
+ "validation": {
+  "status": "pass",
+  "summary": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "triangles": 1188,
+ "clips": [
+  "float_bob"
+ ],
+ "contract": {
+  "root": "floating_salvage",
+  "ground": false,
+  "clips": [
+   "float_bob"
+  ]
+ },
+ "files": [
+  {
+   "path": "source/floating_salvage.blend",
+   "kind": "blend",
+   "bytes": 120064,
+   "sha256": "52b4dac798c5f7112e278fae0c0880f7352e39447b98c8d39ef4de0a21cd13e3",
+   "content": "52b4dac798c5f7112e278fae0c0880f7352e39447b98c8d39ef4de0a21cd13e3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/source/floating_salvage.blend"
+  },
+  {
+   "path": "exports/floating_salvage.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 97968,
+   "sha256": "b4d58dffdadc9337629c69753dcaa6e18398f70655f89947c740e0b7a1877013",
+   "content": "c51ac3bba1f2741e5e0d22f4d73d01d3cdd63f6b2fd74849b3e09a2ee0ce4d3c",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.glb"
+  },
+  {
+   "path": "exports/floating_salvage.three-web-toon.lod50.glb",
+   "kind": "lod",
+   "bytes": 66248,
+   "sha256": "e50c52c1a2f1c5d5ba4c4756546d9b3a4a58ddf67da1c247e35da9e5ad94045e",
+   "content": "9bab8724c18533ec625f855bbcc36b9a2b88481c7ed1cc117325a230839cc4a7",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb"
+  },
+  {
+   "path": "exports/floating_salvage.three-web-toon.lod25.glb",
+   "kind": "lod",
+   "bytes": 38616,
+   "sha256": "5e0ce1a4e484e775dc3b3b32a790f1c7056d821ec2c1bb50bcac824a92dfa3a9",
+   "content": "596403caa3cfef8e21b04824a1b0936a4e25a1265a8ab6e47753081ee2160ec5",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb"
+  },
+  {
+   "path": "exports/floating_salvage.three-web-toon.collision.glb",
+   "kind": "collision",
+   "bytes": 8264,
+   "sha256": "ae2d95dbc4f600aaf89dc69b8e8994e8c88f0ea5f0a18e5de37a4c2e229bab53",
+   "content": "33a9b161bdb07e4fc1f50cb16b0436b1fda21ec0edca872aa0a056b97e06951d",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.collision.glb"
+  },
+  {
+   "path": "exports/floating_salvage.web-pbr.glb",
+   "kind": "export",
+   "bytes": 251412,
+   "sha256": "201dd950fb157873200047b948168b2f3cceede03a288156f05f2d173614f9d1",
+   "content": "c87400ce52df877857ee0cae9af280a824cfe7d2ee81e58ac10ac3e39e880f93",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.glb"
+  },
+  {
+   "path": "exports/floating_salvage.web-pbr.basecolor.png",
+   "kind": "sidecar",
+   "bytes": 104140,
+   "sha256": "f5946851537da6b66576d53b949fb35fa385cad30933452d2364a8e5498dc3d0",
+   "content": "f5946851537da6b66576d53b949fb35fa385cad30933452d2364a8e5498dc3d0",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.basecolor.png"
+  },
+  {
+   "path": "exports/floating_salvage.web-pbr.orm.png",
+   "kind": "sidecar",
+   "bytes": 57552,
+   "sha256": "4662f1b550e0439b34d33590ce52c2bedf25186c35597cf688359bf390ace4fc",
+   "content": "4662f1b550e0439b34d33590ce52c2bedf25186c35597cf688359bf390ace4fc",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.orm.png"
+  },
+  {
+   "path": "exports/floating_salvage.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 57180,
+   "sha256": "c91e278e3cfed82467e32d9d89c661ef5c602953dfaa39909361b639e2aad053",
+   "content": "fbx-size:57180",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.unity-fbx.fbx"
+  },
+  {
+   "path": "exports/floating_salvage.unity-fbx.atlas.png",
+   "kind": "sidecar",
+   "bytes": 301,
+   "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
+   "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.unity-fbx.atlas.png"
+  },
+  {
+   "path": "previews/floating_salvage_three_quarter.png",
+   "kind": "preview",
+   "bytes": 139248,
+   "sha256": "c5d90e951854877c9666278c835351c83f3960305476ef03a9e86d3e7ed5a5a2",
+   "content": "c5d90e951854877c9666278c835351c83f3960305476ef03a9e86d3e7ed5a5a2",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_three_quarter.png"
+  },
+  {
+   "path": "previews/floating_salvage_front.png",
+   "kind": "preview",
+   "bytes": 109953,
+   "sha256": "75946d83149268b62a60ae44f4037c67e0194e236550d8c1b58218388880ffc3",
+   "content": "75946d83149268b62a60ae44f4037c67e0194e236550d8c1b58218388880ffc3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_front.png"
+  },
+  {
+   "path": "previews/floating_salvage_side.png",
+   "kind": "preview",
+   "bytes": 111412,
+   "sha256": "606588916408372fc4491f47f8a0f114bb02fdd8f80c78ceb575358b37412f33",
+   "content": "606588916408372fc4491f47f8a0f114bb02fdd8f80c78ceb575358b37412f33",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_side.png"
+  },
+  {
+   "path": "previews/floating_salvage_top.png",
+   "kind": "preview",
+   "bytes": 162480,
+   "sha256": "cbc51537933d5920958a825e3f96c715163ff81c0293cddea48605f0fe398cb2",
+   "content": "cbc51537933d5920958a825e3f96c715163ff81c0293cddea48605f0fe398cb2",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_top.png"
+  },
+  {
+   "path": "previews/floating_salvage_sheet.png",
+   "kind": "preview",
+   "bytes": 181300,
+   "sha256": "95b10a975179c0bd7bae6af061058c02fbf7d52b294e21fd1fca25ddd5495f57",
+   "content": "95b10a975179c0bd7bae6af061058c02fbf7d52b294e21fd1fca25ddd5495f57",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_sheet.png"
+  },
+  {
+   "path": "floating_salvage.meshcraft.json",
+   "kind": "report",
+   "bytes": 12448,
+   "sha256": "ca2ddc95cb6f607dfbbd2b54081d24e1fba9787a8a87872441fd263c40874fe3",
+   "content": "ca2ddc95cb6f607dfbbd2b54081d24e1fba9787a8a87872441fd263c40874fe3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/floating_salvage.meshcraft.json"
+  }
+ ],
+ "title": "Floating Salvage",
+ "kind": "salvage",
+ "source_tool": "meshcraft",
+ "route": {
+  "route": "template",
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+ },
+ "license": {
+  "asset": "Owned by the project that commissioned it",
+  "tools": [
+   {
+    "tool": "MeshCraft (GITCRAFT, Blender 5.2 bpy)",
+    "license": "GITCRAFT code; Blender GPL-2.0-or-later (wheel GPL-3.0) does not extend to models, renders or .blend content"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "forgecraft_job": "job-20261102-212756-9ccc9e",
+  "meshcraft_job": "job-20261102-212756-8b29bb",
+  "inputs": [],
+  "blender": "5.2.3",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "recorded": "2026-11-02T21:28:23Z"
+ },
+ "generation": {
+  "method": "meshcraft template",
+  "template": "salvage",
+  "params": {
+   "seed": 752
+  },
+  "palette": "tidebreakers-palette.json",
+  "request": "floating salvage: lashed crate, barrel and buoy on driftwood"
+ },
+ "rig": null,
+ "geometry": {
+  "triangles": 1188,
+  "size_m": [
+   2.499,
+   2.452,
+   1.456
+  ],
+  "meshes": null
+ },
+ "animations": [
+  {
+   "name": "float_bob"
+  }
+ ],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/floating_salvage_three_quarter.png",
+  "views": [
+   "previews/floating_salvage_three_quarter.png",
+   "previews/floating_salvage_front.png",
+   "previews/floating_salvage_side.png",
+   "previews/floating_salvage_top.png",
+   "previews/floating_salvage_sheet.png"
+  ]
+ },
+ "engine_check": {
+  "status": "passed",
+  "glb": "exports/floating_salvage.web-pbr.glb",
+  "three": null,
+  "checks": [
+   {
+    "check": "engine_load",
+    "level": "pass",
+    "detail": "GLTFLoader (three@0.170) loaded the file"
+   },
+   {
+    "check": "engine_basecolor_maps",
+    "level": "pass",
+    "detail": "1/1 meshes have a base colour map (texture-baked export)"
+   },
+   {
+    "check": "engine_clip:float_bob",
+    "level": "pass",
+    "detail": "clip present"
+   }
+  ],
+  "screenshot": "previews/floating_salvage_engine_check.png"
+ },
+ "deliverable_validation": {
+  "status": "passed",
+  "meshcraft": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  },
+  "engine_check": "passed"
+ },
+ "orchestration": {
+  "forgecraft_job": "job-20261102-212756-9ccc9e",
+  "route": "template",
+  "tool": "meshcraft_template"
+ }
+}

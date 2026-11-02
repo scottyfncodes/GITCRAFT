@@ -1,0 +1,92 @@
+{
+ "id": "job-20261102-212557-b9062c",
+ "tool": "run_pipeline",
+ "asset_id": "upgrade_canvas_mainsail",
+ "request": {
+  "brief": {
+   "asset_id": "upgrade_canvas_mainsail",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft",
+   "parent_job": "job-20261102-212556-d69640",
+   "template": "boat_upgrade",
+   "params": {
+    "seed": 812,
+    "upgrade": "sail_canvas"
+   },
+   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Upgrade: Canvas Mainsail",
+   "tags": [
+    "tidebreakers"
+   ],
+   "profiles": [
+    "three-web-toon",
+    "web-pbr",
+    "unity-fbx"
+   ],
+   "preview": {
+    "size": 512,
+    "views": [
+     "three_quarter",
+     "front",
+     "side",
+     "top"
+    ]
+   },
+   "bake": {
+    "resolution": 512,
+    "fallbacks": [
+     512
+    ]
+   }
+  }
+ },
+ "status": "done",
+ "created": "2026-11-02T21:25:57Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:25:57Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 18.7,
+   "steps": [
+    {
+     "step": "build",
+     "ok": true,
+     "seconds": 0.13
+    },
+    {
+     "step": "preview",
+     "ok": true,
+     "seconds": 17.51
+    },
+    {
+     "step": "validate_scene",
+     "ok": true,
+     "seconds": 0.0
+    },
+    {
+     "step": "export",
+     "ok": true,
+     "seconds": 0.54
+    },
+    {
+     "step": "contact_sheet",
+     "ok": true,
+     "seconds": 0.2
+    }
+   ],
+   "finished": "2026-11-02T21:26:16Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261102-212556-d69640",
+ "updated": "2026-11-02T21:26:16Z",
+ "library": {
+  "asset": "upgrade_canvas_mainsail",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_canvas_mainsail/v1",
+  "same_as": null,
+  "files": 16
+ }
+}

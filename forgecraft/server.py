@@ -1,122 +1,114 @@
 #!/usr/bin/env python3
-"""ForgeCraft: the GITCRAFT 3D Department as an MCP server (stdio, JSON-RPC 2.0, stdlib only).
+"""ForgeCraft: the GITCRAFT 3D Department's orchestrator, as an MCP server (stdio, JSON-RPC 2.0,
+stdlib only). Started by scripts/mcp.sh behind the same guard + Landlock sandbox as every tool.
 
-Started by scripts/mcp.sh behind the same guard + Landlock sandbox as the other seven tools.
-Long jobs (photogrammetry, AI generation) can run in the background: pass "wait": false and
-poll job_get. Everything a tool returns is real output from a real run; failures and
-"blocked" (tool unavailable here) come back as errors with the reason."""
-import json, os, subprocess, sys, threading, traceback
+ForgeCraft decides how an asset gets made (routing), runs the external generators (Meshroom,
+TripoSR, Hunyuan3D), has MeshCraft do every piece of Blender work (modelling, mesh processing,
+materials, rigging, previews, export, validation), checks the deliverable in the engine, records
+provenance and licensing on the asset's single library version, and hands it off. Tool names are
+unchanged from ForgeCraft 1.0; blockbench_*, mixamo_* and the library/job tools delegate to the
+one shared implementation. Long jobs can run in the background ("wait": false, poll job_get)."""
+import json, os, sys, threading, traceback
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
-import hardware, library, pipeline, routing
-from backends import blockbench, mixamo
+sys.path.insert(0, HERE); sys.path.insert(0, os.path.dirname(HERE))
+import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
+from gitcraft3d import hardware, jobs, library, routing
+import meshcraft as mc
+import pipeline
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 S = lambda **p: {"type": "object", "properties": p}
-STR, INT, BOOL, OBJ = {"type": "string"}, {"type": "integer"}, {"type": "boolean"}, {"type": "object"}
+STR, INT, BOOL, OBJ, NUM = {"type": "string"}, {"type": "integer"}, {"type": "boolean"}, {"type": "object"}, {"type": "number"}
 ARR = lambda t=STR: {"type": "array", "items": t}
-GEN_OPTS = dict(name=STR, max_tris=INT, bake={"type": "integer", "description": "texture bake resolution (0 = keep materials, no bake)"},
-                formats=ARR(), turntable=INT, asset_id={"type": "string", "description": "add the result as a new version of this asset"},
-                handoff_dir={"type": "string", "description": "also copy the finished asset here (inside a GITCRAFT root)"},
+GEN_OPTS = dict(name=STR, profiles=ARR(), formats={"type": "array", "items": STR, "description": "legacy: glb, gltf, fbx, obj, stl → MeshCraft export profiles"},
+                max_tris=INT, bake={"type": "integer", "description": "PBR bake resolution (web-pbr)"},
+                asset_id={"type": "string", "description": "add the result as a new version of this asset"},
+                handoff_dir={"type": "string", "description": "also copy the finished asset here (inside a GITCRAFT root), hash-verified"},
                 tags=ARR(), wait={"type": "boolean", "description": "false = run in the background and return the job id"})
 
 TOOLS = {
- "hardware_probe": ("CPU/RAM/GPU, installed 3D backends (Blender, Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D) with the exact reason any is unavailable, and job limits.", S()),
- "route": ("Show which tool ForgeCraft would use for a brief (and optional reference images) on this machine, the fallbacks, and why. Does not generate.",
-           S(brief=STR, images=ARR(), tool={"type": "string", "description": "force a preferred tool"})),
- "generate": ("Run the full 3D pipeline for a brief: route → generate (Blender procedural, Blockbench, TripoSR, Hunyuan3D or Meshroom) → clean → optimise → UV → bake textures → rig/animate → previews → GLB/glTF/FBX/OBJ/STL/.blend → validate → library.",
-              S(brief=STR, images=ARR(), tool=STR, kind=STR, params=OBJ, template_params={"type": "object", "description": "parameters for a MeshCraft template (see meshcraft list_templates)"}, clips=ARR(), **GEN_OPTS)),
- "process_mesh": ("Import an existing mesh (GLB/glTF/FBX/OBJ/STL/PLY/.bbmodel) and run it through cleanup, optimisation, UV, bake, previews, export and validation into the library.",
-                  S(input=STR, keep_materials=BOOL, target_size={"type": "number", "description": "scale so the largest side is this many metres"}, **GEN_OPTS)),
- "photogrammetry": ("Reconstruct a textured mesh from overlapping photos with Meshroom/AliceVision (CUDA: full pipeline; CPU: draft meshing). Slow: defaults to running in the background.",
-                    S(images=ARR(), meshroom_overrides=ARR(), crop={"type": "number", "description": "keep the centre of the capture: radius as a fraction of the scene half-width (e.g. 0.3)"},
+ "hardware_probe": ("CPU/RAM/GPU/disk and every 3D capability (MeshCraft/Blender, Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D) with the exact reason any is unavailable, and job limits. Same probe as MeshCraft's.", S()),
+ "route": ("Which capability the 3D Department would use for a brief (and optional reference images) on this machine, the fallbacks, and why. Does not generate.",
+           S(brief=STR, images=ARR(), tool={"type": "string", "description": "force a preferred tool"}, kind=STR, template=STR, params=OBJ)),
+ "generate": ("The full production pipeline for a brief: route → generate (MeshCraft template, Blockbench via MeshCraft, Meshroom, TripoSR or Hunyuan3D) → MeshCraft builds/imports, cleans, colours and bakes, rigs/animates, renders previews, exports per engine profile and validates → engine check in three.js r170 → one library version with routing, licence and provenance → optional hand-off.",
+              S(brief=STR, images=ARR(), tool=STR, kind=STR, template=STR, params=OBJ,
+                template_params={"type": "object", "description": "extra parameters for the MeshCraft template (see MeshCraft list_templates)"}, **GEN_OPTS)),
+ "process_mesh": ("Bring an existing mesh (GLB/glTF/FBX/OBJ/STL/PLY) into the library through MeshCraft process_mesh: optional scan crop, cleanup, decimation, rescale, PBR bake, previews, exports, validation, engine check.",
+                  S(input=STR, crop=NUM, crop_floor=BOOL, target_size=NUM, **GEN_OPTS)),
+ "photogrammetry": ("Reconstruct a mesh from overlapping photos with Meshroom/AliceVision (CUDA: full pipeline; CPU: draft meshing), then MeshCraft process_mesh (crop to subject, cleanup, rescale, PBR bake). Slow: runs in the background by default.",
+                    S(images=ARR(), meshroom_overrides=ARR(), crop={"type": "number", "description": "keep the centre of the capture (fraction of the half-width, e.g. 0.25)"},
                       target_size={"type": "number", "description": "rescale so the largest side is this many metres (scans have no real scale)"}, **GEN_OPTS)),
- "blockbench_build": ("Write an editable Blockbench project (.bbmodel) from a cube template (crate, chest, crab, lantern, boat). Open it in Blockbench to edit; import with process_mesh.",
-                      S(template=STR, name=STR, out=STR)),
- "blockbench_inspect": ("Read a .bbmodel and report format version, elements, textures and problems.", S(path=STR)),
- "mixamo_guide": ("The supported Mixamo workflow (Mixamo has no API: a person uploads/downloads at mixamo.com) and the bone names ForgeCraft matches.", S()),
- "mixamo_prepare_upload": ("Export a character asset as an unrigged T-pose FBX for Mixamo's auto-rigger.", S(asset=STR, out=STR)),
- "mixamo_apply": ("Merge Mixamo FBX animation downloads onto a Mixamo-skeleton character (library asset id or file) and add the result to the library.",
+ "blockbench_build": ("Write an editable Blockbench project (.bbmodel 5.0) from a cube template (boat, chest, crab, crate, lantern), coloured from the project palette. Delegates to MeshCraft.",
+                      S(template=STR, name=STR, out=STR, palette=STR, roles=OBJ)),
+ "blockbench_inspect": ("Read a .bbmodel and report format version, elements, textures and problems. Delegates to MeshCraft.", S(path=STR)),
+ "mixamo_guide": ("The supported Mixamo workflow (no API: a person uses mixamo.com) and the bone names that are matched. Delegates to MeshCraft.", S()),
+ "mixamo_prepare_upload": ("Export a character (library asset id or file) as a mesh-only T-pose FBX for Mixamo's auto-rigger. Delegates to MeshCraft.", S(asset=STR, input=STR, out=STR)),
+ "mixamo_apply": ("Merge Mixamo FBX animation downloads onto a Mixamo-skeleton character (library asset id → new version, or a file) via MeshCraft mixamo_apply, then engine-check and record.",
                   S(character=STR, animations=ARR(), **GEN_OPTS)),
- "compose_scene": ("Compose library assets into a scene in Blender (placements or socket attachments, ocean, lights, camera), render a hero image and export scene GLB + .blend.",
-                   S(items={"type": "array", "items": OBJ, "description": "[{asset, version?, location[x,y,z], rotation[deg], scale, attach_to:'<host name>:<socket>'}]"},
-                     camera=ARR({"type": "number"}), look_at=ARR({"type": "number"}), samples=INT, **GEN_OPTS)),
- "library_search": ("Search the 3D asset library by text, kind, source tool or validation status.", S(query=STR, kind=STR, tool=STR, status=STR)),
- "library_get": ("Full metadata for an asset version: geometry, textures, rig, animations, sockets, previews, files with hashes, licence, provenance, validation.", S(asset=STR, version=INT)),
- "library_export": ("Copy an asset version (exports, textures, previews, asset.json) into a folder inside a GITCRAFT root: the handoff to other tools and game repos.",
-                    S(asset=STR, dest=STR, version=INT, formats=ARR())),
- "jobs_list": ("Recent pipeline jobs with status and stages.", S(limit=INT)),
- "job_get": ("One job: per-stage state/timing/errors, routing plan, compute needs, attempts.", S(job=STR)),
- "job_retry": ("Re-run a failed or blocked job with the same request.", S(job=STR, wait=BOOL)),
+ "compose_scene": ("Compose library assets into a scene via MeshCraft compose_scene: items [{asset, version?, name, location, rotation, scale, attach_to:'<name>:<socket_*>'}], ocean, sun, sky, camera, hero render, scene GLB + .blend; engine-checked and recorded.",
+                   S(items={"type": "array", "items": OBJ}, camera=ARR(NUM), look_at=ARR(NUM), lens=NUM, sun=ARR(NUM), sky=STR, samples=INT, resolution=ARR(INT), **GEN_OPTS)),
+ "library_search": ("Search the shared 3D asset library (MeshCraft and ForgeCraft write the same one) by text, template/kind, tool or validation status.", S(query=STR, kind=STR, template=STR, tool=STR, status=STR)),
+ "library_get": ("Full record of an asset version: files with SHA-256, MeshCraft validation, and ForgeCraft's routing, licence, provenance, previews, engine check.", S(asset=STR, version=INT)),
+ "library_export": ("Copy an asset version into a folder inside a GITCRAFT root and verify every hash: the hand-off to other tools and game repos.",
+                    S(asset=STR, dest=STR, version=INT, kinds=ARR())),
+ "jobs_list": ("Recent jobs (ForgeCraft orchestration jobs and the MeshCraft jobs they started) with status.", S(limit=INT, status=STR)),
+ "job_get": ("One job: attempts, stages with timing and errors, routing plan, compute needs, child jobs.", S(job=STR)),
+ "job_retry": ("Re-run a failed or blocked job with its original request (ForgeCraft jobs re-run here; MeshCraft jobs in MeshCraft).", S(job=STR, wait=BOOL)),
 }
 
 
-def _bg(spec, job_id=None):
-    job = pipeline.Job(spec, job_id); job.save()
-    threading.Thread(target=pipeline.run, args=(spec, job.id) if not job_id else (None, job_id), daemon=True).start()
-    return {"job": job.id, "status": "started", "poll": "job_get"}
+def _roots(): return [r for r in os.environ.get("GITCRAFT_ROOTS", os.environ.get("GITCRAFT_ROOT", "")).split(":") if r]
 
 
 def _gen(spec, default_wait=True):
     wait = spec.pop("wait", default_wait)
-    if not wait: return _bg(spec)
-    rec = pipeline.run(spec)
-    return _summ(rec)
+    if not wait: return {"job": pipeline.start(spec), "status": "started", "poll": "job_get"}
+    return pipeline.summary(pipeline.run(spec))
 
 
-def _summ(rec):
-    out = {"job": rec["id"], "status": rec["status"], "error": rec["error"], "asset": rec.get("asset"),
-           "route": {k: (rec.get("plan") or {}).get(k) for k in ("route", "chosen", "fallback_used", "explanation")},
-           "stages": [f"{s['stage']}:{s['state']}" for s in rec["stages"] if s["attempt"] == len(rec["attempts"]) - 1]}
-    if rec.get("asset"):
-        md = library.get(rec["asset"]["id"], rec["asset"]["version"])
-        out["files"] = {k: os.path.join(md["dir"], v["path"]) for k, v in md["files"].items()}
-        out["thumbnail"] = os.path.join(md["dir"], md["previews"]["thumbnail"]) if md["previews"]["thumbnail"] else None
-        out["geometry"] = md["geometry"]; out["animations"] = [a["name"] for a in md["animations"]]
-    if rec.get("handoff"): out["handoff"] = rec["handoff"]["dir"]
-    if rec["status"] == "blocked": out["alternatives"] = (rec.get("plan") or {}).get("alternatives")
-    return out
+def _source(asset):
+    """A library asset's editable source (.blend), else its first export."""
+    md = library.get(asset)
+    f = next((f for f in md["files"] if f["kind"] == "blend"), None) or next(f for f in md["files"] if f["kind"] == "export")
+    return os.path.join(md["dir"], f["path"])
 
 
 def call(name, a):
-    if name == "hardware_probe": return hardware.probe()
-    if name == "route": return routing.route(a.get("brief", ""), routing.expand_images(a.get("images") or []), prefer=a.get("tool"), kind=a.get("kind"), params=a.get("params"))
-    if name == "generate": return _gen(dict(a))
+    a = dict(a or {})
+    if name == "hardware_probe": return hardware.probe(_roots())
+    if name == "route": return routing.route(a.get("brief", ""), routing.expand_images(a.get("images") or []), hardware.probe(_roots()),
+                                             prefer=a.get("tool"), kind=a.get("kind"), params=a.get("params"), template=a.get("template"))
+    if name == "generate": return _gen(a)
     if name == "process_mesh":
-        spec = dict(a); spec["input_mesh"] = spec.pop("input"); spec.setdefault("brief", os.path.basename(spec["input_mesh"]))
-        return _gen(spec)
+        a["input_mesh"] = a.pop("input"); a.setdefault("brief", os.path.basename(a["input_mesh"])); return _gen(a)
     if name == "photogrammetry":
-        spec = dict(a, tool="meshroom"); spec.setdefault("brief", "photogrammetry reconstruction"); return _gen(spec, default_wait=False)
-    if name == "blockbench_build":
-        out = a.get("out") or os.path.join(os.environ.get("GITCRAFT_ROOT", "."), f"{library.slugify(a.get('name', a['template']))}.bbmodel")
-        return blockbench.build(a["template"], library.slugify(a.get("name", a["template"])), out)
-    if name == "blockbench_inspect": return blockbench.inspect(a["path"])
-    if name == "mixamo_guide": return {"steps": mixamo.GUIDE, "bones": ["mixamorig:" + b for b in mixamo.MIXAMO_CORE],
-                                       "note": "ForgeCraft never contacts mixamo.com; there is no official API."}
-    if name == "mixamo_prepare_upload":
-        md = library.get(a["asset"])
-        job = pipeline.Job({"tool": "mixamo_prep", "name": f"Mixamo upload: {md['name']}", "brief": f"Mixamo upload FBX for {md['id']}"})
-        job.rec["attempts"].append({"started": pipeline._now()}); job.rec["status"] = "running"; job.save()
-        try:
-            res = pipeline._blender(job, "mixamo_prep", os.path.join(job.work, "out"), 600, input=library.file_path(md, "glb"), slug=md["slug"])
-            dest = a.get("out") or os.path.join(os.environ.get("GITCRAFT_ROOT", "."), os.path.basename(res["files"]["fbx"]))
-            import shutil; shutil.copy2(res["files"]["fbx"], dest)
-            job.rec.update(status="done", output=dest); job.stage("mixamo_upload_fbx", "done", info={"fbx": dest, "triangles": res["triangles"]})
-        except Exception as e:
-            job.rec.update(status="failed", error=str(e)); job.save(); raise
-        return {"fbx": dest, "triangles": res["triangles"], "next": mixamo.GUIDE[1:]}
+        a["tool"] = "meshroom"; a.setdefault("brief", "photogrammetry reconstruction"); return _gen(a, default_wait=False)
+    if name == "compose_scene": return _gen(dict(a, tool="meshcraft_scene", brief=(a.get("name") or "") + " scene"))
     if name == "mixamo_apply": return _gen(dict(a, tool="mixamo", brief=a.get("name") or "mixamo character"))
-    if name == "compose_scene": return _gen(dict(a, tool="blender_scene", brief=(a.get("name") or "") + " scene"))
-    if name == "library_search": return library.search(a.get("query", ""), a.get("kind"), a.get("tool"), a.get("status"))
+    # delegated to MeshCraft (the one implementation); argument names from ForgeCraft 1.0 still accepted
+    if name == "blockbench_build":
+        out = a.get("out") or os.path.join(os.environ.get("GITCRAFT_ROOT", "."), f"{pipeline.slugify(a.get('name') or a['template'])}.bbmodel")
+        return mc.call("blockbench_build", dict({k: v for k, v in a.items() if k != "name"}, out=out, palette=a.get("palette") or pipeline.PALETTE))
+    if name == "blockbench_inspect": return mc.call("blockbench_inspect", a)
+    if name == "mixamo_guide": return mc.call("mixamo_guide", a)
+    if name == "mixamo_prepare_upload":
+        src = a.get("input") or _source(a["asset"])
+        out = a.get("out") or os.path.join(os.environ.get("GITCRAFT_ROOT", "."), f"{pipeline.slugify(a.get('asset') or os.path.basename(src))}_mixamo_upload.fbx")
+        return mc.call("mixamo_prepare_upload", {"input": src, "out": out}, timeout=600)
+    if name == "library_search":
+        r = library.search(a.get("query", ""), a.get("template") or a.get("kind"), a.get("tool"), a.get("status"), a.get("limit", 50))
+        return r
     if name == "library_get": return library.get(a["asset"], a.get("version"))
-    if name == "library_export": return library.export(a["asset"], a["dest"], a.get("version"), a.get("formats"))
-    if name == "jobs_list":
-        return [{"id": j["id"], "status": j["status"], "brief": (j.get("spec") or {}).get("brief"), "tool": (j.get("plan") or {}).get("chosen"),
-                 "asset": j.get("asset"), "error": j.get("error"), "updated": j.get("updated")} for j in pipeline.jobs(a.get("limit", 20))]
-    if name == "job_get": return pipeline.get_job(a["job"])
+    if name == "library_export": return library.export(a["asset"], a["dest"], a.get("version"), a.get("kinds"))
+    if name == "jobs_list": return jobs.list_jobs(a.get("limit", 20), a.get("status"))
+    if name == "job_get": return jobs.get(a["job"])
     if name == "job_retry":
-        if a.get("wait", True): return _summ(pipeline.retry(a["job"]))
-        return _bg(None, a["job"])
+        rec = jobs.get(a["job"])
+        if rec["tool"] != "generate":   # a MeshCraft job: MeshCraft re-runs it
+            return mc.call("job_retry", {"job": rec["id"]})
+        if not a.get("wait", True):
+            threading.Thread(target=pipeline.retry, args=(rec["id"],), daemon=True).start(); return {"job": rec["id"], "status": "started"}
+        return pipeline.summary(pipeline.retry(rec["id"]))
     raise KeyError(f"unknown tool {name}")
 
 
@@ -134,7 +126,7 @@ def main():
         if method == "initialize":
             send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": p.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {}},
                   "serverInfo": {"name": "forgecraft", "version": VERSION},
-                  "instructions": "GITCRAFT 3D Department. Start with hardware_probe or route; generate runs the whole pipeline; library_export hands assets to other tools."}})
+                  "instructions": "GITCRAFT 3D Department orchestrator. Start with hardware_probe or route; generate runs the whole production pipeline (MeshCraft does the Blender work); library_export hands assets to other tools."}})
         elif method == "tools/list":
             send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()]}})
         elif method == "tools/call":

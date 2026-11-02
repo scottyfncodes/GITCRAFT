@@ -1,0 +1,92 @@
+{
+ "id": "job-20261102-212618-19cc2e",
+ "tool": "run_pipeline",
+ "asset_id": "upgrade_lashed_cargo_crates",
+ "request": {
+  "brief": {
+   "asset_id": "upgrade_lashed_cargo_crates",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212618-3214cb/meshcraft",
+   "parent_job": "job-20261102-212618-3214cb",
+   "template": "boat_upgrade",
+   "params": {
+    "seed": 78,
+    "upgrade": "cargo_crate"
+   },
+   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Upgrade: Lashed Cargo Crates",
+   "tags": [
+    "tidebreakers"
+   ],
+   "profiles": [
+    "three-web-toon",
+    "web-pbr",
+    "unity-fbx"
+   ],
+   "preview": {
+    "size": 512,
+    "views": [
+     "three_quarter",
+     "front",
+     "side",
+     "top"
+    ]
+   },
+   "bake": {
+    "resolution": 512,
+    "fallbacks": [
+     512
+    ]
+   }
+  }
+ },
+ "status": "done",
+ "created": "2026-11-02T21:26:18Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:26:18Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 20.8,
+   "steps": [
+    {
+     "step": "build",
+     "ok": true,
+     "seconds": 0.12
+    },
+    {
+     "step": "preview",
+     "ok": true,
+     "seconds": 15.1
+    },
+    {
+     "step": "validate_scene",
+     "ok": true,
+     "seconds": 0.0
+    },
+    {
+     "step": "export",
+     "ok": true,
+     "seconds": 4.93
+    },
+    {
+     "step": "contact_sheet",
+     "ok": true,
+     "seconds": 0.23
+    }
+   ],
+   "finished": "2026-11-02T21:26:39Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261102-212618-3214cb",
+ "updated": "2026-11-02T21:26:39Z",
+ "library": {
+  "asset": "upgrade_lashed_cargo_crates",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_lashed_cargo_crates/v1",
+  "same_as": null,
+  "files": 16
+ }
+}

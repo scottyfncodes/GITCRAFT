@@ -1,0 +1,419 @@
+{
+ "asset_id": "upgrade_canvas_mainsail",
+ "brief": {
+  "asset_id": "upgrade_canvas_mainsail",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft",
+  "parent_job": "job-20261102-212556-d69640",
+  "template": "boat_upgrade",
+  "params": {
+   "seed": 812,
+   "upgrade": "sail_canvas"
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Upgrade: Canvas Mainsail",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 512,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.13
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 17.51
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.0
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 0.54
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.2
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/source/upgrade_canvas_mainsail.blend",
+   "kind": "blend",
+   "bytes": 103697,
+   "sha256": "f077a9e1deaaf190dc42f55971309d8b8e5e1f50e74acf2457a3017efcf1ec21"
+  },
+  "seconds": 0.08,
+  "roles": {
+   "cloth_f6ead0": "#F6EAD0",
+   "wood_9a5a2e": "#9A5A2E",
+   "cloth_c9a46b": "#C9A46B"
+  },
+  "objects": [
+   "upgrade_canvas_mainsail",
+   "upgrade_canvas_mainsail_mesh"
+  ],
+  "actions": [],
+  "contract": {
+   "root": "upgrade_canvas_mainsail",
+   "ground": false
+  },
+  "expect": {}
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/previews/upgrade_canvas_mainsail_three_quarter.png",
+   "kind": "preview",
+   "bytes": 109662,
+   "sha256": "3e797669e07d7df39b483ad946feb208c66cc7abb143386a97c8642030c8d2f2",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/previews/upgrade_canvas_mainsail_front.png",
+   "kind": "preview",
+   "bytes": 97902,
+   "sha256": "23a9da6c87ad53dcab996688dfa746a9c48c96e10371b3186c08ae039a8f5741",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/previews/upgrade_canvas_mainsail_side.png",
+   "kind": "preview",
+   "bytes": 127659,
+   "sha256": "38b7b2a3fe4cd63e7c7484e3f87521cf0bd27a7d189130695f915ac37d4759f0",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/previews/upgrade_canvas_mainsail_top.png",
+   "kind": "preview",
+   "bytes": 81123,
+   "sha256": "76c18e79c1358967ed59a4a7b2b49f18df5bc42f0bb9399e926cb39e03a668e8",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/previews/upgrade_canvas_mainsail_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 99415,
+   "sha256": "c73f6a734a263d76672190add6858dd66d9c1d953e298ce5c4a6ccea204a158c"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 44948,
+   "sha256": "c5b5e0f7d9fa9bff4fe1c4114694764b9ba3774466f1a9053e21f364607cad5b",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 32880,
+     "sha256": "473a349d485204f9635d93d5274b8319c83d8e9e119075e08639f887bad74e21",
+     "ratio": 0.5,
+     "triangles": 294
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 17456,
+     "sha256": "d5a86b4b87b22d7e478df52a2581b9dc2bb616428b469dcc5d653e97b5c22156",
+     "ratio": 0.25,
+     "triangles": 140
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 7208,
+     "sha256": "6d4a3490c37fb786b516e53567276211e5f0708a45058f3fc1aa43e94a713a8b",
+     "shape": "convex_hull",
+     "triangles": 88
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 7208,
+     "sha256": "6d4a3490c37fb786b516e53567276211e5f0708a45058f3fc1aa43e94a713a8b"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 17456,
+     "sha256": "d5a86b4b87b22d7e478df52a2581b9dc2bb616428b469dcc5d653e97b5c22156"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 32880,
+     "sha256": "473a349d485204f9635d93d5274b8319c83d8e9e119075e08639f887bad74e21"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.glb",
+    "objects": [
+     "upgrade_canvas_mainsail (EMPTY)",
+     "upgrade_canvas_mainsail_mesh (MESH)"
+    ],
+    "triangles": 588,
+    "materials": [
+     "GC_Cloth_c9a46b",
+     "GC_Cloth_f6ead0",
+     "GC_Wood_9a5a2e"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     0.582,
+     4.531,
+     7.322
+    ],
+    "min_z": 0.1475
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.glb",
+   "kind": "export",
+   "bytes": 78288,
+   "sha256": "8a25bd4e54d6c437b8b178c52bee026d63212c314cae6eb2022a46cbd9e9bfd3",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.orm.png"
+    },
+    "resolution": 512,
+    "attempts": [
+     {
+      "resolution": 512,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 25137,
+     "sha256": "2c6c223867bc2d0e382186a539eff86e13cc3d6f2b110b36df0d0c79f95cd929"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 10062,
+     "sha256": "259308669141d84d42a69bcc52fe7445a8fcf308a78cf102a538bda1c7f840e5"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.glb",
+    "objects": [
+     "upgrade_canvas_mainsail (EMPTY)",
+     "upgrade_canvas_mainsail_mesh (MESH)"
+    ],
+    "triangles": 588,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     0.582,
+     4.531,
+     7.322
+    ],
+    "min_z": 0.1475
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 37484,
+   "sha256": "1f05c4cc1ca45b24169aece49fd7e0d46536401ace7ecf4e6f4ac047a0e21b76",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft/exports/upgrade_canvas_mainsail.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 274,
+     "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "588 triangles (budget 6000)",
+    "tris": 588
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "0 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_centered",
+    "level": "warn",
+    "detail": "footprint centre (0.271, 2.066)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: []",
+    "clips": []
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "upgrade_canvas_mainsail.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "upgrade_canvas_mainsail.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 3 primitives, 3 materials, 0 animations, 0 skins, 0 images",
+    "animations": [],
+    "file": "upgrade_canvas_mainsail.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "upgrade_canvas_mainsail.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported upgrade_canvas_mainsail.three-web-toon.glb: 588 tris, size [0.582, 4.531, 7.322] m, clips []",
+    "file": "upgrade_canvas_mainsail.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "upgrade_canvas_mainsail.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "upgrade_canvas_mainsail.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 2 images",
+    "animations": [],
+    "file": "upgrade_canvas_mainsail.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "upgrade_canvas_mainsail.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported upgrade_canvas_mainsail.web-pbr.glb: 588 tris, size [0.582, 4.531, 7.322] m, clips []",
+    "file": "upgrade_canvas_mainsail.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 17,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 18.7
+}

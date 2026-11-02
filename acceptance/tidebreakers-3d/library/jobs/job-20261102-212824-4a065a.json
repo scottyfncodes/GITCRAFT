@@ -1,0 +1,93 @@
+{
+ "id": "job-20261102-212824-4a065a",
+ "tool": "run_pipeline",
+ "asset_id": "turtle_cay",
+ "request": {
+  "brief": {
+   "asset_id": "turtle_cay",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft",
+   "parent_job": "job-20261102-212823-4de3b5",
+   "template": "island",
+   "params": {
+    "seed": 7,
+    "radius": 15,
+    "palms": 7
+   },
+   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Turtle Cay",
+   "tags": [
+    "tidebreakers"
+   ],
+   "profiles": [
+    "three-web-toon",
+    "web-pbr",
+    "unity-fbx"
+   ],
+   "preview": {
+    "size": 512,
+    "views": [
+     "three_quarter",
+     "front",
+     "side",
+     "top"
+    ]
+   },
+   "bake": {
+    "resolution": 1024,
+    "fallbacks": [
+     512
+    ]
+   }
+  }
+ },
+ "status": "done",
+ "created": "2026-11-02T21:28:24Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:28:24Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 22.4,
+   "steps": [
+    {
+     "step": "build",
+     "ok": true,
+     "seconds": 1.29
+    },
+    {
+     "step": "preview",
+     "ok": true,
+     "seconds": 17.9
+    },
+    {
+     "step": "validate_scene",
+     "ok": true,
+     "seconds": 0.01
+    },
+    {
+     "step": "export",
+     "ok": true,
+     "seconds": 2.25
+    },
+    {
+     "step": "contact_sheet",
+     "ok": true,
+     "seconds": 0.22
+    }
+   ],
+   "finished": "2026-11-02T21:28:46Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261102-212823-4de3b5",
+ "updated": "2026-11-02T21:28:46Z",
+ "library": {
+  "asset": "turtle_cay",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/turtle_cay/v1",
+  "same_as": null,
+  "files": 16
+ }
+}

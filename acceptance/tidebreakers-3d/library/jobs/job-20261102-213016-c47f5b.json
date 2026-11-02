@@ -1,0 +1,145 @@
+{
+ "id": "job-20261102-213016-c47f5b",
+ "tool": "generate",
+ "asset_id": "deckhand_pip",
+ "request": {
+  "character": "deckhand_pip",
+  "animations": [
+   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo/Walking.fbx",
+   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
+  ],
+  "name": "Deckhand Pip",
+  "tags": [
+   "tidebreakers"
+  ],
+  "tool": "mixamo",
+  "brief": "Deckhand Pip"
+ },
+ "status": "done",
+ "created": "2026-11-02T21:30:16Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:30:16Z",
+   "change": null,
+   "manual": false,
+   "stages": [
+    {
+     "stage": "route",
+     "state": "done",
+     "started": "2026-11-02T21:30:16Z",
+     "info": {
+      "chosen": "mixamo",
+      "route": "mixamo",
+      "fallback_used": false,
+      "explanation": "merge Mixamo clips: MeshCraft mixamo_apply"
+     },
+     "finished": "2026-11-02T21:30:16Z",
+     "seconds": 0.01
+    },
+    {
+     "stage": "generate",
+     "state": "done",
+     "started": "2026-11-02T21:30:16Z",
+     "info": {
+      "meshcraft_job": "job-20261102-213017-c4f44c",
+      "meshcraft_status": "done",
+      "fallback": null,
+      "validation": {
+       "pass": 17,
+       "warn": 1,
+       "fail": 0,
+       "info": 3
+      },
+      "library": {
+       "asset": "deckhand_pip",
+       "version": 2
+      }
+     },
+     "finished": "2026-11-02T21:30:36Z",
+     "seconds": 20.28
+    },
+    {
+     "stage": "engine_check",
+     "state": "done",
+     "started": "2026-11-02T21:30:36Z",
+     "info": {
+      "status": "passed"
+     },
+     "finished": "2026-11-02T21:30:39Z",
+     "seconds": 2.14
+    },
+    {
+     "stage": "record",
+     "state": "done",
+     "started": "2026-11-02T21:30:39Z",
+     "info": {
+      "asset": "deckhand_pip",
+      "version": 2,
+      "validation": "passed-with-warnings"
+     },
+     "finished": "2026-11-02T21:30:39Z",
+     "seconds": 0.0
+    }
+   ],
+   "status": "done",
+   "finished": "2026-11-02T21:30:39Z",
+   "error": null
+  }
+ ],
+ "error": null,
+ "children": [
+  "job-20261102-213017-c4f44c"
+ ],
+ "updated": "2026-11-02T21:30:39Z",
+ "plan": {
+  "request": {
+   "brief": "Deckhand Pip",
+   "intents": [
+    "character"
+   ],
+   "kind": "character",
+   "template": "deckhand",
+   "params": {
+    "seed": 316,
+    "weapon": true
+   },
+   "images": 0,
+   "name": "Deckhand Pip"
+  },
+  "route": "mixamo",
+  "chosen": "mixamo",
+  "preferred": "mixamo",
+  "fallback_used": false,
+  "candidates": [],
+  "explanation": "merge Mixamo clips: MeshCraft mixamo_apply"
+ },
+ "compute": {
+  "tool": "mixamo",
+  "needs": "CPU, seconds",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "asset": {
+  "id": "deckhand_pip",
+  "version": 2,
+  "name": "Deckhand Pip",
+  "validation": "passed-with-warnings"
+ }
+}

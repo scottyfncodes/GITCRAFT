@@ -59,7 +59,7 @@ try {
     bounds: { min: box.min.toArray().map((v) => +v.toFixed(3)), max: box.max.toArray().map((v) => +v.toFixed(3)), size: box.getSize(new THREE.Vector3()).toArray().map((v) => +v.toFixed(3)) },
     skinned: gltf.scene.getObjectsByProperty ? root.getObjectsByProperty('isSkinnedMesh', true).length : 0 });
   const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() * 0.62;
-  const cam = new THREE.OrthographicCamera(-r, r, r, -r, 0.01, 100);
+  const cam = new THREE.OrthographicCamera(-r, r, r, -r, 0.01, Math.max(100, r * 8));   // far plane scales with the asset: scenes with an ocean are hundreds of metres
   cam.position.set(c.x + r * 1.6, c.y + r * 1.1, c.z + r * 2.4); cam.lookAt(c);
   renderer.render(scene, cam);
 } catch (e) { report.ok = false; report.error = String(e && e.stack || e); }
@@ -89,7 +89,10 @@ const add = (check, ok, detail) => checks.push({ check, level: ok ? 'pass' : 'fa
 add('engine_load', report.ok, report.ok ? 'GLTFLoader (three@0.170) loaded the file' : report.error);
 if (report.ok) {
   // the toon material needs COLOR_0; an authored-material check of a texture-baked export (web-pbr) needs base colour maps instead
-  if (report.material === 'authored' && report.meshesWithVertexColor === 0 && report.meshesWithBaseColorMap > 0)
+  // a composed scene (contract.mixed_materials) mixes texture-baked assets with plain-coloured scenery such as its ocean
+  if (report.material === 'authored' && contract && contract.mixed_materials)
+    add('engine_mixed_materials', report.meshesWithBaseColorMap > 0 || report.meshesWithVertexColor > 0, `${report.meshesWithBaseColorMap} textured + ${report.meshesWithVertexColor} vertex-coloured of ${report.meshes} meshes (scene)`);
+  else if (report.material === 'authored' && report.meshesWithVertexColor === 0 && report.meshesWithBaseColorMap > 0)
     add('engine_basecolor_maps', report.meshesWithBaseColorMap === report.meshes, `${report.meshesWithBaseColorMap}/${report.meshes} meshes have a base colour map (texture-baked export)`);
   else if (report.material === 'authored' && report.meshesWithVertexColor === 0)
     add('engine_authored_materials', true, `${report.meshes} meshes shade with their own materials (no COLOR_0 or maps needed)`);

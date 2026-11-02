@@ -33,13 +33,14 @@ Builds are **reproducible**: the same brief gives byte-identical GLB content in 
 
 ## Jobs and the asset library
 
-`run_pipeline`, `blockbench_import` and `mixamo_apply` each run as a **job** and add a **version** to the asset library. They return what they always did, plus `job` and `library` keys; a brief with `"library": false` skips the library.
+`run_pipeline`, `process_mesh`, `compose_scene`, `blockbench_import` and `mixamo_apply` each run as a **job** and add a **version** to the asset library. They return what they always did, plus `job` and `library` keys; a brief with `"library": false` skips the library.
 
-- **Library**: `~/.gitcraft/meshcraft-library` (override with `GITCRAFT_MESHCRAFT_LIBRARY`; the sandbox gives MeshCraft read-write access to it, as LightCraft has to its own). Each version keeps the `.blend`, exports, LODs, collision, bake maps, previews and report, with every file's SHA-256, the inputs' hashes (palette, references, source files), the brief, validation, clips, contract and job. A re-run whose exports match the previous version is marked `same_as`. Source files from Mixamo are hashed, not copied.
+- **Library**: the 3D Department's one shared library, `$GITCRAFT_3D_LIBRARY` (default `~/.gitcraft/3d-library`; an existing `~/.gitcraft/meshcraft-library` is used in place, and `GITCRAFT_MESHCRAFT_LIBRARY` is still honoured). ForgeCraft writes the same library and adds routing, licence, provenance and engine-check records to MeshCraft's versions. The code lives in `gitcraft3d/` (library, jobs, hardware probe, router), shared with ForgeCraft; the sandbox gives MeshCraft read-write access to the library. Each version keeps the `.blend`, exports, LODs, collision, bake maps, previews and report, with every file's SHA-256, the inputs' hashes (palette, references, source files), the brief, validation, clips, contract and job. A re-run whose exports match the previous version is marked `same_as`. Source files from Mixamo are hashed, not copied.
 - **Tools**: `library_search` (text, template, tool, status), `library_get` (one version), `library_export` (copies a version into a root and re-verifies every hash: the handoff to a game repo).
 - **Jobs**: `jobs_list`, `job_get` (every attempt: what changed, timing, error, pipeline steps), `job_retry` (re-run the original request as new attempts on the same record).
 - **Automatic retries** only for failures a lighter setting can fix. For `run_pipeline`: (1) previews ≤ 320 px and a 512 px bake; (2) previews 256 px, one view, texture-bake profiles dropped. The job is then `done_with_fallback` and says what changed. A bad request (unknown template, missing file, path outside the roots) fails at once with the reason.
-- **`route`** (advice only): which path fits a request on this machine: a template, Blockbench, Mixamo, `run_script`, or photogrammetry / image-to-3D, which are reported as unavailable until their phases land. Alternatives that would not come from the photos or image say so.
+- **`route`** (advice only): which path fits a request on this machine: a template, Blockbench, a scene, `run_script`, or photogrammetry / image-to-3D (ForgeCraft runs those generators). It is the same decision ForgeCraft's router makes (`gitcraft3d/rules.json`). Alternatives that would not come from the photos or image say so.
+- **Called by ForgeCraft**: `python server.py --call <tool> '<json>'|@args.json` runs one tool exactly as MCP `tools/call` does and prints `{"ok": …, "result"|"error": …}` as its last line. ForgeCraft uses it (inside its own sandbox) for every Blender step, passing `parent_job` so the MeshCraft job links back to the ForgeCraft job.
 
 ## Blockbench, Mixamo and the machine
 
@@ -85,6 +86,16 @@ Output layout: `source/<id>.blend` (editable), `exports/<id>.<profile>.<ext>` (+
 | `flag` | ship component | Swallowtail flag on a pole; designs: tidebreaker, harbor, wren | `wave` loop (**skeletal**, 4-bone chain) |
 | `sail` | ship component | Square sail + yard; patterns plain, stripe, sunset, shells | `fill`, `luff` (**morph target** `billow`) |
 | `crab` | character | Biscuit the teacup crab | `idle`, `wave`, `snap` (**rigged**, 8 bones) |
+| `boat` | vehicle | Coastal Sloop / dinghy: lofted hull, deck, cabin, mast, sails, rails; `socket_*` empties for every upgrade slot | — |
+| `boat_upgrade` | ship component | The five TIDEBREAKERS upgrades (canvas mainsail, cargo crates, brass compass, wheel & ash rudder, copper-sheathed hull), each modelled at its socket origin | — |
+| `salvage` | prop | Lashed crate, barrel, chest and buoy on driftwood | `float_bob` loop |
+| `island` | environment | Noise heightfield island with palms, rocks, stilt hut, dock; `socket_dock`, `socket_spawn` | — |
+| `lighthouse` | environment | Lighthouse on a rock base, emissive lamp | — |
+| `prop` | prop | Barrel, crate, rock or palm | — |
+| `deckhand` | character | Humanoid crew member, 22-bone **Mixamo-named** skeleton | `Idle`, `Walk`, `Run`, `Jump`, `Interact`, `Attack` (**rigged**) |
+| `mesh_import` | import | Not a model: imports a GLB/glTF/FBX/OBJ/STL/PLY made elsewhere (scan, AI, download) and cleans it: scan crop, fragment/outlier removal, cleanup, decimation, grounding, rescale. Run it with `process_mesh` | kept from the source |
+
+The seven templates from `boat` to `deckhand` came from ForgeCraft in the 3D Department consolidation; their builders live in `engine/procedural/` and use the same palette roles, vertex colours, export profiles and validation as the others.
 
 Templates are Python modules in `engine/templates/` with `META` (params, roles, triangle budget), `default_roles(params)` and `build(ctx)`, using the modelling kit in `engine/kit.py`:
 - primitives with bevels;
@@ -96,6 +107,8 @@ Templates are Python modules in `engine/templates/` with `META` (params, roles, 
 - reference images.
 
 A template returns a **contract** (node names, pivots, clips) that validation and the engine check enforce.
+
+**Scenes:** `compose_scene` places library assets or files (`attach_to: "<item>:<socket_*>"` snaps one asset to another's socket), adds ocean, sky and sun, renders a hero shot and exports a scene GLB and `.blend`, validated like any asset.
 
 **Not everything should be a template.** For one-off or hand-directed work, use `run_script`: write a Blender Python script in the workspace (globals: `bpy`, `kit`, `args`, `Palette`), run it against a `.blend`, then preview, validate and export as usual. That covers assisted modelling, where Claude iterates on geometry script by script.
 

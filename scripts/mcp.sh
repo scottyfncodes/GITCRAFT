@@ -43,8 +43,7 @@ done
 native=(--automation-read-root "$root" --automation-write-root "$root")
 # LightCraft locks its library to one process; GITCRAFT_LIGHTCRAFT_LIBRARY lets tests use their own.
 lc_library="${GITCRAFT_LIGHTCRAFT_LIBRARY:-$GITCRAFT_HOME/lightcraft-library}"
-# MeshCraft's versioned asset library and job records (outside the workspace, like LightCraft's library)
-mc_library="${GITCRAFT_MESHCRAFT_LIBRARY:-$GITCRAFT_HOME/meshcraft-library}"
+# The 3D library ($GITCRAFT_3D_LIBRARY, from tools.sh) is shared by meshcraft and forgecraft, outside the workspace like LightCraft's
 case "$name" in
   photocraft)  cmd=("$bin" mcp "${native[@]}") ;;
   vectorcraft) cmd=("$bin" mcp --headless "${native[@]}") ;;
@@ -56,11 +55,11 @@ case "$name" in
   lightcraft)  mkdir -p "$lc_library"
                cmd=("$bin" mcp --compact --library "$lc_library") ;;
   # Blender in-process; enforces the roots itself as well as through the sandbox below.
-  meshcraft)   mkdir -p "$mc_library"; export GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_MESHCRAFT_LIBRARY="$mc_library"
+  meshcraft)   mkdir -p "$GITCRAFT_3D_LIBRARY"; export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_3D_LIBRARY FORGECRAFT_HOME
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
   # The 3D Department pipeline (stdlib Python); spawns Blender, Meshroom and the AI backends as children.
-  forgecraft)  mkdir -p "$FORGECRAFT_LIBRARY" "$FORGECRAFT_HOME/hf-cache"
-               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME FORGECRAFT_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache"
+  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME GITCRAFT_3D_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache"
                # HOME inside the sandbox is the tool's state folder (Chromium and Blender write caches there)
                cmd=(env HOME="$state/data" python3 "$repo/forgecraft/server.py") ;;
 esac
@@ -72,13 +71,15 @@ cmd+=("$@")
 
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
-[[ "$name" == meshcraft ]] && writable+=("$mc_library")
-[[ "$name" == forgecraft ]] && writable+=("$FORGECRAFT_LIBRARY" "$FORGECRAFT_HOME/hf-cache")
+[[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
+[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
-  [[ "$name" == meshcraft ]] && policy+=(--rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
-  [[ "$name" == forgecraft ]] && policy+=(--rx "$repo/forgecraft" --rx "$FORGECRAFT_HOME" --rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
+  # meshcraft: its code + Blender venv + the shared 3D code; ForgeCraft's runtimes only to probe them (hardware_probe)
+  [[ "$name" == meshcraft ]] && policy+=(--rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft" --rx "$repo/gitcraft3d" --rx "$FORGECRAFT_HOME")
+  # forgecraft: its code + generators, and MeshCraft (code + Blender), which it runs as a child for all Blender work
+  [[ "$name" == forgecraft ]] && policy+=(--rx "$repo/forgecraft" --rx "$repo/gitcraft3d" --rx "$FORGECRAFT_HOME" --rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done

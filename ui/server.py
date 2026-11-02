@@ -35,8 +35,8 @@ def gitcraft_config():
     """Tool list, roots, policy and paths, exactly as the launcher computes them."""
     script = r'''
 source "$1/scripts/tools.sh"
-printf 'HOME=%s\nBIN=%s\nLOG=%s\nROOT=%s\nROOTS=%s\nSANDBOX=%s\nNET=%s\nMESH=%s\n' "$GITCRAFT_HOME" "$GITCRAFT_BIN" "$GITCRAFT_LOG" \
-  "$GITCRAFT_ROOT" "$GITCRAFT_ROOTS" "$GITCRAFT_SANDBOX" "$GITCRAFT_ALLOW_NET" "$GITCRAFT_MESHCRAFT"
+printf 'HOME=%s\nBIN=%s\nLOG=%s\nROOT=%s\nROOTS=%s\nSANDBOX=%s\nNET=%s\nMESH=%s\nLIB3D=%s\n' "$GITCRAFT_HOME" "$GITCRAFT_BIN" "$GITCRAFT_LOG" \
+  "$GITCRAFT_ROOT" "$GITCRAFT_ROOTS" "$GITCRAFT_SANDBOX" "$GITCRAFT_ALLOW_NET" "$GITCRAFT_MESHCRAFT" "$GITCRAFT_3D_LIBRARY"
 for e in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_TOOLS[@]}"}; do
   IFS=: read -r n r p <<<"$e"; printf 'TOOL=%s:%s:%s:%s\n' "$n" "$r" "$p" "$(gitcraft_denied "$n")"
 done'''
@@ -49,7 +49,9 @@ done'''
             cfg["tools"].append({"name": n, "repo": r, "package": p, "denied": d.split()})
         elif k: cfg[k.lower()] = v
     cfg["roots"] = [os.path.realpath(r) for r in cfg.get("roots", "").split(":") if r]
-    cfg["library"] = os.path.realpath(os.environ.get("GITCRAFT_MESHCRAFT_LIBRARY") or os.path.join(cfg["home"], "meshcraft-library"))
+    # the 3D Department's one library (meshcraft + forgecraft), as tools.sh resolves it (GITCRAFT_3D_LIBRARY,
+    # legacy GITCRAFT_MESHCRAFT_LIBRARY / FORGECRAFT_LIBRARY, or ~/.gitcraft/3d-library)
+    cfg["library"] = os.path.realpath(cfg.get("lib3d") or os.path.join(cfg["home"], "3d-library"))
     return cfg
 
 

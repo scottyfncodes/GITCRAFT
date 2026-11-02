@@ -5,7 +5,10 @@ maps) runs; without one, AliceVision's DepthMap node cannot run, so ForgeCraft s
 `photogrammetryDraft` template (SfM → Draft Meshing from the sparse point cloud →
 Texturing), which works on CPU and produces a coarser but real, textured mesh."""
 import glob, os, shutil, subprocess, time
-import hardware
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import _gitcraft3d  # noqa: F401
+from gitcraft3d import hardware
 
 IMG_EXT = (".jpg", ".jpeg", ".png", ".tif", ".tiff", ".exr", ".JPG", ".JPEG", ".PNG")
 
@@ -22,7 +25,7 @@ def run(images, work, log, timeout=None, pipeline=None, overrides=None):
     st = hardware.meshroom()
     if not st.get("installed"): raise RuntimeError(st.get("reason"))
     imgs = collect(images)
-    lim = hardware.limits({"ram": hardware.meminfo(), "gpus": hardware.gpus()})
+    lim = hardware.limits(hardware.meminfo()["total_gb"], bool(hardware.gpus()[0]))
     if len(imgs) < 3: raise RuntimeError(f"photogrammetry needs at least 3 overlapping images (got {len(imgs)}); 20–60 is typical")
     if len(imgs) > lim["photogrammetry_max_images"]:
         raise RuntimeError(f"{len(imgs)} images exceeds this machine's job limit of {lim['photogrammetry_max_images']}")

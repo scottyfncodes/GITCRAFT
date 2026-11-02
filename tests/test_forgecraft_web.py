@@ -28,9 +28,8 @@ import json, os, re, socket, subprocess, sys, tempfile, time, urllib.error, urll
 
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(HERE); FC = os.path.join(REPO, "forgecraft")
 ws = tempfile.mkdtemp(prefix="forgecraft-web-ws-")
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_MESHCRAFT_LIBRARY=os.path.join(ws, "mc-library"),
-           FORGECRAFT_LIBRARY=os.path.join(ws, "fc-library"), MESHCRAFT_LIBRARY=os.path.join(ws, "fc-library"),
-           GITCRAFT_LIGHTCRAFT_LIBRARY=os.path.join(ws, "lc-library"))
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_3D_LIBRARY=os.path.join(ws, "3d-library"),
+           GITCRAFT_LIGHTCRAFT_LIBRARY=os.path.join(ws, "lc-library"))   # scratch libraries: the real ones are untouched
 results = []
 def check(label, ok, detail=""):
     results.append(bool(ok)); print(("PASS " if ok else "FAIL ") + label + ("" if ok else f"  [{str(detail)[:500]}]"), flush=True)

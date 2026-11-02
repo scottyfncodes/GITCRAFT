@@ -1,0 +1,18 @@
+{
+ "status": "passed",
+ "glb": "exports/tidebreakers_turtle_cay_scene.scene.glb",
+ "three": null,
+ "checks": [
+  {
+   "check": "engine_load",
+   "level": "pass",
+   "detail": "GLTFLoader (three@0.170) loaded the file"
+  },
+  {
+   "check": "engine_mixed_materials",
+   "level": "pass",
+   "detail": "26 textured + 0 vertex-coloured of 27 meshes (scene)"
+  }
+ ],
+ "screenshot": "previews/tidebreakers_turtle_cay_scene_engine_check.png"
+}
