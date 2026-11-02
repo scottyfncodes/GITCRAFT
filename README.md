@@ -19,7 +19,9 @@ scripts/install.sh --source   # compile from source instead (slow, needs crates.
 scripts/mcp.sh photocraft     # start one server by hand
 ```
 
-Files are fenced to `$GITCRAFT_ROOT` (default `$HOME`). Set it before starting a session to narrow that.
+Files are fenced to `$GITCRAFT_ROOT` (default `$HOME`, or the session workspace when it is outside `$HOME`). Set it before starting a session to narrow that.
+
+If several repos are attached to a session, this repo's SessionStart hook doesn't run (the session starts in their parent folder). Run `scripts/install.sh` yourself, then `/mcp` to connect.
 
 ## Credits
 
