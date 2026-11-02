@@ -43,6 +43,8 @@ done
 native=(--automation-read-root "$root" --automation-write-root "$root")
 # LightCraft locks its library to one process; GITCRAFT_LIGHTCRAFT_LIBRARY lets tests use their own.
 lc_library="${GITCRAFT_LIGHTCRAFT_LIBRARY:-$GITCRAFT_HOME/lightcraft-library}"
+# MeshCraft's versioned asset library and job records (outside the workspace, like LightCraft's library)
+mc_library="${GITCRAFT_MESHCRAFT_LIBRARY:-$GITCRAFT_HOME/meshcraft-library}"
 case "$name" in
   photocraft)  cmd=("$bin" mcp "${native[@]}") ;;
   vectorcraft) cmd=("$bin" mcp --headless "${native[@]}") ;;
@@ -54,7 +56,7 @@ case "$name" in
   lightcraft)  mkdir -p "$lc_library"
                cmd=("$bin" mcp --compact --library "$lc_library") ;;
   # Blender in-process; enforces the roots itself as well as through the sandbox below.
-  meshcraft)   export GITCRAFT_ROOTS GITCRAFT_ROOT
+  meshcraft)   mkdir -p "$mc_library"; export GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_MESHCRAFT_LIBRARY="$mc_library"
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
   # The 3D Department pipeline (stdlib Python); spawns Blender, Meshroom and the AI backends as children.
   forgecraft)  mkdir -p "$FORGECRAFT_LIBRARY" "$FORGECRAFT_HOME/hf-cache"
@@ -70,6 +72,7 @@ cmd+=("$@")
 
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
+[[ "$name" == meshcraft ]] && writable+=("$mc_library")
 [[ "$name" == forgecraft ]] && writable+=("$FORGECRAFT_LIBRARY" "$FORGECRAFT_HOME/hf-cache")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()

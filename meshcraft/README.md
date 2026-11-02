@@ -31,6 +31,16 @@ creative brief ──► build_asset ──► render_preview ──► validate
 
 Builds are **reproducible**: the same brief gives byte-identical GLB content in any server process (only the brief stored in the scene, which names the `out_dir`, differs). FBX files embed a timestamp and random object IDs, so compare those by content.
 
+## Jobs and the asset library
+
+`run_pipeline`, `blockbench_import` and `mixamo_apply` each run as a **job** and add a **version** to the asset library. They return what they always did, plus `job` and `library` keys; a brief with `"library": false` skips the library.
+
+- **Library**: `~/.gitcraft/meshcraft-library` (override with `GITCRAFT_MESHCRAFT_LIBRARY`; the sandbox gives MeshCraft read-write access to it, as LightCraft has to its own). Each version keeps the `.blend`, exports, LODs, collision, bake maps, previews and report, with every file's SHA-256, the inputs' hashes (palette, references, source files), the brief, validation, clips, contract and job. A re-run whose exports match the previous version is marked `same_as`. Source files from Mixamo are hashed, not copied.
+- **Tools**: `library_search` (text, template, tool, status), `library_get` (one version), `library_export` (copies a version into a root and re-verifies every hash: the handoff to a game repo).
+- **Jobs**: `jobs_list`, `job_get` (every attempt: what changed, timing, error, pipeline steps), `job_retry` (re-run the original request as new attempts on the same record).
+- **Automatic retries** only for failures a lighter setting can fix. For `run_pipeline`: (1) previews ≤ 320 px and a 512 px bake; (2) previews 256 px, one view, texture-bake profiles dropped. The job is then `done_with_fallback` and says what changed. A bad request (unknown template, missing file, path outside the roots) fails at once with the reason.
+- **`route`** (advice only): which path fits a request on this machine: a template, Blockbench, Mixamo, `run_script`, or photogrammetry / image-to-3D, which are reported as unavailable until their phases land. Alternatives that would not come from the photos or image say so.
+
 ## Blockbench, Mixamo and the machine
 
 | Tool | Needs Blender | What it does |
