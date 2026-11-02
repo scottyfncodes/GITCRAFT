@@ -351,7 +351,7 @@ def island(p):
         for j in range(n):
             a = i * (n + 1) + j; q = (a, a + n + 1, a + n + 2, a + 1)
             zs = [verts[k].z for k in q]
-            if max(zs) < -2.0: continue  # open water: no geometry
+            if max(zs) < -0.7: continue  # open water / flat seabed: no geometry (the game draws its own ocean)
             faces.append(q)
             zc = sum(zs) / 4; slope = max(zs) - min(zs)
             fm.append(4 if zc < 0.0 else 0 if zc < 0.9 else 3 if slope > 1.1 * (2 * ext / n) else 1 if zc < 3.4 else 2)

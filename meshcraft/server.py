@@ -94,10 +94,16 @@ def call(name, a):
     if name == "mixamo_guide": return {"steps": mixamo.GUIDE, "bones": ["mixamorig:" + b for b in mixamo.MIXAMO_CORE],
                                        "note": "MeshCraft never contacts mixamo.com; there is no official API."}
     if name == "mixamo_prepare_upload":
-        md = library.get(a["asset"]); job = pipeline.Job({"tool": "mixamo_prep", "asset": md["id"]}); job.save()
-        res = pipeline._blender(job, "mixamo_prep", os.path.join(job.work, "out"), 600, input=library.file_path(md, "glb"), slug=md["slug"])
-        dest = a.get("out") or os.path.join(os.environ.get("GITCRAFT_ROOT", "."), os.path.basename(res["files"]["fbx"]))
-        import shutil; shutil.copy2(res["files"]["fbx"], dest)
+        md = library.get(a["asset"])
+        job = pipeline.Job({"tool": "mixamo_prep", "name": f"Mixamo upload: {md['name']}", "brief": f"Mixamo upload FBX for {md['id']}"})
+        job.rec["attempts"].append({"started": pipeline._now()}); job.rec["status"] = "running"; job.save()
+        try:
+            res = pipeline._blender(job, "mixamo_prep", os.path.join(job.work, "out"), 600, input=library.file_path(md, "glb"), slug=md["slug"])
+            dest = a.get("out") or os.path.join(os.environ.get("GITCRAFT_ROOT", "."), os.path.basename(res["files"]["fbx"]))
+            import shutil; shutil.copy2(res["files"]["fbx"], dest)
+            job.rec.update(status="done", output=dest); job.stage("mixamo_upload_fbx", "done", info={"fbx": dest, "triangles": res["triangles"]})
+        except Exception as e:
+            job.rec.update(status="failed", error=str(e)); job.save(); raise
         return {"fbx": dest, "triangles": res["triangles"], "next": mixamo.GUIDE[1:]}
     if name == "mixamo_apply": return _gen(dict(a, tool="mixamo", brief=a.get("name") or "mixamo character"))
     if name == "compose_scene": return _gen(dict(a, tool="blender_scene", brief=(a.get("name") or "") + " scene"))

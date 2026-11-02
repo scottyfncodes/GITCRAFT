@@ -61,9 +61,10 @@ class Job:
             tmp = self.file + ".tmp"; json.dump(self.rec, open(tmp, "w"), indent=1, default=str); os.replace(tmp, self.file)
 
     def stage(self, name, state, **info):
-        st = next((s for s in self.rec["stages"] if s["stage"] == name and s.get("attempt") == len(self.rec["attempts"])), None)
+        att = len(self.rec["attempts"]) - 1   # 0-based index of the current attempt
+        st = next((s for s in self.rec["stages"] if s["stage"] == name and s.get("attempt") == att), None)
         if not st:
-            st = {"stage": name, "attempt": len(self.rec["attempts"]), "state": state, "started": _now()}
+            st = {"stage": name, "attempt": att, "state": state, "started": _now()}
             self.rec["stages"].append(st)
         st["state"] = state; st.update(info)
         if state in ("done", "failed", "skipped"): st["finished"] = _now()
@@ -74,7 +75,7 @@ class Job:
 def _blender(job, op, out_dir, timeout, **fields):
     """Run one Blender job in its own process; mirror its stage progress into the job record."""
     spec = dict(op=op, out_dir=out_dir, **fields)
-    jf = os.path.join(job.work, f"blender_{op}_{len(job.rec['attempts'])}_{uuid.uuid4().hex[:4]}.json")
+    jf = os.path.join(job.work, f"blender_{op}_{max(0, len(job.rec['attempts']) - 1)}_{uuid.uuid4().hex[:4]}.json")
     json.dump(spec, open(jf, "w"), indent=1)
     shutil.rmtree(out_dir, ignore_errors=True); os.makedirs(out_dir, exist_ok=True)
     env = dict(os.environ, TMPDIR=os.path.join(job.work, "tmp")); os.makedirs(env["TMPDIR"], exist_ok=True)

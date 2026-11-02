@@ -443,7 +443,7 @@ def stats(root):
         fr = a.frame_range
         acts.append({"name": a.name, "frames": [int(fr[0]), int(fr[1])],
                      "seconds": round((fr[1] - fr[0]) / bpy.context.scene.render.fps, 3),
-                     "loop": bool(a.get("mc_loop", True))})
+                     "loop": bool(a["mc_loop"]) if "mc_loop" in a else not any(k in a.name.lower() for k in ("jump", "attack", "interact", "slash", "death"))})
     sockets = [{"name": o.name, "location": [round(v, 4) for v in o.matrix_world.translation]}
                for o in objs if o.type == "EMPTY" and o.name.startswith("socket_")]
     return {
