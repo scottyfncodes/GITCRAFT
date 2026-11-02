@@ -1,0 +1,11 @@
+{
+  "id": "stl-print",
+  "engine": "3D printing / slicers (PrusaSlicer, Cura, Bambu Studio)",
+  "format": "stl",
+  "description": "Binary STL of every mesh in its rest pose, Z up, millimetres (1 m in Blender = 1000 mm). Geometry only: no colour, UVs, rig or animation. Kit-bashed assets are built from overlapping closed parts, so let the slicer union them.",
+  "vertex_colors": false,
+  "atlas": false,
+  "animations": false,
+  "scale": 1000.0,
+  "budget_tris": 200000
+}

@@ -36,10 +36,10 @@ const report = { ok: true };
 try {
   const gltf = await new GLTFLoader().loadAsync('http://gc.local/asset.glb');
   const root = gltf.scene; scene.add(root);
-  let meshes = 0, withColor = 0, tris = 0;
+  let meshes = 0, withColor = 0, withMap = 0, tris = 0;
   root.traverse((o) => {
     if (!o.isMesh) return; meshes++;
-    const g = o.geometry; if (g.attributes.color) withColor++;
+    const g = o.geometry; if (g.attributes.color) withColor++; if (o.material && o.material.map) withMap++;
     tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
     if (opts.material === 'game-toon') o.material = new THREE.MeshToonMaterial({ vertexColors: !!g.attributes.color, gradientMap: grad, color: g.attributes.color ? 0xffffff : 0xcccccc });
   });
@@ -55,7 +55,7 @@ try {
   const box = new THREE.Box3().setFromObject(root);
   const nodes = []; root.traverse((o) => nodes.push(o.name));
   const named = {}; for (const n of ['chest_lid', 'glow_anchor', 'lantern_body', 'figurehead', 'flag_cloth', 'biscuit']) { const o = root.getObjectByName(n); if (o) { const p = new THREE.Vector3(); o.getWorldPosition(p); named[n] = { position: p.toArray().map((v) => +v.toFixed(4)), rotationX: +o.rotation.x.toFixed(4) }; } }
-  Object.assign(report, { meshes, meshesWithVertexColor: withColor, triangles: Math.round(tris), nodes, named,
+  Object.assign(report, { meshes, meshesWithVertexColor: withColor, meshesWithBaseColorMap: withMap, material: opts.material, triangles: Math.round(tris), nodes, named,
     bounds: { min: box.min.toArray().map((v) => +v.toFixed(3)), max: box.max.toArray().map((v) => +v.toFixed(3)), size: box.getSize(new THREE.Vector3()).toArray().map((v) => +v.toFixed(3)) },
     skinned: gltf.scene.getObjectsByProperty ? root.getObjectsByProperty('isSkinnedMesh', true).length : 0 });
   const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() * 0.62;
@@ -88,7 +88,13 @@ const checks = [];
 const add = (check, ok, detail) => checks.push({ check, level: ok ? 'pass' : 'fail', detail });
 add('engine_load', report.ok, report.ok ? 'GLTFLoader (three@0.170) loaded the file' : report.error);
 if (report.ok) {
-  add('engine_vertex_colors', report.meshesWithVertexColor === report.meshes, `${report.meshesWithVertexColor}/${report.meshes} meshes carry COLOR_0 for the toon material`);
+  // the toon material needs COLOR_0; an authored-material check of a texture-baked export (web-pbr) needs base colour maps instead
+  if (report.material === 'authored' && report.meshesWithVertexColor === 0 && report.meshesWithBaseColorMap > 0)
+    add('engine_basecolor_maps', report.meshesWithBaseColorMap === report.meshes, `${report.meshesWithBaseColorMap}/${report.meshes} meshes have a base colour map (texture-baked export)`);
+  else if (report.material === 'authored' && report.meshesWithVertexColor === 0)
+    add('engine_authored_materials', true, `${report.meshes} meshes shade with their own materials (no COLOR_0 or maps needed)`);
+  else
+    add('engine_vertex_colors', report.meshesWithVertexColor === report.meshes, `${report.meshesWithVertexColor}/${report.meshes} meshes carry COLOR_0 for the toon material`);
   // assets that hang or mount (contract.ground === false) are anchored elsewhere, so only grounded assets get this check
   if (!contract || contract.ground !== false) add('engine_base_on_ground', Math.abs(report.bounds.min[1]) < 0.02 || !!args.clip, `lowest point y=${report.bounds.min[1]} m`);
   if (contract) {

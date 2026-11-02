@@ -3,10 +3,10 @@
 Runs inside Blender's Python (the `bpy` module). Every function takes and
 returns plain JSON-able data so the MCP server can expose them directly.
 """
-import json, math, os, time, hashlib, random
+import json, math, os, time, hashlib, random, zlib
 import bpy
 from mathutils import Vector
-from . import kit, templates
+from . import kit, templates, bake
 from .palette import Palette
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -91,7 +91,7 @@ def build(brief):
     res = mod.build(ctx)
     for o in bpy.context.scene.objects:
         if o.type == "MESH" and o.data.materials:
-            kit.bake_vertex_colors(o, mats, jitter=brief.get("color_jitter", 0.04), seed=hash(o.name) & 0xffff)
+            kit.bake_vertex_colors(o, mats, jitter=brief.get("color_jitter", 0.04), seed=zlib.crc32(o.name.encode()) & 0xffff)  # stable across runs (hash() is salted per process)
     for i, ref in enumerate(brief.get("references", [])):
         kit.add_reference(ref, f"ref_{i}_{os.path.basename(ref)}", loc=(0, 3 + i, 1), size=2.0)
     scene = bpy.context.scene
@@ -347,7 +347,13 @@ def validate_gltf(path, contract=None):
     _chk(R, "pass" if g.asset.version == "2.0" else "fail", "gltf_version", f"glTF {g.asset.version}, generator {g.asset.generator}")
     prims = [p for m in g.meshes for p in m.primitives]
     has_col = all(p.attributes.COLOR_0 is not None for p in prims)
-    _chk(R, "pass" if has_col else "warn", "gltf_color0", "every primitive has COLOR_0" if has_col else "some primitives lack COLOR_0")
+    textured = bool(prims) and not any(p.attributes.COLOR_0 is not None for p in prims) and all(
+        p.material is not None and g.materials[p.material].pbrMetallicRoughness and g.materials[p.material].pbrMetallicRoughness.baseColorTexture
+        for p in prims)
+    if textured:   # PBR-baked exports (web-pbr) shade from textures, not vertex colours
+        _chk(R, "pass", "gltf_basecolor_texture", "every primitive uses a baseColor texture (no COLOR_0 by design)")
+    else:
+        _chk(R, "pass" if has_col else "warn", "gltf_color0", "every primitive has COLOR_0" if has_col else "some primitives lack COLOR_0")
     _chk(R, "info", "gltf_counts", f"{len(g.nodes)} nodes, {len(g.meshes)} meshes, {len(prims)} primitives, {len(g.materials)} materials, {len(g.animations)} animations, {len(g.skins)} skins, {len(g.images)} images",
          animations=[a.name for a in g.animations])
     if contract and contract.get("nodes"):
@@ -395,7 +401,10 @@ def export(blend, profile_ids, out_dir=None):
         for o in meshes:
             if prof.get("vertex_colors", True) and "Color" not in o.data.color_attributes:
                 kit.bake_vertex_colors(o, None, 0)
-        if prof.get("atlas"):
+        atlas_note = None
+        if prof.get("atlas") and not any(m.get("gitcraft_role") and m.get("gitcraft_color") for m in bpy.data.materials):
+            atlas_note = "palette atlas skipped: no palette-role materials (imported asset); its own materials are exported"
+        elif prof.get("atlas"):
             # rebuild a Materials-like view from material custom props
             class _M: pass
             mm = _M(); mm.mats = {}; mm.hex = {}
@@ -407,11 +416,21 @@ def export(blend, profile_ids, out_dir=None):
             amat = kit.atlas_material(img, name=f"{brief.get('material_prefix', 'GC')}_Atlas")
             for o in meshes: kit.apply_atlas(o, cells, amat)
         fmt = prof["format"]; base = os.path.join(out_dir, f"{aid}.{pid}")
+        baked = None
+        if prof.get("bake"):   # web-pbr: bake to texture maps and swap in one PBR material
+            for o in meshes:
+                if "Color" not in o.data.color_attributes and any(m and m.get("gitcraft_role") for m in o.data.materials):
+                    kit.bake_vertex_colors(o, None, 0)
+            bk = prof["bake"]
+            baked = bake.bake_pbr(meshes, out_dir, os.path.basename(base), bk.get("resolution", 1024), tuple(bk.get("fallbacks", [512])),
+                                  material_name=f"{brief.get('material_prefix', 'GC')}_Baked")
+        textured = bool(prof.get("atlas") or baked) or any(n.type == "TEX_IMAGE" and n.image for o in meshes for m in o.data.materials
+                                                             if m and m.use_nodes for n in m.node_tree.nodes)
         if fmt in ("glb", "gltf"):
             path = base + (".glb" if fmt == "glb" else ".gltf")
             bpy.ops.export_scene.gltf(filepath=path, export_format="GLB" if fmt == "glb" else "GLTF_SEPARATE", export_yup=True,
                                       export_apply=True, export_vertex_color=prof.get("gltf_vertex_color", "ACTIVE"),
-                                      export_all_vertex_colors=False, export_materials="EXPORT", export_texcoords=bool(prof.get("atlas")),
+                                      export_all_vertex_colors=False, export_materials="EXPORT", export_texcoords=textured,
                                       export_animations=prof.get("animations", True), export_animation_mode="ACTIONS",
                                       export_merge_animation="ACTION", export_skins=True, export_morph=True,
                                       export_image_format="AUTO", export_extras=True,
@@ -422,6 +441,12 @@ def export(blend, profile_ids, out_dir=None):
                                      use_mesh_modifiers=True, mesh_smooth_type="FACE", add_leaf_bones=False, bake_anim=prof.get("animations", True),
                                      bake_anim_use_all_actions=True, bake_anim_use_nla_strips=False, path_mode="COPY", embed_textures=True,
                                      colors_type="SRGB")
+        elif fmt == "stl":   # one watertight-agnostic triangle soup, rest pose, Z up, scaled (mm by default)
+            path = base + ".stl"
+            for a in [o for o in bpy.context.scene.objects if o.type == "ARMATURE"]: a.data.pose_position = "REST"
+            for o in bpy.context.scene.objects: o.select_set(o in meshes)
+            bpy.ops.wm.stl_export(filepath=path, export_selected_objects=True, global_scale=prof.get("scale", 1000.0), apply_modifiers=True,
+                                  forward_axis="Y", up_axis="Z", ascii_format=False)
         elif fmt == "obj":
             path = base + ".obj"
             bpy.ops.wm.obj_export(filepath=path, export_materials=True, export_colors=True, apply_modifiers=True, forward_axis="NEGATIVE_Z", up_axis="Y",
@@ -429,6 +454,8 @@ def export(blend, profile_ids, out_dir=None):
         else:
             raise ValueError(f"profile {pid}: unknown format {fmt}")
         rec = _file(path, "export", profile=pid, format=fmt, engine=prof.get("engine"))
+        if baked: rec["bake"] = baked
+        if atlas_note: rec["note"] = atlas_note
         if fmt in ("glb", "gltf") and (prof.get("lods") or prof.get("collision")):
             rec["extras"] = _lods_and_collision(prof, base, meshes)
         sidecars = [os.path.join(out_dir, f) for f in os.listdir(out_dir) if f.startswith(os.path.basename(base)) and f != os.path.basename(path)]
@@ -487,6 +514,7 @@ def inspect_file(path):
     if ext in (".glb", ".gltf"): bpy.ops.import_scene.gltf(filepath=path)
     elif ext == ".fbx": bpy.ops.import_scene.fbx(filepath=path)
     elif ext == ".obj": bpy.ops.wm.obj_import(filepath=path)
+    elif ext == ".stl": bpy.ops.wm.stl_import(filepath=path)
     elif ext == ".blend": open_blend(path)
     else: raise ValueError(f"cannot inspect {ext}")
     shapes = {pb.custom_shape for a in bpy.context.scene.objects if a.type == "ARMATURE" for pb in a.pose.bones if pb.custom_shape}
@@ -549,6 +577,10 @@ def run_pipeline(brief):
                 bz = (result.get("expect") or {}).get("base_z")
                 _chk(checks, "pass" if info["triangles"] and (bz is None or abs((info["min_z"] or 0) - bz) < 0.02) else "warn",
                      "roundtrip_reimport", f"re-imported {os.path.basename(e['path'])}: {info['triangles']} tris, size {info['size_m']} m, clips {info['actions']}", file=os.path.basename(e["path"]))
+            elif e["format"] == "stl":
+                info = inspect_file(e["path"]); e["roundtrip"] = info
+                _chk(checks, "pass" if info["triangles"] else "fail", "roundtrip_reimport",
+                     f"re-imported {os.path.basename(e['path'])}: {info['triangles']} tris, size {info['size_m']} (file units)", file=os.path.basename(e["path"]))
         report["validation"] = {"checks": checks, "summary": summarize(checks)}
         open_blend(P["blend"])
         sheet = step("contact_sheet", lambda: contact_sheet(brief, [r for r in renders], os.path.join(P["previews"], f"{brief['asset_id']}_sheet.png"), report["validation"]))
