@@ -1,0 +1,9 @@
+{
+  "name": "meshcraft-web-check",
+  "private": true,
+  "description": "Engine-compatibility checks for MeshCraft exports: Khronos glTF validator + three.js r170 (TIDEBREAKERS' version) in headless Chromium.",
+  "dependencies": {
+    "gltf-validator": "2.0.0-dev.3.10",
+    "three": "0.170.0"
+  }
+}
