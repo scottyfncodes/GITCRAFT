@@ -1,10 +1,11 @@
 # GITCRAFT
 
 This repo gives Claude Code seven creative tools from the ArtCraft suite
-(github.com/storytold) plus two 3D tools of its own: MeshCraft (headless Blender,
-brief → template asset) and ForgeCraft (the 3D Department pipeline that routes
-across Blender, MeshCraft, Blockbench, Mixamo, Meshroom, TripoSR and Hunyuan3D),
-each running as a headless MCP server. When this repo is
+(github.com/storytold) plus the two servers of its 3D Department: ForgeCraft
+(the orchestrator: routes across MeshCraft templates, Blockbench, Mixamo,
+Meshroom, TripoSR and Hunyuan3D, then engine-checks, records and hands off) and
+MeshCraft (the specialist: headless Blender for every modelling, cleanup, bake,
+rig, export and validation step), each running as a headless MCP server. When this repo is
 attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`
 and registers them at user scope, so they work no matter which repo you're
 working in.
@@ -20,8 +21,8 @@ working in.
 | `lightcraft`  | Photo library and raw developer (Lightroom-style) | Batch photo grading, raw development, exports |
 | `filmcraft`   | Non-linear video editor                     | Cutting, trimming, color, audio, exporting video |
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
-| `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ/STL export (toon or baked PBR), Three.js engine check, Blockbench and Mixamo hand-offs, versioned asset library (`~/.gitcraft/meshcraft-library`) and job records |
-| `forgecraft`  | 3D Department pipeline (`forgecraft/`)      | Any 3D request: routes to Blender procedural, MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D; versioned asset library, jobs, scenes |
+| `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ/STL export (toon or baked PBR), Three.js engine check, Blockbench and Mixamo hand-offs, the shared versioned asset library (`$GITCRAFT_3D_LIBRARY`, default `~/.gitcraft/3d-library`) and job records. The 3D Department's specialist: does every Blender step |
+| `forgecraft`  | 3D Department orchestrator (`forgecraft/`)  | Any 3D request: routes to MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D, has MeshCraft do the Blender work, engine-checks, records licence/provenance, hands off; same library and jobs as MeshCraft |
 
 ## How to use them
 
@@ -61,14 +62,17 @@ working in.
 
 - Call `hardware_probe` or `route` first. `generate` runs the whole pipeline
   and returns real files; `library_export` hands assets to other tools or a game
-  repo. Requests that match a MeshCraft template (chest, crab, flag, lantern,
-  sail, figurehead) are built by MeshCraft and packaged by ForgeCraft.
+  repo. ForgeCraft orchestrates and MeshCraft does every Blender step (as a
+  child job of the ForgeCraft job); both write one library and job store
+  (`gitcraft3d/`, `$GITCRAFT_3D_LIBRARY`). Ownership matrix: `docs/3d-department.md`.
 - A `blocked` job means no tool here can honour the request: report its reason
   and alternatives, and never substitute a 2D image. TripoSR and Hunyuan3D need
   a GPU or network access to huggingface.co (blocked in default cloud sessions).
-- Mixamo has no API: a person uploads/downloads at mixamo.com; ForgeCraft
-  prepares and merges the files.
-- Details: `docs/3d-department.md`; licences: `docs/forgecraft-licensing.md`.
+- Mixamo has no API: a person uploads/downloads at mixamo.com; MeshCraft
+  prepares and merges the files (ForgeCraft's `mixamo_*` tools delegate to it).
+- Details: `docs/3d-department.md`; licences: `docs/3d-licensing.md`.
+- Never add Blender code to `forgecraft/`: it belongs in `meshcraft/engine/`.
+  Shared library/jobs/probe/routing code belongs in `gitcraft3d/`.
 
 ## If a tool won't connect
 
@@ -90,7 +94,7 @@ working in.
   sandbox.
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
   `scripts/mcp.sh` need updating to match if you add one.
-- `tests/test_forgecraft.py` must pass after any change under `forgecraft/`
+- `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`
   (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
 - Never commit model weights or Meshroom: they install into
   `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).

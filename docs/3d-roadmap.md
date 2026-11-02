@@ -1,6 +1,6 @@
 # GITCRAFT 3D roadmap
 
-Status as of November 2026, after the MeshCraft foundation and the TIDEBREAKERS 3D pilot.
+Status as of November 2026, after the MeshCraft foundation, the TIDEBREAKERS 3D pilot, the ForgeCraft 3D Department (PR #9) and the consolidation of both into one department (ForgeCraft orchestrates, MeshCraft specialises; see [3d-consolidation.md](3d-consolidation.md)).
 
 **Guiding rule:** GITCRAFT adapts to each game; games are never redesigned or downgraded to fit the tooling. When a game needs something MeshCraft can't make yet, the answer is a new template, a `run_script` workflow or a new integration. A simpler game is never the answer.
 
@@ -24,11 +24,15 @@ A GitHub code search across the portfolio found **13 games built on Three.js**: 
 | **P0 hardening**: the guard also hashes files a tool names only in its result (`outputs` in `audit.jsonl`); MeshCraft builds are reproducible (stable colour seeds, canonical primitive face order); doctor reads MeshCraft's version on upgraded installs; tests for the 2 s MeshCraft handshake and the audit outputs | P0/P1 PR |
 | **P1 from the 3D Department proposal (PR #9)**, added beside the existing 14 tools: `hardware_probe`, `blockbench_build` / `_inspect` / `_import`, `mixamo_guide` / `_prepare_upload` / `_apply`; `web-pbr` (baked texture maps) and `stl-print` profiles. The 9 TIDEBREAKERS briefs export identical files before and after | P0/P1 PR |
 
+| **3D Department (PR #9)**: ForgeCraft pipeline server, routing with honest refusals, Meshroom photogrammetry, TripoSR/Hunyuan3D adapters, department UI, TIDEBREAKERS acceptance package | PR #9 |
+| **Consolidation**: one library, job store, probe and router (`gitcraft3d/`); every Blender step in MeshCraft (7 templates, `mesh_import`/`process_mesh`, `compose_scene` ported from ForgeCraft); ForgeCraft as orchestrator with parent/child jobs, engine check per deliverable, licence and provenance records; duplicate Blockbench, Mixamo, Blender runner and engine-check code removed; all ForgeCraft 1.0 tool names kept | consolidation PR |
+
 ### Next phases (from the PR #9 assessment)
 - **P2 (done)** jobs and a versioned asset library: job records with a retry ladder, `job_retry`, library search/get/export with re-verified hashes, `same_as` for identical re-runs, `route` as advice only. Re-running all 9 TIDEBREAKERS briefs gives identical exports and a `same_as` version for each.
-- **P3** Meshroom photogrammetry as an optional install, inside the sandbox.
-- **P4** a local 3D Department UI that starts jobs through the guarded launcher, with a per-launch token and origin checks; no deployment from GITCRAFT.
-- **P5** AI generation (TripoSR, then Hunyuan3D) opt-in only, with per-host network allowances and approval of cost, data sharing and licence territory.
+- **P3 (done)** Meshroom photogrammetry as an optional install, inside the sandbox (ForgeCraft backend; MeshCraft `process_mesh` cleans the scan).
+- **P4 (partly done)** the 3D Department UI runs locally (127.0.0.1) and a static snapshot of the acceptance library is published. Still to do: start live jobs through the guarded launcher (today `ui_server.py` runs outside the sandbox) with a per-launch token and origin checks.
+- **P5 (adapters done, not exercised)** AI generation (TripoSR, then Hunyuan3D) is opt-in and refuses with the reason when unavailable. Still to do: run both on a GPU machine or with Hugging Face access, per-host network allowances instead of `GITCRAFT_ALLOW_NET=1`, and approval of cost, data sharing and licence territory.
+- **P6 (next, from the consolidation)** stream MeshCraft progress into ForgeCraft's job record while a child runs (today stages update when the child finishes); migrate ForgeCraft 1.0 `~/.gitcraft/forgecraft-library` records if anyone still has them; a CI job running `test_meshcraft.py`, `test_forgecraft.py` and `test_policy.py` on every PR.
 
 ### 1. Immediate improvements (days)
 1. **TIDEBREAKERS GLTFLoader adoption.** Behind a feature flag, load `tb_chest_*.glb` in `chestMesh()`, keeping the `{root, lid, glow}` API; the handoff in `creative/3d/HANDOFF.md` has the code. Engineering-owned.

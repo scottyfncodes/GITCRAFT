@@ -2,7 +2,7 @@
 
 Seven open-source creative apps from [ArtCraft](https://github.com/storytold), wired into Claude Code as MCP tools:
 
-PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department pipeline)
+PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department orchestrator)
 
 ## How it works
 
@@ -16,9 +16,9 @@ MeshCraft runs Blender 5.2 headless as an MCP server: creative brief + brand pal
 
 ## 3D Department: ForgeCraft
 
-ForgeCraft runs the 3D Department pipeline. It routes each request to the best available tool (Blender procedural modelling, MeshCraft templates, Blockbench, Mixamo, Meshroom photogrammetry, TripoSR, Hunyuan3D), with fallbacks. It then cleans, optimises, UV-unwraps and bakes the model, rigs and animates it, renders previews, exports GLB/glTF/FBX/OBJ/STL/.blend, validates the result (Blender re-import, Khronos, three.js r170) and packages it in a versioned asset library. It never substitutes a 2D image for a 3D model.
+ForgeCraft orchestrates the 3D Department. It routes each request to the best available method (a MeshCraft template, Blockbench, Mixamo, Meshroom photogrammetry, TripoSR, Hunyuan3D), with fallbacks, and has **MeshCraft** do every Blender step: modelling or import, cleanup, materials and baked textures, rigging and animation, previews, export per engine profile and validation. ForgeCraft then checks the deliverable in three.js r170, records routing, licence and provenance, and hands it off. Both servers share one versioned asset library and job store (`gitcraft3d/`). It never substitutes a 2D image for a 3D model.
 
-- Docs: [docs/3d-department.md](docs/3d-department.md); licences, hardware and costs: [docs/forgecraft-licensing.md](docs/forgecraft-licensing.md).
+- Docs: [docs/3d-department.md](docs/3d-department.md) (architecture, ownership matrix, pipeline); [docs/3d-licensing.md](docs/3d-licensing.md) (dependency and licensing audit); [docs/3d-consolidation.md](docs/3d-consolidation.md) (consolidation report).
 - The TIDEBREAKERS 3D package is in `acceptance/tidebreakers-3d/`.
 - ForgeCraft uses MeshCraft's Blender. `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
 
@@ -44,7 +44,7 @@ scripts/mcp.sh photocraft     # start one server by hand (sandboxed)
 scripts/doctor.sh             # health report
 tests/test_policy.py          # end-to-end security test
 tests/test_meshcraft.py       # MeshCraft pipeline + sandbox test
-tests/test_forgecraft.py      # ForgeCraft: every 3D backend, routing, retries, library
+tests/test_forgecraft.py      # ForgeCraft: routing, delegation to MeshCraft, jobs, library, refusals
 python3 forgecraft/ui_server.py   # the 3D Department UI, live on http://127.0.0.1:8765
 ```
 
