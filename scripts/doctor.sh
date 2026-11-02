@@ -26,7 +26,7 @@ say ""
 say "  tool          installed  registered  build"
 for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_TOOLS[@]}"}; do
   IFS=: read -r name _ pkg <<<"$entry"
-  if [[ "$name" == meshcraft ]]; then
+  if [[ "$name" == meshcraft || "$name" == forgecraft ]]; then
     inst=$([[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] && echo yes || echo NO)
   else
     inst=$([[ -x "$GITCRAFT_BIN/$pkg" ]] && echo yes || echo NO)
@@ -45,6 +45,22 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
   [[ $inst == yes ]] || problems+=("$name is not installed: run scripts/install.sh $name")
   [[ $reg == yes ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")
 done
+
+if [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]]; then
+  say ""
+  say "  3D Department (forgecraft) backends:"
+  while IFS= read -r line; do say "    $line"; done < <(python3 - "$here/../forgecraft" <<'PY'
+import sys; sys.path.insert(0, sys.argv[1])
+import hardware
+d = hardware.probe()
+hw = d["hardware"]
+print(f"machine: {hw['cpu_threads']} CPU threads, {hw['ram']['total_gb']} GB RAM, GPU: {', '.join(g['name'] for g in hw['gpus']) or 'none (CPU only)'}")
+for k, v in d["backends"].items():
+    det = v.get("version") or (", ".join(v["templates"]) if v.get("templates") else None) or v.get("reason") or v.get("mode") or ""
+    print(f"{k:11s} {'available  ' if v.get('available') else 'unavailable'} {det[:110]}")
+PY
+)
+fi
 
 audit="$GITCRAFT_LOG/audit.jsonl"
 if [[ -f "$audit" ]]; then

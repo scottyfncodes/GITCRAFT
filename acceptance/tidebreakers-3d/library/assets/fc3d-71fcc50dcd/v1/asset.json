@@ -1,0 +1,383 @@
+{
+ "id": "fc3d-71fcc50dcd",
+ "version": 1,
+ "name": "Deckhand Pip",
+ "slug": "deckhand_pip",
+ "kind": "character",
+ "brief": "animated pirate deckhand character, coral bandana, crimson vest",
+ "tags": [
+  "animated",
+  "blender_character",
+  "character",
+  "tidebreakers"
+ ],
+ "source_tool": "blender",
+ "pipeline": [
+  "model",
+  "cleanup",
+  "optimize",
+  "uv_unwrap",
+  "texture_bake",
+  "rig_animate",
+  "preview_render",
+  "export"
+ ],
+ "generation": {
+  "method": "procedural",
+  "kind": "character",
+  "params": {
+   "seed": 117,
+   "colors": {
+    "vest": "crimson",
+    "bandana": "coral"
+   },
+   "weapon": true
+  },
+  "blender_config": {
+   "bake": 1024,
+   "turntable": 8
+  }
+ },
+ "route": {
+  "route": "character",
+  "chosen": "blender_character",
+  "preferred": "blender_character",
+  "fallback_used": false,
+  "explanation": "Animated characters need a skeleton: Blender builds a Mixamo-compatible rig and clips; Mixamo downloads can be layered on."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-195631-d0fd",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T19:56:43Z"
+ },
+ "geometry": {
+  "triangles": 1476,
+  "vertices": 796,
+  "meshes": 1,
+  "dimensions_m": [
+   1.617,
+   0.44,
+   2.05
+  ],
+  "bounds_min": [
+   -0.812,
+   -0.22,
+   0.0
+  ],
+  "bounds_max": [
+   0.805,
+   0.22,
+   2.05
+  ]
+ },
+ "materials": [
+  "M_deckhand_pip"
+ ],
+ "textures": [
+  {
+   "name": "deckhand_pip_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "deckhand_pip_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": {
+  "bones": 22,
+  "bone_names": [
+   "mixamorig:Hips",
+   "mixamorig:Spine",
+   "mixamorig:Spine1",
+   "mixamorig:Spine2",
+   "mixamorig:Neck",
+   "mixamorig:Head",
+   "mixamorig:LeftShoulder",
+   "mixamorig:LeftArm",
+   "mixamorig:LeftForeArm",
+   "mixamorig:LeftHand",
+   "mixamorig:RightShoulder",
+   "mixamorig:RightArm",
+   "mixamorig:RightForeArm",
+   "mixamorig:RightHand",
+   "mixamorig:LeftUpLeg",
+   "mixamorig:LeftLeg",
+   "mixamorig:LeftFoot",
+   "mixamorig:LeftToeBase",
+   "mixamorig:RightUpLeg",
+   "mixamorig:RightLeg",
+   "mixamorig:RightFoot",
+   "mixamorig:RightToeBase"
+  ],
+  "convention": "mixamo"
+ },
+ "animations": [
+  {
+   "name": "Attack",
+   "frames": [
+    0,
+    30
+   ],
+   "seconds": 1.0,
+   "loop": false
+  },
+  {
+   "name": "Idle",
+   "frames": [
+    0,
+    60
+   ],
+   "seconds": 2.0,
+   "loop": true
+  },
+  {
+   "name": "Interact",
+   "frames": [
+    0,
+    48
+   ],
+   "seconds": 1.6,
+   "loop": false
+  },
+  {
+   "name": "Jump",
+   "frames": [
+    0,
+    40
+   ],
+   "seconds": 1.333,
+   "loop": false
+  },
+  {
+   "name": "Run",
+   "frames": [
+    0,
+    20
+   ],
+   "seconds": 0.667,
+   "loop": true
+  },
+  {
+   "name": "Walk",
+   "frames": [
+    0,
+    32
+   ],
+   "seconds": 1.067,
+   "loop": true
+  }
+ ],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/deckhand_pip_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/deckhand_pip_turn_00.png",
+   "previews/deckhand_pip_turn_01.png",
+   "previews/deckhand_pip_turn_02.png",
+   "previews/deckhand_pip_turn_03.png",
+   "previews/deckhand_pip_turn_04.png",
+   "previews/deckhand_pip_turn_05.png",
+   "previews/deckhand_pip_turn_06.png",
+   "previews/deckhand_pip_turn_07.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "deckhand_pip.glb",
+   "bytes": 1165908,
+   "sha256": "887a35a3ac2695e3ba2477b155ac3b94a4f7261e984c322dcec0ef79f6486e9c"
+  },
+  "fbx": {
+   "path": "deckhand_pip.fbx",
+   "bytes": 1617292,
+   "sha256": "8b40dbf7f57ec565c81981330ea0315448be7b339d721a70b107f3cac9a47181"
+  },
+  "blend": {
+   "path": "deckhand_pip.blend",
+   "bytes": 174929,
+   "sha256": "ac75eb1b24f4e49457bbfef3f3a17a329dab6da9299ba59117f387c9be0cb260"
+  }
+ },
+ "companion_files": [
+  "textures/deckhand_pip_basecolor.png",
+  "textures/deckhand_pip_metalrough.png"
+ ],
+ "validation": {
+  "status": "passed-with-warnings",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.glb",
+   "bytes": 1165908,
+   "objects": 3,
+   "meshes": 1,
+   "triangles": 1476,
+   "vertices": 2998,
+   "dimensions_m": [
+    1.432,
+    0.44,
+    1.798
+   ],
+   "textures": [
+    "deckhand_pip_basecolor",
+    "deckhand_pip_metalrough"
+   ],
+   "bones": 22,
+   "animations": [
+    "Attack",
+    "Idle",
+    "Interact",
+    "Jump",
+    "Run",
+    "Walk"
+   ],
+   "non_manifold_edges": 2998,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/web_check.png",
+   "files": {
+    "deckhand_pip.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 1,
+     "khronos_messages": [
+      "NODE_SKINNED_MESH_NON_ROOT: Node with a skinned mesh is not root. Parent transforms will not affect a skinned mesh."
+     ],
+     "three_loaded": true,
+     "three_clips": 6
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-195631-d0fd",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.09,
+   "info": {
+    "root": "deckhand_pip",
+    "rig": true
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 16
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1476,
+    "tris_after": 1476,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 1.39,
+   "info": {
+    "maps": {
+     "basecolor": "deckhand_pip_basecolor.png",
+     "metalrough": "deckhand_pip_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "rig_animate",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "armature": "deckhand_pip_rig",
+    "bones": 22,
+    "clips": [
+     "Idle",
+     "Walk",
+     "Run",
+     "Jump",
+     "Interact",
+     "Attack"
+    ]
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 5.0,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_03.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_04.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_05.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_06.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.67,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.glb",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.fbx",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.blend"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,222 @@
+{
+ "id": "job-20261102-195713-5b1c",
+ "spec": {
+  "character": "fc3d-71fcc50dcd",
+  "animations": [
+   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo_fixture/MixamoLayout_Jump.fbx",
+   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo_fixture/MixamoLayout_Walk.fbx"
+  ],
+  "name": "Deckhand Pip",
+  "tags": [
+   "tidebreakers"
+  ],
+  "tool": "mixamo",
+  "brief": "Deckhand Pip",
+  "asset_id": "fc3d-71fcc50dcd"
+ },
+ "status": "done",
+ "created": "2026-11-02T19:57:13Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T19:57:15Z",
+   "finished": "2026-11-02T19:57:23Z",
+   "status": "done",
+   "error": null
+  }
+ ],
+ "stages": [
+  {
+   "stage": "route",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:15Z",
+   "info": {
+    "chosen": "mixamo",
+    "route": "mixamo",
+    "fallback_used": false,
+    "explanation": "explicit mixamo"
+   },
+   "finished": "2026-11-02T19:57:15Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:15Z",
+   "info": {
+    "clips": [
+     {
+      "clip": "MixamoLayout_Jump",
+      "matched_bones": 22,
+      "frames": [
+       1,
+       41
+      ]
+     },
+     {
+      "clip": "MixamoLayout_Walk",
+      "matched_bones": 22,
+      "frames": [
+       1,
+       33
+      ]
+     }
+    ]
+   },
+   "finished": "2026-11-02T19:57:21Z"
+  },
+  {
+   "stage": "blender:import_character",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:16Z",
+   "seconds": 0.07,
+   "info": {
+    "objects": 3,
+    "bones": 22
+   },
+   "finished": "2026-11-02T19:57:16Z"
+  },
+  {
+   "stage": "blender:import_animations",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:16Z",
+   "seconds": 0.06,
+   "info": {
+    "clips": [
+     {
+      "clip": "MixamoLayout_Jump",
+      "matched_bones": 22,
+      "frames": [
+       1,
+       41
+      ]
+     },
+     {
+      "clip": "MixamoLayout_Walk",
+      "matched_bones": 22,
+      "frames": [
+       1,
+       33
+      ]
+     }
+    ]
+   },
+   "finished": "2026-11-02T19:57:16Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:16Z",
+   "seconds": 0.97,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/deckhand_pip.glb",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/deckhand_pip.fbx",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/deckhand_pip.blend"
+    }
+   },
+   "finished": "2026-11-02T19:57:17Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:18Z",
+   "seconds": 3.14,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/previews/deckhand_pip_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/previews/deckhand_pip_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/previews/deckhand_pip_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/previews/deckhand_pip_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195713-5b1c/out/previews/deckhand_pip_turn_03.png"
+    ]
+   },
+   "finished": "2026-11-02T19:57:21Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:21Z",
+   "info": {
+    "status": "passed-with-warnings"
+   },
+   "finished": "2026-11-02T19:57:23Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:23Z",
+   "info": {
+    "asset": "fc3d-71fcc50dcd",
+    "version": 2
+   },
+   "finished": "2026-11-02T19:57:23Z"
+  }
+ ],
+ "error": null,
+ "asset": {
+  "id": "fc3d-71fcc50dcd",
+  "version": 2,
+  "name": "Deckhand Pip",
+  "validation": "passed-with-warnings"
+ },
+ "plan": {
+  "request": {
+   "brief": "Deckhand Pip",
+   "intents": [
+    "character"
+   ],
+   "kind": "character",
+   "params": {
+    "seed": 316,
+    "weapon": true
+   },
+   "images": 0,
+   "name": "Deckhand Pip",
+   "template": null
+  },
+  "route": "mixamo",
+  "why": "Mixamo FBX animations \u2192 Blender",
+  "candidates": [
+   {
+    "tool": "mixamo",
+    "available": true,
+    "label": "Mixamo FBX animations \u2192 Blender",
+    "detail": "explicit"
+   }
+  ],
+  "chosen": "mixamo",
+  "preferred": "mixamo",
+  "fallback_used": false,
+  "explanation": "explicit mixamo"
+ },
+ "compute": {
+  "tool": "mixamo",
+  "needs": "CPU, seconds",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "updated": "2026-11-02T19:57:23Z"
+}

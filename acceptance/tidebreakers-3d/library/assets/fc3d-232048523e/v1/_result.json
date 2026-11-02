@@ -1,0 +1,444 @@
+{
+ "op": "scene",
+ "stages": [
+  {
+   "stage": "assemble",
+   "state": "done",
+   "seconds": 0.21,
+   "info": {
+    "items": 9
+   }
+  },
+  {
+   "stage": "environment",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "ocean": 160
+   }
+  },
+  {
+   "stage": "render",
+   "state": "done",
+   "seconds": 23.65,
+   "info": {
+    "hero": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/previews/tidebreakers_turtle_cay_scene_thumb.png"
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.88,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/tidebreakers_turtle_cay_scene.glb",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/tidebreakers_turtle_cay_scene.blend"
+    }
+   }
+  }
+ ],
+ "ok": true,
+ "files": {
+  "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/tidebreakers_turtle_cay_scene.glb",
+  "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/tidebreakers_turtle_cay_scene.blend"
+ },
+ "previews": {
+  "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/previews/tidebreakers_turtle_cay_scene_thumb.png",
+  "hero": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-200229-01cc/out/previews/tidebreakers_turtle_cay_scene_hero.png",
+  "turntable": []
+ },
+ "stats": {
+  "triangles": 26410,
+  "vertices": 46347,
+  "meshes": 11,
+  "materials": [
+   "BB_reef_crab_blockbench_texture.png",
+   "M_deckhand_pip",
+   "M_floating_salvage",
+   "M_ocean",
+   "M_tidebreakers_coastal_sloop",
+   "M_turtle_cay",
+   "M_upgrade_brass_compass",
+   "M_upgrade_copper_banded_hull",
+   "M_upgrade_lashed_cargo_crates",
+   "M_upgrade_ship_s_wheel_ash_rudder"
+  ],
+  "textures": [
+   {
+    "name": "tidebreakers_coastal_sloop_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "tidebreakers_coastal_sloop_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "upgrade_lashed_cargo_crates_basecolor",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "upgrade_lashed_cargo_crates_metalrough",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "upgrade_brass_compass_basecolor",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "upgrade_brass_compass_metalrough",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "upgrade_copper_banded_hull_basecolor",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "upgrade_copper_banded_hull_metalrough",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "upgrade_ship_s_wheel_ash_rudder_basecolor",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "upgrade_ship_s_wheel_ash_rudder_metalrough",
+    "size": [
+     512,
+     512
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "floating_salvage_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "floating_salvage_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "0_reef_crab_blockbench_texture",
+    "size": [
+     128,
+     48
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "deckhand_pip_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "deckhand_pip_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   },
+   {
+    "name": "turtle_cay_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "turtle_cay_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   }
+  ],
+  "dimensions_m": [
+   160.0,
+   160.0,
+   12.0
+  ],
+  "bounds_min": [
+   -80.0,
+   -80.0,
+   -1.7
+  ],
+  "bounds_max": [
+   80.0,
+   80.0,
+   10.3
+  ],
+  "rig": {
+   "bones": 22,
+   "bone_names": [
+    "mixamorig:Hips",
+    "mixamorig:LeftUpLeg",
+    "mixamorig:LeftLeg",
+    "mixamorig:LeftFoot",
+    "mixamorig:LeftToeBase",
+    "mixamorig:RightUpLeg",
+    "mixamorig:RightLeg",
+    "mixamorig:RightFoot",
+    "mixamorig:RightToeBase",
+    "mixamorig:Spine",
+    "mixamorig:Spine1",
+    "mixamorig:Spine2",
+    "mixamorig:LeftShoulder",
+    "mixamorig:LeftArm",
+    "mixamorig:LeftForeArm",
+    "mixamorig:LeftHand",
+    "mixamorig:Neck",
+    "mixamorig:Head",
+    "mixamorig:RightShoulder",
+    "mixamorig:RightArm",
+    "mixamorig:RightForeArm",
+    "mixamorig:RightHand"
+   ],
+   "convention": "mixamo"
+  },
+  "animations": [
+   {
+    "name": "Attack",
+    "frames": [
+     0,
+     30
+    ],
+    "seconds": 1.0,
+    "loop": false
+   },
+   {
+    "name": "float_bob",
+    "frames": [
+     0,
+     60
+    ],
+    "seconds": 2.0,
+    "loop": true
+   },
+   {
+    "name": "Idle",
+    "frames": [
+     0,
+     60
+    ],
+    "seconds": 2.0,
+    "loop": true
+   },
+   {
+    "name": "Interact",
+    "frames": [
+     0,
+     48
+    ],
+    "seconds": 1.6,
+    "loop": false
+   },
+   {
+    "name": "Jump",
+    "frames": [
+     0,
+     40
+    ],
+    "seconds": 1.333,
+    "loop": false
+   },
+   {
+    "name": "MixamoLayout_Jump",
+    "frames": [
+     1,
+     41
+    ],
+    "seconds": 1.333,
+    "loop": false
+   },
+   {
+    "name": "MixamoLayout_Walk",
+    "frames": [
+     1,
+     33
+    ],
+    "seconds": 1.067,
+    "loop": true
+   },
+   {
+    "name": "Run",
+    "frames": [
+     0,
+     20
+    ],
+    "seconds": 0.667,
+    "loop": true
+   },
+   {
+    "name": "Walk",
+    "frames": [
+     0,
+     32
+    ],
+    "seconds": 1.067,
+    "loop": true
+   }
+  ],
+  "sockets": [
+   {
+    "name": "socket_flag",
+    "location": [
+     9.4695,
+     -27.8829,
+     9.8703
+    ]
+   },
+   {
+    "name": "socket_hull",
+    "location": [
+     9.0,
+     -27.0,
+     0.15
+    ]
+   },
+   {
+    "name": "socket_navigation",
+    "location": [
+     8.2488,
+     -25.5873,
+     1.2003
+    ]
+   },
+   {
+    "name": "socket_sail",
+    "location": [
+     9.4695,
+     -27.8829,
+     2.6003
+    ]
+   },
+   {
+    "name": "socket_steering",
+    "location": [
+     6.7465,
+     -22.7619,
+     1.2003
+    ]
+   },
+   {
+    "name": "socket_storage",
+    "location": [
+     8.7653,
+     -26.5585,
+     1.2003
+    ]
+   },
+   {
+    "name": "socket_dock",
+    "location": [
+     0.0,
+     -17.28,
+     0.96
+    ]
+   },
+   {
+    "name": "socket_spawn",
+    "location": [
+     3.75,
+     -8.75,
+     4.195
+    ]
+   }
+  ]
+ },
+ "placed": [
+  {
+   "name": "turtle_cay.001",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-7e35f73ff8/v1/turtle_cay.glb",
+   "objects": 4
+  },
+  {
+   "name": "player_sloop",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-9831ff542e/v1/tidebreakers_coastal_sloop.glb",
+   "objects": 8
+  },
+  {
+   "name": "upg_cargo_crate",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-21a46a8062/v1/upgrade_lashed_cargo_crates.glb",
+   "objects": 2
+  },
+  {
+   "name": "upg_compass_brass",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-82b6135f47/v1/upgrade_brass_compass.glb",
+   "objects": 2
+  },
+  {
+   "name": "upg_rudder_ash",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-c75a7997c3/v1/upgrade_ship_s_wheel_ash_rudder.glb",
+   "objects": 2
+  },
+  {
+   "name": "upg_hull_copper",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-0486db99be/v1/upgrade_copper_banded_hull.glb",
+   "objects": 2
+  },
+  {
+   "name": "salvage",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-0b2467cdb8/v1/floating_salvage.glb",
+   "objects": 2
+  },
+  {
+   "name": "deckhand",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-71fcc50dcd/v2/deckhand_pip.glb",
+   "objects": 5
+  },
+  {
+   "name": "crab",
+   "file": "/root/.gitcraft/forgecraft-library/assets/fc3d-46906d9596/v1/reef_crab_blockbench.glb",
+   "objects": 2
+  }
+ ]
+}

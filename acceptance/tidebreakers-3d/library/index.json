@@ -1,0 +1,295 @@
+{
+ "assets": [
+  {
+   "id": "fc3d-9831ff542e",
+   "name": "TIDEBREAKERS Coastal Sloop",
+   "slug": "tidebreakers_coastal_sloop",
+   "kind": "boat",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "boat",
+    "stylized",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-9831ff542e/v1/previews/tidebreakers_coastal_sloop_thumb.png",
+   "triangles": 4384,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:55:13Z",
+   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails"
+  },
+  {
+   "id": "fc3d-6cca3f5f59",
+   "name": "Upgrade: Canvas Mainsail",
+   "slug": "upgrade_canvas_mainsail",
+   "kind": "upgrade",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "tidebreakers",
+    "upgrade"
+   ],
+   "thumbnail": "assets/fc3d-6cca3f5f59/v1/previews/upgrade_canvas_mainsail_thumb.png",
+   "triangles": 588,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:55:23Z",
+   "brief": "boat upgrade component: Canvas Mainsail"
+  },
+  {
+   "id": "fc3d-21a46a8062",
+   "name": "Upgrade: Lashed Cargo Crates",
+   "slug": "upgrade_lashed_cargo_crates",
+   "kind": "upgrade",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "tidebreakers",
+    "upgrade"
+   ],
+   "thumbnail": "assets/fc3d-21a46a8062/v1/previews/upgrade_lashed_cargo_crates_thumb.png",
+   "triangles": 492,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:55:34Z",
+   "brief": "boat upgrade component: Lashed Cargo Crates"
+  },
+  {
+   "id": "fc3d-82b6135f47",
+   "name": "Upgrade: Brass Compass",
+   "slug": "upgrade_brass_compass",
+   "kind": "upgrade",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "tidebreakers",
+    "upgrade"
+   ],
+   "thumbnail": "assets/fc3d-82b6135f47/v1/previews/upgrade_brass_compass_thumb.png",
+   "triangles": 698,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:55:45Z",
+   "brief": "boat upgrade component: Brass Compass"
+  },
+  {
+   "id": "fc3d-c75a7997c3",
+   "name": "Upgrade: Ship's Wheel & Ash Rudder",
+   "slug": "upgrade_ship_s_wheel_ash_rudder",
+   "kind": "upgrade",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "tidebreakers",
+    "upgrade"
+   ],
+   "thumbnail": "assets/fc3d-c75a7997c3/v1/previews/upgrade_ship_s_wheel_ash_rudder_thumb.png",
+   "triangles": 1016,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:55:55Z",
+   "brief": "boat upgrade component: Ship's Wheel & Ash Rudder"
+  },
+  {
+   "id": "fc3d-0486db99be",
+   "name": "Upgrade: Copper-Banded Hull",
+   "slug": "upgrade_copper_banded_hull",
+   "kind": "upgrade",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "tidebreakers",
+    "upgrade"
+   ],
+   "thumbnail": "assets/fc3d-0486db99be/v1/previews/upgrade_copper_banded_hull_thumb.png",
+   "triangles": 1912,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:56:05Z",
+   "brief": "boat upgrade component: Copper-Banded Hull"
+  },
+  {
+   "id": "fc3d-0b2467cdb8",
+   "name": "Floating Salvage",
+   "slug": "floating_salvage",
+   "kind": "salvage",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "salvage",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-0b2467cdb8/v1/previews/floating_salvage_thumb.png",
+   "triangles": 1188,
+   "animations": 1,
+   "validation": "passed",
+   "updated": "2026-11-02T19:56:18Z",
+   "brief": "floating salvage: lashed crate, barrel and buoy on driftwood"
+  },
+  {
+   "id": "fc3d-7e35f73ff8",
+   "name": "Turtle Cay",
+   "slug": "turtle_cay",
+   "kind": "island",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_procedural",
+    "island",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-7e35f73ff8/v1/previews/turtle_cay_thumb.png",
+   "triangles": 10340,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:56:31Z",
+   "brief": "small tropical island with palms, rocks, a stilt hut and a dock"
+  },
+  {
+   "id": "fc3d-4d0ab4aea8",
+   "name": "Grand Treasure Chest (MeshCraft)",
+   "slug": "grand_treasure_chest_meshcraft",
+   "kind": "prop",
+   "source_tool": "meshcraft \u2192 blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "meshcraft_template",
+    "prop",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-4d0ab4aea8/v1/previews/grand_treasure_chest_meshcraft_three_quarter.png",
+   "triangles": 2456,
+   "animations": 2,
+   "validation": "passed",
+   "updated": "2026-11-02T19:57:02Z",
+   "brief": "grand treasure chest"
+  },
+  {
+   "id": "fc3d-46906d9596",
+   "name": "Reef Crab (Blockbench)",
+   "slug": "reef_crab_blockbench",
+   "kind": null,
+   "source_tool": "blockbench \u2192 blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blockbench",
+    "creature",
+    "tidebreakers",
+    "voxel"
+   ],
+   "thumbnail": "assets/fc3d-46906d9596/v1/previews/reef_crab_blockbench_thumb.png",
+   "triangles": 216,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T19:57:12Z",
+   "brief": "blocky voxel reef crab creature"
+  },
+  {
+   "id": "fc3d-71fcc50dcd",
+   "name": "Deckhand Pip",
+   "slug": "deckhand_pip",
+   "kind": "character",
+   "source_tool": "mixamo \u2192 blender",
+   "latest": 2,
+   "versions": [
+    1,
+    2
+   ],
+   "tags": [
+    "character",
+    "mixamo",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-71fcc50dcd/v2/previews/deckhand_pip_thumb.png",
+   "triangles": 1476,
+   "animations": 8,
+   "validation": "passed-with-warnings",
+   "updated": "2026-11-02T19:57:23Z",
+   "brief": "Deckhand Pip"
+  },
+  {
+   "id": "fc3d-297ecf1de4",
+   "name": "Salvage Raft (photogrammetry scan)",
+   "slug": "salvage_raft_photogrammetry_scan",
+   "kind": null,
+   "source_tool": "meshroom \u2192 blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "meshroom",
+    "photogrammetry",
+    "scan",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-297ecf1de4/v1/previews/salvage_raft_photogrammetry_scan_thumb.png",
+   "triangles": 1141,
+   "animations": 0,
+   "validation": "passed",
+   "updated": "2026-11-02T20:02:29Z",
+   "brief": "photogrammetry reconstruction"
+  },
+  {
+   "id": "fc3d-232048523e",
+   "name": "TIDEBREAKERS Turtle Cay Scene",
+   "slug": "tidebreakers_turtle_cay_scene",
+   "kind": "island",
+   "source_tool": "blender",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tags": [
+    "blender_scene",
+    "island",
+    "scene",
+    "tidebreakers"
+   ],
+   "thumbnail": "assets/fc3d-232048523e/v1/previews/tidebreakers_turtle_cay_scene_thumb.png",
+   "triangles": 26410,
+   "animations": 9,
+   "validation": "passed-with-warnings",
+   "updated": "2026-11-02T20:03:00Z",
+   "brief": "TIDEBREAKERS Turtle Cay Scene scene"
+  }
+ ]
+}

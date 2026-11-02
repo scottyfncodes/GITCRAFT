@@ -23,6 +23,14 @@ Claude Code ⇄ guard.py ⇄ sandbox.py (Landlock) ⇄ tool MCP server (+ its na
 | read + write | every root in `GITCRAFT_ROOTS`, the tool's own `~/.gitcraft/state/<tool>/` (its `TMPDIR` and XDG config/cache/data), `/dev`, and for LightCraft its library |
 | **denied** | everything else, including `~/.claude.json`, `~/.ssh`, credentials, `/tmp`, other repos outside the roots, and the network |
 
+## ForgeCraft
+
+- ForgeCraft (`forgecraft/server.py`, stdlib Python) runs behind the same guard and sandbox. Blender, Meshroom, MeshCraft's engine and the three.js check all run as its children, so the same fence applies to them.
+- It can read and execute its code, `~/.gitcraft/forgecraft` (Meshroom, AI venv) and MeshCraft's Blender venv. It can write its library (`~/.gitcraft/forgecraft-library`) and model cache.
+- The engine check serves files to Chromium by request interception, not a socket, so it works with network denied.
+- Hunyuan3D's hosted mode needs `GITCRAFT_ALLOW_NET=1`, set deliberately for that session only.
+- `forgecraft/ui_server.py` (the live UI) runs outside the sandbox as a local tool and binds to 127.0.0.1 only.
+
 ## MeshCraft
 
 MeshCraft runs Blender in-process and can execute Python (`run_script`, templates). It is safe to offer that because:

@@ -1,0 +1,237 @@
+{
+ "op": "generate",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.28,
+   "info": {
+    "root": "tidebreakers_coastal_sloop"
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "merged_vertices": 68
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 4384,
+    "tris_after": 4384,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.02,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 1.37,
+   "info": {
+    "maps": {
+     "basecolor": "tidebreakers_coastal_sloop_basecolor.png",
+     "metalrough": "tidebreakers_coastal_sloop_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": true
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 11.23,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_03.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_04.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_05.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_06.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_07.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_08.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_09.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_10.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_11.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_12.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_13.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_14.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_15.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_16.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_17.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_18.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_19.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_20.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_21.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_22.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_23.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.11,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.glb",
+     "gltf": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/gltf/tidebreakers_coastal_sloop.gltf",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.fbx",
+     "obj": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/obj/tidebreakers_coastal_sloop.obj",
+     "stl": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.stl",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.blend"
+    }
+   }
+  }
+ ],
+ "ok": true,
+ "files": {
+  "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.glb",
+  "gltf": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/gltf/tidebreakers_coastal_sloop.gltf",
+  "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.fbx",
+  "obj": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/obj/tidebreakers_coastal_sloop.obj",
+  "stl": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.stl",
+  "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/tidebreakers_coastal_sloop.blend"
+ },
+ "previews": {
+  "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_thumb.png",
+  "turntable": [
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_00.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_01.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_02.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_03.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_04.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_05.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_06.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_07.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_08.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_09.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_10.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_11.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_12.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_13.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_14.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_15.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_16.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_17.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_18.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_19.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_20.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_21.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_22.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/previews/tidebreakers_coastal_sloop_turn_23.png"
+  ]
+ },
+ "stats": {
+  "triangles": 4384,
+  "vertices": 2282,
+  "meshes": 1,
+  "materials": [
+   "M_tidebreakers_coastal_sloop"
+  ],
+  "textures": [
+   {
+    "name": "tidebreakers_coastal_sloop_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "tidebreakers_coastal_sloop_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   }
+  ],
+  "dimensions_m": [
+   3.868,
+   12.297,
+   11.28
+  ],
+  "bounds_min": [
+   -1.934,
+   -7.267,
+   -1.129
+  ],
+  "bounds_max": [
+   1.934,
+   5.03,
+   10.15
+  ],
+  "rig": null,
+  "animations": [],
+  "sockets": [
+   {
+    "name": "socket_flag",
+    "location": [
+     0.0,
+     -1.0,
+     9.7203
+    ]
+   },
+   {
+    "name": "socket_hull",
+    "location": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "name": "socket_navigation",
+    "location": [
+     0.0,
+     1.6,
+     1.0503
+    ]
+   },
+   {
+    "name": "socket_sail",
+    "location": [
+     0.0,
+     -1.0,
+     2.4503
+    ]
+   },
+   {
+    "name": "socket_steering",
+    "location": [
+     0.0,
+     4.8,
+     1.0503
+    ]
+   },
+   {
+    "name": "socket_storage",
+    "location": [
+     0.0,
+     0.5,
+     1.0503
+    ]
+   }
+  ]
+ },
+ "texture_files": [
+  "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/textures/tidebreakers_coastal_sloop_basecolor.png",
+  "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195455-9447/out/textures/tidebreakers_coastal_sloop_metalrough.png"
+ ]
+}

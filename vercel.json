@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python3 forgecraft/ui_server.py --publish acceptance/tidebreakers-3d/library forgecraft/ui/dist --source 'TIDEBREAKERS acceptance run'",
+  "outputDirectory": "forgecraft/ui/dist",
+  "installCommand": "true",
+  "framework": null,
+  "headers": [
+    { "source": "/(.*)\\.glb", "headers": [{ "key": "Content-Type", "value": "model/gltf-binary" }] },
+    { "source": "/data/state.json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}

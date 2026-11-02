@@ -1,0 +1,265 @@
+{
+ "id": "job-20261102-195631-d0fd",
+ "spec": {
+  "brief": "animated pirate deckhand character, coral bandana, crimson vest",
+  "name": "Deckhand Pip",
+  "max_tris": 6000,
+  "bake": 1024,
+  "formats": [
+   "glb",
+   "fbx",
+   "blend"
+  ],
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T19:56:31Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T19:56:33Z",
+   "finished": "2026-11-02T19:56:43Z",
+   "status": "done",
+   "error": null
+  }
+ ],
+ "stages": [
+  {
+   "stage": "route",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:33Z",
+   "info": {
+    "chosen": "blender_character",
+    "route": "character",
+    "fallback_used": false,
+    "explanation": "Animated characters need a skeleton: Blender builds a Mixamo-compatible rig and clips; Mixamo downloads can be layered on."
+   },
+   "finished": "2026-11-02T19:56:33Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:33Z",
+   "info": {
+    "tool": "blender_character",
+    "kind": "character"
+   },
+   "finished": "2026-11-02T19:56:41Z"
+  },
+  {
+   "stage": "blender:model",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:34Z",
+   "seconds": 0.09,
+   "info": {
+    "root": "deckhand_pip",
+    "rig": true
+   },
+   "finished": "2026-11-02T19:56:34Z"
+  },
+  {
+   "stage": "blender:cleanup",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:34Z",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 16
+   },
+   "finished": "2026-11-02T19:56:34Z"
+  },
+  {
+   "stage": "blender:optimize",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:34Z",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1476,
+    "tris_after": 1476,
+    "ratio": 1.0
+   },
+   "finished": "2026-11-02T19:56:34Z"
+  },
+  {
+   "stage": "blender:uv_unwrap",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:34Z",
+   "seconds": 0.01,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   },
+   "finished": "2026-11-02T19:56:34Z"
+  },
+  {
+   "stage": "blender:texture_bake",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:34Z",
+   "seconds": 1.39,
+   "info": {
+    "maps": {
+     "basecolor": "deckhand_pip_basecolor.png",
+     "metalrough": "deckhand_pip_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   },
+   "finished": "2026-11-02T19:56:36Z"
+  },
+  {
+   "stage": "blender:rig_animate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:36Z",
+   "seconds": 0.01,
+   "info": {
+    "armature": "deckhand_pip_rig",
+    "bones": 22,
+    "clips": [
+     "Idle",
+     "Walk",
+     "Run",
+     "Jump",
+     "Interact",
+     "Attack"
+    ]
+   },
+   "finished": "2026-11-02T19:56:36Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:36Z",
+   "seconds": 5.0,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_03.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_04.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_05.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_06.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/previews/deckhand_pip_turn_07.png"
+    ]
+   },
+   "finished": "2026-11-02T19:56:41Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:41Z",
+   "seconds": 0.67,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.glb",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.fbx",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195631-d0fd/out/deckhand_pip.blend"
+    }
+   },
+   "finished": "2026-11-02T19:56:41Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:41Z",
+   "info": {
+    "status": "passed-with-warnings"
+   },
+   "finished": "2026-11-02T19:56:43Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:43Z",
+   "info": {
+    "asset": "fc3d-71fcc50dcd",
+    "version": 1
+   },
+   "finished": "2026-11-02T19:56:43Z"
+  }
+ ],
+ "error": null,
+ "asset": {
+  "id": "fc3d-71fcc50dcd",
+  "version": 1,
+  "name": "Deckhand Pip",
+  "validation": "passed-with-warnings"
+ },
+ "plan": {
+  "request": {
+   "brief": "animated pirate deckhand character, coral bandana, crimson vest",
+   "intents": [
+    "animated",
+    "character"
+   ],
+   "kind": "character",
+   "params": {
+    "seed": 117,
+    "colors": {
+     "vest": "crimson",
+     "bandana": "coral"
+    },
+    "weapon": true
+   },
+   "images": 0,
+   "name": "animated pirate deckhand character, coral bandana, crimson v",
+   "template": null
+  },
+  "route": "character",
+  "why": "Animated characters need a skeleton: Blender builds a Mixamo-compatible rig and clips; Mixamo downloads can be layered on.",
+  "candidates": [
+   {
+    "tool": "blender_character",
+    "label": "Blender (rig + animation, Mixamo skeleton)",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh)",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "blender_character",
+  "preferred": "blender_character",
+  "fallback_used": false,
+  "explanation": "Animated characters need a skeleton: Blender builds a Mixamo-compatible rig and clips; Mixamo downloads can be layered on."
+ },
+ "compute": {
+  "tool": "blender_character",
+  "needs": "CPU, seconds",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "updated": "2026-11-02T19:56:43Z"
+}
