@@ -1,10 +1,12 @@
-"""Procedural asset generators (Blender's own modelling, no AI). Each builder returns a
-root object; meshes hang under it. Blender -Y is forward (glTF/three.js +Z)."""
+"""Procedural builders behind MeshCraft's boat, boat_upgrade, salvage, island, lighthouse, prop
+and deckhand templates (moved here from ForgeCraft during the 3D Department consolidation).
+Each builder returns a root object with the meshes under it. Blender -Y is forward
+(glTF/three.js +Z). Materials come from geo.mat(), i.e. the template's palette roles."""
 import math, random
 import bpy, bmesh
 from mathutils import Vector, Matrix, Euler, Quaternion
-import mc
-from mc import mat, prim, mesh_obj, join, empty, solidify, shade
+from . import geo as mc
+from .geo import mat, prim, mesh_obj, join, empty, solidify, shade
 
 
 # ====================================================================== boats
@@ -419,10 +421,6 @@ def prop(p):
     if kind == "barrel": parts = _barrel("barrel", (0, 0, 0.45))
     elif kind == "crate":
         c = prim("cube", "crate", mat("honey", "plank"), loc=(0, 0, 0.4), scale=(0.4, 0.4, 0.4)); mc.bevel(c, 0.02); parts = [c]
-    elif kind == "chest":
-        parts = [prim("cube", "box", mat("timber", "plank"), loc=(0, 0, 0.3), scale=(0.5, 0.32, 0.3)),
-                 prim("cyl", "lid", mat("crimson", "plank"), loc=(0, 0, 0.6), rot=(0, math.pi / 2, 0), vertices=12, radius=0.32, depth=1.0),
-                 prim("cube", "lock", mat("gold", "metal", 0.3, 0.9), loc=(0, -0.33, 0.55), scale=(0.08, 0.02, 0.1))]
     elif kind == "rock": parts = [rock("rock", (0, 0, 0.3), 0.8, int(p.get("seed", 1)))]
     elif kind == "palm": parts = palm("palm", (0, 0, 0), 5.0, 0.3, int(p.get("seed", 1)))
     else: raise ValueError(f"unknown prop {kind}")

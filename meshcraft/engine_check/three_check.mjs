@@ -89,7 +89,10 @@ const add = (check, ok, detail) => checks.push({ check, level: ok ? 'pass' : 'fa
 add('engine_load', report.ok, report.ok ? 'GLTFLoader (three@0.170) loaded the file' : report.error);
 if (report.ok) {
   // the toon material needs COLOR_0; an authored-material check of a texture-baked export (web-pbr) needs base colour maps instead
-  if (report.material === 'authored' && report.meshesWithVertexColor === 0 && report.meshesWithBaseColorMap > 0)
+  // a composed scene (contract.mixed_materials) mixes texture-baked assets with plain-coloured scenery such as its ocean
+  if (report.material === 'authored' && contract && contract.mixed_materials)
+    add('engine_mixed_materials', report.meshesWithBaseColorMap > 0 || report.meshesWithVertexColor > 0, `${report.meshesWithBaseColorMap} textured + ${report.meshesWithVertexColor} vertex-coloured of ${report.meshes} meshes (scene)`);
+  else if (report.material === 'authored' && report.meshesWithVertexColor === 0 && report.meshesWithBaseColorMap > 0)
     add('engine_basecolor_maps', report.meshesWithBaseColorMap === report.meshes, `${report.meshesWithBaseColorMap}/${report.meshes} meshes have a base colour map (texture-baked export)`);
   else if (report.material === 'authored' && report.meshesWithVertexColor === 0)
     add('engine_authored_materials', true, `${report.meshes} meshes shade with their own materials (no COLOR_0 or maps needed)`);
