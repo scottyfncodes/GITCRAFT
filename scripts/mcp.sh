@@ -34,6 +34,11 @@ mkdir -p "$root" "$GITCRAFT_LOG"
 state="$GITCRAFT_STATE/$name"
 mkdir -p "$state/tmp" "$state/config" "$state/cache" "$state/data"
 export TMPDIR="$state/tmp" XDG_CONFIG_HOME="$state/config" XDG_CACHE_HOME="$state/cache" XDG_DATA_HOME="$state/data"
+# XDG_DATA_HOME moved, so point the tool's user-font folder back at the real one (read-only in the sandbox);
+# without this, tools silently fall back to default fonts.
+for fd in "$HOME/.local/share/fonts" "$HOME/.fonts"; do
+  [[ -d "$fd" ]] && { ln -sfn "$fd" "$state/data/fonts"; break; }
+done
 
 native=(--automation-read-root "$root" --automation-write-root "$root")
 case "$name" in

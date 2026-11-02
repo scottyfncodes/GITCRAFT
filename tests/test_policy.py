@@ -57,6 +57,24 @@ for name in want:
     except Exception as e:
         check(f"{name}: server starts under guard + sandbox", False, str(e)[:300])
 
+# Fonts: the per-tool XDG folders must still expose the user's fonts inside the sandbox.
+# Render the same text with a user-installed font sandboxed and unsandboxed; the pixels must match.
+ufont_dir = next((d for d in (os.path.expanduser("~/.local/share/fonts"), os.path.expanduser("~/.fonts")) if os.path.isdir(d) and os.listdir(d)), None)
+if ufont_dir and "designcraft" in want:
+    def render(sandbox):
+        e = dict(env, GITCRAFT_SANDBOX="landlock" if sandbox else "off")
+        c = Client([MCP, "designcraft"], env=e)
+        c.call("new_document", {"width": 600, "height": 200, "pages": 1, "intent": "web", "margins": 0})
+        ok, r = c.call("execute", {"command": "frame.create", "params": {"rect": [10, 10, 590, 190], "content": "text", "text": "Fontcheck Gg"}})
+        c.call("execute", {"command": "selection.set", "params": {"ids": [r["id"]]}})
+        fam = os.environ.get("GITCRAFT_TEST_FONT", "Fraunces 144pt")
+        c.call("execute", {"command": "type.char", "params": {"attrs": {"fontFamily": fam, "size": 80}}})
+        out = f"{ws}/fontcheck_{'sb' if sandbox else 'open'}.png"
+        c.call("export_png", {"page": 0, "path": out, "scale": 1}); c.close()
+        return open(out, "rb").read()
+    check("designcraft: user fonts render identically inside the sandbox", render(True) == render(False),
+          "sandboxed render differs: user fonts not visible (set GITCRAFT_TEST_FONT to a family installed in " + ufont_dir + ")")
+
 # Kernel layer alone (no guard): the two tools without a native fence.
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 gh = os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"))
