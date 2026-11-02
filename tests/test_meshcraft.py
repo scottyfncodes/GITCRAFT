@@ -39,11 +39,15 @@ check("hardware_probe answers before Blender loads", ok and dt < 3 and hw["cpu"]
 ok, st = c.call("meshcraft_status"); check("meshcraft starts sandboxed", ok and st.get("sandbox", "").startswith("landlock"), st)
 templates = sys.argv[1:] or st["templates"]
 CLIPS = {"chest": ("lid_open", "end"), "lantern": ("swing", "mid"), "flag": ("wave", "mid"), "sail": ("fill", "end"), "crab": ("wave", 14)}
-for t in templates:
+built = {}
+for t in sorted(templates, key=lambda t: t == "mesh_import"):   # mesh_import re-imports a GLB built here
     clip = CLIPS.get(t)
     brief = {"asset_id": f"test_{t}", "template": t, "palette": pal, "out_dir": os.path.join(ws, t), "profiles": ["three-web-toon", "unity-fbx"],
              "preview": {"size": 256, "views": ["three_quarter"], "poses": [{"clip": clip[0], "at": clip[1]}] if clip else []}}
+    if t == "mesh_import":
+        brief.update(params={"path": built.get("chest") or next(iter(built.values())), "max_tris": 2000, "target_size": 1.0}, profiles=["web-pbr", "obj-static"])
     ok, r = c.call("run_pipeline", {"brief": brief}, timeout=900)
+    if ok: built[t] = next((e["path"] for e in r["exports"] if e["format"] == "glb"), None)
     s = r["validation"]["summary"] if ok else {}
     check(f"{t}: pipeline with no failed checks", ok and s.get("fail") == 0, s if ok else r)
     if ok and t == "chest":
@@ -58,15 +62,19 @@ def glb_content(p):   # GLB minus the brief stored in the scene extras (it names
 
 def failed(r): return [x for x in r["validation"]["checks"] if x["level"] == "fail"]
 
-# reproducible builds: the same brief in two fresh server processes gives the same GLB
-digests = []
-for i in range(2):
-    ci = Client(MCP, env=env)
-    b = {"asset_id": "repro_lantern", "template": "lantern", "palette": pal, "out_dir": os.path.join(ws, f"repro{i}")}
-    ok, r = ci.call("build_asset", {"brief": b}, timeout=600)
-    ok2, e = ci.call("export_asset", {"blend": r["blend"]["path"], "profiles": ["three-web-toon"]}, timeout=600) if ok else (False, r)
-    digests.append(glb_content(e[0]["path"]) if ok2 else None); ci.close()
-check("builds are reproducible across server processes (identical GLB content)", digests[0] is not None and digests[0] == digests[1])
+# reproducible builds: the same brief in two fresh server processes gives the same GLB (MeshCraft's
+# own templates and the procedural ones ported from ForgeCraft, incl. the rigged deckhand)
+for tpl in ("lantern", "boat", "deckhand", "island"):
+    if tpl not in st["templates"]: continue
+    digests = []
+    for i in range(2):
+        ci = Client(MCP, env=env)
+        b = {"asset_id": f"repro_{tpl}", "template": tpl, "palette": pal, "out_dir": os.path.join(ws, f"repro_{tpl}{i}")}
+        if tpl == "island": b["params"] = {"resolution": 40}
+        ok, r = ci.call("build_asset", {"brief": b}, timeout=600)
+        ok2, e = ci.call("export_asset", {"blend": r["blend"]["path"], "profiles": ["three-web-toon"]}, timeout=600) if ok else (False, r)
+        digests.append(glb_content(e[0]["path"]) if ok2 else None); ci.close()
+    check(f"{tpl}: build is reproducible across server processes (identical GLB content)", digests[0] is not None and digests[0] == digests[1])
 
 # web-pbr + stl-print on the chest
 brief = {"asset_id": "pbr_chest", "template": "chest", "palette": pal, "out_dir": os.path.join(ws, "pbr_chest"), "profiles": ["web-pbr", "stl-print"],
@@ -157,6 +165,31 @@ check("jobs: a bad request fails at once with the reason (no retries)", not ok a
 ok, ro = c.call("route", {"request": "blocky voxel lifeboat"}); ok2, ro2 = c.call("route", {"request": "turn this concept art into a ship", "images": 1})
 check("route: advises Blockbench for voxel work and reports image-to-3D as unavailable", ok and ok2 and ro["route"] == "blockbench" and ro2["route"] == "image_to_3d"
       and ro2["available"] is False and "NOT derived" in ro2["alternatives"][0]["note"], (ro, ro2))
+
+# consolidation: mesh processing and scene composition live in MeshCraft, as jobs and library versions
+if "boat" in st["templates"] and "deckhand" in st["templates"]:
+    mk = lambda t, **kw: c.call("run_pipeline", {"brief": dict({"asset_id": f"lib_{t}", "template": t, "palette": pal, "out_dir": os.path.join(ws, f"lib_{t}"),
+                                                                 "profiles": ["three-web-toon", "web-pbr"], "preview": {"size": 128, "views": ["three_quarter"]}}, **kw)}, timeout=900)
+    ok_b, rb2 = mk("boat"); ok_u, ru = mk("boat_upgrade", params={"upgrade": "cargo_crate"}); ok_d, rd = mk("deckhand")
+    check("ported templates: boat, boat_upgrade, deckhand pass MeshCraft validation", ok_b and ok_u and ok_d and not failed(rb2) and not failed(ru) and not failed(rd)
+          and rd["build"]["actions"] == ["Attack", "Idle", "Interact", "Jump", "Run", "Walk"], [rb2 if not ok_b else failed(rb2), ru if not ok_u else failed(ru), rd if not ok_d else failed(rd)])
+    ok, sc = c.call("compose_scene", {"asset_id": "lib_scene", "out_dir": os.path.join(ws, "lib_scene"), "samples": 2, "resolution": [160, 90],
+                                      "items": [{"asset": "lib_boat", "name": "boat"}, {"asset": "lib_boat_upgrade", "name": "crates", "attach_to": "boat:socket_storage"},
+                                                {"asset": "lib_deckhand", "name": "crew", "location": [3, 0, 0]}], "parent_job": "job-test-parent"}, timeout=900)
+    check("compose_scene: library assets + socket attachment → validated scene GLB, a job with its parent, a library version",
+          ok and not failed(sc) and sc["library"]["version"] == 1 and len(sc["placed"]) == 3 and sc["placed"][1]["attach_to"] == "boat:socket_storage"
+          and c.call("job_get", {"job": sc["job"]["id"]})[1].get("parent") == "job-test-parent" and "Walk" in sc["build"]["actions"], sc if not ok else failed(sc))
+    glb_b = next(e["path"] for e in rb2["exports"] if e.get("profile") == "three-web-toon")
+    ok, pm = c.call("process_mesh", {"path": glb_b, "asset_id": "lib_reimport", "out_dir": os.path.join(ws, "lib_reimport"), "target_size": 2.0, "max_tris": 1000}, timeout=900)
+    sz = max(next(e for e in pm["exports"] if e.get("profile") == "web-pbr")["roundtrip"]["size_m"]) if ok else 0
+    tris = next((c2 for c2 in pm["validation"]["checks"] if c2["check"] == "triangle_budget"), {}).get("tris", 0) if ok else 0
+    check("process_mesh: a GLB re-imports, decimates to its budget, rescales to 2 m and validates", ok and not failed(pm) and abs(sz - 2.0) < 0.02 and 0 < tris <= 1100,
+          pm if not ok else (failed(pm), sz, tris))
+    glb_d = next(e["path"] for e in rd["exports"] if e.get("profile") == "three-web-toon")
+    ok, pr = c.call("process_mesh", {"path": glb_d, "asset_id": "lib_reimport_rig", "out_dir": os.path.join(ws, "lib_reimport_rig")}, timeout=900)
+    check("process_mesh: a rigged, animated GLB keeps its skeleton and all six clips", ok and not failed(pr) and len(pr["build"]["actions"]) == 6, pr if not ok else failed(pr))
+ok, ra = c.call("route", {"request": "animated pirate deckhand"})
+check("route: humanoid characters now have a MeshCraft template (deckhand)", ok and ra["route"] == "template" and ra["template"] == "deckhand", ra)
 
 hostile = os.path.join(ws, "hostile.py")
 open(hostile, "w").write('''

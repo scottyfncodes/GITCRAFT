@@ -84,10 +84,18 @@ def prim(kind, name, material=None, loc=(0, 0, 0), rot=(0, 0, 0), scale=(1, 1, 1
     ops[kind](location=loc, rotation=rot, **kw)
     o = bpy.context.active_object
     o.name = name
+    _canonical(o)
     o.scale = scale
     if material: assign(o, material)
     apply_xf(o)
     return o
+
+
+def _canonical(o):
+    """Fixed element order (MeshCraft kit._canonical): Blender's sphere/ico primitive operators emit
+    faces in a varying order between runs, which made identical builds export different GLBs."""
+    from ..kit import _canonical as canon
+    bm = bmesh.new(); bm.from_mesh(o.data); out = canon(bm); out.to_mesh(o.data); out.free(); o.data.update()
 
 
 def apply_xf(o):

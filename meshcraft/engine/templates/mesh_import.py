@@ -107,11 +107,8 @@ def build(ctx):
     meshes = [o for o in objs if o.type == "MESH"]
     if not meshes: raise ValueError(f"mesh_import: {os.path.basename(path)} contains no mesh")
     stats = {"imported_objects": len(objs), "imported_triangles": sum(sum(len(f.vertices) - 2 for f in o.data.polygons) for o in meshes)}
-    for o in meshes:   # bake parent transforms into the meshes so cleanup and grounding work in world space
-        kit.link(o) if o.name not in bpy.context.scene.objects else None
-        for x in bpy.context.selected_objects: x.select_set(False)
-        o.select_set(True); bpy.context.view_layer.objects.active = o
-        bpy.ops.object.parent_clear(type="CLEAR_KEEP_TRANSFORM"); bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    # the imported hierarchy (armatures, skinning, animated parts) stays intact: cleanup works on mesh
+    # data, cropping in world space, and grounding/rescaling is one transform on the asset's root
     if p.get("crop"): stats["crop"] = crop_scan(meshes, float(p["crop"]), p.get("crop_floor", True))
     merged = 0
     for o in meshes:   # merge doubles, drop loose and degenerate geometry, consistent normals
@@ -130,15 +127,14 @@ def build(ctx):
             m = o.modifiers.new("decimate", "DECIMATE"); m.ratio = budget / tris; m.use_collapse_triangulate = True
             bpy.context.view_layer.objects.active = o; bpy.ops.object.modifier_apply(modifier=m.name)
     stats["triangles"] = sum(sum(len(f.vertices) - 2 for f in o.data.polygons) for o in meshes)
+    bpy.context.view_layer.update()
     lo, hi = _bounds(meshes)
-    if p.get("recenter", True):
-        off = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))
-        for o in meshes: o.data.transform(__import__("mathutils").Matrix.Translation(-off))
-        lo, hi = lo - off, hi - off
-    if p.get("target_size"):
-        k = float(p["target_size"]) / max(hi - lo)
-        for o in meshes: o.data.transform(__import__("mathutils").Matrix.Scale(k, 4))
-        stats["scale"] = round(k, 5)
+    k = float(p["target_size"]) / max(hi - lo) if p.get("target_size") else 1.0
+    off = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z)) if p.get("recenter", True) else Vector((0, 0, 0))
+    for o in [o for o in objs if o.name in bpy.data.objects and o.parent is None and o.type in ("MESH", "ARMATURE", "EMPTY")]:
+        o.parent = root
+    root.scale = (k, k, k); root.location = -off * k
+    if k != 1.0: stats["scale"] = round(k, 5)
     for o in meshes:
         if not o.data.materials:   # something to bake and export
             m = bpy.data.materials.new("GC_Imported"); o.data.materials.append(m)
@@ -148,8 +144,7 @@ def build(ctx):
                 if b and not b.inputs["Base Color"].is_linked:
                     vc = m.node_tree.nodes.new("ShaderNodeVertexColor"); vc.layer_name = o.data.color_attributes[0].name
                     m.node_tree.links.new(vc.outputs["Color"], b.inputs["Base Color"])
-        o.parent = root
-    for o in [o for o in objs if o.type not in ("MESH", "ARMATURE") and o.name in bpy.data.objects]:
+    for o in [o for o in objs if o.type not in ("MESH", "ARMATURE", "EMPTY") and o.name in bpy.data.objects]:
         bpy.data.objects.remove(o, do_unlink=True)   # importer cameras/lights/empties are not the asset
     return {"root": root.name, "contract": {"root": root.name}, "expect": {"base_z": 0.0} if p.get("recenter", True) else {},
             "import": dict(stats, source=os.path.basename(path))}
