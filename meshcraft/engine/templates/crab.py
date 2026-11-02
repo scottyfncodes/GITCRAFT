@@ -63,17 +63,19 @@ def build(ctx):
     kit.pose_keyframes(arm, "idle", {1: {"body": {"loc": (0, 0, 0)}, "eye_L": {"rot": (0, 0, 0)}, "eye_R": {"rot": (0, 0, 0)}},
                                      31: {"body": {"loc": (0, 0.02 * s, 0)}, "eye_L": {"rot": (0, r(8), 0)}, "eye_R": {"rot": (0, r(-8), 0)}},
                                      61: {"body": {"loc": (0, 0, 0)}, "eye_L": {"rot": (0, 0, 0)}, "eye_R": {"rot": (0, 0, 0)}}})
+    # Bone Y runs along the bone (twist); +X lifts the arm/claw tip on both sides (measured), Z swings it sideways.
+    up = r(70)
     kit.pose_keyframes(arm, "wave", {1: {"arm_L": {"rot": (0, 0, 0)}, "claw_L": {"rot": (0, 0, 0)}},
-                                     8: {"arm_L": {"rot": (0, r(-55), 0)}, "claw_L": {"rot": (0, r(-20), 0)}},
-                                     14: {"arm_L": {"rot": (0, r(-55), 0)}, "claw_L": {"rot": (0, r(25), 0)}},
-                                     20: {"arm_L": {"rot": (0, r(-55), 0)}, "claw_L": {"rot": (0, r(-20), 0)}},
-                                     26: {"arm_L": {"rot": (0, r(-55), 0)}, "claw_L": {"rot": (0, r(25), 0)}},
+                                     8: {"arm_L": {"rot": (up, 0, 0)}, "claw_L": {"rot": (r(20), 0, r(-30))}},
+                                     14: {"arm_L": {"rot": (up, 0, 0)}, "claw_L": {"rot": (r(20), 0, r(30))}},
+                                     20: {"arm_L": {"rot": (up, 0, 0)}, "claw_L": {"rot": (r(20), 0, r(-30))}},
+                                     26: {"arm_L": {"rot": (up, 0, 0)}, "claw_L": {"rot": (r(20), 0, r(30))}},
                                      34: {"arm_L": {"rot": (0, 0, 0)}, "claw_L": {"rot": (0, 0, 0)}}})
-    kit.pose_keyframes(arm, "snap", {1: {"claw_L": {"rot": (0, 0, 0)}, "claw_R": {"rot": (0, 0, 0)}},
-                                     5: {"claw_L": {"rot": (r(25), 0, 0)}, "claw_R": {"rot": (r(25), 0, 0)}},
-                                     9: {"claw_L": {"rot": (0, 0, 0)}, "claw_R": {"rot": (0, 0, 0)}},
-                                     13: {"claw_L": {"rot": (r(25), 0, 0)}, "claw_R": {"rot": (r(25), 0, 0)}},
-                                     17: {"claw_L": {"rot": (0, 0, 0)}, "claw_R": {"rot": (0, 0, 0)}}})
+    kit.pose_keyframes(arm, "snap", {1: {"arm_L": {"rot": (0, 0, 0)}, "arm_R": {"rot": (0, 0, 0)}, "claw_L": {"rot": (0, 0, 0)}, "claw_R": {"rot": (0, 0, 0)}},
+                                     5: {"arm_L": {"rot": (r(25), 0, 0)}, "arm_R": {"rot": (r(25), 0, 0)}, "claw_L": {"rot": (r(40), 0, 0)}, "claw_R": {"rot": (r(40), 0, 0)}},
+                                     9: {"arm_L": {"rot": (r(10), 0, 0)}, "arm_R": {"rot": (r(10), 0, 0)}, "claw_L": {"rot": (r(-10), 0, 0)}, "claw_R": {"rot": (r(-10), 0, 0)}},
+                                     13: {"arm_L": {"rot": (r(25), 0, 0)}, "arm_R": {"rot": (r(25), 0, 0)}, "claw_L": {"rot": (r(40), 0, 0)}, "claw_R": {"rot": (r(40), 0, 0)}},
+                                     17: {"arm_L": {"rot": (0, 0, 0)}, "arm_R": {"rot": (0, 0, 0)}, "claw_L": {"rot": (0, 0, 0)}, "claw_R": {"rot": (0, 0, 0)}}})
     return {"root": root, "expect": {"base_z": 0.0, "centered": True},
             "contract": {"nodes": {"root": "biscuit", "rig": "biscuit_rig", "mesh": "biscuit_mesh"}, "clips": ["idle", "wave", "snap"],
                          "bones": ["root", "body", "eye_L", "eye_R", "arm_L", "claw_L", "arm_R", "claw_R"]}}

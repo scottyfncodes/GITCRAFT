@@ -89,7 +89,8 @@ const add = (check, ok, detail) => checks.push({ check, level: ok ? 'pass' : 'fa
 add('engine_load', report.ok, report.ok ? 'GLTFLoader (three@0.170) loaded the file' : report.error);
 if (report.ok) {
   add('engine_vertex_colors', report.meshesWithVertexColor === report.meshes, `${report.meshesWithVertexColor}/${report.meshes} meshes carry COLOR_0 for the toon material`);
-  add('engine_base_on_ground', Math.abs(report.bounds.min[1]) < 0.02 || !!args.clip, `lowest point y=${report.bounds.min[1]} m`);
+  // assets that hang or mount (contract.ground === false) are anchored elsewhere, so only grounded assets get this check
+  if (!contract || contract.ground !== false) add('engine_base_on_ground', Math.abs(report.bounds.min[1]) < 0.02 || !!args.clip, `lowest point y=${report.bounds.min[1]} m`);
   if (contract) {
     for (const n of Object.values(contract.nodes || {})) add(`engine_node:${n}`, report.nodes.includes(n), report.nodes.includes(n) ? 'found' : 'missing');
     if (contract.lid_hinge_yup && report.named.chest_lid) {

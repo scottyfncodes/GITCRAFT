@@ -55,4 +55,4 @@ def build(ctx):
     body = kit.join(parts, "figurehead_mesh"); kit.shade(body, smooth_angle=35); body.parent = root
     root.rotation_euler = (math.radians(-p["tilt_deg"]), 0, 0)
     return {"root": root, "expect": {"base_z": None, "centered": True},
-            "contract": {"nodes": {"root": "figurehead", "mesh": "figurehead_mesh"}, "origin": "mounting point on the bow; face looks +Z"}}
+            "contract": {"ground": False, "nodes": {"root": "figurehead", "mesh": "figurehead_mesh"}, "origin": "mounting point on the bow; face looks +Z"}}
