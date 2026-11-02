@@ -132,7 +132,7 @@ if [[ $mesh_state == ok ]] && { ! ((${#want[@]})) || [[ " ${want[*]} " =~ " forg
   "$here/install-3d.sh" core && forge_state=ok || { forge_state=failed; failed+=(forgecraft); }
 fi
 
-"$here/register.sh"
+"$here/install-global.sh"   # runtime copy in ~/.gitcraft/runtime, user-scope registration, global instructions
 
 # Machine-readable result for doctor.sh and for anything orchestrating installs.
 python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
