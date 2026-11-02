@@ -94,6 +94,15 @@ for entry in "${todo[@]}"; do
   fi
 done
 
+# 3) The 3D Department (meshcraft) installs its Python runtimes separately.
+if ! ((${#want[@]})) || [[ " ${want[*]} " == *" meshcraft "* ]]; then
+  if gitcraft_installed meshcraft x && ((update == 0)); then
+    echo "gitcraft: meshcraft already installed"
+  elif ! "$here/install-3d.sh" core; then
+    failed+=("meshcraft")
+  fi
+fi
+
 "$here/register.sh"
 
 # Machine-readable result for doctor.sh and for anything orchestrating installs.
@@ -103,7 +112,8 @@ out, bindir, failed, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()),
 st = {"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tools": {}}
 for e in tools:
     name, _, pkg = e.split(":")
-    ok = os.access(os.path.join(bindir, pkg), os.X_OK) and name not in failed
+    exe = os.path.join(mchome, "venv", "bin", "python") if name == "meshcraft" else os.path.join(bindir, pkg)
+    ok = os.access(exe, os.X_OK) and name not in failed
     ver = open(os.path.join(bindir, name + ".version")).read().strip() if os.path.exists(os.path.join(bindir, name + ".version")) else None
     st["tools"][name] = {"state": "ok" if ok else "failed", "version": ver}
 json.dump(st, open(out, "w"), indent=1)

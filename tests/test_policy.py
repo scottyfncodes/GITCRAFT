@@ -3,8 +3,8 @@
 
 For each tool: start it through scripts/mcp.sh (guard + sandbox), do one real
 operation inside a scratch workspace, and confirm a path outside the workspace
-is refused. FilmCraft and LightCraft (no native file fence) are also run under
-the sandbox *without* the guard, to prove the kernel layer stops them alone.
+is refused. FilmCraft, LightCraft and MeshCraft (no native file fence) are also run
+under the sandbox *without* the guard, to prove the kernel layer stops them alone.
 
     GITCRAFT_ROOT=/some/workspace tests/test_policy.py [tool ...]
 """
@@ -45,8 +45,11 @@ TESTS = {
                  lambda c: c.call("media_import", {"paths": [SECRET]})),
  "lightcraft":  (lambda c: c.call("import", {"paths": [src]}),
                  lambda c: c.call("import", {"paths": [SECRET]})),
+ "meshcraft":   (lambda c: c.call("blockbench_build", {"template": "crate", "name": "policy", "out": f"{ws}/policy.bbmodel"}),
+                 lambda c: c.call("blockbench_inspect", {"path": SECRET})),
 }
-want = sys.argv[1:] or list(TESTS)
+installed = lambda n: os.access(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft") + ("/meshcraft/venv/bin/python" if n == "meshcraft" else "")), os.X_OK)
+want = sys.argv[1:] or [n for n in TESTS if n != "meshcraft" or installed(n)]
 for name in want:
     good, bad = TESTS[name]
     try:
@@ -62,13 +65,17 @@ sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 gh = os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"))
 base = ["python3", os.path.join(HERE, "..", "scripts", "sandbox.py"), "--rx", "/usr", "--rx", "/lib", "--rx", "/lib64", "--rx", "/bin",
         "--rx", f"{gh}/bin", "--ro", "/etc", "--ro", "/proc", "--ro", "/sys", "--rw", "/dev", "--rw", ws, "--rw", f"{gh}/state", "--no-net", "--require", "--"]
+MC_DIR = os.path.join(HERE, "..", "meshcraft")
 for name, cmd, bad in (("filmcraft", [f"{gh}/bin/filmcraft-cli", "mcp"], ("media_import", {"paths": [SECRET]})),
-                       ("lightcraft", [f"{gh}/bin/lightcraft-cli", "mcp", "--compact", "--library", f"{ws}/lc-lib"], ("import", {"paths": [SECRET]}))):
+                       ("lightcraft", [f"{gh}/bin/lightcraft-cli", "mcp", "--compact", "--library", f"{ws}/lc-lib"], ("import", {"paths": [SECRET]})),
+                       ("meshcraft", ["python3", os.path.join(MC_DIR, "server.py")], ("blockbench_inspect", {"path": SECRET}))):
     if name not in want: continue
     try:
-        c = Client(base + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state"))
+        extra = ["--rx", MC_DIR, "--rx", f"{gh}/meshcraft"] if name == "meshcraft" else []
+        c = Client(base[:-1] + extra + ["--"] + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state", MESHCRAFT_LIBRARY=f"{ws}/mc-lib"))
         ok, val = c.call(*bad)
-        leaked = ok and ("imported" in str(val) and "[]" not in str(val).split("imported")[1][:8] or "items" in str(val) and "[]" not in str(val).split("items")[1][:8])
+        if name == "meshcraft": leaked = ok
+        else: leaked = ok and ("imported" in str(val) and "[]" not in str(val).split("imported")[1][:8] or "items" in str(val) and "[]" not in str(val).split("items")[1][:8])
         print("   kernel-only response:", str(val)[:240]); check(f"{name}: sandbox alone blocks reading outside the workspace", not leaked, str(val)[:300])
         c.close()
     except Exception as e:

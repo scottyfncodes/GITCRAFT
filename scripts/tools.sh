@@ -11,12 +11,29 @@ GITCRAFT_TOOLS=(
   designcraft:designcraft:designcraft-cli
 )
 
+# Tools that are not ArtCraft binaries (no CI build). Same format; installed by their own script.
+#   meshcraft: the 3D Department (Blender, Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D),
+#              a Python MCP server in meshcraft/, runtimes installed by scripts/install-3d.sh
+GITCRAFT_EXTRA_TOOLS=(
+  meshcraft:-:meshcraft
+)
+
 GITCRAFT_HOME="${GITCRAFT_HOME:-$HOME/.gitcraft}"
 GITCRAFT_BIN="$GITCRAFT_HOME/bin"
 GITCRAFT_SRC="$GITCRAFT_HOME/src"
 GITCRAFT_TARGET="$GITCRAFT_HOME/target"
 GITCRAFT_LOG="$GITCRAFT_HOME/logs"
 GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
+MESHCRAFT_HOME="${MESHCRAFT_HOME:-$GITCRAFT_HOME/meshcraft}"             # Blender venv, Meshroom, AI venv, model cache
+MESHCRAFT_LIBRARY="${MESHCRAFT_LIBRARY:-$GITCRAFT_HOME/meshcraft-library}" # 3D asset library + job records
+
+# Is a tool installed? (ArtCraft binary, or MeshCraft's Blender venv)
+gitcraft_installed() {
+  case "$1" in
+    meshcraft) [[ -x "$MESHCRAFT_HOME/venv/bin/python" ]] ;;
+    *) [[ -x "$GITCRAFT_BIN/$2" ]] ;;
+  esac
+}
 
 # Folder the tools may read from and write to. Defaults to the session home, or
 # to the workspace when it lives outside home (cloud sessions check repos out to

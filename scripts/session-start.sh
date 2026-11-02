@@ -6,9 +6,9 @@ source "$here/tools.sh"
 mkdir -p "$GITCRAFT_LOG"
 
 missing=()
-for entry in "${GITCRAFT_TOOLS[@]}"; do
+for entry in "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
-  [[ -x "$GITCRAFT_BIN/$pkg" ]] || missing+=("$name")
+  gitcraft_installed "$name" "$pkg" || missing+=("$name")
 done
 
 "$here/register.sh" >/dev/null 2>&1

@@ -13,15 +13,15 @@ source "$here/tools.sh"
 name="${1:?usage: mcp.sh <tool>}"
 shift
 pkg=""
-for entry in "${GITCRAFT_TOOLS[@]}"; do
+for entry in "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}"; do
   IFS=: read -r n _ p <<<"$entry"
   [[ "$n" == "$name" ]] && pkg="$p"
 done
 [[ -n "$pkg" ]] || { echo "gitcraft: unknown tool '$name'" >&2; exit 2; }
 
 bin="$GITCRAFT_BIN/$pkg"
-if [[ ! -x "$bin" ]]; then
-  echo "gitcraft: $pkg isn't built yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
+if ! gitcraft_installed "$name" "$pkg"; then
+  echo "gitcraft: $name isn't installed yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
   exit 1
 fi
 
@@ -43,6 +43,11 @@ case "$name" in
   filmcraft)   cmd=("$bin" mcp) ;;
   lightcraft)  mkdir -p "$GITCRAFT_HOME/lightcraft-library"
                cmd=("$bin" mcp --compact --library "$GITCRAFT_HOME/lightcraft-library") ;;
+  # The 3D Department: Python MCP server; Blender/Meshroom/AI runtimes live in MESHCRAFT_HOME.
+  meshcraft)   mkdir -p "$MESHCRAFT_LIBRARY" "$MESHCRAFT_HOME/hf-cache"
+               export GITCRAFT_HOME MESHCRAFT_HOME MESHCRAFT_LIBRARY HF_HOME="$MESHCRAFT_HOME/hf-cache" GITCRAFT_ROOT GITCRAFT_ALLOW_NET
+               # HOME inside the sandbox points at the tool's state folder (Chromium and Blender write caches there)
+               cmd=(env HOME="$state/data" python3 "$(dirname "$here")/meshcraft/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
 case "$name" in vectorcraft|designcraft|effectcraft)
@@ -52,9 +57,11 @@ cmd+=("$@")
 
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$GITCRAFT_HOME/lightcraft-library")
+[[ "$name" == meshcraft ]] && writable+=("$MESHCRAFT_LIBRARY" "$MESHCRAFT_HOME/hf-cache")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
+  [[ "$name" == meshcraft ]] && policy+=(--rx "$(dirname "$here")/meshcraft" --rx "$MESHCRAFT_HOME")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done
