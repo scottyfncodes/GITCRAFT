@@ -1,7 +1,11 @@
-"""MeshCraft's versioned asset library. Standard library only.
+"""The 3D Department's versioned asset library: one library for MeshCraft and ForgeCraft.
+Standard library only.
 
-Layout ($GITCRAFT_MESHCRAFT_LIBRARY, default ~/.gitcraft/meshcraft-library; the sandbox gives
-MeshCraft read-write access to it, like LightCraft's library):
+Location: $GITCRAFT_3D_LIBRARY (scripts/tools.sh sets it for both servers; the sandbox gives
+both read-write access). Older variables still work: GITCRAFT_MESHCRAFT_LIBRARY,
+FORGECRAFT_LIBRARY. Default ~/.gitcraft/3d-library, or ~/.gitcraft/meshcraft-library when that
+exists from before the consolidation (same format, so it is used in place, never copied).
+Layout:
 
   index.json                              one summary per asset (search reads only this)
   assets/<asset_id>/v<N>/asset.json       full record of that version: files with SHA-256,
@@ -12,12 +16,22 @@ MeshCraft read-write access to it, like LightCraft's library):
 Every run_pipeline / blockbench_import / mixamo_apply adds a version. A version whose content
 matches the previous one says so (`same_as`), so a re-run is visibly a no-op. `export()` copies a
 version into an authorized root and re-hashes every copied file: the handoff to a game repo.
-Ported from the 3D Department proposal (GITCRAFT PR #9) and adapted to MeshCraft's reports.
+Every version is written by the tool that produced it (a MeshCraft job); ForgeCraft adds its
+orchestration record to the same version with annotate() (routing decision, backend, licences,
+provenance, previews, geometry), so each asset has exactly one record.
 """
 import fcntl, hashlib, json, os, shutil, struct, time
 
-ROOT = os.path.expanduser(os.environ.get("GITCRAFT_MESHCRAFT_LIBRARY") or
-                          os.path.join(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"), "meshcraft-library"))
+def _default_root():
+    home = os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"))
+    new, legacy = os.path.join(home, "3d-library"), os.path.join(home, "meshcraft-library")
+    return legacy if os.path.isdir(legacy) and not os.path.isdir(new) else new
+
+
+ROOT = os.path.expanduser(os.environ.get("GITCRAFT_3D_LIBRARY") or os.environ.get("GITCRAFT_MESHCRAFT_LIBRARY")
+                          or os.environ.get("FORGECRAFT_LIBRARY") or _default_root())
+ANNOTATION_KEYS = ("title", "kind", "source_tool", "route", "license", "provenance", "generation", "engine", "geometry",
+                   "previews", "animations", "rig", "sockets", "textures", "orchestration", "engine_check", "deliverable_validation")
 SUBDIR = {"blend": "source", "export": "exports", "lod": "exports", "collision": "exports", "sidecar": "exports",
           "preview": "previews", "contact_sheet": "previews", "report": "."}
 
@@ -117,13 +131,14 @@ def add_version(asset_id, res, meta):
               "inputs": [{"path": p, "sha256": sha256(p)} for p in meta.get("inputs", []) if isinstance(p, str) and os.path.isfile(p)],
               "validation": {"status": status, "summary": summary}, "triangles": tri, "clips": clips,
               "contract": (res.get("build") or {}).get("contract"), "files": recs}
+        md.update({k: meta[k] for k in ANNOTATION_KEYS if k in meta})
         _write_json(os.path.join(dest, "asset.json"), md)
         thumb = next((r["path"] for r in recs if r["kind"] == "preview" and "three_quarter" in r["path"]),
                      next((r["path"] for r in recs if r["kind"] == "preview"), None))
         s = {"id": asset_id, "latest": ver, "versions": (entry["versions"] if entry else []) + [ver], "tool": md["tool"],
              "template": md["template"], "tags": md["tags"], "validation": status, "triangles": tri, "clips": clips,
              "thumbnail": f"assets/{asset_id}/v{ver}/{thumb}" if thumb else None, "updated": md["created"],
-             "title": (md["brief"] or {}).get("title") or asset_id}
+             "title": meta.get("title") or (md["brief"] or {}).get("title") or asset_id, "kind": meta.get("kind")}
         idx["assets"] = [a for a in idx["assets"] if a["id"] != asset_id] + [s]
         _write_json(path("index.json"), idx)
     return dict(md, dir=dest)
@@ -139,10 +154,59 @@ def get(asset_id, version=None):
     return dict(md, dir=d, versions=e["versions"])
 
 
+def annotate(asset_id, version, info):
+    """Merge orchestration info (ForgeCraft) into an existing version's asset.json and its index
+    summary. Only ANNOTATION_KEYS and tags are accepted; produced files are never touched."""
+    with _Lock():
+        idx = load_index()
+        e = next((a for a in idx["assets"] if a["id"] == asset_id), None)
+        if not e or int(version) not in e["versions"]: raise KeyError(f"no version {version} of `{asset_id}`")
+        p = path("assets", asset_id, f"v{int(version)}", "asset.json")
+        with open(p) as f: md = json.load(f)
+        bad = [k for k in info if k not in ANNOTATION_KEYS + ("tags",)]
+        if bad: raise ValueError(f"annotate: unknown keys {bad}")
+        for k, v in info.items():
+            if k == "tags": md["tags"] = sorted(set(md.get("tags", [])) | set(v))
+            else: md[k] = v
+        _write_json(p, md)
+        if int(version) == e["latest"]:
+            for k in ("title", "kind", "source_tool"):
+                if info.get(k): e[k] = info[k]
+            if info.get("previews", {}).get("thumbnail"): e["thumbnail"] = f"assets/{asset_id}/v{int(version)}/{info['previews']['thumbnail']}"
+            if "tags" in info: e["tags"] = md["tags"]
+            if info.get("deliverable_validation"): e["deliverable_validation"] = info["deliverable_validation"].get("status")
+            _write_json(path("index.json"), idx)
+    return dict(md, dir=os.path.dirname(p))
+
+
+def snapshot(dest, probe=None):
+    """Copy the whole library (index, every asset version, job records, machine probe) to dest,
+    without job scratch folders. Used to publish the department UI or archive a run."""
+    if os.path.isdir(dest): shutil.rmtree(dest)
+    os.makedirs(os.path.join(dest, "jobs"))
+    shutil.copy2(path("index.json"), dest)
+    shutil.copytree(path("assets"), os.path.join(dest, "assets"))
+    jd = path("jobs")
+    for f in (os.listdir(jd) if os.path.isdir(jd) else []):
+        if f.endswith(".json"): shutil.copy2(os.path.join(jd, f), os.path.join(dest, "jobs"))
+    if probe is not None: _write_json(os.path.join(dest, "probe.json"), probe)
+    return {"dest": dest, "assets": len(load_index()["assets"]),
+            "bytes": sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dest) for f in fs)}
+
+
+def unique_id(base):
+    """`base`, or base_2, base_3… if an asset with that id already exists (new assets, not versions)."""
+    ids = {a["id"] for a in load_index()["assets"]}
+    if base not in ids: return base
+    n = 2
+    while f"{base}_{n}" in ids: n += 1
+    return f"{base}_{n}"
+
+
 def search(query="", template=None, tool=None, status=None, limit=50):
     words = (query or "").lower().split(); out = []
     for a in load_index()["assets"]:
-        hay = " ".join(str(a.get(k) or "") for k in ("id", "title", "template", "tool")).lower() + " " + " ".join(a.get("tags", [])).lower()
+        hay = " ".join(str(a.get(k) or "") for k in ("id", "title", "template", "tool", "kind", "source_tool")).lower() + " " + " ".join(a.get("tags", [])).lower()
         if words and not all(w in hay for w in words): continue
         if template and a.get("template") != template: continue
         if tool and tool not in (a.get("tool") or ""): continue

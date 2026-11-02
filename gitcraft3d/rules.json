@@ -1,0 +1,62 @@
+{
+ "_doc": "3D Department routing rules (owner: ForgeCraft). Read by gitcraft3d/routing.py (ForgeCraft's route/generate, MeshCraft's route advice) and by the department UI, so all three route identically. The first route whose `when` matches wins; its `tools` are tried in order and the first available one is chosen.",
+ "intents": {
+  "photogrammetry": {"words": ["photogrammetry", "scan", "reconstruct", "reconstruction", "real-world", "real world", "captured"]},
+  "concept_art": {"words": ["concept art", "concept", "painting", "illustration", "detailed", "realistic", "high detail", "hero asset", "from the drawing"]},
+  "photo": {"words": ["photo", "photograph", "picture of", "snapshot", "reference photo", "object from"]},
+  "voxel": {"words": ["voxel", "blocky", "minecraft", "cube-built", "pixel art", "boxy", "blockbench"]},
+  "character": {"words": ["character", "human", "humanoid", "pirate", "sailor", "deckhand", "captain", "person", "npc", "villager", "crewmate", "crew"]},
+  "creature": {"words": ["creature", "animal", "monster", "beast"]},
+  "animated": {"words": ["animated", "animation", "rigged", "rig", "walk", "run", "jump", "attack", "idle", "mixamo"]},
+  "scene": {"words": ["scene", "level", "diorama", "game-ready scene", "complete scene", "compose"]},
+  "stylized": {"words": ["stylized", "stylised", "low-poly", "low poly", "lowpoly", "cartoon", "toon", "simple"]}
+ },
+ "kinds": {
+  "boat": ["boat", "ship", "sloop", "dinghy", "vessel", "skiff", "brig", "lifeboat"],
+  "upgrade": ["upgrade", "cargo crate", "compass", "ship's wheel", "steering wheel", "rudder", "copper", "hull plating", "binnacle"],
+  "salvage": ["salvage", "flotsam", "debris", "wreckage", "floating", "jetsam"],
+  "island": ["island", "atoll", "cay", "islet", "terrain", "landmass", "beach"],
+  "lighthouse": ["lighthouse", "beacon tower", "watchtower"],
+  "character": ["character", "human", "pirate", "sailor", "deckhand", "captain", "person", "npc", "crewmate"],
+  "prop": ["barrel", "crate", "rock", "boulder", "palm", "tree"],
+  "scene": ["scene", "level", "diorama"]
+ },
+ "kind_templates": {"boat": "boat", "upgrade": "boat_upgrade", "salvage": "salvage", "island": "island", "lighthouse": "lighthouse",
+                    "prop": "prop", "character": "deckhand"},
+ "meshcraft_templates": {"chest": ["treasure chest", "chest", "treasure", "loot box", "coffer"], "crab": ["biscuit", "teacup crab", "crab"],
+                         "flag": ["flag", "pennant", "banner"], "lantern": ["lantern", "lamp"], "sail": ["sail", "mainsail", "canvas sail"],
+                         "sun_figurehead": ["figurehead", "sun emblem", "bow ornament"]},
+ "upgrade_words": {"sail_canvas": ["sail", "canvas"], "cargo_crate": ["crate", "cargo", "storage"], "compass_brass": ["compass", "navigation", "binnacle"],
+                   "rudder_ash": ["wheel", "rudder", "steering", "helm"], "hull_copper": ["copper", "hull", "plating", "armor"]},
+ "prop_words": {"barrel": ["barrel"], "crate": ["crate", "box"], "rock": ["rock", "boulder", "stone"], "palm": ["palm", "tree"]},
+ "routes": [
+  {"id": "photogrammetry", "when": "images>=8 or intent:photogrammetry and images>=1", "tools": ["meshroom", "triposr", "hunyuan3d"],
+   "why": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."},
+  {"id": "concept_image", "when": "images>=1 and intent:concept_art", "tools": ["hunyuan3d", "triposr"],
+   "why": "Detailed concept art: Hunyuan3D gives the most faithful shape and texture; TripoSR is the faster fallback."},
+  {"id": "photo_image", "when": "images>=1", "tools": ["triposr", "hunyuan3d"],
+   "why": "One reference image: TripoSR converts a single photo to a mesh in seconds on a GPU (minutes on CPU)."},
+  {"id": "scene", "when": "intent:scene or kind:scene", "tools": ["meshcraft_scene"],
+   "why": "Scene assembly, sockets, lighting and composition are MeshCraft's Blender work."},
+  {"id": "voxel", "when": "intent:voxel", "tools": ["blockbench", "meshcraft_template"],
+   "why": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench."},
+  {"id": "template", "when": "template:any", "tools": ["meshcraft_template", "blockbench", "hunyuan3d"],
+   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."},
+  {"id": "creature", "when": "intent:creature", "tools": ["blockbench", "hunyuan3d"],
+   "why": "Non-humanoid creature without a template: a Blockbench cube-built model, or Hunyuan3D for organic detail."},
+  {"id": "detailed_text", "when": "true", "tools": ["hunyuan3d", "meshcraft_template", "blockbench"],
+   "why": "Free-form description with no template: text-to-3D (Hunyuan3D) when compute allows."}
+ ],
+ "tools": {
+  "meshcraft_template": {"label": "MeshCraft template (Blender)", "backend": "meshcraft", "compute": "CPU, seconds to a minute with previews", "owner": "meshcraft"},
+  "blockbench": {"label": "Blockbench .bbmodel → MeshCraft", "backend": "meshcraft", "compute": "CPU, seconds", "owner": "meshcraft"},
+  "meshcraft_scene": {"label": "MeshCraft scene composition (Blender)", "backend": "meshcraft", "compute": "CPU, ~1 min with hero render", "owner": "meshcraft"},
+  "meshcraft_import": {"label": "Import existing mesh → MeshCraft process_mesh", "backend": "meshcraft", "compute": "CPU, seconds", "owner": "meshcraft"},
+  "mixamo": {"label": "Mixamo FBX clips → MeshCraft mixamo_apply", "backend": "meshcraft", "compute": "CPU, seconds", "owner": "meshcraft"},
+  "meshroom": {"label": "Meshroom / AliceVision photogrammetry → MeshCraft", "backend": "meshroom", "compute": "CPU draft: 5–30 min; CUDA for dense", "owner": "forgecraft"},
+  "triposr": {"label": "TripoSR (image → mesh) → MeshCraft", "backend": "triposr", "compute": "GPU ~6 GB VRAM: ~1 s; CPU: minutes", "owner": "forgecraft"},
+  "hunyuan3d": {"label": "Hunyuan3D-2 (text/image → textured mesh) → MeshCraft", "backend": "hunyuan3d", "compute": "NVIDIA GPU ≥6 GB (shape) / ≥16 GB (texture), or HF Space", "owner": "forgecraft"}
+ },
+ "aliases": {"blender_procedural": "meshcraft_template", "blender_character": "meshcraft_template", "blender_scene": "meshcraft_scene", "import": "meshcraft_import"},
+ "blockbench_templates": ["boat", "chest", "crab", "crate", "lantern"]
+}

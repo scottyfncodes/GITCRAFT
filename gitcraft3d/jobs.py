@@ -1,7 +1,9 @@
-"""MeshCraft job records and retries. Standard library only.
+"""Job records and retries for the 3D Department (one job store for MeshCraft and ForgeCraft).
+Standard library only.
 
-Every run_pipeline, blockbench_import and mixamo_apply call is a job: a JSON record in the
-library's jobs/ folder with the request, each attempt (time, outcome, error, what was changed
+Every MeshCraft run_pipeline, blockbench_import and mixamo_apply call is a job, and every
+ForgeCraft request is an orchestration job whose record lists the MeshCraft jobs it started
+(`children`; each child names its `parent`). Records are JSON in the library's jobs/ folder with the request, each attempt (time, outcome, error, what was changed
 for it), the pipeline steps, and where the result went in the library.
 
 A failed attempt is retried automatically down a ladder of lighter settings, only for failures
@@ -65,13 +67,15 @@ def pipeline_ladder(brief):
             ({"brief": s2}, "previews 256 px; dropped " + (", ".join(bake_profiles) or "nothing") + " (texture bake)")]
 
 
-def run(tool, args, fn, asset_id=None, ladder=(), job_id=None, manual=False):
-    """Run fn(args) as a job (or as a new attempt of job_id). Returns (result, job record)."""
+def run(tool, args, fn, asset_id=None, ladder=(), job_id=None, manual=False, parent=None):
+    """Run fn(args) as a job (or as a new attempt of job_id). Returns (result, job record).
+    parent: the ForgeCraft orchestration job that asked for this one (both records link)."""
     if job_id:
         rec = get(job_id)
     else:
         rec = {"id": f"job-{time.strftime('%Y%m%d-%H%M%S', time.gmtime())}-{uuid.uuid4().hex[:6]}", "tool": tool,
                "asset_id": asset_id, "request": args, "status": "queued", "created": _now(), "attempts": [], "error": None}
+        if parent: rec["parent"] = parent
     variants = [(args, None)] + list(ladder)
     result, last = None, None
     for i, (a, change) in enumerate(variants):
@@ -101,3 +105,40 @@ def run(tool, args, fn, asset_id=None, ladder=(), job_id=None, manual=False):
 
 def attach(rec, **info):
     rec.update(info); rec["updated"] = _now(); _save(rec); return rec
+
+
+# ------------------------------------------------------------------ orchestration jobs (ForgeCraft)
+def create(tool, args, asset_id=None, parent=None, job_id=None):
+    """A new job record (status queued), or the existing record of job_id for a retry."""
+    if job_id: return get(job_id)
+    rec = {"id": f"job-{time.strftime('%Y%m%d-%H%M%S', time.gmtime())}-{uuid.uuid4().hex[:6]}", "tool": tool, "asset_id": asset_id,
+           "request": args, "status": "queued", "created": _now(), "attempts": [], "error": None, "children": []}
+    if parent: rec["parent"] = parent
+    _save(rec); return rec
+
+
+def begin(rec, manual=False, change=None):
+    att = {"n": len(rec["attempts"]) + 1, "started": _now(), "change": change, "manual": manual, "stages": []}
+    rec["attempts"].append(att); rec["status"] = "running"; rec["error"] = None; rec["updated"] = _now(); _save(rec)
+    return att
+
+
+def stage(rec, name, state, **info):
+    """Record one pipeline stage of the current attempt (running → done / failed / skipped)."""
+    att = rec["attempts"][-1]; st = next((x for x in att["stages"] if x["stage"] == name), None)
+    if st is None:
+        st = {"stage": name, "state": state, "started": _now(), "t0": time.time()}; att["stages"].append(st)
+    st["state"] = state; st.update({k: v for k, v in info.items() if v is not None})
+    if state in ("done", "failed", "skipped"):
+        st["finished"] = _now(); st["seconds"] = round(time.time() - st.pop("t0", time.time()), 2)
+    rec["updated"] = _now(); _save(rec); return st
+
+
+def child(rec, child_job_id):
+    if child_job_id and child_job_id not in rec.setdefault("children", []): rec["children"].append(child_job_id); _save(rec)
+
+
+def finish(rec, status, error=None, **info):
+    att = rec["attempts"][-1]
+    att.update(status=status, finished=_now(), error=(error or None) and error[:2000])
+    rec.update(status=status, error=(error or None) and error[:2000], updated=_now(), **info); _save(rec); return rec
