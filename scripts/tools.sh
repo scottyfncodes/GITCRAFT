@@ -11,11 +11,12 @@ GITCRAFT_TOOLS=(
   designcraft:designcraft:designcraft-cli
 )
 
-# Tools GITCRAFT builds itself (not ArtCraft binaries): MeshCraft is a Blender
-# (bpy) MCP server living in meshcraft/ with its own venv in ~/.gitcraft/meshcraft.
-# ForgeCraft is the 3D Department pipeline in forgecraft/: routing across Blender procedural,
-# MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR and Hunyuan3D, plus a versioned
-# asset library. It drives MeshCraft's Blender venv; its own runtimes live in ~/.gitcraft/forgecraft.
+# Tools GITCRAFT builds itself (not ArtCraft binaries): the 3D Department.
+#   meshcraft   modelling specialist: Blender (bpy) MCP server in meshcraft/, venv in ~/.gitcraft/meshcraft
+#               (the department's only Blender)
+#   forgecraft  orchestrator: routing, Meshroom/TripoSR/Hunyuan3D, jobs, hand-offs, UI (forgecraft/);
+#               does its Blender work through MeshCraft; runtimes in ~/.gitcraft/forgecraft
+# Both share gitcraft3d/ (library, jobs, probe, router) and one asset library ($GITCRAFT_3D_LIBRARY).
 GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft)
 GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"   # 0 skips installing MeshCraft (it downloads Blender, ~400 MB)
 
@@ -26,7 +27,15 @@ GITCRAFT_TARGET="$GITCRAFT_HOME/target"
 GITCRAFT_LOG="$GITCRAFT_HOME/logs"
 GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
 FORGECRAFT_HOME="${FORGECRAFT_HOME:-$GITCRAFT_HOME/forgecraft}"               # Meshroom, AI venv, model cache
-FORGECRAFT_LIBRARY="${FORGECRAFT_LIBRARY:-$GITCRAFT_HOME/forgecraft-library}" # 3D asset library + job records
+# The 3D asset library + job records shared by meshcraft and forgecraft. Older variables still work;
+# a pre-consolidation ~/.gitcraft/meshcraft-library is used in place (same format).
+if [[ -z "${GITCRAFT_3D_LIBRARY:-}" ]]; then
+  GITCRAFT_3D_LIBRARY="${GITCRAFT_MESHCRAFT_LIBRARY:-${FORGECRAFT_LIBRARY:-}}"
+  if [[ -z "$GITCRAFT_3D_LIBRARY" ]]; then
+    GITCRAFT_3D_LIBRARY="$GITCRAFT_HOME/3d-library"
+    [[ -d "$GITCRAFT_HOME/meshcraft-library" && ! -d "$GITCRAFT_3D_LIBRARY" ]] && GITCRAFT_3D_LIBRARY="$GITCRAFT_HOME/meshcraft-library"
+  fi
+fi
 
 # Folder the tools may read from and write to. Defaults to the session home, or
 # to the workspace when it lives outside home (cloud sessions check repos out to
