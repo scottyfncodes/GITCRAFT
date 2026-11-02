@@ -215,7 +215,10 @@ def overview(cfg, pool):
     reg = registered(); tools = []
     for t in cfg["tools"]:
         n = t["name"]
-        inst = os.path.exists(os.path.join(cfg["home"], "meshcraft", "venv", "bin", "python")) if n == "meshcraft" else os.path.exists(os.path.join(cfg["bin"], t["package"]))
+        # tools GITCRAFT builds itself (MeshCraft, ForgeCraft) run a server.py from the repo on MeshCraft's Blender venv
+        repo_tool = os.path.exists(os.path.join(REPO, n, "server.py"))
+        inst = (os.path.exists(os.path.join(cfg["home"], "meshcraft", "venv", "bin", "python")) if repo_tool
+                else os.path.exists(os.path.join(cfg["bin"], t["package"])))
         ver = None
         try:
             with open(os.path.join(cfg["bin"], n + ".version")) as f: ver = f.read().strip()
