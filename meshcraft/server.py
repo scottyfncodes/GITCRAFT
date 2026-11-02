@@ -27,10 +27,26 @@ sys.path.insert(0, HERE)
 os.environ.setdefault("BLENDER_USER_CONFIG", os.path.join(os.environ.get("XDG_CONFIG_HOME", "/tmp"), "blender"))
 ROOTS = [os.path.realpath(r) for r in os.environ.get("GITCRAFT_ROOTS", os.environ.get("GITCRAFT_ROOT", os.getcwd())).split(":") if r]
 
-with contextlib.redirect_stdout(sys.stderr):   # bpy prints on import; stdout is the MCP channel
-    import bpy
-    from engine import core, kit
-    from engine.palette import Palette
+# Blender (~1 GB) loads after the MCP handshake, but on the MAIN thread: bpy must be
+# imported and used on the same thread (a background-thread import crashed on the first
+# render). A reader thread queues messages; initialize / tools/list / ping never need
+# Blender, so they are answered at once even while a cold import (session start, page
+# cache empty, other servers starting) would outlast the client's connect timeout.
+import queue, threading
+bpy = core = kit = Palette = None
+_import_error = []
+
+def _load():
+    global bpy, core, kit, Palette
+    if bpy is not None or _import_error: return
+    try:
+        with contextlib.redirect_stdout(sys.stderr):   # bpy prints on import; stdout is the MCP channel
+            import bpy as _bpy
+            from engine import core as _core, kit as _kit
+            from engine.palette import Palette as _P
+        bpy, core, kit, Palette = _bpy, _core, _kit, _P
+    except Exception as e:
+        _import_error.append(f"{type(e).__name__}: {e}")
 
 
 def _inside(p):
@@ -146,7 +162,18 @@ def send(msg):
 
 
 def main():
-    for line in sys.stdin:
+    inbox = queue.Queue()
+    def reader():
+        for line in sys.stdin: inbox.put(line)
+        inbox.put(None)
+    threading.Thread(target=reader, daemon=True).start()
+    while True:
+        try:
+            line = inbox.get(timeout=0.5)
+        except queue.Empty:
+            _load()          # quiet after the handshake: warm Blender up on the main thread
+            continue
+        if line is None: break
         try: msg = json.loads(line)
         except Exception: continue
         mid, method = msg.get("id"), msg.get("method")
@@ -160,6 +187,8 @@ def main():
             p = msg.get("params", {}); name, args = p.get("name"), p.get("arguments") or {}
             try:
                 if name not in TOOLS: raise ValueError(f"unknown tool {name}")
+                _load()
+                if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0] + " (run scripts/doctor.sh)")
                 with contextlib.redirect_stdout(sys.stderr):
                     res = TOOLS[name][2](args)
                 send({"jsonrpc": "2.0", "id": mid, "result": {"content": [{"type": "text", "text": json.dumps(res, default=str)}]}})
