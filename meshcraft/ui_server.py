@@ -46,7 +46,7 @@ def state(lib_root, base_url, probe=None, mode="live", source=""):
 def publish(lib_root, dist, source=""):
     """Write a static snapshot: UI + data/state.json + the library's asset files (no job work dirs)."""
     if os.path.isdir(dist): shutil.rmtree(dist)
-    shutil.copytree(UI, dist)
+    shutil.copytree(UI, dist, ignore=shutil.ignore_patterns("dist"))
     data = os.path.join(dist, "data"); os.makedirs(data)
     if os.path.isdir(os.path.join(lib_root, "assets")): shutil.copytree(os.path.join(lib_root, "assets"), os.path.join(data, "assets"))
     probe_file = os.path.join(lib_root, "probe.json")
