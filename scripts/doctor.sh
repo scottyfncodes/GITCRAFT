@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Health check for GITCRAFT: what's installed, registered, sandboxed and failing.
+#   scripts/doctor.sh          full report, exit 1 if anything needs attention
+#   scripts/doctor.sh --brief  one line per problem (used by the session hook)
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$here/tools.sh"
+brief=0; [[ "${1:-}" == --brief ]] && brief=1
+problems=()
+say() { ((brief)) || echo "$@"; }
+
+say "GITCRAFT doctor"
+say "  scripts:  $here"
+say "  roots:    $GITCRAFT_ROOTS"
+abi=$(python3 -c 'import ctypes;l=ctypes.CDLL(None);l.syscall.restype=ctypes.c_long;print(l.syscall(444,None,0,1))' 2>/dev/null)
+if [[ "$GITCRAFT_SANDBOX" == off ]]; then
+  say "  sandbox:  OFF (GITCRAFT_SANDBOX=off)"; problems+=("sandbox disabled by GITCRAFT_SANDBOX=off")
+elif [[ "${abi:--1}" -gt 0 ]]; then
+  say "  sandbox:  Landlock ABI $abi, network $([[ $GITCRAFT_ALLOW_NET == 1 ]] && echo allowed || echo denied)"
+else
+  say "  sandbox:  Landlock UNAVAILABLE on this kernel; only the guard and native roots apply"
+  problems+=("Landlock unavailable: tools run without the kernel sandbox")
+fi
+
+registered=$(python3 -c 'import json,os;print(" ".join(json.load(open(os.path.expanduser("~/.claude.json"))).get("mcpServers",{})))' 2>/dev/null)
+say ""
+say "  tool          installed  registered  build"
+for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_TOOLS[@]}"}; do
+  IFS=: read -r name _ pkg <<<"$entry"
+  if [[ "$name" == meshcraft ]]; then
+    inst=$([[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] && echo yes || echo NO)
+  else
+    inst=$([[ -x "$GITCRAFT_BIN/$pkg" ]] && echo yes || echo NO)
+  fi
+  reg=$([[ " $registered " == *" $name "* ]] && echo yes || echo NO)
+  build=$(cat "$GITCRAFT_BIN/$name.version" 2>/dev/null || echo "-")
+  say "$(printf '  %-13s %-10s %-11s %s' "$name" "$inst" "$reg" "$build")"
+  [[ $inst == yes ]] || problems+=("$name is not installed: run scripts/install.sh $name")
+  [[ $reg == yes ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")
+done
+
+audit="$GITCRAFT_LOG/audit.jsonl"
+if [[ -f "$audit" ]]; then
+  read -r calls fails refused < <(python3 - "$audit" <<'PY'
+import json, sys
+c = f = r = 0
+for line in open(sys.argv[1]):
+    try: e = json.loads(line)
+    except Exception: continue
+    c += 1; f += (not e.get("ok", True)); r += bool(e.get("refused"))
+print(c, f, r)
+PY
+)
+  say ""
+  say "  audit:    $calls tool calls logged, $fails failed, $refused refused by policy ($audit)"
+fi
+if [[ -f "$GITCRAFT_HOME/status.json" ]]; then
+  bad=$(python3 -c 'import json,os;s=json.load(open(os.path.expanduser("~/.gitcraft/status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state")!="ok"))' 2>/dev/null)
+  [[ -n "$bad" ]] && problems+=("last install reported failures for: $bad (see $GITCRAFT_LOG/install.log)")
+fi
+
+if ((${#problems[@]})); then
+  ((brief)) && printf 'GITCRAFT: %s\n' "${problems[@]}" || { echo; echo "Needs attention:"; printf '  - %s\n' "${problems[@]}"; }
+  exit 1
+fi
+((brief)) && echo "GITCRAFT: all tools installed, registered and sandboxed." || { echo; echo "All good."; }
