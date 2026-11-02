@@ -53,9 +53,11 @@ def gen(key, args, expect_anim=0):
     return md
 
 
+STD = ["glb", "fbx", "blend"]   # the player boat ships every format; the rest GLB (engine) + FBX (DCC) + .blend (source)
+
 # 1. the player boat (the Coastal Sloop), with sockets for every upgrade slot
 boat = gen("player_boat", {"brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails", "name": "TIDEBREAKERS Coastal Sloop",
-                           "max_tris": 12000, "bake": 1024, "turntable": 24})
+                           "max_tris": 12000, "bake": 1024, "turntable": 24, "formats": ["glb", "gltf", "fbx", "obj", "stl", "blend"]})
 if boat: check("player_boat: has upgrade sockets", {"socket_sail", "socket_storage", "socket_navigation", "socket_steering", "socket_hull"} <= {s["name"] for s in boat["sockets"]})
 # 2. modular upgrade components (TIDEBREAKERS src/data/ship.ts slots: sail, storage, navigation, steering, hull)
 UPG = {"sail_canvas": "Canvas Mainsail", "cargo_crate": "Lashed Cargo Crates", "compass_brass": "Brass Compass", "rudder_ash": "Ship's Wheel & Ash Rudder",
@@ -63,15 +65,15 @@ UPG = {"sail_canvas": "Canvas Mainsail", "cargo_crate": "Lashed Cargo Crates", "
 ups = {}
 for u, nm in UPG.items():
     ups[u] = gen(f"upgrade_{u}", {"brief": f"boat upgrade component: {nm}", "name": f"Upgrade: {nm}", "kind": "upgrade", "params": {"upgrade": u},
-                                  "max_tris": 6000, "bake": 512, "turntable": 8})
+                                  "max_tris": 6000, "bake": 512, "turntable": 8, "formats": STD})
 # 3. floating salvage (with a looping bob animation)
-salv = gen("salvage", {"brief": "floating salvage: lashed crate, barrel and buoy on driftwood", "name": "Floating Salvage", "max_tris": 6000, "bake": 1024}, expect_anim=1)
+salv = gen("salvage", {"brief": "floating salvage: lashed crate, barrel and buoy on driftwood", "name": "Floating Salvage", "max_tris": 6000, "bake": 1024, "formats": STD}, expect_anim=1)
 # 4. island environment
-isl = gen("island", {"brief": "small tropical island with palms, rocks, a stilt hut and a dock", "name": "Turtle Cay", "max_tris": 40000, "bake": 2048,
+isl = gen("island", {"brief": "small tropical island with palms, rocks, a stilt hut and a dock", "name": "Turtle Cay", "max_tris": 40000, "bake": 1024, "formats": STD,
                      "params": {"seed": 7}})
 # 5. animated character (Mixamo-named rig) + a creature through Blockbench
-crew = gen("character", {"brief": "animated pirate deckhand character, coral bandana, crimson vest", "name": "Deckhand Pip", "max_tris": 6000, "bake": 1024}, expect_anim=6)
-crab = gen("creature", {"brief": "blocky voxel reef crab creature", "name": "Reef Crab (Blockbench)", "bake": 0})
+crew = gen("character", {"brief": "animated pirate deckhand character, coral bandana, crimson vest", "name": "Deckhand Pip", "max_tris": 6000, "bake": 1024, "formats": STD}, expect_anim=6)
+crab = gen("creature", {"brief": "blocky voxel reef crab creature", "name": "Reef Crab (Blockbench)", "bake": 0, "formats": STD})
 
 # 6. Mixamo path: one-clip armature-only FBX files in Mixamo's download layout (generated from the
 #    character's own clips: a fixture, not Mixamo data) merged back by bone name into a new version.
@@ -93,7 +95,7 @@ if crew:
 # 7. photogrammetry (optional: needs a photo set; copied into the workspace so the sandboxed tool can read it)
 if photos:
     dst = os.path.join(out, "work", "photos"); shutil.copytree(photos, dst, dirs_exist_ok=True); photos = dst
-    ok, r = mc.call("photogrammetry", {"images": [photos], "name": "Salvage Raft (photogrammetry scan)", "wait": True, "max_tris": 30000,
+    ok, r = mc.call("photogrammetry", {"images": [photos], "name": "Salvage Raft (photogrammetry scan)", "wait": True, "max_tris": 20000, "formats": STD,
                                        "meshroom_overrides": ["CameraInit:defaultFieldOfView=54.4"], "crop": 0.22, "target_size": 2.4,
                                        "tags": ["tidebreakers", "scan"]}, timeout=7200)
     check("meshroom: reconstructed mesh from photos", ok and r["status"] == "done", r)
@@ -175,6 +177,20 @@ try:
     report["handoffs"]["designcraft"] = {"thumbnails": len(thumbs), "output": sheet}
 except Exception as e:
     check("handoff → DesignCraft", False, e)
+
+# three.js r170 (TIDEBREAKERS' engine): load the exported scene, boat and character GLBs into one scene
+try:
+    import glob, subprocess
+    pick = [glob.glob(os.path.join(exported[k], "*.glb"))[0] for k in exported if any(w in k for w in ("scene", "coastal_sloop", "deckhand"))]
+    shot = os.path.join(out, "handoffs", "threejs_r170_import.png"); rep = os.path.join(out, "handoffs", "threejs_r170_import.json")
+    r = subprocess.run(["node", os.path.join(REPO, "meshcraft", "web-check", "check.mjs"), rep, shot, *pick], capture_output=True, text=True, timeout=600)
+    d = json.load(open(rep))
+    check(f"three.js r170: {len(pick)} exported GLBs load into one engine scene (clips play, Khronos 0 errors)", d["ok"], r.stdout[-300:])
+    report["handoffs"]["threejs"] = {"files": [os.path.relpath(p, out) for p in pick], "screenshot": os.path.relpath(shot, out),
+                                     "per_file": {os.path.basename(k): {"triangles": v["three"]["triangles"], "clips": [c["name"] for c in v["three"]["clips"]],
+                                                                        "khronos_errors": v["validator"]["errors"]} for k, v in d["files"].items()}}
+except Exception as e:
+    check("three.js r170 import", False, e)
 
 report["finished"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 fails = [c for c in report["checks"] if not c["ok"]]

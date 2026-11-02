@@ -8,6 +8,7 @@
   meshcraft/cli.py process path/to/mesh.glb [name]
   meshcraft/cli.py jobs | job <id> | retry <id>
   meshcraft/cli.py search [query] | get <asset> | export <asset> <dest_dir>
+  meshcraft/cli.py snapshot <dir>                                            # copy the library (no scratch) for publishing
   meshcraft/cli.py serve [--port 8765]                                      # the UI, live
 """
 import json, os, sys
@@ -30,6 +31,8 @@ def main(a):
     elif cmd == "search": r = server.call("library_search", {"query": " ".join(rest)})
     elif cmd == "get": r = server.call("library_get", {"asset": rest[0]})
     elif cmd == "export": r = server.call("library_export", {"asset": rest[0], "dest": rest[1]})
+    elif cmd == "snapshot":
+        import hardware, library; r = library.snapshot(rest[0], hardware.probe())
     elif cmd == "serve":
         os.execv(sys.executable, [sys.executable, os.path.join(HERE, "ui_server.py"), *rest])
     else: print(__doc__); return 2

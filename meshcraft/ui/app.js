@@ -70,12 +70,14 @@ class Viewer {
 }
 
 function viewerBox(m, { clips = true } = {}) {
+  const wrap = document.createElement("div");
   const box = document.createElement("div"); box.className = "viewer";
-  box.innerHTML = `<div class="msg">${m.files.glb ? "Loading model…" : "No GLB export for this asset"}</div><div class="hud"></div>`;
+  box.innerHTML = `<div class="msg">${m.files.glb ? "Loading model…" : "No GLB export for this asset"}</div>`;
+  const hud = document.createElement("div"); hud.className = "hud";
+  wrap.append(box, hud);
   if (m.files.glb) setTimeout(() => {
     const v = new Viewer(box);
     v.load(url(m, m.files.glb.path), (names) => {
-      const hud = box.querySelector(".hud");
       const rot = document.createElement("button"); rot.className = "btn small"; rot.textContent = "⟳ spin"; rot.onclick = () => (v.ctl.autoRotate = !v.ctl.autoRotate); hud.append(rot);
       if (clips) for (const n of names) {
         const b = document.createElement("button"); b.className = "btn small"; b.textContent = "▶ " + n;
@@ -84,7 +86,7 @@ function viewerBox(m, { clips = true } = {}) {
       }
     });
   });
-  return box;
+  return wrap;
 }
 
 // ---------------------------------------------------------------- routing (same rules file as meshcraft/routing.py)

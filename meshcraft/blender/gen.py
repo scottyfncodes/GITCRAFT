@@ -153,18 +153,22 @@ def upgrade(p):
     kind = p.get("upgrade", "cargo_crate")
     h = HULLS["sloop"]; S = 1.0
     root = empty(p["slug"]); parts = []
-    if kind == "hull_copper":   # copper-banded plating that wraps the sloop hull's waterline
-        band = hull_surface(h, "band", mat("copper", "metal", 0.35, 0.85), nu=26, nv=10, v_range=(-1, 1), offset=0.03)
-        # keep only the band between keel-ish and waterline heights by deleting faces above z=0.55
+    if kind == "hull_copper":   # copper sheathing over the underwater hull of the sloop + brass rub-strips
+        band = hull_surface(h, "sheathing", mat("copper", "metal", 0.35, 0.85), nu=26, nv=14, v_range=(-1, 1), offset=0.03)
         bm = bmesh.new(); bm.from_mesh(band.data)
-        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().z > 0.62 or f.calc_center_median().z < 0.15], context="FACES")
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().z > 0.55], context="FACES")
         bm.to_mesh(band.data); bm.free()
         parts.append(solidify(band, 0.03))
-        for i in range(2, 25, 2):  # rivet bands
-            u = i / 26; a = hull_point(h, u, -0.9); b = hull_point(h, u, 0.9)
-            for q in (a, b):
-                q.x += math.copysign(0.05, q.x)
-                parts.append(prim("cube", "strap", mat("gold_deep", "metal", 0.3, 0.9), loc=(q.x, q.y, 0.38), scale=(0.02, 0.06, 0.24)))
+        for side in (-1, 1):   # brass rub-strip along the top edge of the sheathing
+            pts = []
+            for k in range(1, 26):
+                u = k / 26
+                v = min((x / 40 for x in range(41)), key=lambda vv: abs(hull_point(h, u, side * vv).z - 0.55))
+                q = hull_point(h, u, side * v); q.x += side * 0.05; pts.append(q)
+            for a, b in zip(pts, pts[1:]):
+                d = b - a
+                r = prim("cyl", "rub", mat("gold_deep", "metal", 0.3, 0.9), loc=(a + b) / 2, vertices=6, radius=0.04, depth=d.length * 1.02)
+                r.rotation_euler = d.to_track_quat("Z", "Y").to_euler(); mc.apply_xf(r); parts.append(r)
         attach = "socket_hull"
     elif kind == "cargo_crate":
         wood = mat("honey", "plank", 0.75); rope = mat("rope", "cloth")

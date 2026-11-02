@@ -125,6 +125,20 @@ def search(query="", kind=None, tool=None, status=None, limit=50):
     return sorted(out, key=lambda a: a["updated"], reverse=True)[:limit]
 
 
+def snapshot(dest, probe=None):
+    """Copy the whole library (index, every asset version, job records, machine probe) to `dest`,
+    without the per-job scratch folders. Used to publish or archive a run."""
+    if os.path.isdir(dest): shutil.rmtree(dest)
+    os.makedirs(os.path.join(dest, "jobs"))
+    shutil.copy2(path("index.json"), dest)
+    shutil.copytree(path("assets"), os.path.join(dest, "assets"))
+    for f in os.listdir(path("jobs")):
+        if f.endswith(".json"): shutil.copy2(path("jobs", f), os.path.join(dest, "jobs"))
+    if probe is not None: json.dump(probe, open(os.path.join(dest, "probe.json"), "w"), indent=1)
+    return {"dest": dest, "assets": len(load_index()["assets"]),
+            "bytes": sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dest) for f in fs)}
+
+
 def export(asset_id, dest, version=None, formats=None):
     """Copy an asset (exports + textures + previews + asset.json) into `dest`/<slug>_v<N>/."""
     md = get(asset_id, version)
