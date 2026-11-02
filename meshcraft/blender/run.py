@@ -251,7 +251,42 @@ def op_process():
                     bm = bmesh.new(); bm.from_mesh(o.data); mw = o.matrix_world
                     dead = [f for f in bm.faces if all((mw @ v.co).z <= floor for v in f.verts)]
                     removed += len(dead); bmesh.ops.delete(bm, geom=dead, context="FACES"); bm.to_mesh(o.data); bm.free()
-            return {"radius": round(r, 3), "faces_removed": removed}
+            # photogrammetry noise: drop disconnected fragments smaller than 3% of the largest piece
+            fragments = 0
+            for o in meshes:
+                bm = bmesh.new(); bm.from_mesh(o.data); bm.faces.ensure_lookup_table()
+                seen, islands = set(), []
+                for f in bm.faces:
+                    if f.index in seen: continue
+                    stack, isl = [f], []
+                    seen.add(f.index)
+                    while stack:
+                        g = stack.pop(); isl.append(g)
+                        for e in g.edges:
+                            for h in e.link_faces:
+                                if h.index not in seen: seen.add(h.index); stack.append(h)
+                    islands.append(isl)
+                if islands:
+                    big = max(len(i) for i in islands)
+                    dead = [f for i in islands if len(i) < 0.03 * big for f in i]
+                    fragments += sum(1 for i in islands if len(i) < 0.03 * big)
+                    bmesh.ops.delete(bm, geom=dead, context="FACES"); removed += len(dead)
+                bm.to_mesh(o.data); bm.free()
+            # floating artefacts joined to the subject by slivers: a vertical gap in face heights wider
+            # than 15% of the total height means everything above it is not resting on the subject
+            floating = 0
+            for o in meshes:
+                bm = bmesh.new(); bm.from_mesh(o.data); mw = o.matrix_world
+                zs = sorted(((mw @ f.calc_center_median()).z, f) for f in bm.faces)
+                if len(zs) > 10:
+                    H = zs[-1][0] - zs[0][0]
+                    cut = next((zs[i][0] for i in range(len(zs) - 1) if zs[i + 1][0] - zs[i][0] > 0.15 * H), None)
+                    if cut is not None:
+                        dead = [f for z, f in zs if z > cut]; floating += len(dead)
+                        bmesh.ops.delete(bm, geom=dead, context="FACES")
+                bm.to_mesh(o.data); bm.free()
+            removed += floating
+            return {"radius": round(r, 3), "faces_removed": removed, "fragments_removed": fragments, "floating_faces_removed": floating}
         crop()
     root = wrap_root(objs, slug)
     textured = JOB.get("keep_materials", False)

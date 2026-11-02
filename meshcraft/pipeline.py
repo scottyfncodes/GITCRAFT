@@ -126,6 +126,8 @@ def run(spec, job_id=None):
     """Run (or re-run) a job synchronously. Returns the job record."""
     job = Job(spec, job_id)
     spec = job.rec["spec"]
+    if job_id and job.rec.get("asset") and not spec.get("asset_id"):
+        spec["asset_id"] = job.rec["asset"]["id"]   # re-running a job that made an asset → next version of it
     probe = hardware.probe()
     lim = probe["limits"]
     job.rec["attempts"].append({"started": _now()})

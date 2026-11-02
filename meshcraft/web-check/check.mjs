@@ -68,9 +68,12 @@ for (const url of files) {
   } catch (e) { rec.ok = false; rec.error = String(e); }
   out.push(rec);
 }
-const all = new THREE.Box3().setFromObject(scene); const c = all.getCenter(new THREE.Vector3()); const s = all.getSize(new THREE.Vector3());
-const cam = new THREE.PerspectiveCamera(40, 960 / 540, 0.1, 5000);
-cam.position.set(c.x, c.y + s.y * 0.6 + 2, c.z + Math.max(s.x, s.y) * 1.25 + 4); cam.lookAt(c);
+// frame the content, not the ocean plane a composed scene carries
+const all = new THREE.Box3(); scene.updateMatrixWorld(true);
+scene.traverse((o) => { if (o.isMesh && !/ocean/i.test(o.name)) all.expandByObject(o); });
+const c = all.getCenter(new THREE.Vector3()); const s = all.getSize(new THREE.Vector3());
+const cam = new THREE.PerspectiveCamera(40, 960 / 540, 0.1, 5000); const r = Math.max(s.x, s.y, s.z);
+cam.position.set(c.x + r * 0.55, c.y + r * 0.42, c.z + r * 0.85); cam.lookAt(c);
 renderer.render(scene, cam);
 window.__result = { three: THREE.REVISION, renderer: renderer.getContext().getParameter(renderer.getContext().VERSION), files: out };
 </script></body></html>`;
