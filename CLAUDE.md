@@ -24,10 +24,15 @@ working in.
   MCP. Start by listing or describing commands instead of guessing ids.
 - They run headless: there's no window, so check results by exporting
   (PNG/PDF/MP4) and looking at the file.
-- File access for photocraft, vectorcraft, designcraft, pdfcraft and
-  effectcraft is fenced to `$GITCRAFT_ROOT` (defaults to `$HOME`, or to the
-  session workspace when that is outside `$HOME`, as in cloud sessions where
-  repos live in `/home/user`). Keep inputs and outputs under there.
+- Every tool runs inside a kernel sandbox (Landlock) started by `scripts/mcp.sh`:
+  it can read and write only the folders in `$GITCRAFT_ROOTS` (default
+  `$GITCRAFT_ROOT`: `$HOME`, or the session workspace when that is outside
+  `$HOME`, as in cloud sessions where repos live in `/home/user`), plus its own
+  state folder, and it has no network. Keep inputs and outputs under the roots.
+  A refused call says `GITCRAFT policy: …`; copy the file into the workspace
+  rather than widening the roots. Details: `docs/security.md`.
+- Every call is logged with the hashes of the files it touched in
+  `~/.gitcraft/logs/audit.jsonl`. `scripts/doctor.sh` summarises health.
 - lightcraft keeps a persistent library at `~/.gitcraft/lightcraft-library`.
 - lightcraft and pdfcraft run in compact mode: a short list of helper tools,
   with every other command reachable through their list/run command tools.
@@ -36,18 +41,22 @@ working in.
 
 ## If a tool won't connect
 
+0. `scripts/doctor.sh` shows what's missing, unregistered or failing.
 1. `cat ~/.gitcraft/logs/install.log` to see whether the install is still
    running or failed.
 2. `scripts/install.sh` to install anything missing, then `/mcp` to reconnect.
 3. In a session with several repos attached, the session starts in their
    parent folder, so this repo's SessionStart hook never runs and nothing is
    installed. Run `scripts/install.sh` from this repo, then `/mcp` (or start a
-   new session) so the servers connect.
+   new session). To avoid this entirely, use `scripts/setup-env.sh` as the
+   environment's setup script (`docs/install.md`).
 4. If the `bin` branch doesn't exist yet, the "Build ArtCraft CLIs" GitHub
    Action hasn't finished. Run it from the Actions tab.
 
 ## Working on this repo
 
+- `tests/test_policy.py` must pass after any change to the launcher, guard or
+  sandbox.
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
   `scripts/mcp.sh` need updating to match if you add one.
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.

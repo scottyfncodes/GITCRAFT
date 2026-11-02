@@ -10,16 +10,30 @@ PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft 
 2. Attach this repo to a Claude Code session. A SessionStart hook downloads the prebuilt binaries and registers all seven tools, so they're available in whatever repo the session is working on.
 3. Ask Claude to use them: "make a poster in DesignCraft", "merge these PDFs", "cut this clip down to 30 seconds".
 
+## Install before your session (recommended)
+
+Use this as the cloud environment's setup script so the tools are ready in every session, whichever repos are attached:
+
+```
+curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
+```
+
+## Security
+
+Every tool runs in a Landlock kernel sandbox: it can only read and write your workspace roots and its own state folder, and has no network. A guard in front of each server gives readable refusals and keeps an audit log with file hashes of every handoff. See [docs/security.md](docs/security.md).
+
 ## Manual commands
 
 ```
 scripts/install.sh            # install anything missing
 scripts/install.sh --update   # pull the latest builds
 scripts/install.sh --source   # compile from source instead (slow, needs crates.io)
-scripts/mcp.sh photocraft     # start one server by hand
+scripts/mcp.sh photocraft     # start one server by hand (sandboxed)
+scripts/doctor.sh             # health report
+tests/test_policy.py          # end-to-end security test
 ```
 
-Files are fenced to `$GITCRAFT_ROOT` (default `$HOME`, or the session workspace when it is outside `$HOME`). Set it before starting a session to narrow that.
+Files are limited to `$GITCRAFT_ROOTS` (default `$GITCRAFT_ROOT`: `$HOME`, or the session workspace when it is outside `$HOME`), enforced by the kernel sandbox. Set them before starting a session to narrow or widen that.
 
 If several repos are attached to a session, this repo's SessionStart hook doesn't run (the session starts in their parent folder). Run `scripts/install.sh` yourself, then `/mcp` to connect.
 

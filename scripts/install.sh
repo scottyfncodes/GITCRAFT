@@ -48,7 +48,9 @@ if ((${#todo[@]})) && ((source_only == 0)); then
       IFS=: read -r name _ pkg <<<"$entry"
       if [[ -f "$stage/$pkg.gz" ]] && gunzip -c "$stage/$pkg.gz" > "$GITCRAFT_BIN/$pkg.tmp"; then
         chmod 755 "$GITCRAFT_BIN/$pkg.tmp" && mv "$GITCRAFT_BIN/$pkg.tmp" "$GITCRAFT_BIN/$pkg"
-        echo "gitcraft: $name installed (prebuilt $(grep "^$name " "$stage/MANIFEST.txt" 2>/dev/null | cut -d' ' -f3-))"
+        ver="$(grep "^$name " "$stage/MANIFEST.txt" 2>/dev/null | cut -d' ' -f3-)"
+        echo "prebuilt ${ver:-unknown}" > "$GITCRAFT_BIN/$name.version"
+        echo "gitcraft: $name installed (prebuilt $ver)"
       else
         rm -f "$GITCRAFT_BIN/$pkg.tmp"
         left+=("$entry")
@@ -84,6 +86,7 @@ for entry in "${todo[@]}"; do
   start=$SECONDS
   if (cd "$src" && cargo build --release --locked -p "$pkg") >"$GITCRAFT_LOG/$name.log" 2>&1; then
     install -m 755 "$GITCRAFT_TARGET/release/$pkg" "$GITCRAFT_BIN/$pkg"
+    echo "source $(git -C "$src" rev-parse --short HEAD) $(date -u +%F)" > "$GITCRAFT_BIN/$name.version"
     echo "gitcraft: $name ready ($((SECONDS - start))s)"
   else
     echo "gitcraft: $name FAILED, see $GITCRAFT_LOG/$name.log" >&2
@@ -92,6 +95,19 @@ for entry in "${todo[@]}"; do
 done
 
 "$here/register.sh"
+
+# Machine-readable result for doctor.sh and for anything orchestrating installs.
+python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "${GITCRAFT_TOOLS[@]}" <<'PY'
+import json, os, sys, time
+out, bindir, failed, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4:]
+st = {"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tools": {}}
+for e in tools:
+    name, _, pkg = e.split(":")
+    ok = os.access(os.path.join(bindir, pkg), os.X_OK) and name not in failed
+    ver = open(os.path.join(bindir, name + ".version")).read().strip() if os.path.exists(os.path.join(bindir, name + ".version")) else None
+    st["tools"][name] = {"state": "ok" if ok else "failed", "version": ver}
+json.dump(st, open(out, "w"), indent=1)
+PY
 
 if ((${#failed[@]})); then
   echo "gitcraft: failed: ${failed[*]}" >&2

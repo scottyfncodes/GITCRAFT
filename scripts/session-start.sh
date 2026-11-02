@@ -14,7 +14,7 @@ done
 "$here/register.sh" >/dev/null 2>&1
 
 if ((${#missing[@]} == 0)); then
-  echo "GITCRAFT: all 7 ArtCraft MCP tools are installed and registered."
+  "$here/doctor.sh" --brief
   exit 0
 fi
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared tool list for GITCRAFT. Sourced by the other scripts.
+# Shared tool list and policy for GITCRAFT. Sourced by the other scripts.
 # Format: <server name>:<storytold repo>:<cargo package / binary name>
 GITCRAFT_TOOLS=(
   photocraft:photocraft:photocraft-cli
@@ -16,6 +16,8 @@ GITCRAFT_BIN="$GITCRAFT_HOME/bin"
 GITCRAFT_SRC="$GITCRAFT_HOME/src"
 GITCRAFT_TARGET="$GITCRAFT_HOME/target"
 GITCRAFT_LOG="$GITCRAFT_HOME/logs"
+GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
+
 # Folder the tools may read from and write to. Defaults to the session home, or
 # to the workspace when it lives outside home (cloud sessions check repos out to
 # /home/user while HOME is /root, which would otherwise fence every repo out).
@@ -28,3 +30,20 @@ if [[ -z "${GITCRAFT_ROOT:-}" ]]; then
   esac
   unset _gc_ws
 fi
+# Extra authorized folders, colon-separated (e.g. one per repo). The sandbox
+# allows every root; tools with a single native root flag get GITCRAFT_ROOT.
+GITCRAFT_ROOTS="${GITCRAFT_ROOTS:-$GITCRAFT_ROOT}"
+
+# Sandbox policy (enforced centrally by scripts/mcp.sh for every tool):
+#   GITCRAFT_SANDBOX=landlock (default) | require (refuse to start without it) | off
+#   GITCRAFT_ALLOW_NET=1 lets tools open network connections (denied by default)
+GITCRAFT_SANDBOX="${GITCRAFT_SANDBOX:-landlock}"
+GITCRAFT_ALLOW_NET="${GITCRAFT_ALLOW_NET:-0}"
+# Tool commands refused by the guard, per server (space-separated).
+gitcraft_denied() {
+  case "$1" in
+    effectcraft) echo "run_script" ;;   # arbitrary JavaScript; also refused natively when roots are set
+    photocraft)  echo "control_call" ;; # raw bridge protocol, bypasses the MCP surface
+    *) echo "" ;;
+  esac
+}
