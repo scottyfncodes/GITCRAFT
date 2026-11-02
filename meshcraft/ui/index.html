@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GITCRAFT 3D Department</title>
+<meta name="description" content="GITCRAFT's 3D production department: asset factory, character studio, world builder, asset library and pipeline monitor.">
+<meta name="theme-color" content="#0a2142">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 29 9.5v13L16 30 3 22.5v-13z' fill='%231FB5B0'/%3E%3Cpath d='M16 2v28M3 9.5l13 7.5 13-7.5' stroke='%230A2142' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="cube" aria-hidden="true"></span><div><b>GITCRAFT</b><small>3D Department</small></div></div>
+  <nav class="tabs" id="tabs" aria-label="Departments">
+    <a href="#factory" data-tab="factory"><i>◆</i><span>Asset Factory</span></a>
+    <a href="#characters" data-tab="characters"><i>☺</i><span>Characters</span></a>
+    <a href="#world" data-tab="world"><i>▲</i><span>World Builder</span></a>
+    <a href="#library" data-tab="library"><i>▦</i><span>Library</span></a>
+    <a href="#monitor" data-tab="monitor"><i>◷</i><span>Pipeline</span></a>
+  </nav>
+  <div class="mode" id="mode"></div>
+</header>
+<main id="main"><p class="loading">Loading the department…</p></main>
+<dialog id="dlg"><form method="dialog"><div id="dlgBody"></div><menu><button class="btn" value="close">Close</button></menu></form></dialog>
+<script type="module" src="app.js"></script>
+</body>
+</html>
