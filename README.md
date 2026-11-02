@@ -49,7 +49,7 @@ scripts/doctor.sh             # health report
 tests/test_policy.py          # end-to-end security test
 tests/test_meshcraft.py       # MeshCraft pipeline + sandbox test
 tests/test_forgecraft.py      # ForgeCraft: every 3D backend, routing, retries, library
-python3 forgecraft/ui_server.py   # the 3D Department UI, live on http://127.0.0.1:8765
+scripts/ui.sh                     # the GITCRAFT control room (all tools, incl. ForgeCraft) on 127.0.0.1
 ```
 
 Files are limited to `$GITCRAFT_ROOTS` (default `$GITCRAFT_ROOT`: `$HOME`, or the session workspace when it is outside `$HOME`), enforced by the kernel sandbox. Set them before starting a session to narrow or widen that.

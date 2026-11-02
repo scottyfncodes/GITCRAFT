@@ -29,7 +29,7 @@ Claude Code ⇄ guard.py ⇄ sandbox.py (Landlock) ⇄ tool MCP server (+ its na
 - It can read and execute its code, `~/.gitcraft/forgecraft` (Meshroom, AI venv) and MeshCraft's Blender venv. It can write its library (`~/.gitcraft/forgecraft-library`) and model cache.
 - The engine check serves files to Chromium by request interception, not a socket, so it works with network denied.
 - Hunyuan3D's hosted mode needs `GITCRAFT_ALLOW_NET=1`, set deliberately for that session only.
-- `forgecraft/ui_server.py` (the live UI) runs outside the sandbox as a local tool and binds to 127.0.0.1 only.
+- ForgeCraft has no web server. `forgecraft/ui_server.py` only publishes a static snapshot (`--publish`); its former live mode was removed because it ran jobs outside the guard and sandbox and accepted unauthenticated, cross-site and DNS-rebinding requests. Browser access to every tool goes through the control room (`scripts/ui.sh`, see `docs/ui.md`). `tests/test_forgecraft_web.py` covers each finding.
 
 ## MeshCraft
 

@@ -1,7 +1,7 @@
-// GITCRAFT 3D Department UI.
-// Live mode (forgecraft/ui_server.py on the department machine): buttons run real pipeline jobs.
-// Snapshot mode (static deploy): browse the real assets/jobs captured from a run; actions show
-// the exact MCP call or CLI command to run them, because Blender cannot run on a static host.
+// GITCRAFT 3D Department UI: a static snapshot (forgecraft/ui_server.py --publish). Browse the real
+// assets and jobs captured from a run; actions show the exact MCP call or CLI command to run them.
+// There is no live mode: running jobs from a web page goes through the GITCRAFT control room
+// (scripts/ui.sh), which is token-protected and acts only through scripts/mcp.sh.
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -11,13 +11,8 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const fmtB = (n) => (n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : (n / 1024).toFixed(0) + " KB");
 const num = (n) => (n ?? 0).toLocaleString();
 let S = null; // department state
-let LIVE = false;
 
 async function load() {
-  try {
-    const r = await fetch("/api/state", { cache: "no-store" });
-    if (r.ok) { S = await r.json(); LIVE = true; return; }
-  } catch {}
   S = await (await fetch("data/state.json", { cache: "no-store" })).json();
 }
 
@@ -148,22 +143,15 @@ function routeHtml(p) {
     : `<div class="note"><b>Nothing here can honour this request.</b> ForgeCraft will not substitute a 2D image or an unrelated model. Enable one of the tools above (reasons listed) or change the request.</div>`}`;
 }
 
-// ---------------------------------------------------------------- actions (live: run; snapshot: show how)
+// ---------------------------------------------------------------- actions (this page is static: show how to run them)
 async function act(kind, payload, label) {
-  if (LIVE) {
-    const r = await fetch("/api/" + kind, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-    const j = await r.json();
-    if (!r.ok) return dialog(`<h2>${esc(label)}</h2><p class="err">${esc(j.error || r.statusText)}</p>`);
-    dialog(`<h2>${esc(label)}: started</h2><p>Job <code>${esc(j.job)}</code> is running. Follow it in the Pipeline Monitor.</p>`);
-    location.hash = "#monitor/" + j.job; return;
-  }
   const tool = { generate: "generate", compose: "compose_scene", retry: "job_retry" }[kind];
   const cli = kind === "retry" ? `python3 forgecraft/cli.py retry ${payload.job}` : `python3 forgecraft/cli.py ${kind} '${JSON.stringify(payload)}'`;
   dialog(`<h2>${esc(label)}</h2>
-  <p>This page is a <b>snapshot</b> hosted on a static server, which cannot run Blender. To run this for real, use the department machine:</p>
+  <p>This page is a <b>snapshot</b>, which cannot run Blender. To run this for real on the department machine:</p>
   <h3>From Claude Code (MCP)</h3><pre>forgecraft · ${tool}\n${esc(JSON.stringify(payload, null, 1))}</pre>
   <h3>From a terminal</h3><pre>${esc(cli)}</pre>
-  <h3>Or run this UI live</h3><pre>python3 forgecraft/ui_server.py   # http://127.0.0.1:8765</pre>`);
+  <h3>Or from the GITCRAFT control room</h3><pre>scripts/ui.sh   # 127.0.0.1, token-protected → Run → Any tool → forgecraft · ${tool}</pre>`);
 }
 function dialog(html) { $("#dlgBody").innerHTML = html; $("#dlg").showModal(); }
 
@@ -184,7 +172,7 @@ pages.factory = (main) => {
   <div class="grid2"><section class="panel"><h2>New asset</h2>
     <label for="brief">Brief</label><textarea id="brief" placeholder="e.g. stylized low-poly boat with a red hull">stylized low-poly boat with a red hull</textarea>
     <div class="chips" id="ex">${["stylized low-poly boat with a red hull", "detailed ship from concept art", "object from photograph", "animated human pirate character", "reconstructed real-world environment", "blocky voxel treasure chest", "floating salvage debris", "small tropical island", "complete game-ready scene"].map((x) => `<span class="chip">${x}</span>`).join("")}</div>
-    <div class="row"><div><label for="imgs">Reference images</label><input id="imgs" type="file" accept="image/*" multiple ${LIVE ? "" : 'title="Uploads need the live department server"'}></div>
+    <div class="row"><div><label for="imgs">Reference images</label><input id="imgs" type="file" accept="image/*" multiple title="On a snapshot, images are listed in the MCP call; run it from Claude Code or the control room"></div>
       <div><label for="nimg">…or count (planning)</label><input id="nimg" type="number" min="0" value="0"></div>
       <div><label for="tool">Tool</label><select id="tool"><option value="">Automatic</option>${Object.entries(S.rules.tools).filter(([k]) => !["import", "mixamo"].includes(k)).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("")}</select></div></div>
     <div class="row"><div><label for="nm">Asset name</label><input id="nm" placeholder="optional"></div><div><label for="tris">Triangle budget</label><input id="tris" type="number" value="20000"></div><div><label for="bake">Texture bake</label><select id="bake"><option>1024</option><option>2048</option><option>512</option><option value="0">none</option></select></div></div>
@@ -200,7 +188,7 @@ pages.factory = (main) => {
   $("#go").onclick = async () => {
     const p = route($("#brief").value, Math.max(+$("#nimg").value || 0, $("#imgs").files.length), $("#tool").value);
     if (!p.chosen) return dialog(`<h2>Can't generate this here</h2>${routeHtml(p)}`);
-    const images = LIVE ? await Promise.all([...$("#imgs").files].map((f) => new Promise((ok) => { const r = new FileReader(); r.onload = () => ok({ name: f.name, data: r.result }); r.readAsDataURL(f); }))) : undefined;
+    const images = undefined;   // static page: nothing is uploaded anywhere
     act("generate", { brief: $("#brief").value, name: $("#nm").value || undefined, tool: $("#tool").value || undefined, max_tris: +$("#tris").value, bake: +$("#bake").value, ...(images?.length ? { uploads: images } : {}) }, "Generate 3D asset");
   };
 };
@@ -230,7 +218,7 @@ pages.characters = (main, arg) => {
     params: { colors: { bandana: $("#cb").value, vest: $("#cvst").value, pants: $("#cp").value }, weapon: $("#cw").checked },
     clips: [...$("#clips").querySelectorAll(".chip.on")].map((c) => c.textContent) }, "Create character");
   if (sel) {
-    $("#mxu").onclick = () => LIVE ? act("mixamo_prepare", { asset: sel.id }, "Prepare Mixamo upload") : dialog(`<h2>Prepare Mixamo upload</h2><pre>forgecraft · mixamo_prepare_upload\n{"asset": "${esc(sel.id)}", "out": "&lt;workspace&gt;/${esc(sel.slug)}_mixamo_upload.fbx"}</pre>`);
+    $("#mxu").onclick = () => dialog(`<h2>Prepare Mixamo upload</h2><pre>forgecraft · mixamo_prepare_upload\n{"asset": "${esc(sel.id)}", "out": "&lt;workspace&gt;/${esc(sel.slug)}_mixamo_upload.fbx"}</pre>`);
     $("#mxa").onclick = () => dialog(`<h2>Apply Mixamo clips</h2><p>Put the downloaded FBX files inside a GITCRAFT root, then:</p><pre>forgecraft · mixamo_apply\n{"character": "${esc(sel.id)}", "animations": ["&lt;root&gt;/mixamo/Walking.fbx", "&lt;root&gt;/mixamo/Jump.fbx"]}</pre><p>Clips are matched on the ${sel.rig.bones} <code>mixamorig:*</code> bones and added as version ${sel.version + 1}.</p>`);
   }
 };
@@ -344,7 +332,6 @@ pages.monitor = (main, arg) => {
     ${j.compute ? `<h3>Compute</h3><p style="font-size:13.5px">${esc(j.compute.tool)}: ${esc(j.compute.needs || "")}</p>` : ""}
     <div class="row" style="margin-top:10px"><button class="btn ${/failed|blocked/.test(j.status) ? "primary" : ""}" id="rt">Retry job</button></div>`;
   $("#rt").onclick = () => act("retry", { job: j.id }, "Retry " + j.id);
-  if (LIVE && /running|queued/.test(j.status)) setTimeout(async () => { if (location.hash.startsWith("#monitor")) { await load(); render(); } }, 2000);
 };
 
 // ---------------------------------------------------------------- router
@@ -355,7 +342,7 @@ function render() {
   pages[t]($("#main"), arg, ver);
   window.scrollTo({ top: 0 });
 }
-window.addEventListener("hashchange", async () => { if (LIVE) await load(); render(); });
+window.addEventListener("hashchange", () => render());
 await load();
-$("#mode").innerHTML = LIVE ? "<b>LIVE</b> · department server" : `<b>SNAPSHOT</b> · ${esc(S.source || "")}<br>${esc((S.generated || "").replace("T", " ").slice(0, 16))} UTC`;
+$("#mode").innerHTML = `<b>SNAPSHOT</b> · ${esc(S.source || "")}<br>${esc((S.generated || "").replace("T", " ").slice(0, 16))} UTC`;
 render();

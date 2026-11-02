@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""3D Department UI: live server and static snapshot publisher (standard library only).
+"""3D Department UI: static snapshot publisher (standard library only).
 
-  python3 forgecraft/ui_server.py [--port 8765]           live: the UI runs real pipeline jobs on this machine
   python3 forgecraft/ui_server.py --publish <library> <dist> [--source LABEL]
-                                                          snapshot: static site (UI + state.json + asset files)
+                                  static site (UI + data/state.json + asset files), e.g. for the Vercel preview
 
-Live API: GET /api/state · POST /api/generate · /api/compose · /api/retry · /api/mixamo_prepare.
-It binds to 127.0.0.1 only: it can run Blender and write files, so it is not for the internet."""
-import base64, http.server, json, os, shutil, socketserver, sys, threading, time, urllib.parse
+There is no live mode any more. The old live server ran pipeline jobs in its own process,
+outside the guard and the Landlock sandbox, and accepted unauthenticated, cross-site and
+DNS-rebinding requests (PR #9 security audit). ForgeCraft never needed it: every action it
+offered is a ForgeCraft MCP tool (generate, compose_scene, job_retry, mixamo_prepare_upload).
+Run them from Claude Code, from `forgecraft/cli.py`, or from the GITCRAFT control room
+(`scripts/ui.sh`: local, token-protected, every call through scripts/mcp.sh)."""
+import json, os, shutil, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import hardware, library, pipeline, routing
+import hardware, routing
 from backends import blockbench, mixamo
 
 UI = os.path.join(HERE, "ui")
@@ -57,58 +60,12 @@ def publish(lib_root, dist, source=""):
     print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs to {dist} ({total / 2**20:.1f} MB)")
 
 
-RUNNING = {}
-
-
-def start(spec):
-    job = pipeline.Job(spec); job.save()
-    t = threading.Thread(target=pipeline.run, args=(None, job.id), daemon=True); t.start()
-    RUNNING[job.id] = t
-    return job.id
-
-
-class H(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *a, **k): super().__init__(*a, directory=UI, **k)
-
-    def log_message(self, *a): pass
-
-    def _json(self, obj, code=200):
-        b = json.dumps(obj, default=str).encode()
-        self.send_response(code); self.send_header("content-type", "application/json"); self.send_header("content-length", str(len(b))); self.end_headers(); self.wfile.write(b)
-
-    def translate_path(self, path):
-        p = urllib.parse.unquote(urllib.parse.urlparse(path).path)
-        if p.startswith("/library/"):
-            full = os.path.realpath(os.path.join(library.ROOT, p[len("/library/"):]))
-            return full if full.startswith(os.path.realpath(library.ROOT) + os.sep) else "/nonexistent"
-        return super().translate_path(path)
-
-    def do_GET(self):
-        if self.path.startswith("/api/state"): return self._json(state(library.ROOT, "/library/", mode="live", source="this machine"))
-        return super().do_GET()
-
-    def do_POST(self):
-        n = int(self.headers.get("content-length", 0)); body = json.loads(self.rfile.read(n) or b"{}")
-        try:
-            if self.path == "/api/generate":
-                spec = {k: v for k, v in body.items() if v not in (None, "") and k != "uploads"}
-                if body.get("uploads"):
-                    up = os.path.join(library.ROOT, "uploads", time.strftime("%Y%m%d-%H%M%S")); os.makedirs(up, exist_ok=True)
-                    spec["images"] = []
-                    for u in body["uploads"]:
-                        fn = os.path.join(up, os.path.basename(u["name"]))
-                        open(fn, "wb").write(base64.b64decode(u["data"].split(",", 1)[1])); spec["images"].append(fn)
-                return self._json({"job": start(spec)})
-            if self.path == "/api/compose":
-                return self._json({"job": start(dict(body, tool="blender_scene", brief=body.get("name", "") + " scene"))})
-            if self.path == "/api/retry":
-                job_id = body["job"]; t = threading.Thread(target=pipeline.retry, args=(job_id,), daemon=True); t.start(); return self._json({"job": job_id})
-            if self.path == "/api/mixamo_prepare":
-                import server; r = server.call("mixamo_prepare_upload", {"asset": body["asset"], "out": os.path.join(library.ROOT, "uploads", body["asset"] + "_mixamo_upload.fbx")})
-                return self._json({"job": "-", "fbx": r["fbx"]})
-        except Exception as e:
-            return self._json({"error": f"{type(e).__name__}: {e}"}, 400)
-        self._json({"error": "unknown endpoint"}, 404)
+NO_LIVE = """ForgeCraft's live web server was removed (it ran jobs outside GITCRAFT's sandbox and accepted
+cross-site requests). Use one of the supported routes instead:
+  * Claude Code: the forgecraft MCP tools (generate, compose_scene, job_retry, mixamo_prepare_upload, ...)
+  * terminal:    python3 forgecraft/cli.py generate "a wooden crate"
+  * web UI:      scripts/ui.sh   (GITCRAFT control room on 127.0.0.1: token-protected, every call through scripts/mcp.sh)
+  * snapshot:    python3 forgecraft/ui_server.py --publish <library> <dist>   (static site, no API)"""
 
 
 if __name__ == "__main__":
@@ -117,8 +74,4 @@ if __name__ == "__main__":
         i = a.index("--publish"); src = a[a.index("--source") + 1] if "--source" in a else ""
         publish(a[i + 1], a[i + 2], src)
     else:
-        port = int(a[a.index("--port") + 1]) if "--port" in a else 8765
-        socketserver.ThreadingTCPServer.allow_reuse_address = True
-        with socketserver.ThreadingTCPServer(("127.0.0.1", port), H) as srv:
-            print(f"GITCRAFT 3D Department (live): http://127.0.0.1:{port}  library: {library.ROOT}")
-            srv.serve_forever()
+        print(NO_LIVE, file=sys.stderr); sys.exit(2)

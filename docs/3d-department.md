@@ -15,7 +15,7 @@
 | Job management / reporting | None beyond the audit log, `status.json` and `doctor.sh`. | Added job records (stages, attempts, errors, compute) and a Pipeline Monitor. `doctor.sh` now lists 3D backends. |
 | Artifact formats / metadata | Project manifests such as TIDEBREAKERS `creative/MANIFEST.json`. | Every 3D asset carries an `asset.json` (ID, version, provenance, licence, stats, validation). |
 | Install / deploy | Prebuilt Rust binaries from the `bin` branch (CI matrix in `scripts/tools.sh`), with registration at user scope. | Blender etc. are not ArtCraft binaries, so they are not in the CI matrix. `GITCRAFT_EXTRA_TOOLS` + `scripts/install-3d.sh` install them from their official sources. |
-| UI | **There was no GITCRAFT UI.** The "interface" was Claude Code itself. | The department's UI is new. It runs live on the department machine and is published as a static snapshot. It follows the TIDEBREAKERS palette that the GITCRAFT pilot established. |
+| UI | **There was no GITCRAFT UI.** The "interface" was Claude Code itself. | The department's UI is a static snapshot of a run (published to Vercel). Jobs run through the MCP tools, the CLI or the GITCRAFT control room (`scripts/ui.sh`). It follows the TIDEBREAKERS palette that the GITCRAFT pilot established. |
 
 **Hardware and runtime found in the cloud session:** 4 CPU threads, 15.7 GB RAM, **no GPU**, Python 3.13, Node 22, Chromium + Playwright, Linux 6.18 with Landlock. **Network policy:** PyPI, npm and GitHub downloads are allowed; `download.blender.org`, `huggingface.co` (all model weights), `*.hf.space` and `download.pytorch.org` are **denied** by the egress proxy.
 
@@ -50,7 +50,7 @@ forgecraft/
   backends/         meshcraft_tpl.py (MeshCraft templates) · blockbench.py (.bbmodel writer/reader) · meshroom.py · triposr.py · hunyuan3d.py · mixamo.py
   blender/          run.py (job runner inside Blender) · mc.py (stages) · gen.py (procedural models, rig, animation)
   web-check/        Khronos glTF-Validator + three.js r170 load test in headless Chromium (no sockets: works in the sandbox)
-  ui/, ui_server.py the 3D Department interface (live server + static snapshot publisher)
+  ui/, ui_server.py the 3D Department interface (static snapshot publisher; no live server)
   cli.py            command line for the same operations
 scripts/install-3d.sh   ensures MeshCraft's Blender, installs the engine check, Meshroom, the AI venv and weights
 ```
@@ -117,8 +117,8 @@ Five sections:
 
 It is mobile-first: on phones the navigation becomes a bottom tab bar.
 
-- **Live** (`python3 forgecraft/ui_server.py`, 127.0.0.1 only): buttons run real jobs on the machine and the monitor polls.
-- **Snapshot** (`ui_server.py --publish <library> <dist>`): a static site of the real assets and job records from a run, deployed to Vercel. On a static host, action buttons show the exact MCP call or CLI command, because Blender cannot run there.
+- **No live mode.** The live server was removed for security: it ran jobs outside the guard and Landlock sandbox and accepted unauthenticated, cross-site and DNS-rebinding requests (`tests/test_forgecraft_web.py`). To run jobs from a browser, use the GITCRAFT control room (`scripts/ui.sh`: 127.0.0.1, per-launch token, Origin/Host checks, every call through `scripts/mcp.sh`).
+- **Snapshot** (`ui_server.py --publish <library> <dist>`): a static site of the real assets and job records from a run, deployed to Vercel. Action buttons show the exact MCP call, CLI command and control-room route.
 
 ## 6. Operating the department
 
