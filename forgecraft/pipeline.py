@@ -234,7 +234,9 @@ def _run(rec, spec, work, log):
                         "ai_generated": chosen in ("triposr", "hunyuan3d")},
             "provenance": {"forgecraft_job": rec["id"], "meshcraft_job": (res.get("job") or {}).get("id"), "inputs": inputs,
                            "blender": probe["backends"]["blender"].get("version"), "machine": rec["compute"]["machine"], "recorded": _now()},
-            "generation": gen_info,
+            "generation": dict(gen_info, request=spec.get("brief")),
+            "rig": ({"armatures": rt["armatures"], "convention": "Mixamo skeleton (22 mixamorig:* bones)" if req.get("template") == "deckhand" or chosen == "mixamo"
+                     else "MeshCraft rig"} if rt and rt.get("armatures") else None),
             "geometry": {"triangles": (rt or {}).get("triangles") or md.get("triangles"), "size_m": (rt or {}).get("size_m"), "meshes": (rt or {}).get("meshes")},
             "animations": [{"name": c} for c in (md.get("clips") or [])],
             "sockets": sorted(o for o in objs if o.startswith("socket_")),
