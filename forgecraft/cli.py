@@ -32,7 +32,7 @@ def main(a):
     elif cmd == "get": r = server.call("library_get", {"asset": rest[0]})
     elif cmd == "export": r = server.call("library_export", {"asset": rest[0], "dest": rest[1]})
     elif cmd == "snapshot":
-        import hardware, library; r = library.snapshot(rest[0], hardware.probe())
+        from gitcraft3d import hardware, library; r = library.snapshot(rest[0], hardware.probe())
     elif cmd == "serve":
         os.execv(sys.executable, [sys.executable, os.path.join(HERE, "ui_server.py"), *rest])
     else: print(__doc__); return 2
