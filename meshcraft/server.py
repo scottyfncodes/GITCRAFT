@@ -27,10 +27,27 @@ sys.path.insert(0, HERE)
 os.environ.setdefault("BLENDER_USER_CONFIG", os.path.join(os.environ.get("XDG_CONFIG_HOME", "/tmp"), "blender"))
 ROOTS = [os.path.realpath(r) for r in os.environ.get("GITCRAFT_ROOTS", os.environ.get("GITCRAFT_ROOT", os.getcwd())).split(":") if r]
 
-with contextlib.redirect_stdout(sys.stderr):   # bpy prints on import; stdout is the MCP channel
-    import bpy
-    from engine import core, kit
-    from engine.palette import Palette
+# Blender (~1 GB) is imported in the background so the MCP handshake answers at once:
+# at session start, a cold import alongside the other servers can outlast the client's
+# connect timeout. Tool calls wait for the import to finish.
+import threading
+bpy = core = kit = Palette = None
+_ready = threading.Event(); _import_error = []
+
+def _load():
+    global bpy, core, kit, Palette
+    try:
+        with contextlib.redirect_stdout(sys.stderr):   # bpy prints on import; stdout is the MCP channel
+            import bpy as _bpy
+            from engine import core as _core, kit as _kit
+            from engine.palette import Palette as _P
+        bpy, core, kit, Palette = _bpy, _core, _kit, _P
+    except Exception as e:
+        _import_error.append(f"{type(e).__name__}: {e}")
+    finally:
+        _ready.set()
+
+threading.Thread(target=_load, daemon=True).start()
 
 
 def _inside(p):
@@ -160,6 +177,8 @@ def main():
             p = msg.get("params", {}); name, args = p.get("name"), p.get("arguments") or {}
             try:
                 if name not in TOOLS: raise ValueError(f"unknown tool {name}")
+                if not _ready.wait(600): raise RuntimeError("Blender is still loading; try again shortly")
+                if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0] + " (run scripts/doctor.sh)")
                 with contextlib.redirect_stdout(sys.stderr):
                     res = TOOLS[name][2](args)
                 send({"jsonrpc": "2.0", "id": mid, "result": {"content": [{"type": "text", "text": json.dumps(res, default=str)}]}})
