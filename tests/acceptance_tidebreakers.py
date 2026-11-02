@@ -140,9 +140,9 @@ if all([boat, isl, salv, crew]):
     if scene: report["assets"]["scene"]["items"] = len(items)
 
 # 9. hand off: export everything into the workspace (hash-verified), then FilmCraft + DesignCraft consume the files
-ok, lib = fc.call("library_search", {"query": "tidebreakers"})
+ok, lib = fc.call("library_search", {"query": "tidebreakers", "limit": 500})
 exported = {}
-for a in (lib if ok else []):
+for a in (lib["assets"] if ok else []):
     ok, r = fc.call("library_export", {"asset": a["id"], "dest": os.path.join(out, "assets")})
     if ok: exported[a["id"]] = r["dir"]
 check(f"handoff: {len(exported)} assets exported into the workspace with verified hashes", len(exported) >= 11, list(exported))
