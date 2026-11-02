@@ -43,6 +43,8 @@ done
 native=(--automation-read-root "$root" --automation-write-root "$root")
 # LightCraft locks its library to one process; GITCRAFT_LIGHTCRAFT_LIBRARY lets tests use their own.
 lc_library="${GITCRAFT_LIGHTCRAFT_LIBRARY:-$GITCRAFT_HOME/lightcraft-library}"
+# MeshCraft's versioned asset library and job records (outside the workspace, like LightCraft's library)
+mc_library="${GITCRAFT_MESHCRAFT_LIBRARY:-$GITCRAFT_HOME/meshcraft-library}"
 case "$name" in
   photocraft)  cmd=("$bin" mcp "${native[@]}") ;;
   vectorcraft) cmd=("$bin" mcp --headless "${native[@]}") ;;
@@ -54,7 +56,7 @@ case "$name" in
   lightcraft)  mkdir -p "$lc_library"
                cmd=("$bin" mcp --compact --library "$lc_library") ;;
   # Blender in-process; enforces the roots itself as well as through the sandbox below.
-  meshcraft)   export GITCRAFT_ROOTS GITCRAFT_ROOT
+  meshcraft)   mkdir -p "$mc_library"; export GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_MESHCRAFT_LIBRARY="$mc_library"
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
@@ -65,6 +67,7 @@ cmd+=("$@")
 
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
+[[ "$name" == meshcraft ]] && writable+=("$mc_library")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
