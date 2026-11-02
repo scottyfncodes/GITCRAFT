@@ -66,5 +66,5 @@ def build(ctx):
     morph_clip("fill", [(1, 0.0), (19, 1.0)])
     morph_clip("luff", [(1, 1.0), (16, 0.72), (31, 1.0)])
     return {"root": root, "expect": {"top_z": None, "centered": True},
-            "contract": {"nodes": {"root": "sail", "yard": "sail_yard", "cloth": "sail_cloth"}, "clips": ["fill", "luff"], "morph_targets": ["billow"],
+            "contract": {"ground": False, "nodes": {"root": "sail", "yard": "sail_yard", "cloth": "sail_cloth"}, "clips": ["fill", "luff"], "morph_targets": ["billow"],
                          "origin": "yard centre; cloth hangs down -Y, belly toward +Z (downwind = forward)"}}

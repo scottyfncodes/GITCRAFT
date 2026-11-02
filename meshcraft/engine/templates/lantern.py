@@ -50,5 +50,5 @@ def build(ctx):
     kit.keyframes(root, "rotation_euler", keys, "swing", interp="BEZIER", easing="AUTO")
     total = 0.03 + 0.02 + cap_h * 1.05 + body_h + h * 0.17
     return {"root": root, "expect": {"top_z": 0.0, "size": [r * 2.3, r * 2.3, total], "tolerance": 0.35, "centered": True},
-            "contract": {"nodes": {"root": "lantern", "body": "lantern_body", "light": "lantern_light"}, "clips": ["swing"],
+            "contract": {"ground": False, "nodes": {"root": "lantern", "body": "lantern_body", "light": "lantern_light"}, "clips": ["swing"],
                          "origin": "hang point (top of hook); hangs down -Y", "light_anchor_yup": [0, round(flame_z, 4), 0]}}
