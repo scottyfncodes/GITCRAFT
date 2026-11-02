@@ -74,6 +74,12 @@ working in.
 - Never add Blender code to `forgecraft/`: it belongs in `meshcraft/engine/`.
   Shared library/jobs/probe/routing code belongs in `gitcraft3d/`.
 
+## Control room (local web UI)
+
+`scripts/ui.sh` serves a phone-friendly UI for every GITCRAFT tool on 127.0.0.1
+(token-protected). Every action it takes is an MCP call through `scripts/mcp.sh`,
+so the guard and sandbox apply unchanged. See `docs/ui.md`.
+
 ## If a tool won't connect
 
 0. `scripts/doctor.sh` shows what's missing, unregistered or failing.
