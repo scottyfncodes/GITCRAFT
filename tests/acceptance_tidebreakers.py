@@ -31,6 +31,30 @@ report = {"started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "engine
           "assets": {}, "checks": [], "handoffs": {}}
 
 
+def png_foreground(path):
+    """Share of pixels that differ from the top-left (background) pixel; stdlib PNG decode (8-bit RGB/RGBA)."""
+    import struct, zlib
+    b = open(path, "rb").read(); i, idat, w = 8, b"", 0
+    while i < len(b):
+        n, t = struct.unpack(">I4s", b[i:i + 8]); d = b[i + 8:i + 8 + n]; i += 12 + n
+        if t == b"IHDR": w, h, depth, ctype = struct.unpack(">IIBB", d[:10]); bpp = {2: 3, 6: 4}[ctype]
+        elif t == b"IDAT": idat += d
+    raw, stride, prev, rows = zlib.decompress(idat), w * bpp, bytearray(w * bpp), []
+    for y in range(h):
+        f, line = raw[y * (stride + 1)], bytearray(raw[y * (stride + 1) + 1:(y + 1) * (stride + 1)])
+        for x in range(stride):
+            a = line[x - bpp] if x >= bpp else 0; c = prev[x - bpp] if x >= bpp else 0; up = prev[x]
+            if f == 1: line[x] = (line[x] + a) & 255
+            elif f == 2: line[x] = (line[x] + up) & 255
+            elif f == 3: line[x] = (line[x] + (a + up) // 2) & 255
+            elif f == 4:
+                p = a + up - c; pa, pb, pc = abs(p - a), abs(p - up), abs(p - c)
+                line[x] = (line[x] + (a if pa <= pb and pa <= pc else up if pb <= pc else c)) & 255
+        rows.append(bytes(line)); prev = line
+    bg = rows[0][:3]; px = [r[x:x + 3] for r in rows[::4] for x in range(0, stride, bpp * 4)]
+    return sum(1 for p in px if max(abs(p[k] - bg[k]) for k in range(3)) > 12) / len(px)
+
+
 def check(label, ok, detail=""):
     report["checks"].append({"check": label, "ok": bool(ok), "detail": str(detail)[:300]})
     print(("PASS " if ok else "FAIL ") + label + (f"  [{str(detail)[:200]}]" if detail and not ok else ""), flush=True)
@@ -205,6 +229,8 @@ try:
     shot = os.path.join(out, "handoffs", "threejs_r170_scene.png"); shutil.copy2(os.path.join(md["dir"], ec["screenshot"]), shot)
     json.dump(ec, open(os.path.join(out, "handoffs", "threejs_r170_scene.json"), "w"), indent=1)
     check("three.js r170: the composed scene GLB loads in GLTFLoader with every check passing", ec["status"] == "passed", ec.get("checks"))
+    share = png_foreground(shot)
+    check(f"three.js r170: the scene screenshot shows the scene ({share:.0%} of pixels differ from the background)", share > 0.05, share)
     report["handoffs"]["threejs"] = {"glb": ec.get("glb"), "screenshot": os.path.relpath(shot, out), "checks": [c["check"] for c in ec.get("checks", [])]}
 except Exception as e:
     check("three.js r170 scene import", False, e)

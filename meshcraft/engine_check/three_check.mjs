@@ -59,7 +59,7 @@ try {
     bounds: { min: box.min.toArray().map((v) => +v.toFixed(3)), max: box.max.toArray().map((v) => +v.toFixed(3)), size: box.getSize(new THREE.Vector3()).toArray().map((v) => +v.toFixed(3)) },
     skinned: gltf.scene.getObjectsByProperty ? root.getObjectsByProperty('isSkinnedMesh', true).length : 0 });
   const c = box.getCenter(new THREE.Vector3()), r = box.getSize(new THREE.Vector3()).length() * 0.62;
-  const cam = new THREE.OrthographicCamera(-r, r, r, -r, 0.01, 100);
+  const cam = new THREE.OrthographicCamera(-r, r, r, -r, 0.01, Math.max(100, r * 8));   // far plane scales with the asset: scenes with an ocean are hundreds of metres
   cam.position.set(c.x + r * 1.6, c.y + r * 1.1, c.z + r * 2.4); cam.lookAt(c);
   renderer.render(scene, cam);
 } catch (e) { report.ok = false; report.error = String(e && e.stack || e); }
