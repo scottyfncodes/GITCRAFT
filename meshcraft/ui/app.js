@@ -118,8 +118,9 @@ function bbTemplate(q) {
   if (q.kind === "prop") return { crate: "crate", chest: "chest", barrel: "crate" }[q.params.prop];
   return S.bb_templates.find((n) => (q.brief || "").toLowerCase().includes(n)) || null;
 }
-function route(brief, images = 0, prefer = "") {
+function route(brief, images = 0, prefer = "", kind = null) {
   const R = S.rules, q = parse(brief, images), be = S.probe.backends;
+  if (kind) q.kind = kind;
   const rt = R.routes.find((r) => cond(r.when, q));
   let order = [...rt.tools]; if (prefer && R.tools[prefer]) order = [prefer, ...order.filter((x) => x !== prefer)];
   const cands = order.map((tool) => {

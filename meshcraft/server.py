@@ -80,7 +80,7 @@ def _summ(rec):
 
 def call(name, a):
     if name == "hardware_probe": return hardware.probe()
-    if name == "route": return routing.route(a.get("brief", ""), a.get("images") or [], prefer=a.get("tool"))
+    if name == "route": return routing.route(a.get("brief", ""), routing.expand_images(a.get("images") or []), prefer=a.get("tool"), kind=a.get("kind"), params=a.get("params"))
     if name == "generate": return _gen(dict(a))
     if name == "process_mesh":
         spec = dict(a); spec["input_mesh"] = spec.pop("input"); spec.setdefault("brief", os.path.basename(spec["input_mesh"]))

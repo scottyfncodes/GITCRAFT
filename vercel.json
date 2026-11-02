@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python3 meshcraft/ui_server.py --publish acceptance/tidebreakers-3d/library meshcraft/ui/dist --source 'TIDEBREAKERS acceptance run'",
+  "outputDirectory": "meshcraft/ui/dist",
+  "installCommand": "true",
+  "framework": null,
+  "headers": [
+    { "source": "/(.*)\\.glb", "headers": [{ "key": "Content-Type", "value": "model/gltf-binary" }] },
+    { "source": "/data/state.json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}

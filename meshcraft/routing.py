@@ -97,10 +97,12 @@ def tool_status(tool, req, probe):
     return True, spec["compute"]
 
 
-def route(brief, images=(), probe=None, prefer=None):
+def route(brief, images=(), probe=None, prefer=None, kind=None, params=None):
     if probe is None:
         import hardware; probe = hardware.probe()
     req = parse(brief, images)
+    if kind: req["kind"] = kind          # an explicit kind/params from the caller beats keyword parsing
+    if params: req["params"].update(params)
     rt = next(r for r in RULES["routes"] if _cond(r["when"], req))
     order = list(rt["tools"])
     if prefer:

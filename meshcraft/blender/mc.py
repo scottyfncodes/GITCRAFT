@@ -223,12 +223,24 @@ def decimate(o, max_tris):
 
 
 def uv_unwrap(o, margin=0.012):
+    """Unwrap into a new UV layer (MC_UV). Existing image textures keep sampling their original
+    UVs through explicit UV Map nodes, so the bake can transfer them (e.g. photogrammetry textures)."""
+    me = o.data
+    orig = me.uv_layers.active.name if me.uv_layers else None
+    if orig:
+        for m in [m for m in me.materials if m]:
+            nt = m.node_tree
+            for n in [n for n in nt.nodes if n.type == "TEX_IMAGE" and not n.inputs["Vector"].is_linked]:
+                uvn = nt.nodes.new("ShaderNodeUVMap"); uvn.uv_map = orig
+                nt.links.new(uvn.outputs["UV"], n.inputs["Vector"])
+    new = me.uv_layers.new(name="MC_UV")
+    me.uv_layers.active = new; new.active_render = True
     select_only([o])
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.smart_project(angle_limit=math.radians(60), island_margin=margin, area_weight=0.6)
     bpy.ops.object.mode_set(mode="OBJECT")
-    return {"uv_layers": len(o.data.uv_layers)}
+    return {"uv_layers": len(o.data.uv_layers), "source_uv": orig}
 
 
 def _cycles(s, samples=16):
@@ -254,6 +266,15 @@ def bake_textures(o, out_dir, slug, res=1024):
         img.colorspace_settings.name = "sRGB" if kind == "basecolor" else "Non-Color"
         imgs[kind] = img
     mats = [m for m in o.data.materials if m]
+    if not mats:
+        mats = [mat("#cccccc")]; o.data.materials.append(mats[0])
+    # meshes from AI generators carry vertex colours: feed them into the base colour so the bake keeps them
+    if o.data.color_attributes:
+        for m in mats:
+            nt = m.node_tree; bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+            if bsdf and not bsdf.inputs["Base Color"].is_linked:
+                vc = nt.nodes.new("ShaderNodeVertexColor"); vc.layer_name = o.data.color_attributes[0].name
+                nt.links.new(vc.outputs["Color"], bsdf.inputs["Base Color"])
     temp = []
 
     def set_target(img):
@@ -308,6 +329,8 @@ def bake_textures(o, out_dir, slug, res=1024):
     emit = max((m.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value
                 for m in mats if "Principled BSDF" in m.node_tree.nodes), default=0)
     o.data.materials.clear(); o.data.materials.append(nm)
+    if "MC_UV" in o.data.uv_layers:   # the source UVs were only needed for the transfer
+        for l in [l for l in o.data.uv_layers if l.name != "MC_UV"]: o.data.uv_layers.remove(l)
     return {"maps": {k: os.path.basename(v) for k, v in paths.items()}, "resolution": res, "emission_dropped": emit > 0,
             "paths": paths}
 

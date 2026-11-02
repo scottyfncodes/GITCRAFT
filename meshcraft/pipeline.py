@@ -163,7 +163,7 @@ def _run(job, spec, probe, lim):
                 "preferred": t, "fallback_used": False, "explanation": "explicit " + t}
         if plan["chosen"] is None: plan["explanation"] = "Blender is not installed: " + probe["backends"]["blender"].get("reason", "")
     else:
-        plan = routing.route(spec.get("brief", ""), images, probe, prefer=spec.get("tool"))
+        plan = routing.route(spec.get("brief", ""), images, probe, prefer=spec.get("tool"), kind=spec.get("kind"), params=spec.get("params"))
     req = plan["request"]
     if spec.get("kind"): req["kind"] = spec["kind"]
     req["params"].update(spec.get("params") or {})
@@ -226,7 +226,7 @@ def _run(job, spec, probe, lim):
         else:
             g = meshroom.run(images, job.work, job.log, pipeline=spec.get("meshroom_pipeline"), overrides=spec.get("meshroom_overrides"))
         job.stage("generate", "done", info=g)
-        res, cfg = blender_stage("process", input=g["mesh"], keep_materials=bool(g.get("textured")) and not spec.get("rebake"),
+        res, cfg = blender_stage("process", input=g["mesh"], keep_materials=bool(g.get("textured")) and not spec.get("rebake", True),
                                  target_size=spec.get("target_size"), crop=spec.get("crop"), crop_floor=spec.get("crop_floor", True))
         source_tools = [tool, "blender"]; gen_info = dict(g, method=tool)
     elif tool == "import":
