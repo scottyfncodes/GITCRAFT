@@ -3,8 +3,8 @@
 
 For each tool: start it through scripts/mcp.sh (guard + sandbox), do one real
 operation inside a scratch workspace, and confirm a path outside the workspace
-is refused. FilmCraft, LightCraft and MeshCraft (no native file fence) are also run
-under the sandbox *without* the guard, to prove the kernel layer stops them alone.
+is refused. FilmCraft and LightCraft (no native file fence) are also run under
+the sandbox *without* the guard, to prove the kernel layer stops them alone.
 
     GITCRAFT_ROOT=/some/workspace tests/test_policy.py [tool ...]
 """
@@ -45,11 +45,11 @@ TESTS = {
                  lambda c: c.call("media_import", {"paths": [SECRET]})),
  "lightcraft":  (lambda c: c.call("import", {"paths": [src]}),
                  lambda c: c.call("import", {"paths": [SECRET]})),
- "meshcraft":   (lambda c: c.call("blockbench_build", {"template": "crate", "name": "policy", "out": f"{ws}/policy.bbmodel"}),
+ "forgecraft":  (lambda c: c.call("blockbench_build", {"template": "crate", "name": "policy", "out": f"{ws}/policy.bbmodel"}),
                  lambda c: c.call("blockbench_inspect", {"path": SECRET})),
 }
-installed = lambda n: os.access(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft") + ("/meshcraft/venv/bin/python" if n == "meshcraft" else "")), os.X_OK)
-want = sys.argv[1:] or [n for n in TESTS if n != "meshcraft" or installed(n)]
+mesh_ok = os.access(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft") + "/meshcraft/venv/bin/python"), os.X_OK)
+want = sys.argv[1:] or [n for n in TESTS if n != "forgecraft" or mesh_ok]   # forgecraft needs MeshCraft's Blender installed
 for name in want:
     good, bad = TESTS[name]
     try:
@@ -60,21 +60,39 @@ for name in want:
     except Exception as e:
         check(f"{name}: server starts under guard + sandbox", False, str(e)[:300])
 
+# Fonts: the per-tool XDG folders must still expose the user's fonts inside the sandbox.
+# Render the same text with a user-installed font sandboxed and unsandboxed; the pixels must match.
+ufont_dir = next((d for d in (os.path.expanduser("~/.local/share/fonts"), os.path.expanduser("~/.fonts")) if os.path.isdir(d) and os.listdir(d)), None)
+if ufont_dir and "designcraft" in want:
+    def render(sandbox):
+        e = dict(env, GITCRAFT_SANDBOX="landlock" if sandbox else "off")
+        c = Client([MCP, "designcraft"], env=e)
+        c.call("new_document", {"width": 600, "height": 200, "pages": 1, "intent": "web", "margins": 0})
+        ok, r = c.call("execute", {"command": "frame.create", "params": {"rect": [10, 10, 590, 190], "content": "text", "text": "Fontcheck Gg"}})
+        c.call("execute", {"command": "selection.set", "params": {"ids": [r["id"]]}})
+        fam = os.environ.get("GITCRAFT_TEST_FONT", "Fraunces 144pt")
+        c.call("execute", {"command": "type.char", "params": {"attrs": {"fontFamily": fam, "size": 80}}})
+        out = f"{ws}/fontcheck_{'sb' if sandbox else 'open'}.png"
+        c.call("export_png", {"page": 0, "path": out, "scale": 1}); c.close()
+        return open(out, "rb").read()
+    check("designcraft: user fonts render identically inside the sandbox", render(True) == render(False),
+          "sandboxed render differs: user fonts not visible (set GITCRAFT_TEST_FONT to a family installed in " + ufont_dir + ")")
+
 # Kernel layer alone (no guard): the two tools without a native fence.
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 gh = os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"))
 base = ["python3", os.path.join(HERE, "..", "scripts", "sandbox.py"), "--rx", "/usr", "--rx", "/lib", "--rx", "/lib64", "--rx", "/bin",
         "--rx", f"{gh}/bin", "--ro", "/etc", "--ro", "/proc", "--ro", "/sys", "--rw", "/dev", "--rw", ws, "--rw", f"{gh}/state", "--no-net", "--require", "--"]
-MC_DIR = os.path.join(HERE, "..", "meshcraft")
-for name, cmd, bad in (("filmcraft", [f"{gh}/bin/filmcraft-cli", "mcp"], ("media_import", {"paths": [SECRET]})),
-                       ("lightcraft", [f"{gh}/bin/lightcraft-cli", "mcp", "--compact", "--library", f"{ws}/lc-lib"], ("import", {"paths": [SECRET]})),
-                       ("meshcraft", ["python3", os.path.join(MC_DIR, "server.py")], ("blockbench_inspect", {"path": SECRET}))):
+FC_DIR = os.path.join(HERE, "..", "forgecraft")
+for name, cmd, bad in (("forgecraft", ["python3", os.path.join(FC_DIR, "server.py")], ("blockbench_inspect", {"path": SECRET})),
+                       ("filmcraft", [f"{gh}/bin/filmcraft-cli", "mcp"], ("media_import", {"paths": [SECRET]})),
+                       ("lightcraft", [f"{gh}/bin/lightcraft-cli", "mcp", "--compact", "--library", f"{ws}/lc-lib"], ("import", {"paths": [SECRET]}))):
     if name not in want: continue
     try:
-        extra = ["--rx", MC_DIR, "--rx", f"{gh}/meshcraft"] if name == "meshcraft" else []
-        c = Client(base[:-1] + extra + ["--"] + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state", MESHCRAFT_LIBRARY=f"{ws}/mc-lib"))
+        extra = ["--rx", FC_DIR, "--rx", f"{gh}/forgecraft", "--rx", f"{gh}/meshcraft"] if name == "forgecraft" else []
+        c = Client(base[:-1] + extra + ["--"] + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state", FORGECRAFT_LIBRARY=f"{ws}/fc-lib"))
         ok, val = c.call(*bad)
-        if name == "meshcraft": leaked = ok
+        if name == "forgecraft": leaked = ok
         else: leaked = ok and ("imported" in str(val) and "[]" not in str(val).split("imported")[1][:8] or "items" in str(val) and "[]" not in str(val).split("items")[1][:8])
         print("   kernel-only response:", str(val)[:240]); check(f"{name}: sandbox alone blocks reading outside the workspace", not leaked, str(val)[:300])
         c.close()

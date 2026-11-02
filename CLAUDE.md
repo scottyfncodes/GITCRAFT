@@ -1,8 +1,10 @@
 # GITCRAFT
 
 This repo gives Claude Code seven creative tools from the ArtCraft suite
-(github.com/storytold), each running as a headless MCP server, plus `meshcraft`,
-the 3D Department (Blender, Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D). When this repo is
+(github.com/storytold) plus two 3D tools of its own: MeshCraft (headless Blender,
+brief → template asset) and ForgeCraft (the 3D Department pipeline that routes
+across Blender, MeshCraft, Blockbench, Mixamo, Meshroom, TripoSR and Hunyuan3D),
+each running as a headless MCP server. When this repo is
 attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`
 and registers them at user scope, so they work no matter which repo you're
 working in.
@@ -18,7 +20,8 @@ working in.
 | `lightcraft`  | Photo library and raw developer (Lightroom-style) | Batch photo grading, raw development, exports |
 | `filmcraft`   | Non-linear video editor                     | Cutting, trimming, color, audio, exporting video |
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
-| `meshcraft`   | 3D Department: Blender pipeline + Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D | 3D models from briefs/images/photos, rigged + animated characters, scenes, GLB/FBX/OBJ export, 3D asset library |
+| `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ export, Three.js engine check |
+| `forgecraft`  | 3D Department pipeline (`forgecraft/`)      | Any 3D request: routes to Blender procedural, MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D; versioned asset library, jobs, scenes |
 
 ## How to use them
 
@@ -40,13 +43,32 @@ working in.
   with every other command reachable through their list/run command tools.
 - These projects are young. If a command fails, say so plainly and try another
   route rather than faking a result.
-- meshcraft: call `hardware_probe` or `route` first. `generate` runs the whole
-  pipeline and returns real files; `library_export` hands assets to other tools or a
-  game repo. A `blocked` job means no tool here can honour the request: report its
-  reason and alternatives, never substitute a 2D image. TripoSR/Hunyuan3D need a GPU
-  or network to huggingface.co (blocked in default cloud sessions). Mixamo has no API:
-  a person uploads/downloads at mixamo.com, MeshCraft prepares and merges the files.
-  Details: `docs/3d-department.md`, licences: `docs/3d-licensing.md`.
+
+## 3D work (MeshCraft)
+
+- Start with `meshcraft_status` and `list_templates`. `run_pipeline` takes a
+  brief (template, params, palette from the project's brand package, 2D
+  references, out_dir, export profiles, manifest) and produces the .blend,
+  previews, validation report and exports. See `meshcraft/README.md`.
+- Use the project's own palette file and 2D references as the source of truth;
+  never redesign a game to fit what a template can make. Extend a template or
+  use `run_script` (custom Blender Python in the workspace) instead.
+- Always look at the contact sheet and run `engine_check` on GLBs before
+  calling an asset game-ready. Never write exports into a game's source or
+  public folders without being asked.
+
+## 3D Department (ForgeCraft)
+
+- Call `hardware_probe` or `route` first. `generate` runs the whole pipeline
+  and returns real files; `library_export` hands assets to other tools or a game
+  repo. Requests that match a MeshCraft template (chest, crab, flag, lantern,
+  sail, figurehead) are built by MeshCraft and packaged by ForgeCraft.
+- A `blocked` job means no tool here can honour the request: report its reason
+  and alternatives, and never substitute a 2D image. TripoSR and Hunyuan3D need
+  a GPU or network access to huggingface.co (blocked in default cloud sessions).
+- Mixamo has no API: a person uploads/downloads at mixamo.com; ForgeCraft
+  prepares and merges the files.
+- Details: `docs/3d-department.md`; licences: `docs/3d-licensing.md`.
 
 ## If a tool won't connect
 
@@ -67,9 +89,9 @@ working in.
 - `tests/test_policy.py` must pass after any change to the launcher, guard or
   sandbox.
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
-  `scripts/mcp.sh` need updating to match if you add one. Non-ArtCraft tools
-  (meshcraft) go in `GITCRAFT_EXTRA_TOOLS` and install via their own script.
-- `tests/test_meshcraft.py` must pass after any change under `meshcraft/`.
-- Never commit model weights, the bpy wheel or Meshroom: they install into
-  `~/.gitcraft/meshcraft` (`scripts/install-3d.sh`).
+  `scripts/mcp.sh` need updating to match if you add one.
+- `tests/test_forgecraft.py` must pass after any change under `forgecraft/`
+  (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
+- Never commit model weights or Meshroom: they install into
+  `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.

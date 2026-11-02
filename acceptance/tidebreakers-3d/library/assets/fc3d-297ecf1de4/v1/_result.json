@@ -1,0 +1,163 @@
+{
+ "op": "process",
+ "stages": [
+  {
+   "stage": "import",
+   "state": "done",
+   "seconds": 0.07,
+   "info": {
+    "objects": 1,
+    "meshes": 1,
+    "triangles": 50514
+   }
+  },
+  {
+   "stage": "crop_to_subject",
+   "state": "done",
+   "seconds": 0.1,
+   "info": {
+    "radius": 0.477,
+    "faces_removed": 49373,
+    "fragments_removed": 1,
+    "floating_faces_removed": 798
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1141,
+    "tris_after": 1141,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.15,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 1.38,
+   "info": {
+    "maps": {
+     "basecolor": "salvage_raft_photogrammetry_scan_basecolor.png",
+     "metalrough": "salvage_raft_photogrammetry_scan_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 4.91,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_03.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_04.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_05.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_06.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.08,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/salvage_raft_photogrammetry_scan.glb",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/salvage_raft_photogrammetry_scan.fbx",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/salvage_raft_photogrammetry_scan.blend"
+    }
+   }
+  }
+ ],
+ "ok": true,
+ "files": {
+  "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/salvage_raft_photogrammetry_scan.glb",
+  "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/salvage_raft_photogrammetry_scan.fbx",
+  "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/salvage_raft_photogrammetry_scan.blend"
+ },
+ "previews": {
+  "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_thumb.png",
+  "turntable": [
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_00.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_01.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_02.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_03.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_04.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_05.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_06.png",
+   "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/previews/salvage_raft_photogrammetry_scan_turn_07.png"
+  ]
+ },
+ "stats": {
+  "triangles": 1141,
+  "vertices": 616,
+  "meshes": 1,
+  "materials": [
+   "M_salvage_raft_photogrammetry_scan"
+  ],
+  "textures": [
+   {
+    "name": "salvage_raft_photogrammetry_scan_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "salvage_raft_photogrammetry_scan_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   }
+  ],
+  "dimensions_m": [
+   2.38,
+   2.4,
+   0.256
+  ],
+  "bounds_min": [
+   -1.19,
+   -1.2,
+   0.0
+  ],
+  "bounds_max": [
+   1.19,
+   1.2,
+   0.256
+  ],
+  "rig": null,
+  "animations": [],
+  "sockets": []
+ },
+ "texture_files": [
+  "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/textures/salvage_raft_photogrammetry_scan_basecolor.png",
+  "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195724-d949/out/textures/salvage_raft_photogrammetry_scan_metalrough.png"
+ ]
+}

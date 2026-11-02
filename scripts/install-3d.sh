@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Install the GITCRAFT 3D Department (MeshCraft) runtimes into ~/.gitcraft/meshcraft.
+# Install the GITCRAFT 3D Department (ForgeCraft) runtimes into ~/.gitcraft/forgecraft.
 #
-#   scripts/install-3d.sh                 core: Blender (bpy 5.2 from PyPI) + engine check (three.js, glTF validator)
+#   scripts/install-3d.sh                 core: Blender (MeshCraft's bpy 5.2 venv) + engine check (three.js, glTF validator)
 #   scripts/install-3d.sh meshroom        + Meshroom 2023.3 / AliceVision (GitHub release, ~1.2 GB download, 2.1 GB on disk)
 #   scripts/install-3d.sh ai              + TripoSR code, PyTorch and Hunyuan3D-2 client libraries in a separate venv (~5 GB)
 #   scripts/install-3d.sh all
@@ -13,34 +13,29 @@ set -uo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(dirname "$here")"
 source "$here/tools.sh"
-MC="${MESHCRAFT_HOME:-$GITCRAFT_HOME/meshcraft}"
-BPY_VERSION="${MESHCRAFT_BPY_VERSION:-5.2.3}"
-MESHROOM_VERSION="${MESHCRAFT_MESHROOM_VERSION:-2023.3.0}"
+MC="${FORGECRAFT_HOME:-$GITCRAFT_HOME/forgecraft}"
+MESHROOM_VERSION="${FORGECRAFT_MESHROOM_VERSION:-2023.3.0}"
 mkdir -p "$MC" "$GITCRAFT_LOG"
 want=("${@:-core}")
 [[ " ${want[*]} " == *" all "* ]] && want=(core meshroom ai)
 fail=0
 
 core() {
-  local py; py="$(command -v python3.13 || command -v python3)"
-  if [[ "$("$py" -c 'import sys;print(f"{sys.version_info[0]}.{sys.version_info[1]}")')" != 3.13 ]]; then
-    echo "gitcraft-3d: bpy $BPY_VERSION needs Python 3.13 (found $("$py" --version)); install python3.13 or set MESHCRAFT_BPY_VERSION" >&2; return 1
+  # Blender: ForgeCraft uses MeshCraft's bpy venv, installed by scripts/install.sh meshcraft.
+  if ! [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] || ! "$GITCRAFT_HOME/meshcraft/venv/bin/python" -c "import bpy" 2>/dev/null; then
+    echo "gitcraft-3d: MeshCraft's Blender is missing; installing it via scripts/install.sh meshcraft"
+    GITCRAFT_MESHCRAFT=1 "$here/install.sh" meshcraft || { echo "gitcraft-3d: Blender (meshcraft) install failed" >&2; return 1; }
   fi
-  if [[ -x "$MC/venv/bin/python" ]] && "$MC/venv/bin/python" -c "import bpy" 2>/dev/null; then
-    echo "gitcraft-3d: Blender $("$MC/venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null | tail -1) already installed"
-  else
-    echo "gitcraft-3d: installing Blender as a Python module (bpy $BPY_VERSION, ~400 MB)"
-    "$py" -m venv "$MC/venv" && "$MC/venv/bin/pip" install -q "bpy==$BPY_VERSION" || { echo "gitcraft-3d: bpy install failed" >&2; return 1; }
-  fi
+  echo "gitcraft-3d: Blender $("$GITCRAFT_HOME/meshcraft/venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null | tail -1) (shared with MeshCraft)"
   if command -v npm >/dev/null; then
-    (cd "$repo/meshcraft/web-check" && npm install -q --no-audit --no-fund >/dev/null 2>&1) \
+    (cd "$repo/forgecraft/web-check" && npm ci -q --no-audit --no-fund >/dev/null 2>&1) \
       && echo "gitcraft-3d: engine check ready (three.js r170 + Khronos glTF-Validator)" \
-      || echo "gitcraft-3d: npm install for meshcraft/web-check failed; validation will skip the engine check" >&2
+      || echo "gitcraft-3d: npm ci for forgecraft/web-check failed; validation will skip the engine check" >&2
   else
     echo "gitcraft-3d: npm not found; validation will skip the three.js / glTF-Validator check" >&2
   fi
   node -e "require('playwright')" 2>/dev/null || echo "gitcraft-3d: playwright not found; the three.js load check needs it (npm i -g playwright && npx playwright install chromium)" >&2
-  echo "meshcraft $(cd "$repo" && git rev-parse --short HEAD 2>/dev/null) bpy-$BPY_VERSION $(date -u +%F)" > "$GITCRAFT_BIN/meshcraft.version"
+  echo "forgecraft $(cd "$repo" && git rev-parse --short HEAD 2>/dev/null) $(date -u +%F)" > "$GITCRAFT_BIN/forgecraft.version"
 }
 
 meshroom() {
@@ -75,7 +70,7 @@ for w in "${want[@]}"; do
   case "$w" in core|meshroom|ai|weights) "$w" || fail=1 ;; *) echo "unknown component $w" >&2; fail=1 ;; esac
 done
 "$here/register.sh" >/dev/null 2>&1
-python3 "$repo/meshcraft/hardware.py" > "$MC/probe.json" 2>/dev/null && python3 - "$MC/probe.json" <<'PY'
+python3 "$repo/forgecraft/hardware.py" > "$MC/probe.json" 2>/dev/null && python3 - "$MC/probe.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 for k, v in d["backends"].items():

@@ -13,7 +13,7 @@ for a in sorted(idx["assets"], key=lambda a: a["updated"]):
 hw = r["machine"]
 open(os.path.join(pkg, "README.md"), "w").write(f"""# TIDEBREAKERS 3D acceptance package
 
-Produced by `tests/acceptance_tidebreakers.py` with GITCRAFT's 3D Department (meshcraft). Every call went through the sandboxed MCP server, as Claude Code drives it. Result: **{r['result']}** ({r['started']} → {r['finished']}).
+Produced by `tests/acceptance_tidebreakers.py` with GITCRAFT's 3D Department (ForgeCraft, with MeshCraft as one of its backends). Every call went through the sandboxed MCP server, as Claude Code drives it. Result: **{r['result']}** ({r['started']} → {r['finished']}).
 Machine: {hw['cpu_threads']} CPU threads, {hw['ram']['total_gb']} GB RAM, no GPU.
 
 **Engine target:** TIDEBREAKERS (Vite + TypeScript + three.js r170). GLB, metres, Y-up, forward/bow = +Z, matching `src/ship/shipModel.ts`. Every GLB passed the Khronos glTF-Validator with 0 errors and loaded in three.js r170's GLTFLoader in Chromium.
@@ -29,8 +29,8 @@ Notes on specific assets:
 - **Deckhand Pip v2** is v1 plus two clips merged through the Mixamo import path. Those clips are **fixtures in Mixamo's download layout, exported from the character's own rig**, not files from mixamo.com.
 - **"passed-with-warnings"** is the Khronos warning `NODE_SKINNED_MESH_NON_ROOT`. The skinned mesh sits under the asset's root node, which is harmless because that root has an identity transform.
 - **The photogrammetry scan** was reconstructed by Meshroom 2023.3 from 36 **Cycles renders of the floating-salvage asset**, not from real camera photos. It used the CPU draft pipeline and solved all 36 cameras, so it is draft quality.
-  - v1 is from the acceptance run.
-  - v2 and v3 are `job_retry` re-runs. They reused Meshroom's cache and added fragment removal and floating-outlier removal to the scan cleanup stage.
+  - ForgeCraft's scan cleanup cropped it to the subject, dropped the floor, disconnected fragments and floating outliers, rescaled it to 2.4 m and rebaked it into PNG maps.
+- **Grand Treasure Chest** was built by **MeshCraft's** chest template (TIDEBREAKERS palette, lid clips) and packaged by ForgeCraft without re-processing.
 
 ## Required deliverables
 
@@ -48,9 +48,9 @@ Notes on specific assets:
 
 ## Layout
 
-- `library/`: snapshot of the MeshCraft library. `index.json`, `assets/<id>/v<N>/` (exports, textures, previews, `asset.json`) and `jobs/*.json` (routing, stages, timings, attempts). The deployed 3D Department UI is built from this folder.
+- `library/`: snapshot of the ForgeCraft library. `index.json`, `assets/<id>/v<N>/` (exports, textures, previews, `asset.json`) and `jobs/*.json` (routing, stages, timings, attempts). The deployed 3D Department UI is built from this folder.
 - `handoffs/`: FilmCraft MP4, DesignCraft sheet, three.js import screenshot + report.
-- `REPORT.json`: every check, asset and handoff from the acceptance run. Its `assets/<slug>_vN/` paths are the `library_export` handoff copies; they are not committed, because the same files are in `library/assets/`. `python3 meshcraft/cli.py export <id> <dir>` recreates them.
+- `REPORT.json`: every check, asset and handoff from the acceptance run. Its `assets/<slug>_vN/` paths are the `library_export` handoff copies; they are not committed, because the same files are in `library/assets/`. `python3 forgecraft/cli.py export <id> <dir>` recreates them.
 
 **Using an asset in TIDEBREAKERS:**
 

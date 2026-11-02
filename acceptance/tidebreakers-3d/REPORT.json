@@ -1,9 +1,9 @@
 {
- "started": "2026-11-02T18:56:23Z",
+ "started": "2026-11-02T19:54:53Z",
  "engine": "three.js r170 (TIDEBREAKERS package.json)",
  "assets": {
   "player_boat": {
-   "id": "mc3d-a3772b915c",
+   "id": "fc3d-9831ff542e",
    "version": 1,
    "name": "TIDEBREAKERS Coastal Sloop",
    "route": {
@@ -33,7 +33,7 @@
     "socket_storage"
    ],
    "validation": "passed",
-   "seconds": 17.8,
+   "seconds": 18.3,
    "files": [
     "blend",
     "fbx",
@@ -44,7 +44,7 @@
    ]
   },
   "upgrade_sail_canvas": {
-   "id": "mc3d-19d66f8164",
+   "id": "fc3d-6cca3f5f59",
    "version": 1,
    "name": "Upgrade: Canvas Mainsail",
    "route": {
@@ -67,7 +67,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 9.3,
+   "seconds": 9.7,
    "files": [
     "blend",
     "fbx",
@@ -75,7 +75,7 @@
    ]
   },
   "upgrade_cargo_crate": {
-   "id": "mc3d-d2a99fe45f",
+   "id": "fc3d-21a46a8062",
    "version": 1,
    "name": "Upgrade: Lashed Cargo Crates",
    "route": {
@@ -98,7 +98,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 10.3,
+   "seconds": 10.7,
    "files": [
     "blend",
     "fbx",
@@ -106,7 +106,7 @@
    ]
   },
   "upgrade_compass_brass": {
-   "id": "mc3d-1ebf521f89",
+   "id": "fc3d-82b6135f47",
    "version": 1,
    "name": "Upgrade: Brass Compass",
    "route": {
@@ -129,7 +129,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 9.7,
+   "seconds": 10.8,
    "files": [
     "blend",
     "fbx",
@@ -137,7 +137,7 @@
    ]
   },
   "upgrade_rudder_ash": {
-   "id": "mc3d-85d92f89e5",
+   "id": "fc3d-c75a7997c3",
    "version": 1,
    "name": "Upgrade: Ship's Wheel & Ash Rudder",
    "route": {
@@ -160,7 +160,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 9.2,
+   "seconds": 10.4,
    "files": [
     "blend",
     "fbx",
@@ -168,7 +168,7 @@
    ]
   },
   "upgrade_hull_copper": {
-   "id": "mc3d-4a16a43440",
+   "id": "fc3d-0486db99be",
    "version": 1,
    "name": "Upgrade: Copper-Banded Hull",
    "route": {
@@ -191,7 +191,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 9.2,
+   "seconds": 10.2,
    "files": [
     "blend",
     "fbx",
@@ -199,7 +199,7 @@
    ]
   },
   "salvage": {
-   "id": "mc3d-c5eb5774ee",
+   "id": "fc3d-0b2467cdb8",
    "version": 1,
    "name": "Floating Salvage",
    "route": {
@@ -211,9 +211,9 @@
    },
    "triangles": 1188,
    "dimensions_m": [
-    2.299,
+    2.325,
     2.401,
-    1.297
+    1.298
    ],
    "textures": [
     "floating_salvage_basecolor",
@@ -224,7 +224,7 @@
    ],
    "sockets": [],
    "validation": "passed",
-   "seconds": 11.3,
+   "seconds": 12.4,
    "files": [
     "blend",
     "fbx",
@@ -232,7 +232,7 @@
    ]
   },
   "island": {
-   "id": "mc3d-42b31cb7ed",
+   "id": "fc3d-7e35f73ff8",
    "version": 1,
    "name": "Turtle Cay",
    "route": {
@@ -258,7 +258,7 @@
     "socket_spawn"
    ],
    "validation": "passed",
-   "seconds": 12.4,
+   "seconds": 13.0,
    "files": [
     "blend",
     "fbx",
@@ -266,7 +266,7 @@
    ]
   },
   "character": {
-   "id": "mc3d-901dd35510",
+   "id": "fc3d-71fcc50dcd",
    "version": 1,
    "name": "Deckhand Pip",
    "route": {
@@ -296,15 +296,47 @@
    ],
    "sockets": [],
    "validation": "passed-with-warnings",
-   "seconds": 10.4,
+   "seconds": 12.6,
    "files": [
     "blend",
     "fbx",
     "glb"
    ]
   },
+  "meshcraft_chest": {
+   "id": "fc3d-4d0ab4aea8",
+   "version": 1,
+   "name": "Grand Treasure Chest (MeshCraft)",
+   "route": {
+    "route": "meshcraft_template",
+    "chosen": "meshcraft_template",
+    "preferred": "meshcraft_template",
+    "fallback_used": false,
+    "explanation": "MeshCraft has a hand-tuned template for this (TIDEBREAKERS Pebble & Sail style, brand palette, engine-checked exports)."
+   },
+   "triangles": 2456,
+   "dimensions_m": [
+    2.175,
+    2.343,
+    2.598
+   ],
+   "textures": [
+    "grand_treasure_chest_meshcraft.three-web-atlas.atlas"
+   ],
+   "animations": [
+    "lid_close",
+    "lid_open"
+   ],
+   "sockets": [],
+   "validation": "passed",
+   "seconds": 18.8,
+   "files": [
+    "blend",
+    "glb"
+   ]
+  },
   "creature": {
-   "id": "mc3d-90b9eb629d",
+   "id": "fc3d-46906d9596",
    "version": 1,
    "name": "Reef Crab (Blockbench)",
    "route": {
@@ -326,7 +358,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 9.1,
+   "seconds": 10.3,
    "files": [
     "bbmodel",
     "blend",
@@ -335,7 +367,7 @@
    ]
   },
   "character_mixamo_merge": {
-   "id": "mc3d-901dd35510",
+   "id": "fc3d-71fcc50dcd",
    "version": 2,
    "animations": [
     "Attack",
@@ -350,30 +382,30 @@
    "note": "clips are Mixamo-layout fixtures exported from the character's own rig, not downloads from mixamo.com"
   },
   "photogrammetry_scan": {
-   "id": "mc3d-1356f6cb3f",
+   "id": "fc3d-297ecf1de4",
    "geometry": {
-    "triangles": 1642,
-    "vertices": 877,
+    "triangles": 1141,
+    "vertices": 616,
     "meshes": 1,
     "dimensions_m": [
-     2.269,
-     2.304,
-     2.4
+     2.38,
+     2.4,
+     0.256
     ],
     "bounds_min": [
-     -1.135,
-     -1.152,
+     -1.19,
+     -1.2,
      0.0
     ],
     "bounds_max": [
-     1.135,
-     1.152,
-     2.4
+     1.19,
+     1.2,
+     0.256
     ]
    }
   },
   "scene": {
-   "id": "mc3d-d5190393ef",
+   "id": "fc3d-232048523e",
    "items": 9,
    "triangles": 26410,
    "animations": [
@@ -552,7 +584,7 @@
    "detail": "None"
   },
   {
-   "check": "salvage: real geometry (1188 tris, [2.299, 2.401, 1.297] m)",
+   "check": "salvage: real geometry (1188 tris, [2.325, 2.401, 1.298] m)",
    "ok": true,
    "detail": ""
   },
@@ -632,6 +664,31 @@
    "detail": "['Attack', 'Idle', 'Interact', 'Jump', 'Run', 'Walk']"
   },
   {
+   "check": "meshcraft_chest: generated (meshcraft_template)",
+   "ok": true,
+   "detail": "None"
+  },
+  {
+   "check": "meshcraft_chest: real geometry (2456 tris, [2.175, 2.343, 2.598] m)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "meshcraft_chest: GLB passes Blender re-import + Khronos validator + three.js r170 load",
+   "ok": true,
+   "detail": "passed"
+  },
+  {
+   "check": "meshcraft_chest: preview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "meshcraft_chest: 1+ animation clips",
+   "ok": true,
+   "detail": "['lid_close', 'lid_open']"
+  },
+  {
    "check": "creature: generated (blockbench)",
    "ok": true,
    "detail": "None"
@@ -654,7 +711,7 @@
   {
    "check": "mixamo: FBX clips merged by bone name into a new character version",
    "ok": true,
-   "detail": "{'job': 'job-20261102-185813-c9f5', 'status': 'done', 'error': None, 'asset': {'id': 'mc3d-901dd35510', 'version': 2, 'name': 'Deckhand Pip', 'validation': 'passed-with-warnings'}, 'route': {'route': 'mixamo', 'chosen': 'mixamo', 'fallback_used': False, 'explanation': 'explicit mixamo'}, 'stages': ["
+   "detail": "{'job': 'job-20261102-195713-5b1c', 'status': 'done', 'error': None, 'asset': {'id': 'fc3d-71fcc50dcd', 'version': 2, 'name': 'Deckhand Pip', 'validation': 'passed-with-warnings'}, 'route': {'route': 'mixamo', 'chosen': 'mixamo', 'fallback_used': False, 'explanation': 'explicit mixamo'}, 'stages': ["
   },
   {
    "check": "mixamo: unrigged T-pose FBX ready for mixamo.com upload",
@@ -664,12 +721,12 @@
   {
    "check": "meshroom: reconstructed mesh from photos",
    "ok": true,
-   "detail": "{'job': 'job-20261102-185823-6476', 'status': 'done', 'error': None, 'asset': {'id': 'mc3d-1356f6cb3f', 'version': 1, 'name': 'Salvage Raft (photogrammetry scan)', 'validation': 'passed'}, 'route': {'route': 'photogrammetry', 'chosen': 'meshroom', 'fallback_used': False, 'explanation': 'Several phot"
+   "detail": "{'job': 'job-20261102-195724-d949', 'status': 'done', 'error': None, 'asset': {'id': 'fc3d-297ecf1de4', 'version': 1, 'name': 'Salvage Raft (photogrammetry scan)', 'validation': 'passed'}, 'route': {'route': 'photogrammetry', 'chosen': 'meshroom', 'fallback_used': False, 'explanation': 'Several phot"
   },
   {
    "check": "scene: composed in Blender from library GLBs (imported into a real 3D scene)",
    "ok": true,
-   "detail": "{'job': 'job-20261102-190343-ef86', 'status': 'done', 'error': None, 'asset': {'id': 'mc3d-d5190393ef', 'version': 1, 'name': 'TIDEBREAKERS Turtle Cay Scene', 'validation': 'passed-with-warnings'}, 'route': {'route': 'scene', 'chosen': 'blender_scene', 'fallback_used': False, 'explanation': \"Scene a"
+   "detail": "{'job': 'job-20261102-200229-01cc', 'status': 'done', 'error': None, 'asset': {'id': 'fc3d-232048523e', 'version': 1, 'name': 'TIDEBREAKERS Turtle Cay Scene', 'validation': 'passed-with-warnings'}, 'route': {'route': 'scene', 'chosen': 'blender_scene', 'fallback_used': False, 'explanation': \"Scene a"
   },
   {
    "check": "scene: scene GLB validates and loads in three.js r170",
@@ -677,9 +734,9 @@
    "detail": "passed-with-warnings"
   },
   {
-   "check": "handoff: 12 assets exported into the workspace",
+   "check": "handoff: 13 assets exported into the workspace",
    "ok": true,
-   "detail": "['tidebreakers_turtle_cay_scene', 'salvage_raft_photogrammetry_scan', 'deckhand_pip', 'reef_crab_blockbench', 'turtle_cay', 'floating_salvage', 'upgrade_copper_banded_hull', 'upgrade_ship_s_wheel_ash_rudder', 'upgrade_brass_compass', 'upgrade_lashed_cargo_crates', 'upgrade_canvas_mainsail', 'tidebre"
+   "detail": "['tidebreakers_turtle_cay_scene', 'salvage_raft_photogrammetry_scan', 'deckhand_pip', 'reef_crab_blockbench', 'grand_treasure_chest_meshcraft', 'turtle_cay', 'floating_salvage', 'upgrade_copper_banded_hull', 'upgrade_ship_s_wheel_ash_rudder', 'upgrade_brass_compass', 'upgrade_lashed_cargo_crates', '"
   },
   {
    "check": "handoff \u2192 FilmCraft: turntable frames edited into an MP4",
@@ -753,14 +810,14 @@
   }
  },
  "machine": {
-  "t": "2026-11-02T18:56:23Z",
+  "t": "2026-11-02T19:54:53Z",
   "cpu_threads": 4,
   "ram": {
    "total_gb": 15.7,
-   "available_gb": 14.8
+   "available_gb": 15.0
   },
   "gpus": [],
-  "disk_free_gb": 19.0,
+  "disk_free_gb": 14.9,
   "network": {
    "allowed_by_gitcraft": false
   }
@@ -782,15 +839,19 @@
    "available": true,
    "detail": "2023.3.0"
   },
+  "meshcraft": {
+   "available": true,
+   "detail": "MeshCraft run_pipeline (brief \u2192 build \u2192 validate \u2192 export)"
+  },
   "triposr": {
    "available": false,
-   "detail": "missing: torch, weights (huggingface.co/stabilityai/TripoSR unreachable and not cached)"
+   "detail": "missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached)"
   },
   "hunyuan3d": {
    "available": false,
-   "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set MESHCRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
   }
  },
- "finished": "2026-11-02T19:04:18Z",
- "result": "61/61 checks passed"
+ "finished": "2026-11-02T20:03:02Z",
+ "result": "66/66 checks passed"
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python3 meshcraft/ui_server.py --publish acceptance/tidebreakers-3d/library meshcraft/ui/dist --source 'TIDEBREAKERS acceptance run'",
-  "outputDirectory": "meshcraft/ui/dist",
+  "buildCommand": "python3 forgecraft/ui_server.py --publish acceptance/tidebreakers-3d/library forgecraft/ui/dist --source 'TIDEBREAKERS acceptance run'",
+  "outputDirectory": "forgecraft/ui/dist",
   "installCommand": "true",
   "framework": null,
   "headers": [

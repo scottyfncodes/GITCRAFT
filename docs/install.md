@@ -28,18 +28,6 @@ scripts/mcp.sh <tool>         start one server by hand (behind the guard and san
 tests/test_policy.py          end-to-end security check of every installed tool
 ```
 
-## 3D Department (meshcraft)
-
-`scripts/install.sh` installs MeshCraft's core (Blender 5.2 as the `bpy` wheel, about 400 MB, plus the engine check) through `scripts/install-3d.sh`. Optional extras:
-
-```
-scripts/install-3d.sh meshroom   # Meshroom/AliceVision 2023.3 photogrammetry (~1.2 GB download)
-scripts/install-3d.sh ai         # PyTorch + TripoSR + Hunyuan3D-2 code (~5 GB); useful on NVIDIA GPUs
-scripts/install-3d.sh weights    # pre-fetch TripoSR weights (needs huggingface.co)
-```
-
-`bpy` 5.2 needs Python 3.13. See `docs/3d-licensing.md` for hardware needs per backend.
-
 ## Requirements
 
 - Linux x86_64 for the prebuilt ArtCraft binaries (source builds need Rust 1.95+ and crates.io).

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """TIDEBREAKERS 3D acceptance test: builds a real game asset package with the 3D Department,
-driving MeshCraft exactly as Claude Code does (MCP over stdio, through scripts/mcp.sh, so
+driving ForgeCraft exactly as Claude Code does (MCP over stdio, through scripts/mcp.sh, so
 the guard and Landlock sandbox apply), then hands the results to FilmCraft and DesignCraft.
 
     GITCRAFT_ROOT=<workspace> tests/acceptance_tidebreakers.py <out_dir> [--photogrammetry <images_dir>]
@@ -27,7 +27,7 @@ def check(label, ok, detail=""):
     print(("PASS " if ok else "FAIL ") + label + (f"  [{str(detail)[:200]}]" if detail and not ok else ""), flush=True)
 
 
-mc = Client([MCP, "meshcraft"], env=env, log=os.path.join(out, "meshcraft.stderr.log"))
+mc = Client([MCP, "forgecraft"], env=env, log=os.path.join(out, "forgecraft.stderr.log"))
 ok, probe = mc.call("hardware_probe")
 report["machine"] = probe["hardware"]; report["backends"] = {k: {"available": v.get("available"), "detail": v.get("version") or v.get("reason") or v.get("mode")} for k, v in probe["backends"].items()}
 
@@ -73,6 +73,8 @@ isl = gen("island", {"brief": "small tropical island with palms, rocks, a stilt 
                      "params": {"seed": 7}})
 # 5. animated character (Mixamo-named rig) + a creature through Blockbench
 crew = gen("character", {"brief": "animated pirate deckhand character, coral bandana, crimson vest", "name": "Deckhand Pip", "max_tris": 6000, "bake": 1024, "formats": STD}, expect_anim=6)
+chest = gen("meshcraft_chest", {"brief": "grand treasure chest", "name": "Grand Treasure Chest (MeshCraft)", "template_params": {"tier": "grand"},
+                               "bake": 0}, expect_anim=1)   # built by MeshCraft's template engine, packaged by ForgeCraft
 crab = gen("creature", {"brief": "blocky voxel reef crab creature", "name": "Reef Crab (Blockbench)", "bake": 0, "formats": STD})
 
 # 6. Mixamo path: one-clip armature-only FBX files in Mixamo's download layout (generated from the
@@ -81,9 +83,9 @@ if crew:
     import subprocess, tempfile
     fx = os.path.join(out, "work", "mixamo_fixture"); os.makedirs(fx, exist_ok=True)
     jf = os.path.join(fx, "job.json")
-    json.dump({"op": "split_clips", "out_dir": fx, "input": os.path.join(os.path.expanduser(env.get("MESHCRAFT_LIBRARY", "~/.gitcraft/meshcraft-library")), "assets", crew["id"], f"v{crew['version']}", crew["files"]["glb"]["path"]),
+    json.dump({"op": "split_clips", "out_dir": fx, "input": os.path.join(os.path.expanduser(env.get("FORGECRAFT_LIBRARY", "~/.gitcraft/forgecraft-library")), "assets", crew["id"], f"v{crew['version']}", crew["files"]["glb"]["path"]),
                "clips": ["Walk", "Jump"], "prefix": "MixamoLayout_"}, open(jf, "w"))
-    subprocess.run([os.path.expanduser("~/.gitcraft/meshcraft/venv/bin/python"), os.path.join(REPO, "meshcraft", "blender", "run.py"), jf], capture_output=True)
+    subprocess.run([os.path.expanduser("~/.gitcraft/meshcraft/venv/bin/python"), os.path.join(REPO, "forgecraft", "blender", "run.py"), jf], capture_output=True)
     clips = json.load(open(os.path.join(fx, "_result.json")))["files"]["clips"]
     ok, r = mc.call("mixamo_apply", {"character": crew["id"], "animations": clips, "name": "Deckhand Pip", "tags": ["tidebreakers"]}, timeout=1200)
     check("mixamo: FBX clips merged by bone name into a new character version", ok and r["status"] == "done" and r["asset"]["version"] == 2, r)
@@ -130,7 +132,7 @@ exported = {}
 for a in mine:
     ok, r = mc.call("library_export", {"asset": a["id"], "dest": os.path.join(out, "assets")})
     if ok: exported[a["slug"]] = r["dir"]
-check(f"handoff: {len(exported)} assets exported into the workspace", len(exported) >= 9, list(exported))
+check(f"handoff: {len(exported)} assets exported into the workspace", len(exported) >= 10, list(exported))
 mc.close()
 
 # FilmCraft: boat turntable frames → MP4
@@ -183,7 +185,7 @@ try:
     import glob, subprocess
     pick = [glob.glob(os.path.join(exported[k], "*.glb"))[0] for k in exported if any(w in k for w in ("scene", "coastal_sloop", "deckhand"))]
     shot = os.path.join(out, "handoffs", "threejs_r170_import.png"); rep = os.path.join(out, "handoffs", "threejs_r170_import.json")
-    r = subprocess.run(["node", os.path.join(REPO, "meshcraft", "web-check", "check.mjs"), rep, shot, *pick], capture_output=True, text=True, timeout=600)
+    r = subprocess.run(["node", os.path.join(REPO, "forgecraft", "web-check", "check.mjs"), rep, shot, *pick], capture_output=True, text=True, timeout=600)
     d = json.load(open(rep))
     check(f"three.js r170: {len(pick)} exported GLBs load into one engine scene (clips play, Khronos 0 errors)", d["ok"], r.stdout[-300:])
     report["handoffs"]["threejs"] = {"files": [os.path.relpath(p, out) for p in pick], "screenshot": os.path.relpath(shot, out),

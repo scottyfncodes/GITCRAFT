@@ -1,13 +1,13 @@
 {
  "hardware": {
-  "t": "2026-11-02T19:07:08Z",
+  "t": "2026-11-02T20:03:21Z",
   "cpu_threads": 4,
   "ram": {
    "total_gb": 15.7,
-   "available_gb": 14.9
+   "available_gb": 15.0
   },
   "gpus": [],
-  "disk_free_gb": 14.7,
+  "disk_free_gb": 14.5,
   "network": {
    "allowed_by_gitcraft": false
   }
@@ -25,7 +25,7 @@
    "installed": true,
    "available": true,
    "mode": "file format (.bbmodel read/write); the Blockbench desktop app has no headless API",
-   "note": "open the .bbmodel in Blockbench to hand-edit; MeshCraft converts it with Blender"
+   "note": "open the .bbmodel in Blockbench to hand-edit; ForgeCraft converts it with Blender"
   },
   "mixamo": {
    "available": true,
@@ -35,10 +35,23 @@
   "meshroom": {
    "installed": true,
    "version": "2023.3.0",
-   "batch": "/root/.gitcraft/meshcraft/Meshroom-2023.3.0/meshroom_batch",
+   "batch": "/root/.gitcraft/forgecraft/Meshroom-2023.3.0/meshroom_batch",
    "pipeline": "photogrammetryDraft",
    "note": "no CUDA GPU: Draft Meshing from the SfM point cloud (coarser)",
    "available": true
+  },
+  "meshcraft": {
+   "installed": true,
+   "available": true,
+   "templates": [
+    "chest",
+    "crab",
+    "flag",
+    "lantern",
+    "sail",
+    "sun_figurehead"
+   ],
+   "mode": "MeshCraft run_pipeline (brief \u2192 build \u2192 validate \u2192 export)"
   },
   "triposr": {
    "code": true,
@@ -68,7 +81,7 @@
    },
    "license_accepted": false,
    "available": false,
-   "reason": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set MESHCRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   "reason": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
   }
  },
  "limits": {

@@ -11,12 +11,13 @@ GITCRAFT_TOOLS=(
   designcraft:designcraft:designcraft-cli
 )
 
-# Tools that are not ArtCraft binaries (no CI build). Same format; installed by their own script.
-#   meshcraft: the 3D Department (Blender, Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D),
-#              a Python MCP server in meshcraft/, runtimes installed by scripts/install-3d.sh
-GITCRAFT_EXTRA_TOOLS=(
-  meshcraft:-:meshcraft
-)
+# Tools GITCRAFT builds itself (not ArtCraft binaries): MeshCraft is a Blender
+# (bpy) MCP server living in meshcraft/ with its own venv in ~/.gitcraft/meshcraft.
+# ForgeCraft is the 3D Department pipeline in forgecraft/: routing across Blender procedural,
+# MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR and Hunyuan3D, plus a versioned
+# asset library. It drives MeshCraft's Blender venv; its own runtimes live in ~/.gitcraft/forgecraft.
+GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft)
+GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"   # 0 skips installing MeshCraft (it downloads Blender, ~400 MB)
 
 GITCRAFT_HOME="${GITCRAFT_HOME:-$HOME/.gitcraft}"
 GITCRAFT_BIN="$GITCRAFT_HOME/bin"
@@ -24,16 +25,8 @@ GITCRAFT_SRC="$GITCRAFT_HOME/src"
 GITCRAFT_TARGET="$GITCRAFT_HOME/target"
 GITCRAFT_LOG="$GITCRAFT_HOME/logs"
 GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
-MESHCRAFT_HOME="${MESHCRAFT_HOME:-$GITCRAFT_HOME/meshcraft}"             # Blender venv, Meshroom, AI venv, model cache
-MESHCRAFT_LIBRARY="${MESHCRAFT_LIBRARY:-$GITCRAFT_HOME/meshcraft-library}" # 3D asset library + job records
-
-# Is a tool installed? (ArtCraft binary, or MeshCraft's Blender venv)
-gitcraft_installed() {
-  case "$1" in
-    meshcraft) [[ -x "$MESHCRAFT_HOME/venv/bin/python" ]] ;;
-    *) [[ -x "$GITCRAFT_BIN/$2" ]] ;;
-  esac
-}
+FORGECRAFT_HOME="${FORGECRAFT_HOME:-$GITCRAFT_HOME/forgecraft}"               # Meshroom, AI venv, model cache
+FORGECRAFT_LIBRARY="${FORGECRAFT_LIBRARY:-$GITCRAFT_HOME/forgecraft-library}" # 3D asset library + job records
 
 # Folder the tools may read from and write to. Defaults to the session home, or
 # to the workspace when it lives outside home (cloud sessions check repos out to

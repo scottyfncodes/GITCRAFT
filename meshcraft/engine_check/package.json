@@ -1,0 +1,10 @@
+{
+  "name": "meshcraft-engine-check",
+  "private": true,
+  "description": "Engine-side validation for MeshCraft exports: Khronos glTF-Validator and a Three.js render/animation check in headless Chromium.",
+  "type": "module",
+  "dependencies": {
+    "gltf-validator": "2.0.0-dev.3.10",
+    "three": "0.170.0"
+  }
+}

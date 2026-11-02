@@ -1,6 +1,6 @@
 # 3D Department: licensing, cost and infrastructure
 
-Researched 2026-11-02. Sources are listed at the end. **Free software is not free compute**, so each tool's licence and the hardware it needs are listed separately. Nothing large is committed to git. Every runtime and model weight is downloaded into `~/.gitcraft/meshcraft` by `scripts/install-3d.sh` or on first use.
+Researched 2026-11-02. Sources are listed at the end. **Free software is not free compute**, so each tool's licence and the hardware it needs are listed separately. Nothing large is committed to git. Every runtime and model weight is downloaded into `~/.gitcraft/forgecraft` by `scripts/install-3d.sh` or on first use.
 
 ## Integration status (what actually runs)
 
@@ -8,8 +8,8 @@ Researched 2026-11-02. Sources are listed at the end. **Free software is not fre
 |---|---|---|---|
 | **Blender 5.2.3 LTS** | `bpy` wheel (official, Blender Foundation, PyPI), headless, one process per job. Procedural modelling, cleanup, decimation, UV, Cycles texture baking, rigging, animation, scene composition, Cycles rendering, GLB/glTF/FBX/OBJ/STL/.blend export, re-import validation. | **Yes**: every asset in the TIDEBREAKERS package | Local, CPU (Cycles can also use CUDA/OptiX) |
 | **Blockbench** (format) | Writes genuine `.bbmodel` projects (format 5.0, schema from Blockbench's own `js/formats/bbmodel.js`) and converts any `.bbmodel` to Blender → GLB etc. **The Blockbench app itself is not executed**: it has no headless/CLI/server mode (upstream issue #1764). | **Yes** (format + conversion). Opening the files in Blockbench is a manual step and was not done here. | Local, CPU |
-| **Mixamo** | Supported manual workflow only. MeshCraft prepares the unrigged T-pose FBX for upload and merges downloaded FBX clips by Mixamo bone name. MeshCraft characters already use the Mixamo skeleton names. No API calls and no scraping (there is no official API). | **Partly**: the import/merge path ran on Mixamo-layout FBX fixtures exported from our own rig. No real mixamo.com download was used (the site needs a person with an Adobe ID, and the host is blocked here). | Hosted (Adobe), by hand |
-| **Meshroom 2023.3.0 / AliceVision** | `meshroom_batch` with hardware detection: full `photogrammetry` with an NVIDIA CUDA GPU, CPU `photogrammetryDraft` without one. Then Blender crops to the subject, rescales, cleans and exports. | **Yes**: 36 photos → all 36 cameras solved → textured mesh, about 5 min on 4 CPU threads (draft quality). The photos were Cycles renders of a MeshCraft asset, not camera photos. | Local, CPU draft / CUDA dense |
+| **Mixamo** | Supported manual workflow only. ForgeCraft prepares the unrigged T-pose FBX for upload and merges downloaded FBX clips by Mixamo bone name. ForgeCraft characters already use the Mixamo skeleton names. No API calls and no scraping (there is no official API). | **Partly**: the import/merge path ran on Mixamo-layout FBX fixtures exported from our own rig. No real mixamo.com download was used (the site needs a person with an Adobe ID, and the host is blocked here). | Hosted (Adobe), by hand |
+| **Meshroom 2023.3.0 / AliceVision** | `meshroom_batch` with hardware detection: full `photogrammetry` with an NVIDIA CUDA GPU, CPU `photogrammetryDraft` without one. Then Blender crops to the subject, rescales, cleans and exports. | **Yes**: 36 photos → all 36 cameras solved → textured mesh, about 5 min on 4 CPU threads (draft quality). The photos were Cycles renders of a ForgeCraft asset, not camera photos. | Local, CPU draft / CUDA dense |
 | **TripoSR** | Adapter runs upstream `run.py` from a checkout in an AI venv (CPU or CUDA), then the Blender stages. | **No.** Weights are on huggingface.co, which this environment's network policy blocks. PyTorch is also not installed. The adapter refuses with that reason. | Local, CPU (minutes) or GPU ~6 GB (seconds) |
 | **Hunyuan3D-2** | Adapter: local `hy3dgen` on an NVIDIA GPU, or the public HF Space through `gradio_client`. Gated by a licence acknowledgement. | **No.** No GPU here, and huggingface.co / hf.space are blocked. The adapter refuses with that reason. The Space's endpoint signature is discovered at call time and was **not verified** in this environment. | Local GPU (≥6 GB shape, ≥16 GB texture) or hosted Space |
 
@@ -18,11 +18,11 @@ Researched 2026-11-02. Sources are listed at the end. **Free software is not fre
 | Tool | Licence | Commercial use | Notes |
 |---|---|---|---|
 | Blender / `bpy` | GPL-2.0-or-later (source); binaries/wheel GPL-3.0; Cycles Apache-2.0 | Unrestricted for what you make | GPL covers the software, not your models, renders or `.blend` content. |
-| Blockbench | GPL-3.0-or-later | Unrestricted for `.bbmodel`/exported content you author | Plugins may be proprietary per its README. MeshCraft uses only the file format. |
+| Blockbench | GPL-3.0-or-later | Unrestricted for `.bbmodel`/exported content you author | Plugins may be proprietary per its README. ForgeCraft uses only the file format. |
 | Mixamo | Adobe terms (free with an Adobe ID) | Characters and animations royalty-free in personal, commercial and non-profit projects; no attribution needed | Do not redistribute raw Mixamo files standalone, bulk-download, or use them to train ML models. Re-check Adobe's current General Terms. |
 | Meshroom / AliceVision | MPL-2.0 (plus MIT and other bundled third-party code) | Unrestricted | If you modify MPL files, publish those files' source. Reconstructions belong to whoever owns the photos. |
 | TripoSR | MIT (code and `stabilityai/TripoSR` weights) | Unrestricted with the MIT notice | The newer Stable Fast 3D is under the Stability Community License, not MIT. Not used. |
-| Hunyuan3D-2 / 2mini / 2mv / 2.1 | Tencent Hunyuan 3D 2.0 / 2.1 Community License (one licence for code and weights) | **Restricted**: not licensed in the **EU, UK or South Korea**. More than **1M monthly active users** needs a separate Tencent licence. Outputs must be labelled as machine-generated when shown publicly. Outputs may not be used to improve other AI models. | MeshCraft refuses to run it until `MESHCRAFT_HUNYUAN_LICENSE=accepted` is set, and marks its assets `ai_generated: true`. Hunyuan3D 2.5/3.0/3.1 are **hosted-only** (Tencent Cloud, paid) and are deliberately not wired in. |
+| Hunyuan3D-2 / 2mini / 2mv / 2.1 | Tencent Hunyuan 3D 2.0 / 2.1 Community License (one licence for code and weights) | **Restricted**: not licensed in the **EU, UK or South Korea**. More than **1M monthly active users** needs a separate Tencent licence. Outputs must be labelled as machine-generated when shown publicly. Outputs may not be used to improve other AI models. | ForgeCraft refuses to run it until `FORGECRAFT_HUNYUAN_LICENSE=accepted` is set, and marks its assets `ai_generated: true`. Hunyuan3D 2.5/3.0/3.1 are **hosted-only** (Tencent Cloud, paid) and are deliberately not wired in. |
 
 ## Hardware, compute and cost
 
@@ -54,13 +54,13 @@ Researched 2026-11-02. Sources are listed at the end. **Free software is not fre
 1. Run on a machine with an NVIDIA GPU, or allow `huggingface.co` in the environment's network policy.
 2. Run `scripts/install-3d.sh ai weights`.
 3. For the hosted Space, set `GITCRAFT_ALLOW_NET=1`. Its free quota applies.
-4. For Hunyuan3D, also confirm the licence territory and set `MESHCRAFT_HUNYUAN_LICENSE=accepted`.
+4. For Hunyuan3D, also confirm the licence territory and set `FORGECRAFT_HUNYUAN_LICENSE=accepted`.
 
 `scripts/doctor.sh` shows what is still missing.
 
 ## No large files in git
 
-The `bpy` wheel, Meshroom, PyTorch and all model weights install into `~/.gitcraft/meshcraft`. The TIDEBREAKERS acceptance package in `acceptance/tidebreakers-3d/` is small game assets: low-poly GLBs and baked PNGs, about 1–4 MB per asset. Model weights are never committed.
+Meshroom, PyTorch and all model weights install into `~/.gitcraft/forgecraft`. The TIDEBREAKERS acceptance package in `acceptance/tidebreakers-3d/` is small game assets: low-poly GLBs and baked PNGs, about 1–4 MB per asset. Model weights are never committed.
 
 ## Sources
 

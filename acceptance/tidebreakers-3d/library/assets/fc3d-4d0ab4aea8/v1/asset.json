@@ -1,0 +1,201 @@
+{
+ "id": "fc3d-4d0ab4aea8",
+ "version": 1,
+ "name": "Grand Treasure Chest (MeshCraft)",
+ "slug": "grand_treasure_chest_meshcraft",
+ "kind": "prop",
+ "brief": "grand treasure chest",
+ "tags": [
+  "meshcraft_template",
+  "prop",
+  "tidebreakers"
+ ],
+ "source_tool": "meshcraft \u2192 blender",
+ "pipeline": [
+  "meshcraft:build",
+  "meshcraft:preview",
+  "meshcraft:validate_scene",
+  "meshcraft:export",
+  "meshcraft:contact_sheet"
+ ],
+ "generation": {
+  "method": "meshcraft template",
+  "template": "chest",
+  "params": {
+   "tier": "grand"
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "meshcraft_validation": {
+   "pass": 17,
+   "warn": 0,
+   "fail": 0,
+   "info": 2
+  },
+  "profile": "three-web-atlas"
+ },
+ "route": {
+  "route": "meshcraft_template",
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "MeshCraft has a hand-tuned template for this (TIDEBREAKERS Pebble & Sail style, brand palette, engine-checked exports)."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "MeshCraft templates (GITCRAFT, Blender)",
+    "license": "GITCRAFT code; Blender GPL does not extend to outputs; colours from the project's own brand palette"
+   },
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-195643-bdd2",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T19:57:02Z"
+ },
+ "geometry": {
+  "triangles": 2456,
+  "vertices": 4896,
+  "meshes": 2,
+  "dimensions_m": [
+   2.175,
+   2.343,
+   2.598
+  ],
+  "bounds_min": null,
+  "bounds_max": null
+ },
+ "materials": [],
+ "textures": [
+  {
+   "name": "grand_treasure_chest_meshcraft.three-web-atlas.atlas",
+   "size": [],
+   "colorspace": ""
+  }
+ ],
+ "rig": null,
+ "animations": [
+  {
+   "name": "lid_close",
+   "frames": [],
+   "seconds": null,
+   "loop": null
+  },
+  {
+   "name": "lid_open",
+   "frames": [],
+   "seconds": null,
+   "loop": null
+  }
+ ],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/grand_treasure_chest_meshcraft_three_quarter.png",
+  "hero": null,
+  "turntable": [
+   "previews/grand_treasure_chest_meshcraft_front.png",
+   "previews/grand_treasure_chest_meshcraft_side.png",
+   "previews/grand_treasure_chest_meshcraft_top.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "grand_treasure_chest_meshcraft.glb",
+   "bytes": 216184,
+   "sha256": "06d0e046ba767a02aee533555d9b387141c70a090746c25ce07144969635da97"
+  },
+  "blend": {
+   "path": "grand_treasure_chest_meshcraft.blend",
+   "bytes": 145421,
+   "sha256": "b14e6f62f7f22203edd6b01b0a34e8c72e44912f7b91318c3e26566ce7591436"
+  }
+ },
+ "companion_files": [],
+ "validation": {
+  "status": "passed",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195643-bdd2/out/grand_treasure_chest_meshcraft.glb",
+   "bytes": 216184,
+   "objects": 4,
+   "meshes": 2,
+   "triangles": 2456,
+   "vertices": 4896,
+   "dimensions_m": [
+    2.175,
+    2.343,
+    2.598
+   ],
+   "textures": [
+    "grand_treasure_chest_meshcraft.three-web-atlas.atlas"
+   ],
+   "bones": 0,
+   "animations": [
+    "lid_close",
+    "lid_open"
+   ],
+   "non_manifold_edges": 4896,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195643-bdd2/web_check.png",
+   "files": {
+    "grand_treasure_chest_meshcraft.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 0,
+     "khronos_messages": [],
+     "three_loaded": true,
+     "three_clips": 2
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-195643-bdd2",
+ "stages": [
+  {
+   "stage": "meshcraft:build",
+   "state": "done",
+   "seconds": 0.15
+  },
+  {
+   "stage": "meshcraft:preview",
+   "state": "done",
+   "seconds": 11.74
+  },
+  {
+   "stage": "meshcraft:validate_scene",
+   "state": "done",
+   "seconds": 0.0
+  },
+  {
+   "stage": "meshcraft:export",
+   "state": "done",
+   "seconds": 0.07
+  },
+  {
+   "stage": "meshcraft:contact_sheet",
+   "state": "done",
+   "seconds": 0.37
+  }
+ ]
+}

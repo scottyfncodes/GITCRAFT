@@ -1,6 +1,6 @@
 {
  "files": {
-  "assets/tidebreakers_turtle_cay_scene_v1/tidebreakers_turtle_cay_scene.glb": {
+  "/home/user/GITCRAFT/acceptance/tidebreakers-3d/assets/tidebreakers_turtle_cay_scene_v1/tidebreakers_turtle_cay_scene.glb": {
    "validator": {
     "errors": 0,
     "warnings": 1,
@@ -85,7 +85,7 @@
     ]
    }
   },
-  "assets/deckhand_pip_v2/deckhand_pip.glb": {
+  "/home/user/GITCRAFT/acceptance/tidebreakers-3d/assets/deckhand_pip_v2/deckhand_pip.glb": {
    "validator": {
     "errors": 0,
     "warnings": 1,
@@ -156,7 +156,7 @@
     "sockets": []
    }
   },
-  "assets/tidebreakers_coastal_sloop_v1/tidebreakers_coastal_sloop.glb": {
+  "/home/user/GITCRAFT/acceptance/tidebreakers-3d/assets/tidebreakers_coastal_sloop_v1/tidebreakers_coastal_sloop.glb": {
    "validator": {
     "errors": 0,
     "warnings": 0,
@@ -195,7 +195,7 @@
  "three": {
   "revision": "170",
   "gl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
-  "screenshot": "handoffs/threejs_r170_import.png",
+  "screenshot": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/handoffs/threejs_r170_import.png",
   "console": []
  },
  "ok": true

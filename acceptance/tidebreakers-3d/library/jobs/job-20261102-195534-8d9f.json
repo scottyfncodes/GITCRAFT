@@ -1,0 +1,248 @@
+{
+ "id": "job-20261102-195534-8d9f",
+ "spec": {
+  "brief": "boat upgrade component: Brass Compass",
+  "name": "Upgrade: Brass Compass",
+  "kind": "upgrade",
+  "params": {
+   "upgrade": "compass_brass"
+  },
+  "max_tris": 6000,
+  "bake": 512,
+  "turntable": 8,
+  "formats": [
+   "glb",
+   "fbx",
+   "blend"
+  ],
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T19:55:34Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T19:55:36Z",
+   "finished": "2026-11-02T19:55:45Z",
+   "status": "done",
+   "error": null
+  }
+ ],
+ "stages": [
+  {
+   "stage": "route",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:36Z",
+   "info": {
+    "chosen": "blender_procedural",
+    "route": "procedural",
+    "fallback_used": false,
+    "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+   },
+   "finished": "2026-11-02T19:55:36Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:36Z",
+   "info": {
+    "tool": "blender_procedural",
+    "kind": "upgrade"
+   },
+   "finished": "2026-11-02T19:55:43Z"
+  },
+  {
+   "stage": "blender:model",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:37Z",
+   "seconds": 0.02,
+   "info": {
+    "root": "upgrade_brass_compass"
+   },
+   "finished": "2026-11-02T19:55:37Z"
+  },
+  {
+   "stage": "blender:cleanup",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:37Z",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   },
+   "finished": "2026-11-02T19:55:37Z"
+  },
+  {
+   "stage": "blender:optimize",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:37Z",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 698,
+    "tris_after": 698,
+    "ratio": 1.0
+   },
+   "finished": "2026-11-02T19:55:37Z"
+  },
+  {
+   "stage": "blender:uv_unwrap",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:37Z",
+   "seconds": 0.0,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   },
+   "finished": "2026-11-02T19:55:37Z"
+  },
+  {
+   "stage": "blender:texture_bake",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:37Z",
+   "seconds": 0.4,
+   "info": {
+    "maps": {
+     "basecolor": "upgrade_brass_compass_basecolor.png",
+     "metalrough": "upgrade_brass_compass_metalrough.png"
+    },
+    "resolution": 512,
+    "emission_dropped": false
+   },
+   "finished": "2026-11-02T19:55:37Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:37Z",
+   "seconds": 5.03,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_03.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_04.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_05.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_06.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_07.png"
+    ]
+   },
+   "finished": "2026-11-02T19:55:43Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:43Z",
+   "seconds": 0.05,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.glb",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.fbx",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.blend"
+    }
+   },
+   "finished": "2026-11-02T19:55:43Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:43Z",
+   "info": {
+    "status": "passed"
+   },
+   "finished": "2026-11-02T19:55:45Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:55:45Z",
+   "info": {
+    "asset": "fc3d-82b6135f47",
+    "version": 1
+   },
+   "finished": "2026-11-02T19:55:45Z"
+  }
+ ],
+ "error": null,
+ "asset": {
+  "id": "fc3d-82b6135f47",
+  "version": 1,
+  "name": "Upgrade: Brass Compass",
+  "validation": "passed"
+ },
+ "plan": {
+  "request": {
+   "brief": "boat upgrade component: Brass Compass",
+   "intents": [],
+   "kind": "upgrade",
+   "params": {
+    "seed": 263,
+    "upgrade": "compass_brass"
+   },
+   "images": 0,
+   "name": "boat upgrade component: Brass Compass",
+   "template": null
+  },
+  "route": "procedural",
+  "why": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free.",
+  "candidates": [
+   {
+    "tool": "blender_procedural",
+    "label": "Blender (procedural)",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "blockbench",
+    "label": "Blockbench (.bbmodel) \u2192 Blender",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh)",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "blender_procedural",
+  "preferred": "blender_procedural",
+  "fallback_used": false,
+  "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+ },
+ "compute": {
+  "tool": "blender_procedural",
+  "needs": "CPU, seconds",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "updated": "2026-11-02T19:55:45Z"
+}

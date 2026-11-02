@@ -1,0 +1,268 @@
+{
+ "id": "fc3d-82b6135f47",
+ "version": 1,
+ "name": "Upgrade: Brass Compass",
+ "slug": "upgrade_brass_compass",
+ "kind": "upgrade",
+ "brief": "boat upgrade component: Brass Compass",
+ "tags": [
+  "blender_procedural",
+  "tidebreakers",
+  "upgrade"
+ ],
+ "source_tool": "blender",
+ "pipeline": [
+  "model",
+  "cleanup",
+  "optimize",
+  "uv_unwrap",
+  "texture_bake",
+  "preview_render",
+  "export"
+ ],
+ "generation": {
+  "method": "procedural",
+  "kind": "upgrade",
+  "params": {
+   "seed": 263,
+   "upgrade": "compass_brass"
+  },
+  "blender_config": {
+   "bake": 512,
+   "turntable": 8
+  }
+ },
+ "route": {
+  "route": "procedural",
+  "chosen": "blender_procedural",
+  "preferred": "blender_procedural",
+  "fallback_used": false,
+  "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-195534-8d9f",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T19:55:45Z"
+ },
+ "geometry": {
+  "triangles": 698,
+  "vertices": 359,
+  "meshes": 1,
+  "dimensions_m": [
+   0.771,
+   0.51,
+   1.26
+  ],
+  "bounds_min": [
+   -0.386,
+   -0.255,
+   0.0
+  ],
+  "bounds_max": [
+   0.386,
+   0.255,
+   1.26
+  ]
+ },
+ "materials": [
+  "M_upgrade_brass_compass"
+ ],
+ "textures": [
+  {
+   "name": "upgrade_brass_compass_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_brass_compass_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": null,
+ "animations": [],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/upgrade_brass_compass_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/upgrade_brass_compass_turn_00.png",
+   "previews/upgrade_brass_compass_turn_01.png",
+   "previews/upgrade_brass_compass_turn_02.png",
+   "previews/upgrade_brass_compass_turn_03.png",
+   "previews/upgrade_brass_compass_turn_04.png",
+   "previews/upgrade_brass_compass_turn_05.png",
+   "previews/upgrade_brass_compass_turn_06.png",
+   "previews/upgrade_brass_compass_turn_07.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "upgrade_brass_compass.glb",
+   "bytes": 205260,
+   "sha256": "f97b47ff821e7c94d035ec02e582fe607184fa74160fac4a268a508fe4653c07"
+  },
+  "fbx": {
+   "path": "upgrade_brass_compass.fbx",
+   "bytes": 171388,
+   "sha256": "97f375653bc11f9ae4f5aef24a1fb1150d21c22981ca717b908773afad17a6e8"
+  },
+  "blend": {
+   "path": "upgrade_brass_compass.blend",
+   "bytes": 112548,
+   "sha256": "e0fcdaaaa8ca372888380e04e17a5e4894b1f4240dee0ccb86a53aec04ea7dc0"
+  }
+ },
+ "companion_files": [
+  "textures/upgrade_brass_compass_basecolor.png",
+  "textures/upgrade_brass_compass_metalrough.png"
+ ],
+ "validation": {
+  "status": "passed",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.glb",
+   "bytes": 205260,
+   "objects": 2,
+   "meshes": 1,
+   "triangles": 698,
+   "vertices": 1384,
+   "dimensions_m": [
+    0.771,
+    0.51,
+    1.26
+   ],
+   "textures": [
+    "upgrade_brass_compass_basecolor",
+    "upgrade_brass_compass_metalrough"
+   ],
+   "bones": 0,
+   "animations": [],
+   "non_manifold_edges": 1384,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/web_check.png",
+   "files": {
+    "upgrade_brass_compass.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 0,
+     "khronos_messages": [],
+     "three_loaded": true,
+     "three_clips": 0
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-195534-8d9f",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.02,
+   "info": {
+    "root": "upgrade_brass_compass"
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 698,
+    "tris_after": 698,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 0.4,
+   "info": {
+    "maps": {
+     "basecolor": "upgrade_brass_compass_basecolor.png",
+     "metalrough": "upgrade_brass_compass_metalrough.png"
+    },
+    "resolution": 512,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 5.03,
+   "info": {
+    "thumbnail": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_00.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_01.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_02.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_03.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_04.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_05.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_06.png",
+     "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/previews/upgrade_brass_compass_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.05,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.glb",
+     "fbx": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.fbx",
+     "blend": "/root/.gitcraft/forgecraft-library/jobs/job-20261102-195534-8d9f/out/upgrade_brass_compass.blend"
+    }
+   }
+  }
+ ]
+}
