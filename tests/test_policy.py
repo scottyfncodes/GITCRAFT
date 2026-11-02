@@ -17,7 +17,8 @@ ws = os.environ.get("GITCRAFT_ROOT") or tempfile.mkdtemp(prefix="gitcraft-ws-")
 os.makedirs(ws, exist_ok=True)
 SECRET = os.path.expanduser("~/.gitcraft-policy-secret.txt")   # outside the workspace
 open(SECRET, "w").write("top secret")
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws)
+# own LightCraft library: the session's LightCraft server keeps the shared one locked
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_LIGHTCRAFT_LIBRARY=os.path.join(ws, "lightcraft-library"))
 results = []
 
 def check(label, cond, detail=""):
