@@ -33,6 +33,14 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
   fi
   reg=$([[ " $registered " == *" $name "* ]] && echo yes || echo NO)
   build=$(cat "$GITCRAFT_BIN/$name.version" 2>/dev/null || echo "-")
+  if [[ "$name" == meshcraft && "$build" == - && $inst == yes ]]; then
+    # installed before the version file existed: read the wheel's metadata (no Blender start-up) and record it
+    di=$(ls -d "$GITCRAFT_HOME"/meshcraft/venv/lib/python*/site-packages/bpy-*.dist-info 2>/dev/null | head -1)
+    if [[ -n "$di" ]]; then
+      v=${di##*/bpy-}; build="blender ${v%.dist-info} (bpy wheel)"
+      echo "$build" > "$GITCRAFT_BIN/meshcraft.version" 2>/dev/null || true
+    fi
+  fi
   say "$(printf '  %-13s %-10s %-11s %s' "$name" "$inst" "$reg" "$build")"
   [[ $inst == yes ]] || problems+=("$name is not installed: run scripts/install.sh $name")
   [[ $reg == yes ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")

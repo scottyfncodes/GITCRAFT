@@ -29,6 +29,22 @@ creative brief ──► build_asset ──► render_preview ──► validate
 
 `run_pipeline` does all of it for one brief and writes `<out_dir>/<asset_id>.meshcraft.json` (every step, timing, check, file and SHA-256).
 
+Builds are **reproducible**: the same brief gives byte-identical GLB content in any server process (only the brief stored in the scene, which names the `out_dir`, differs). FBX files embed a timestamp and random object IDs, so compare those by content.
+
+## Blockbench, Mixamo and the machine
+
+| Tool | Needs Blender | What it does |
+|---|---|---|
+| `hardware_probe` | no | CPU, RAM, NVIDIA GPUs, free disk at the roots, sandbox and network state, and each capability (Blender, texture bake, Blockbench, Mixamo, engine check, photogrammetry, image-to-3D) with the reason when it is unavailable |
+| `blockbench_build` | no | Writes an editable Blockbench project (`.bbmodel`, format 5.0, `free` model) from a cube template (`crate`, `chest`, `crab`, `lantern`, `boat`) with an embedded pixel texture. Colours come from the project's palette through `roles`. Fronts face south (+Z), the glTF front |
+| `blockbench_inspect` | no | Format version, elements, textures (embedded or linked), animations and problems of any `.bbmodel` |
+| `blockbench_import` | yes | `.bbmodel` → `out_dir/source/<asset_id>.blend`: cubes and mesh elements, element rotation, embedded textures (nearest-neighbour), and each face's texel colour baked into `Color` so the toon profile renders it like the game's own geometry. Pass `profiles` to export and validate at once. Groups/bones and Blockbench animations are reported, not converted |
+| `mixamo_guide` | no | The supported Mixamo workflow, export settings, core bone names and licence terms |
+| `mixamo_prepare_upload` | yes | A character (GLB/FBX/OBJ/.blend) → a mesh-only FBX with the rig removed, for Mixamo's auto-rigger |
+| `mixamo_apply` | yes | Mixamo downloads (FBX, *Without Skin*) → clips on a Mixamo-skeleton character, matched by bone name (`mixamorig:`/`mixamorig1:` ignored). Refuses, with the reason, a clip from a non-Mixamo skeleton or a skeleton whose rest pose differs; rescales hip motion for a different-size character |
+
+**Blockbench** has no headless mode, CLI or server API, so MeshCraft never runs the app: it reads and writes the project format, and people edit the files in Blockbench. **Mixamo** has no API and scripted use of the site is not a supported access method, so MeshCraft never contacts mixamo.com: a person uploads and downloads, and MeshCraft prepares and merges the files. See `docs/3d-licensing.md`.
+
 ## Brief
 
 ```json
@@ -82,6 +98,10 @@ A template returns a **contract** (node names, pivots, clips) that validation an
 | `godot-glb` | GLB | atlas | clips → AnimationPlayer | Godot 4 |
 | `unity-fbx` | FBX (-Z fwd, Y up, unit scale applied) | embedded atlas | all actions baked | Unity / Unreal |
 | `obj-static` | OBJ + MTL | atlas PNG | none | DCC interchange |
+| `web-pbr` | GLB | baked maps in one shared UV layout: basecolor (sRGB), metallic-roughness, emissive when something glows; one PBR material; no COLOR_0 | named clips | glTF engines with standard PBR materials (three.js `MeshStandardMaterial`, Babylon.js, PlayCanvas, Godot, glTFast). Bakes at 1024 px (Cycles EMIT bakes, CPU) and retries at 512 px |
+| `stl-print` | binary STL | none | none (rest pose) | 3D printing: Z up, millimetres. Kit-bashed parts overlap, so let the slicer union them |
+
+Assets without palette roles (Blockbench projects saved by people, Mixamo characters) keep their own materials in the atlas profiles; the export result says so.
 
 Profiles are data: add a JSON file to target another engine. Exports **never overwrite game assets**: they go only to the brief's `out_dir`, and integrating them into a game is a separate, reviewed change.
 
@@ -98,12 +118,12 @@ Profiles are data: add a JSON file to target another engine. Exports **never ove
 - skinning: no unweighted vertices and at most 4 influences.
 
 **Export checks.**
-- glTF 2.0 structure with `COLOR_0` on every primitive;
+- glTF 2.0 structure with `COLOR_0` on every primitive (or, for `web-pbr`, a base colour texture on every primitive);
 - contract nodes present;
 - the **Khronos glTF-Validator**;
-- **re-import round-trip**: size, base height and clips survive.
+- **re-import round-trip**: size, base height and clips survive (STL: triangle count).
 
-**Engine check.** The GLB is loaded with `three@0.170` GLTFLoader in headless Chromium, using the game's own toon material. A clip is played and screenshotted, and the contract is checked: hinge position, end rotation, nodes, vertex colours.
+**Engine check.** The GLB is loaded with `three@0.170` GLTFLoader in headless Chromium, using the game's own toon material. A clip is played and screenshotted, and the contract is checked: hinge position, end rotation, nodes, vertex colours. With `material: "authored"` it checks base colour maps (`web-pbr`) or the file's own materials instead of `COLOR_0`.
 
 ## Limits
 
@@ -114,4 +134,4 @@ Profiles are data: add a JSON file to target another engine. Exports **never ove
 
 ## License
 
-`meshcraft/` imports Blender's `bpy` module (GPL-2.0-or-later), and the Blender Foundation treats code built on its Python API as GPL. Treat everything under `meshcraft/` as **GPL-3.0-or-later**, and keep it a separate directory from GITCRAFT's other scripts. **Assets MeshCraft produces are not affected**: Blender's licence does not apply to its output. Dependencies: three.js (MIT), Khronos glTF-Validator (Apache-2.0), pygltflib (MIT), Pillow (MIT-CMU), numpy (BSD-3-Clause).
+`meshcraft/` imports Blender's `bpy` module (GPL-2.0-or-later), and the Blender Foundation treats code built on its Python API as GPL. Treat everything under `meshcraft/` as **GPL-3.0-or-later**, and keep it a separate directory from GITCRAFT's other scripts. **Assets MeshCraft produces are not affected**: Blender's licence does not apply to its output. Dependencies: three.js (MIT), Khronos glTF-Validator (Apache-2.0), pygltflib (MIT), Pillow (MIT-CMU), numpy (BSD-3-Clause). Blockbench (GPL-3.0) is not bundled or run; only its file format is used. Mixamo terms: `docs/3d-licensing.md`.
