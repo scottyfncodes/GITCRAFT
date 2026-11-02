@@ -28,6 +28,8 @@ working in.
   effectcraft is fenced to `$GITCRAFT_ROOT` (defaults to `$HOME`). Keep inputs
   and outputs under there.
 - lightcraft keeps a persistent library at `~/.gitcraft/lightcraft-library`.
+- lightcraft and pdfcraft run in compact mode: a short list of helper tools,
+  with every other command reachable through their list/run command tools.
 - These projects are young. If a command fails, say so plainly and try another
   route rather than faking a result.
 

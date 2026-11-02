@@ -28,8 +28,8 @@ case "$name" in
   vectorcraft) exec "$bin" mcp --headless "${roots[@]}" "$@" ;;
   designcraft) exec "$bin" mcp "${roots[@]}" "$@" ;;
   effectcraft) exec "$bin" mcp "${roots[@]}" "$@" ;;
-  pdfcraft)    exec "$bin" mcp --root "$root" "${roots[@]}" "$@" ;;
+  pdfcraft)    exec "$bin" mcp --compact --root "$root" "${roots[@]}" "$@" ;;
   # These two don't support file roots; they run as a headless session.
   filmcraft)   exec "$bin" mcp "$@" ;;
-  lightcraft)  exec "$bin" mcp --library "$GITCRAFT_HOME/lightcraft-library" "$@" ;;
+  lightcraft)  exec "$bin" mcp --compact --library "$GITCRAFT_HOME/lightcraft-library" "$@" ;;
 esac
