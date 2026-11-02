@@ -22,6 +22,10 @@ ForgeCraft runs the 3D Department pipeline. It routes each request to the best a
 - The TIDEBREAKERS 3D package is in `acceptance/tidebreakers-3d/`.
 - ForgeCraft uses MeshCraft's Blender. `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
 
+## Control room
+
+`scripts/ui.sh` opens a local, phone-friendly web UI for every tool: health, discovery, MeshCraft pipelines, jobs with their retries, the versioned 3D library with fingerprints and verified exports, and routing advice. It listens on 127.0.0.1 only, needs its one-time link, and acts only through `scripts/mcp.sh`, so the sandbox and guard apply. See [docs/ui.md](docs/ui.md).
+
 ## Install before your session (recommended)
 
 Use this as the cloud environment's setup script so the tools are ready in every session, whichever repos are attached:

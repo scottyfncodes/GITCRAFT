@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f151a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eef2f5" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GITCRAFT">
+<title>GITCRAFT Control Room</title>
+<link rel="stylesheet" href="app.css">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+</head>
+<body>
+<div id="app">
+  <aside class="rail" aria-label="Sections">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><span>GITCRAFT</span></div>
+    <nav id="nav-rail"></nav>
+    <div class="rail-foot" id="rail-foot"></div>
+  </aside>
+  <main id="main" tabindex="-1"></main>
+  <nav class="tabbar" id="nav-tabs" aria-label="Sections"></nav>
+</div>
+<div id="sheet-root"></div>
+<div id="toasts" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
