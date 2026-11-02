@@ -421,7 +421,7 @@ def export(blend, profile_ids, out_dir=None):
             for o in meshes:
                 if "Color" not in o.data.color_attributes and any(m and m.get("gitcraft_role") for m in o.data.materials):
                     kit.bake_vertex_colors(o, None, 0)
-            bk = prof["bake"]
+            bk = dict(prof["bake"], **(brief.get("bake") or {}))   # a brief (or a job retry) may lower the bake size
             baked = bake.bake_pbr(meshes, out_dir, os.path.basename(base), bk.get("resolution", 1024), tuple(bk.get("fallbacks", [512])),
                                   material_name=f"{brief.get('material_prefix', 'GC')}_Baked")
         textured = bool(prof.get("atlas") or baked) or any(n.type == "TEX_IMAGE" and n.image for o in meshes for m in o.data.materials

@@ -26,6 +26,13 @@ only, no network). Tools:
   mixamo_guide       the supported Mixamo workflow (Mixamo has no API; a person uses the site)
   mixamo_prepare_upload  character → mesh-only FBX for Mixamo's auto-rigger
   mixamo_apply       merge Mixamo animation downloads onto a Mixamo-skeleton character (+ optional exports)
+  route              which MeshCraft path fits a request on this machine (advice only)
+  jobs_list / job_get / job_retry          job records: attempts, fallbacks, errors (run_pipeline,
+                                           blockbench_import and mixamo_apply each run as a job)
+  library_search / library_get / library_export   the versioned asset library (every job adds a version)
+
+run_pipeline, blockbench_import and mixamo_apply return what they always did, plus `job` and
+`library` keys. A brief with "library": false skips the library.
 """
 import io, json, os, subprocess, sys, traceback, contextlib, runpy
 
@@ -40,7 +47,7 @@ ROOTS = [os.path.realpath(r) for r in os.environ.get("GITCRAFT_ROOTS", os.enviro
 # Blender, so they are answered at once even while a cold import (session start, page
 # cache empty, other servers starting) would outlast the client's connect timeout.
 import queue, threading
-from engine import blockbench, hardware, mixamo     # standard library only: usable before Blender loads
+from engine import blockbench, hardware, mixamo, library, jobs, route   # standard library only: usable before Blender loads
 bpy = core = kit = Palette = None
 _import_error = []
 
@@ -132,7 +139,32 @@ def _finish(blend, profiles, contract=None):
     return {"exports": exports, "validation": {"checks": checks, "summary": core.summarize(checks)}}
 
 
-def blockbench_import(a):
+def _as_job(tool, args, fn, asset_id, ladder=(), meta=None, job_id=None, manual=False, to_library=True):
+    """Run a producing tool as a job; add its result to the library; annotate the result."""
+    res, rec = jobs.run(tool, args, fn, asset_id=asset_id, ladder=ladder, job_id=job_id, manual=manual)
+    info = {"id": rec["id"], "status": rec["status"], "attempts": len(rec["attempts"])}
+    if rec.get("fallback"): info["fallback"] = rec["fallback"]
+    if to_library:
+        try:
+            md = library.add_version(asset_id, res, dict(meta or {}, job=rec["id"]))
+            lib = {"asset": asset_id, "version": md["version"], "dir": md["dir"], "same_as": md["same_as"], "files": len(md["files"])}
+        except Exception as e:      # the deliverables exist in out_dir either way; say why the library copy failed
+            lib = {"error": f"{type(e).__name__}: {e}"}
+        jobs.attach(rec, library=lib)
+        res["library"] = lib
+    res["job"] = info
+    return res
+
+
+def run_pipeline(a, job_id=None, manual=False):
+    brief = _brief(a)
+    meta = {"tool": "run_pipeline", "template": brief.get("template"), "brief": brief, "tags": brief.get("tags", []),
+            "inputs": [brief.get("palette")] + list(brief.get("references", []))}
+    return _as_job("run_pipeline", {"brief": brief}, lambda x: core.run_pipeline(_brief(x)), brief["asset_id"],
+                   jobs.pipeline_ladder(brief), meta, job_id, manual, brief.get("library", True) is not False)
+
+
+def _blockbench_import(a):
     from engine import bbimport
     out_dir = _need(a["out_dir"], True)
     r = bbimport.import_bbmodel(_need(a["path"]), _asset_id(a), out_dir, a.get("material_prefix", "BB"),
@@ -141,7 +173,28 @@ def blockbench_import(a):
     return r
 
 
-def mixamo_apply(a):
+def blockbench_import(a, job_id=None, manual=False):
+    meta = {"tool": "blockbench_import", "template": "bbmodel", "brief": a, "inputs": [a.get("path"), a.get("palette")]}
+    return _as_job("blockbench_import", a, _blockbench_import, _asset_id(a), (), meta, job_id, manual, a.get("library", True) is not False)
+
+
+def mixamo_apply(a, job_id=None, manual=False):
+    meta = {"tool": "mixamo_apply", "template": "mixamo", "brief": a, "inputs": [a.get("character")] + list(a.get("animations", []))}
+    return _as_job("mixamo_apply", a, _mixamo_apply, _asset_id(a), (), meta, job_id, manual, a.get("library", True) is not False)
+
+
+def job_retry(a):
+    rec = jobs.get(a["job"])
+    fn = {"run_pipeline": run_pipeline, "blockbench_import": blockbench_import, "mixamo_apply": mixamo_apply}.get(rec["tool"])
+    if fn is None: raise ValueError(f"job {rec['id']} ran {rec['tool']}, which cannot be retried")
+    return fn(rec["request"], job_id=rec["id"], manual=True)
+
+
+def library_export(a):
+    return library.export(a["asset"], _need(a["dest"], True), a.get("version"), a.get("kinds"))
+
+
+def _mixamo_apply(a):
     anims = [_need(p) for p in a.get("animations", [])]
     r = mixamo.apply(_need(a["character"]), anims, _need(a["out_dir"], True), _asset_id(a), a.get("material_prefix", "MX"))
     r.update(_finish(r["blend"]["path"], a.get("profiles", [])))
@@ -188,7 +241,7 @@ TOOLS = {
                   S({"glb": STR, "out": STR, "clip": STR, "time": NUM, "contract": OBJ, "material": {"type": "string", "enum": ["game-toon", "authored"]}, "size": NUM}, ["glb"]),
                   lambda a: engine_check(a["glb"], a.get("out"), a.get("clip"), a.get("time"), a.get("contract"), a.get("material", "game-toon"), int(a.get("size", 640)))),
  "run_pipeline": ("The full workflow for one brief: build → preview → validate → export → validate exports (incl. Khronos) → contact sheet → manifest → report JSON.",
-                  S({"brief": BRIEF}, ["brief"]), lambda a: core.run_pipeline(_brief(a))),
+                  S({"brief": BRIEF}, ["brief"]), run_pipeline),
  "run_script": ("Assisted modelling: run a Python script from the workspace inside Blender (globals: bpy, kit, args, Palette), optionally against a .blend which is then saved. Runs inside the sandbox.",
                 S({"path": STR, "blend": STR, "save": BOOL, "args": OBJ}, ["path"]),
                 lambda a: run_script(a["path"], a.get("blend"), a.get("save", True), a.get("args"))),
@@ -216,13 +269,30 @@ TOOLS = {
                   "Saves out_dir/source/<asset_id>.blend; pass `profiles` (e.g. web-pbr, godot-glb) to export and validate at once.",
                   S({"character": STR, "animations": STRS, "out_dir": STR, "asset_id": STR, "profiles": STRS, "material_prefix": STR}, ["character", "animations", "out_dir", "asset_id"]),
                   mixamo_apply),
+ "route": ("Advice only: which MeshCraft path fits a request on this machine (template, Blockbench, Mixamo, run_script, photogrammetry, image-to-3D), the tools to call, and why. "
+           "Unavailable capabilities are reported as unavailable; alternatives are labelled when they would not be derived from the photos or image.",
+           S({"request": STR, "images": NUM}, ["request"]), lambda a: route.route(a["request"], int(a.get("images", 0)))),
+ "jobs_list": ("Recent MeshCraft jobs (run_pipeline, blockbench_import, mixamo_apply): status (done, done_with_fallback, failed), attempts, library version.",
+               S({"limit": NUM, "status": STR}), lambda a: jobs.list_jobs(a.get("limit", 20), a.get("status"))),
+ "job_get": ("One job record: the request, every attempt (what was changed for it, timing, error), the pipeline steps and the library version.",
+             S({"job": STR}, ["job"]), lambda a: jobs.get(a["job"])),
+ "job_retry": ("Re-run a job with its original request, as a new attempt on the same record (automatic fallbacks apply again).",
+               S({"job": STR}, ["job"]), job_retry),
+ "library_search": ("Search the versioned 3D asset library by text (id, title, template, tool, tags), template, tool or validation status (pass / needs-fix).",
+                    S({"query": STR, "template": STR, "tool": STR, "status": STR, "limit": NUM}),
+                    lambda a: library.search(a.get("query", ""), a.get("template"), a.get("tool"), a.get("status"), a.get("limit", 50))),
+ "library_get": ("Full record of one asset version (latest by default): every file with its SHA-256, inputs, brief, validation, clips, contract, job, and `same_as` when it matches the previous version.",
+                 S({"asset": STR, "version": NUM}, ["asset"]), lambda a: library.get(a["asset"], a.get("version"))),
+ "library_export": ("Copy an asset version (source .blend, exports, previews, asset.json) into dest/<asset>_v<N>/ inside a GITCRAFT root and verify every copy's SHA-256: the handoff to a game repo or another tool. `kinds` limits it (e.g. [\"export\", \"lod\", \"collision\"]).",
+                    S({"asset": STR, "version": NUM, "dest": STR, "kinds": STRS}, ["asset", "dest"]), library_export),
  "update_manifest": ("Merge entries [{path, status, notes, ...}] into a creative-package MANIFEST.json (paths are stored relative to it).",
                      S({"manifest": STR, "items": ARR}, ["manifest", "items"]),
                      lambda a: core.update_manifest(_need(a["manifest"], True), [dict(i, path=_need(i["path"])) for i in a["items"]])),
 }
 
 
-NO_BLENDER = {"hardware_probe", "blockbench_build", "blockbench_inspect", "mixamo_guide"}
+NO_BLENDER = {"hardware_probe", "blockbench_build", "blockbench_inspect", "mixamo_guide", "route", "jobs_list", "job_get",
+              "library_search", "library_get", "library_export"}
 
 
 def send(msg):

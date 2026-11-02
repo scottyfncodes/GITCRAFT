@@ -10,7 +10,10 @@
   * web-pbr (baked texture maps) and stl-print exports validate and load;
   * Blockbench projects are written, inspected and imported (toon + PBR exports);
   * Mixamo: upload FBX has no rig; downloaded clips merge by bone name, clips from
-    another skeleton are refused with a reason, and the merged clip plays in three.js.
+    another skeleton are refused with a reason, and the merged clip plays in three.js;
+  * jobs and library: every run is a job and a library version; an identical re-run is a
+    new version marked `same_as`; export to a root re-verifies hashes; a failing bake is
+    retried down the ladder; a bad request fails at once; job_retry adds attempts; route advises.
 
     tests/test_meshcraft.py [template ...]
 """
@@ -23,7 +26,7 @@ pal = os.path.join(ws, "palette.json")
 json.dump({"Honey Timber": "#D9954F", "Timber": "#9A5A2E", "Deep Tide": "#0E3B66", "Midnight Swell": "#0A2142", "Doubloon Gold": "#F4C542",
            "Gold Deep": "#C98A12", "Sunlit Amber": "#FF9F2E", "Hibiscus": "#E0607E", "Sailcloth Cream": "#F6EAD0", "Palm Green": "#3FA55A",
            "Jungle Deep": "#1E6B4E", "Lagoon Teal": "#1FB5B0", "Shallows Aqua": "#7FE3D6", "Coral Flame": "#FF6B4A"}, open(pal, "w"))
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws)
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_MESHCRAFT_LIBRARY=os.path.join(ws, "library"))
 res = []
 def check(label, ok, detail=""):
     res.append(ok); print(("PASS " if ok else "FAIL ") + label + ("" if ok else f"  [{str(detail)[:400]}]"))
@@ -122,6 +125,38 @@ if ok:
     check("mixamo_apply: merged clips play in three@0.170", ok2 and all(x["level"] == "pass" for x in e["checks"]), e)
 ok, r = c.call("mixamo_apply", {"character": os.path.join(fx, "character.fbx"), "animations": [anims[2]], "out_dir": os.path.join(fx, "bad"), "asset_id": "mx_bad"})
 check("mixamo_apply: nothing applicable → error that names the reason", not ok and "core bones" in str(r), r)
+
+# jobs + versioned library
+chest = {"asset_id": "lib_chest", "template": "chest", "palette": pal, "out_dir": os.path.join(ws, "lib_chest"), "profiles": ["three-web-toon"],
+         "preview": {"size": 128, "views": ["three_quarter"]}}
+ok, r1 = c.call("run_pipeline", {"brief": chest}, timeout=900)
+ok2, r2 = c.call("run_pipeline", {"brief": chest}, timeout=900)
+check("library: each run is a job and a new version", ok and ok2 and r1["job"]["status"] == "done" and r1["library"]["version"] == 1
+      and r2["library"]["version"] == 2, (r1.get("library"), r1.get("job"), r2.get("library")) if ok and ok2 else (r1, r2))
+check("library: an identical re-run is marked same_as the previous version", ok2 and r2["library"].get("same_as") == 1, r2.get("library") if ok2 else r2)
+ok, g = c.call("library_get", {"asset": "lib_chest"})
+check("library_get: every file recorded with SHA-256, plus inputs and job", ok and g["version"] == 2 and all(len(f["sha256"]) == 64 for f in g["files"])
+      and any(f["kind"] == "blend" for f in g["files"]) and g["inputs"] and g["job"] == r2["job"]["id"], g)
+ok, sr = c.call("library_search", {"query": "chest", "status": "pass"})
+check("library_search finds the asset", ok and any(a["id"] == "lib_chest" and a["versions"] == [1, 2] for a in sr["assets"]), sr)
+ok, ex = c.call("library_export", {"asset": "lib_chest", "version": 1, "dest": os.path.join(ws, "handoff"), "kinds": ["export", "lod", "collision"]})
+check("library_export: copies into the root and re-verifies every hash", ok and ex["verified"] and ex["files"] and all(os.path.exists(f["path"]) for f in ex["files"]), ex)
+bad_bake = dict(chest, asset_id="lib_bake", out_dir=os.path.join(ws, "lib_bake"), profiles=["web-pbr"], bake={"resolution": 100000, "fallbacks": []})
+ok, rb = c.call("run_pipeline", {"brief": bad_bake}, timeout=900)
+pbr_e = next((e for e in rb.get("exports", []) if e["profile"] == "web-pbr"), {}) if ok else {}
+check("jobs: a failing bake is retried at 512 px and the job says so", ok and rb["job"]["status"] == "done_with_fallback" and rb["job"]["attempts"] == 2
+      and "512" in rb["job"].get("fallback", "") and pbr_e.get("bake", {}).get("resolution") == 512, rb.get("job") if ok else rb)
+ok, jr = c.call("job_retry", {"job": rb["job"]["id"]}, timeout=900) if ok else (False, rb)
+ok2, jg = c.call("job_get", {"job": rb["job"]["id"]}) if ok else (False, jr)
+check("job_retry: re-runs the original request as new attempts on the same record", ok and ok2 and len(jg["attempts"]) == 4 and jg["attempts"][2]["manual"]
+      and jr["library"]["version"] == 2, jg if ok2 else jr)
+ok, rx = c.call("run_pipeline", {"brief": dict(chest, asset_id="lib_bad", template="no_such_template")})
+ok2, jl = c.call("jobs_list", {"status": "failed"})
+badjob = next((j for j in jl.get("jobs", []) if j["asset_id"] == "lib_bad"), {}) if ok2 else {}
+check("jobs: a bad request fails at once with the reason (no retries)", not ok and "unknown template" in str(rx) and badjob.get("attempts") == 1, (rx, badjob))
+ok, ro = c.call("route", {"request": "blocky voxel lifeboat"}); ok2, ro2 = c.call("route", {"request": "turn this concept art into a ship", "images": 1})
+check("route: advises Blockbench for voxel work and reports image-to-3D as unavailable", ok and ok2 and ro["route"] == "blockbench" and ro2["route"] == "image_to_3d"
+      and ro2["available"] is False and "NOT derived" in ro2["alternatives"][0]["note"], (ro, ro2))
 
 hostile = os.path.join(ws, "hostile.py")
 open(hostile, "w").write('''

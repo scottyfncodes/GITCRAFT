@@ -25,7 +25,7 @@ A GitHub code search across the portfolio found **13 games built on Three.js**: 
 | **P1 from the 3D Department proposal (PR #9)**, added beside the existing 14 tools: `hardware_probe`, `blockbench_build` / `_inspect` / `_import`, `mixamo_guide` / `_prepare_upload` / `_apply`; `web-pbr` (baked texture maps) and `stl-print` profiles. The 9 TIDEBREAKERS briefs export identical files before and after | P0/P1 PR |
 
 ### Next phases (from the PR #9 assessment)
-- **P2** jobs and a versioned asset library (job records, retry ladder, search, export with hashes), `route` as advice only.
+- **P2 (done)** jobs and a versioned asset library: job records with a retry ladder, `job_retry`, library search/get/export with re-verified hashes, `same_as` for identical re-runs, `route` as advice only. Re-running all 9 TIDEBREAKERS briefs gives identical exports and a `same_as` version for each.
 - **P3** Meshroom photogrammetry as an optional install, inside the sandbox.
 - **P4** a local 3D Department UI that starts jobs through the guarded launcher, with a per-launch token and origin checks; no deployment from GITCRAFT.
 - **P5** AI generation (TripoSR, then Hunyuan3D) opt-in only, with per-host network allowances and approval of cost, data sharing and licence territory.
