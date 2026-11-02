@@ -41,6 +41,8 @@ for fd in "$HOME/.local/share/fonts" "$HOME/.fonts"; do
 done
 
 native=(--automation-read-root "$root" --automation-write-root "$root")
+# LightCraft locks its library to one process; GITCRAFT_LIGHTCRAFT_LIBRARY lets tests use their own.
+lc_library="${GITCRAFT_LIGHTCRAFT_LIBRARY:-$GITCRAFT_HOME/lightcraft-library}"
 case "$name" in
   photocraft)  cmd=("$bin" mcp "${native[@]}") ;;
   vectorcraft) cmd=("$bin" mcp --headless "${native[@]}") ;;
@@ -49,8 +51,8 @@ case "$name" in
   pdfcraft)    cmd=("$bin" mcp --compact --root "$root" "${native[@]}") ;;
   # These two have no file-root flags of their own; the sandbox is their fence.
   filmcraft)   cmd=("$bin" mcp) ;;
-  lightcraft)  mkdir -p "$GITCRAFT_HOME/lightcraft-library"
-               cmd=("$bin" mcp --compact --library "$GITCRAFT_HOME/lightcraft-library") ;;
+  lightcraft)  mkdir -p "$lc_library"
+               cmd=("$bin" mcp --compact --library "$lc_library") ;;
   # Blender in-process; enforces the roots itself as well as through the sandbox below.
   meshcraft)   export GITCRAFT_ROOTS GITCRAFT_ROOT
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
@@ -62,7 +64,7 @@ esac
 cmd+=("$@")
 
 writable=("${roots[@]}" "$state")
-[[ "$name" == lightcraft ]] && writable+=("$GITCRAFT_HOME/lightcraft-library")
+[[ "$name" == lightcraft ]] && writable+=("$lc_library")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
