@@ -15,8 +15,8 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
                      │  sandbox.py    │  Landlock: workspace roots + own state only, no network
                      └───────┬────────┘
    ┌───────────┬────────────┼────────────┬────────────┬────────────┬────────────┐
- photocraft vectorcraft designcraft   pdfcraft    lightcraft   filmcraft   effectcraft
-   raster     vector      layout        PDF         photo        video       motion
+ photocraft vectorcraft designcraft   pdfcraft    lightcraft   filmcraft   effectcraft   meshcraft
+   raster     vector      layout        PDF         photo        video       motion       3D (Blender)
 ```
 
 ## Components
@@ -33,11 +33,20 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
 | `scripts/sandbox.py` | Landlock launcher (filesystem + network) |
 | `scripts/doctor.sh` | Health report |
 | `.github/workflows/build.yml` | Builds the ArtCraft CLIs weekly / on demand into the `bin` branch |
-| `tests/` | MCP test client and the end-to-end policy test |
+| `meshcraft/` | MeshCraft: MCP server (`server.py`), engine (`engine/`: kit, templates, preview, validation, export), export profiles, engine check (Three.js + Khronos) |
+| `tests/` | MCP test client, the policy test and the MeshCraft test |
 
 ## How tools hand off work
 
 Tools never talk to each other directly. A handoff is a **file in an authorized root**: one tool exports (SVG, PNG, PSD, PDF, MP4, …), the next imports it. Claude Code chooses formats and paths. The audit log records each file's SHA-256 at both ends, so every handoff is traceable. Package-level metadata (what each deliverable is, which tools made it, its status) lives in the project's own manifest, e.g. TIDEBREAKERS `creative/MANIFEST.json`.
+
+## 2D → 3D
+
+MeshCraft consumes what the 2D tools produce:
+- **palettes** (VectorCraft ASE/CSS/GPL/JSON exports) become its material roles;
+- **reference images** (PNG/JPG from any tool) are attached to the `.blend` and shown on its contact sheet next to the renders;
+- its previews are PNGs the 2D tools can lay out (DesignCraft) or composite (PhotoCraft);
+- its manifest updates use the same `MANIFEST.json` the creative package uses.
 
 ## Session lifecycle
 

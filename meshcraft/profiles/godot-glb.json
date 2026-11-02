@@ -1,0 +1,10 @@
+{
+  "id": "godot-glb",
+  "engine": "Godot 4 (glTF import)",
+  "format": "glb",
+  "description": "GLB with palette atlas and named animation clips; Godot imports clips into an AnimationPlayer.",
+  "vertex_colors": true,
+  "atlas": true,
+  "animations": true,
+  "budget_tris": 15000
+}

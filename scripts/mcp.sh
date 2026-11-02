@@ -12,7 +12,9 @@ source "$here/tools.sh"
 
 name="${1:?usage: mcp.sh <tool>}"
 shift
+repo="$(dirname "$here")"
 pkg=""
+[[ "$name" == meshcraft ]] && pkg=meshcraft
 for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r n _ p <<<"$entry"
   [[ "$n" == "$name" ]] && pkg="$p"
@@ -20,6 +22,7 @@ done
 [[ -n "$pkg" ]] || { echo "gitcraft: unknown tool '$name'" >&2; exit 2; }
 
 bin="$GITCRAFT_BIN/$pkg"
+[[ "$name" == meshcraft ]] && bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"
 if [[ ! -x "$bin" ]]; then
   echo "gitcraft: $pkg isn't built yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
   exit 1
@@ -43,6 +46,9 @@ case "$name" in
   filmcraft)   cmd=("$bin" mcp) ;;
   lightcraft)  mkdir -p "$GITCRAFT_HOME/lightcraft-library"
                cmd=("$bin" mcp --compact --library "$GITCRAFT_HOME/lightcraft-library") ;;
+  # Blender in-process; enforces the roots itself as well as through the sandbox below.
+  meshcraft)   export GITCRAFT_ROOTS GITCRAFT_ROOT
+               cmd=("$bin" "$repo/meshcraft/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
 case "$name" in vectorcraft|designcraft|effectcraft)
@@ -55,6 +61,7 @@ writable=("${roots[@]}" "$state")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
+  [[ "$name" == meshcraft ]] && policy+=(--rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done
