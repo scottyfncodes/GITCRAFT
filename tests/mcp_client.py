@@ -2,9 +2,9 @@
 import json, os, queue, subprocess, threading, time
 
 class Client:
-    def __init__(self, cmd, env=None, log=None):
+    def __init__(self, cmd, env=None, log=None, cwd=None):
         self.p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                  stderr=open(log or os.devnull, "ab"), env=env, bufsize=0)
+                                  stderr=open(log or os.devnull, "ab"), env=env, bufsize=0, cwd=cwd)
         self.q, self.id = queue.Queue(), 0
         threading.Thread(target=self._read, daemon=True).start()
         self.info = self.req("initialize", {"protocolVersion": "2025-06-18", "capabilities": {},

@@ -16,7 +16,7 @@ except Exception: cfg = {}
 servers = cfg.setdefault("mcpServers", {})
 for entry in tools:
     name, _, pkg = entry.split(":")
-    if os.access(os.path.join(bindir, pkg), os.X_OK) or (name in ("meshcraft", "forgecraft") and os.access(os.path.expanduser("~/.gitcraft/meshcraft/venv/bin/python"), os.X_OK)):
+    if os.access(os.path.join(bindir, pkg), os.X_OK) or (name in ("meshcraft", "forgecraft") and os.access(os.path.join(os.path.dirname(bindir), "meshcraft", "venv", "bin", "python"), os.X_OK)):
         servers[name] = {"type": "stdio", "command": os.path.join(here, "mcp.sh"), "args": [name], "env": {}}
         print(f"gitcraft: registered {name} (wrote ~/.claude.json)")
 tmp = cfg_path + ".gitcraft.tmp"

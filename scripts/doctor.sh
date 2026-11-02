@@ -46,6 +46,34 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
   [[ $reg == yes ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")
 done
 
+# Global availability: the servers must start from ~/.gitcraft/runtime, not from a checkout that
+# may not be attached next session; the instructions and skill make every project consider them.
+say ""
+say "  global (every project):"
+runtime="$GITCRAFT_HOME/runtime"
+if [[ -x "$runtime/scripts/mcp.sh" ]]; then
+  say "    runtime:      $runtime (from $(tail -1 "$runtime/.gitcraft-source" 2>/dev/null) @ $(head -1 "$runtime/.gitcraft-source" 2>/dev/null))"
+else
+  say "    runtime:      MISSING"; problems+=("no runtime in $runtime: run scripts/install-global.sh")
+fi
+while IFS= read -r line; do
+  say "    $line"; [[ "$line" == *"NOT"* || "$line" == *"missing"* ]] && problems+=("${line# *}")
+done < <(python3 - "$runtime" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" <<'PY'
+import json, os, sys
+runtime, cdir = sys.argv[1], sys.argv[2]
+cfg = os.path.join(os.environ.get("CLAUDE_CONFIG_DIR", os.path.expanduser("~")), ".claude.json")
+try: servers = json.load(open(cfg)).get("mcpServers", {})
+except Exception: servers = {}
+mine = {k: v for k, v in servers.items() if str(v.get("command", "")).endswith("/scripts/mcp.sh")}
+bad = sorted(k for k, v in mine.items() if not str(v["command"]).startswith(runtime + "/") or not os.access(v["command"], os.X_OK))
+print(f"registration: {len(mine)} user-scope servers" + (f"; NOT from the runtime or not runnable: {', '.join(bad)} (run scripts/install-global.sh)" if bad else ", all from the runtime"))
+md = os.path.join(cdir, "CLAUDE.md")
+print("instructions: " + (md if os.path.exists(md) and "GITCRAFT:BEGIN" in open(md).read() else f"missing from {md} (run scripts/install-global.sh)"))
+sk = os.path.join(cdir, "skills", "gitcraft", "SKILL.md")
+print("skill:        " + (sk if os.path.exists(sk) else f"missing: {sk} (run scripts/install-global.sh)"))
+PY
+)
+
 if [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]]; then
   say ""
   say "  3D Department capabilities (meshcraft + forgecraft):"
