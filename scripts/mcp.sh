@@ -43,7 +43,7 @@ done
 native=(--automation-read-root "$root" --automation-write-root "$root")
 # LightCraft locks its library to one process; GITCRAFT_LIGHTCRAFT_LIBRARY lets tests use their own.
 lc_library="${GITCRAFT_LIGHTCRAFT_LIBRARY:-$GITCRAFT_HOME/lightcraft-library}"
-# MeshCraft's versioned asset library and job records (outside the workspace, like LightCraft's library)
+# The 3D library ($GITCRAFT_3D_LIBRARY, from tools.sh) is shared by meshcraft and forgecraft, outside the workspace like LightCraft's
 case "$name" in
   photocraft)  cmd=("$bin" mcp "${native[@]}") ;;
   vectorcraft) cmd=("$bin" mcp --headless "${native[@]}") ;;
