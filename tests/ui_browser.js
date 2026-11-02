@@ -2,7 +2,7 @@
 // dark mode and the desktop layout. Prints one JSON line per check; screenshots go to OUT.
 //   node tests/ui_browser.js URL OUT
 const { chromium, devices } = require('playwright');
-const [url, out, palette] = process.argv.slice(2);
+const [url, out, palette, expected] = process.argv.slice(2);
 const results = [];
 const check = (name, ok, detail) => { results.push({ name, ok: !!ok, detail: detail == null ? '' : String(detail).slice(0, 300) }); };
 
@@ -20,7 +20,7 @@ const check = (name, ok, detail) => { results.push({ name, ok: !!ok, detail: det
     await p.goto(url); await p.waitForSelector('.grid .card');
     await p.waitForFunction(() => document.body.innerText.includes('CPU threads'), null, { timeout: 60000 });
     const txt = await p.innerText('main');
-    check('home: 8 tools, sandbox and network state shown', (await p.$$('.grid .card')).length === 8 && /Landlock ABI \d/.test(txt) && txt.includes('Network denied'), txt.slice(0, 200));
+    check(`home: all ${expected} tools, sandbox and network state shown`, (await p.$$('.grid .card')).length === Number(expected) && /Landlock ABI \d/.test(txt) && txt.includes('Network denied'), txt.slice(0, 200));
     check('home: capabilities distinguish available from not available', txt.includes('Available') && txt.includes('Not available'));
     check('token removed from the address bar', !p.url().includes('token='), p.url());
     const tabs = await p.$$eval('.tabbar a', (as) => as.map((a) => a.getBoundingClientRect().height));

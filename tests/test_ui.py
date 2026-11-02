@@ -26,6 +26,8 @@ results = []
 def check(label, ok, detail=""):
     results.append(bool(ok)); print(("PASS " if ok else "FAIL ") + label + ("" if ok else f"  [{str(detail)[:400]}]"), flush=True)
 
+EXPECTED = int(subprocess.run(["bash", "-c", 'source "$1/scripts/tools.sh"; echo $(( ${#GITCRAFT_TOOLS[@]} + ${#GITCRAFT_EXTRA_TOOLS[@]} ))', "_", REPO],
+                              capture_output=True, text=True, env=env).stdout.strip())
 urlfile = os.path.join(ws, "ui-url.txt")
 srv = subprocess.Popen([os.path.join(REPO, "scripts", "ui.sh"), "--port", "0", "--url-file", urlfile], env=env,
                        stdout=open(os.path.join(ws, "ui-server.log"), "w"), stderr=subprocess.STDOUT)
@@ -93,11 +95,13 @@ try:
 
     # ---------------- discovery
     code, ov, _ = req("/api/overview")
-    check("overview lists the 8 tools, installed and registered", code == 200 and len(ov["tools"]) == 8 and all(t["installed"] for t in ov["tools"]), ov)
+    check(f"overview lists all {EXPECTED} tools from scripts/tools.sh, all installed", code == 200 and len(ov["tools"]) == EXPECTED and all(t["installed"] for t in ov["tools"]),
+          [(t["name"], t["installed"]) for t in ov.get("tools", [])])
     check("overview reports the kernel sandbox and the closed network", ov["sandbox"]["landlock_abi"] and ov["network"] == "denied", ov.get("sandbox"))
     code, d, _ = req("/api/discover", "POST", {})
     counts = {k: len(v.get("tools", [])) for k, v in d.items()}
-    check("discovers every server's tools over MCP through scripts/mcp.sh", code == 200 and len(d) == 8 and all(v["ok"] and v["tools"] for v in d.values()), d if code != 200 else counts)
+    check("discovers every server's tools over MCP through scripts/mcp.sh", code == 200 and len(d) == EXPECTED and all(v["ok"] and v["tools"] for v in d.values()),
+          d if code != 200 else {k: (v.get("error") or len(v["tools"]))[:300] if isinstance(v.get("error"), str) else len(v["tools"]) for k, v in d.items()})
     check("policy-blocked commands are reported", req("/api/tools?tool=effectcraft")[1].get("denied") == ["run_script"])
 
     # ---------------- guard and sandbox still apply to UI calls
@@ -149,7 +153,7 @@ try:
 
     # ---------------- browser (iPhone first)
     shots = os.path.join(ws, "ui-shots"); os.makedirs(shots, exist_ok=True)
-    pr = subprocess.run(["node", os.path.join(HERE, "ui_browser.js"), URL, shots, pal], capture_output=True, text=True, timeout=1200)
+    pr = subprocess.run(["node", os.path.join(HERE, "ui_browser.js"), URL, shots, pal, str(EXPECTED)], capture_output=True, text=True, timeout=1200)
     lines = [json.loads(l) for l in pr.stdout.splitlines() if l.startswith("{")]
     if not lines: check("browser run", False, pr.stdout[-500:] + pr.stderr[-500:])
     for l in lines: check("browser: " + l["name"], l["ok"], l["detail"])

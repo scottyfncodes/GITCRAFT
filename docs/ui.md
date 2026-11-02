@@ -1,6 +1,6 @@
 # GITCRAFT control room (local web UI)
 
-A visual front end for all eight GITCRAFT tools, built for phones first. It is an **extra interface**: Claude Code, the MCP servers, `scripts/mcp.sh` and the CLIs work exactly as before, and the UI adds no new engine.
+A visual front end for every GITCRAFT tool (the list comes from `scripts/tools.sh`, so new tools such as ForgeCraft appear automatically), built for phones first. It is an **extra interface**: Claude Code, the MCP servers, `scripts/mcp.sh` and the CLIs work exactly as before, and the UI adds no new engine.
 
 ```
 scripts/ui.sh                    # serves http://127.0.0.1:8765/#token=… (prints the link; Ctrl-C stops it)
@@ -20,7 +20,7 @@ Open the printed link once. The page keeps the token for that tab and removes it
 | **Run · Any tool** | Every tool on every server, with a form generated from its input schema. Results show images inline and the full JSON. Commands GITCRAFT policy blocks are marked and cannot be run |
 | **Jobs** | Every MeshCraft job, filterable by status. A job shows each attempt (what was changed for a retry, timing, the error), the pipeline steps, a plain explanation of any fallback, a link to the library version, and **Retry** |
 | **Library** | The versioned 3D library: search, check-status filter, thumbnails. An asset shows its versions (with *identical to vN*), previews, an interactive 3D viewer for its GLBs, the check results (problems first), every file with its SHA-256, the inputs it came from, and **Export and verify** into a workspace root |
-| **Tools** | The eight servers and their discovered tool lists, searchable; tap a tool to run it |
+| **Tools** | Every server and its discovered tool list, searchable; tap a tool to run it |
 
 ## How it stays inside GITCRAFT's security model
 
@@ -45,7 +45,7 @@ The control room listens on `127.0.0.1` only, so it is never on your network. To
 `tests/test_ui.py` starts the UI on a free port with a scratch workspace and library. It checks:
 - the security gates;
 - that the guard and audit log still apply to UI calls;
-- discovery of all eight servers;
+- discovery of every server listed in `scripts/tools.sh`;
 - MeshCraft pipelines, jobs (done, fallback, failed), library versions, verified export, a refused export outside the roots, and advice;
 - the browser flow at iPhone size (`tests/ui_browser.js`, Playwright: home, library, asset with 3D viewer and export, jobs, advice, pipeline form, tools, dark mode, desktop, no horizontal scroll, no page errors);
 - the snapshot.

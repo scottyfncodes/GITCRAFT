@@ -594,7 +594,7 @@ async function viewer(el, url) {
 
 // ---------------------------------------------------------------- Tools
 function pageTools(main) {
-  main.append(head("All eight servers", "Tools", "Each server's own tool list, discovered live over MCP. Commands GITCRAFT policy blocks are marked; the guard refuses them."));
+  main.append(head("Every GITCRAFT server", "Tools", "Each server's own tool list, discovered live over MCP. Commands GITCRAFT policy blocks are marked; the guard refuses them."));
   const list = h("div", { class: "grid" }, loading(4)); main.append(list);
   api.get("/api/overview").then((ov) => { LIB = ov.library; list.replaceChildren(...ov.tools.map(toolCard)); }).catch((e) => list.replaceChildren(failBox(e)));
 }
