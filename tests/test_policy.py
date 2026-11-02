@@ -48,11 +48,13 @@ TESTS = {
                  lambda c: c.call("import", {"paths": [SECRET]})),
  "meshcraft":   (lambda c: c.call("inspect_palette", {"path": pal}),
                  lambda c: c.call("inspect_palette", {"path": SECRET})),
+ "forgecraft":  (lambda c: c.call("blockbench_build", {"template": "crate", "name": "policy", "out": f"{ws}/policy.bbmodel"}),
+                 lambda c: c.call("blockbench_inspect", {"path": SECRET})),
 }
 pal = os.path.join(ws, "palette.json"); json.dump({"Honey Timber": "#D9954F", "Timber": "#9A5A2E", "Deep Tide": "#0E3B66", "Midnight Swell": "#0A2142",
                                                 "Doubloon Gold": "#F4C542", "Gold Deep": "#C98A12", "Sunlit Amber": "#FF9F2E", "Sailcloth Cream": "#F6EAD0"}, open(pal, "w"))
 if not os.path.exists(os.path.join(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft")), "meshcraft", "venv", "bin", "python")):
-    TESTS.pop("meshcraft")   # optional tool (GITCRAFT_MESHCRAFT=0)
+    TESTS.pop("meshcraft"); TESTS.pop("forgecraft")   # optional tools (GITCRAFT_MESHCRAFT=0); forgecraft drives MeshCraft's Blender
 want = sys.argv[1:] or list(TESTS)
 for name in want:
     good, bad = TESTS[name]
@@ -112,13 +114,17 @@ sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 gh = os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"))
 base = ["python3", os.path.join(HERE, "..", "scripts", "sandbox.py"), "--rx", "/usr", "--rx", "/lib", "--rx", "/lib64", "--rx", "/bin",
         "--rx", f"{gh}/bin", "--ro", "/etc", "--ro", "/proc", "--ro", "/sys", "--rw", "/dev", "--rw", ws, "--rw", f"{gh}/state", "--no-net", "--require", "--"]
-for name, cmd, bad in (("filmcraft", [f"{gh}/bin/filmcraft-cli", "mcp"], ("media_import", {"paths": [SECRET]})),
+FC_DIR = os.path.join(HERE, "..", "forgecraft")
+for name, cmd, bad in (("forgecraft", ["python3", os.path.join(FC_DIR, "server.py")], ("blockbench_inspect", {"path": SECRET})),
+                       ("filmcraft", [f"{gh}/bin/filmcraft-cli", "mcp"], ("media_import", {"paths": [SECRET]})),
                        ("lightcraft", [f"{gh}/bin/lightcraft-cli", "mcp", "--compact", "--library", f"{ws}/lc-lib"], ("import", {"paths": [SECRET]}))):
     if name not in want: continue
     try:
-        c = Client(base + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state"))
+        extra = ["--rx", FC_DIR, "--rx", f"{gh}/forgecraft", "--rx", f"{gh}/meshcraft"] if name == "forgecraft" else []
+        c = Client(base[:-1] + extra + ["--"] + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state", FORGECRAFT_LIBRARY=f"{ws}/fc-lib"))
         ok, val = c.call(*bad)
-        leaked = ok and ("imported" in str(val) and "[]" not in str(val).split("imported")[1][:8] or "items" in str(val) and "[]" not in str(val).split("items")[1][:8])
+        if name == "forgecraft": leaked = ok
+        else: leaked = ok and ("imported" in str(val) and "[]" not in str(val).split("imported")[1][:8] or "items" in str(val) and "[]" not in str(val).split("items")[1][:8])
         print("   kernel-only response:", str(val)[:240]); check(f"{name}: sandbox alone blocks reading outside the workspace", not leaked, str(val)[:300])
         c.close()
     except Exception as e:

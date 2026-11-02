@@ -14,7 +14,7 @@ name="${1:?usage: mcp.sh <tool>}"
 shift
 repo="$(dirname "$here")"
 pkg=""
-[[ "$name" == meshcraft ]] && pkg=meshcraft
+[[ "$name" == meshcraft || "$name" == forgecraft ]] && pkg="$name"
 for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r n _ p <<<"$entry"
   [[ "$n" == "$name" ]] && pkg="$p"
@@ -22,7 +22,7 @@ done
 [[ -n "$pkg" ]] || { echo "gitcraft: unknown tool '$name'" >&2; exit 2; }
 
 bin="$GITCRAFT_BIN/$pkg"
-[[ "$name" == meshcraft ]] && bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"
+[[ "$name" == meshcraft || "$name" == forgecraft ]] && bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"   # ForgeCraft drives MeshCraft's Blender
 if [[ ! -x "$bin" ]]; then
   echo "gitcraft: $pkg isn't built yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
   exit 1
@@ -58,6 +58,11 @@ case "$name" in
   # Blender in-process; enforces the roots itself as well as through the sandbox below.
   meshcraft)   mkdir -p "$mc_library"; export GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_MESHCRAFT_LIBRARY="$mc_library"
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
+  # The 3D Department pipeline (stdlib Python); spawns Blender, Meshroom and the AI backends as children.
+  forgecraft)  mkdir -p "$FORGECRAFT_LIBRARY" "$FORGECRAFT_HOME/hf-cache"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME FORGECRAFT_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache"
+               # HOME inside the sandbox is the tool's state folder (Chromium and Blender write caches there)
+               cmd=(env HOME="$state/data" python3 "$repo/forgecraft/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
 case "$name" in vectorcraft|designcraft|effectcraft)
@@ -68,10 +73,12 @@ cmd+=("$@")
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$mc_library")
+[[ "$name" == forgecraft ]] && writable+=("$FORGECRAFT_LIBRARY" "$FORGECRAFT_HOME/hf-cache")
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
   [[ "$name" == meshcraft ]] && policy+=(--rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
+  [[ "$name" == forgecraft ]] && policy+=(--rx "$repo/forgecraft" --rx "$FORGECRAFT_HOME" --rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done

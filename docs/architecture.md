@@ -33,8 +33,9 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
 | `scripts/sandbox.py` | Landlock launcher (filesystem + network) |
 | `scripts/doctor.sh` | Health report |
 | `.github/workflows/build.yml` | Builds the ArtCraft CLIs weekly / on demand into the `bin` branch |
+| `forgecraft/` | ForgeCraft, the 3D Department pipeline: MCP server, routing, job pipeline, library, Blender job runner, backends (incl. MeshCraft templates), UI. See `docs/3d-department.md` |
 | `meshcraft/` | MeshCraft: MCP server (`server.py`), engine (`engine/`: kit, templates, preview, validation, export), export profiles, engine check (Three.js + Khronos) |
-| `tests/` | MCP test client, the policy test and the MeshCraft test |
+| `tests/` | MCP test client, the policy test, the MeshCraft and ForgeCraft tests, the TIDEBREAKERS 3D acceptance test |
 
 ## How tools hand off work
 
@@ -47,6 +48,8 @@ MeshCraft consumes what the 2D tools produce:
 - **reference images** (PNG/JPG from any tool) are attached to the `.blend` and shown on its contact sheet next to the renders;
 - its previews are PNGs the 2D tools can lay out (DesignCraft) or composite (PhotoCraft);
 - its manifest updates use the same `MANIFEST.json` the creative package uses.
+
+ForgeCraft sits one level up: it routes a request to Blender procedural modelling, a MeshCraft template, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D. It packages every result in its versioned library, and `library_export` hands assets to the other tools.
 
 ## Session lifecycle
 

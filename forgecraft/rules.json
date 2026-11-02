@@ -1,0 +1,423 @@
+{
+ "_doc": "ForgeCraft routing rules. Read by forgecraft/routing.py and by the 3D Department UI, so both route identically. Order of `routes` matters: the first route whose `when` matches wins; its `tools` are tried in order and the first available one is chosen.",
+ "intents": {
+  "photogrammetry": {
+   "min_images": 8,
+   "words": [
+    "photogrammetry",
+    "scan",
+    "reconstruct",
+    "reconstruction",
+    "real-world",
+    "captured"
+   ]
+  },
+  "concept_art": {
+   "words": [
+    "concept art",
+    "concept",
+    "painting",
+    "illustration",
+    "detailed",
+    "realistic",
+    "high detail",
+    "hero asset"
+   ]
+  },
+  "photo": {
+   "words": [
+    "photo",
+    "photograph",
+    "picture of",
+    "snapshot",
+    "reference photo",
+    "object from"
+   ]
+  },
+  "voxel": {
+   "words": [
+    "voxel",
+    "blocky",
+    "minecraft",
+    "cube-built",
+    "pixel art",
+    "boxy",
+    "blockbench"
+   ]
+  },
+  "character": {
+   "words": [
+    "character",
+    "human",
+    "humanoid",
+    "pirate",
+    "sailor",
+    "deckhand",
+    "captain",
+    "person",
+    "npc",
+    "hero",
+    "villager",
+    "crewmate"
+   ]
+  },
+  "creature": {
+   "words": [
+    "creature",
+    "animal",
+    "crab",
+    "monster",
+    "beast"
+   ]
+  },
+  "animated": {
+   "words": [
+    "animated",
+    "animation",
+    "rigged",
+    "rig",
+    "walk",
+    "run",
+    "jump",
+    "attack",
+    "idle"
+   ]
+  },
+  "scene": {
+   "words": [
+    "scene",
+    "level",
+    "diorama",
+    "game-ready scene",
+    "complete scene",
+    "compose"
+   ]
+  },
+  "stylized": {
+   "words": [
+    "stylized",
+    "stylised",
+    "low-poly",
+    "low poly",
+    "lowpoly",
+    "cartoon",
+    "toon",
+    "simple"
+   ]
+  }
+ },
+ "kinds": {
+  "boat": [
+   "boat",
+   "ship",
+   "sloop",
+   "dinghy",
+   "vessel",
+   "skiff",
+   "brig"
+  ],
+  "upgrade": [
+   "upgrade",
+   "mainsail",
+   "cargo crate",
+   "compass",
+   "ship's wheel",
+   "steering wheel",
+   "rudder",
+   "copper",
+   "hull plating",
+   "binnacle"
+  ],
+  "salvage": [
+   "salvage",
+   "flotsam",
+   "debris",
+   "wreckage",
+   "floating",
+   "jetsam"
+  ],
+  "island": [
+   "island",
+   "atoll",
+   "cay",
+   "islet",
+   "terrain",
+   "landmass",
+   "beach"
+  ],
+  "lighthouse": [
+   "lighthouse",
+   "beacon tower",
+   "watchtower"
+  ],
+  "character": [
+   "character",
+   "human",
+   "pirate",
+   "sailor",
+   "deckhand",
+   "captain",
+   "person",
+   "npc",
+   "crewmate"
+  ],
+  "prop": [
+   "barrel",
+   "crate",
+   "chest",
+   "rock",
+   "boulder",
+   "palm",
+   "tree"
+  ],
+  "scene": [
+   "scene",
+   "level",
+   "diorama"
+  ]
+ },
+ "upgrade_words": {
+  "sail_canvas": [
+   "sail",
+   "canvas"
+  ],
+  "cargo_crate": [
+   "crate",
+   "cargo",
+   "storage"
+  ],
+  "compass_brass": [
+   "compass",
+   "navigation",
+   "binnacle"
+  ],
+  "rudder_ash": [
+   "wheel",
+   "rudder",
+   "steering",
+   "helm"
+  ],
+  "hull_copper": [
+   "copper",
+   "hull",
+   "plating",
+   "armor"
+  ]
+ },
+ "prop_words": {
+  "barrel": [
+   "barrel"
+  ],
+  "crate": [
+   "crate",
+   "box"
+  ],
+  "chest": [
+   "chest",
+   "treasure"
+  ],
+  "rock": [
+   "rock",
+   "boulder",
+   "stone"
+  ],
+  "palm": [
+   "palm",
+   "tree"
+  ]
+ },
+ "routes": [
+  {
+   "id": "photogrammetry",
+   "when": "images>=8 or intent:photogrammetry and images>=1",
+   "tools": [
+    "meshroom",
+    "triposr",
+    "hunyuan3d"
+   ],
+   "why": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+  },
+  {
+   "id": "concept_image",
+   "when": "images>=1 and intent:concept_art",
+   "tools": [
+    "hunyuan3d",
+    "triposr"
+   ],
+   "why": "Detailed concept art: Hunyuan3D gives the most faithful shape and texture; TripoSR is the faster fallback."
+  },
+  {
+   "id": "photo_image",
+   "when": "images>=1",
+   "tools": [
+    "triposr",
+    "hunyuan3d"
+   ],
+   "why": "One reference image: TripoSR converts a single photo to a mesh in seconds on a GPU (minutes on CPU)."
+  },
+  {
+   "id": "scene",
+   "when": "intent:scene or kind:scene",
+   "tools": [
+    "blender_scene"
+   ],
+   "why": "Scene assembly, lighting and composition are Blender's job."
+  },
+  {
+   "id": "voxel",
+   "when": "intent:voxel",
+   "tools": [
+    "blockbench",
+    "blender_procedural"
+   ],
+   "why": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench."
+  },
+  {
+   "id": "meshcraft_template",
+   "when": "template:any",
+   "tools": [
+    "meshcraft_template",
+    "blender_procedural",
+    "blockbench"
+   ],
+   "why": "MeshCraft has a hand-tuned template for this (TIDEBREAKERS Pebble & Sail style, brand palette, engine-checked exports)."
+  },
+  {
+   "id": "character",
+   "when": "intent:character or kind:character",
+   "tools": [
+    "blender_character",
+    "hunyuan3d"
+   ],
+   "why": "Animated characters need a skeleton: Blender builds a Mixamo-compatible rig and clips; Mixamo downloads can be layered on."
+  },
+  {
+   "id": "creature",
+   "when": "intent:creature",
+   "tools": [
+    "blockbench",
+    "hunyuan3d"
+   ],
+   "why": "Non-humanoid creatures: a Blockbench cube-built model (stylized) or Hunyuan3D for organic detail. The humanoid Mixamo rig is not used for creatures."
+  },
+  {
+   "id": "procedural",
+   "when": "kind:known",
+   "tools": [
+    "blender_procedural",
+    "blockbench",
+    "hunyuan3d"
+   ],
+   "why": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+  },
+  {
+   "id": "detailed_text",
+   "when": "true",
+   "tools": [
+    "hunyuan3d",
+    "blender_procedural",
+    "blockbench"
+   ],
+   "why": "Free-form description with no template: text-to-3D (Hunyuan3D) when compute allows."
+  }
+ ],
+ "tools": {
+  "blender_procedural": {
+   "label": "Blender (procedural)",
+   "backend": "blender",
+   "needs": "kind:known",
+   "kinds": [
+    "boat",
+    "upgrade",
+    "salvage",
+    "island",
+    "lighthouse",
+    "prop"
+   ],
+   "compute": "CPU, seconds"
+  },
+  "blender_character": {
+   "label": "Blender (rig + animation, Mixamo skeleton)",
+   "backend": "blender",
+   "compute": "CPU, seconds"
+  },
+  "blender_scene": {
+   "label": "Blender (scene composition)",
+   "backend": "blender",
+   "compute": "CPU, ~1 min with hero render"
+  },
+  "blockbench": {
+   "label": "Blockbench (.bbmodel) → Blender",
+   "backend": "blender",
+   "needs": "bb_template",
+   "kinds": [
+    "boat",
+    "prop",
+    "salvage",
+    "character",
+    "crab",
+    "lantern"
+   ],
+   "compute": "CPU, seconds"
+  },
+  "triposr": {
+   "label": "TripoSR (image → mesh)",
+   "backend": "triposr",
+   "needs": "image",
+   "compute": "GPU ~6 GB VRAM: ~1 s; CPU: minutes"
+  },
+  "hunyuan3d": {
+   "label": "Hunyuan3D-2 (text/image → textured mesh)",
+   "backend": "hunyuan3d",
+   "compute": "NVIDIA GPU ≥6 GB (shape) / ≥16 GB (texture), or HF Space"
+  },
+  "meshroom": {
+   "label": "Meshroom / AliceVision (photogrammetry)",
+   "backend": "meshroom",
+   "needs": "images>=3",
+   "compute": "CPU draft: 5–30 min; CUDA for dense"
+  },
+  "import": {
+   "label": "Import existing mesh → Blender",
+   "backend": "blender",
+   "compute": "CPU, seconds"
+  },
+  "mixamo": {
+   "label": "Mixamo FBX animations → Blender",
+   "backend": "blender",
+   "compute": "CPU, seconds"
+  },
+  "meshcraft_template": {
+   "label": "MeshCraft template (Blender)",
+   "backend": "meshcraft",
+   "compute": "CPU, ~30–60 s with previews"
+  }
+ },
+ "meshcraft_templates": {
+  "chest": [
+   "treasure chest",
+   "chest"
+  ],
+  "crab": [
+   "biscuit",
+   "teacup crab",
+   "crab"
+  ],
+  "flag": [
+   "flag",
+   "pennant",
+   "banner"
+  ],
+  "lantern": [
+   "lantern"
+  ],
+  "sail": [
+   "sail",
+   "mainsail"
+  ],
+  "sun_figurehead": [
+   "figurehead",
+   "sun emblem"
+  ]
+ }
+}

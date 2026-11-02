@@ -97,7 +97,7 @@ done
 # 3) MeshCraft: Blender as a Python module (bpy from PyPI) in its own venv,
 #    plus the Node packages its engine check uses. No compiled GitHub artifact needed.
 mesh_state=skipped
-want_mesh=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " meshcraft " ]] && want_mesh=0
+want_mesh=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " meshcraft " && ! " ${want[*]} " =~ " forgecraft " ]] && want_mesh=0   # forgecraft needs MeshCraft's Blender
 if [[ "$GITCRAFT_MESHCRAFT" == 1 && $want_mesh == 1 ]]; then
   venv="$GITCRAFT_HOME/meshcraft/venv"
   if [[ -x "$venv/bin/python" && $update -eq 0 ]] && "$venv/bin/python" -c "import bpy" 2>/dev/null; then
@@ -126,12 +126,18 @@ if [[ "$GITCRAFT_MESHCRAFT" == 1 && $want_mesh == 1 ]]; then
   fi
 fi
 
+# 4) ForgeCraft (3D Department) rides on MeshCraft's Blender; its core extra is the engine check.
+forge_state=skipped
+if [[ $mesh_state == ok ]] && { ! ((${#want[@]})) || [[ " ${want[*]} " =~ " forgecraft " ]]; }; then
+  "$here/install-3d.sh" core && forge_state=ok || { forge_state=failed; failed+=(forgecraft); }
+fi
+
 "$here/register.sh"
 
 # Machine-readable result for doctor.sh and for anything orchestrating installs.
-python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
+python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
 import json, os, sys, time
-out, bindir, failed, mesh, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4], sys.argv[5:]
+out, bindir, failed, mesh, forge, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4], sys.argv[5], sys.argv[6:]
 st = {"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tools": {}}
 for e in tools:
     name, _, pkg = e.split(":")
@@ -141,6 +147,9 @@ for e in tools:
 if mesh != "skipped":
     v = os.path.join(bindir, "meshcraft.version")
     st["tools"]["meshcraft"] = {"state": mesh, "version": open(v).read().strip() if os.path.exists(v) else None}
+if forge != "skipped":
+    v = os.path.join(bindir, "forgecraft.version")
+    st["tools"]["forgecraft"] = {"state": forge, "version": open(v).read().strip() if os.path.exists(v) else None}
 json.dump(st, open(out, "w"), indent=1)
 PY
 

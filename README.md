@@ -2,7 +2,7 @@
 
 Seven open-source creative apps from [ArtCraft](https://github.com/storytold), wired into Claude Code as MCP tools:
 
-PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender)
+PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department pipeline)
 
 ## How it works
 
@@ -13,6 +13,14 @@ PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft 
 ## 3D: MeshCraft
 
 MeshCraft runs Blender 5.2 headless as an MCP server: creative brief + brand palette + 2D references → modelled, coloured, previewed, validated assets exported as GLB / FBX / OBJ, with a Three.js engine check. See [meshcraft/README.md](meshcraft/README.md).
+
+## 3D Department: ForgeCraft
+
+ForgeCraft runs the 3D Department pipeline. It routes each request to the best available tool (Blender procedural modelling, MeshCraft templates, Blockbench, Mixamo, Meshroom photogrammetry, TripoSR, Hunyuan3D), with fallbacks. It then cleans, optimises, UV-unwraps and bakes the model, rigs and animates it, renders previews, exports GLB/glTF/FBX/OBJ/STL/.blend, validates the result (Blender re-import, Khronos, three.js r170) and packages it in a versioned asset library. It never substitutes a 2D image for a 3D model.
+
+- Docs: [docs/3d-department.md](docs/3d-department.md); licences, hardware and costs: [docs/forgecraft-licensing.md](docs/forgecraft-licensing.md).
+- The TIDEBREAKERS 3D package is in `acceptance/tidebreakers-3d/`.
+- ForgeCraft uses MeshCraft's Blender. `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
 
 ## Control room
 
@@ -40,6 +48,8 @@ scripts/mcp.sh photocraft     # start one server by hand (sandboxed)
 scripts/doctor.sh             # health report
 tests/test_policy.py          # end-to-end security test
 tests/test_meshcraft.py       # MeshCraft pipeline + sandbox test
+tests/test_forgecraft.py      # ForgeCraft: every 3D backend, routing, retries, library
+python3 forgecraft/ui_server.py   # the 3D Department UI, live on http://127.0.0.1:8765
 ```
 
 Files are limited to `$GITCRAFT_ROOTS` (default `$GITCRAFT_ROOT`: `$HOME`, or the session workspace when it is outside `$HOME`), enforced by the kernel sandbox. Set them before starting a session to narrow or widen that.

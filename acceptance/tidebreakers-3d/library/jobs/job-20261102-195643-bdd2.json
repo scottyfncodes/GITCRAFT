@@ -1,0 +1,151 @@
+{
+ "id": "job-20261102-195643-bdd2",
+ "spec": {
+  "brief": "grand treasure chest",
+  "name": "Grand Treasure Chest (MeshCraft)",
+  "template_params": {
+   "tier": "grand"
+  },
+  "bake": 0,
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T19:56:43Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T19:56:46Z",
+   "finished": "2026-11-02T19:57:02Z",
+   "status": "done",
+   "error": null
+  }
+ ],
+ "stages": [
+  {
+   "stage": "route",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:46Z",
+   "info": {
+    "chosen": "meshcraft_template",
+    "route": "meshcraft_template",
+    "fallback_used": false,
+    "explanation": "MeshCraft has a hand-tuned template for this (TIDEBREAKERS Pebble & Sail style, brand palette, engine-checked exports)."
+   },
+   "finished": "2026-11-02T19:56:46Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:56:46Z",
+   "info": {
+    "template": "chest",
+    "clips": [
+     "lid_close",
+     "lid_open"
+    ],
+    "meshcraft_validation": {
+     "pass": 17,
+     "warn": 0,
+     "fail": 0,
+     "info": 2
+    },
+    "seconds": 13.2
+   },
+   "finished": "2026-11-02T19:56:59Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:00Z",
+   "info": {
+    "status": "passed"
+   },
+   "finished": "2026-11-02T19:57:02Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:57:02Z",
+   "info": {
+    "asset": "fc3d-4d0ab4aea8",
+    "version": 1
+   },
+   "finished": "2026-11-02T19:57:02Z"
+  }
+ ],
+ "error": null,
+ "asset": {
+  "id": "fc3d-4d0ab4aea8",
+  "version": 1,
+  "name": "Grand Treasure Chest (MeshCraft)",
+  "validation": "passed"
+ },
+ "plan": {
+  "request": {
+   "brief": "grand treasure chest",
+   "intents": [],
+   "kind": "prop",
+   "params": {
+    "seed": 545,
+    "prop": "chest"
+   },
+   "images": 0,
+   "name": "grand treasure chest",
+   "template": "chest"
+  },
+  "route": "meshcraft_template",
+  "why": "MeshCraft has a hand-tuned template for this (TIDEBREAKERS Pebble & Sail style, brand palette, engine-checked exports).",
+  "candidates": [
+   {
+    "tool": "meshcraft_template",
+    "label": "MeshCraft template (Blender)",
+    "available": true,
+    "detail": "CPU, ~30\u201360 s with previews"
+   },
+   {
+    "tool": "blender_procedural",
+    "label": "Blender (procedural)",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "blockbench",
+    "label": "Blockbench (.bbmodel) \u2192 Blender",
+    "available": true,
+    "detail": "CPU, seconds"
+   }
+  ],
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "MeshCraft has a hand-tuned template for this (TIDEBREAKERS Pebble & Sail style, brand palette, engine-checked exports)."
+ },
+ "compute": {
+  "tool": "meshcraft_template",
+  "needs": "CPU, ~30\u201360 s with previews",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "updated": "2026-11-02T19:57:02Z"
+}
