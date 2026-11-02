@@ -1,0 +1,268 @@
+{
+ "id": "mc3d-85d92f89e5",
+ "version": 1,
+ "name": "Upgrade: Ship's Wheel & Ash Rudder",
+ "slug": "upgrade_ship_s_wheel_ash_rudder",
+ "kind": "upgrade",
+ "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
+ "tags": [
+  "blender_procedural",
+  "tidebreakers",
+  "upgrade"
+ ],
+ "source_tool": "blender",
+ "pipeline": [
+  "model",
+  "cleanup",
+  "optimize",
+  "uv_unwrap",
+  "texture_bake",
+  "preview_render",
+  "export"
+ ],
+ "generation": {
+  "method": "procedural",
+  "kind": "upgrade",
+  "params": {
+   "seed": 777,
+   "upgrade": "rudder_ash"
+  },
+  "blender_config": {
+   "bake": 512,
+   "turntable": 8
+  }
+ },
+ "route": {
+  "route": "procedural",
+  "chosen": "blender_procedural",
+  "preferred": "blender_procedural",
+  "fallback_used": false,
+  "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-185711-6b1a",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T18:57:20Z"
+ },
+ "geometry": {
+  "triangles": 1016,
+  "vertices": 544,
+  "meshes": 1,
+  "dimensions_m": [
+   1.35,
+   0.32,
+   1.775
+  ],
+  "bounds_min": [
+   -0.675,
+   -0.2,
+   0.0
+  ],
+  "bounds_max": [
+   0.675,
+   0.12,
+   1.775
+  ]
+ },
+ "materials": [
+  "M_upgrade_ship_s_wheel_ash_rudder"
+ ],
+ "textures": [
+  {
+   "name": "upgrade_ship_s_wheel_ash_rudder_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_ship_s_wheel_ash_rudder_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": null,
+ "animations": [],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/upgrade_ship_s_wheel_ash_rudder_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_00.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_01.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_02.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_03.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_04.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_05.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_06.png",
+   "previews/upgrade_ship_s_wheel_ash_rudder_turn_07.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "upgrade_ship_s_wheel_ash_rudder.glb",
+   "bytes": 249264,
+   "sha256": "fb7338a57fb7ede72877c165106128d085e0fc7c5eac9dde44562b50d4836f1d"
+  },
+  "fbx": {
+   "path": "upgrade_ship_s_wheel_ash_rudder.fbx",
+   "bytes": 198924,
+   "sha256": "5b263522b3a5f89604caeca15e4e7f9e58254f93fcc63e328fc9df63191b61a6"
+  },
+  "blend": {
+   "path": "upgrade_ship_s_wheel_ash_rudder.blend",
+   "bytes": 118724,
+   "sha256": "c23ccc9b37bfccea1444adc828b8f9c6bd4a2fa85a47b0c25e62be7b35b73255"
+  }
+ },
+ "companion_files": [
+  "textures/upgrade_ship_s_wheel_ash_rudder_basecolor.png",
+  "textures/upgrade_ship_s_wheel_ash_rudder_metalrough.png"
+ ],
+ "validation": {
+  "status": "passed",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/upgrade_ship_s_wheel_ash_rudder.glb",
+   "bytes": 249264,
+   "objects": 2,
+   "meshes": 1,
+   "triangles": 1016,
+   "vertices": 2016,
+   "dimensions_m": [
+    1.35,
+    0.32,
+    1.775
+   ],
+   "textures": [
+    "upgrade_ship_s_wheel_ash_rudder_basecolor",
+    "upgrade_ship_s_wheel_ash_rudder_metalrough"
+   ],
+   "bones": 0,
+   "animations": [],
+   "non_manifold_edges": 2016,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/web_check.png",
+   "files": {
+    "upgrade_ship_s_wheel_ash_rudder.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 0,
+     "khronos_messages": [],
+     "three_loaded": true,
+     "three_clips": 0
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-185711-6b1a",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.04,
+   "info": {
+    "root": "upgrade_ship_s_wheel_ash_rudder"
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1016,
+    "tris_after": 1016,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 0.42,
+   "info": {
+    "maps": {
+     "basecolor": "upgrade_ship_s_wheel_ash_rudder_basecolor.png",
+     "metalrough": "upgrade_ship_s_wheel_ash_rudder_metalrough.png"
+    },
+    "resolution": 512,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 4.96,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/previews/upgrade_ship_s_wheel_ash_rudder_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.09,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/upgrade_ship_s_wheel_ash_rudder.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/upgrade_ship_s_wheel_ash_rudder.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185711-6b1a/out/upgrade_ship_s_wheel_ash_rudder.blend"
+    }
+   }
+  }
+ ]
+}

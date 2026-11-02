@@ -1,0 +1,255 @@
+{
+ "id": "mc3d-90b9eb629d",
+ "version": 1,
+ "name": "Reef Crab (Blockbench)",
+ "slug": "reef_crab_blockbench",
+ "kind": null,
+ "brief": "blocky voxel reef crab creature",
+ "tags": [
+  "blockbench",
+  "creature",
+  "tidebreakers",
+  "voxel"
+ ],
+ "source_tool": "blockbench \u2192 blender",
+ "pipeline": [
+  "import",
+  "cleanup",
+  "optimize",
+  "preview_render",
+  "export"
+ ],
+ "generation": {
+  "method": "blockbench template",
+  "template": "crab",
+  "bbmodel": {
+   "format_version": "5.0",
+   "model_format": "free",
+   "elements": 18,
+   "cubes": 18,
+   "meshes": 0,
+   "textures": [
+    {
+     "name": "reef_crab_blockbench_texture.png",
+     "embedded": true,
+     "size": [
+      128,
+      48
+     ]
+    }
+   ],
+   "animations": 0,
+   "problems": []
+  }
+ },
+ "route": {
+  "route": "voxel",
+  "chosen": "blockbench",
+  "preferred": "blockbench",
+  "fallback_used": false,
+  "explanation": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blockbench .bbmodel format",
+    "license": "Blockbench is GPL-3.0; .bbmodel files you create are yours"
+   },
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-185803-9074",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T18:58:12Z"
+ },
+ "geometry": {
+  "triangles": 216,
+  "vertices": 144,
+  "meshes": 1,
+  "dimensions_m": [
+   1.5,
+   1.062,
+   0.828
+  ],
+  "bounds_min": [
+   -0.75,
+   -0.531,
+   0.0
+  ],
+  "bounds_max": [
+   0.75,
+   0.531,
+   0.828
+  ]
+ },
+ "materials": [
+  "BB_reef_crab_blockbench_texture.png"
+ ],
+ "textures": [
+  {
+   "name": "0_reef_crab_blockbench_texture.png",
+   "size": [
+    128,
+    48
+   ],
+   "colorspace": "sRGB"
+  }
+ ],
+ "rig": null,
+ "animations": [],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/reef_crab_blockbench_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/reef_crab_blockbench_turn_00.png",
+   "previews/reef_crab_blockbench_turn_01.png",
+   "previews/reef_crab_blockbench_turn_02.png",
+   "previews/reef_crab_blockbench_turn_03.png",
+   "previews/reef_crab_blockbench_turn_04.png",
+   "previews/reef_crab_blockbench_turn_05.png",
+   "previews/reef_crab_blockbench_turn_06.png",
+   "previews/reef_crab_blockbench_turn_07.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "reef_crab_blockbench.glb",
+   "bytes": 23852,
+   "sha256": "b79378891cea715e5c499f88d048803b0c06b87771787b8459d438a47c413776"
+  },
+  "fbx": {
+   "path": "reef_crab_blockbench.fbx",
+   "bytes": 29804,
+   "sha256": "bacf23f85569885825fb5767a1083e47cc326b05c6a84a4996b2adf8786eb9ef"
+  },
+  "blend": {
+   "path": "reef_crab_blockbench.blend",
+   "bytes": 99878,
+   "sha256": "02ab863c7df80fcd8db37b6adc0bf44fd97f9a6e97b59372115d29065da9ec5c"
+  },
+  "bbmodel": {
+   "path": "reef_crab_blockbench.bbmodel",
+   "bytes": 30932,
+   "sha256": "f0c611773f1598e1fc306b8178798b721150027960787f710827643976cc4ef6"
+  }
+ },
+ "companion_files": [],
+ "validation": {
+  "status": "passed",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/reef_crab_blockbench.glb",
+   "bytes": 23852,
+   "objects": 2,
+   "meshes": 1,
+   "triangles": 216,
+   "vertices": 432,
+   "dimensions_m": [
+    1.5,
+    1.062,
+    0.828
+   ],
+   "textures": [
+    "0_reef_crab_blockbench_texture"
+   ],
+   "bones": 0,
+   "animations": [],
+   "non_manifold_edges": 432,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/web_check.png",
+   "files": {
+    "reef_crab_blockbench.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 0,
+     "khronos_messages": [],
+     "three_loaded": true,
+     "three_clips": 0
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-185803-9074",
+ "stages": [
+  {
+   "stage": "import",
+   "state": "done",
+   "seconds": 0.09,
+   "info": {
+    "objects": 18,
+    "meshes": 18,
+    "triangles": 216
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 288
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 216,
+    "tris_after": 216,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 5.27,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/previews/reef_crab_blockbench_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.04,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/reef_crab_blockbench.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/reef_crab_blockbench.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185803-9074/out/reef_crab_blockbench.blend"
+    }
+   }
+  }
+ ]
+}

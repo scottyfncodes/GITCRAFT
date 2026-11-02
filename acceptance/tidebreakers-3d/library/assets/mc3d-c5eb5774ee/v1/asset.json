@@ -1,0 +1,279 @@
+{
+ "id": "mc3d-c5eb5774ee",
+ "version": 1,
+ "name": "Floating Salvage",
+ "slug": "floating_salvage",
+ "kind": "salvage",
+ "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
+ "tags": [
+  "blender_procedural",
+  "salvage",
+  "tidebreakers"
+ ],
+ "source_tool": "blender",
+ "pipeline": [
+  "model",
+  "cleanup",
+  "optimize",
+  "uv_unwrap",
+  "texture_bake",
+  "preview_render",
+  "export"
+ ],
+ "generation": {
+  "method": "procedural",
+  "kind": "salvage",
+  "params": {
+   "seed": 752
+  },
+  "blender_config": {
+   "bake": 1024,
+   "turntable": 8
+  }
+ },
+ "route": {
+  "route": "procedural",
+  "chosen": "blender_procedural",
+  "preferred": "blender_procedural",
+  "fallback_used": false,
+  "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-185729-cdd7",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T18:57:41Z"
+ },
+ "geometry": {
+  "triangles": 1188,
+  "vertices": 618,
+  "meshes": 1,
+  "dimensions_m": [
+   2.299,
+   2.401,
+   1.297
+  ],
+  "bounds_min": [
+   -1.148,
+   -1.207,
+   -0.1
+  ],
+  "bounds_max": [
+   1.15,
+   1.195,
+   1.198
+  ]
+ },
+ "materials": [
+  "M_floating_salvage"
+ ],
+ "textures": [
+  {
+   "name": "floating_salvage_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "floating_salvage_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": null,
+ "animations": [
+  {
+   "name": "float_bob",
+   "frames": [
+    0,
+    60
+   ],
+   "seconds": 2.0,
+   "loop": true
+  }
+ ],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/floating_salvage_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/floating_salvage_turn_00.png",
+   "previews/floating_salvage_turn_01.png",
+   "previews/floating_salvage_turn_02.png",
+   "previews/floating_salvage_turn_03.png",
+   "previews/floating_salvage_turn_04.png",
+   "previews/floating_salvage_turn_05.png",
+   "previews/floating_salvage_turn_06.png",
+   "previews/floating_salvage_turn_07.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "floating_salvage.glb",
+   "bytes": 870192,
+   "sha256": "ae6a5a8523f13f71484d047958f47bca11f9b785d8bf2a5aa9342f4d6f027460"
+  },
+  "fbx": {
+   "path": "floating_salvage.fbx",
+   "bytes": 778220,
+   "sha256": "63902a483facdac0c96aa49daa81ae2fc0466c901c2bf19a8513000b26f2ba65"
+  },
+  "blend": {
+   "path": "floating_salvage.blend",
+   "bytes": 136843,
+   "sha256": "75055b8eac0f97c1d9fe622c260b09252153821d1151138508de9b7e00a1d610"
+  }
+ },
+ "companion_files": [
+  "textures/floating_salvage_basecolor.png",
+  "textures/floating_salvage_metalrough.png"
+ ],
+ "validation": {
+  "status": "passed",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/floating_salvage.glb",
+   "bytes": 870192,
+   "objects": 2,
+   "meshes": 1,
+   "triangles": 1188,
+   "vertices": 2418,
+   "dimensions_m": [
+    2.299,
+    2.401,
+    1.297
+   ],
+   "textures": [
+    "floating_salvage_basecolor",
+    "floating_salvage_metalrough"
+   ],
+   "bones": 0,
+   "animations": [
+    "float_bob"
+   ],
+   "non_manifold_edges": 2418,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/web_check.png",
+   "files": {
+    "floating_salvage.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 0,
+     "khronos_messages": [],
+     "three_loaded": true,
+     "three_clips": 1
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-185729-cdd7",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.04,
+   "info": {
+    "root": "floating_salvage"
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1188,
+    "tris_after": 1188,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 1.52,
+   "info": {
+    "maps": {
+     "basecolor": "floating_salvage_basecolor.png",
+     "metalrough": "floating_salvage_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 6.09,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/previews/floating_salvage_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.1,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/floating_salvage.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/floating_salvage.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185729-cdd7/out/floating_salvage.blend"
+    }
+   }
+  }
+ ]
+}

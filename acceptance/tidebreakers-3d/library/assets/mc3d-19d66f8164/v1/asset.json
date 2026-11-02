@@ -1,0 +1,268 @@
+{
+ "id": "mc3d-19d66f8164",
+ "version": 1,
+ "name": "Upgrade: Canvas Mainsail",
+ "slug": "upgrade_canvas_mainsail",
+ "kind": "upgrade",
+ "brief": "boat upgrade component: Canvas Mainsail",
+ "tags": [
+  "blender_procedural",
+  "tidebreakers",
+  "upgrade"
+ ],
+ "source_tool": "blender",
+ "pipeline": [
+  "model",
+  "cleanup",
+  "optimize",
+  "uv_unwrap",
+  "texture_bake",
+  "preview_render",
+  "export"
+ ],
+ "generation": {
+  "method": "procedural",
+  "kind": "upgrade",
+  "params": {
+   "seed": 812,
+   "upgrade": "sail_canvas"
+  },
+  "blender_config": {
+   "bake": 512,
+   "turntable": 8
+  }
+ },
+ "route": {
+  "route": "procedural",
+  "chosen": "blender_procedural",
+  "preferred": "blender_procedural",
+  "fallback_used": false,
+  "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-185642-3ffe",
+  "inputs": [],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T18:56:51Z"
+ },
+ "geometry": {
+  "triangles": 588,
+  "vertices": 310,
+  "meshes": 1,
+  "dimensions_m": [
+   0.582,
+   4.531,
+   7.322
+  ],
+  "bounds_min": [
+   -0.02,
+   -0.2,
+   0.148
+  ],
+  "bounds_max": [
+   0.562,
+   4.331,
+   7.47
+  ]
+ },
+ "materials": [
+  "M_upgrade_canvas_mainsail"
+ ],
+ "textures": [
+  {
+   "name": "upgrade_canvas_mainsail_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_canvas_mainsail_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": null,
+ "animations": [],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/upgrade_canvas_mainsail_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/upgrade_canvas_mainsail_turn_00.png",
+   "previews/upgrade_canvas_mainsail_turn_01.png",
+   "previews/upgrade_canvas_mainsail_turn_02.png",
+   "previews/upgrade_canvas_mainsail_turn_03.png",
+   "previews/upgrade_canvas_mainsail_turn_04.png",
+   "previews/upgrade_canvas_mainsail_turn_05.png",
+   "previews/upgrade_canvas_mainsail_turn_06.png",
+   "previews/upgrade_canvas_mainsail_turn_07.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "upgrade_canvas_mainsail.glb",
+   "bytes": 290460,
+   "sha256": "da028da4981f81747525a3af634f1f8c0dd618a8e7f86419afbb6f539307e278"
+  },
+  "fbx": {
+   "path": "upgrade_canvas_mainsail.fbx",
+   "bytes": 273948,
+   "sha256": "9d562bf6031e0684619a61af5605b363396a0e27881fa18f489dd494316e58da"
+  },
+  "blend": {
+   "path": "upgrade_canvas_mainsail.blend",
+   "bytes": 109079,
+   "sha256": "2d94426554d6da6f71b533acc49bb22ab099b8ff7aa6518f8d73ec81fd204f6a"
+  }
+ },
+ "companion_files": [
+  "textures/upgrade_canvas_mainsail_basecolor.png",
+  "textures/upgrade_canvas_mainsail_metalrough.png"
+ ],
+ "validation": {
+  "status": "passed",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/upgrade_canvas_mainsail.glb",
+   "bytes": 290460,
+   "objects": 2,
+   "meshes": 1,
+   "triangles": 588,
+   "vertices": 1156,
+   "dimensions_m": [
+    0.582,
+    4.531,
+    7.322
+   ],
+   "textures": [
+    "upgrade_canvas_mainsail_basecolor",
+    "upgrade_canvas_mainsail_metalrough"
+   ],
+   "bones": 0,
+   "animations": [],
+   "non_manifold_edges": 1156,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/web_check.png",
+   "files": {
+    "upgrade_canvas_mainsail.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 0,
+     "khronos_messages": [],
+     "three_loaded": true,
+     "three_clips": 0
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-185642-3ffe",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "root": "upgrade_canvas_mainsail"
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 588,
+    "tris_after": 588,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 0.34,
+   "info": {
+    "maps": {
+     "basecolor": "upgrade_canvas_mainsail_basecolor.png",
+     "metalrough": "upgrade_canvas_mainsail_metalrough.png"
+    },
+    "resolution": 512,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 5.21,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/previews/upgrade_canvas_mainsail_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.06,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/upgrade_canvas_mainsail.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/upgrade_canvas_mainsail.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185642-3ffe/out/upgrade_canvas_mainsail.blend"
+    }
+   }
+  }
+ ]
+}

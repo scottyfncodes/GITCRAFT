@@ -1,0 +1,377 @@
+{
+ "id": "mc3d-901dd35510",
+ "version": 2,
+ "name": "Deckhand Pip",
+ "slug": "deckhand_pip",
+ "kind": "character",
+ "brief": "Deckhand Pip",
+ "tags": [
+  "character",
+  "mixamo",
+  "tidebreakers"
+ ],
+ "source_tool": "mixamo \u2192 blender",
+ "pipeline": [
+  "import_character",
+  "import_animations",
+  "export",
+  "preview_render"
+ ],
+ "generation": {
+  "method": "mixamo animation merge",
+  "clips": [
+   {
+    "clip": "MixamoLayout_Jump",
+    "matched_bones": 22,
+    "frames": [
+     1,
+     41
+    ]
+   },
+   {
+    "clip": "MixamoLayout_Walk",
+    "matched_bones": 22,
+    "frames": [
+     1,
+     33
+    ]
+   }
+  ]
+ },
+ "route": {
+  "route": "mixamo",
+  "chosen": "mixamo",
+  "preferred": "mixamo",
+  "fallback_used": false,
+  "explanation": "explicit mixamo"
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Mixamo (Adobe)",
+    "license": "Royalty-free in commercial projects; do not redistribute raw Mixamo files standalone"
+   },
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-185813-c9f5",
+  "inputs": [
+   {
+    "asset": "mc3d-901dd35510",
+    "version": 1
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo_fixture/MixamoLayout_Jump.fbx",
+    "sha256": "0257809706fca58b9bdb0c6e78b9d2eeccef059fd6b6b625ee97924e616419f4"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo_fixture/MixamoLayout_Walk.fbx",
+    "sha256": "1284c7e14cc13023da0549671a2d83ff7512439134e28a1ac781daed4cb35e12"
+   }
+  ],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T18:58:22Z"
+ },
+ "geometry": {
+  "triangles": 1476,
+  "vertices": 2998,
+  "meshes": 1,
+  "dimensions_m": [
+   1.432,
+   0.44,
+   1.798
+  ],
+  "bounds_min": [
+   -1.022,
+   -0.22,
+   -0.0
+  ],
+  "bounds_max": [
+   0.41,
+   0.22,
+   1.798
+  ]
+ },
+ "materials": [
+  "M_deckhand_pip"
+ ],
+ "textures": [
+  {
+   "name": "deckhand_pip_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "deckhand_pip_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": {
+  "bones": 22,
+  "bone_names": [
+   "mixamorig:Hips",
+   "mixamorig:LeftUpLeg",
+   "mixamorig:LeftLeg",
+   "mixamorig:LeftFoot",
+   "mixamorig:LeftToeBase",
+   "mixamorig:RightUpLeg",
+   "mixamorig:RightLeg",
+   "mixamorig:RightFoot",
+   "mixamorig:RightToeBase",
+   "mixamorig:Spine",
+   "mixamorig:Spine1",
+   "mixamorig:Spine2",
+   "mixamorig:LeftShoulder",
+   "mixamorig:LeftArm",
+   "mixamorig:LeftForeArm",
+   "mixamorig:LeftHand",
+   "mixamorig:Neck",
+   "mixamorig:Head",
+   "mixamorig:RightShoulder",
+   "mixamorig:RightArm",
+   "mixamorig:RightForeArm",
+   "mixamorig:RightHand"
+  ],
+  "convention": "mixamo"
+ },
+ "animations": [
+  {
+   "name": "Attack",
+   "frames": [
+    0,
+    30
+   ],
+   "seconds": 1.0,
+   "loop": false
+  },
+  {
+   "name": "Idle",
+   "frames": [
+    0,
+    60
+   ],
+   "seconds": 2.0,
+   "loop": true
+  },
+  {
+   "name": "Interact",
+   "frames": [
+    0,
+    48
+   ],
+   "seconds": 1.6,
+   "loop": false
+  },
+  {
+   "name": "Jump",
+   "frames": [
+    0,
+    40
+   ],
+   "seconds": 1.333,
+   "loop": false
+  },
+  {
+   "name": "MixamoLayout_Jump",
+   "frames": [
+    1,
+    41
+   ],
+   "seconds": 1.333,
+   "loop": true
+  },
+  {
+   "name": "MixamoLayout_Walk",
+   "frames": [
+    1,
+    33
+   ],
+   "seconds": 1.067,
+   "loop": true
+  },
+  {
+   "name": "Run",
+   "frames": [
+    0,
+    20
+   ],
+   "seconds": 0.667,
+   "loop": true
+  },
+  {
+   "name": "Walk",
+   "frames": [
+    0,
+    32
+   ],
+   "seconds": 1.067,
+   "loop": true
+  }
+ ],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/deckhand_pip_thumb.png",
+  "hero": null,
+  "turntable": [
+   "previews/deckhand_pip_turn_00.png",
+   "previews/deckhand_pip_turn_01.png",
+   "previews/deckhand_pip_turn_02.png",
+   "previews/deckhand_pip_turn_03.png"
+  ]
+ },
+ "files": {
+  "glb": {
+   "path": "deckhand_pip.glb",
+   "bytes": 1219640,
+   "sha256": "2effd69ad47c8df5715ef56fd4d8bfe726338c4ce74d349deefc17c1c7257b77"
+  },
+  "fbx": {
+   "path": "deckhand_pip.fbx",
+   "bytes": 1872092,
+   "sha256": "5294a13313f42e0e490df08f68738117bc66bcff71d8588819ff7172f204acc1"
+  },
+  "blend": {
+   "path": "deckhand_pip.blend",
+   "bytes": 1231140,
+   "sha256": "a27845e39c1579b5cedd7912f4ffa3737d4514a145b77a3877cc6ee28a302fb0"
+  }
+ },
+ "companion_files": [],
+ "validation": {
+  "status": "passed-with-warnings",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/deckhand_pip.glb",
+   "bytes": 1219640,
+   "objects": 4,
+   "meshes": 1,
+   "triangles": 1476,
+   "vertices": 3080,
+   "dimensions_m": [
+    1.432,
+    0.44,
+    1.798
+   ],
+   "textures": [
+    "deckhand_pip_basecolor",
+    "deckhand_pip_metalrough"
+   ],
+   "bones": 22,
+   "animations": [
+    "Attack",
+    "Idle",
+    "Interact",
+    "Jump",
+    "MixamoLayout_Jump",
+    "MixamoLayout_Walk",
+    "Run",
+    "Walk"
+   ],
+   "non_manifold_edges": 3080,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/web_check.png",
+   "files": {
+    "deckhand_pip.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 1,
+     "khronos_messages": [
+      "NODE_SKINNED_MESH_NON_ROOT: Node with a skinned mesh is not root. Parent transforms will not affect a skinned mesh."
+     ],
+     "three_loaded": true,
+     "three_clips": 8
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-185813-c9f5",
+ "stages": [
+  {
+   "stage": "import_character",
+   "state": "done",
+   "seconds": 0.07,
+   "info": {
+    "objects": 3,
+    "bones": 22
+   }
+  },
+  {
+   "stage": "import_animations",
+   "state": "done",
+   "seconds": 0.06,
+   "info": {
+    "clips": [
+     {
+      "clip": "MixamoLayout_Jump",
+      "matched_bones": 22,
+      "frames": [
+       1,
+       41
+      ]
+     },
+     {
+      "clip": "MixamoLayout_Walk",
+      "matched_bones": 22,
+      "frames": [
+       1,
+       33
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.98,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/deckhand_pip.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/deckhand_pip.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/deckhand_pip.blend"
+    }
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 3.21,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/previews/deckhand_pip_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/previews/deckhand_pip_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/previews/deckhand_pip_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/previews/deckhand_pip_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185813-c9f5/out/previews/deckhand_pip_turn_03.png"
+    ]
+   }
+  }
+ ]
+}

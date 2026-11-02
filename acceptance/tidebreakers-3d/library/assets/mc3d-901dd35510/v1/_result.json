@@ -1,0 +1,250 @@
+{
+ "op": "generate",
+ "stages": [
+  {
+   "stage": "model",
+   "state": "done",
+   "seconds": 0.1,
+   "info": {
+    "root": "deckhand_pip",
+    "rig": true
+   }
+  },
+  {
+   "stage": "cleanup",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 16
+   }
+  },
+  {
+   "stage": "optimize",
+   "state": "done",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1476,
+    "tris_after": 1476,
+    "ratio": 1.0
+   }
+  },
+  {
+   "stage": "uv_unwrap",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   }
+  },
+  {
+   "stage": "texture_bake",
+   "state": "done",
+   "seconds": 1.45,
+   "info": {
+    "maps": {
+     "basecolor": "deckhand_pip_basecolor.png",
+     "metalrough": "deckhand_pip_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   }
+  },
+  {
+   "stage": "rig_animate",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "armature": "deckhand_pip_rig",
+    "bones": 22,
+    "clips": [
+     "Idle",
+     "Walk",
+     "Run",
+     "Jump",
+     "Interact",
+     "Attack"
+    ]
+   }
+  },
+  {
+   "stage": "preview_render",
+   "state": "done",
+   "seconds": 4.66,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_07.png"
+    ]
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.52,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/deckhand_pip.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/deckhand_pip.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/deckhand_pip.blend"
+    }
+   }
+  }
+ ],
+ "ok": true,
+ "files": {
+  "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/deckhand_pip.glb",
+  "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/deckhand_pip.fbx",
+  "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/deckhand_pip.blend"
+ },
+ "previews": {
+  "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_thumb.png",
+  "turntable": [
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_00.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_01.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_02.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_03.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_04.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_05.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_06.png",
+   "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/previews/deckhand_pip_turn_07.png"
+  ]
+ },
+ "stats": {
+  "triangles": 1476,
+  "vertices": 796,
+  "meshes": 1,
+  "materials": [
+   "M_deckhand_pip"
+  ],
+  "textures": [
+   {
+    "name": "deckhand_pip_basecolor",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "sRGB"
+   },
+   {
+    "name": "deckhand_pip_metalrough",
+    "size": [
+     1024,
+     1024
+    ],
+    "colorspace": "Non-Color"
+   }
+  ],
+  "dimensions_m": [
+   1.617,
+   0.44,
+   2.05
+  ],
+  "bounds_min": [
+   -0.812,
+   -0.22,
+   0.0
+  ],
+  "bounds_max": [
+   0.805,
+   0.22,
+   2.05
+  ],
+  "rig": {
+   "bones": 22,
+   "bone_names": [
+    "mixamorig:Hips",
+    "mixamorig:Spine",
+    "mixamorig:Spine1",
+    "mixamorig:Spine2",
+    "mixamorig:Neck",
+    "mixamorig:Head",
+    "mixamorig:LeftShoulder",
+    "mixamorig:LeftArm",
+    "mixamorig:LeftForeArm",
+    "mixamorig:LeftHand",
+    "mixamorig:RightShoulder",
+    "mixamorig:RightArm",
+    "mixamorig:RightForeArm",
+    "mixamorig:RightHand",
+    "mixamorig:LeftUpLeg",
+    "mixamorig:LeftLeg",
+    "mixamorig:LeftFoot",
+    "mixamorig:LeftToeBase",
+    "mixamorig:RightUpLeg",
+    "mixamorig:RightLeg",
+    "mixamorig:RightFoot",
+    "mixamorig:RightToeBase"
+   ],
+   "convention": "mixamo"
+  },
+  "animations": [
+   {
+    "name": "Attack",
+    "frames": [
+     0,
+     30
+    ],
+    "seconds": 1.0,
+    "loop": false
+   },
+   {
+    "name": "Idle",
+    "frames": [
+     0,
+     60
+    ],
+    "seconds": 2.0,
+    "loop": true
+   },
+   {
+    "name": "Interact",
+    "frames": [
+     0,
+     48
+    ],
+    "seconds": 1.6,
+    "loop": false
+   },
+   {
+    "name": "Jump",
+    "frames": [
+     0,
+     40
+    ],
+    "seconds": 1.333,
+    "loop": false
+   },
+   {
+    "name": "Run",
+    "frames": [
+     0,
+     20
+    ],
+    "seconds": 0.667,
+    "loop": true
+   },
+   {
+    "name": "Walk",
+    "frames": [
+     0,
+     32
+    ],
+    "seconds": 1.067,
+    "loop": true
+   }
+  ],
+  "sockets": []
+ },
+ "texture_files": [
+  "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/textures/deckhand_pip_basecolor.png",
+  "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185753-4efe/out/textures/deckhand_pip_metalrough.png"
+ ]
+}

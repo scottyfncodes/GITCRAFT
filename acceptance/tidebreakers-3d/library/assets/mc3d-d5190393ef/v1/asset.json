@@ -1,0 +1,632 @@
+{
+ "id": "mc3d-d5190393ef",
+ "version": 1,
+ "name": "TIDEBREAKERS Turtle Cay Scene",
+ "slug": "tidebreakers_turtle_cay_scene",
+ "kind": "island",
+ "brief": "TIDEBREAKERS Turtle Cay Scene scene",
+ "tags": [
+  "blender_scene",
+  "island",
+  "scene",
+  "tidebreakers"
+ ],
+ "source_tool": "blender",
+ "pipeline": [
+  "assemble",
+  "environment",
+  "render",
+  "export"
+ ],
+ "generation": {
+  "method": "scene composition",
+  "items": [
+   {
+    "asset": "mc3d-42b31cb7ed",
+    "name": "turtle_cay"
+   },
+   {
+    "asset": "mc3d-a3772b915c",
+    "name": "player_sloop",
+    "location": [
+     9,
+     -27,
+     0.15
+    ],
+    "rotation": [
+     0,
+     0,
+     28
+    ]
+   },
+   {
+    "asset": "mc3d-d2a99fe45f",
+    "name": "upg_cargo_crate",
+    "attach_to": "player_sloop:socket_storage"
+   },
+   {
+    "asset": "mc3d-1ebf521f89",
+    "name": "upg_compass_brass",
+    "attach_to": "player_sloop:socket_navigation"
+   },
+   {
+    "asset": "mc3d-85d92f89e5",
+    "name": "upg_rudder_ash",
+    "attach_to": "player_sloop:socket_steering"
+   },
+   {
+    "asset": "mc3d-4a16a43440",
+    "name": "upg_hull_copper",
+    "attach_to": "player_sloop:socket_hull"
+   },
+   {
+    "asset": "mc3d-c5eb5774ee",
+    "name": "salvage",
+    "location": [
+     -7,
+     -30,
+     0
+    ]
+   },
+   {
+    "asset": "mc3d-901dd35510",
+    "name": "deckhand",
+    "attach_to": "turtle_cay:socket_dock"
+   },
+   {
+    "asset": "mc3d-90b9eb629d",
+    "name": "crab",
+    "attach_to": "turtle_cay:socket_spawn"
+   }
+  ]
+ },
+ "route": {
+  "route": "scene",
+  "chosen": "blender_scene",
+  "preferred": "blender_scene",
+  "fallback_used": false,
+  "explanation": "Scene assembly, lighting and composition are Blender's job."
+ },
+ "license": {
+  "asset": "Owned by the project that generated it",
+  "tools": [
+   {
+    "tool": "Blender 5.2 (bpy)",
+    "license": "GPL-2.0-or-later (binaries GPL-3.0); outputs belong to you, no restrictions"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "job": "job-20261102-190343-ef86",
+  "inputs": [
+   {
+    "asset": "mc3d-42b31cb7ed",
+    "version": 1,
+    "sha256": "ed80edd74355f4d67f977b82fc3230da20e13deee84497951f44a6ff03fb3e37"
+   },
+   {
+    "asset": "mc3d-a3772b915c",
+    "version": 1,
+    "sha256": "ae5e1d96292ce656a87166747f5f9b956f01127a986fcec833f71fe2c6980f7c"
+   },
+   {
+    "asset": "mc3d-d2a99fe45f",
+    "version": 1,
+    "sha256": "58cd7e6fd1d0c4ae9660b2a2645317fcc335664f193f290d9854abd5975ef17a"
+   },
+   {
+    "asset": "mc3d-1ebf521f89",
+    "version": 1,
+    "sha256": "798a0fd107a2fae523ad6729af302a6407085e779e2974a1fb0165a7b8f923d1"
+   },
+   {
+    "asset": "mc3d-85d92f89e5",
+    "version": 1,
+    "sha256": "fb7338a57fb7ede72877c165106128d085e0fc7c5eac9dde44562b50d4836f1d"
+   },
+   {
+    "asset": "mc3d-4a16a43440",
+    "version": 1,
+    "sha256": "1401eefd455ab080ddaa57e30520c54b386c716f942f99c374550cef50ebd617"
+   },
+   {
+    "asset": "mc3d-c5eb5774ee",
+    "version": 1,
+    "sha256": "ae6a5a8523f13f71484d047958f47bca11f9b785d8bf2a5aa9342f4d6f027460"
+   },
+   {
+    "asset": "mc3d-901dd35510",
+    "version": 2,
+    "sha256": "2effd69ad47c8df5715ef56fd4d8bfe726338c4ce74d349deefc17c1c7257b77"
+   },
+   {
+    "asset": "mc3d-90b9eb629d",
+    "version": 1,
+    "sha256": "b79378891cea715e5c499f88d048803b0c06b87771787b8459d438a47c413776"
+   }
+  ],
+  "blender": "5.2.3 LTS",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "created": "2026-11-02T19:04:15Z"
+ },
+ "geometry": {
+  "triangles": 26410,
+  "vertices": 46347,
+  "meshes": 11,
+  "dimensions_m": [
+   160.0,
+   160.0,
+   12.0
+  ],
+  "bounds_min": [
+   -80.0,
+   -80.0,
+   -1.7
+  ],
+  "bounds_max": [
+   80.0,
+   80.0,
+   10.3
+  ]
+ },
+ "materials": [
+  "BB_reef_crab_blockbench_texture.png",
+  "M_deckhand_pip",
+  "M_floating_salvage",
+  "M_ocean",
+  "M_tidebreakers_coastal_sloop",
+  "M_turtle_cay",
+  "M_upgrade_brass_compass",
+  "M_upgrade_copper_banded_hull",
+  "M_upgrade_lashed_cargo_crates",
+  "M_upgrade_ship_s_wheel_ash_rudder"
+ ],
+ "textures": [
+  {
+   "name": "tidebreakers_coastal_sloop_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "tidebreakers_coastal_sloop_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "upgrade_lashed_cargo_crates_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_lashed_cargo_crates_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "upgrade_brass_compass_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_brass_compass_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "upgrade_copper_banded_hull_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_copper_banded_hull_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "upgrade_ship_s_wheel_ash_rudder_basecolor",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "upgrade_ship_s_wheel_ash_rudder_metalrough",
+   "size": [
+    512,
+    512
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "floating_salvage_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "floating_salvage_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "0_reef_crab_blockbench_texture",
+   "size": [
+    128,
+    48
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "deckhand_pip_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "deckhand_pip_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  },
+  {
+   "name": "turtle_cay_basecolor",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "sRGB"
+  },
+  {
+   "name": "turtle_cay_metalrough",
+   "size": [
+    1024,
+    1024
+   ],
+   "colorspace": "Non-Color"
+  }
+ ],
+ "rig": {
+  "bones": 22,
+  "bone_names": [
+   "mixamorig:Hips",
+   "mixamorig:LeftUpLeg",
+   "mixamorig:LeftLeg",
+   "mixamorig:LeftFoot",
+   "mixamorig:LeftToeBase",
+   "mixamorig:RightUpLeg",
+   "mixamorig:RightLeg",
+   "mixamorig:RightFoot",
+   "mixamorig:RightToeBase",
+   "mixamorig:Spine",
+   "mixamorig:Spine1",
+   "mixamorig:Spine2",
+   "mixamorig:LeftShoulder",
+   "mixamorig:LeftArm",
+   "mixamorig:LeftForeArm",
+   "mixamorig:LeftHand",
+   "mixamorig:Neck",
+   "mixamorig:Head",
+   "mixamorig:RightShoulder",
+   "mixamorig:RightArm",
+   "mixamorig:RightForeArm",
+   "mixamorig:RightHand"
+  ],
+  "convention": "mixamo"
+ },
+ "animations": [
+  {
+   "name": "Attack",
+   "frames": [
+    0,
+    30
+   ],
+   "seconds": 1.0,
+   "loop": false
+  },
+  {
+   "name": "float_bob",
+   "frames": [
+    0,
+    60
+   ],
+   "seconds": 2.0,
+   "loop": true
+  },
+  {
+   "name": "Idle",
+   "frames": [
+    0,
+    60
+   ],
+   "seconds": 2.0,
+   "loop": true
+  },
+  {
+   "name": "Interact",
+   "frames": [
+    0,
+    48
+   ],
+   "seconds": 1.6,
+   "loop": false
+  },
+  {
+   "name": "Jump",
+   "frames": [
+    0,
+    40
+   ],
+   "seconds": 1.333,
+   "loop": false
+  },
+  {
+   "name": "MixamoLayout_Jump",
+   "frames": [
+    1,
+    41
+   ],
+   "seconds": 1.333,
+   "loop": false
+  },
+  {
+   "name": "MixamoLayout_Walk",
+   "frames": [
+    1,
+    33
+   ],
+   "seconds": 1.067,
+   "loop": true
+  },
+  {
+   "name": "Run",
+   "frames": [
+    0,
+    20
+   ],
+   "seconds": 0.667,
+   "loop": true
+  },
+  {
+   "name": "Walk",
+   "frames": [
+    0,
+    32
+   ],
+   "seconds": 1.067,
+   "loop": true
+  }
+ ],
+ "sockets": [
+  {
+   "name": "socket_flag",
+   "location": [
+    9.4695,
+    -27.8829,
+    9.8703
+   ]
+  },
+  {
+   "name": "socket_hull",
+   "location": [
+    9.0,
+    -27.0,
+    0.15
+   ]
+  },
+  {
+   "name": "socket_navigation",
+   "location": [
+    8.2488,
+    -25.5873,
+    1.2003
+   ]
+  },
+  {
+   "name": "socket_sail",
+   "location": [
+    9.4695,
+    -27.8829,
+    2.6003
+   ]
+  },
+  {
+   "name": "socket_steering",
+   "location": [
+    6.7465,
+    -22.7619,
+    1.2003
+   ]
+  },
+  {
+   "name": "socket_storage",
+   "location": [
+    8.7653,
+    -26.5585,
+    1.2003
+   ]
+  },
+  {
+   "name": "socket_dock",
+   "location": [
+    0.0,
+    -17.28,
+    0.96
+   ]
+  },
+  {
+   "name": "socket_spawn",
+   "location": [
+    3.75,
+    -8.75,
+    4.195
+   ]
+  }
+ ],
+ "previews": {
+  "thumbnail": "previews/tidebreakers_turtle_cay_scene_thumb.png",
+  "hero": "previews/tidebreakers_turtle_cay_scene_hero.png",
+  "turntable": []
+ },
+ "files": {
+  "glb": {
+   "path": "tidebreakers_turtle_cay_scene.glb",
+   "bytes": 7002844,
+   "sha256": "6b454aa4346b5f6b6ef6769af5c67e720c3389c625882481d847319378e5abf0"
+  },
+  "blend": {
+   "path": "tidebreakers_turtle_cay_scene.blend",
+   "bytes": 6106250,
+   "sha256": "f40d34d0ebd66a82302988e288f910e9dd22015f60c34c37b90fc383d53a6829"
+  }
+ },
+ "companion_files": [],
+ "validation": {
+  "status": "passed-with-warnings",
+  "blender_reimport": {
+   "file": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-190343-ef86/out/tidebreakers_turtle_cay_scene.glb",
+   "bytes": 7002844,
+   "objects": 39,
+   "meshes": 10,
+   "triangles": 26330,
+   "vertices": 53852,
+   "dimensions_m": [
+    160.0,
+    160.0,
+    12.0
+   ],
+   "textures": [
+    "0_reef_crab_blockbench_texture",
+    "deckhand_pip_basecolor",
+    "deckhand_pip_metalrough",
+    "floating_salvage_basecolor",
+    "floating_salvage_metalrough",
+    "tidebreakers_coastal_sloop_basecolor",
+    "tidebreakers_coastal_sloop_metalrough",
+    "turtle_cay_basecolor",
+    "turtle_cay_metalrough",
+    "upgrade_brass_compass_basecolor",
+    "upgrade_brass_compass_metalrough",
+    "upgrade_copper_banded_hull_basecolor",
+    "upgrade_copper_banded_hull_metalrough",
+    "upgrade_lashed_cargo_crates_basecolor",
+    "upgrade_lashed_cargo_crates_metalrough",
+    "upgrade_ship_s_wheel_ash_rudder_basecolor",
+    "upgrade_ship_s_wheel_ash_rudder_metalrough"
+   ],
+   "bones": 22,
+   "animations": [
+    "Attack",
+    "Idle",
+    "Interact",
+    "Jump",
+    "MixamoLayout_Jump",
+    "MixamoLayout_Walk",
+    "Run",
+    "Walk",
+    "float_bob"
+   ],
+   "non_manifold_edges": 53902,
+   "degenerate_faces": 0,
+   "problems": []
+  },
+  "engine": {
+   "status": "passed",
+   "three_revision": "170",
+   "screenshot": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-190343-ef86/web_check.png",
+   "files": {
+    "tidebreakers_turtle_cay_scene.glb": {
+     "khronos_errors": 0,
+     "khronos_warnings": 1,
+     "khronos_messages": [
+      "NODE_SKINNED_MESH_NON_ROOT: Node with a skinned mesh is not root. Parent transforms will not affect a skinned mesh."
+     ],
+     "three_loaded": true,
+     "three_clips": 9
+    }
+   }
+  }
+ },
+ "engine": {
+  "units": "metres",
+  "up": "+Y (glTF)",
+  "forward": "+Z (glTF / three.js)",
+  "handedness": "right"
+ },
+ "job": "job-20261102-190343-ef86",
+ "stages": [
+  {
+   "stage": "assemble",
+   "state": "done",
+   "seconds": 0.23,
+   "info": {
+    "items": 9
+   }
+  },
+  {
+   "stage": "environment",
+   "state": "done",
+   "seconds": 0.01,
+   "info": {
+    "ocean": 160
+   }
+  },
+  {
+   "stage": "render",
+   "state": "done",
+   "seconds": 25.72,
+   "info": {
+    "hero": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-190343-ef86/out/previews/tidebreakers_turtle_cay_scene_thumb.png"
+   }
+  },
+  {
+   "stage": "export",
+   "state": "done",
+   "seconds": 0.8,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-190343-ef86/out/tidebreakers_turtle_cay_scene.glb",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-190343-ef86/out/tidebreakers_turtle_cay_scene.blend"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,34 @@
+{
+ "id": "job-20261102-185822-a91a",
+ "spec": {
+  "tool": "mixamo_prep",
+  "name": "Mixamo upload: Deckhand Pip",
+  "brief": "Mixamo upload FBX for mc3d-901dd35510"
+ },
+ "status": "done",
+ "created": "2026-11-02T18:58:22Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T18:58:22Z"
+  }
+ ],
+ "stages": [
+  {
+   "stage": "mixamo_upload_fbx",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:58:23Z",
+   "info": {
+    "fbx": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo_fixture/deckhand_pip_mixamo_upload.fbx",
+    "triangles": 1476
+   },
+   "finished": "2026-11-02T18:58:23Z"
+  }
+ ],
+ "error": null,
+ "asset": null,
+ "plan": null,
+ "compute": null,
+ "updated": "2026-11-02T18:58:23Z",
+ "output": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo_fixture/deckhand_pip_mixamo_upload.fbx"
+}

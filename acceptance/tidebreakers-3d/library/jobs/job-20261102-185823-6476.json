@@ -1,0 +1,613 @@
+{
+ "id": "job-20261102-185823-6476",
+ "spec": {
+  "images": [
+   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos"
+  ],
+  "name": "Salvage Raft (photogrammetry scan)",
+  "max_tris": 20000,
+  "formats": [
+   "glb",
+   "fbx",
+   "blend"
+  ],
+  "meshroom_overrides": [
+   "CameraInit:defaultFieldOfView=54.4"
+  ],
+  "crop": 0.22,
+  "target_size": 2.4,
+  "tags": [
+   "tidebreakers",
+   "scan"
+  ],
+  "tool": "meshroom",
+  "brief": "photogrammetry reconstruction",
+  "asset_id": "mc3d-1356f6cb3f"
+ },
+ "status": "done",
+ "created": "2026-11-02T18:58:23Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T18:58:23Z",
+   "finished": "2026-11-02T19:03:43Z",
+   "status": "done",
+   "error": null
+  },
+  {
+   "started": "2026-11-02T19:05:51Z",
+   "finished": "2026-11-02T19:06:01Z",
+   "status": "done",
+   "error": null
+  },
+  {
+   "started": "2026-11-02T19:06:37Z",
+   "finished": "2026-11-02T19:06:47Z",
+   "status": "done",
+   "error": null
+  }
+ ],
+ "stages": [
+  {
+   "stage": "route",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:58:23Z",
+   "info": {
+    "chosen": "meshroom",
+    "route": "photogrammetry",
+    "fallback_used": false,
+    "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+   },
+   "finished": "2026-11-02T18:58:23Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:58:23Z",
+   "info": {
+    "mesh": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/meshroom_out/texturedMesh.obj",
+    "pipeline": "photogrammetryDraft",
+    "images": 36,
+    "cameras_reconstructed": 36,
+    "seconds": 309.7,
+    "version": "2023.3.0",
+    "textured": true
+   },
+   "finished": "2026-11-02T19:03:33Z"
+  },
+  {
+   "stage": "blender:import",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:34Z",
+   "seconds": 0.04,
+   "info": {
+    "objects": 1,
+    "meshes": 1,
+    "triangles": 49932
+   },
+   "finished": "2026-11-02T19:03:34Z"
+  },
+  {
+   "stage": "blender:crop_to_subject",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:34Z",
+   "seconds": 0.1,
+   "info": {
+    "radius": 0.478,
+    "faces_removed": 48290
+   },
+   "finished": "2026-11-02T19:03:34Z"
+  },
+  {
+   "stage": "blender:cleanup",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:34Z",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   },
+   "finished": "2026-11-02T19:03:34Z"
+  },
+  {
+   "stage": "blender:optimize",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:34Z",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1642,
+    "tris_after": 1642,
+    "ratio": 1.0
+   },
+   "finished": "2026-11-02T19:03:34Z"
+  },
+  {
+   "stage": "blender:uv_unwrap",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:34Z",
+   "seconds": 0.15,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   },
+   "finished": "2026-11-02T19:03:34Z"
+  },
+  {
+   "stage": "blender:texture_bake",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:34Z",
+   "seconds": 1.49,
+   "info": {
+    "maps": {
+     "basecolor": "salvage_raft_photogrammetry_scan_basecolor.png",
+     "metalrough": "salvage_raft_photogrammetry_scan_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   },
+   "finished": "2026-11-02T19:03:36Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:36Z",
+   "seconds": 4.91,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_07.png"
+    ]
+   },
+   "finished": "2026-11-02T19:03:40Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:40Z",
+   "seconds": 0.1,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.blend"
+    }
+   },
+   "finished": "2026-11-02T19:03:41Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:41Z",
+   "info": {
+    "status": "passed"
+   },
+   "finished": "2026-11-02T19:03:43Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T19:03:43Z",
+   "info": {
+    "asset": "mc3d-1356f6cb3f",
+    "version": 1
+   },
+   "finished": "2026-11-02T19:03:43Z"
+  },
+  {
+   "stage": "route",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:51Z",
+   "info": {
+    "chosen": "meshroom",
+    "route": "photogrammetry",
+    "fallback_used": false,
+    "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+   },
+   "finished": "2026-11-02T19:05:51Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:51Z",
+   "info": {
+    "mesh": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/meshroom_out/texturedMesh.obj",
+    "pipeline": "photogrammetryDraft",
+    "images": 36,
+    "cameras_reconstructed": 36,
+    "seconds": 0.4,
+    "version": "2023.3.0",
+    "textured": true
+   },
+   "finished": "2026-11-02T19:05:52Z"
+  },
+  {
+   "stage": "blender:import",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:53Z",
+   "seconds": 0.05,
+   "info": {
+    "objects": 1,
+    "meshes": 1,
+    "triangles": 49932
+   },
+   "finished": "2026-11-02T19:05:53Z"
+  },
+  {
+   "stage": "blender:crop_to_subject",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:53Z",
+   "seconds": 0.11,
+   "info": {
+    "radius": 0.478,
+    "faces_removed": 48290,
+    "fragments_removed": 0
+   },
+   "finished": "2026-11-02T19:05:53Z"
+  },
+  {
+   "stage": "blender:cleanup",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:53Z",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   },
+   "finished": "2026-11-02T19:05:53Z"
+  },
+  {
+   "stage": "blender:optimize",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:53Z",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1642,
+    "tris_after": 1642,
+    "ratio": 1.0
+   },
+   "finished": "2026-11-02T19:05:53Z"
+  },
+  {
+   "stage": "blender:uv_unwrap",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:53Z",
+   "seconds": 0.16,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   },
+   "finished": "2026-11-02T19:05:53Z"
+  },
+  {
+   "stage": "blender:texture_bake",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:53Z",
+   "seconds": 1.54,
+   "info": {
+    "maps": {
+     "basecolor": "salvage_raft_photogrammetry_scan_basecolor.png",
+     "metalrough": "salvage_raft_photogrammetry_scan_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   },
+   "finished": "2026-11-02T19:05:54Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:54Z",
+   "seconds": 4.9,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_07.png"
+    ]
+   },
+   "finished": "2026-11-02T19:05:59Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:59Z",
+   "seconds": 0.08,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.blend"
+    }
+   },
+   "finished": "2026-11-02T19:05:59Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:05:59Z",
+   "info": {
+    "status": "passed"
+   },
+   "finished": "2026-11-02T19:06:01Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 1,
+   "state": "done",
+   "started": "2026-11-02T19:06:01Z",
+   "info": {
+    "asset": "mc3d-1356f6cb3f",
+    "version": 2
+   },
+   "finished": "2026-11-02T19:06:01Z"
+  },
+  {
+   "stage": "route",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:37Z",
+   "info": {
+    "chosen": "meshroom",
+    "route": "photogrammetry",
+    "fallback_used": false,
+    "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+   },
+   "finished": "2026-11-02T19:06:37Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:37Z",
+   "info": {
+    "mesh": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/meshroom_out/texturedMesh.obj",
+    "pipeline": "photogrammetryDraft",
+    "images": 36,
+    "cameras_reconstructed": 36,
+    "seconds": 0.4,
+    "version": "2023.3.0",
+    "textured": true
+   },
+   "finished": "2026-11-02T19:06:37Z"
+  },
+  {
+   "stage": "blender:import",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:38Z",
+   "seconds": 0.05,
+   "info": {
+    "objects": 1,
+    "meshes": 1,
+    "triangles": 49932
+   },
+   "finished": "2026-11-02T19:06:38Z"
+  },
+  {
+   "stage": "blender:crop_to_subject",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:38Z",
+   "seconds": 0.1,
+   "info": {
+    "radius": 0.478,
+    "faces_removed": 48738,
+    "fragments_removed": 0,
+    "floating_faces_removed": 448
+   },
+   "finished": "2026-11-02T19:06:38Z"
+  },
+  {
+   "stage": "blender:cleanup",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:38Z",
+   "seconds": 0.0,
+   "info": {
+    "merged_vertices": 0
+   },
+   "finished": "2026-11-02T19:06:38Z"
+  },
+  {
+   "stage": "blender:optimize",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:38Z",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 1194,
+    "tris_after": 1194,
+    "ratio": 1.0
+   },
+   "finished": "2026-11-02T19:06:38Z"
+  },
+  {
+   "stage": "blender:uv_unwrap",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:38Z",
+   "seconds": 0.16,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   },
+   "finished": "2026-11-02T19:06:38Z"
+  },
+  {
+   "stage": "blender:texture_bake",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:38Z",
+   "seconds": 1.49,
+   "info": {
+    "maps": {
+     "basecolor": "salvage_raft_photogrammetry_scan_basecolor.png",
+     "metalrough": "salvage_raft_photogrammetry_scan_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": false
+   },
+   "finished": "2026-11-02T19:06:40Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:40Z",
+   "seconds": 4.99,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/previews/salvage_raft_photogrammetry_scan_turn_07.png"
+    ]
+   },
+   "finished": "2026-11-02T19:06:45Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:45Z",
+   "seconds": 0.09,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.glb",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.fbx",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185823-6476/out/salvage_raft_photogrammetry_scan.blend"
+    }
+   },
+   "finished": "2026-11-02T19:06:45Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:45Z",
+   "info": {
+    "status": "passed"
+   },
+   "finished": "2026-11-02T19:06:47Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 2,
+   "state": "done",
+   "started": "2026-11-02T19:06:47Z",
+   "info": {
+    "asset": "mc3d-1356f6cb3f",
+    "version": 3
+   },
+   "finished": "2026-11-02T19:06:47Z"
+  }
+ ],
+ "error": null,
+ "asset": {
+  "id": "mc3d-1356f6cb3f",
+  "version": 3,
+  "name": "Salvage Raft (photogrammetry scan)",
+  "validation": "passed"
+ },
+ "plan": {
+  "request": {
+   "brief": "photogrammetry reconstruction",
+   "intents": [
+    "photogrammetry"
+   ],
+   "kind": null,
+   "params": {
+    "seed": 572
+   },
+   "images": 36,
+   "name": "photogrammetry reconstruction"
+  },
+  "route": "photogrammetry",
+  "why": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it.",
+  "candidates": [
+   {
+    "tool": "meshroom",
+    "label": "Meshroom / AliceVision (photogrammetry)",
+    "available": true,
+    "detail": "CPU draft: 5\u201330 min; CUDA for dense"
+   },
+   {
+    "tool": "triposr",
+    "label": "TripoSR (image \u2192 mesh)",
+    "available": false,
+    "detail": "missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached)"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh)",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set MESHCRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "meshroom",
+  "preferred": "meshroom",
+  "fallback_used": false,
+  "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+ },
+ "compute": {
+  "tool": "meshroom",
+  "needs": "CPU draft: 5\u201330 min; CUDA for dense",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "updated": "2026-11-02T19:06:47Z"
+}

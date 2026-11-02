@@ -1,0 +1,275 @@
+{
+ "id": "job-20261102-185624-56f4",
+ "spec": {
+  "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+  "name": "TIDEBREAKERS Coastal Sloop",
+  "max_tris": 12000,
+  "bake": 1024,
+  "turntable": 24,
+  "formats": [
+   "glb",
+   "gltf",
+   "fbx",
+   "obj",
+   "stl",
+   "blend"
+  ],
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T18:56:24Z",
+ "attempts": [
+  {
+   "started": "2026-11-02T18:56:24Z",
+   "finished": "2026-11-02T18:56:42Z",
+   "status": "done",
+   "error": null
+  }
+ ],
+ "stages": [
+  {
+   "stage": "route",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:24Z",
+   "info": {
+    "chosen": "blender_procedural",
+    "route": "procedural",
+    "fallback_used": false,
+    "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+   },
+   "finished": "2026-11-02T18:56:24Z"
+  },
+  {
+   "stage": "generate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:24Z",
+   "info": {
+    "tool": "blender_procedural",
+    "kind": "boat"
+   },
+   "finished": "2026-11-02T18:56:39Z"
+  },
+  {
+   "stage": "blender:model",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:25Z",
+   "seconds": 0.3,
+   "info": {
+    "root": "tidebreakers_coastal_sloop"
+   },
+   "finished": "2026-11-02T18:56:25Z"
+  },
+  {
+   "stage": "blender:cleanup",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:25Z",
+   "seconds": 0.01,
+   "info": {
+    "merged_vertices": 68
+   },
+   "finished": "2026-11-02T18:56:25Z"
+  },
+  {
+   "stage": "blender:optimize",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:25Z",
+   "seconds": 0.0,
+   "info": {
+    "tris_before": 4384,
+    "tris_after": 4384,
+    "ratio": 1.0
+   },
+   "finished": "2026-11-02T18:56:25Z"
+  },
+  {
+   "stage": "blender:uv_unwrap",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:25Z",
+   "seconds": 0.03,
+   "info": {
+    "uv_layers": 2,
+    "source_uv": "UVMap"
+   },
+   "finished": "2026-11-02T18:56:25Z"
+  },
+  {
+   "stage": "blender:texture_bake",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:25Z",
+   "seconds": 1.52,
+   "info": {
+    "maps": {
+     "basecolor": "tidebreakers_coastal_sloop_basecolor.png",
+     "metalrough": "tidebreakers_coastal_sloop_metalrough.png"
+    },
+    "resolution": 1024,
+    "emission_dropped": true
+   },
+   "finished": "2026-11-02T18:56:27Z"
+  },
+  {
+   "stage": "blender:preview_render",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:27Z",
+   "seconds": 12.13,
+   "info": {
+    "thumbnail": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_thumb.png",
+    "turntable": [
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_00.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_01.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_02.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_03.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_04.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_05.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_06.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_07.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_08.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_09.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_10.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_11.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_12.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_13.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_14.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_15.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_16.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_17.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_18.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_19.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_20.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_21.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_22.png",
+     "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/previews/tidebreakers_coastal_sloop_turn_23.png"
+    ]
+   },
+   "finished": "2026-11-02T18:56:39Z"
+  },
+  {
+   "stage": "blender:export",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:39Z",
+   "seconds": 0.11,
+   "info": {
+    "files": {
+     "glb": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/tidebreakers_coastal_sloop.glb",
+     "gltf": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/gltf/tidebreakers_coastal_sloop.gltf",
+     "fbx": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/tidebreakers_coastal_sloop.fbx",
+     "obj": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/obj/tidebreakers_coastal_sloop.obj",
+     "stl": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/tidebreakers_coastal_sloop.stl",
+     "blend": "/root/.gitcraft/meshcraft-library/jobs/job-20261102-185624-56f4/out/tidebreakers_coastal_sloop.blend"
+    }
+   },
+   "finished": "2026-11-02T18:56:39Z"
+  },
+  {
+   "stage": "validate",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:39Z",
+   "info": {
+    "status": "passed"
+   },
+   "finished": "2026-11-02T18:56:41Z"
+  },
+  {
+   "stage": "package",
+   "attempt": 0,
+   "state": "done",
+   "started": "2026-11-02T18:56:41Z",
+   "info": {
+    "asset": "mc3d-a3772b915c",
+    "version": 1
+   },
+   "finished": "2026-11-02T18:56:42Z"
+  }
+ ],
+ "error": null,
+ "asset": {
+  "id": "mc3d-a3772b915c",
+  "version": 1,
+  "name": "TIDEBREAKERS Coastal Sloop",
+  "validation": "passed"
+ },
+ "plan": {
+  "request": {
+   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+   "intents": [
+    "stylized"
+   ],
+   "kind": "boat",
+   "params": {
+    "seed": 692,
+    "vessel": "sloop",
+    "paint": [
+     "#4fb39a",
+     "#f2ead8"
+    ],
+    "sail_colors": [
+     "#f1e6cc",
+     "crimson"
+    ]
+   },
+   "images": 0,
+   "name": "stylized low-poly player boat: the Coastal Sloop, seafoam hu"
+  },
+  "route": "procedural",
+  "why": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free.",
+  "candidates": [
+   {
+    "tool": "blender_procedural",
+    "label": "Blender (procedural)",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "blockbench",
+    "label": "Blockbench (.bbmodel) \u2192 Blender",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh)",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set MESHCRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "blender_procedural",
+  "preferred": "blender_procedural",
+  "fallback_used": false,
+  "explanation": "A stylized game asset of a known type: Blender's procedural modelling is fast, deterministic and free."
+ },
+ "compute": {
+  "tool": "blender_procedural",
+  "needs": "CPU, seconds",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "updated": "2026-11-02T18:56:42Z"
+}
