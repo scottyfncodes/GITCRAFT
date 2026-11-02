@@ -54,6 +54,12 @@ working in.
   calling an asset game-ready. Never write exports into a game's source or
   public folders without being asked.
 
+## Control room (local web UI)
+
+`scripts/ui.sh` serves a phone-friendly UI for all eight tools on 127.0.0.1
+(token-protected). Every action it takes is an MCP call through `scripts/mcp.sh`,
+so the guard and sandbox apply unchanged. See `docs/ui.md`.
+
 ## If a tool won't connect
 
 0. `scripts/doctor.sh` shows what's missing, unregistered or failing.

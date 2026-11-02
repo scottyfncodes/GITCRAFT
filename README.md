@@ -14,6 +14,10 @@ PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft 
 
 MeshCraft runs Blender 5.2 headless as an MCP server: creative brief + brand palette + 2D references → modelled, coloured, previewed, validated assets exported as GLB / FBX / OBJ, with a Three.js engine check. See [meshcraft/README.md](meshcraft/README.md).
 
+## Control room
+
+`scripts/ui.sh` opens a local, phone-friendly web UI for every tool: health, discovery, MeshCraft pipelines, jobs with their retries, the versioned 3D library with fingerprints and verified exports, and routing advice. It listens on 127.0.0.1 only, needs its one-time link, and acts only through `scripts/mcp.sh`, so the sandbox and guard apply. See [docs/ui.md](docs/ui.md).
+
 ## Install before your session (recommended)
 
 Use this as the cloud environment's setup script so the tools are ready in every session, whichever repos are attached:

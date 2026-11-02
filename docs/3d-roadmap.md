@@ -27,7 +27,7 @@ A GitHub code search across the portfolio found **13 games built on Three.js**: 
 ### Next phases (from the PR #9 assessment)
 - **P2 (done)** jobs and a versioned asset library: job records with a retry ladder, `job_retry`, library search/get/export with re-verified hashes, `same_as` for identical re-runs, `route` as advice only. Re-running all 9 TIDEBREAKERS briefs gives identical exports and a `same_as` version for each.
 - **P3** Meshroom photogrammetry as an optional install, inside the sandbox.
-- **P4** a local 3D Department UI that starts jobs through the guarded launcher, with a per-launch token and origin checks; no deployment from GITCRAFT.
+- **P4 (in review)** the GITCRAFT control room (`scripts/ui.sh`, `docs/ui.md`): a local, phone-first UI for all eight tools that acts only through the guarded launcher, with a per-launch token, origin/host checks and a read-only snapshot for previews; no deployment from GITCRAFT.
 - **P5** AI generation (TripoSR, then Hunyuan3D) opt-in only, with per-host network allowances and approval of cost, data sharing and licence territory.
 
 ### 1. Immediate improvements (days)
