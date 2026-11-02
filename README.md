@@ -4,6 +4,8 @@ Seven open-source creative apps from [ArtCraft](https://github.com/storytold), w
 
 PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft
 
+…plus a **3D Department** (`meshcraft`) that produces real 3D game assets: Blender, Blockbench, Mixamo, Meshroom/AliceVision, TripoSR and Hunyuan3D behind one pipeline. It routes each request, generates or imports a model, then cleans, optimises, UV-unwraps, bakes textures, rigs and animates it, renders previews, exports GLB/glTF/FBX/OBJ/STL/.blend, validates the result (including a three.js load test), and packages it in a versioned library. See [docs/3d-department.md](docs/3d-department.md) and [docs/3d-licensing.md](docs/3d-licensing.md).
+
 ## How it works
 
 1. A GitHub Action builds each app's CLI (which includes its MCP server) and publishes them to the `bin` branch. It reruns weekly to pick up upstream changes, or on demand from the Actions tab.
@@ -22,6 +24,18 @@ curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts
 
 Every tool runs in a Landlock kernel sandbox: it can only read and write your workspace roots and its own state folder, and has no network. A guard in front of each server gives readable refusals and keeps an audit log with file hashes of every handoff. See [docs/security.md](docs/security.md).
 
+## 3D Department quick start
+
+```
+scripts/install-3d.sh [meshroom|ai|all]   # Blender 5.2 (bpy) core; optional photogrammetry / AI runtimes
+python3 meshcraft/cli.py generate "stylized low-poly boat with a red hull"
+python3 meshcraft/ui_server.py            # the department UI, live on http://127.0.0.1:8765
+tests/test_meshcraft.py                   # integration tests for every 3D tool
+tests/acceptance_tidebreakers.py out/     # the TIDEBREAKERS 3D asset package
+```
+
+The TIDEBREAKERS acceptance package (real GLBs, textures, previews, metadata, scene, handoffs) is in `acceptance/tidebreakers-3d/`.
+
 ## Manual commands
 
 ```
@@ -39,4 +53,4 @@ If several repos are attached to a session, this repo's SessionStart hook doesn'
 
 ## Credits
 
-All seven apps are by the ArtCraft team, MIT or Apache-2.0. This repo only builds and wires them up.
+All seven apps are by the ArtCraft team, MIT or Apache-2.0. This repo only builds and wires them up. The 3D Department's tools keep their own licences (Blender GPL, Blockbench GPL, Meshroom MPL-2.0, TripoSR MIT, Hunyuan3D Tencent Community License with territory limits, Mixamo Adobe terms); see [docs/3d-licensing.md](docs/3d-licensing.md).

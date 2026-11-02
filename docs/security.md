@@ -18,9 +18,9 @@ Claude Code ⇄ guard.py ⇄ sandbox.py (Landlock) ⇄ tool MCP server (+ its na
 
 | Access | Paths |
 |---|---|
-| read + execute | `/usr`, `/lib*`, `/bin`, `/sbin`, `/opt`, `~/.gitcraft/bin` (and MeshCraft's venv when installed) |
+| read + execute | `/usr`, `/lib*`, `/bin`, `/sbin`, `/opt`, `~/.gitcraft/bin`; for MeshCraft also its code (`meshcraft/`) and runtimes (`~/.gitcraft/meshcraft`: Blender, Meshroom, AI venv) |
 | read only | `/etc`, `/proc`, `/sys`, system and user font folders |
-| read + write | every root in `GITCRAFT_ROOTS`, the tool's own `~/.gitcraft/state/<tool>/` (its `TMPDIR` and XDG config/cache/data), `/dev`, and for LightCraft its library |
+| read + write | every root in `GITCRAFT_ROOTS`, the tool's own `~/.gitcraft/state/<tool>/` (its `TMPDIR` and XDG config/cache/data), `/dev`, for LightCraft its library, for MeshCraft its library (`~/.gitcraft/meshcraft-library`) and model cache (`~/.gitcraft/meshcraft/hf-cache`) |
 | **denied** | everything else, including `~/.claude.json`, `~/.ssh`, credentials, `/tmp`, other repos outside the roots, and the network |
 
 ## Choosing the roots
@@ -45,6 +45,12 @@ Claude Code ⇄ guard.py ⇄ sandbox.py (Landlock) ⇄ tool MCP server (+ its na
 ## Verifying
 
 `tests/test_policy.py` starts every installed tool through the launcher, does one real operation inside a scratch workspace, checks a path outside it is refused, and runs FilmCraft and LightCraft under the kernel sandbox **without** the guard to prove the kernel layer stops them on its own (`Permission denied (os error 13)`).
+
+## MeshCraft specifics
+
+- Blender, Meshroom and the engine check (Node + Chromium) all run as children of the sandboxed server, so the same fence applies to them. The three.js check serves files to Chromium through Playwright request interception rather than a local socket, so it works with network denied.
+- Hunyuan3D's hosted mode and first-time weight downloads need network: set `GITCRAFT_ALLOW_NET=1` deliberately, for that session only.
+- `meshcraft/ui_server.py` (the live UI) runs **outside** the sandbox as a local developer tool and binds to 127.0.0.1 only.
 
 ## Known limits
 

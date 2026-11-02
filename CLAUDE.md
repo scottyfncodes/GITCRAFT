@@ -1,7 +1,8 @@
 # GITCRAFT
 
 This repo gives Claude Code seven creative tools from the ArtCraft suite
-(github.com/storytold), each running as a headless MCP server. When this repo is
+(github.com/storytold), each running as a headless MCP server, plus `meshcraft`,
+the 3D Department (Blender, Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D). When this repo is
 attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`
 and registers them at user scope, so they work no matter which repo you're
 working in.
@@ -17,6 +18,7 @@ working in.
 | `lightcraft`  | Photo library and raw developer (Lightroom-style) | Batch photo grading, raw development, exports |
 | `filmcraft`   | Non-linear video editor                     | Cutting, trimming, color, audio, exporting video |
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
+| `meshcraft`   | 3D Department: Blender pipeline + Blockbench, Mixamo, Meshroom, TripoSR, Hunyuan3D | 3D models from briefs/images/photos, rigged + animated characters, scenes, GLB/FBX/OBJ export, 3D asset library |
 
 ## How to use them
 
@@ -38,6 +40,13 @@ working in.
   with every other command reachable through their list/run command tools.
 - These projects are young. If a command fails, say so plainly and try another
   route rather than faking a result.
+- meshcraft: call `hardware_probe` or `route` first. `generate` runs the whole
+  pipeline and returns real files; `library_export` hands assets to other tools or a
+  game repo. A `blocked` job means no tool here can honour the request: report its
+  reason and alternatives, never substitute a 2D image. TripoSR/Hunyuan3D need a GPU
+  or network to huggingface.co (blocked in default cloud sessions). Mixamo has no API:
+  a person uploads/downloads at mixamo.com, MeshCraft prepares and merges the files.
+  Details: `docs/3d-department.md`, licences: `docs/3d-licensing.md`.
 
 ## If a tool won't connect
 
@@ -58,5 +67,9 @@ working in.
 - `tests/test_policy.py` must pass after any change to the launcher, guard or
   sandbox.
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
-  `scripts/mcp.sh` need updating to match if you add one.
+  `scripts/mcp.sh` need updating to match if you add one. Non-ArtCraft tools
+  (meshcraft) go in `GITCRAFT_EXTRA_TOOLS` and install via their own script.
+- `tests/test_meshcraft.py` must pass after any change under `meshcraft/`.
+- Never commit model weights, the bpy wheel or Meshroom: they install into
+  `~/.gitcraft/meshcraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.

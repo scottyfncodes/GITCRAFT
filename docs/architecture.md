@@ -14,9 +14,12 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
                      ┌───────▼────────┐
                      │  sandbox.py    │  Landlock: workspace roots + own state only, no network
                      └───────┬────────┘
-   ┌───────────┬────────────┼────────────┬────────────┬────────────┬────────────┐
- photocraft vectorcraft designcraft   pdfcraft    lightcraft   filmcraft   effectcraft
-   raster     vector      layout        PDF         photo        video       motion
+   ┌───────────┬────────────┼────────────┬────────────┬────────────┬────────────┬────────────┐
+ photocraft vectorcraft designcraft   pdfcraft    lightcraft   filmcraft   effectcraft   meshcraft
+   raster     vector      layout        PDF         photo        video       motion      3D department
+                                                                                       (Blender, Blockbench,
+                                                                                        Mixamo, Meshroom,
+                                                                                        TripoSR, Hunyuan3D)
 ```
 
 ## Components
@@ -33,11 +36,13 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
 | `scripts/sandbox.py` | Landlock launcher (filesystem + network) |
 | `scripts/doctor.sh` | Health report |
 | `.github/workflows/build.yml` | Builds the ArtCraft CLIs weekly / on demand into the `bin` branch |
-| `tests/` | MCP test client and the end-to-end policy test |
+| `meshcraft/` | The 3D Department: MCP server, pipeline, routing, library, Blender job runner, backends, UI. See `docs/3d-department.md` |
+| `scripts/install-3d.sh` | Installs MeshCraft's runtimes (Blender `bpy`, Meshroom, AI venv, weights) into `~/.gitcraft/meshcraft` |
+| `tests/` | MCP test client, the end-to-end policy test, MeshCraft integration tests, the TIDEBREAKERS 3D acceptance test |
 
 ## How tools hand off work
 
-Tools never talk to each other directly. A handoff is a **file in an authorized root**: one tool exports (SVG, PNG, PSD, PDF, MP4, …), the next imports it. Claude Code chooses formats and paths. The audit log records each file's SHA-256 at both ends, so every handoff is traceable. Package-level metadata (what each deliverable is, which tools made it, its status) lives in the project's own manifest, e.g. TIDEBREAKERS `creative/MANIFEST.json`.
+Tools never talk to each other directly. (Inside MeshCraft, Blender, Meshroom and the AI backends are stages of one pipeline in one sandboxed server; across GITCRAFT tools the rule below still holds: `library_export` puts 3D assets, previews and turntables into a root for FilmCraft, DesignCraft and the rest.) A handoff is a **file in an authorized root**: one tool exports (SVG, PNG, PSD, PDF, MP4, …), the next imports it. Claude Code chooses formats and paths. The audit log records each file's SHA-256 at both ends, so every handoff is traceable. Package-level metadata (what each deliverable is, which tools made it, its status) lives in the project's own manifest, e.g. TIDEBREAKERS `creative/MANIFEST.json`.
 
 ## Session lifecycle
 
