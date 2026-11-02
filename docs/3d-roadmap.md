@@ -21,6 +21,14 @@ A GitHub code search across the portfolio found **13 games built on Three.js**: 
 | Pre-session install (`setup-env.sh`), multi-repo fix, doctor, `status.json` | PR #4 |
 | MeshCraft: Blender 5.2 MCP server, brief schema, palette loader (JSON/CSS/GPL/ASE), modelling kit, 6 templates (prop, ship parts, skeletal flag, morph sail, rigged character), previews and contact sheets with 2D references, validation, 5 export profiles, LODs, convex collision, Khronos validator, Three.js engine check, manifest updates, `run_script` | MeshCraft PR |
 | TIDEBREAKERS 3D pilot: drop-in chest (3 tiers), lantern, figurehead, flags, sails, Biscuit; engine-verified against `chestMesh()` | TIDEBREAKERS PR |
+| **P0 hardening**: the guard also hashes files a tool names only in its result (`outputs` in `audit.jsonl`); MeshCraft builds are reproducible (stable colour seeds, canonical primitive face order); doctor reads MeshCraft's version on upgraded installs; tests for the 2 s MeshCraft handshake and the audit outputs | P0/P1 PR |
+| **P1 from the 3D Department proposal (PR #9)**, added beside the existing 14 tools: `hardware_probe`, `blockbench_build` / `_inspect` / `_import`, `mixamo_guide` / `_prepare_upload` / `_apply`; `web-pbr` (baked texture maps) and `stl-print` profiles. The 9 TIDEBREAKERS briefs export identical files before and after | P0/P1 PR |
+
+### Next phases (from the PR #9 assessment)
+- **P2** jobs and a versioned asset library (job records, retry ladder, search, export with hashes), `route` as advice only.
+- **P3** Meshroom photogrammetry as an optional install, inside the sandbox.
+- **P4** a local 3D Department UI that starts jobs through the guarded launcher, with a per-launch token and origin checks; no deployment from GITCRAFT.
+- **P5** AI generation (TripoSR, then Hunyuan3D) opt-in only, with per-host network allowances and approval of cost, data sharing and licence territory.
 
 ### 1. Immediate improvements (days)
 1. **TIDEBREAKERS GLTFLoader adoption.** Behind a feature flag, load `tb_chest_*.glb` in `chestMesh()`, keeping the `{root, lid, glow}` API; the handoff in `creative/3d/HANDOFF.md` has the code. Engineering-owned.
@@ -31,7 +39,7 @@ A GitHub code search across the portfolio found **13 games built on Three.js**: 
 ### 2. Required 3D infrastructure (weeks)
 1. **Per-game profile files** checked into each game repo (scale, axis, budget, material mode), read by MeshCraft from the brief.
 2. **Asset registry**: each game's `creative/3d/` manifest drives a typed loader manifest (`assets.json`) the game imports, so adding an asset needs no code.
-3. **Texture painting path**: bake palette, AO and curvature into a hand-painted-style atlas (Blender bake on CPU), for games that want texture over vertex colour.
+3. **Texture painting path**: the `web-pbr` bake (shipped) covers colour, roughness, metalness and emission; next, bake AO and curvature into a hand-painted-style atlas.
 4. **Weighted skinning** for organic characters: automatic weights (Blender heat) plus clip retargeting between characters sharing a skeleton.
 5. **CI for assets**: a GitHub Action that runs `tests/test_meshcraft.py` and re-validates committed GLBs (Khronos + engine check) on every PR.
 

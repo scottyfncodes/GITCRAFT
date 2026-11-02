@@ -1,0 +1,13 @@
+{
+  "id": "web-pbr",
+  "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+  "format": "glb",
+  "description": "GLB with baked texture maps (basecolor, metallic-roughness, emissive when something glows) in one shared UV layout and one PBR material; painted vertex colours become texture detail. For games that do not use the vertex-colour toon pipeline. Animations as named clips, Y-up metres. Bakes at 1024 px and retries at 512 px if a bake fails.",
+  "vertex_colors": false,
+  "gltf_vertex_color": "NONE",
+  "atlas": false,
+  "animations": true,
+  "draco": false,
+  "budget_tris": 20000,
+  "bake": {"resolution": 1024, "fallbacks": [512]}
+}

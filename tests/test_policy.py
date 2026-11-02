@@ -46,11 +46,16 @@ TESTS = {
                  lambda c: c.call("media_import", {"paths": [SECRET]})),
  "lightcraft":  (lambda c: c.call("import", {"paths": [src]}),
                  lambda c: c.call("import", {"paths": [SECRET]})),
+ "meshcraft":   (lambda c: c.call("inspect_palette", {"path": pal}),
+                 lambda c: c.call("inspect_palette", {"path": SECRET})),
  "forgecraft":  (lambda c: c.call("blockbench_build", {"template": "crate", "name": "policy", "out": f"{ws}/policy.bbmodel"}),
                  lambda c: c.call("blockbench_inspect", {"path": SECRET})),
 }
-mesh_ok = os.access(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft") + "/meshcraft/venv/bin/python"), os.X_OK)
-want = sys.argv[1:] or [n for n in TESTS if n != "forgecraft" or mesh_ok]   # forgecraft needs MeshCraft's Blender installed
+pal = os.path.join(ws, "palette.json"); json.dump({"Honey Timber": "#D9954F", "Timber": "#9A5A2E", "Deep Tide": "#0E3B66", "Midnight Swell": "#0A2142",
+                                                "Doubloon Gold": "#F4C542", "Gold Deep": "#C98A12", "Sunlit Amber": "#FF9F2E", "Sailcloth Cream": "#F6EAD0"}, open(pal, "w"))
+if not os.path.exists(os.path.join(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft")), "meshcraft", "venv", "bin", "python")):
+    TESTS.pop("meshcraft"); TESTS.pop("forgecraft")   # optional tools (GITCRAFT_MESHCRAFT=0); forgecraft drives MeshCraft's Blender
+want = sys.argv[1:] or list(TESTS)
 for name in want:
     good, bad = TESTS[name]
     try:
@@ -60,6 +65,31 @@ for name in want:
         c.close()
     except Exception as e:
         check(f"{name}: server starts under guard + sandbox", False, str(e)[:300])
+
+# MeshCraft must answer the MCP handshake at once (Blender loads afterwards): Claude Code gives a
+# server 30 s to connect, and a cold Blender import at session start used to take longer (#10).
+import time
+if "meshcraft" in want:
+    try:
+        t0 = time.time(); c = Client([MCP, "meshcraft"], env=env); dt = time.time() - t0
+        check("meshcraft: answers initialize within 2 s, before Blender has loaded", dt < 2.0, f"{dt:.2f} s")
+        names = [t["name"] for t in c.tools()]
+        check("meshcraft: lists its tools without loading Blender", "run_pipeline" in names and time.time() - t0 < 3.0, names)
+        # the guard records files a tool names only in its result (renders written into an out_dir)
+        lantern = {"asset_id": "policy_lantern", "template": "lantern", "palette": pal, "out_dir": os.path.join(ws, "policy_lantern")}
+        ok, b = c.call("build_asset", {"brief": lantern}, timeout=600)
+        ok2, r = c.call("render_preview", {"blend": b["blend"]["path"] if ok else "", "out_dir": os.path.join(ws, "policy_lantern", "previews"),
+                                           "size": 64, "views": ["front"]}, timeout=600)
+        c.close()
+        pngs = sorted({os.path.realpath(p) for p in __import__("re").findall(r"/[^\s\"']+\.png", json.dumps(r))}) if ok2 else []
+        log = os.path.join(os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft")), "logs", "audit.jsonl")
+        rec = next((json.loads(l) for l in reversed(open(log).readlines()) if '"render_preview"' in l and "policy_lantern" in l), {})
+        logged = {o["path"]: o["sha256"] for o in rec.get("outputs", [])}
+        import hashlib
+        match = bool(pngs) and all(logged.get(p) == hashlib.sha256(open(p, "rb").read()).hexdigest() for p in pngs)
+        check("guard: hashes files named only in a tool's result (audit `outputs`)", match, f"renders {pngs[:2]} logged {list(logged)[:3]}")
+    except Exception as e:
+        check("meshcraft: startup and audit checks", False, str(e)[:300])
 
 # Fonts: the per-tool XDG folders must still expose the user's fonts inside the sandbox.
 # Render the same text with a user-installed font sandboxed and unsandboxed; the pixels must match.

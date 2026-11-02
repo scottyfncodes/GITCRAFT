@@ -20,7 +20,7 @@ working in.
 | `lightcraft`  | Photo library and raw developer (Lightroom-style) | Batch photo grading, raw development, exports |
 | `filmcraft`   | Non-linear video editor                     | Cutting, trimming, color, audio, exporting video |
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
-| `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ export, Three.js engine check |
+| `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ/STL export (toon or baked PBR), Three.js engine check, Blockbench and Mixamo hand-offs |
 | `forgecraft`  | 3D Department pipeline (`forgecraft/`)      | Any 3D request: routes to Blender procedural, MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D; versioned asset library, jobs, scenes |
 
 ## How to use them
@@ -68,7 +68,7 @@ working in.
   a GPU or network access to huggingface.co (blocked in default cloud sessions).
 - Mixamo has no API: a person uploads/downloads at mixamo.com; ForgeCraft
   prepares and merges the files.
-- Details: `docs/3d-department.md`; licences: `docs/3d-licensing.md`.
+- Details: `docs/3d-department.md`; licences: `docs/forgecraft-licensing.md`.
 
 ## If a tool won't connect
 

@@ -68,7 +68,27 @@ def assign(obj, mat):
 
 
 # ---------------------------------------------------------------- geometry
+def _canonical(bm):
+    """Same geometry, fixed element order. Some bmesh primitives (create_uvsphere) emit faces in a
+    different order / starting corner from run to run, which made exports differ between identical
+    builds. Faces are re-created in sorted order, each starting at its lowest vertex index."""
+    bm.verts.index_update()
+    faces = []
+    for f in bm.faces:
+        idx = [v.index for v in f.verts]; k = idx.index(min(idx))
+        faces.append((tuple(idx[k:] + idx[:k]), f.material_index, f.smooth))
+    loose = sorted(tuple(sorted(v.index for v in e.verts)) for e in bm.edges if not e.link_faces)
+    out = bmesh.new()
+    vs = [out.verts.new(v.co) for v in bm.verts]
+    for idx, mi, sm in sorted(faces):
+        f = out.faces.new([vs[i] for i in idx]); f.material_index = mi; f.smooth = sm
+    for a, b in loose: out.edges.new((vs[a], vs[b]))
+    bm.free()
+    return out
+
+
 def _mesh_obj(name, bm, mat=None, parent=None):
+    bm = _canonical(bm)
     me = bpy.data.meshes.new(name); bm.to_mesh(me); bm.free()
     o = link(bpy.data.objects.new(name, me), parent)
     if mat is not None: assign(o, mat)

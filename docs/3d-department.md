@@ -1,6 +1,6 @@
 # The 3D Department (ForgeCraft)
 
-`forgecraft` is GITCRAFT's 3D Department: a pipeline server that sits alongside MeshCraft (`meshcraft`, the Blender template tool) and uses it as one of its backends. It brings six 3D capabilities into one pipeline that produces, processes, packages and hands off real game assets. The capabilities are Blender, Blockbench, Mixamo, Meshroom/AliceVision, TripoSR and Hunyuan3D. Licensing, cost and hardware details are in [3d-licensing.md](3d-licensing.md).
+`forgecraft` is GITCRAFT's 3D Department: a pipeline server that sits alongside MeshCraft (`meshcraft`, the Blender template tool) and uses it as one of its backends. It brings six 3D capabilities into one pipeline that produces, processes, packages and hands off real game assets. The capabilities are Blender, Blockbench, Mixamo, Meshroom/AliceVision, TripoSR and Hunyuan3D. Licensing, cost and hardware details are in [forgecraft-licensing.md](forgecraft-licensing.md).
 
 ## 1. Architecture assessment (before any change)
 

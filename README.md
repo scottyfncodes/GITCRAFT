@@ -18,7 +18,7 @@ MeshCraft runs Blender 5.2 headless as an MCP server: creative brief + brand pal
 
 ForgeCraft runs the 3D Department pipeline. It routes each request to the best available tool (Blender procedural modelling, MeshCraft templates, Blockbench, Mixamo, Meshroom photogrammetry, TripoSR, Hunyuan3D), with fallbacks. It then cleans, optimises, UV-unwraps and bakes the model, rigs and animates it, renders previews, exports GLB/glTF/FBX/OBJ/STL/.blend, validates the result (Blender re-import, Khronos, three.js r170) and packages it in a versioned asset library. It never substitutes a 2D image for a 3D model.
 
-- Docs: [docs/3d-department.md](docs/3d-department.md); licences, hardware and costs: [docs/3d-licensing.md](docs/3d-licensing.md).
+- Docs: [docs/3d-department.md](docs/3d-department.md); licences, hardware and costs: [docs/forgecraft-licensing.md](docs/forgecraft-licensing.md).
 - The TIDEBREAKERS 3D package is in `acceptance/tidebreakers-3d/`.
 - ForgeCraft uses MeshCraft's Blender. `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
 
