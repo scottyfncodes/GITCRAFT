@@ -1,0 +1,10 @@
+{
+  "id": "obj-static",
+  "engine": "Any DCC / static mesh interchange",
+  "format": "obj",
+  "description": "OBJ + MTL, static pose, vertex colours where the reader supports them. No animation or rig.",
+  "vertex_colors": true,
+  "atlas": true,
+  "animations": false,
+  "budget_tris": 50000
+}

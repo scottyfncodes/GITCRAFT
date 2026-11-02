@@ -1,7 +1,8 @@
 # GITCRAFT
 
 This repo gives Claude Code seven creative tools from the ArtCraft suite
-(github.com/storytold), each running as a headless MCP server. When this repo is
+(github.com/storytold) plus MeshCraft, its own 3D tool (headless Blender), each
+running as a headless MCP server. When this repo is
 attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`
 and registers them at user scope, so they work no matter which repo you're
 working in.
@@ -17,6 +18,7 @@ working in.
 | `lightcraft`  | Photo library and raw developer (Lightroom-style) | Batch photo grading, raw development, exports |
 | `filmcraft`   | Non-linear video editor                     | Cutting, trimming, color, audio, exporting video |
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
+| `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ export, Three.js engine check |
 
 ## How to use them
 
@@ -38,6 +40,19 @@ working in.
   with every other command reachable through their list/run command tools.
 - These projects are young. If a command fails, say so plainly and try another
   route rather than faking a result.
+
+## 3D work (MeshCraft)
+
+- Start with `meshcraft_status` and `list_templates`. `run_pipeline` takes a
+  brief (template, params, palette from the project's brand package, 2D
+  references, out_dir, export profiles, manifest) and produces the .blend,
+  previews, validation report and exports. See `meshcraft/README.md`.
+- Use the project's own palette file and 2D references as the source of truth;
+  never redesign a game to fit what a template can make. Extend a template or
+  use `run_script` (custom Blender Python in the workspace) instead.
+- Always look at the contact sheet and run `engine_check` on GLBs before
+  calling an asset game-ready. Never write exports into a game's source or
+  public folders without being asked.
 
 ## If a tool won't connect
 

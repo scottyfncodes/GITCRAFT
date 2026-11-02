@@ -1,0 +1,12 @@
+{
+  "asset_id": "tb_chest_small",
+  "template": "chest",
+  "params": { "tier": "small", "fill": 0.8 },
+  "palette": "/home/user/TIDEBREAKERS/creative/branding/palette/tidebreakers-palette.json",
+  "material_prefix": "TB",
+  "references": ["/home/user/TIDEBREAKERS/creative/ui/kit/nav/cargo.png"],
+  "out_dir": "/home/user/TIDEBREAKERS/creative/3d/chest",
+  "profiles": ["three-web-toon", "three-web-atlas", "godot-glb", "unity-fbx", "obj-static"],
+  "preview": { "size": 640, "poses": [{ "clip": "lid_open", "at": "end" }] },
+  "manifest": "/home/user/TIDEBREAKERS/creative/MANIFEST.json"
+}

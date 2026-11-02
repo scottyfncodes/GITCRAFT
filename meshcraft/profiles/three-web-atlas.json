@@ -1,0 +1,12 @@
+{
+  "id": "three-web-atlas",
+  "engine": "Three.js / any glTF engine — single palette-atlas texture",
+  "format": "glb",
+  "description": "GLB with one material and a small hand-painted palette atlas (UVs into swatch cells), plus COLOR_0. One draw call per mesh, texture-based engines.",
+  "vertex_colors": true,
+  "atlas": true,
+  "atlas_cell": 16,
+  "animations": true,
+  "draco": false,
+  "budget_tris": 8000
+}

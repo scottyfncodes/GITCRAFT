@@ -11,6 +11,11 @@ GITCRAFT_TOOLS=(
   designcraft:designcraft:designcraft-cli
 )
 
+# Tools GITCRAFT builds itself (not ArtCraft binaries): MeshCraft is a Blender
+# (bpy) MCP server living in meshcraft/ with its own venv in ~/.gitcraft/meshcraft.
+GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft)
+GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"   # 0 skips installing MeshCraft (it downloads Blender, ~400 MB)
+
 GITCRAFT_HOME="${GITCRAFT_HOME:-$HOME/.gitcraft}"
 GITCRAFT_BIN="$GITCRAFT_HOME/bin"
 GITCRAFT_SRC="$GITCRAFT_HOME/src"

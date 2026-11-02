@@ -94,18 +94,53 @@ for entry in "${todo[@]}"; do
   fi
 done
 
+# 3) MeshCraft: Blender as a Python module (bpy from PyPI) in its own venv,
+#    plus the Node packages its engine check uses. No compiled GitHub artifact needed.
+mesh_state=skipped
+want_mesh=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " meshcraft " ]] && want_mesh=0
+if [[ "$GITCRAFT_MESHCRAFT" == 1 && $want_mesh == 1 ]]; then
+  venv="$GITCRAFT_HOME/meshcraft/venv"
+  if [[ -x "$venv/bin/python" && $update -eq 0 ]] && "$venv/bin/python" -c "import bpy" 2>/dev/null; then
+    echo "gitcraft: meshcraft already installed"; mesh_state=ok
+    [[ -f "$GITCRAFT_BIN/meshcraft.version" ]] || echo "blender $("$venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null)" > "$GITCRAFT_BIN/meshcraft.version"
+  else
+    echo "gitcraft: installing meshcraft (Blender bpy wheel, ~400 MB; log: $GITCRAFT_LOG/meshcraft.log)"
+    py=$(command -v python3.13 || command -v python3.11 || command -v python3)
+    mkdir -p "$GITCRAFT_HOME/meshcraft"
+    if { if command -v uv >/dev/null; then uv venv -q --allow-existing -p "$py" "$venv" && VIRTUAL_ENV="$venv" uv pip install -q -r "$repo_dir/meshcraft/requirements.txt";
+         else "$py" -m venv "$venv" && "$venv/bin/pip" install -q -r "$repo_dir/meshcraft/requirements.txt"; fi; } >"$GITCRAFT_LOG/meshcraft.log" 2>&1 \
+       && "$venv/bin/python" -c "import bpy; print('blender', bpy.app.version_string)" >>"$GITCRAFT_LOG/meshcraft.log" 2>&1; then
+      echo "blender $("$venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null)" > "$GITCRAFT_BIN/meshcraft.version"
+      echo "gitcraft: meshcraft ready ($(cat "$GITCRAFT_BIN/meshcraft.version"))"; mesh_state=ok
+    else
+      echo "gitcraft: meshcraft FAILED (bpy needs Python 3.11/3.13 matching a published wheel; see $GITCRAFT_LOG/meshcraft.log)" >&2
+      failed+=(meshcraft); mesh_state=failed
+    fi
+  fi
+  if command -v npm >/dev/null; then
+    (cd "$repo_dir/meshcraft/engine_check" && npm ci --silent --no-audit --no-fund >>"$GITCRAFT_LOG/meshcraft.log" 2>&1) \
+      && echo "gitcraft: meshcraft engine check ready (three@0.170, gltf-validator)" \
+      || echo "gitcraft: meshcraft engine check unavailable (npm ci failed); exports still validate with pygltflib" >&2
+  else
+    echo "gitcraft: npm not found; meshcraft's engine check is disabled" >&2
+  fi
+fi
+
 "$here/register.sh"
 
 # Machine-readable result for doctor.sh and for anything orchestrating installs.
-python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "${GITCRAFT_TOOLS[@]}" <<'PY'
+python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
 import json, os, sys, time
-out, bindir, failed, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4:]
+out, bindir, failed, mesh, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4], sys.argv[5:]
 st = {"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tools": {}}
 for e in tools:
     name, _, pkg = e.split(":")
     ok = os.access(os.path.join(bindir, pkg), os.X_OK) and name not in failed
     ver = open(os.path.join(bindir, name + ".version")).read().strip() if os.path.exists(os.path.join(bindir, name + ".version")) else None
     st["tools"][name] = {"state": "ok" if ok else "failed", "version": ver}
+if mesh != "skipped":
+    v = os.path.join(bindir, "meshcraft.version")
+    st["tools"]["meshcraft"] = {"state": mesh, "version": open(v).read().strip() if os.path.exists(v) else None}
 json.dump(st, open(out, "w"), indent=1)
 PY
 

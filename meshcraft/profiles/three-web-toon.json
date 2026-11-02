@@ -1,0 +1,16 @@
+{
+  "id": "three-web-toon",
+  "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+  "format": "glb",
+  "description": "GLB with baked COLOR_0 and PBR fallback materials, animations as named clips, Y-up metres. Matches games that shade with MeshToonMaterial({vertexColors: true}) such as TIDEBREAKERS. Also writes LOD GLBs (50%, 25% triangles) and a convex collision hull GLB beside the asset.",
+  "vertex_colors": true,
+  "atlas": false,
+  "animations": true,
+  "draco": false,
+  "budget_tris": 8000,
+  "lods": [
+    0.5,
+    0.25
+  ],
+  "collision": "convex"
+}

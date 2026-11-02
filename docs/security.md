@@ -23,6 +23,18 @@ Claude Code ⇄ guard.py ⇄ sandbox.py (Landlock) ⇄ tool MCP server (+ its na
 | read + write | every root in `GITCRAFT_ROOTS`, the tool's own `~/.gitcraft/state/<tool>/` (its `TMPDIR` and XDG config/cache/data), `/dev`, and for LightCraft its library |
 | **denied** | everything else, including `~/.claude.json`, `~/.ssh`, credentials, `/tmp`, other repos outside the roots, and the network |
 
+## MeshCraft
+
+MeshCraft runs Blender in-process and can execute Python (`run_script`, templates). It is safe to offer that because:
+- it runs under the **same Landlock sandbox**, with extra read and execute access to its venv, its own code, Node and Chromium;
+- it **checks paths itself** against `GITCRAFT_ROOTS`, on top of the guard;
+- the headless Chromium used by `engine_check` runs inside the sandbox too, with requests served through Playwright routing, so no network is needed.
+
+`tests/test_meshcraft.py` proves it. A hostile `run_script` tries three escapes, and each is stopped by the kernel with `PermissionError`:
+- reading `~/.claude.json`;
+- writing `/tmp`;
+- opening a TCP connection.
+
 ## Choosing the roots
 
 - `GITCRAFT_ROOT` is the primary folder (it defaults to `$HOME`, or to the session workspace when that is outside `$HOME`). Tools with a single native root flag (PhotoCraft) get this one.

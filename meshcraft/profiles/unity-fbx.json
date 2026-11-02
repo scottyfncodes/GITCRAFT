@@ -1,0 +1,10 @@
+{
+  "id": "unity-fbx",
+  "engine": "Unity / Unreal (FBX)",
+  "format": "fbx",
+  "description": "FBX, -Z forward / Y up, unit scale applied, embedded atlas texture, all actions baked as takes.",
+  "vertex_colors": true,
+  "atlas": true,
+  "animations": true,
+  "budget_tris": 15000
+}
