@@ -1,0 +1,180 @@
+{
+ "id": "job-20261102-212532-a3232c",
+ "tool": "generate",
+ "asset_id": "tidebreakers_coastal_sloop",
+ "request": {
+  "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+  "name": "TIDEBREAKERS Coastal Sloop",
+  "bake": 1024,
+  "profiles": [
+   "three-web-toon",
+   "three-web-atlas",
+   "web-pbr",
+   "unity-fbx",
+   "obj-static",
+   "stl-print",
+   "godot-glb"
+  ],
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T21:25:32Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:25:32Z",
+   "change": null,
+   "manual": false,
+   "stages": [
+    {
+     "stage": "route",
+     "state": "done",
+     "started": "2026-11-02T21:25:32Z",
+     "info": {
+      "chosen": "meshcraft_template",
+      "route": "template",
+      "fallback_used": false,
+      "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+     },
+     "finished": "2026-11-02T21:25:32Z",
+     "seconds": 0.0
+    },
+    {
+     "stage": "generate",
+     "state": "done",
+     "started": "2026-11-02T21:25:32Z",
+     "info": {
+      "meshcraft_job": "job-20261102-212533-3587f0",
+      "meshcraft_status": "done",
+      "fallback": null,
+      "validation": {
+       "pass": 27,
+       "warn": 0,
+       "fail": 0,
+       "info": 5
+      },
+      "library": {
+       "asset": "tidebreakers_coastal_sloop",
+       "version": 1
+      }
+     },
+     "finished": "2026-11-02T21:25:54Z",
+     "seconds": 21.92
+    },
+    {
+     "stage": "engine_check",
+     "state": "done",
+     "started": "2026-11-02T21:25:54Z",
+     "info": {
+      "status": "passed"
+     },
+     "finished": "2026-11-02T21:25:56Z",
+     "seconds": 2.47
+    },
+    {
+     "stage": "record",
+     "state": "done",
+     "started": "2026-11-02T21:25:56Z",
+     "info": {
+      "asset": "tidebreakers_coastal_sloop",
+      "version": 1,
+      "validation": "passed"
+     },
+     "finished": "2026-11-02T21:25:56Z",
+     "seconds": 0.0
+    }
+   ],
+   "status": "done",
+   "finished": "2026-11-02T21:25:56Z",
+   "error": null
+  }
+ ],
+ "error": null,
+ "children": [
+  "job-20261102-212533-3587f0"
+ ],
+ "updated": "2026-11-02T21:25:56Z",
+ "plan": {
+  "request": {
+   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+   "intents": [
+    "stylized"
+   ],
+   "kind": "boat",
+   "template": "boat",
+   "params": {
+    "seed": 692,
+    "vessel": "sloop",
+    "paint": [
+     "#4FB39A",
+     "#F2EAD8"
+    ],
+    "sail_colors": [
+     "#F1E6CC",
+     "crimson"
+    ]
+   },
+   "images": 0,
+   "name": "stylized low-poly player boat: the Coastal Sloop, seafoam hu"
+  },
+  "route": "template",
+  "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
+  "candidates": [
+   {
+    "tool": "meshcraft_template",
+    "label": "MeshCraft template (Blender)",
+    "owner": "meshcraft",
+    "available": true,
+    "detail": "CPU, seconds to a minute with previews"
+   },
+   {
+    "tool": "blockbench",
+    "label": "Blockbench .bbmodel \u2192 MeshCraft",
+    "owner": "meshcraft",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh) \u2192 MeshCraft",
+    "owner": "forgecraft",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+ },
+ "compute": {
+  "tool": "meshcraft_template",
+  "needs": "CPU, seconds to a minute with previews",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "asset": {
+  "id": "tidebreakers_coastal_sloop",
+  "version": 1,
+  "name": "TIDEBREAKERS Coastal Sloop",
+  "validation": "passed"
+ }
+}

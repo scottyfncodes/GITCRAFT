@@ -1,0 +1,445 @@
+{
+ "asset_id": "floating_salvage",
+ "brief": {
+  "asset_id": "floating_salvage",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft",
+  "parent_job": "job-20261102-212756-9ccc9e",
+  "template": "salvage",
+  "params": {
+   "seed": 752
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Floating Salvage",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 1024,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.18
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 20.97
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.0
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 2.34
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.25
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/source/floating_salvage.blend",
+   "kind": "blend",
+   "bytes": 120064,
+   "sha256": "52b4dac798c5f7112e278fae0c0880f7352e39447b98c8d39ef4de0a21cd13e3"
+  },
+  "seconds": 0.12,
+  "roles": {
+   "plank_d9954f": "#D9954F",
+   "wood_5e331b": "#5E331B",
+   "plank_9a5a2e": "#9A5A2E",
+   "metal_4a4f57_m8": "#4A4F57",
+   "plain_ff6b4a": "#FF6B4A",
+   "plain_f6ead0": "#F6EAD0",
+   "cloth_f4c542": "#F4C542",
+   "cloth_c9a46b": "#C9A46B",
+   "plank_c0392b": "#C0392B"
+  },
+  "objects": [
+   "floating_salvage",
+   "floating_salvage_mesh"
+  ],
+  "actions": [
+   "float_bob"
+  ],
+  "contract": {
+   "root": "floating_salvage",
+   "ground": false,
+   "clips": [
+    "float_bob"
+   ]
+  },
+  "expect": {}
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_three_quarter.png",
+   "kind": "preview",
+   "bytes": 139248,
+   "sha256": "c5d90e951854877c9666278c835351c83f3960305476ef03a9e86d3e7ed5a5a2",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_front.png",
+   "kind": "preview",
+   "bytes": 109953,
+   "sha256": "75946d83149268b62a60ae44f4037c67e0194e236550d8c1b58218388880ffc3",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_side.png",
+   "kind": "preview",
+   "bytes": 111412,
+   "sha256": "606588916408372fc4491f47f8a0f114bb02fdd8f80c78ceb575358b37412f33",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_top.png",
+   "kind": "preview",
+   "bytes": 162480,
+   "sha256": "cbc51537933d5920958a825e3f96c715163ff81c0293cddea48605f0fe398cb2",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/previews/floating_salvage_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 181300,
+   "sha256": "95b10a975179c0bd7bae6af061058c02fbf7d52b294e21fd1fca25ddd5495f57"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 97968,
+   "sha256": "b4d58dffdadc9337629c69753dcaa6e18398f70655f89947c740e0b7a1877013",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 66248,
+     "sha256": "e50c52c1a2f1c5d5ba4c4756546d9b3a4a58ddf67da1c247e35da9e5ad94045e",
+     "ratio": 0.5,
+     "triangles": 593
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 38616,
+     "sha256": "5e0ce1a4e484e775dc3b3b32a790f1c7056d821ec2c1bb50bcac824a92dfa3a9",
+     "ratio": 0.25,
+     "triangles": 294
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 8264,
+     "sha256": "ae2d95dbc4f600aaf89dc69b8e8994e8c88f0ea5f0a18e5de37a4c2e229bab53",
+     "shape": "convex_hull",
+     "triangles": 116
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 8264,
+     "sha256": "ae2d95dbc4f600aaf89dc69b8e8994e8c88f0ea5f0a18e5de37a4c2e229bab53"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 38616,
+     "sha256": "5e0ce1a4e484e775dc3b3b32a790f1c7056d821ec2c1bb50bcac824a92dfa3a9"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 66248,
+     "sha256": "e50c52c1a2f1c5d5ba4c4756546d9b3a4a58ddf67da1c247e35da9e5ad94045e"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.three-web-toon.glb",
+    "objects": [
+     "floating_salvage (EMPTY)",
+     "floating_salvage_mesh (MESH)"
+    ],
+    "triangles": 1188,
+    "materials": [
+     "GC_Cloth_c9a46b",
+     "GC_Cloth_f4c542",
+     "GC_Metal_4a4f57_m8",
+     "GC_Plain_f6ead0",
+     "GC_Plain_ff6b4a",
+     "GC_Plank_9a5a2e",
+     "GC_Plank_c0392b",
+     "GC_Plank_d9954f",
+     "GC_Wood_5e331b"
+    ],
+    "actions": [
+     "float_bob"
+    ],
+    "armatures": 0,
+    "size_m": [
+     2.499,
+     2.452,
+     1.456
+    ],
+    "min_z": -0.1077
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.glb",
+   "kind": "export",
+   "bytes": 251412,
+   "sha256": "201dd950fb157873200047b948168b2f3cceede03a288156f05f2d173614f9d1",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.orm.png"
+    },
+    "resolution": 1024,
+    "attempts": [
+     {
+      "resolution": 1024,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 104140,
+     "sha256": "f5946851537da6b66576d53b949fb35fa385cad30933452d2364a8e5498dc3d0"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 57552,
+     "sha256": "4662f1b550e0439b34d33590ce52c2bedf25186c35597cf688359bf390ace4fc"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.web-pbr.glb",
+    "objects": [
+     "floating_salvage (EMPTY)",
+     "floating_salvage_mesh (MESH)"
+    ],
+    "triangles": 1188,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [
+     "float_bob"
+    ],
+    "armatures": 0,
+    "size_m": [
+     2.499,
+     2.452,
+     1.456
+    ],
+    "min_z": -0.1077
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 57180,
+   "sha256": "c91e278e3cfed82467e32d9d89c661ef5c602953dfaa39909361b639e2aad053",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft/exports/floating_salvage.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "1188 triangles (budget 6000)",
+    "tris": 1188
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "0 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_centered",
+    "level": "pass",
+    "detail": "footprint centre (0.025, -0.026)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: ['float_bob']",
+    "clips": [
+     "float_bob"
+    ]
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "floating_salvage.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "floating_salvage.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 9 primitives, 9 materials, 1 animations, 0 skins, 0 images",
+    "animations": [
+     "float_bob"
+    ],
+    "file": "floating_salvage.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "floating_salvage.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported floating_salvage.three-web-toon.glb: 1188 tris, size [2.499, 2.452, 1.456] m, clips ['float_bob']",
+    "file": "floating_salvage.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "floating_salvage.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "floating_salvage.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 1 primitives, 1 materials, 1 animations, 0 skins, 2 images",
+    "animations": [
+     "float_bob"
+    ],
+    "file": "floating_salvage.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "floating_salvage.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported floating_salvage.web-pbr.glb: 1188 tris, size [2.499, 2.452, 1.456] m, clips ['float_bob']",
+    "file": "floating_salvage.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 24.2
+}

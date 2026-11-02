@@ -1,295 +1,328 @@
 {
  "assets": [
   {
-   "id": "fc3d-9831ff542e",
-   "name": "TIDEBREAKERS Coastal Sloop",
-   "slug": "tidebreakers_coastal_sloop",
-   "kind": "boat",
-   "source_tool": "blender",
+   "id": "tidebreakers_coastal_sloop",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "boat",
    "tags": [
-    "blender_procedural",
     "boat",
-    "stylized",
+    "meshcraft_template",
     "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-9831ff542e/v1/previews/tidebreakers_coastal_sloop_thumb.png",
-   "triangles": 4384,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:55:13Z",
-   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails"
+   "validation": "pass",
+   "triangles": 4392,
+   "clips": [],
+   "thumbnail": "assets/tidebreakers_coastal_sloop/v1/previews/tidebreakers_coastal_sloop_three_quarter.png",
+   "updated": "2026-11-02T21:25:54Z",
+   "title": "TIDEBREAKERS Coastal Sloop",
+   "kind": "boat",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-6cca3f5f59",
-   "name": "Upgrade: Canvas Mainsail",
-   "slug": "upgrade_canvas_mainsail",
-   "kind": "upgrade",
-   "source_tool": "blender",
+   "id": "upgrade_canvas_mainsail",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "boat_upgrade",
    "tags": [
-    "blender_procedural",
+    "boat_upgrade",
+    "meshcraft_template",
     "tidebreakers",
     "upgrade"
    ],
-   "thumbnail": "assets/fc3d-6cca3f5f59/v1/previews/upgrade_canvas_mainsail_thumb.png",
+   "validation": "pass",
    "triangles": 588,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:55:23Z",
-   "brief": "boat upgrade component: Canvas Mainsail"
+   "clips": [],
+   "thumbnail": "assets/upgrade_canvas_mainsail/v1/previews/upgrade_canvas_mainsail_three_quarter.png",
+   "updated": "2026-11-02T21:26:16Z",
+   "title": "Upgrade: Canvas Mainsail",
+   "kind": "upgrade",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed-with-warnings"
   },
   {
-   "id": "fc3d-21a46a8062",
-   "name": "Upgrade: Lashed Cargo Crates",
-   "slug": "upgrade_lashed_cargo_crates",
-   "kind": "upgrade",
-   "source_tool": "blender",
+   "id": "upgrade_lashed_cargo_crates",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "boat_upgrade",
    "tags": [
-    "blender_procedural",
+    "boat_upgrade",
+    "meshcraft_template",
     "tidebreakers",
     "upgrade"
    ],
-   "thumbnail": "assets/fc3d-21a46a8062/v1/previews/upgrade_lashed_cargo_crates_thumb.png",
+   "validation": "pass",
    "triangles": 492,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:55:34Z",
-   "brief": "boat upgrade component: Lashed Cargo Crates"
+   "clips": [],
+   "thumbnail": "assets/upgrade_lashed_cargo_crates/v1/previews/upgrade_lashed_cargo_crates_three_quarter.png",
+   "updated": "2026-11-02T21:26:39Z",
+   "title": "Upgrade: Lashed Cargo Crates",
+   "kind": "upgrade",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-82b6135f47",
-   "name": "Upgrade: Brass Compass",
-   "slug": "upgrade_brass_compass",
-   "kind": "upgrade",
-   "source_tool": "blender",
+   "id": "upgrade_brass_compass",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "boat_upgrade",
    "tags": [
-    "blender_procedural",
+    "boat_upgrade",
+    "meshcraft_template",
     "tidebreakers",
     "upgrade"
    ],
-   "thumbnail": "assets/fc3d-82b6135f47/v1/previews/upgrade_brass_compass_thumb.png",
+   "validation": "pass",
    "triangles": 698,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:55:45Z",
-   "brief": "boat upgrade component: Brass Compass"
+   "clips": [],
+   "thumbnail": "assets/upgrade_brass_compass/v1/previews/upgrade_brass_compass_three_quarter.png",
+   "updated": "2026-11-02T21:27:03Z",
+   "title": "Upgrade: Brass Compass",
+   "kind": "upgrade",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-c75a7997c3",
-   "name": "Upgrade: Ship's Wheel & Ash Rudder",
-   "slug": "upgrade_ship_s_wheel_ash_rudder",
-   "kind": "upgrade",
-   "source_tool": "blender",
+   "id": "upgrade_ship_s_wheel_ash_rudder",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "boat_upgrade",
    "tags": [
-    "blender_procedural",
+    "boat_upgrade",
+    "meshcraft_template",
     "tidebreakers",
     "upgrade"
    ],
-   "thumbnail": "assets/fc3d-c75a7997c3/v1/previews/upgrade_ship_s_wheel_ash_rudder_thumb.png",
+   "validation": "pass",
    "triangles": 1016,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:55:55Z",
-   "brief": "boat upgrade component: Ship's Wheel & Ash Rudder"
+   "clips": [],
+   "thumbnail": "assets/upgrade_ship_s_wheel_ash_rudder/v1/previews/upgrade_ship_s_wheel_ash_rudder_three_quarter.png",
+   "updated": "2026-11-02T21:27:34Z",
+   "title": "Upgrade: Ship's Wheel & Ash Rudder",
+   "kind": "upgrade",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-0486db99be",
-   "name": "Upgrade: Copper-Banded Hull",
-   "slug": "upgrade_copper_banded_hull",
-   "kind": "upgrade",
-   "source_tool": "blender",
+   "id": "upgrade_copper_banded_hull",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "boat_upgrade",
    "tags": [
-    "blender_procedural",
+    "boat_upgrade",
+    "meshcraft_template",
     "tidebreakers",
     "upgrade"
    ],
-   "thumbnail": "assets/fc3d-0486db99be/v1/previews/upgrade_copper_banded_hull_thumb.png",
+   "validation": "pass",
    "triangles": 1912,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:56:05Z",
-   "brief": "boat upgrade component: Copper-Banded Hull"
+   "clips": [],
+   "thumbnail": "assets/upgrade_copper_banded_hull/v1/previews/upgrade_copper_banded_hull_three_quarter.png",
+   "updated": "2026-11-02T21:27:53Z",
+   "title": "Upgrade: Copper-Banded Hull",
+   "kind": "upgrade",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-0b2467cdb8",
-   "name": "Floating Salvage",
-   "slug": "floating_salvage",
-   "kind": "salvage",
-   "source_tool": "blender",
+   "id": "floating_salvage",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "salvage",
    "tags": [
-    "blender_procedural",
+    "meshcraft_template",
     "salvage",
     "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-0b2467cdb8/v1/previews/floating_salvage_thumb.png",
+   "validation": "pass",
    "triangles": 1188,
-   "animations": 1,
-   "validation": "passed",
-   "updated": "2026-11-02T19:56:18Z",
-   "brief": "floating salvage: lashed crate, barrel and buoy on driftwood"
+   "clips": [
+    "float_bob"
+   ],
+   "thumbnail": "assets/floating_salvage/v1/previews/floating_salvage_three_quarter.png",
+   "updated": "2026-11-02T21:28:20Z",
+   "title": "Floating Salvage",
+   "kind": "salvage",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-7e35f73ff8",
-   "name": "Turtle Cay",
-   "slug": "turtle_cay",
-   "kind": "island",
-   "source_tool": "blender",
+   "id": "turtle_cay",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "island",
    "tags": [
-    "blender_procedural",
     "island",
-    "tidebreakers"
-   ],
-   "thumbnail": "assets/fc3d-7e35f73ff8/v1/previews/turtle_cay_thumb.png",
-   "triangles": 10340,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:56:31Z",
-   "brief": "small tropical island with palms, rocks, a stilt hut and a dock"
-  },
-  {
-   "id": "fc3d-4d0ab4aea8",
-   "name": "Grand Treasure Chest (MeshCraft)",
-   "slug": "grand_treasure_chest_meshcraft",
-   "kind": "prop",
-   "source_tool": "meshcraft \u2192 blender",
-   "latest": 1,
-   "versions": [
-    1
-   ],
-   "tags": [
     "meshcraft_template",
-    "prop",
     "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-4d0ab4aea8/v1/previews/grand_treasure_chest_meshcraft_three_quarter.png",
-   "triangles": 2456,
-   "animations": 2,
-   "validation": "passed",
-   "updated": "2026-11-02T19:57:02Z",
-   "brief": "grand treasure chest"
+   "validation": "pass",
+   "triangles": 10732,
+   "clips": [],
+   "thumbnail": "assets/turtle_cay/v1/previews/turtle_cay_three_quarter.png",
+   "updated": "2026-11-02T21:28:46Z",
+   "title": "Turtle Cay",
+   "kind": "island",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed-with-warnings"
   },
   {
-   "id": "fc3d-46906d9596",
-   "name": "Reef Crab (Blockbench)",
-   "slug": "reef_crab_blockbench",
-   "kind": null,
-   "source_tool": "blockbench \u2192 blender",
+   "id": "grand_treasure_chest",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "chest",
+   "tags": [
+    "chest",
+    "meshcraft_template",
+    "tidebreakers"
+   ],
+   "validation": "pass",
+   "triangles": 2456,
+   "clips": [
+    "lid_close",
+    "lid_open"
+   ],
+   "thumbnail": "assets/grand_treasure_chest/v1/previews/grand_treasure_chest_three_quarter.png",
+   "updated": "2026-11-02T21:29:42Z",
+   "title": "Grand Treasure Chest",
+   "kind": "chest",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed"
+  },
+  {
+   "id": "reef_crab_blockbench",
+   "latest": 1,
+   "versions": [
+    1
+   ],
+   "tool": "blockbench_import",
+   "template": "bbmodel",
    "tags": [
     "blockbench",
-    "creature",
-    "tidebreakers",
-    "voxel"
+    "crab",
+    "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-46906d9596/v1/previews/reef_crab_blockbench_thumb.png",
+   "validation": "pass",
    "triangles": 216,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T19:57:12Z",
-   "brief": "blocky voxel reef crab creature"
+   "clips": [],
+   "thumbnail": "assets/reef_crab_blockbench/v1/previews/reef_crab_blockbench_three_quarter.png",
+   "updated": "2026-11-02T21:30:13Z",
+   "title": "Reef Crab (Blockbench)",
+   "kind": "crab",
+   "source_tool": "blockbench \u2192 meshcraft",
+   "deliverable_validation": "passed"
   },
   {
-   "id": "fc3d-71fcc50dcd",
-   "name": "Deckhand Pip",
-   "slug": "deckhand_pip",
-   "kind": "character",
-   "source_tool": "mixamo \u2192 blender",
+   "id": "deckhand_pip",
    "latest": 2,
    "versions": [
     1,
     2
    ],
+   "tool": "mixamo_apply",
+   "template": "mixamo",
    "tags": [
     "character",
+    "deckhand",
     "mixamo",
     "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-71fcc50dcd/v2/previews/deckhand_pip_thumb.png",
-   "triangles": 1476,
-   "animations": 8,
-   "validation": "passed-with-warnings",
-   "updated": "2026-11-02T19:57:23Z",
-   "brief": "Deckhand Pip"
+   "validation": "pass",
+   "triangles": 1488,
+   "clips": [
+    "Walking",
+    "Sneak_Walk"
+   ],
+   "thumbnail": "assets/deckhand_pip/v2/previews/deckhand_pip_three_quarter.png",
+   "updated": "2026-11-02T21:30:36Z",
+   "title": "Deckhand Pip",
+   "kind": "character",
+   "source_tool": "mixamo \u2192 meshcraft",
+   "deliverable_validation": "passed-with-warnings"
   },
   {
-   "id": "fc3d-297ecf1de4",
-   "name": "Salvage Raft (photogrammetry scan)",
-   "slug": "salvage_raft_photogrammetry_scan",
-   "kind": null,
-   "source_tool": "meshroom \u2192 blender",
+   "id": "salvage_raft_photogrammetry_scan",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "run_pipeline",
+   "template": "mesh_import",
    "tags": [
     "meshroom",
-    "photogrammetry",
     "scan",
     "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-297ecf1de4/v1/previews/salvage_raft_photogrammetry_scan_thumb.png",
-   "triangles": 1141,
-   "animations": 0,
-   "validation": "passed",
-   "updated": "2026-11-02T20:02:29Z",
-   "brief": "photogrammetry reconstruction"
+   "validation": "pass",
+   "triangles": 1163,
+   "clips": [],
+   "thumbnail": "assets/salvage_raft_photogrammetry_scan/v1/previews/salvage_raft_photogrammetry_scan_three_quarter.png",
+   "updated": "2026-11-02T21:36:07Z",
+   "title": "Salvage Raft (photogrammetry scan)",
+   "kind": null,
+   "source_tool": "meshroom \u2192 meshcraft",
+   "deliverable_validation": "passed-with-warnings"
   },
   {
-   "id": "fc3d-232048523e",
-   "name": "TIDEBREAKERS Turtle Cay Scene",
-   "slug": "tidebreakers_turtle_cay_scene",
-   "kind": "island",
-   "source_tool": "blender",
+   "id": "tidebreakers_turtle_cay_scene",
    "latest": 1,
    "versions": [
     1
    ],
+   "tool": "compose_scene",
+   "template": "scene",
    "tags": [
-    "blender_scene",
     "island",
-    "scene",
+    "meshcraft_scene",
     "tidebreakers"
    ],
-   "thumbnail": "assets/fc3d-232048523e/v1/previews/tidebreakers_turtle_cay_scene_thumb.png",
-   "triangles": 26410,
-   "animations": 9,
-   "validation": "passed-with-warnings",
-   "updated": "2026-11-02T20:03:00Z",
-   "brief": "TIDEBREAKERS Turtle Cay Scene scene"
+   "validation": "pass",
+   "triangles": null,
+   "clips": [
+    "Attack",
+    "Idle",
+    "Interact",
+    "Jump",
+    "Run",
+    "Sneak_Walk",
+    "Walk",
+    "Walking",
+    "float_bob"
+   ],
+   "thumbnail": "assets/tidebreakers_turtle_cay_scene/v1/previews/tidebreakers_turtle_cay_scene_three_quarter.png",
+   "updated": "2026-11-02T21:36:38Z",
+   "title": "TIDEBREAKERS Turtle Cay Scene",
+   "kind": "island",
+   "source_tool": "meshcraft",
+   "deliverable_validation": "passed-with-warnings"
   }
  ]
 }

@@ -1,0 +1,302 @@
+{
+ "id": "turtle_cay",
+ "version": 1,
+ "created": "2026-11-02T21:28:46Z",
+ "tool": "run_pipeline",
+ "template": "island",
+ "tags": [
+  "island",
+  "meshcraft_template",
+  "tidebreakers"
+ ],
+ "brief": {
+  "asset_id": "turtle_cay",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft",
+  "parent_job": "job-20261102-212823-4de3b5",
+  "template": "island",
+  "params": {
+   "seed": 7,
+   "radius": 15,
+   "palms": 7
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Turtle Cay",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 1024,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "job": "job-20261102-212824-4a065a",
+ "same_as": null,
+ "inputs": [
+  {
+   "path": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "sha256": "768522f8d4b53b21428a6244f92de5a16f8e5a2bf1fe84fd634beb4a93934d3f"
+  }
+ ],
+ "validation": {
+  "status": "pass",
+  "summary": {
+   "pass": 17,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "triangles": 10732,
+ "clips": [],
+ "contract": {
+  "root": "turtle_cay",
+  "ground": false
+ },
+ "files": [
+  {
+   "path": "source/turtle_cay.blend",
+   "kind": "blend",
+   "bytes": 319532,
+   "sha256": "086e89e3851c926ad20b687b1e35d73c7eb2beabd457d5af382cd353f929ebfc",
+   "content": "086e89e3851c926ad20b687b1e35d73c7eb2beabd457d5af382cd353f929ebfc",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/source/turtle_cay.blend"
+  },
+  {
+   "path": "exports/turtle_cay.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 790132,
+   "sha256": "e2b3ab0f9ae271c4494da2e0451159c6b511bd06d4c026be4f8156fbbaebca54",
+   "content": "c84e36b12fe788bc664a6d060b8119ffde4cdca186523a30b8ac9ef84c4171c9",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.glb"
+  },
+  {
+   "path": "exports/turtle_cay.three-web-toon.lod50.glb",
+   "kind": "lod",
+   "bytes": 544716,
+   "sha256": "d9591c6bfc4a64602a546d888580142389452dfd96f78e2b32dfd541f8352d10",
+   "content": "bdc14abb8894241917a6d57b3f38c82be630a966d6576d0ab5f8ef1cc2047be7",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb"
+  },
+  {
+   "path": "exports/turtle_cay.three-web-toon.lod25.glb",
+   "kind": "lod",
+   "bytes": 279080,
+   "sha256": "d79896a6c219e4a65e0f73071b64c3944ba263ef75d9ef0dc1ac0c12b7b0bc35",
+   "content": "b58ee21f77d55d99c73510d6524eb4b51d1a6577241dcefa2876e41435bb9f20",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb"
+  },
+  {
+   "path": "exports/turtle_cay.three-web-toon.collision.glb",
+   "kind": "collision",
+   "bytes": 12892,
+   "sha256": "efe0c8f0a4e4cd88dfdd8ca6a78c1327786324f54ad977d4fd0f6f9a7d0229ce",
+   "content": "7f723718447d948732f99eedfbcbcbd1d80c5cbf7a362e6534f5f0454f8b3ddd",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.collision.glb"
+  },
+  {
+   "path": "exports/turtle_cay.web-pbr.glb",
+   "kind": "export",
+   "bytes": 1396800,
+   "sha256": "f03f2a180d86718fa20ed5b9160cb660c9e823865dbe1ff6064fe6d8bca7a938",
+   "content": "d8eaab4f19b04285442f59f4e9a3fcdfc74761a9300190fe918b780d824b2019",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.glb"
+  },
+  {
+   "path": "exports/turtle_cay.web-pbr.basecolor.png",
+   "kind": "sidecar",
+   "bytes": 435175,
+   "sha256": "37a72ece260ae2a245e346a3a2166d2c26bb272d682fd42faf5ffe4378ab1921",
+   "content": "37a72ece260ae2a245e346a3a2166d2c26bb272d682fd42faf5ffe4378ab1921",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.basecolor.png"
+  },
+  {
+   "path": "exports/turtle_cay.web-pbr.orm.png",
+   "kind": "sidecar",
+   "bytes": 184917,
+   "sha256": "b103cbb478c7c625858da8f2deb2f75f4aae4b6f901799e28044347079bf2d0a",
+   "content": "b103cbb478c7c625858da8f2deb2f75f4aae4b6f901799e28044347079bf2d0a",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.orm.png"
+  },
+  {
+   "path": "exports/turtle_cay.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 336700,
+   "sha256": "c5e864186665f732fd2fb9efb5ccc471485ec13bf24716c1a0b07a058701e4dd",
+   "content": "fbx-size:336700",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.unity-fbx.fbx"
+  },
+  {
+   "path": "exports/turtle_cay.unity-fbx.atlas.png",
+   "kind": "sidecar",
+   "bytes": 315,
+   "sha256": "908f962b4f22d8442a0bcc0c2c0b8891ceb70316e9219dd103b07c2eb6dc2153",
+   "content": "908f962b4f22d8442a0bcc0c2c0b8891ceb70316e9219dd103b07c2eb6dc2153",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.unity-fbx.atlas.png"
+  },
+  {
+   "path": "previews/turtle_cay_three_quarter.png",
+   "kind": "preview",
+   "bytes": 110250,
+   "sha256": "0a7bf8d3ff78288fcfc24a315282011d755cf0ef5acc7c8048f8510d941219a0",
+   "content": "0a7bf8d3ff78288fcfc24a315282011d755cf0ef5acc7c8048f8510d941219a0",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_three_quarter.png"
+  },
+  {
+   "path": "previews/turtle_cay_front.png",
+   "kind": "preview",
+   "bytes": 92164,
+   "sha256": "e83d9dde98e12c1115afd450d2010e1188a8dc7684c9310a738386a1a51d9610",
+   "content": "e83d9dde98e12c1115afd450d2010e1188a8dc7684c9310a738386a1a51d9610",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_front.png"
+  },
+  {
+   "path": "previews/turtle_cay_side.png",
+   "kind": "preview",
+   "bytes": 92435,
+   "sha256": "a32e485210d5e7337f02b38872de87f3b8a6ac9eef77b8e5aba1def64ebfc2f8",
+   "content": "a32e485210d5e7337f02b38872de87f3b8a6ac9eef77b8e5aba1def64ebfc2f8",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_side.png"
+  },
+  {
+   "path": "previews/turtle_cay_top.png",
+   "kind": "preview",
+   "bytes": 143403,
+   "sha256": "981d4a888ef9a4afa99a5eff7c9130a274be3c76a538462ee4add01b414f36c5",
+   "content": "981d4a888ef9a4afa99a5eff7c9130a274be3c76a538462ee4add01b414f36c5",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_top.png"
+  },
+  {
+   "path": "previews/turtle_cay_sheet.png",
+   "kind": "preview",
+   "bytes": 138544,
+   "sha256": "45982c07a97584408e77f97b7825fa8dd43d244eb3269d8fd9f0c20c90b47e5f",
+   "content": "45982c07a97584408e77f97b7825fa8dd43d244eb3269d8fd9f0c20c90b47e5f",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_sheet.png"
+  },
+  {
+   "path": "turtle_cay.meshcraft.json",
+   "kind": "report",
+   "bytes": 12584,
+   "sha256": "78a5e7497f3cc6cd5f5681a593f963102a86382df2890f67215e668dfbded6d1",
+   "content": "78a5e7497f3cc6cd5f5681a593f963102a86382df2890f67215e668dfbded6d1",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/turtle_cay.meshcraft.json"
+  }
+ ],
+ "title": "Turtle Cay",
+ "kind": "island",
+ "source_tool": "meshcraft",
+ "route": {
+  "route": "template",
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+ },
+ "license": {
+  "asset": "Owned by the project that commissioned it",
+  "tools": [
+   {
+    "tool": "MeshCraft (GITCRAFT, Blender 5.2 bpy)",
+    "license": "GITCRAFT code; Blender GPL-2.0-or-later (wheel GPL-3.0) does not extend to models, renders or .blend content"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "forgecraft_job": "job-20261102-212823-4de3b5",
+  "meshcraft_job": "job-20261102-212824-4a065a",
+  "inputs": [],
+  "blender": "5.2.3",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "recorded": "2026-11-02T21:28:49Z"
+ },
+ "generation": {
+  "method": "meshcraft template",
+  "template": "island",
+  "params": {
+   "seed": 7,
+   "radius": 15,
+   "palms": 7
+  },
+  "palette": "tidebreakers-palette.json",
+  "request": "small tropical island with palms, rocks, a stilt hut and a dock"
+ },
+ "rig": null,
+ "geometry": {
+  "triangles": 10732,
+  "size_m": [
+   32.062,
+   32.185,
+   11.027
+  ],
+  "meshes": null
+ },
+ "animations": [],
+ "sockets": [
+  "socket_dock",
+  "socket_spawn"
+ ],
+ "previews": {
+  "thumbnail": "previews/turtle_cay_three_quarter.png",
+  "views": [
+   "previews/turtle_cay_three_quarter.png",
+   "previews/turtle_cay_front.png",
+   "previews/turtle_cay_side.png",
+   "previews/turtle_cay_top.png",
+   "previews/turtle_cay_sheet.png"
+  ]
+ },
+ "engine_check": {
+  "status": "passed",
+  "glb": "exports/turtle_cay.web-pbr.glb",
+  "three": null,
+  "checks": [
+   {
+    "check": "engine_load",
+    "level": "pass",
+    "detail": "GLTFLoader (three@0.170) loaded the file"
+   },
+   {
+    "check": "engine_basecolor_maps",
+    "level": "pass",
+    "detail": "1/1 meshes have a base colour map (texture-baked export)"
+   }
+  ],
+  "screenshot": "previews/turtle_cay_engine_check.png"
+ },
+ "deliverable_validation": {
+  "status": "passed-with-warnings",
+  "meshcraft": {
+   "pass": 17,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  },
+  "engine_check": "passed"
+ },
+ "orchestration": {
+  "forgecraft_job": "job-20261102-212823-4de3b5",
+  "route": "template",
+  "tool": "meshcraft_template"
+ }
+}

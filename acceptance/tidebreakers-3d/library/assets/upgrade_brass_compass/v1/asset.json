@@ -1,0 +1,298 @@
+{
+ "id": "upgrade_brass_compass",
+ "version": 1,
+ "created": "2026-11-02T21:27:03Z",
+ "tool": "run_pipeline",
+ "template": "boat_upgrade",
+ "tags": [
+  "boat_upgrade",
+  "meshcraft_template",
+  "tidebreakers",
+  "upgrade"
+ ],
+ "brief": {
+  "asset_id": "upgrade_brass_compass",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft",
+  "parent_job": "job-20261102-212642-06f08e",
+  "template": "boat_upgrade",
+  "params": {
+   "seed": 263,
+   "upgrade": "compass_brass"
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Upgrade: Brass Compass",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 512,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "job": "job-20261102-212642-a73ef8",
+ "same_as": null,
+ "inputs": [
+  {
+   "path": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "sha256": "768522f8d4b53b21428a6244f92de5a16f8e5a2bf1fe84fd634beb4a93934d3f"
+  }
+ ],
+ "validation": {
+  "status": "pass",
+  "summary": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "triangles": 698,
+ "clips": [],
+ "contract": {
+  "root": "upgrade_brass_compass",
+  "ground": false
+ },
+ "files": [
+  {
+   "path": "source/upgrade_brass_compass.blend",
+   "kind": "blend",
+   "bytes": 106986,
+   "sha256": "efadc72216bad3c941736f077a84750656b55d8d26496966e01f32515c4690d5",
+   "content": "efadc72216bad3c941736f077a84750656b55d8d26496966e01f32515c4690d5",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/source/upgrade_brass_compass.blend"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 57616,
+   "sha256": "175a6ded739118c6a980b5dc02c263d2ceb3e13ce4cb85a84abad2a28a33a530",
+   "content": "fbbfa81edcfddaa82c3b094818ab423e4ea79bd84ba7ae90e053b7c4ce2d9279",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.three-web-toon.glb"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.three-web-toon.lod50.glb",
+   "kind": "lod",
+   "bytes": 39328,
+   "sha256": "487fe9ea06883e91c208bd87485a99400918545b0c0cdac9f5fdc4bbd7925a6a",
+   "content": "6eeca094999434dad9c3254c11dc50c4032cb875f767cf8d32cbd1361efe2c1a",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.three-web-toon.lod50.glb"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.three-web-toon.lod25.glb",
+   "kind": "lod",
+   "bytes": 22084,
+   "sha256": "f30229af5adf04c5954039b119b00d1a462cbdd154b44ae81c95998ea5cd3fe2",
+   "content": "e2ee1a82180303052200b1aac526622d1067b6795ddc4070913032144bc55180",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.three-web-toon.lod25.glb"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.three-web-toon.collision.glb",
+   "kind": "collision",
+   "bytes": 13108,
+   "sha256": "1d0c8f72e131c29577f119e034d668ba4fc5fe2b8595e11981eee3201e3e7b26",
+   "content": "eb21fa6f1528d555fa5fe459db5845878b1f13fdf211d43e1d99edd810adbfc3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.three-web-toon.collision.glb"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.web-pbr.glb",
+   "kind": "export",
+   "bytes": 119512,
+   "sha256": "150631fb6a071903edb00da09e9fbd9b3c6ba040d1d97badc3929a3fe4368fa6",
+   "content": "10a23beb6dea5cd2f238fb9ced7dc682be07f3c6b1bb72747ff9c0adc6906966",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.web-pbr.glb"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.web-pbr.basecolor.png",
+   "kind": "sidecar",
+   "bytes": 46540,
+   "sha256": "6d2346d65aef893e6153d482ad6832d06b40a0e70749a5520d2d4a8963409759",
+   "content": "6d2346d65aef893e6153d482ad6832d06b40a0e70749a5520d2d4a8963409759",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.web-pbr.basecolor.png"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.web-pbr.orm.png",
+   "kind": "sidecar",
+   "bytes": 21931,
+   "sha256": "e7fa34df2d7857b0580c47412c4c206e9be8c8b61b86c03eec674a0dfcbd1f87",
+   "content": "e7fa34df2d7857b0580c47412c4c206e9be8c8b61b86c03eec674a0dfcbd1f87",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.web-pbr.orm.png"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 37340,
+   "sha256": "884d6a2049d2e6d2241f7162552d2a997fd57d6ca34de6d0ca456ff1c95f46b7",
+   "content": "fbx-size:37340",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.unity-fbx.fbx"
+  },
+  {
+   "path": "exports/upgrade_brass_compass.unity-fbx.atlas.png",
+   "kind": "sidecar",
+   "bytes": 287,
+   "sha256": "e723c4d2849f846ffd34433015af37df8c5abed8e83d59b657333c4884882849",
+   "content": "e723c4d2849f846ffd34433015af37df8c5abed8e83d59b657333c4884882849",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/exports/upgrade_brass_compass.unity-fbx.atlas.png"
+  },
+  {
+   "path": "previews/upgrade_brass_compass_three_quarter.png",
+   "kind": "preview",
+   "bytes": 129769,
+   "sha256": "a56a9f81e0964f75ab5729a539f17b9835a5cc8dfaa0ca39f571795a3fd4c7e3",
+   "content": "a56a9f81e0964f75ab5729a539f17b9835a5cc8dfaa0ca39f571795a3fd4c7e3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/previews/upgrade_brass_compass_three_quarter.png"
+  },
+  {
+   "path": "previews/upgrade_brass_compass_front.png",
+   "kind": "preview",
+   "bytes": 132871,
+   "sha256": "1ca4483d3016185247816a9d7f8af022a01acb8773a674ee8aec426fea8291c4",
+   "content": "1ca4483d3016185247816a9d7f8af022a01acb8773a674ee8aec426fea8291c4",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/previews/upgrade_brass_compass_front.png"
+  },
+  {
+   "path": "previews/upgrade_brass_compass_side.png",
+   "kind": "preview",
+   "bytes": 127134,
+   "sha256": "9c2ea857ece1b0fbfc810fe818cd7f5fb72e2a6dc2a0a47961aa9a34203b4439",
+   "content": "9c2ea857ece1b0fbfc810fe818cd7f5fb72e2a6dc2a0a47961aa9a34203b4439",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/previews/upgrade_brass_compass_side.png"
+  },
+  {
+   "path": "previews/upgrade_brass_compass_top.png",
+   "kind": "preview",
+   "bytes": 100366,
+   "sha256": "2959a00c28746b286a748a8da7a67090fac5a11b44b474b347365d52d8d441d6",
+   "content": "2959a00c28746b286a748a8da7a67090fac5a11b44b474b347365d52d8d441d6",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/previews/upgrade_brass_compass_top.png"
+  },
+  {
+   "path": "previews/upgrade_brass_compass_sheet.png",
+   "kind": "preview",
+   "bytes": 153637,
+   "sha256": "bd354760bedf686a1ebeb58de9d9c14518891ef06a9a138686034fe4ea32a1a3",
+   "content": "bd354760bedf686a1ebeb58de9d9c14518891ef06a9a138686034fe4ea32a1a3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/previews/upgrade_brass_compass_sheet.png"
+  },
+  {
+   "path": "upgrade_brass_compass.meshcraft.json",
+   "kind": "report",
+   "bytes": 12272,
+   "sha256": "a8e521d31fc95aa0bc797171c232a567dc200fd7a46eb881aacdc0c006bdbd27",
+   "content": "a8e521d31fc95aa0bc797171c232a567dc200fd7a46eb881aacdc0c006bdbd27",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft/upgrade_brass_compass.meshcraft.json"
+  }
+ ],
+ "title": "Upgrade: Brass Compass",
+ "kind": "upgrade",
+ "source_tool": "meshcraft",
+ "route": {
+  "route": "template",
+  "chosen": "meshcraft_template",
+  "preferred": "meshcraft_template",
+  "fallback_used": false,
+  "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
+ },
+ "license": {
+  "asset": "Owned by the project that commissioned it",
+  "tools": [
+   {
+    "tool": "MeshCraft (GITCRAFT, Blender 5.2 bpy)",
+    "license": "GITCRAFT code; Blender GPL-2.0-or-later (wheel GPL-3.0) does not extend to models, renders or .blend content"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "forgecraft_job": "job-20261102-212642-06f08e",
+  "meshcraft_job": "job-20261102-212642-a73ef8",
+  "inputs": [],
+  "blender": "5.2.3",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "recorded": "2026-11-02T21:27:06Z"
+ },
+ "generation": {
+  "method": "meshcraft template",
+  "template": "boat_upgrade",
+  "params": {
+   "seed": 263,
+   "upgrade": "compass_brass"
+  },
+  "palette": "tidebreakers-palette.json",
+  "request": "boat upgrade component: Brass Compass"
+ },
+ "rig": null,
+ "geometry": {
+  "triangles": 698,
+  "size_m": [
+   0.771,
+   0.51,
+   1.26
+  ],
+  "meshes": null
+ },
+ "animations": [],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/upgrade_brass_compass_three_quarter.png",
+  "views": [
+   "previews/upgrade_brass_compass_three_quarter.png",
+   "previews/upgrade_brass_compass_front.png",
+   "previews/upgrade_brass_compass_side.png",
+   "previews/upgrade_brass_compass_top.png",
+   "previews/upgrade_brass_compass_sheet.png"
+  ]
+ },
+ "engine_check": {
+  "status": "passed",
+  "glb": "exports/upgrade_brass_compass.web-pbr.glb",
+  "three": null,
+  "checks": [
+   {
+    "check": "engine_load",
+    "level": "pass",
+    "detail": "GLTFLoader (three@0.170) loaded the file"
+   },
+   {
+    "check": "engine_basecolor_maps",
+    "level": "pass",
+    "detail": "1/1 meshes have a base colour map (texture-baked export)"
+   }
+  ],
+  "screenshot": "previews/upgrade_brass_compass_engine_check.png"
+ },
+ "deliverable_validation": {
+  "status": "passed",
+  "meshcraft": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  },
+  "engine_check": "passed"
+ },
+ "orchestration": {
+  "forgecraft_job": "job-20261102-212642-06f08e",
+  "route": "template",
+  "tool": "meshcraft_template"
+ }
+}

@@ -1,0 +1,514 @@
+{
+ "asset_id": "grand_treasure_chest",
+ "brief": {
+  "asset_id": "grand_treasure_chest",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft",
+  "parent_job": "job-20261102-212918-4bce16",
+  "template": "chest",
+  "params": {
+   "seed": 545,
+   "tier": "grand"
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Grand Treasure Chest",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.16
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 18.81
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.01
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 3.48
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.35
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/source/grand_treasure_chest.blend",
+   "kind": "blend",
+   "bytes": 144730,
+   "sha256": "6e7742c9f5f8c241c5323c9fe96fb386d4b73266cc810b512ec5f275185004ae"
+  },
+  "seconds": 0.11,
+  "roles": {
+   "wood": "#0E3B66",
+   "plank": "#0A2142",
+   "band": "#F4C542",
+   "trim": "#FF9F2E",
+   "rivet": "#C98A12",
+   "gold": "#F4C542",
+   "gem": "#2ECC71",
+   "gem2": "#E0607E",
+   "pearl": "#F6EAD0",
+   "dark": "#0A2142",
+   "barnacle": "#F6EAD0",
+   "weed": "#3FA55A"
+  },
+  "objects": [
+   "chest_body",
+   "chest_grand",
+   "chest_lid",
+   "glow_anchor"
+  ],
+  "actions": [
+   "lid_close",
+   "lid_open"
+  ],
+  "contract": {
+   "engine": "TIDEBREAKERS chestMesh() replacement",
+   "nodes": {
+    "root": "chest_grand",
+    "body": "chest_body",
+    "lid": "chest_lid",
+    "glow": "glow_anchor"
+   },
+   "lid_hinge_yup": [
+    0,
+    1.2,
+    -0.675
+   ],
+   "lid_open": {
+    "axis": "x",
+    "radians": -1.9,
+    "clip": "lid_open"
+   },
+   "glow_anchor_yup": [
+    0,
+    1.8,
+    0
+   ],
+   "scale": 1.5
+  },
+  "expect": {
+   "base_z": 0.0,
+   "size": [
+    2.1839999999999997,
+    1.4850000000000003,
+    1.9455000000000002
+   ],
+   "tolerance": 0.2
+  }
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/previews/grand_treasure_chest_three_quarter.png",
+   "kind": "preview",
+   "bytes": 196374,
+   "sha256": "ff31d9bd04c65219fdb78d083da0231bf1d0235f6ae184aebae9b20d2d588d94",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/previews/grand_treasure_chest_front.png",
+   "kind": "preview",
+   "bytes": 154051,
+   "sha256": "503d5784fce1d03a956e1d2e9e1d11ff2492934bb7af5901b1201b48e5d169f8",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/previews/grand_treasure_chest_side.png",
+   "kind": "preview",
+   "bytes": 127355,
+   "sha256": "0437f9d43169e644f933dfd0728a61a8f2905a36fe0b585bbb5009d9b8712492",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/previews/grand_treasure_chest_top.png",
+   "kind": "preview",
+   "bytes": 123159,
+   "sha256": "5b03c5ed4eaec01f5826564125353020678711ef877ac9339b49363b60e6a1d1",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/previews/grand_treasure_chest_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 217646,
+   "sha256": "a1f0d3571e680171832603fd6c613ea90a321909f44ca4e1a81be5cf37d2aa7d"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 186756,
+   "sha256": "c11be22bbf6c3a58faeefe35245b65f5c54b232db943d121bc41b21afd70d9da",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 131044,
+     "sha256": "5469c3aef08e43554888847abbcbc25b7bc9dbb58b0cd49ab9c6af898209b5c6",
+     "ratio": 0.5,
+     "triangles": 1228
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 72236,
+     "sha256": "2de6467583c755e32f0596a8ac79580bff6642c5f8cee0b49fbadf0360513aaf",
+     "ratio": 0.25,
+     "triangles": 602
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 11288,
+     "sha256": "261986213f29608e133ab25016c01ae4dce6397184effb08f5c5c89f279c6f98",
+     "shape": "convex_hull",
+     "triangles": 160
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 11288,
+     "sha256": "261986213f29608e133ab25016c01ae4dce6397184effb08f5c5c89f279c6f98"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 72236,
+     "sha256": "2de6467583c755e32f0596a8ac79580bff6642c5f8cee0b49fbadf0360513aaf"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 131044,
+     "sha256": "5469c3aef08e43554888847abbcbc25b7bc9dbb58b0cd49ab9c6af898209b5c6"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.three-web-toon.glb",
+    "objects": [
+     "chest_body (MESH)",
+     "chest_grand (EMPTY)",
+     "chest_lid (MESH)",
+     "glow_anchor (EMPTY)"
+    ],
+    "triangles": 2456,
+    "materials": [
+     "GC_Band",
+     "GC_Dark",
+     "GC_Gem",
+     "GC_Gem2",
+     "GC_Gold",
+     "GC_Pearl",
+     "GC_Plank",
+     "GC_Rivet",
+     "GC_Trim",
+     "GC_Wood"
+    ],
+    "actions": [
+     "lid_close",
+     "lid_open"
+    ],
+    "armatures": 0,
+    "size_m": [
+     2.175,
+     2.544,
+     2.602
+    ],
+    "min_z": -0.0048
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.web-pbr.glb",
+   "kind": "export",
+   "bytes": 444064,
+   "sha256": "237551d1dc2e4048f5efe33e60476fce6c492817afd91ae2cf1c75604d956ec7",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.web-pbr.orm.png"
+    },
+    "resolution": 1024,
+    "attempts": [
+     {
+      "resolution": 1024,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 176183,
+     "sha256": "5b4af19e1addc3ccea7b21e476085d7a5e1b4952fe4c3e720d5ea3a6b1ec3b3b"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 91195,
+     "sha256": "6fe8bef9d8413b09df443b8f83302f4b7bc429c3cb31f6c13807991ff7b6ff80"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.web-pbr.glb",
+    "objects": [
+     "chest_body (MESH)",
+     "chest_grand (EMPTY)",
+     "chest_lid (MESH)",
+     "glow_anchor (EMPTY)"
+    ],
+    "triangles": 2456,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [
+     "lid_close",
+     "lid_open"
+    ],
+    "armatures": 0,
+    "size_m": [
+     2.175,
+     2.544,
+     2.602
+    ],
+    "min_z": -0.0048
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 95660,
+   "sha256": "a3ee678cb86673e5a9590a0a83c362d086eb089e9f024f2776de4a2646a4fffe",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft/exports/grand_treasure_chest.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "2 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "2456 triangles (budget 6000)",
+    "tris": 2456
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "0 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_base",
+    "level": "pass",
+    "detail": "lowest point at z=-0.005 m (expected 0.0; the asset sits on its origin)",
+    "min_z": -0.0048
+   },
+   {
+    "check": "origin_centered",
+    "level": "pass",
+    "detail": "footprint centre (0.000, -0.012)"
+   },
+   {
+    "check": "dimensions",
+    "level": "pass",
+    "detail": "2.175 \u00d7 1.477 \u00d7 1.913 m (W\u00d7D\u00d7H, expected \u2248 [2.184, 1.485, 1.946])",
+    "size": [
+     2.175,
+     1.477,
+     1.913
+    ]
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: ['lid_close', 'lid_open']",
+    "clips": [
+     "lid_close",
+     "lid_open"
+    ]
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "grand_treasure_chest.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "grand_treasure_chest.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "4 nodes, 2 meshes, 13 primitives, 10 materials, 2 animations, 0 skins, 0 images",
+    "animations": [
+     "lid_close",
+     "lid_open"
+    ],
+    "file": "grand_treasure_chest.three-web-toon.glb"
+   },
+   {
+    "check": "contract_nodes",
+    "level": "pass",
+    "detail": "nodes present: ['chest_body', 'chest_grand', 'chest_lid', 'glow_anchor']",
+    "file": "grand_treasure_chest.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 1 infos",
+    "messages": [
+     "Empty node encountered."
+    ],
+    "file": "grand_treasure_chest.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported grand_treasure_chest.three-web-toon.glb: 2456 tris, size [2.175, 2.544, 2.602] m, clips ['lid_close', 'lid_open']",
+    "file": "grand_treasure_chest.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "grand_treasure_chest.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "grand_treasure_chest.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "4 nodes, 2 meshes, 2 primitives, 1 materials, 2 animations, 0 skins, 2 images",
+    "animations": [
+     "lid_close",
+     "lid_open"
+    ],
+    "file": "grand_treasure_chest.web-pbr.glb"
+   },
+   {
+    "check": "contract_nodes",
+    "level": "pass",
+    "detail": "nodes present: ['chest_body', 'chest_grand', 'chest_lid', 'glow_anchor']",
+    "file": "grand_treasure_chest.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 1 infos",
+    "messages": [
+     "Empty node encountered."
+    ],
+    "file": "grand_treasure_chest.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported grand_treasure_chest.web-pbr.glb: 2456 tris, size [2.175, 2.544, 2.602] m, clips ['lid_close', 'lid_open']",
+    "file": "grand_treasure_chest.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 22,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 23.4
+}

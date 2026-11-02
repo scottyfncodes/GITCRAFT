@@ -56,4 +56,16 @@
 
 ## 5. Test results
 
-See section 5 of the PR description and `acceptance/tidebreakers-3d/REPORT.json`; numbers are filled in below after the final runs.
+All run on this branch (main 1506bd3 + the consolidation), on 4 CPU threads, 15.7 GB RAM, no GPU. Every test drives the real servers through `scripts/mcp.sh` (guard + Landlock).
+
+| Suite | Result | Covers |
+|---|---|---|
+| `tests/test_policy.py` | **28/28** | Security policy for all nine tools: handshakes, path refusals, deny list, kernel-only escapes (ForgeCraft and MeshCraft included), audit hashes |
+| `tests/test_meshcraft.py` | **59/59** | MeshCraft templates (old and ported), determinism, profiles, validation, engine check, Blockbench, Mixamo, library/jobs, `process_mesh`, `compose_scene`, a hostile `run_script` blocked by the kernel (no read, write or network outside the workspace); `--call` is exercised by every ForgeCraft test |
+| `tests/test_forgecraft.py` | **37/37** | One implementation per capability, routing and fallbacks, refusals, MCP orchestration, ForgeCraft → MeshCraft child jobs, shared library record, retry → next version, `same_as`, delegated Blockbench/Mixamo/scene/process_mesh, honest blocked jobs |
+| `tests/test_fresh_install.sh` | **pass** (10 checks) | Empty HOME → `install.sh meshcraft forgecraft` → one Blender → status, registration, doctor → first real job through both sandboxed servers |
+| `tests/acceptance_tidebreakers.py` | **110/110** | The TIDEBREAKERS package: boat (7 profiles, sockets), 5 upgrades, salvage, island, deckhand (6 clips) + Mixamo merge, chest, Blockbench crab, Meshroom scan → `process_mesh`, composed scene, hand-offs to FilmCraft and DesignCraft, three.js r170 scene load with a non-blank screenshot |
+
+Found and fixed during the final runs: the engine check's camera clipped scenes larger than 100 m, so the scene screenshot was blank while the load checks passed. The far plane now scales with the asset, and the acceptance test fails on a blank screenshot.
+
+Not exercised here: TripoSR and Hunyuan3D (no GPU, Hugging Face blocked; they refuse with the reason, tested), real mixamo.com downloads (fixtures in Mixamo's layout), real camera photos (Cycles renders).

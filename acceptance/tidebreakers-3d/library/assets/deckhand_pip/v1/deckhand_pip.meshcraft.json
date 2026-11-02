@@ -1,0 +1,499 @@
+{
+ "asset_id": "deckhand_pip",
+ "brief": {
+  "asset_id": "deckhand_pip",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft",
+  "parent_job": "job-20261102-212849-76b489",
+  "template": "deckhand",
+  "params": {
+   "seed": 117,
+   "colors": {
+    "vest": "crimson",
+    "bandana": "coral"
+   },
+   "weapon": true
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Deckhand Pip",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ],
+   "poses": [
+    {
+     "clip": "Attack",
+     "at": "end"
+    }
+   ]
+  },
+  "bake": {
+   "resolution": 1024,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.25
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 21.41
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.0
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 3.22
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.17
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/source/deckhand_pip.blend",
+   "kind": "blend",
+   "bytes": 157313,
+   "sha256": "4eff32408d55ff24290d82c67c83ea40d3473ff17a5dcd313719c81babf6dbfc"
+  },
+  "seconds": 0.2,
+  "roles": {
+   "skin_e8b48a": "#E8B48A",
+   "cloth_f6ead0": "#F6EAD0",
+   "cloth_c0392b": "#C0392B",
+   "cloth_0e3b66": "#0E3B66",
+   "plain_5e331b": "#5E331B",
+   "cloth_ff6b4a": "#FF6B4A",
+   "metal_f4c542_m9": "#F4C542",
+   "plain_1b1b1f": "#1B1B1F",
+   "metal_f4f4f0_m10": "#F4F4F0"
+  },
+  "objects": [
+   "deckhand_pip",
+   "deckhand_pip_mesh",
+   "deckhand_pip_rig"
+  ],
+  "actions": [
+   "Attack",
+   "Idle",
+   "Interact",
+   "Jump",
+   "Run",
+   "Walk"
+  ],
+  "contract": {
+   "root": "deckhand_pip",
+   "ground": true,
+   "clips": [
+    "Idle",
+    "Walk",
+    "Run",
+    "Jump",
+    "Interact",
+    "Attack"
+   ]
+  },
+  "expect": {
+   "base_z": 0.0
+  }
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/previews/deckhand_pip_three_quarter.png",
+   "kind": "preview",
+   "bytes": 127717,
+   "sha256": "286bab05b90875882288bfb99425e5b31c3a01b0fe64082619f398b69773ba4f",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/previews/deckhand_pip_front.png",
+   "kind": "preview",
+   "bytes": 130169,
+   "sha256": "bc88f6c67f01a40ce0e777746b9b25cac5d7763b84f396283a5dbb77b4dfd7d2",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/previews/deckhand_pip_side.png",
+   "kind": "preview",
+   "bytes": 108899,
+   "sha256": "289043fea43833a188f36a5f76ee6c1a12c814a799c7112bb8b9649ee5fec4bf",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/previews/deckhand_pip_top.png",
+   "kind": "preview",
+   "bytes": 80832,
+   "sha256": "f3e6c3009298ba4cbd9329851e675da84c2da179abc900c95d0defa16af8eb54",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/previews/deckhand_pip_three_quarter_Attack-end.png",
+   "kind": "preview",
+   "bytes": 127717,
+   "sha256": "e1c632a8d3306a6f3f880c6eb851d99e76968df3292993783e68f5e7eb8aa26e",
+   "view": "three_quarter",
+   "clip": "Attack",
+   "pose": "end",
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/previews/deckhand_pip_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 96567,
+   "sha256": "c74107d9745300bb71db344cec84a4b3fc9dfb91b804786ab9068a9b2d2beafc"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 271984,
+   "sha256": "34a32343d5495a9a4930c0fda7a94af4b3d946d2a12d40fa0335fd69016f6aa3",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "kind": "lod",
+     "skipped": "asset has skinned meshes; decimating them would break their weights (author LODs by hand or per template)"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 9084,
+     "sha256": "6efdd6474f6655ee21f9f7b01df6d8c7588ffdd482334ef1097c42edb6275bd6",
+     "shape": "convex_hull",
+     "triangles": 116
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 9084,
+     "sha256": "6efdd6474f6655ee21f9f7b01df6d8c7588ffdd482334ef1097c42edb6275bd6"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.three-web-toon.glb",
+    "objects": [
+     "Icosphere (MESH)",
+     "deckhand_pip (EMPTY)",
+     "deckhand_pip_mesh (MESH)",
+     "deckhand_pip_rig (ARMATURE)"
+    ],
+    "triangles": 1488,
+    "materials": [
+     "GC_Cloth_0e3b66",
+     "GC_Cloth_c0392b",
+     "GC_Cloth_f6ead0",
+     "GC_Cloth_ff6b4a",
+     "GC_Metal_f4c542_m9",
+     "GC_Metal_f4f4f0_m10",
+     "GC_Plain_1b1b1f",
+     "GC_Plain_5e331b",
+     "GC_Skin_e8b48a"
+    ],
+    "actions": [
+     "Attack",
+     "Idle",
+     "Interact",
+     "Jump",
+     "Run",
+     "Walk"
+    ],
+    "armatures": 1,
+    "size_m": [
+     1.432,
+     0.44,
+     1.798
+    ],
+    "min_z": -0.0
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.web-pbr.glb",
+   "kind": "export",
+   "bytes": 475012,
+   "sha256": "67187f89d5bd729835383d9b7e2b1a273f6099fd13580904d112f89432263294",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.web-pbr.orm.png"
+    },
+    "resolution": 1024,
+    "attempts": [
+     {
+      "resolution": 1024,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 138150,
+     "sha256": "545c7d8a3ffdbad6ff0df1f1d703e2b47a3734d9973010dc8ddcd771dd00e36f"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 75850,
+     "sha256": "613e495ca2deece09eba986c2ce52ba2381378fa01687a753f55fcae230fd31d"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.web-pbr.glb",
+    "objects": [
+     "Icosphere (MESH)",
+     "deckhand_pip (EMPTY)",
+     "deckhand_pip_mesh (MESH)",
+     "deckhand_pip_rig (ARMATURE)"
+    ],
+    "triangles": 1488,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [
+     "Attack",
+     "Idle",
+     "Interact",
+     "Jump",
+     "Run",
+     "Walk"
+    ],
+    "armatures": 1,
+    "size_m": [
+     1.432,
+     0.44,
+     1.798
+    ],
+    "min_z": -0.0
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 790940,
+   "sha256": "4dcd84d21baa31eb5ac6386630f0439716d0e00dbb9f63d93d2a3c3e9e979256",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212849-76b489/meshcraft/exports/deckhand_pip.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "1488 triangles (budget 6000)",
+    "tris": 1488
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "14 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_base",
+    "level": "pass",
+    "detail": "lowest point at z=0.000 m (expected 0.0; the asset sits on its origin)",
+    "min_z": 0.0
+   },
+   {
+    "check": "origin_centered",
+    "level": "warn",
+    "detail": "footprint centre (-0.293, 0.000)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: ['Attack', 'Idle', 'Interact', 'Jump', 'Run', 'Walk']",
+    "clips": [
+     "Attack",
+     "Idle",
+     "Interact",
+     "Jump",
+     "Run",
+     "Walk"
+    ]
+   },
+   {
+    "check": "skinning:deckhand_pip_rig",
+    "level": "pass",
+    "detail": "22 bones, 1 skinned meshes, 0 unweighted verts, 0 verts with >4 influences"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "deckhand_pip.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "deckhand_pip.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "25 nodes, 1 meshes, 9 primitives, 9 materials, 6 animations, 1 skins, 0 images",
+    "animations": [
+     "Attack",
+     "Idle",
+     "Interact",
+     "Jump",
+     "Run",
+     "Walk"
+    ],
+    "file": "deckhand_pip.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 1 warnings, 0 infos",
+    "messages": [
+     "Node with a skinned mesh is not root. Parent transforms will not affect a skinned mesh."
+    ],
+    "file": "deckhand_pip.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported deckhand_pip.three-web-toon.glb: 1488 tris, size [1.432, 0.44, 1.798] m, clips ['Attack', 'Idle', 'Interact', 'Jump', 'Run', 'Walk']",
+    "file": "deckhand_pip.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "deckhand_pip.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "deckhand_pip.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "25 nodes, 1 meshes, 1 primitives, 1 materials, 6 animations, 1 skins, 2 images",
+    "animations": [
+     "Attack",
+     "Idle",
+     "Interact",
+     "Jump",
+     "Run",
+     "Walk"
+    ],
+    "file": "deckhand_pip.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 1 warnings, 0 infos",
+    "messages": [
+     "Node with a skinned mesh is not root. Parent transforms will not affect a skinned mesh."
+    ],
+    "file": "deckhand_pip.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported deckhand_pip.web-pbr.glb: 1488 tris, size [1.432, 0.44, 1.798] m, clips ['Attack', 'Idle', 'Interact', 'Jump', 'Run', 'Walk']",
+    "file": "deckhand_pip.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 19,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 26.1
+}

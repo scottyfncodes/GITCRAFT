@@ -1,0 +1,160 @@
+{
+ "id": "job-20261102-212944-1f93ea",
+ "tool": "generate",
+ "asset_id": "reef_crab_blockbench",
+ "request": {
+  "brief": "blocky voxel reef crab creature",
+  "name": "Reef Crab (Blockbench)",
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "tags": [
+   "tidebreakers"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-02T21:29:44Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:29:44Z",
+   "change": null,
+   "manual": false,
+   "stages": [
+    {
+     "stage": "route",
+     "state": "done",
+     "started": "2026-11-02T21:29:45Z",
+     "info": {
+      "chosen": "blockbench",
+      "route": "voxel",
+      "fallback_used": false,
+      "explanation": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench."
+     },
+     "finished": "2026-11-02T21:29:45Z",
+     "seconds": 0.0
+    },
+    {
+     "stage": "generate",
+     "state": "done",
+     "started": "2026-11-02T21:29:45Z",
+     "info": {
+      "meshcraft_job": "job-20261102-212945-3b6806",
+      "meshcraft_status": "done",
+      "fallback": null,
+      "validation": {
+       "pass": 16,
+       "warn": 0,
+       "fail": 0,
+       "info": 3
+      },
+      "library": {
+       "asset": "reef_crab_blockbench",
+       "version": 1
+      }
+     },
+     "finished": "2026-11-02T21:30:14Z",
+     "seconds": 29.11
+    },
+    {
+     "stage": "engine_check",
+     "state": "done",
+     "started": "2026-11-02T21:30:14Z",
+     "info": {
+      "status": "passed"
+     },
+     "finished": "2026-11-02T21:30:16Z",
+     "seconds": 2.29
+    },
+    {
+     "stage": "record",
+     "state": "done",
+     "started": "2026-11-02T21:30:16Z",
+     "info": {
+      "asset": "reef_crab_blockbench",
+      "version": 1,
+      "validation": "passed"
+     },
+     "finished": "2026-11-02T21:30:16Z",
+     "seconds": 0.01
+    }
+   ],
+   "status": "done",
+   "finished": "2026-11-02T21:30:16Z",
+   "error": null
+  }
+ ],
+ "error": null,
+ "children": [
+  "job-20261102-212945-3b6806"
+ ],
+ "updated": "2026-11-02T21:30:16Z",
+ "plan": {
+  "request": {
+   "brief": "blocky voxel reef crab creature",
+   "intents": [
+    "creature",
+    "voxel"
+   ],
+   "kind": null,
+   "template": "crab",
+   "params": {
+    "seed": 372
+   },
+   "images": 0,
+   "name": "blocky voxel reef crab creature"
+  },
+  "route": "voxel",
+  "why": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench.",
+  "candidates": [
+   {
+    "tool": "blockbench",
+    "label": "Blockbench .bbmodel \u2192 MeshCraft",
+    "owner": "meshcraft",
+    "available": true,
+    "detail": "CPU, seconds"
+   },
+   {
+    "tool": "meshcraft_template",
+    "label": "MeshCraft template (Blender)",
+    "owner": "meshcraft",
+    "available": true,
+    "detail": "CPU, seconds to a minute with previews"
+   }
+  ],
+  "chosen": "blockbench",
+  "preferred": "blockbench",
+  "fallback_used": false,
+  "explanation": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench."
+ },
+ "compute": {
+  "tool": "blockbench",
+  "needs": "CPU, seconds",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "asset": {
+  "id": "reef_crab_blockbench",
+  "version": 1,
+  "name": "Reef Crab (Blockbench)",
+  "validation": "passed"
+ }
+}

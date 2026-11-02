@@ -1,0 +1,417 @@
+{
+ "asset_id": "upgrade_copper_banded_hull",
+ "brief": {
+  "asset_id": "upgrade_copper_banded_hull",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft",
+  "parent_job": "job-20261102-212737-6ee111",
+  "template": "boat_upgrade",
+  "params": {
+   "seed": 173,
+   "upgrade": "hull_copper"
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Upgrade: Copper-Banded Hull",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 512,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.25
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 14.34
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.0
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 1.01
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.19
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/source/upgrade_copper_banded_hull.blend",
+   "kind": "blend",
+   "bytes": 124700,
+   "sha256": "b63c92738eb47db32335c93965e20ee957115a72c2820910aa4822318d7e50c4"
+  },
+  "seconds": 0.19,
+  "roles": {
+   "metal_c77b4a_m8": "#C77B4A",
+   "metal_c98a12_m9": "#C98A12"
+  },
+  "objects": [
+   "upgrade_copper_banded_hull",
+   "upgrade_copper_banded_hull_mesh"
+  ],
+  "actions": [],
+  "contract": {
+   "root": "upgrade_copper_banded_hull",
+   "ground": false
+  },
+  "expect": {}
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_three_quarter.png",
+   "kind": "preview",
+   "bytes": 91499,
+   "sha256": "af6f5e11b8db69e6e7999c17c6c9d0cc8ef6de54a0583702084a154e194be77e",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_front.png",
+   "kind": "preview",
+   "bytes": 70790,
+   "sha256": "e46c2f8f4672c1d6b6b753141eeb52504804db58d51f789aa3e9afc01ecd48c2",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_side.png",
+   "kind": "preview",
+   "bytes": 78403,
+   "sha256": "6ef6df697979354feceedd459bd50843e1b662a29be40b76165cf057175aa3a7",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_top.png",
+   "kind": "preview",
+   "bytes": 129583,
+   "sha256": "86147dcc771697dd5272d8c8b34536aa0991c75f466a197c9509162e47f542ce",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 102913,
+   "sha256": "0bf9b479e485416255c3f309a6ce44f7cdceeb1b942234e009b10a1bcdfc5b76"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 131172,
+   "sha256": "c233ee949cca86fc05bbb24429200658215fb48e121ebbfe6fd1670aee988e59",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 94268,
+     "sha256": "29993408283b3da3cf7429f1cf3d83b93b467ebad8477a5067515d757eb3e05e",
+     "ratio": 0.5,
+     "triangles": 956
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 51000,
+     "sha256": "d8b2a92cb40a15de1ece1dd7958b19dd88cc8b68c734d7365ab35b3b7d0b85fb",
+     "ratio": 0.25,
+     "triangles": 478
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 50220,
+     "sha256": "3d1cfa93b0fc90acb2f40e73371141c110e5502d34a2f472b3785f2309c46f8f",
+     "shape": "convex_hull",
+     "triangles": 640
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 50220,
+     "sha256": "3d1cfa93b0fc90acb2f40e73371141c110e5502d34a2f472b3785f2309c46f8f"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 51000,
+     "sha256": "d8b2a92cb40a15de1ece1dd7958b19dd88cc8b68c734d7365ab35b3b7d0b85fb"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 94268,
+     "sha256": "29993408283b3da3cf7429f1cf3d83b93b467ebad8477a5067515d757eb3e05e"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.glb",
+    "objects": [
+     "upgrade_copper_banded_hull (EMPTY)",
+     "upgrade_copper_banded_hull_mesh (MESH)"
+    ],
+    "triangles": 1912,
+    "materials": [
+     "GC_Metal_c77b4a_m8",
+     "GC_Metal_c98a12_m9"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3.205,
+     9.641,
+     1.444
+    ],
+    "min_z": -0.2483
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.glb",
+   "kind": "export",
+   "bytes": 283428,
+   "sha256": "7d545bbb20665f36be5f9b270f2d5f99faa0e5e9b500b80c7221bacb9bc0b97d",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.orm.png"
+    },
+    "resolution": 512,
+    "attempts": [
+     {
+      "resolution": 512,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 99374,
+     "sha256": "ff88667464c669110a4c02845ef0cbc4b162f146ec1bed21ff94cbfeb60fb421"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 53767,
+     "sha256": "e15f7efc2c7083a9160aebcc67ff97ba331fd11aba1ed0755c75bcbafe90dbbc"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.glb",
+    "objects": [
+     "upgrade_copper_banded_hull (EMPTY)",
+     "upgrade_copper_banded_hull_mesh (MESH)"
+    ],
+    "triangles": 1912,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3.205,
+     9.641,
+     1.444
+    ],
+    "min_z": -0.2483
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 68940,
+   "sha256": "25798220bab05ab24ecacec13daea4e52d5856e58927b181a0fb7bc511964b32",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 274,
+     "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "1912 triangles (budget 6000)",
+    "tris": 1912
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "0 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_centered",
+    "level": "pass",
+    "detail": "footprint centre (0.000, 0.182)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: []",
+    "clips": []
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "upgrade_copper_banded_hull.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "upgrade_copper_banded_hull.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 2 primitives, 2 materials, 0 animations, 0 skins, 0 images",
+    "animations": [],
+    "file": "upgrade_copper_banded_hull.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "upgrade_copper_banded_hull.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported upgrade_copper_banded_hull.three-web-toon.glb: 1912 tris, size [3.205, 9.641, 1.444] m, clips []",
+    "file": "upgrade_copper_banded_hull.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "upgrade_copper_banded_hull.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "upgrade_copper_banded_hull.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 2 images",
+    "animations": [],
+    "file": "upgrade_copper_banded_hull.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "upgrade_copper_banded_hull.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported upgrade_copper_banded_hull.web-pbr.glb: 1912 tris, size [3.205, 9.641, 1.444] m, clips []",
+    "file": "upgrade_copper_banded_hull.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 16.2
+}

@@ -1,0 +1,421 @@
+{
+ "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+ "brief": {
+  "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft",
+  "parent_job": "job-20261102-212706-619b42",
+  "template": "boat_upgrade",
+  "params": {
+   "seed": 777,
+   "upgrade": "rudder_ash"
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Upgrade: Ship's Wheel & Ash Rudder",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 512,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.16
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 18.78
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.0
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 8.57
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.18
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/source/upgrade_ship_s_wheel_ash_rudder.blend",
+   "kind": "blend",
+   "bytes": 111715,
+   "sha256": "09e3277c9731e1973b1518b256ae7c5c158829f1e361ec632cb10191190ab307"
+  },
+  "seconds": 0.1,
+  "roles": {
+   "wood_d9954f": "#D9954F",
+   "wood_9a5a2e": "#9A5A2E",
+   "wood_5e331b": "#5E331B",
+   "metal_f4c542_m9": "#F4C542"
+  },
+  "objects": [
+   "upgrade_ship_s_wheel_ash_rudder",
+   "upgrade_ship_s_wheel_ash_rudder_mesh"
+  ],
+  "actions": [],
+  "contract": {
+   "root": "upgrade_ship_s_wheel_ash_rudder",
+   "ground": false
+  },
+  "expect": {}
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_three_quarter.png",
+   "kind": "preview",
+   "bytes": 137241,
+   "sha256": "15e30632424f880d32b60051d008f4a5a911f3e1cf463dc791f2bdcd878b0e99",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_front.png",
+   "kind": "preview",
+   "bytes": 149619,
+   "sha256": "7dc1957984d39bf84d9053d99887e06f0b9b8a454106afcac40848ffb3607fda",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_side.png",
+   "kind": "preview",
+   "bytes": 101735,
+   "sha256": "69a19317b7adc6c5d905f262b3325a25395d0a5da7d4fb25f64b921dc17a467f",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_top.png",
+   "kind": "preview",
+   "bytes": 76039,
+   "sha256": "13bbb4fb249ac509c3f64229c9c09b3905ec8ca818ae3d89fafc6498d1eb53c1",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 136090,
+   "sha256": "7c742f5f38883437ca423bbb9f7a224d2bbe5ab460a896c2bf13620f465d2c69"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 79316,
+   "sha256": "5af11956b47b8b0bad5ce699a4dc334f5c62b49f9c0f7007a04f0ad1e585a727",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 54532,
+     "sha256": "9162d836af1936b10b0b2f30bb0815ab3eebd02f30d1d33db52b29d3d62b61d1",
+     "ratio": 0.5,
+     "triangles": 508
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 29580,
+     "sha256": "497895a445e7e82b968d05ba1518cbdab50996ed1a263263feeb8f6508161480",
+     "ratio": 0.25,
+     "triangles": 254
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 8124,
+     "sha256": "2fb9079dbe6ed88a362537e98cfe00f92af532392ea4c0979daa85cfb4bd2ca2",
+     "shape": "convex_hull",
+     "triangles": 124
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 8124,
+     "sha256": "2fb9079dbe6ed88a362537e98cfe00f92af532392ea4c0979daa85cfb4bd2ca2"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 29580,
+     "sha256": "497895a445e7e82b968d05ba1518cbdab50996ed1a263263feeb8f6508161480"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 54532,
+     "sha256": "9162d836af1936b10b0b2f30bb0815ab3eebd02f30d1d33db52b29d3d62b61d1"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb",
+    "objects": [
+     "upgrade_ship_s_wheel_ash_rudder (EMPTY)",
+     "upgrade_ship_s_wheel_ash_rudder_mesh (MESH)"
+    ],
+    "triangles": 1016,
+    "materials": [
+     "GC_Metal_f4c542_m9",
+     "GC_Wood_5e331b",
+     "GC_Wood_9a5a2e",
+     "GC_Wood_d9954f"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     1.35,
+     0.32,
+     1.775
+    ],
+    "min_z": 0.0
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb",
+   "kind": "export",
+   "bytes": 160092,
+   "sha256": "5c665bf456d7dce54a40c677f77899f5f3b79fed2279b261c48dc020ac6116b5",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.orm.png"
+    },
+    "resolution": 512,
+    "attempts": [
+     {
+      "resolution": 512,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 57906,
+     "sha256": "a490302cf9f3d5ad7464e5dddcd82183e995bc82f060954f02e75fb22e5eb310"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 28899,
+     "sha256": "3e8b072453b838947024123b9ba27d089dce3a3a6a432d1bb93c8daff09b6af5"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb",
+    "objects": [
+     "upgrade_ship_s_wheel_ash_rudder (EMPTY)",
+     "upgrade_ship_s_wheel_ash_rudder_mesh (MESH)"
+    ],
+    "triangles": 1016,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     1.35,
+     0.32,
+     1.775
+    ],
+    "min_z": 0.0
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 44476,
+   "sha256": "b414dd624fa541e25d293528ad2f8334820677a2ce46323b9a45e82411b05a3b",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 274,
+     "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "1016 triangles (budget 6000)",
+    "tris": 1016
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "0 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_centered",
+    "level": "pass",
+    "detail": "footprint centre (0.000, -0.040)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: []",
+    "clips": []
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 4 primitives, 4 materials, 0 animations, 0 skins, 0 images",
+    "animations": [],
+    "file": "upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb: 1016 tris, size [1.35, 0.32, 1.775] m, clips []",
+    "file": "upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "2 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 2 images",
+    "animations": [],
+    "file": "upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 0 infos",
+    "messages": [],
+    "file": "upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported upgrade_ship_s_wheel_ash_rudder.web-pbr.glb: 1016 tris, size [1.35, 0.32, 1.775] m, clips []",
+    "file": "upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 18,
+   "warn": 0,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 28.1
+}

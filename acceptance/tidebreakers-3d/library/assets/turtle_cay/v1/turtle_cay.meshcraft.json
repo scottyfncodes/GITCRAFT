@@ -1,0 +1,454 @@
+{
+ "asset_id": "turtle_cay",
+ "brief": {
+  "asset_id": "turtle_cay",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft",
+  "parent_job": "job-20261102-212823-4de3b5",
+  "template": "island",
+  "params": {
+   "seed": 7,
+   "radius": 15,
+   "palms": 7
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "Turtle Cay",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 1024,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 1.29
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 17.9
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.01
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 2.25
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.22
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/source/turtle_cay.blend",
+   "kind": "blend",
+   "bytes": 319532,
+   "sha256": "086e89e3851c926ad20b687b1e35d73c7eb2beabd457d5af382cd353f929ebfc"
+  },
+  "seconds": 1.24,
+  "roles": {
+   "sand_f7d9a0": "#F7D9A0",
+   "grass_3fa55a": "#3FA55A",
+   "grass_1e6b4e": "#1E6B4E",
+   "rock_8c8a86": "#8C8A86",
+   "sand_d8c08a": "#D8C08A",
+   "wood_d9954f": "#D9954F",
+   "wood_9a5a2e": "#9A5A2E",
+   "plain_5e331b": "#5E331B",
+   "plank_d9954f": "#D9954F",
+   "wood_5e331b": "#5E331B",
+   "plank_ecdab4": "#ECDAB4",
+   "grass_c9a24a": "#C9A24A",
+   "plain_f6ead0": "#F6EAD0",
+   "cloth_c0392b": "#C0392B"
+  },
+  "objects": [
+   "socket_dock",
+   "socket_spawn",
+   "turtle_cay",
+   "turtle_cay_mesh"
+  ],
+  "actions": [],
+  "contract": {
+   "root": "turtle_cay",
+   "ground": false
+  },
+  "expect": {}
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_three_quarter.png",
+   "kind": "preview",
+   "bytes": 110250,
+   "sha256": "0a7bf8d3ff78288fcfc24a315282011d755cf0ef5acc7c8048f8510d941219a0",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_front.png",
+   "kind": "preview",
+   "bytes": 92164,
+   "sha256": "e83d9dde98e12c1115afd450d2010e1188a8dc7684c9310a738386a1a51d9610",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_side.png",
+   "kind": "preview",
+   "bytes": 92435,
+   "sha256": "a32e485210d5e7337f02b38872de87f3b8a6ac9eef77b8e5aba1def64ebfc2f8",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_top.png",
+   "kind": "preview",
+   "bytes": 143403,
+   "sha256": "981d4a888ef9a4afa99a5eff7c9130a274be3c76a538462ee4add01b414f36c5",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 138544,
+   "sha256": "45982c07a97584408e77f97b7825fa8dd43d244eb3269d8fd9f0c20c90b47e5f"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 790132,
+   "sha256": "e2b3ab0f9ae271c4494da2e0451159c6b511bd06d4c026be4f8156fbbaebca54",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 544716,
+     "sha256": "d9591c6bfc4a64602a546d888580142389452dfd96f78e2b32dfd541f8352d10",
+     "ratio": 0.5,
+     "triangles": 5365
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 279080,
+     "sha256": "d79896a6c219e4a65e0f73071b64c3944ba263ef75d9ef0dc1ac0c12b7b0bc35",
+     "ratio": 0.25,
+     "triangles": 2668
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 12892,
+     "sha256": "efe0c8f0a4e4cd88dfdd8ca6a78c1327786324f54ad977d4fd0f6f9a7d0229ce",
+     "shape": "convex_hull",
+     "triangles": 164
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 12892,
+     "sha256": "efe0c8f0a4e4cd88dfdd8ca6a78c1327786324f54ad977d4fd0f6f9a7d0229ce"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 279080,
+     "sha256": "d79896a6c219e4a65e0f73071b64c3944ba263ef75d9ef0dc1ac0c12b7b0bc35"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 544716,
+     "sha256": "d9591c6bfc4a64602a546d888580142389452dfd96f78e2b32dfd541f8352d10"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.glb",
+    "objects": [
+     "socket_dock (EMPTY)",
+     "socket_spawn (EMPTY)",
+     "turtle_cay (EMPTY)",
+     "turtle_cay_mesh (MESH)"
+    ],
+    "triangles": 10732,
+    "materials": [
+     "GC_Cloth_c0392b",
+     "GC_Grass_1e6b4e",
+     "GC_Grass_3fa55a",
+     "GC_Grass_c9a24a",
+     "GC_Plain_5e331b",
+     "GC_Plain_f6ead0",
+     "GC_Plank_d9954f",
+     "GC_Plank_ecdab4",
+     "GC_Rock_8c8a86",
+     "GC_Sand_d8c08a",
+     "GC_Sand_f7d9a0",
+     "GC_Wood_5e331b",
+     "GC_Wood_9a5a2e",
+     "GC_Wood_d9954f"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     32.062,
+     32.185,
+     11.027
+    ],
+    "min_z": -1.7
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.glb",
+   "kind": "export",
+   "bytes": 1396800,
+   "sha256": "f03f2a180d86718fa20ed5b9160cb660c9e823865dbe1ff6064fe6d8bca7a938",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.orm.png"
+    },
+    "resolution": 1024,
+    "attempts": [
+     {
+      "resolution": 1024,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 435175,
+     "sha256": "37a72ece260ae2a245e346a3a2166d2c26bb272d682fd42faf5ffe4378ab1921"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 184917,
+     "sha256": "b103cbb478c7c625858da8f2deb2f75f4aae4b6f901799e28044347079bf2d0a"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.glb",
+    "objects": [
+     "socket_dock (EMPTY)",
+     "socket_spawn (EMPTY)",
+     "turtle_cay (EMPTY)",
+     "turtle_cay_mesh (MESH)"
+    ],
+    "triangles": 10732,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     32.062,
+     32.185,
+     11.027
+    ],
+    "min_z": -1.7
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 336700,
+   "sha256": "c5e864186665f732fd2fb9efb5ccc471485ec13bf24716c1a0b07a058701e4dd",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 315,
+     "sha256": "908f962b4f22d8442a0bcc0c2c0b8891ceb70316e9219dd103b07c2eb6dc2153"
+    }
+   ]
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "10732 triangles (budget 20000)",
+    "tris": 10732
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "warn",
+    "detail": "98 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "218 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_centered",
+    "level": "pass",
+    "detail": "footprint centre (0.000, 0.000)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: []",
+    "clips": []
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "turtle_cay.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "turtle_cay.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "4 nodes, 1 meshes, 14 primitives, 14 materials, 0 animations, 0 skins, 0 images",
+    "animations": [],
+    "file": "turtle_cay.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 2 infos",
+    "messages": [
+     "Empty node encountered.",
+     "Empty node encountered."
+    ],
+    "file": "turtle_cay.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported turtle_cay.three-web-toon.glb: 10732 tris, size [32.062, 32.185, 11.027] m, clips []",
+    "file": "turtle_cay.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "turtle_cay.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "turtle_cay.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "4 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 2 images",
+    "animations": [],
+    "file": "turtle_cay.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 2 infos",
+    "messages": [
+     "Empty node encountered.",
+     "Empty node encountered."
+    ],
+    "file": "turtle_cay.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported turtle_cay.web-pbr.glb: 10732 tris, size [32.062, 32.185, 11.027] m, clips []",
+    "file": "turtle_cay.web-pbr.glb"
+   }
+  ],
+  "summary": {
+   "pass": 17,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "seconds": 22.4
+}
