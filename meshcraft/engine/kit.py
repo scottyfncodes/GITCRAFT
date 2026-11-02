@@ -392,8 +392,10 @@ def skin_rigid(mesh_obj, arm, part_bones):
     for vg_name, bone in part_bones.items():
         vg = mesh_obj.vertex_groups.get(vg_name)
         if vg is not None: vg.name = bone
+    # glTF ignores a skinned mesh's parent transforms (validator: NODE_SKINNED_MESH_NON_ROOT),
+    # so the mesh stays at the scene root; only the modifier binds it to the armature.
     mw = mesh_obj.matrix_world.copy()
-    mesh_obj.parent = arm; mesh_obj.matrix_world = mw
+    mesh_obj.parent = None; mesh_obj.matrix_world = mw
     mod = mesh_obj.modifiers.new("Armature", "ARMATURE"); mod.object = arm
 
 
@@ -413,7 +415,7 @@ def skin_gradient(mesh_obj, arm, chain, axis=0, start=0.0, length=1.0):
         i = int(t); f = t - i
         groups[i].add([v.index], 1 - f, "REPLACE")
         if i + 1 < n: groups[i + 1].add([v.index], f, "REPLACE")
-    mw = mesh_obj.matrix_world.copy(); mesh_obj.parent = arm; mesh_obj.matrix_world = mw
+    mw = mesh_obj.matrix_world.copy(); mesh_obj.parent = None; mesh_obj.matrix_world = mw  # skinned meshes at the root (glTF)
     mod = mesh_obj.modifiers.new("Armature", "ARMATURE"); mod.object = arm
 
 

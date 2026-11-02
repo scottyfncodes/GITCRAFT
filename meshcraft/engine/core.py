@@ -450,7 +450,9 @@ def _lods_and_collision(prof, base, meshes):
     out = []
     dg = bpy.context.evaluated_depsgraph_get()
     statics = [o for o in meshes if not any(m.type == "ARMATURE" for m in o.modifiers)]
-    for ratio in prof.get("lods", []):
+    if prof.get("lods") and len(statics) < len(meshes):
+        out.append({"kind": "lod", "skipped": "asset has skinned meshes; decimating them would break their weights (author LODs by hand or per template)"})
+    for ratio in (prof.get("lods", []) if len(statics) == len(meshes) else []):
         copies = []
         for o in statics:
             me = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
@@ -463,7 +465,7 @@ def _lods_and_collision(prof, base, meshes):
         for c in copies: bpy.data.objects.remove(c)
     if prof.get("collision") == "convex":
         bm = bmesh.new()
-        for o in statics:
+        for o in meshes:  # rest pose, skinned meshes included
             me = o.evaluated_get(dg).to_mesh()
             for v in me.vertices: bm.verts.new(o.matrix_world @ v.co)
             o.evaluated_get(dg).to_mesh_clear()
@@ -558,7 +560,7 @@ def run_pipeline(brief):
                               "notes": f"{e['profile']} export ({e.get('engine')})", "triangles": next((c.get("tris") for c in checks if c["check"] == "triangle_budget"), None),
                               "clips": b["actions"]})
                 items += [dict(sc, status="game-ready", notes=f"{e['profile']} sidecar") for sc in e.get("sidecars", [])]
-                items += [dict(x, status="game-ready", notes=f"{e['profile']} {x['kind']}" + (f" ({int(x['ratio'] * 100)}% triangles)" if x.get("ratio") else " (convex hull)")) for x in e.get("extras", [])]
+                items += [dict(x, status="game-ready", notes=f"{e['profile']} {x['kind']}" + (f" ({int(x['ratio'] * 100)}% triangles)" if x.get("ratio") else " (convex hull)")) for x in e.get("extras", []) if "path" in x]
             items += [dict(r, status="preview", notes="MeshCraft preview render") for r in report["previews"]]
             report["manifest"] = step("manifest", lambda: update_manifest(brief["manifest"], items))
     finally:
