@@ -1,55 +1,57 @@
 # TIDEBREAKERS 3D acceptance package
 
-Produced by `tests/acceptance_tidebreakers.py` with GITCRAFT's 3D Department (ForgeCraft, with MeshCraft as one of its backends). Every call went through the sandboxed MCP server, as Claude Code drives it. Result: **66/66 checks passed** (2026-11-02T19:54:53Z → 2026-11-02T20:03:02Z).
+Produced by `tests/acceptance_tidebreakers.py` with GITCRAFT's consolidated 3D Department: **ForgeCraft orchestrates** (routing, engine check, licence and provenance records, hand-off) and **MeshCraft does every Blender step** as a child job, both writing one shared library. Every call went through the sandboxed MCP servers, as Claude Code drives them. Result: **110/110 checks passed** (2026-11-02T21:25:32Z → 2026-11-02T21:36:44Z).
 Machine: 4 CPU threads, 15.7 GB RAM, no GPU.
 
-**Engine target:** TIDEBREAKERS (Vite + TypeScript + three.js r170). GLB, metres, Y-up, forward/bow = +Z, matching `src/ship/shipModel.ts`. Every GLB passed the Khronos glTF-Validator with 0 errors and loaded in three.js r170's GLTFLoader in Chromium.
+**Engine target:** TIDEBREAKERS (Vite + TypeScript + three.js r170). GLB, metres, Y-up, forward/bow = +Z, matching `src/ship/shipModel.ts`. Every main GLB passed the Khronos glTF-Validator, a Blender re-import, MeshCraft's geometry checks and a three.js r170 `GLTFLoader` load in Chromium (the engine check; its screenshot is in each version's `previews/`).
 
 ## Assets (latest versions)
 
-| Asset | ID | Made with | Triangles | Texture maps | Animations | Formats | Validation | Files |
+| Asset | ID | Made with | Triangles | Texture maps | Animations | Export profiles | Validation | Files |
 |---|---|---|---|---|---|---|---|---|
-| TIDEBREAKERS Coastal Sloop | `fc3d-9831ff542e` v1 | blender | 4,384 | 2 | — | blend, fbx, glb, gltf, obj, stl | passed | [GLB](library/assets/fc3d-9831ff542e/v1/tidebreakers_coastal_sloop.glb) · [preview](library/assets/fc3d-9831ff542e/v1/previews/tidebreakers_coastal_sloop_thumb.png) |
-| Upgrade: Canvas Mainsail | `fc3d-6cca3f5f59` v1 | blender | 588 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-6cca3f5f59/v1/upgrade_canvas_mainsail.glb) · [preview](library/assets/fc3d-6cca3f5f59/v1/previews/upgrade_canvas_mainsail_thumb.png) |
-| Upgrade: Lashed Cargo Crates | `fc3d-21a46a8062` v1 | blender | 492 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-21a46a8062/v1/upgrade_lashed_cargo_crates.glb) · [preview](library/assets/fc3d-21a46a8062/v1/previews/upgrade_lashed_cargo_crates_thumb.png) |
-| Upgrade: Brass Compass | `fc3d-82b6135f47` v1 | blender | 698 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-82b6135f47/v1/upgrade_brass_compass.glb) · [preview](library/assets/fc3d-82b6135f47/v1/previews/upgrade_brass_compass_thumb.png) |
-| Upgrade: Ship's Wheel & Ash Rudder | `fc3d-c75a7997c3` v1 | blender | 1,016 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-c75a7997c3/v1/upgrade_ship_s_wheel_ash_rudder.glb) · [preview](library/assets/fc3d-c75a7997c3/v1/previews/upgrade_ship_s_wheel_ash_rudder_thumb.png) |
-| Upgrade: Copper-Banded Hull | `fc3d-0486db99be` v1 | blender | 1,912 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-0486db99be/v1/upgrade_copper_banded_hull.glb) · [preview](library/assets/fc3d-0486db99be/v1/previews/upgrade_copper_banded_hull_thumb.png) |
-| Floating Salvage | `fc3d-0b2467cdb8` v1 | blender | 1,188 | 2 | float_bob | blend, fbx, glb | passed | [GLB](library/assets/fc3d-0b2467cdb8/v1/floating_salvage.glb) · [preview](library/assets/fc3d-0b2467cdb8/v1/previews/floating_salvage_thumb.png) |
-| Turtle Cay | `fc3d-7e35f73ff8` v1 | blender | 10,340 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-7e35f73ff8/v1/turtle_cay.glb) · [preview](library/assets/fc3d-7e35f73ff8/v1/previews/turtle_cay_thumb.png) |
-| Grand Treasure Chest (MeshCraft) | `fc3d-4d0ab4aea8` v1 | meshcraft → blender | 2,456 | 1 | lid_close, lid_open | blend, glb | passed | [GLB](library/assets/fc3d-4d0ab4aea8/v1/grand_treasure_chest_meshcraft.glb) · [preview](library/assets/fc3d-4d0ab4aea8/v1/previews/grand_treasure_chest_meshcraft_three_quarter.png) |
-| Reef Crab (Blockbench) | `fc3d-46906d9596` v1 | blockbench → blender | 216 | 1 | — | bbmodel, blend, fbx, glb | passed | [GLB](library/assets/fc3d-46906d9596/v1/reef_crab_blockbench.glb) · [preview](library/assets/fc3d-46906d9596/v1/previews/reef_crab_blockbench_thumb.png) |
-| Deckhand Pip | `fc3d-71fcc50dcd` v2 | mixamo → blender | 1,476 | 2 | Attack, Idle, Interact, Jump, MixamoLayout_Jump, MixamoLayout_Walk, Run, Walk | blend, fbx, glb | passed-with-warnings | [GLB](library/assets/fc3d-71fcc50dcd/v2/deckhand_pip.glb) · [preview](library/assets/fc3d-71fcc50dcd/v2/previews/deckhand_pip_thumb.png) |
-| Salvage Raft (photogrammetry scan) | `fc3d-297ecf1de4` v1 | meshroom → blender | 1,141 | 2 | — | blend, fbx, glb | passed | [GLB](library/assets/fc3d-297ecf1de4/v1/salvage_raft_photogrammetry_scan.glb) · [preview](library/assets/fc3d-297ecf1de4/v1/previews/salvage_raft_photogrammetry_scan_thumb.png) |
-| TIDEBREAKERS Turtle Cay Scene | `fc3d-232048523e` v1 | blender | 26,410 | 17 | Attack, float_bob, Idle, Interact, Jump, MixamoLayout_Jump, MixamoLayout_Walk, Run, Walk | blend, glb | passed-with-warnings | [GLB](library/assets/fc3d-232048523e/v1/tidebreakers_turtle_cay_scene.glb) · [preview](library/assets/fc3d-232048523e/v1/previews/tidebreakers_turtle_cay_scene_thumb.png) |
+| TIDEBREAKERS Coastal Sloop | `tidebreakers_coastal_sloop` v1 | meshcraft_template | 4,392 | 7 | — | godot-glb.glb, obj-static.obj, stl-print.stl, three-web-atlas.glb, three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/tidebreakers_coastal_sloop/v1/exports/tidebreakers_coastal_sloop.web-pbr.glb) · [preview](library/assets/tidebreakers_coastal_sloop/v1/previews/tidebreakers_coastal_sloop_three_quarter.png) |
+| Upgrade: Canvas Mainsail | `upgrade_canvas_mainsail` v1 | meshcraft_template | 588 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed-with-warnings / engine passed | [GLB](library/assets/upgrade_canvas_mainsail/v1/exports/upgrade_canvas_mainsail.web-pbr.glb) · [preview](library/assets/upgrade_canvas_mainsail/v1/previews/upgrade_canvas_mainsail_three_quarter.png) |
+| Upgrade: Lashed Cargo Crates | `upgrade_lashed_cargo_crates` v1 | meshcraft_template | 492 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/upgrade_lashed_cargo_crates/v1/exports/upgrade_lashed_cargo_crates.web-pbr.glb) · [preview](library/assets/upgrade_lashed_cargo_crates/v1/previews/upgrade_lashed_cargo_crates_three_quarter.png) |
+| Upgrade: Brass Compass | `upgrade_brass_compass` v1 | meshcraft_template | 698 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/upgrade_brass_compass/v1/exports/upgrade_brass_compass.web-pbr.glb) · [preview](library/assets/upgrade_brass_compass/v1/previews/upgrade_brass_compass_three_quarter.png) |
+| Upgrade: Ship's Wheel & Ash Rudder | `upgrade_ship_s_wheel_ash_rudder` v1 | meshcraft_template | 1,016 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/upgrade_ship_s_wheel_ash_rudder/v1/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb) · [preview](library/assets/upgrade_ship_s_wheel_ash_rudder/v1/previews/upgrade_ship_s_wheel_ash_rudder_three_quarter.png) |
+| Upgrade: Copper-Banded Hull | `upgrade_copper_banded_hull` v1 | meshcraft_template | 1,912 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/upgrade_copper_banded_hull/v1/exports/upgrade_copper_banded_hull.web-pbr.glb) · [preview](library/assets/upgrade_copper_banded_hull/v1/previews/upgrade_copper_banded_hull_three_quarter.png) |
+| Floating Salvage | `floating_salvage` v1 | meshcraft_template | 1,188 | 3 | float_bob | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/floating_salvage/v1/exports/floating_salvage.web-pbr.glb) · [preview](library/assets/floating_salvage/v1/previews/floating_salvage_three_quarter.png) |
+| Turtle Cay | `turtle_cay` v1 | meshcraft_template | 10,732 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed-with-warnings / engine passed | [GLB](library/assets/turtle_cay/v1/exports/turtle_cay.web-pbr.glb) · [preview](library/assets/turtle_cay/v1/previews/turtle_cay_three_quarter.png) |
+| Grand Treasure Chest | `grand_treasure_chest` v1 | meshcraft_template | 2,456 | 3 | lid_close, lid_open | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/grand_treasure_chest/v1/exports/grand_treasure_chest.web-pbr.glb) · [preview](library/assets/grand_treasure_chest/v1/previews/grand_treasure_chest_three_quarter.png) |
+| Reef Crab (Blockbench) | `reef_crab_blockbench` v1 | blockbench | 216 | 3 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed / engine passed | [GLB](library/assets/reef_crab_blockbench/v1/exports/reef_crab_blockbench.web-pbr.glb) · [preview](library/assets/reef_crab_blockbench/v1/previews/reef_crab_blockbench_three_quarter.png) |
+| Deckhand Pip | `deckhand_pip` v2 | mixamo | 1,488 | 3 | Walking, Sneak_Walk | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed-with-warnings / engine passed | [GLB](library/assets/deckhand_pip/v2/exports/deckhand_pip.web-pbr.glb) · [preview](library/assets/deckhand_pip/v2/previews/deckhand_pip_three_quarter.png) |
+| Salvage Raft (photogrammetry scan) | `salvage_raft_photogrammetry_scan` v1 | meshroom | 1,163 | 2 | — | three-web-toon.glb, unity-fbx.fbx, web-pbr.glb | passed-with-warnings / engine passed | [GLB](library/assets/salvage_raft_photogrammetry_scan/v1/exports/salvage_raft_photogrammetry_scan.web-pbr.glb) · [preview](library/assets/salvage_raft_photogrammetry_scan/v1/previews/salvage_raft_photogrammetry_scan_three_quarter.png) |
+| TIDEBREAKERS Turtle Cay Scene | `tidebreakers_turtle_cay_scene` v1 | meshcraft_scene | 26,742 | 0 | Attack, Idle, Interact, Jump, Run, Sneak_Walk, Walk, Walking, float_bob | scene.glb | passed-with-warnings / engine passed | [GLB](library/assets/tidebreakers_turtle_cay_scene/v1/exports/tidebreakers_turtle_cay_scene.scene.glb) · [preview](library/assets/tidebreakers_turtle_cay_scene/v1/previews/tidebreakers_turtle_cay_scene_three_quarter.png) |
+
+Each row's job column is in `asset.json` → `provenance`: the ForgeCraft job that ordered it and the MeshCraft job that built it. `library/jobs/` has both records.
 
 Notes on specific assets:
 
-- **Deckhand Pip v2** is v1 plus two clips merged through the Mixamo import path. Those clips are **fixtures in Mixamo's download layout, exported from the character's own rig**, not files from mixamo.com.
-- **"passed-with-warnings"** is the Khronos warning `NODE_SKINNED_MESH_NON_ROOT`. The skinned mesh sits under the asset's root node, which is harmless because that root has an identity transform.
-- **The photogrammetry scan** was reconstructed by Meshroom 2023.3 from 36 **Cycles renders of the floating-salvage asset**, not from real camera photos. It used the CPU draft pipeline and solved all 36 cameras, so it is draft quality.
-  - ForgeCraft's scan cleanup cropped it to the subject, dropped the floor, disconnected fragments and floating outliers, rescaled it to 2.4 m and rebaked it into PNG maps.
-- **Grand Treasure Chest** was built by **MeshCraft's** chest template (TIDEBREAKERS palette, lid clips) and packaged by ForgeCraft without re-processing.
+- **Deckhand Pip v2** is v1 plus two clips merged through the Mixamo path (ForgeCraft `mixamo_apply` → MeshCraft). Those clips are **fixtures in Mixamo's download layout written by `tests/fixtures/mixamo_fixture.py`**, not files from mixamo.com.
+- **"passed-with-warnings"** means MeshCraft's validation passed with warnings (e.g. a rigged mesh under the asset's root node); there were no failures.
+- **The photogrammetry scan** was reconstructed by Meshroom 2023.3 (ForgeCraft backend, CPU draft pipeline) from 36 **Cycles renders of a salvage asset**, not real camera photos, so it is draft quality. MeshCraft's `process_mesh` cropped it to the subject, dropped the floor, fragments and floating outliers, rescaled it to 2.4 m, decimated it and baked PBR maps.
+- **Grand Treasure Chest** is MeshCraft's chest template (TIDEBREAKERS palette, lid clips), ordered by ForgeCraft.
+- **Reef Crab** was routed to Blockbench: MeshCraft wrote the `.bbmodel` (included) and imported it into Blender.
 
 ## Required deliverables
 
 | Requirement | Delivered |
 |---|---|
-| Recognisable 3D player boat | TIDEBREAKERS Coastal Sloop: lofted hull ported from `shipModel.ts`, deck, cabin, mast, boom, striped mainsail, jib, rails, tiller, lantern, flag. Six `socket_*` attachment nodes. All six formats (GLB, glTF, FBX, OBJ, STL, .blend). |
-| Modular upgrade components | Canvas Mainsail, Lashed Cargo Crates, Brass Compass, Ship's Wheel & Ash Rudder, Copper-Banded Hull. These are the five TIDEBREAKERS upgrade slots, each modelled at its socket origin. |
+| Recognisable 3D player boat | TIDEBREAKERS Coastal Sloop (MeshCraft `boat` template): lofted hull ported from `shipModel.ts`, deck, cabin, mast, boom, striped mainsail, jib, rails, tiller, lantern, flag; `socket_*` attachment nodes; all seven export profiles |
+| Modular upgrade components | Canvas Mainsail, Lashed Cargo Crates, Brass Compass, Ship's Wheel & Ash Rudder, Copper-Banded Hull: the five TIDEBREAKERS upgrade slots, each modelled at its socket origin (`boat_upgrade`) |
 | Floating salvage object | Lashed crate, barrel, chest and buoy on driftwood, with a looping `float_bob` animation |
-| Island / environmental structure | Turtle Cay: noise heightfield (sand, grass, rock), palms, rocks, stilt hut, dock, summit flag. `socket_dock` / `socket_spawn` nodes. |
-| Animated character or creature | Deckhand Pip: 22-bone Mixamo-named rig; Idle, Walk, Run, Jump, Interact, Attack (+2 merged clips). Reef Crab built through Blockbench (`.bbmodel` included). |
-| Composed 3D scene | TIDEBREAKERS Turtle Cay Scene, assembled in Blender from library GLBs. The four hull/deck upgrades are attached to the sloop's sockets (the canvas mainsail replaces the base sail in game). The deckhand stands on the dock socket and the crab at the spawn socket. Ocean, sun, sky and a hero render. Exported as scene GLB + .blend. |
-| Real geometry, GLB/glTF, textures, previews, metadata | Every asset: baked PNG base-colour + metallic-roughness maps (Blockbench: its pixel-art texture), a Cycles thumbnail + turntable, and `asset.json` (ID, provenance, licence, stats, validation) |
-| Downstream handoffs | `library_export` into the workspace (exports were hashed in the audit log), then: **FilmCraft** cut 24 turntable frames into `handoffs/coastal_sloop_turntable.mp4`; **DesignCraft** laid out `handoffs/tidebreakers_3d_asset_sheet.png` (+ `.designcraft`) from every preview |
-| Imported into a real 3D scene | (1) Blender scene composition; (2) three.js r170 loads the scene, boat and character GLBs into one engine scene, with clips playing: `handoffs/threejs_r170_import.png` / `.json` |
+| Island / environmental structure | Turtle Cay: heightfield island with palms, rocks, stilt hut, dock; `socket_dock` / `socket_spawn` |
+| Animated character or creature | Deckhand Pip: 22-bone Mixamo-named rig; Idle, Walk, Run, Jump, Interact, Attack (+2 merged clips in v2). Reef Crab via Blockbench |
+| Composed 3D scene | TIDEBREAKERS Turtle Cay Scene (MeshCraft `compose_scene`): the four hull/deck upgrades attached to the sloop's sockets (the canvas mainsail replaces the base sail in game), the deckhand on the dock socket, the crab on the spawn socket, salvage, ocean, sun, sky, hero render; scene GLB + `.blend` |
+| Real geometry, GLB, textures, previews, metadata | Every asset: baked PNG base-colour + ORM maps (`web-pbr`), vertex-colour toon GLB, FBX, `.blend`, Cycles previews, and `asset.json` (files with SHA-256, routing, licence, provenance, validation, engine check) |
+| Downstream handoffs | `library_export` into the workspace (hash-verified), then **FilmCraft** cut the preview renders into `handoffs/tidebreakers_3d_review_reel.mp4`, and **DesignCraft** laid out `handoffs/tidebreakers_3d_asset_sheet.png` (+ `.designcraft`) |
+| Imported into a real 3D scene | (1) Blender scene composition; (2) three.js r170 loads the scene GLB (boat, upgrades, island, salvage, deckhand, crab) in `GLTFLoader`: `handoffs/threejs_r170_scene.png` / `.json` |
 
 ## Layout
 
-- `library/`: snapshot of the ForgeCraft library. `index.json`, `assets/<id>/v<N>/` (exports, textures, previews, `asset.json`) and `jobs/*.json` (routing, stages, timings, attempts). The deployed 3D Department UI is built from this folder.
-- `handoffs/`: FilmCraft MP4, DesignCraft sheet, three.js import screenshot + report.
-- `REPORT.json`: every check, asset and handoff from the acceptance run. Its `assets/<slug>_vN/` paths are the `library_export` handoff copies; they are not committed, because the same files are in `library/assets/`. `python3 forgecraft/cli.py export <id> <dir>` recreates them.
+- `library/`: snapshot of the shared 3D library: `index.json`, `assets/<id>/v<N>/` (exports, textures, previews, `source/*.blend`, `asset.json`), `jobs/*.json` (ForgeCraft jobs and their MeshCraft child jobs) and `probe.json`. The deployed 3D Department UI is built from this folder.
+- `handoffs/`: FilmCraft MP4, DesignCraft sheet, three.js scene screenshot + report.
+- `REPORT.json`: every check, asset and handoff from the run. Its `assets/<id>_vN/` export copies are not committed (the same files are in `library/assets/`); `python3 forgecraft/cli.py export <id> <dir>` recreates them.
 
 **Using an asset in TIDEBREAKERS:**
 
@@ -57,4 +59,4 @@ Notes on specific assets:
 new GLTFLoader().load(url, (g) => scene.add(g.scene));
 ```
 
-For the game's toon look, swap each `MeshStandardMaterial` for `MeshToonMaterial({ map: m.map, gradientMap: toonGradient() })`. To fit an upgrade, add it as a child of the boat's matching `socket_*` node.
+The `three-web-toon` GLB carries vertex colours for the game's toon look; the `web-pbr` GLB carries baked maps. To fit an upgrade, add it as a child of the boat's matching `socket_*` node.

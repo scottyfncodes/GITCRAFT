@@ -25,8 +25,8 @@ Claude Code ⇄ guard.py ⇄ sandbox.py (Landlock) ⇄ tool MCP server (+ its na
 
 ## ForgeCraft
 
-- ForgeCraft (`forgecraft/server.py`, stdlib Python) runs behind the same guard and sandbox. Blender, Meshroom, MeshCraft's engine and the three.js check all run as its children, so the same fence applies to them.
-- It can read and execute its code, `~/.gitcraft/forgecraft` (Meshroom, AI venv) and MeshCraft's Blender venv. It can write its library (`~/.gitcraft/forgecraft-library`) and model cache.
+- ForgeCraft (`forgecraft/server.py`, stdlib Python) runs behind the same guard and sandbox. Every Blender step it orders runs as a MeshCraft child process (`meshcraft/server.py --call`), and Meshroom and the AI backends also run as its children, so the same fence applies to all of them.
+- It can read and execute its code, `~/.gitcraft/forgecraft` (Meshroom, AI venv) and MeshCraft's Blender venv. It can write the shared 3D library (`$GITCRAFT_3D_LIBRARY`, default `~/.gitcraft/3d-library`, the same one MeshCraft writes) and its model cache.
 - The engine check serves files to Chromium by request interception, not a socket, so it works with network denied.
 - Hunyuan3D's hosted mode needs `GITCRAFT_ALLOW_NET=1`, set deliberately for that session only.
 - `forgecraft/ui_server.py` (the live UI) runs outside the sandbox as a local tool and binds to 127.0.0.1 only.

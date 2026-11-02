@@ -1,0 +1,86 @@
+{
+ "id": "job-20261102-212919-116546",
+ "tool": "run_pipeline",
+ "asset_id": "grand_treasure_chest",
+ "request": {
+  "brief": {
+   "asset_id": "grand_treasure_chest",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft",
+   "parent_job": "job-20261102-212918-4bce16",
+   "template": "chest",
+   "params": {
+    "seed": 545,
+    "tier": "grand"
+   },
+   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Grand Treasure Chest",
+   "tags": [
+    "tidebreakers"
+   ],
+   "profiles": [
+    "three-web-toon",
+    "web-pbr",
+    "unity-fbx"
+   ],
+   "preview": {
+    "size": 512,
+    "views": [
+     "three_quarter",
+     "front",
+     "side",
+     "top"
+    ]
+   }
+  }
+ },
+ "status": "done",
+ "created": "2026-11-02T21:29:19Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:29:19Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 23.4,
+   "steps": [
+    {
+     "step": "build",
+     "ok": true,
+     "seconds": 0.16
+    },
+    {
+     "step": "preview",
+     "ok": true,
+     "seconds": 18.81
+    },
+    {
+     "step": "validate_scene",
+     "ok": true,
+     "seconds": 0.01
+    },
+    {
+     "step": "export",
+     "ok": true,
+     "seconds": 3.48
+    },
+    {
+     "step": "contact_sheet",
+     "ok": true,
+     "seconds": 0.35
+    }
+   ],
+   "finished": "2026-11-02T21:29:42Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261102-212918-4bce16",
+ "updated": "2026-11-02T21:29:42Z",
+ "library": {
+  "asset": "grand_treasure_chest",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/grand_treasure_chest/v1",
+  "same_as": null,
+  "files": 16
+ }
+}

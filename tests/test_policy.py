@@ -18,7 +18,8 @@ os.makedirs(ws, exist_ok=True)
 SECRET = os.path.expanduser("~/.gitcraft-policy-secret.txt")   # outside the workspace
 open(SECRET, "w").write("top secret")
 # own LightCraft library: the session's LightCraft server keeps the shared one locked
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_LIGHTCRAFT_LIBRARY=os.path.join(ws, "lightcraft-library"))
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_LIGHTCRAFT_LIBRARY=os.path.join(ws, "lightcraft-library"),
+           GITCRAFT_3D_LIBRARY=os.path.join(ws, "3d-library"))
 results = []
 
 def check(label, cond, detail=""):
@@ -65,6 +66,24 @@ for name in want:
         c.close()
     except Exception as e:
         check(f"{name}: server starts under guard + sandbox", False, str(e)[:300])
+
+# ForgeCraft (the 3D orchestrator) answers at once too, and what it hands to MeshCraft stays fenced:
+# a mesh outside the roots is refused before any Blender work starts.
+if "forgecraft" in want:
+    try:
+        import time
+        t0 = time.time(); c = Client([MCP, "forgecraft"], env=env); dt = time.time() - t0
+        check("forgecraft: answers initialize within 2 s", dt < 2.0, f"{dt:.2f} s")
+        names = [t["name"] for t in c.tools()]
+        check("forgecraft: keeps its 1.0 tool names", {"generate", "route", "process_mesh", "photogrammetry", "compose_scene", "blockbench_build",
+              "mixamo_apply", "library_search", "job_retry"} <= set(names), names)
+        ok, val = c.call("process_mesh", {"input": SECRET + ".glb", "name": "escape"})
+        check("forgecraft: a mesh outside the workspace is refused before MeshCraft runs", not ok and "GITCRAFT policy" in str(val), str(val)[:200])
+        ok, val = c.call("hardware_probe")
+        check("forgecraft: probe reports one shared library and every 3D backend", ok and {"meshcraft", "blockbench", "mixamo", "meshroom", "triposr", "hunyuan3d"} <= set(val["backends"]), str(val)[:200])
+        c.close()
+    except Exception as e:
+        check("forgecraft: handshake and delegation fence", False, str(e)[:300])
 
 # MeshCraft must answer the MCP handshake at once (Blender loads afterwards): Claude Code gives a
 # server 30 s to connect, and a cold Blender import at session start used to take longer (#10).
@@ -115,13 +134,21 @@ gh = os.path.expanduser(os.environ.get("GITCRAFT_HOME", "~/.gitcraft"))
 base = ["python3", os.path.join(HERE, "..", "scripts", "sandbox.py"), "--rx", "/usr", "--rx", "/lib", "--rx", "/lib64", "--rx", "/bin",
         "--rx", f"{gh}/bin", "--ro", "/etc", "--ro", "/proc", "--ro", "/sys", "--rw", "/dev", "--rw", ws, "--rw", f"{gh}/state", "--no-net", "--require", "--"]
 FC_DIR = os.path.join(HERE, "..", "forgecraft")
-for name, cmd, bad in (("forgecraft", ["python3", os.path.join(FC_DIR, "server.py")], ("blockbench_inspect", {"path": SECRET})),
+# ForgeCraft writes hand-offs itself (library_export): give its kernel-only run one library asset and
+# ask it to export into the home folder, which only the kernel layer can stop here.
+if "forgecraft" in want:
+    os.environ["GITCRAFT_3D_LIBRARY"] = f"{ws}/3d-lib"; sys.path.insert(0, os.path.join(HERE, ".."))
+    from gitcraft3d import library as _lib
+    _lib.ROOT = f"{ws}/3d-lib"; open(f"{ws}/policy_asset.glb", "wb").write(b"glTF")
+    _lib.add_version("policy_asset", {"exports": [{"path": f"{ws}/policy_asset.glb"}]}, {"tool": "test_policy"})
+for name, cmd, bad in (("forgecraft", ["python3", os.path.join(FC_DIR, "server.py")], ("library_export", {"asset": "policy_asset", "dest": os.path.expanduser("~/gitcraft-policy-escape")})),
                        ("filmcraft", [f"{gh}/bin/filmcraft-cli", "mcp"], ("media_import", {"paths": [SECRET]})),
                        ("lightcraft", [f"{gh}/bin/lightcraft-cli", "mcp", "--compact", "--library", f"{ws}/lc-lib"], ("import", {"paths": [SECRET]}))):
     if name not in want: continue
     try:
-        extra = ["--rx", FC_DIR, "--rx", f"{gh}/forgecraft", "--rx", f"{gh}/meshcraft"] if name == "forgecraft" else []
-        c = Client(base[:-1] + extra + ["--"] + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state", FORGECRAFT_LIBRARY=f"{ws}/fc-lib"))
+        extra = ["--rx", FC_DIR, "--rx", os.path.join(HERE, "..", "gitcraft3d"), "--rx", f"{gh}/forgecraft", "--rx", f"{gh}/meshcraft",
+                 "--rx", os.path.join(HERE, "..", "meshcraft")] if name == "forgecraft" else []
+        c = Client(base[:-1] + extra + ["--"] + cmd, env=dict(env, TMPDIR=ws, XDG_CONFIG_HOME=f"{gh}/state", XDG_CACHE_HOME=f"{gh}/state", GITCRAFT_3D_LIBRARY=f"{ws}/3d-lib"))
         ok, val = c.call(*bad)
         if name == "forgecraft": leaked = ok
         else: leaked = ok and ("imported" in str(val) and "[]" not in str(val).split("imported")[1][:8] or "items" in str(val) and "[]" not in str(val).split("items")[1][:8])

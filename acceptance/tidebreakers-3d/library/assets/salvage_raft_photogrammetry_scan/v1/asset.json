@@ -1,0 +1,425 @@
+{
+ "id": "salvage_raft_photogrammetry_scan",
+ "version": 1,
+ "created": "2026-11-02T21:36:07Z",
+ "tool": "run_pipeline",
+ "template": "mesh_import",
+ "tags": [
+  "meshroom",
+  "scan",
+  "tidebreakers"
+ ],
+ "brief": {
+  "asset_id": "salvage_raft_photogrammetry_scan",
+  "template": "mesh_import",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft",
+  "title": "Salvage Raft (photogrammetry scan)",
+  "params": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshroom_out/texturedMesh.obj",
+   "crop": 0.22,
+   "target_size": 2.4,
+   "max_tris": 20000
+  },
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side"
+   ]
+  },
+  "tags": [
+   "tidebreakers",
+   "scan"
+  ],
+  "library": true,
+  "parent_job": "job-20261102-213039-f3ad85"
+ },
+ "job": "job-20261102-213549-b7bff1",
+ "same_as": null,
+ "inputs": [],
+ "validation": {
+  "status": "pass",
+  "summary": {
+   "pass": 18,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  }
+ },
+ "triangles": 1163,
+ "clips": [],
+ "contract": {
+  "root": "salvage_raft_photogrammetry_scan"
+ },
+ "files": [
+  {
+   "path": "source/salvage_raft_photogrammetry_scan.blend",
+   "kind": "blend",
+   "bytes": 130168,
+   "sha256": "fa0f764485d918d8eacec265ee1c58a6ba6284ad995b822373c95bc472809ead",
+   "content": "fa0f764485d918d8eacec265ee1c58a6ba6284ad995b822373c95bc472809ead",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/source/salvage_raft_photogrammetry_scan.blend"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 5133632,
+   "sha256": "e675fa9763ed9a5dc35a83e0f40331b6c3c61d8ffffbd71d382bc94f078e4d12",
+   "content": "1d9abdacbd8d139d10e9042e7c903a7299c400dbf87bbed5b4d31a8e5f0da742",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb",
+   "kind": "lod",
+   "bytes": 5059348,
+   "sha256": "67dea78e3781537b6d720d7de28611a34db796a05c0ae9de29cc4ed95743517b",
+   "content": "f3497cdcc3b3366999f4fefd1ca5b00086d2a0d347051256248060d43fd20996",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb",
+   "kind": "lod",
+   "bytes": 5022672,
+   "sha256": "6b2e1b404b4aa76132abe64df97e32815127b0422dcb4d66d7820df5c0ab6212",
+   "content": "de23e48a12d4e17c9149b3fc5344e006322f61f3d9623ebf480a3c23edbdafae",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb",
+   "kind": "collision",
+   "bytes": 11328,
+   "sha256": "a3fd803e1134986f3132d874a04671de2f80c350a3babb24e802c6001604c07e",
+   "content": "794cd8f5858e048a86611948df89e92cf40852e882fbfd9e7214ddab411c4279",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
+   "kind": "export",
+   "bytes": 1166752,
+   "sha256": "079dbd9e32606d2871e9060cb50212d7edb9fe25aaa0b7159f29fe611110c7a7",
+   "content": "8719871873dbc49fd22a0205751c6706491e4d1ee7e6e222a6eb6a8b3d0cc091",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
+   "kind": "sidecar",
+   "bytes": 988180,
+   "sha256": "3a514b81f74f1ce247a274f261eaba5f52b1bcdced03d3c11d78697dc10ad751",
+   "content": "3a514b81f74f1ce247a274f261eaba5f52b1bcdced03d3c11d78697dc10ad751",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png",
+   "kind": "sidecar",
+   "bytes": 57161,
+   "sha256": "4815ca34ef894704dca802944162c4ae07cbdbf4ddbc24189af1dad9a811b214",
+   "content": "4815ca34ef894704dca802944162c4ae07cbdbf4ddbc24189af1dad9a811b214",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png"
+  },
+  {
+   "path": "exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 5211452,
+   "sha256": "e1c27e8d37eeaf42aa49ece823e9639bdfec581799ef5cc5f60af32a913c0509",
+   "content": "fbx-size:5211452",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx"
+  },
+  {
+   "path": "previews/salvage_raft_photogrammetry_scan_three_quarter.png",
+   "kind": "preview",
+   "bytes": 120435,
+   "sha256": "635518347165d61cf49b25cf29a464c8caf62eb3b41edb5f45f153cc72e8df12",
+   "content": "635518347165d61cf49b25cf29a464c8caf62eb3b41edb5f45f153cc72e8df12",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_three_quarter.png"
+  },
+  {
+   "path": "previews/salvage_raft_photogrammetry_scan_front.png",
+   "kind": "preview",
+   "bytes": 81626,
+   "sha256": "8c49588700af040fd80997bc0935bc9cafe976568e166ed28f4dab815b198728",
+   "content": "8c49588700af040fd80997bc0935bc9cafe976568e166ed28f4dab815b198728",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_front.png"
+  },
+  {
+   "path": "previews/salvage_raft_photogrammetry_scan_side.png",
+   "kind": "preview",
+   "bytes": 82617,
+   "sha256": "a52a874afa0eeaa55c3c02c63eb62c36e259b1ef7530057d63c9142ef90c40f3",
+   "content": "a52a874afa0eeaa55c3c02c63eb62c36e259b1ef7530057d63c9142ef90c40f3",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_side.png"
+  },
+  {
+   "path": "previews/salvage_raft_photogrammetry_scan_sheet.png",
+   "kind": "preview",
+   "bytes": 126102,
+   "sha256": "29ee381105298e6e04140be031ec2c406175959d6293fe3fb46c48af5daedccb",
+   "content": "29ee381105298e6e04140be031ec2c406175959d6293fe3fb46c48af5daedccb",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_sheet.png"
+  },
+  {
+   "path": "salvage_raft_photogrammetry_scan.meshcraft.json",
+   "kind": "report",
+   "bytes": 12037,
+   "sha256": "02db9a6e01fee3cc9a13fa97f920ac7ece217e55169e2d1b00b429854b67d372",
+   "content": "02db9a6e01fee3cc9a13fa97f920ac7ece217e55169e2d1b00b429854b67d372",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/salvage_raft_photogrammetry_scan.meshcraft.json"
+  }
+ ],
+ "title": "Salvage Raft (photogrammetry scan)",
+ "kind": null,
+ "source_tool": "meshroom \u2192 meshcraft",
+ "route": {
+  "route": "photogrammetry",
+  "chosen": "meshroom",
+  "preferred": "meshroom",
+  "fallback_used": false,
+  "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+ },
+ "license": {
+  "asset": "Owned by the project that commissioned it",
+  "tools": [
+   {
+    "tool": "Meshroom / AliceVision",
+    "license": "MPL-2.0; reconstructions belong to whoever owns the photos"
+   },
+   {
+    "tool": "MeshCraft (GITCRAFT, Blender 5.2 bpy)",
+    "license": "GITCRAFT code; Blender GPL-2.0-or-later (wheel GPL-3.0) does not extend to models, renders or .blend content"
+   }
+  ],
+  "ai_generated": false
+ },
+ "provenance": {
+  "forgecraft_job": "job-20261102-213039-f3ad85",
+  "meshcraft_job": "job-20261102-213549-b7bff1",
+  "inputs": [
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_00.jpg",
+    "sha256": "c40a9c08ed192b31742a866d6d8b0090d4304fa108d3f1e0b27d4ad7deb847ab"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_01.jpg",
+    "sha256": "cc33a94369f55e9919da4792c2b384f2df15edc5e5deac5b2f98cc49b003d79a"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_02.jpg",
+    "sha256": "9cdfa2011dad3bd1b4615b9d42b94c1ad4608219b8fee7f9e243d7bcb3570094"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_03.jpg",
+    "sha256": "124471b3ce3c51e0d029b977aaaa5de24363c0f4af211bdb1d3f78e9d84e2baa"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_04.jpg",
+    "sha256": "aba90232dbf26d4dfbf74dda7ea139d7b983e7f9b72ca0f6e05fe081634b6413"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_05.jpg",
+    "sha256": "3a68044a29e6fafc56f0a44b379eaa0ccefe9ebfe2695e24c0ea67bb6c2e02de"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_06.jpg",
+    "sha256": "eadc94363d90c22d525f0b2e60dc9fe019b2ccdde4576f7be31dfa91f59ed5bb"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_07.jpg",
+    "sha256": "c24644fddf6a9a7f834bbac590e9a9498ebdb4dc04e2fd7b2dc87197c040b4ca"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_08.jpg",
+    "sha256": "9c615639b50a1a9791ff940159e7029fb91073c301729545934e995197b9bda1"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_09.jpg",
+    "sha256": "ca9a6bb63cc5eabd785ecf7757552ccf4a5890706cd26165bb43f638f15a93c5"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_10.jpg",
+    "sha256": "e1b2622f2e2c78437eb4c0542428487f58e5d55d4bb3167611bb609cf4cef61d"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_11.jpg",
+    "sha256": "cb3ba1d534fa77e6826daa0ed80c9b668183d6105bbb6bd53380fb57bb88862c"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_12.jpg",
+    "sha256": "2bd290b694b3ad55c7628035deffac1cd6e6f4ef2e06d9fe1b7294fbc6da1a70"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_13.jpg",
+    "sha256": "73abbe239bb087786abc8ff245c6fe4c705ae6cf4cd63cd350fced4ffdbb745f"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_14.jpg",
+    "sha256": "870f6a23b65cdd743950d08f7fdc4c2b537954f2ac735f29c48c5eb30b02b979"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_15.jpg",
+    "sha256": "a4e1412699d6ea09e190da142056794b5d6bb8141eccc663f6233512104843fa"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_16.jpg",
+    "sha256": "508f982c82523020fe05f64707d425c878d66deb88a0f79b1743f81126003252"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_0_17.jpg",
+    "sha256": "ccff987165b23738fa2cd06dea35ffcc551197275a6f34c7af58ba25138fd4fd"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_00.jpg",
+    "sha256": "73ba711abc982c68b431809fdb101e1358645b4de987de4cf2eb7f5d983256d9"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_01.jpg",
+    "sha256": "f08d5b5dc96279f2b79721c260c39ad3b601853a479ca1a3b753907a3bc209b3"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_02.jpg",
+    "sha256": "0c74e73a690b1de691469fe29e74839f68a82fe65589dcdd257e1cea27708946"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_03.jpg",
+    "sha256": "f99bd15c8eccf84563befde0a3170a6bc45ad91db06ea8ae37ff31779131c493"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_04.jpg",
+    "sha256": "f37d8b5dd59e4e85f0ec8032e2555a396dec6a9ed100ea31f581d8efb0ad5616"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_05.jpg",
+    "sha256": "d0ff0c54c482e1b9ac8cbc493c81806c0b1f4a3fde0a0dee3b0b7a8b38adffca"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_06.jpg",
+    "sha256": "875ec95e86677430cc07a05e85363ec50a1a0e3b9b906575903ec2452716c736"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_07.jpg",
+    "sha256": "0cf2e5ff5b9ded1a95ca24199d79653b5e044b9eaf640e602a9d02b27a5b1155"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_08.jpg",
+    "sha256": "36e52ac31a112d67bdc7348b91b7dac6f16469bdc7185c5eb61158ffc6eabc90"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_09.jpg",
+    "sha256": "957a926f2af54030ce42b3573c750baabc18e8c4768aa3842b021b309dd54195"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_10.jpg",
+    "sha256": "7e48541d311091a1f35712218c16dd0ae91021dab92512a4b777414ef5b4ac78"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_11.jpg",
+    "sha256": "8b4e7bd163c3232cb706bd22c7f8e6f1134763839ad561447966a71f6d804b24"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_12.jpg",
+    "sha256": "3089c6541c00723411fd18c770130d311c2704e3005d4e67a5881df8fe379de3"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_13.jpg",
+    "sha256": "d6f8cd59b00b56f73c13cc375962f76aca089e08b77fd8812656562ec0e6731c"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_14.jpg",
+    "sha256": "9934509af2d8bfa4275c1c334d65883b7860d9baa3f5b788ae0e015615bccca1"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_15.jpg",
+    "sha256": "85eadbde1b86fc1fdd404df096958b6a34cbf5865b66bb0e5b3fcd961224371f"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_16.jpg",
+    "sha256": "5cdce1ed372d8dc5b0204d1f71e6edd3ff4dd20e106a0e3a7ee00bc79b423e32"
+   },
+   {
+    "path": "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos/view_1_17.jpg",
+    "sha256": "24aead830b2a8d028e7572990b47631d0fbbbe2a89d39795f219de2cd23b7f87"
+   }
+  ],
+  "blender": "5.2.3",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "recorded": "2026-11-02T21:36:09Z"
+ },
+ "generation": {
+  "pipeline": "photogrammetryDraft",
+  "images": 36,
+  "cameras_reconstructed": 36,
+  "seconds": 309.6,
+  "version": "2023.3.0",
+  "textured": true,
+  "method": "meshroom",
+  "mesh": "texturedMesh.obj",
+  "request": "photogrammetry reconstruction"
+ },
+ "rig": null,
+ "geometry": {
+  "triangles": 1163,
+  "size_m": [
+   2.4,
+   2.389,
+   0.26
+  ],
+  "meshes": null
+ },
+ "animations": [],
+ "sockets": [],
+ "previews": {
+  "thumbnail": "previews/salvage_raft_photogrammetry_scan_three_quarter.png",
+  "views": [
+   "previews/salvage_raft_photogrammetry_scan_three_quarter.png",
+   "previews/salvage_raft_photogrammetry_scan_front.png",
+   "previews/salvage_raft_photogrammetry_scan_side.png",
+   "previews/salvage_raft_photogrammetry_scan_sheet.png"
+  ]
+ },
+ "engine_check": {
+  "status": "passed",
+  "glb": "exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
+  "three": null,
+  "checks": [
+   {
+    "check": "engine_load",
+    "level": "pass",
+    "detail": "GLTFLoader (three@0.170) loaded the file"
+   },
+   {
+    "check": "engine_basecolor_maps",
+    "level": "pass",
+    "detail": "1/1 meshes have a base colour map (texture-baked export)"
+   },
+   {
+    "check": "engine_base_on_ground",
+    "level": "pass",
+    "detail": "lowest point y=0 m"
+   }
+  ],
+  "screenshot": "previews/salvage_raft_photogrammetry_scan_engine_check.png"
+ },
+ "deliverable_validation": {
+  "status": "passed-with-warnings",
+  "meshcraft": {
+   "pass": 18,
+   "warn": 1,
+   "fail": 0,
+   "info": 3
+  },
+  "engine_check": "passed"
+ },
+ "orchestration": {
+  "forgecraft_job": "job-20261102-213039-f3ad85",
+  "route": "photogrammetry",
+  "tool": "meshroom"
+ }
+}

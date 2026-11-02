@@ -1,0 +1,177 @@
+{
+ "id": "job-20261102-213039-f3ad85",
+ "tool": "generate",
+ "asset_id": "salvage_raft_photogrammetry_scan",
+ "request": {
+  "images": [
+   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos"
+  ],
+  "name": "Salvage Raft (photogrammetry scan)",
+  "max_tris": 20000,
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ],
+  "meshroom_overrides": [
+   "CameraInit:defaultFieldOfView=54.4"
+  ],
+  "crop": 0.22,
+  "target_size": 2.4,
+  "tags": [
+   "tidebreakers",
+   "scan"
+  ],
+  "tool": "meshroom",
+  "brief": "photogrammetry reconstruction"
+ },
+ "status": "done",
+ "created": "2026-11-02T21:30:39Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:30:39Z",
+   "change": null,
+   "manual": false,
+   "stages": [
+    {
+     "stage": "route",
+     "state": "done",
+     "started": "2026-11-02T21:30:39Z",
+     "info": {
+      "chosen": "meshroom",
+      "route": "photogrammetry",
+      "fallback_used": false,
+      "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+     },
+     "finished": "2026-11-02T21:30:39Z",
+     "seconds": 0.0
+    },
+    {
+     "stage": "generate",
+     "state": "done",
+     "started": "2026-11-02T21:30:39Z",
+     "info": {
+      "meshcraft_job": "job-20261102-213549-b7bff1",
+      "meshcraft_status": "done",
+      "fallback": null,
+      "validation": {
+       "pass": 18,
+       "warn": 1,
+       "fail": 0,
+       "info": 3
+      },
+      "library": {
+       "asset": "salvage_raft_photogrammetry_scan",
+       "version": 1
+      }
+     },
+     "finished": "2026-11-02T21:36:07Z",
+     "seconds": 327.54
+    },
+    {
+     "stage": "engine_check",
+     "state": "done",
+     "started": "2026-11-02T21:36:07Z",
+     "info": {
+      "status": "passed"
+     },
+     "finished": "2026-11-02T21:36:09Z",
+     "seconds": 2.03
+    },
+    {
+     "stage": "record",
+     "state": "done",
+     "started": "2026-11-02T21:36:09Z",
+     "info": {
+      "asset": "salvage_raft_photogrammetry_scan",
+      "version": 1,
+      "validation": "passed-with-warnings"
+     },
+     "finished": "2026-11-02T21:36:09Z",
+     "seconds": 0.0
+    }
+   ],
+   "status": "done",
+   "finished": "2026-11-02T21:36:09Z",
+   "error": null
+  }
+ ],
+ "error": null,
+ "children": [
+  "job-20261102-213549-b7bff1"
+ ],
+ "updated": "2026-11-02T21:36:09Z",
+ "plan": {
+  "request": {
+   "brief": "photogrammetry reconstruction",
+   "intents": [
+    "photogrammetry"
+   ],
+   "kind": null,
+   "template": null,
+   "params": {
+    "seed": 572
+   },
+   "images": 36,
+   "name": "photogrammetry reconstruction"
+  },
+  "route": "photogrammetry",
+  "why": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it.",
+  "candidates": [
+   {
+    "tool": "meshroom",
+    "label": "Meshroom / AliceVision photogrammetry \u2192 MeshCraft",
+    "owner": "forgecraft",
+    "available": true,
+    "detail": "CPU draft: 5\u201330 min; CUDA for dense"
+   },
+   {
+    "tool": "triposr",
+    "label": "TripoSR (image \u2192 mesh) \u2192 MeshCraft",
+    "owner": "forgecraft",
+    "available": false,
+    "detail": "missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
+   },
+   {
+    "tool": "hunyuan3d",
+    "label": "Hunyuan3D-2 (text/image \u2192 textured mesh) \u2192 MeshCraft",
+    "owner": "forgecraft",
+    "available": false,
+    "detail": "local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   }
+  ],
+  "chosen": "meshroom",
+  "preferred": "meshroom",
+  "fallback_used": false,
+  "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
+ },
+ "compute": {
+  "tool": "meshroom",
+  "needs": "CPU draft: 5\u201330 min; CUDA for dense",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "asset": {
+  "id": "salvage_raft_photogrammetry_scan",
+  "version": 1,
+  "name": "Salvage Raft (photogrammetry scan)",
+  "validation": "passed-with-warnings"
+ }
+}

@@ -1,0 +1,211 @@
+{
+ "id": "job-20261102-213609-6659ae",
+ "tool": "generate",
+ "asset_id": "tidebreakers_turtle_cay_scene",
+ "request": {
+  "name": "TIDEBREAKERS Turtle Cay Scene",
+  "items": [
+   {
+    "asset": "turtle_cay",
+    "name": "turtle_cay"
+   },
+   {
+    "asset": "tidebreakers_coastal_sloop",
+    "name": "player_sloop",
+    "location": [
+     9,
+     -27,
+     0.15
+    ],
+    "rotation": [
+     0,
+     0,
+     28
+    ]
+   },
+   {
+    "asset": "upgrade_lashed_cargo_crates",
+    "name": "upg_cargo_crate",
+    "attach_to": "player_sloop:socket_storage"
+   },
+   {
+    "asset": "upgrade_brass_compass",
+    "name": "upg_compass_brass",
+    "attach_to": "player_sloop:socket_navigation"
+   },
+   {
+    "asset": "upgrade_ship_s_wheel_ash_rudder",
+    "name": "upg_rudder_ash",
+    "attach_to": "player_sloop:socket_steering"
+   },
+   {
+    "asset": "upgrade_copper_banded_hull",
+    "name": "upg_hull_copper",
+    "attach_to": "player_sloop:socket_hull"
+   },
+   {
+    "asset": "floating_salvage",
+    "name": "salvage",
+    "location": [
+     -7,
+     -30,
+     0
+    ]
+   },
+   {
+    "asset": "deckhand_pip",
+    "name": "deckhand",
+    "attach_to": "turtle_cay:socket_dock"
+   },
+   {
+    "asset": "reef_crab_blockbench",
+    "name": "crab",
+    "attach_to": "turtle_cay:socket_spawn"
+   }
+  ],
+  "camera": [
+   30,
+   -62,
+   14
+  ],
+  "look_at": [
+   0,
+   -20,
+   2
+  ],
+  "samples": 48,
+  "tags": [
+   "tidebreakers"
+  ],
+  "tool": "meshcraft_scene",
+  "brief": "TIDEBREAKERS Turtle Cay Scene scene"
+ },
+ "status": "done",
+ "created": "2026-11-02T21:36:09Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:36:09Z",
+   "change": null,
+   "manual": false,
+   "stages": [
+    {
+     "stage": "route",
+     "state": "done",
+     "started": "2026-11-02T21:36:09Z",
+     "info": {
+      "chosen": "meshcraft_scene",
+      "route": "meshcraft_scene",
+      "fallback_used": false,
+      "explanation": "compose a scene: MeshCraft compose_scene"
+     },
+     "finished": "2026-11-02T21:36:09Z",
+     "seconds": 0.0
+    },
+    {
+     "stage": "generate",
+     "state": "done",
+     "started": "2026-11-02T21:36:09Z",
+     "info": {
+      "meshcraft_job": "job-20261102-213610-58ab9b",
+      "meshcraft_status": "done",
+      "fallback": null,
+      "validation": {
+       "pass": 3,
+       "warn": 1,
+       "fail": 0,
+       "info": 1
+      },
+      "library": {
+       "asset": "tidebreakers_turtle_cay_scene",
+       "version": 1
+      }
+     },
+     "finished": "2026-11-02T21:36:38Z",
+     "seconds": 28.91
+    },
+    {
+     "stage": "engine_check",
+     "state": "done",
+     "started": "2026-11-02T21:36:38Z",
+     "info": {
+      "status": "passed"
+     },
+     "finished": "2026-11-02T21:36:40Z",
+     "seconds": 2.69
+    },
+    {
+     "stage": "record",
+     "state": "done",
+     "started": "2026-11-02T21:36:40Z",
+     "info": {
+      "asset": "tidebreakers_turtle_cay_scene",
+      "version": 1,
+      "validation": "passed-with-warnings"
+     },
+     "finished": "2026-11-02T21:36:41Z",
+     "seconds": 0.01
+    }
+   ],
+   "status": "done",
+   "finished": "2026-11-02T21:36:41Z",
+   "error": null
+  }
+ ],
+ "error": null,
+ "children": [
+  "job-20261102-213610-58ab9b"
+ ],
+ "updated": "2026-11-02T21:36:41Z",
+ "plan": {
+  "request": {
+   "brief": "TIDEBREAKERS Turtle Cay Scene scene",
+   "intents": [
+    "scene"
+   ],
+   "kind": "island",
+   "template": "island",
+   "params": {
+    "seed": 98,
+    "radius": 22,
+    "palms": 7
+   },
+   "images": 0,
+   "name": "TIDEBREAKERS Turtle Cay Scene scene"
+  },
+  "route": "meshcraft_scene",
+  "chosen": "meshcraft_scene",
+  "preferred": "meshcraft_scene",
+  "fallback_used": false,
+  "candidates": [],
+  "explanation": "compose a scene: MeshCraft compose_scene"
+ },
+ "compute": {
+  "tool": "meshcraft_scene",
+  "needs": "CPU, ~1 min with hero render",
+  "machine": {
+   "cpu_threads": 4,
+   "ram_gb": 15.7,
+   "gpus": []
+  },
+  "limits": {
+   "max_concurrent_heavy_jobs": 1,
+   "max_bake_resolution": 2048,
+   "max_triangles": 200000,
+   "timeouts_s": {
+    "blender": 1200,
+    "meshroom": 5400,
+    "triposr": 1800,
+    "hunyuan3d": 1800
+   },
+   "meshroom_min_ram_gb": 8,
+   "photogrammetry_max_images": 120
+  }
+ },
+ "asset": {
+  "id": "tidebreakers_turtle_cay_scene",
+  "version": 1,
+  "name": "TIDEBREAKERS Turtle Cay Scene",
+  "validation": "passed-with-warnings"
+ }
+}

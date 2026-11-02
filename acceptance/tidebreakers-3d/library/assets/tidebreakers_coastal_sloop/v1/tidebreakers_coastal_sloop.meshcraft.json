@@ -1,0 +1,706 @@
+{
+ "asset_id": "tidebreakers_coastal_sloop",
+ "brief": {
+  "asset_id": "tidebreakers_coastal_sloop",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft",
+  "parent_job": "job-20261102-212532-a3232c",
+  "template": "boat",
+  "params": {
+   "seed": 692,
+   "vessel": "sloop",
+   "paint": [
+    "#4FB39A",
+    "#F2EAD8"
+   ],
+   "sail_colors": [
+    "#F1E6CC",
+    "crimson"
+   ]
+  },
+  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "title": "TIDEBREAKERS Coastal Sloop",
+  "tags": [
+   "tidebreakers"
+  ],
+  "profiles": [
+   "three-web-toon",
+   "three-web-atlas",
+   "web-pbr",
+   "unity-fbx",
+   "obj-static",
+   "stl-print",
+   "godot-glb"
+  ],
+  "preview": {
+   "size": 512,
+   "views": [
+    "three_quarter",
+    "front",
+    "side",
+    "top"
+   ]
+  },
+  "bake": {
+   "resolution": 1024,
+   "fallbacks": [
+    512
+   ]
+  }
+ },
+ "steps": [
+  {
+   "step": "build",
+   "ok": true,
+   "seconds": 0.4
+  },
+  {
+   "step": "preview",
+   "ok": true,
+   "seconds": 15.75
+  },
+  {
+   "step": "validate_scene",
+   "ok": true,
+   "seconds": 0.0
+  },
+  {
+   "step": "export",
+   "ok": true,
+   "seconds": 3.1
+  },
+  {
+   "step": "contact_sheet",
+   "ok": true,
+   "seconds": 0.21
+  }
+ ],
+ "build": {
+  "blend": {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/source/tidebreakers_coastal_sloop.blend",
+   "kind": "blend",
+   "bytes": 180759,
+   "sha256": "cc3271b1ce3df19437ba1c3a49af7ca510c223f511eeb8c242a4ed41c68f231a"
+  },
+  "seconds": 0.35,
+  "roles": {
+   "plank_4fb39a": "#4FB39A",
+   "wood_f2ead8": "#F2EAD8",
+   "plank_d9954f": "#D9954F",
+   "wood_9a5a2e": "#9A5A2E",
+   "wood_5e331b": "#5E331B",
+   "cloth_f1e6cc": "#F1E6CC",
+   "cloth_c0392b": "#C0392B",
+   "plank_f2ead8": "#F2EAD8",
+   "plank_5e331b": "#5E331B",
+   "metal_f4c542_m9": "#F4C542",
+   "plain_ff9f2e_e2": "#FF9F2E",
+   "cloth_0a2142": "#0A2142"
+  },
+  "objects": [
+   "socket_flag",
+   "socket_hull",
+   "socket_navigation",
+   "socket_sail",
+   "socket_steering",
+   "socket_storage",
+   "tidebreakers_coastal_sloop",
+   "tidebreakers_coastal_sloop_mesh"
+  ],
+  "actions": [],
+  "contract": {
+   "root": "tidebreakers_coastal_sloop",
+   "ground": false
+  },
+  "expect": {}
+ },
+ "previews": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/previews/tidebreakers_coastal_sloop_three_quarter.png",
+   "kind": "preview",
+   "bytes": 114528,
+   "sha256": "675bf606fe1a54b95f9e67bdba31f645571f20d424675c699bd6a77b41a8bbd2",
+   "view": "three_quarter",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/previews/tidebreakers_coastal_sloop_front.png",
+   "kind": "preview",
+   "bytes": 91682,
+   "sha256": "07c6758f1d622c7c57a24915342a8447fd92c84c396948be7534e20e85a313e1",
+   "view": "front",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/previews/tidebreakers_coastal_sloop_side.png",
+   "kind": "preview",
+   "bytes": 128565,
+   "sha256": "d2801cd045b76a22ebfbbdec3a514d67784e541fb94c3967d2141c661319341b",
+   "view": "side",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/previews/tidebreakers_coastal_sloop_top.png",
+   "kind": "preview",
+   "bytes": 112659,
+   "sha256": "5cd482f71d9c80c7322e74625a6aee4400fc52422406caf67d855f2f3958027a",
+   "view": "top",
+   "clip": null,
+   "pose": null,
+   "size": 512
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/previews/tidebreakers_coastal_sloop_sheet.png",
+   "kind": "contact_sheet",
+   "bytes": 130571,
+   "sha256": "187a8bbc8cac02a4643b3029b7dbcdbb180a27b8f714cb11626e8cc5cced5d78"
+  }
+ ],
+ "exports": [
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.glb",
+   "kind": "export",
+   "bytes": 312652,
+   "sha256": "5fc9071d45fca4cae1910117a56dad5abd7f9fac740f58324fc0b648d6594212",
+   "profile": "three-web-toon",
+   "format": "glb",
+   "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
+   "extras": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod50.glb",
+     "kind": "lod",
+     "bytes": 221484,
+     "sha256": "ca793fee327abf4b312a6803bd06f43e78b930aad8fee935cc9b87d05cacf658",
+     "ratio": 0.5,
+     "triangles": 2195
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod25.glb",
+     "kind": "lod",
+     "bytes": 121832,
+     "sha256": "5594d5d15b919262307838db2684c13d64f897e1d4e664629ff0e66ada9aa538",
+     "ratio": 0.25,
+     "triangles": 1097
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.collision.glb",
+     "kind": "collision",
+     "bytes": 29256,
+     "sha256": "296c6543c60e181f7671dd23991f2c317c5821dbedde2bb1268241ae2d9b4dab",
+     "shape": "convex_hull",
+     "triangles": 378
+    }
+   ],
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.collision.glb",
+     "kind": "sidecar",
+     "bytes": 29256,
+     "sha256": "296c6543c60e181f7671dd23991f2c317c5821dbedde2bb1268241ae2d9b4dab"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod25.glb",
+     "kind": "sidecar",
+     "bytes": 121832,
+     "sha256": "5594d5d15b919262307838db2684c13d64f897e1d4e664629ff0e66ada9aa538"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod50.glb",
+     "kind": "sidecar",
+     "bytes": 221484,
+     "sha256": "ca793fee327abf4b312a6803bd06f43e78b930aad8fee935cc9b87d05cacf658"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.glb",
+    "objects": [
+     "socket_flag (EMPTY)",
+     "socket_hull (EMPTY)",
+     "socket_navigation (EMPTY)",
+     "socket_sail (EMPTY)",
+     "socket_steering (EMPTY)",
+     "socket_storage (EMPTY)",
+     "tidebreakers_coastal_sloop (EMPTY)",
+     "tidebreakers_coastal_sloop_mesh (MESH)"
+    ],
+    "triangles": 4392,
+    "materials": [
+     "GC_Cloth_0a2142",
+     "GC_Cloth_c0392b",
+     "GC_Cloth_f1e6cc",
+     "GC_Metal_f4c542_m9",
+     "GC_Plain_ff9f2e_e2",
+     "GC_Plank_4fb39a",
+     "GC_Plank_5e331b",
+     "GC_Plank_d9954f",
+     "GC_Plank_f2ead8",
+     "GC_Wood_5e331b",
+     "GC_Wood_9a5a2e",
+     "GC_Wood_f2ead8"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3.868,
+     12.297,
+     11.28
+    ],
+    "min_z": -1.1294
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.glb",
+   "kind": "export",
+   "bytes": 369568,
+   "sha256": "296e512a2248e209cc36e4dae181843054a5502cc14ef9016d7842ed2709c3ff",
+   "profile": "three-web-atlas",
+   "format": "glb",
+   "engine": "Three.js / any glTF engine \u2014 single palette-atlas texture",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.glb",
+    "objects": [
+     "socket_flag (EMPTY)",
+     "socket_hull (EMPTY)",
+     "socket_navigation (EMPTY)",
+     "socket_sail (EMPTY)",
+     "socket_steering (EMPTY)",
+     "socket_storage (EMPTY)",
+     "tidebreakers_coastal_sloop (EMPTY)",
+     "tidebreakers_coastal_sloop_mesh (MESH)"
+    ],
+    "triangles": 4392,
+    "materials": [
+     "GC_Atlas"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3.868,
+     12.297,
+     11.28
+    ],
+    "min_z": -1.1294
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.glb",
+   "kind": "export",
+   "bytes": 668036,
+   "sha256": "fc4efd273cb8928600529ef5918e038f34effa454bb65b7bf27882dd7ffa14cf",
+   "profile": "web-pbr",
+   "format": "glb",
+   "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
+   "bake": {
+    "maps": {
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.orm.png",
+     "emissive": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.emissive.png"
+    },
+    "resolution": 1024,
+    "attempts": [
+     {
+      "resolution": 1024,
+      "ok": true
+     }
+    ]
+   },
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.basecolor.png",
+     "kind": "sidecar",
+     "bytes": 242009,
+     "sha256": "01588660243d4740f8083bc0d47e824c10e674c667dedb3b25a3bef0e56c0270"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.emissive.png",
+     "kind": "sidecar",
+     "bytes": 16090,
+     "sha256": "5715c49cd3e24a90a54bb308475c24e64ea47622f3f6a989f7ee9003e44dee35"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.orm.png",
+     "kind": "sidecar",
+     "bytes": 109850,
+     "sha256": "a46ce0adf33ac021c597aed5b9474845e48c4e5ed7a75e4cee404e0760747a44"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.glb",
+    "objects": [
+     "socket_flag (EMPTY)",
+     "socket_hull (EMPTY)",
+     "socket_navigation (EMPTY)",
+     "socket_sail (EMPTY)",
+     "socket_steering (EMPTY)",
+     "socket_storage (EMPTY)",
+     "tidebreakers_coastal_sloop (EMPTY)",
+     "tidebreakers_coastal_sloop_mesh (MESH)"
+    ],
+    "triangles": 4392,
+    "materials": [
+     "GC_Baked"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3.868,
+     12.297,
+     11.28
+    ],
+    "min_z": -1.1294
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.unity-fbx.fbx",
+   "kind": "export",
+   "bytes": 137692,
+   "sha256": "c6dde8840a93e684f1fd54c55dfbba3804316594af425e4d813ca27db63b128b",
+   "profile": "unity-fbx",
+   "format": "fbx",
+   "engine": "Unity / Unreal (FBX)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.unity-fbx.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    }
+   ]
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.obj",
+   "kind": "export",
+   "bytes": 305781,
+   "sha256": "cd367d9940242856455b1d94d0bbfd40f2fb7c5640edb70d5932d6e41dffdb36",
+   "profile": "obj-static",
+   "format": "obj",
+   "engine": "Any DCC / static mesh interchange",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    },
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.mtl",
+     "kind": "sidecar",
+     "bytes": 289,
+     "sha256": "9abe481dea24b810da1df2046a3db242358a0c5778f995e3e1d8147d76dbbacb"
+    }
+   ]
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.stl-print.stl",
+   "kind": "export",
+   "bytes": 219684,
+   "sha256": "6de1f8c10fc803d41acbf5536ebc21ebd7f5e2fb2bab93424e1fbed4693f9fae",
+   "profile": "stl-print",
+   "format": "stl",
+   "engine": "3D printing / slicers (PrusaSlicer, Cura, Bambu Studio)",
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.stl-print.stl",
+    "objects": [
+     "tidebreakers_coastal_sloop.stl-print (MESH)"
+    ],
+    "triangles": 4392,
+    "materials": [],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3867.767,
+     12296.904,
+     11279.707
+    ],
+    "min_z": -1129.4272
+   }
+  },
+  {
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.glb",
+   "kind": "export",
+   "bytes": 369560,
+   "sha256": "d5f266e7fe6c028d65a4abfc565ef478f7fd9c1779515d21279547d8e34e0ec2",
+   "profile": "godot-glb",
+   "format": "glb",
+   "engine": "Godot 4 (glTF import)",
+   "sidecars": [
+    {
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.atlas.png",
+     "kind": "sidecar",
+     "bytes": 301,
+     "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
+    }
+   ],
+   "roundtrip": {
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.glb",
+    "objects": [
+     "socket_flag (EMPTY)",
+     "socket_hull (EMPTY)",
+     "socket_navigation (EMPTY)",
+     "socket_sail (EMPTY)",
+     "socket_steering (EMPTY)",
+     "socket_storage (EMPTY)",
+     "tidebreakers_coastal_sloop (EMPTY)",
+     "tidebreakers_coastal_sloop_mesh (MESH)"
+    ],
+    "triangles": 4392,
+    "materials": [
+     "GC_Atlas"
+    ],
+    "actions": [],
+    "armatures": 0,
+    "size_m": [
+     3.868,
+     12.297,
+     11.28
+    ],
+    "min_z": -1.1294
+   }
+  }
+ ],
+ "validation": {
+  "checks": [
+   {
+    "check": "has_meshes",
+    "level": "pass",
+    "detail": "1 mesh objects"
+   },
+   {
+    "check": "triangle_budget",
+    "level": "pass",
+    "detail": "4392 triangles (budget 12000)",
+    "tris": 4392
+   },
+   {
+    "check": "degenerate_faces",
+    "level": "pass",
+    "detail": "0 zero-area faces"
+   },
+   {
+    "check": "non_manifold_edges",
+    "level": "info",
+    "detail": "0 non-manifold edges (expected for kit-bashed props built from closed parts)"
+   },
+   {
+    "check": "applied_scale",
+    "level": "pass",
+    "detail": "all mesh scales are 1"
+   },
+   {
+    "check": "naming",
+    "level": "pass",
+    "detail": "no default object names"
+   },
+   {
+    "check": "origin_centered",
+    "level": "pass",
+    "detail": "footprint centre (0.000, -1.118)"
+   },
+   {
+    "check": "materials_assigned",
+    "level": "pass",
+    "detail": "every mesh has materials"
+   },
+   {
+    "check": "vertex_colors",
+    "level": "pass",
+    "detail": "every mesh carries a 'Color' attribute (glTF COLOR_0)"
+   },
+   {
+    "check": "textures_resolvable",
+    "level": "pass",
+    "detail": "no missing texture files"
+   },
+   {
+    "check": "animation_clips",
+    "level": "pass",
+    "detail": "actions: []",
+    "clips": []
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "tidebreakers_coastal_sloop.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "tidebreakers_coastal_sloop.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "8 nodes, 1 meshes, 12 primitives, 12 materials, 0 animations, 0 skins, 0 images",
+    "animations": [],
+    "file": "tidebreakers_coastal_sloop.three-web-toon.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 6 infos",
+    "messages": [
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered."
+    ],
+    "file": "tidebreakers_coastal_sloop.three-web-toon.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported tidebreakers_coastal_sloop.three-web-toon.glb: 4392 tris, size [3.868, 12.297, 11.28] m, clips []",
+    "file": "tidebreakers_coastal_sloop.three-web-toon.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "tidebreakers_coastal_sloop.three-web-atlas.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "tidebreakers_coastal_sloop.three-web-atlas.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "8 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 1 images",
+    "animations": [],
+    "file": "tidebreakers_coastal_sloop.three-web-atlas.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 7 infos",
+    "messages": [
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Image has non-power-of-two dimensions: 64x48."
+    ],
+    "file": "tidebreakers_coastal_sloop.three-web-atlas.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported tidebreakers_coastal_sloop.three-web-atlas.glb: 4392 tris, size [3.868, 12.297, 11.28] m, clips []",
+    "file": "tidebreakers_coastal_sloop.three-web-atlas.glb"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "tidebreakers_coastal_sloop.web-pbr.glb"
+   },
+   {
+    "check": "gltf_basecolor_texture",
+    "level": "pass",
+    "detail": "every primitive uses a baseColor texture (no COLOR_0 by design)",
+    "file": "tidebreakers_coastal_sloop.web-pbr.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "8 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 3 images",
+    "animations": [],
+    "file": "tidebreakers_coastal_sloop.web-pbr.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 6 infos",
+    "messages": [
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered."
+    ],
+    "file": "tidebreakers_coastal_sloop.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported tidebreakers_coastal_sloop.web-pbr.glb: 4392 tris, size [3.868, 12.297, 11.28] m, clips []",
+    "file": "tidebreakers_coastal_sloop.web-pbr.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported tidebreakers_coastal_sloop.stl-print.stl: 4392 tris, size [3867.767, 12296.904, 11279.707] (file units)",
+    "file": "tidebreakers_coastal_sloop.stl-print.stl"
+   },
+   {
+    "check": "gltf_version",
+    "level": "pass",
+    "detail": "glTF 2.0, generator Khronos glTF Blender I/O v5.2.41",
+    "file": "tidebreakers_coastal_sloop.godot-glb.glb"
+   },
+   {
+    "check": "gltf_color0",
+    "level": "pass",
+    "detail": "every primitive has COLOR_0",
+    "file": "tidebreakers_coastal_sloop.godot-glb.glb"
+   },
+   {
+    "check": "gltf_counts",
+    "level": "info",
+    "detail": "8 nodes, 1 meshes, 1 primitives, 1 materials, 0 animations, 0 skins, 1 images",
+    "animations": [],
+    "file": "tidebreakers_coastal_sloop.godot-glb.glb"
+   },
+   {
+    "check": "khronos_validator",
+    "level": "pass",
+    "detail": "0 errors, 0 warnings, 7 infos",
+    "messages": [
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Empty node encountered.",
+     "Image has non-power-of-two dimensions: 64x48."
+    ],
+    "file": "tidebreakers_coastal_sloop.godot-glb.glb"
+   },
+   {
+    "check": "roundtrip_reimport",
+    "level": "pass",
+    "detail": "re-imported tidebreakers_coastal_sloop.godot-glb.glb: 4392 tris, size [3.868, 12.297, 11.28] m, clips []",
+    "file": "tidebreakers_coastal_sloop.godot-glb.glb"
+   }
+  ],
+  "summary": {
+   "pass": 27,
+   "warn": 0,
+   "fail": 0,
+   "info": 5
+  }
+ },
+ "seconds": 20.6
+}

@@ -20,7 +20,7 @@ os.makedirs(ws, exist_ok=True)
 pal = os.path.join(ws, "palette.json")
 json.dump({"Honey Timber": "#D9954F", "Timber": "#9A5A2E", "Deep Tide": "#0E3B66", "Midnight Swell": "#0A2142", "Doubloon Gold": "#F4C542",
            "Gold Deep": "#C98A12", "Sunlit Amber": "#FF9F2E", "Sailcloth Cream": "#F6EAD0"}, open(pal, "w"))
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_MESHCRAFT_LIBRARY=os.path.join(ws, "library"),
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_3D_LIBRARY=os.path.join(ws, "library"), GITCRAFT_MESHCRAFT_LIBRARY=os.path.join(ws, "library"),
            GITCRAFT_LIGHTCRAFT_LIBRARY=os.path.join(ws, "lightcraft-library"))
 results = []
 def check(label, ok, detail=""):

@@ -48,12 +48,13 @@ done
 
 if [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]]; then
   say ""
-  say "  3D Department (forgecraft) backends:"
-  while IFS= read -r line; do say "    $line"; done < <(python3 - "$here/../forgecraft" <<'PY'
+  say "  3D Department capabilities (meshcraft + forgecraft):"
+  while IFS= read -r line; do say "    $line"; done < <(python3 - "$here/.." <<'PY'
 import sys; sys.path.insert(0, sys.argv[1])
-import hardware
+from gitcraft3d import hardware, library
 d = hardware.probe()
 hw = d["hardware"]
+print(f"library: {library.ROOT}")
 print(f"machine: {hw['cpu_threads']} CPU threads, {hw['ram']['total_gb']} GB RAM, GPU: {', '.join(g['name'] for g in hw['gpus']) or 'none (CPU only)'}")
 for k, v in d["backends"].items():
     det = v.get("version") or (", ".join(v["templates"]) if v.get("templates") else None) or v.get("reason") or v.get("mode") or ""

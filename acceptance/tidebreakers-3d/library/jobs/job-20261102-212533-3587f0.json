@@ -1,0 +1,104 @@
+{
+ "id": "job-20261102-212533-3587f0",
+ "tool": "run_pipeline",
+ "asset_id": "tidebreakers_coastal_sloop",
+ "request": {
+  "brief": {
+   "asset_id": "tidebreakers_coastal_sloop",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft",
+   "parent_job": "job-20261102-212532-a3232c",
+   "template": "boat",
+   "params": {
+    "seed": 692,
+    "vessel": "sloop",
+    "paint": [
+     "#4FB39A",
+     "#F2EAD8"
+    ],
+    "sail_colors": [
+     "#F1E6CC",
+     "crimson"
+    ]
+   },
+   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "TIDEBREAKERS Coastal Sloop",
+   "tags": [
+    "tidebreakers"
+   ],
+   "profiles": [
+    "three-web-toon",
+    "three-web-atlas",
+    "web-pbr",
+    "unity-fbx",
+    "obj-static",
+    "stl-print",
+    "godot-glb"
+   ],
+   "preview": {
+    "size": 512,
+    "views": [
+     "three_quarter",
+     "front",
+     "side",
+     "top"
+    ]
+   },
+   "bake": {
+    "resolution": 1024,
+    "fallbacks": [
+     512
+    ]
+   }
+  }
+ },
+ "status": "done",
+ "created": "2026-11-02T21:25:33Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-02T21:25:33Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 20.6,
+   "steps": [
+    {
+     "step": "build",
+     "ok": true,
+     "seconds": 0.4
+    },
+    {
+     "step": "preview",
+     "ok": true,
+     "seconds": 15.75
+    },
+    {
+     "step": "validate_scene",
+     "ok": true,
+     "seconds": 0.0
+    },
+    {
+     "step": "export",
+     "ok": true,
+     "seconds": 3.1
+    },
+    {
+     "step": "contact_sheet",
+     "ok": true,
+     "seconds": 0.21
+    }
+   ],
+   "finished": "2026-11-02T21:25:54Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261102-212532-a3232c",
+ "updated": "2026-11-02T21:25:54Z",
+ "library": {
+  "asset": "tidebreakers_coastal_sloop",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/tidebreakers_coastal_sloop/v1",
+  "same_as": null,
+  "files": 25
+ }
+}
