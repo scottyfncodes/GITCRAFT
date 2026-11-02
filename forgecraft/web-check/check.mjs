@@ -7,12 +7,17 @@
 //    headless Chromium, adds them to one scene, plays each animation clip with an
 //    AnimationMixer, renders a WebGL frame and screenshots it. Reports per-file meshes,
 //    triangles, textures, clips and Y-up bounding boxes as three.js sees them.
+// 3. Plays every clip on its own and compares the pose at the start and part-way through, so a
+//    clip whose keyframes did not survive export (it loads but nothing moves) is reported.
+// Modules (three, gltf-validator) come from $FORGECRAFT_WEB_MODULES when set (the pipeline sets it:
+// ForgeCraft's own install, or MeshCraft's identical engine_check install), else ./node_modules.
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const here = path.dirname(new URL(import.meta.url).pathname);
-const validator = require(path.join(here, "node_modules/gltf-validator"));
+const MODULES = process.env.FORGECRAFT_WEB_MODULES || path.join(here, "node_modules");
+const validator = require(path.join(MODULES, "gltf-validator"));
 const { chromium } = require("playwright");
 
 const [outJson, shot, ...files] = process.argv.slice(2);
@@ -32,7 +37,7 @@ for (const f of files) {
 const ORIGIN = "http://forgecraft.local";
 const served = files.map((f, i) => ({ url: `/asset/${i}${path.extname(f)}`, file: f }));
 function resolve(u) {
-  if (u.startsWith("/three/")) return path.join(here, "node_modules/three", u.slice(7));
+  if (u.startsWith("/three/")) return path.join(MODULES, "three", u.slice(7));
   const s = served.find((x) => x.url === u); if (s) return s.file;
   const i = served.find((x) => u.startsWith(x.url.replace(/\.[^.]+$/, "") + "/") || u.startsWith("/asset/"));
   return i ? path.join(path.dirname(i.file), u.split("/").slice(3).join("/")) : null;
@@ -60,9 +65,18 @@ for (const url of files) {
       for (const m of [].concat(o.material)) for (const k of ['map','metalnessMap','roughnessMap','normalMap']) if (m[k]) tex.add(m[k].uuid); } });
     const box = new THREE.Box3().setFromObject(g.scene); const size = box.getSize(new THREE.Vector3());
     g.scene.position.x = x - box.min.x; x += size.x + 2; scene.add(g.scene);
+    // every clip on its own: does the pose change between the start and part-way through?
+    const pose = () => { const v = []; g.scene.traverse((o) => { v.push(...o.position.toArray(), ...o.quaternion.toArray(), ...o.scale.toArray()); }); return v; };
+    const played = g.animations.map((clip) => {
+      const mx = new THREE.AnimationMixer(g.scene); const act = mx.clipAction(clip); act.play();
+      mx.setTime(0); const a = pose(); mx.setTime(Math.max(clip.duration * 0.4, 1 / 30)); const b = pose();
+      act.stop(); mx.uncacheRoot(g.scene);
+      let d = 0; for (let i = 0; i < a.length; i++) d = Math.max(d, Math.abs(a[i] - b[i]));
+      return { name: clip.name, max_delta: +d.toFixed(5), moves: d > 1e-4 };
+    });
     if (g.animations.length) { const mx = new THREE.AnimationMixer(g.scene); const a = mx.clipAction(g.animations.find(c => /walk|bob/i.test(c.name)) || g.animations[0]); a.play(); mx.update(0.35); mixers.push(mx); }
     rec.ok = true; Object.assign(rec, { meshes, skinned, triangles: tris, textures: tex.size,
-      clips: g.animations.map((c) => ({ name: c.name, seconds: +c.duration.toFixed(3), tracks: c.tracks.length })),
+      clips: g.animations.map((c, i) => ({ name: c.name, seconds: +c.duration.toFixed(3), tracks: c.tracks.length, moves: played[i].moves, max_delta: played[i].max_delta })),
       size_yup: [size.x, size.y, size.z].map((v) => +v.toFixed(3)), nodes: g.parser.json.nodes.length,
       sockets: g.parser.json.nodes.filter((n) => (n.name || '').startsWith('socket_')).map((n) => n.name) });
   } catch (e) { rec.ok = false; rec.error = String(e); }

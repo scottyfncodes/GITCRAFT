@@ -49,7 +49,10 @@ forgecraft/
   library.py        versioned asset library, search, export (handoff)
   backends/         meshcraft_tpl.py (MeshCraft templates) · blockbench.py (.bbmodel writer/reader) · meshroom.py · triposr.py · hunyuan3d.py · mixamo.py
   blender/          run.py (job runner inside Blender) · mc.py (stages) · gen.py (procedural models, rig, animation)
-  web-check/        Khronos glTF-Validator + three.js r170 load test in headless Chromium (no sockets: works in the sandbox)
+  web-check/        Khronos glTF-Validator + three.js r170 load test in headless Chromium (no sockets: works in the sandbox);
+                    plays every clip and reports any that does not move the rig. Uses its own node_modules or, when absent,
+                    MeshCraft's engine_check install (same pinned versions), so standard installs run it. If neither
+                    matches, the asset's validation is `unverified`, never `passed`.
   ui/, ui_server.py the 3D Department interface (live server + static snapshot publisher)
   cli.py            command line for the same operations
 scripts/install-3d.sh   ensures MeshCraft's Blender, installs the engine check, Meshroom, the AI venv and weights

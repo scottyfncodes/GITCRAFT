@@ -109,17 +109,45 @@ def _mirror(job, prog, seen, prefix):
     return len(lines)
 
 
+def _installed(mods, pkg):
+    try:
+        with open(os.path.join(mods, pkg, "package.json")) as f: return json.load(f).get("version")
+    except (OSError, ValueError):
+        return None
+
+
+def web_modules():
+    """(node_modules dir, None) for the engine check, or (None, reason). ForgeCraft pins the same
+    three.js and gltf-validator as MeshCraft's engine check, which the standard installer always
+    installs; so it uses its own install when present, else MeshCraft's, and only if every pinned
+    version matches exactly. FORGECRAFT_WEB_MODULES overrides the search."""
+    with open(os.path.join(HERE, "web-check", "package.json")) as f: pins = json.load(f)["dependencies"]
+    env = os.environ.get("FORGECRAFT_WEB_MODULES")
+    cands = [env] if env else [os.path.join(HERE, "web-check", "node_modules"),
+                               os.path.join(os.path.dirname(HERE), "meshcraft", "engine_check", "node_modules")]
+    seen = []
+    for d in cands:
+        got = {p: _installed(d, p) for p in pins}
+        if got == pins: return d, None
+        seen.append(f"{d}: {got}")
+    return None, f"no node_modules with {pins} ({'; '.join(seen)}); run scripts/install.sh (MeshCraft engine check) or scripts/install-3d.sh"
+
+
 def _web_check(job, files):
-    if not shutil.which("node") or not os.path.isdir(os.path.join(HERE, "web-check", "node_modules")):
-        return {"status": "skipped", "reason": "node or forgecraft/web-check/node_modules missing (run scripts/install-3d.sh)"}
+    mods, why = web_modules()
+    if not shutil.which("node") or not mods:
+        return {"status": "skipped", "reason": why or "node is not installed"}
     out = os.path.join(job.work, "web_check.json"); shot = os.path.join(job.work, "web_check.png")
-    r = subprocess.run(["node", WEB_CHECK, out, shot, *files], capture_output=True, text=True, timeout=300)
+    r = subprocess.run(["node", WEB_CHECK, out, shot, *files], capture_output=True, text=True, timeout=300,
+                       env=dict(os.environ, FORGECRAFT_WEB_MODULES=mods))
     if not os.path.exists(out): return {"status": "error", "reason": (r.stderr or r.stdout)[-600:]}
     d = json.load(open(out))
-    return {"status": "passed" if d.get("ok") else "failed", "three_revision": d["three"]["revision"], "screenshot": shot,
+    return {"status": "passed" if d.get("ok") else "failed", "three_revision": d["three"]["revision"], "screenshot": shot, "modules": mods,
             "files": {os.path.basename(k): {"khronos_errors": v["validator"]["errors"], "khronos_warnings": v["validator"]["warnings"],
                                             "khronos_messages": v["validator"]["messages"], "three_loaded": (v.get("three") or {}).get("ok"),
-                                            "three_clips": len((v.get("three") or {}).get("clips") or [])} for k, v in d["files"].items()}}
+                                            "three_clips": len((v.get("three") or {}).get("clips") or []),
+                                            "three_clips_static": [c["name"] for c in (v.get("three") or {}).get("clips") or [] if not c.get("moves")]}
+                      for k, v in d["files"].items()}}
 
 
 # ------------------------------------------------------------------ main entry
@@ -303,8 +331,10 @@ def _run(job, spec, probe, lim):
         vres = _blender(job, "validate", os.path.join(job.work, "validate"), 300, input=glb, expect=exp)["validation"]
         web = _web_check(job, [glb])
         ok = not vres["problems"] and web["status"] in ("passed", "skipped")
-        warn = web["status"] == "skipped" or any(f.get("khronos_warnings") for f in web.get("files", {}).values())
-        val = {"status": "failed" if not ok else "passed-with-warnings" if warn else "passed", "blender_reimport": vres, "engine": web}
+        warn = any(f.get("khronos_warnings") for f in web.get("files", {}).values())
+        # a skipped engine check is not a pass: the asset was never loaded or played in three.js
+        val = {"status": "failed" if not ok else "unverified" if web["status"] == "skipped" else "passed-with-warnings" if warn else "passed",
+               "blender_reimport": vres, "engine": web}
     job.stage("validate", "done" if val["status"] != "failed" else "failed", info={"status": val["status"]})
 
     # 11. package

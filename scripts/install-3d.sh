@@ -30,7 +30,7 @@ core() {
   if command -v npm >/dev/null; then
     (cd "$repo/forgecraft/web-check" && npm ci -q --no-audit --no-fund >/dev/null 2>&1) \
       && echo "gitcraft-3d: engine check ready (three.js r170 + Khronos glTF-Validator)" \
-      || echo "gitcraft-3d: npm ci for forgecraft/web-check failed; validation will skip the engine check" >&2
+      || echo "gitcraft-3d: npm ci for forgecraft/web-check failed; ForgeCraft falls back to MeshCraft's engine_check install (same versions), else assets are marked unverified" >&2
   else
     echo "gitcraft-3d: npm not found; validation will skip the three.js / glTF-Validator check" >&2
   fi
