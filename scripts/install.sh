@@ -41,7 +41,9 @@ done
 # 1) Prebuilt binaries from the bin branch.
 if ((${#todo[@]})) && ((source_only == 0)); then
   stage="$(mktemp -d)"
-  if git -C "$repo_dir" fetch -q --depth 1 origin bin 2>/dev/null &&
+  # this clone's origin first; a fork or local clone without a `bin` branch uses the main repo's builds
+  bin_repo="${GITCRAFT_BIN_REPO:-https://github.com/scottyfncodes/GITCRAFT}"
+  if { git -C "$repo_dir" fetch -q --depth 1 origin bin 2>/dev/null || git -C "$repo_dir" fetch -q --depth 1 "$bin_repo" bin 2>/dev/null; } &&
      git -C "$repo_dir" archive FETCH_HEAD | tar -x -C "$stage"; then
     left=()
     for entry in "${todo[@]}"; do
