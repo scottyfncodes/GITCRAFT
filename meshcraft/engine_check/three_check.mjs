@@ -1,7 +1,9 @@
 // Load a GLB into three@0.170 (the TIDEBREAKERS version) in headless Chromium, the way a game would.
 //   node three_check.mjs --glb FILE --out shot.png [--clip NAME --time SECONDS] [--material game-toon|authored]
-//                        [--contract contract.json] [--size 640]
+//                        [--contract contract.json] [--size 640] [--all-clips 1]
 // Prints a JSON report: nodes, clips, bounds (Y-up metres), vertex colours, contract checks.
+// --all-clips 1 also plays every clip on its own (rest pose restored before each) and checks that it
+// moves the asset: a clip whose keyframes were lost still loads, but nothing moves.
 import { createRequire } from 'node:module';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -23,7 +25,7 @@ const page_html = `<!doctype html><html><head><script type="importmap">{"imports
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-const opts = ${JSON.stringify({ clip: args.clip || null, time: Number(args.time || 0), material: args.material || 'game-toon' })};
+const opts = ${JSON.stringify({ clip: args.clip || null, time: Number(args.time || 0), material: args.material || 'game-toon', allClips: args['all-clips'] === '1' })};
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(${size}, ${size}, false); renderer.setClearColor(0xd6ecee);
 const scene = new THREE.Scene();
@@ -43,8 +45,28 @@ try {
     tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
     if (opts.material === 'game-toon') o.material = new THREE.MeshToonMaterial({ vertexColors: !!g.attributes.color, gradientMap: grad, color: g.attributes.color ? 0xffffff : 0xcccccc });
   });
-  const mixer = new THREE.AnimationMixer(root);
   report.clips = gltf.animations.map((c) => ({ name: c.name, seconds: +c.duration.toFixed(3), tracks: c.tracks.map((t) => t.name) }));
+  if (opts.allClips) {
+    // each clip independently: restore the rest pose, play only this clip, compare the pose at the start
+    // with three points through it (local position/rotation/scale of every node)
+    const objs = []; root.traverse((o) => objs.push(o));
+    const rest = objs.map((o) => [o.position.clone(), o.quaternion.clone(), o.scale.clone()]);
+    const reset = () => objs.forEach((o, i) => { o.position.copy(rest[i][0]); o.quaternion.copy(rest[i][1]); o.scale.copy(rest[i][2]); });
+    const pose = () => objs.flatMap((o) => [...o.position.toArray(), ...o.quaternion.toArray(), ...o.scale.toArray()]);
+    report.clip_motion = gltf.animations.map((clip) => {
+      reset();
+      const mx = new THREE.AnimationMixer(root); const act = mx.clipAction(clip); act.play();
+      mx.setTime(0); const a = pose(); let d = 0; const samples = [];
+      for (const f of [0.25, 0.5, 0.75]) {
+        mx.setTime(clip.duration * f); const b = pose(); let s = 0;
+        for (let i = 0; i < a.length; i++) s = Math.max(s, Math.abs(a[i] - b[i]));
+        samples.push(+s.toFixed(5)); d = Math.max(d, s);
+      }
+      act.stop(); mx.uncacheRoot(root); reset();
+      return { name: clip.name, seconds: +clip.duration.toFixed(3), max_delta: +d.toFixed(5), samples };
+    });
+  }
+  const mixer = new THREE.AnimationMixer(root);
   if (opts.clip) {
     const clip = gltf.animations.find((c) => c.name === opts.clip);
     if (!clip) throw new Error('clip not found: ' + opts.clip);
@@ -111,6 +133,13 @@ if (report.ok) {
       add('engine_lid_open_rotation', Math.abs(report.named.chest_lid.rotationX - want) < 0.02, `lid rotation.x = ${report.named.chest_lid.rotationX} at end of ${args.clip} (game uses ${want})`);
     }
     for (const c of contract.clips || []) add(`engine_clip:${c}`, report.clips.some((x) => x.name === c), 'clip present');
+  }
+  if (args['all-clips'] === '1') {
+    const tested = report.clip_motion || [];
+    add('engine_all_clips_played', tested.length === report.clips.length && report.clips.length > 0,
+        `${tested.length} of ${report.clips.length} clips played one at a time`);
+    for (const m of tested) add(`engine_clip_motion:${m.name}`, m.max_delta > 1e-4, m.max_delta > 1e-4
+        ? `moves the asset (max change ${m.max_delta} at 25/50/75% of ${m.seconds}s)` : `does not move the asset: keyframes missing or constant`);
   }
 }
 const errs = logs.filter((l) => /error|warn/i.test(l));

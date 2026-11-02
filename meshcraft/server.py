@@ -98,7 +98,7 @@ def _brief(args):
     return b
 
 
-def engine_check(glb, out=None, clip=None, time=None, contract=None, material="game-toon", size=640):
+def engine_check(glb, out=None, clip=None, time=None, contract=None, material="game-toon", size=640, all_clips=False):
     _need(glb)
     script = os.path.join(HERE, "engine_check", "three_check.mjs")
     if not os.path.isdir(os.path.join(HERE, "engine_check", "node_modules", "three")):
@@ -106,6 +106,7 @@ def engine_check(glb, out=None, clip=None, time=None, contract=None, material="g
     cmd = ["node", script, "--glb", glb, "--material", material, "--size", str(size)]
     if out: cmd += ["--out", _need(out, write=True)]
     if clip: cmd += ["--clip", clip, "--time", str(time if time is not None else 99)]
+    if all_clips: cmd += ["--all-clips", "1"]
     cf = None
     if contract:
         cf = os.path.join(os.environ.get("TMPDIR", "/tmp"), "meshcraft_contract.json"); json.dump(contract, open(cf, "w"))
@@ -272,9 +273,10 @@ TOOLS = {
  "export_asset": ("Export a .blend with one or more profiles (see list_profiles). Files go to out_dir (default <asset>/exports).",
                   S({"blend": STR, "profiles": ARR, "out_dir": STR}, ["blend", "profiles"]),
                   lambda a: core.export(_need(a["blend"]), a["profiles"], _need(a["out_dir"], True) if a.get("out_dir") else None)),
- "engine_check": ("Load an exported .glb into three@0.170 in headless Chromium the way a game would (optionally with the TIDEBREAKERS toon material), play a clip to a time, screenshot, and check a contract.",
-                  S({"glb": STR, "out": STR, "clip": STR, "time": NUM, "contract": OBJ, "material": {"type": "string", "enum": ["game-toon", "authored"]}, "size": NUM}, ["glb"]),
-                  lambda a: engine_check(a["glb"], a.get("out"), a.get("clip"), a.get("time"), a.get("contract"), a.get("material", "game-toon"), int(a.get("size", 640)))),
+ "engine_check": ("Load an exported .glb into three@0.170 in headless Chromium the way a game would (optionally with the TIDEBREAKERS toon material), play a clip to a time, screenshot, and check a contract. "
+                  "all_clips: also play every clip on its own and fail any clip that does not move the asset.",
+                  S({"glb": STR, "out": STR, "clip": STR, "time": NUM, "contract": OBJ, "material": {"type": "string", "enum": ["game-toon", "authored"]}, "size": NUM, "all_clips": BOOL}, ["glb"]),
+                  lambda a: engine_check(a["glb"], a.get("out"), a.get("clip"), a.get("time"), a.get("contract"), a.get("material", "game-toon"), int(a.get("size", 640)), bool(a.get("all_clips")))),
  "run_pipeline": ("The full workflow for one brief: build → preview → validate → export → validate exports (incl. Khronos) → contact sheet → manifest → report JSON.",
                   S({"brief": BRIEF}, ["brief"]), run_pipeline),
  "run_script": ("Assisted modelling: run a Python script from the workspace inside Blender (globals: bpy, kit, args, Palette), optionally against a .blend which is then saved. Runs inside the sandbox.",

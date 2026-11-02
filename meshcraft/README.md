@@ -106,7 +106,7 @@ Templates are Python modules in `engine/templates/` with `META` (params, roles, 
 - armatures with rigid or gradient skinning;
 - reference images.
 
-A template returns a **contract** (node names, pivots, clips) that validation and the engine check enforce.
+A template returns a **contract** (node names, pivots, clips) that validation and the engine check enforce. `engine_check` with `all_clips: true` also plays every clip on its own (rest pose restored before each) and fails any clip that does not move the asset; without it the check behaves as before.
 
 **Scenes:** `compose_scene` places library assets or files (`attach_to: "<item>:<socket_*>"` snaps one asset to another's socket), adds ocean, sky and sun, renders a hero shot and exports a scene GLB and `.blend`, validated like any asset.
 
