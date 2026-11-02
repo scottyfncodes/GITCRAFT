@@ -55,7 +55,10 @@ class Viewer {
     try {
       const g = await new GLTFLoader().loadAsync(src);
       this.obj = g.scene; this.scene.add(g.scene);
-      const box = new THREE.Box3().setFromObject(g.scene), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3()).length() || 1;
+      const box = new THREE.Box3(); g.scene.updateMatrixWorld(true);
+      g.scene.traverse((o) => { if (o.isMesh && !/ocean/i.test(o.name)) box.expandByObject(o); });   // frame content, not a scene's ocean plane
+      if (box.isEmpty()) box.setFromObject(g.scene);
+      const c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3()).length() || 1;
       this.ctl.target.copy(c); this.cam.position.copy(c).add(new THREE.Vector3(s * 0.62, s * 0.38, s * 0.72)); this.cam.near = s / 500; this.cam.far = s * 50; this.cam.updateProjectionMatrix();
       this.clips = g.animations;
       if (this.clips.length) { this.mixer = new THREE.AnimationMixer(g.scene); this.play(this.clips.find((c) => /idle|bob/i.test(c.name))?.name || this.clips[0].name); }
