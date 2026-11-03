@@ -1,0 +1,4 @@
+# AudioCraft voice runtime (separate venv: ~/.gitcraft/studio/voice-venv)
+# kokoro-onnx MIT, onnxruntime MIT, soundfile BSD-3; phonemizer GPL-3.0 and espeakng-loader (bundles espeak-ng, GPL-3.0) are pulled in by kokoro-onnx
+kokoro-onnx==0.6.1
+soundfile==0.14.0
