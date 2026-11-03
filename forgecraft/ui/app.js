@@ -21,8 +21,8 @@ const versions = (a) => Object.keys(a.versions).map(Number).sort((x, y) => x - y
 const md = (a, v) => a.versions[v ?? a.latest];
 const url = (m, rel) => (rel ? m.base + rel.split("/").map(encodeURIComponent).join("/") : null);
 const allLatest = () => S.assets.map((a) => md(a)).sort((x, y) => (y.provenance?.created || "").localeCompare(x.provenance?.created || ""));
-const isChar = (m) => !!m.rig;
 const isScene = (m) => m.kind === "scene" || m.template === "scene" || (m.tags || []).includes("meshcraft_scene");
+const isChar = (m) => !!m.rig && !isScene(m);   // a composed scene can hold a rigged character; it is still a scene
 
 // ---------------------------------------------------------------- viewer
 class Viewer {

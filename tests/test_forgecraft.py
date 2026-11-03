@@ -98,12 +98,18 @@ if ok and okf:
     ok, mx = fc.call("mixamo_apply", {"character": d["asset"]["id"], "animations": [os.path.join(fx, "Walking.fbx")], "name": "Deck Crew"}, timeout=1200)
     check("mixamo_apply (delegated): clip merged by bone name onto the library character as a new version", ok and mx["status"] == "done"
           and mx["asset"]["version"] == 2 and "Walking" in mx.get("animations", []), mx)
+    ok2, v2 = mcl.call("library_get", {"asset": mx["asset"]["id"], "version": 2}) if ok else (False, {})
+    names = [a["name"] for a in (v2.get("animations") or [])]
+    check("mixamo_apply record: the new version keeps its rig and lists every clip it ships (own six + Walking), as the Character Studio reads it",
+          ok2 and (v2.get("rig") or {}).get("armatures", 0) >= 1 and len(names) == 7 and "Walking" in names, {"rig": v2.get("rig"), "animations": names})
     ok, up = fc.call("mixamo_prepare_upload", {"asset": d["asset"]["id"], "out": os.path.join(ws, "upload.fbx")}, timeout=600)
     check("mixamo_prepare_upload (delegated): mesh-only FBX for Mixamo", ok and os.path.getsize(os.path.join(ws, "upload.fbx")) > 1000, up)
 
 ok, sc = fc.call("compose_scene", {"name": "Test Scene", "samples": 2, "resolution": [160, 90],
                                     "items": [{"asset": "test_barrel", "name": "barrel"}, {"asset": "voxel_crab", "name": "crab", "location": [2, 0, 0]}]}, timeout=1200)
 check("compose_scene (delegated): scene GLB from library assets, engine-checked, recorded with its inputs", ok and sc["status"] == "done", sc)
+ok2, scm = mcl.call("library_get", {"asset": sc["asset"]["id"]}) if ok and sc.get("asset") else (False, {})
+check("compose_scene record: recorded as kind 'scene' (not the kind of one of its parts)", ok2 and scm.get("kind") == "scene", scm.get("kind"))
 glb = next((p for k, p in (sc.get("files") or {}).items() if k.endswith(".glb")), None) if ok else None
 if glb:
     ok, pm = fc.call("process_mesh", {"input": glb, "name": "Reimported Scene", "max_tris": 3000, "target_size": 4.0}, timeout=1200)
