@@ -8,7 +8,7 @@ Put this in the cloud environment's **setup script** (environment settings ▸ S
 curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
 ```
 
-It clones GITCRAFT to `~/.gitcraft/repo`, installs every tool, copies the launcher and tool code to `~/.gitcraft/runtime`, registers all nine servers at user scope from that runtime, installs the GITCRAFT block in `~/.claude/CLAUDE.md` and the `gitcraft` skill (`scripts/install-global.sh`), and prints `doctor.sh --brief`. Because this happens before Claude Code starts, the tools connect in the first turn of every session, **whichever repos are attached, including none**. See the README's "Use GITCRAFT in every project" for what each piece does, verification and troubleshooting; `tests/test_global.sh` proves it from a separate project in a fresh HOME.
+It clones GITCRAFT to `~/.gitcraft/repo`, installs every tool, copies the launcher and tool code to `~/.gitcraft/runtime`, registers all nine servers at user scope from that runtime, installs the GITCRAFT block in `~/.claude/CLAUDE.md` and the `gitcraft` skill (`scripts/install-global.sh`), installs a user-level SessionStart hook in `~/.claude/settings.json` that finishes anything setup deferred (`GITCRAFT_MESHCRAFT=later`) or didn't finish, in the background, in any project (`GITCRAFT_GLOBAL_HOOK=0` skips it), and prints `doctor.sh --brief`. Because this happens before Claude Code starts, the tools connect in the first turn of every session, **whichever repos are attached, including none**. See the README's "Use GITCRAFT in every project" for what each piece does, verification and troubleshooting; `tests/test_global.sh` proves it from a separate project in a fresh HOME.
 
 ## Other ways
 
