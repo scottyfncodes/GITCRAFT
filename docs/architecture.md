@@ -17,8 +17,12 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
    ┌───────────┬────────────┼────────────┬────────────┬────────────┬────────────┬────────────┐
  photocraft vectorcraft designcraft   pdfcraft    lightcraft   filmcraft   effectcraft   forgecraft ──► meshcraft
    raster     vector      layout        PDF         photo        video       motion     3D orchestrator  3D specialist (Blender)
-                                                                                              └──── gitcraft3d/ ────┘
-                                                                                         shared library · jobs · probe · router
+                                                                                              │  └──── gitcraft3d/ ────┘
+                                                                                              │  shared library · jobs · probe · router
+                                                                            department_*      ▼
+                                                                    studiocraft (studio/): audiocraft · animcraft · worldcraft · fxcraft
+                                                                    materialcraft · levelcraft · cinematiccraft · testcraft · assetcraft
+                                                                    (Blender via MeshCraft's venv · Node/Chromium · FFmpeg · Kokoro)
 ```
 
 ## Components
@@ -38,7 +42,9 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
 | `forgecraft/` | ForgeCraft, the 3D Department orchestrator: MCP server, job pipeline (route → generate → engine check → record → hand-off), the MeshCraft bridge, external generators (Meshroom, TripoSR, Hunyuan3D), UI. No Blender code. See `docs/3d-department.md` |
 | `meshcraft/` | MeshCraft, the 3D modelling specialist: MCP server (`server.py`, also `--call` for ForgeCraft), engine (`engine/`: kit, templates, procedural builders, mesh import, bake, scene composition, Blockbench, Mixamo, preview, validation, export), export profiles, engine check (three.js r170 + Khronos) |
 | `gitcraft3d/` | Shared by both 3D servers: the asset library, job store, hardware probe and router (`rules.json`) |
-| `tests/` | MCP test client, the policy test, the MeshCraft and ForgeCraft tests, the TIDEBREAKERS 3D acceptance test |
+| `studio/` | StudioCraft, the department layer: MCP server and CLI, the department contract (`core/contract.py`: request validation, dependency checks, output validation, provenance, catalogue), routing, the AssetCraft catalogue, and nine departments in `studio/departments/` (manifest + code). See `docs/studio.md` |
+| `scripts/install-studio.sh` | Installs the Studio runtimes into `~/.gitcraft/studio` (core venv, Node runtime, optional Kokoro voice) |
+| `tests/` | MCP test client, the policy test, the MeshCraft, ForgeCraft and Studio tests, the TIDEBREAKERS 3D acceptance test |
 
 ## How tools hand off work
 

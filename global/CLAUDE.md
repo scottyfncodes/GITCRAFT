@@ -4,8 +4,11 @@ GITCRAFT's creative tools are MCP servers registered at user scope, so they are
 available in every project, whether or not the GITCRAFT repo is attached:
 photocraft (raster/PSD), vectorcraft (vector/SVG), designcraft (layout/PDF),
 pdfcraft (PDF ops), lightcraft (photo grading), filmcraft (video), effectcraft
-(motion graphics), meshcraft (3D, Blender) and forgecraft (3D Department
-orchestrator). The `gitcraft` skill has the full tool-selection guide.
+(motion graphics), meshcraft (3D, Blender), forgecraft (3D Department
+orchestrator) and studiocraft (the Studio departments: audio, animation and
+rigging, terrain/skies/oceans, VFX, PBR materials, levels/tilemaps,
+cinematics, browser QA, asset catalogue). The `gitcraft` skill has the full
+tool-selection guide.
 
 Before implementing creative, visual, design, game-development, 2D, 3D,
 modelling, animation, illustration, texture, rendering or asset-generation work
@@ -20,6 +23,11 @@ in ANY project:
 5. Integrate the results into the CURRENT project, following its conventions.
 6. Validate the output (export and look at it; engine-check 3D) and keep the
    project's existing functionality working.
+
+For game audio, animation, worlds, effects, materials, levels, cutscenes, QA
+or asset bookkeeping, studiocraft's `route` (or forgecraft's
+`department_route`) names the department and action; a `blocked` result
+means a runtime is missing, so report it instead of faking the asset.
 
 Project isolation:
 - The active project is whatever repo you are working in. Never assume it is

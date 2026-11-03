@@ -1,6 +1,6 @@
 ---
 name: gitcraft
-description: Choose and chain GITCRAFT's creative MCP tools (photocraft, vectorcraft, designcraft, pdfcraft, lightcraft, filmcraft, effectcraft, meshcraft, forgecraft) for visual, design, game-asset, 2D, 3D, animation, video or rendering work in the current project. Use before making or improving images, icons, logos, illustrations, textures, layouts, PDFs, videos, motion graphics or 3D models in any repository.
+description: Choose and chain GITCRAFT's creative MCP tools (photocraft, vectorcraft, designcraft, pdfcraft, lightcraft, filmcraft, effectcraft, meshcraft, forgecraft, studiocraft) for visual, design, game-asset, 2D, 3D, audio, animation, rigging, terrain, VFX, material, level, cinematic, QA, asset-management, video or rendering work in the current project. Use before making or improving images, icons, logos, illustrations, textures, layouts, PDFs, sounds, music, voice lines, animations, levels, effects, videos, motion graphics or 3D models, or testing a web game, in any repository.
 ---
 
 # Using GITCRAFT in any project
@@ -34,6 +34,16 @@ library. They have no network.
 | Animated titles, motion graphics, lower thirds | effectcraft | filmcraft |
 | 3D asset from a brief (props, characters, ships, islands, scenes) | forgecraft `route` → `generate` | meshcraft (templates, profiles), filmcraft/designcraft (showcase) |
 | Precise 3D build with a project palette and engine profile | meshcraft `run_pipeline` | forgecraft `library_export` |
+| Sound effects, ambience loops, adaptive music + MIDI, voice lines, loudness, loops, OGG/MP3 | studiocraft `audiocraft_*` | cinematiccraft (trailer music bed) |
+| Rig a character, procedural clips, retarget Mixamo/BVH, physics, sprite sheets | studiocraft `animcraft_*` | meshcraft/forgecraft (the model), testcraft (playback) |
+| Terrain/islands, heightmaps + splatmaps, scatter, caves, skyboxes, ocean normals | studiocraft `worldcraft_*` | materialcraft (ground textures), cinematiccraft (flyover) |
+| Fire/smoke/explosion flipbooks, three.js emitters, destruction | studiocraft `fxcraft_*` | photocraft (touch-ups) |
+| Seamless PBR materials, weathering, toon ramps, make an image tile | studiocraft `materialcraft_*` | meshcraft (apply/bake) |
+| Dungeons, platformer levels, overworld maps, towns (Tiled + blockout GLB) | studiocraft `levelcraft_*` | photocraft/vectorcraft (real tileset art) |
+| Camera moves, storyboards, title cards, teaser assembly, gameplay capture | studiocraft `cinematiccraft_*` | filmcraft (hand edit), effectcraft (titles) |
+| Smoke/gameplay/FPS/visual-regression/asset tests of a web game | studiocraft `testcraft_*` | — |
+| Catalogue, duplicates, unused assets, licences/ATTRIBUTION.md, safe import | studiocraft `assetcraft_*` | every department registers its outputs |
+| Not sure which department | studiocraft `route` / forgecraft `department_route` | — |
 
 Typical projects:
 - **New game:** decide 2D vs 3D from the engine; then key art, sprites or 3D
@@ -75,3 +85,9 @@ Every hand-off's SHA-256 is logged in `~/.gitcraft/logs/audit.jsonl`.
   input into the project rather than widening the roots.
 - A 3D job `blocked` means no installed tool can honour it: report the reason
   and alternatives. Never substitute a 2D image for a 3D model.
+- A studiocraft action `blocked` names the missing runtime and its install
+  command (e.g. Blender for animcraft); report it rather than improvising.
+  `studio_status` shows which actions can run on this machine.
+- Studio outputs default to `<workspace>/gitcraft-out/<department>/`; move or
+  `assetcraft_integrate` them into the project. Each run writes a
+  `.studio.json` record (tools, licences, hashes) next to its outputs.

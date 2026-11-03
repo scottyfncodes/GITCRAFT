@@ -2,7 +2,7 @@
 
 Seven open-source creative apps from [ArtCraft](https://github.com/storytold), wired into Claude Code as MCP tools:
 
-PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department orchestrator)
+PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department orchestrator) · **StudioCraft** (nine production departments: AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft, TestCraft, AssetCraft)
 
 ## How it works
 
@@ -22,6 +22,24 @@ ForgeCraft orchestrates the 3D Department. It routes each request to the best av
 - The TIDEBREAKERS 3D package is in `acceptance/tidebreakers-3d/`.
 - ForgeCraft uses MeshCraft's Blender. `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
 
+## Studio departments: StudioCraft
+
+Nine departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, three.js, Phaser, Playwright, numpy) behind one contract: validated requests, honest `blocked` results when a runtime is missing, validated and hashed outputs, a provenance + licence record per run, and automatic registration in a cross-project asset catalogue.
+
+| | |
+|---|---|
+| **AudioCraft** | SFX, seamless ambiences, adaptive music stems + MIDI, voice lines (54 voices, CPU), loop points, loudness, conversion |
+| **AnimCraft** | auto-rig with heat weights, procedural clips, retargeting, physics, sprite sheets |
+| **WorldCraft** | eroded terrains with biomes, heightmaps/splatmaps, scatter, caves, physical skies + cubemaps, looping FFT oceans |
+| **FXCraft** | flipbook effects (exact loops), three.js emitters, Voronoi destruction |
+| **MaterialCraft** | seamless PBR materials with weathering, glTF material spheres, toon ramps |
+| **LevelCraft** | dungeons, caves, completable platformers, overworlds, towns → Tiled + blockout GLB, checked in Phaser |
+| **CinematicCraft** | camera moves rendered in Cycles + engine camera paths, storyboards, title cards, teasers, gameplay capture |
+| **TestCraft** | smoke, gameplay, FPS, visual regression, asset integrity and animation tests in Chromium |
+| **AssetCraft** | catalogue, versions, duplicates, unused assets, licences + ATTRIBUTION.md, safe integration |
+
+ForgeCraft discovers and routes to them (`departments`, `department_route`, `department_run`). Docs: [docs/studio.md](docs/studio.md); how each tool was chosen, licensed and verified: [docs/studio-acquisition.md](docs/studio-acquisition.md). Proofs: `acceptance/studio/`. Test: `tests/test_studio.py`.
+
 ## Control room
 
 `scripts/ui.sh` opens a local, phone-friendly web UI for every tool: health, discovery, MeshCraft pipelines, jobs with their retries, the versioned 3D library with fingerprints and verified exports, and routing advice. It listens on 127.0.0.1 only, needs its one-time link, and acts only through `scripts/mcp.sh`, so the sandbox and guard apply. See [docs/ui.md](docs/ui.md).
@@ -36,7 +54,7 @@ Paste this one line into the environment's **Setup script** (cloud environment m
 curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
 ```
 
-Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all nine tools connected** and the GITCRAFT instructions loaded. Nothing has to be attached. It takes a few minutes on a new container (the tools are ~400 MB prebuilt; MeshCraft's Blender is another ~400 MB, skip it with `GITCRAFT_MESHCRAFT=0`).
+Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all ten servers connected** and the GITCRAFT instructions loaded. Nothing has to be attached. It takes a few minutes on a new container (the tools are ~400 MB prebuilt; MeshCraft's Blender is another ~400 MB, skip it with `GITCRAFT_MESHCRAFT=0`; the Studio's runtimes ~400 MB more, skip them with `GITCRAFT_STUDIO=0`, or only the voice model with `GITCRAFT_STUDIO_VOICE=0`).
 
 ### Workstation
 
@@ -47,7 +65,7 @@ Run the same line once in a terminal. `~/.claude.json` and `~/.claude/` persist,
 | Piece | Where | Purpose |
 |---|---|---|
 | GITCRAFT clone | `~/.gitcraft/repo` | Source the setup installs from (`GITCRAFT_REF=<branch>` for another branch, `GITCRAFT_REPO_URL` for a fork) |
-| Tool binaries, Blender venv | `~/.gitcraft/bin`, `~/.gitcraft/meshcraft` | The nine tools |
+| Tool binaries, Blender venv | `~/.gitcraft/bin`, `~/.gitcraft/meshcraft` | The ten servers |
 | **Runtime** | `~/.gitcraft/runtime` | Copy of the launcher, guard, sandbox and tool code. The servers start from here, never from a checkout, so they work when no GITCRAFT checkout exists |
 | **MCP registration** | `~/.claude.json` → `mcpServers` (user scope) | Claude Code connects user-scope servers in **every** project. Each entry runs `~/.gitcraft/runtime/scripts/mcp.sh <tool>` |
 | **Global instructions** | a managed block in `~/.claude/CLAUDE.md` | Loaded in every project: consider GITCRAFT for creative work, pick tools that fit, hand files between them, integrate into the current project, validate, keep projects isolated. Your own text in that file is kept |
@@ -61,11 +79,11 @@ Project configuration still wins: a project's `.mcp.json`, `.claude/settings.jso
 
 ```
 ~/.gitcraft/runtime/scripts/doctor.sh      # tools, registration (all from the runtime?), instructions, skill, sandbox
-cd <any project> && claude mcp list         # nine *craft servers: Connected
+cd <any project> && claude mcp list         # ten *craft servers: Connected
 tests/test_global.sh                        # full cross-repository acceptance test (fresh HOME + separate project)
 ```
 
-In a session, `/mcp` lists the servers; asking Claude "which GITCRAFT tools and skills do you have?" should name the nine servers and the `gitcraft` skill.
+In a session, `/mcp` lists the servers; asking Claude "which GITCRAFT tools and skills do you have?" should name the ten servers and the `gitcraft` skill.
 
 ### Troubleshooting
 
