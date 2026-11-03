@@ -66,3 +66,12 @@ gitcraft_denied() {
     *) echo "" ;;
   esac
 }
+
+# MeshCraft (and ForgeCraft, which rides on its Blender) counts as installed only when the venv
+# holds a finished bpy install. A venv alone is what an interrupted install leaves behind
+# (e.g. a setup script that ran out of time mid-download), and registering that would show a
+# server that can't start. Checks the wheel's metadata, so it never starts Blender.
+gitcraft_mesh_ready() {
+  [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] || return 1
+  compgen -G "$GITCRAFT_HOME/meshcraft/venv/lib/python*/site-packages/bpy-*.dist-info" >/dev/null
+}
