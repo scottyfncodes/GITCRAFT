@@ -35,7 +35,12 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
       # turned off on purpose: report it, don't count it as a problem
       say "$(printf '  %-13s %-10s %-11s %s' "$name" off off "skipped (GITCRAFT_MESHCRAFT=0)")"; off_note=1; continue
     elif [[ -e "$GITCRAFT_HOME/meshcraft/venv" ]]; then
-      inst=PARTIAL; problems+=("$name: the Blender install didn't finish (venv without bpy; often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
+      inst=PARTIAL
+      if [[ "$(last_state meshcraft)" == failed ]]; then
+        problems+=("$name: the Blender install failed (see $GITCRAFT_LOG/meshcraft.log; often no access to pypi.org or no matching Python). Fix that and run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0")
+      else   # status still "pending": the run stopped during the download
+        problems+=("$name: the Blender install didn't finish (often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
+      fi
     else inst=NO; fi
   else
     inst=$([[ -x "$GITCRAFT_BIN/$pkg" ]] && echo yes || echo NO)
