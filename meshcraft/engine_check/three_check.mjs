@@ -3,7 +3,8 @@
 //                        [--contract contract.json] [--size 640] [--all-clips 1]
 // Prints a JSON report: nodes, clips, bounds (Y-up metres), vertex colours, contract checks.
 // --all-clips 1 also plays every clip on its own (rest pose restored before each) and checks that it
-// moves the asset: a clip whose keyframes were lost still loads, but nothing moves.
+// moves the asset (node transforms or morph-target weights): a clip whose keyframes were lost still
+// loads, but nothing moves.
 import { createRequire } from 'node:module';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -48,11 +49,14 @@ try {
   report.clips = gltf.animations.map((c) => ({ name: c.name, seconds: +c.duration.toFixed(3), tracks: c.tracks.map((t) => t.name) }));
   if (opts.allClips) {
     // each clip independently: restore the rest pose, play only this clip, compare the pose at the start
-    // with three points through it (local position/rotation/scale of every node)
+    // with three points through it: local position/rotation/scale of every node AND every mesh's
+    // morph-target weights (a sail's billow or a face blendshape moves no node, only weights)
     const objs = []; root.traverse((o) => objs.push(o));
-    const rest = objs.map((o) => [o.position.clone(), o.quaternion.clone(), o.scale.clone()]);
-    const reset = () => objs.forEach((o, i) => { o.position.copy(rest[i][0]); o.quaternion.copy(rest[i][1]); o.scale.copy(rest[i][2]); });
-    const pose = () => objs.flatMap((o) => [...o.position.toArray(), ...o.quaternion.toArray(), ...o.scale.toArray()]);
+    const weights = (o) => (o.morphTargetInfluences ? Array.from(o.morphTargetInfluences) : []);
+    const rest = objs.map((o) => [o.position.clone(), o.quaternion.clone(), o.scale.clone(), weights(o)]);
+    const reset = () => objs.forEach((o, i) => { o.position.copy(rest[i][0]); o.quaternion.copy(rest[i][1]); o.scale.copy(rest[i][2]);
+      if (o.morphTargetInfluences) rest[i][3].forEach((w, k) => { o.morphTargetInfluences[k] = w; }); });
+    const pose = () => objs.flatMap((o) => [...o.position.toArray(), ...o.quaternion.toArray(), ...o.scale.toArray(), ...weights(o)]);
     report.clip_motion = gltf.animations.map((clip) => {
       reset();
       const mx = new THREE.AnimationMixer(root); const act = mx.clipAction(clip); act.play();
@@ -139,7 +143,7 @@ if (report.ok) {
     add('engine_all_clips_played', tested.length === report.clips.length && report.clips.length > 0,
         `${tested.length} of ${report.clips.length} clips played one at a time`);
     for (const m of tested) add(`engine_clip_motion:${m.name}`, m.max_delta > 1e-4, m.max_delta > 1e-4
-        ? `moves the asset (max change ${m.max_delta} at 25/50/75% of ${m.seconds}s)` : `does not move the asset: keyframes missing or constant`);
+        ? `moves the asset (max change in node transforms or morph weights ${m.max_delta} at 25/50/75% of ${m.seconds}s)` : `does not move the asset: keyframes missing or constant`);
   }
 }
 const errs = logs.filter((l) => /error|warn/i.test(l));

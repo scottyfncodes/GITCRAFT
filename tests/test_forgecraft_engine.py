@@ -6,7 +6,9 @@ A built asset is not proof that it loads or plays. These tests prove:
      returned) → the deliverable is `blocked` and the job is `blocked` with the reason; never `passed*`
   2  an invalid or unloadable GLB fails
   3  every clip is played on its own (a clip frozen alone fails alone; the others still pass)
-  4  every clip must move the asset (all clips frozen → all fail)
+  4  every clip must move the asset (all clips frozen → all fail); motion counts node transforms AND
+     morph-target weights, so a legitimate morph-only clip (MeshCraft's sail `billow`) passes and the
+     same clip with its morph keyframes frozen fails
   5  existing successful jobs keep their behaviour: an animated character, an animated MeshCraft
      template and a static asset still finish `done` and validated, through scripts/mcp.sh
 Real runs: three@0.170 in headless Chromium via MeshCraft's engine_check, Blender via MeshCraft. Only
@@ -67,6 +69,12 @@ ok, s = fc.call("generate", {"brief": "a wooden barrel", "name": "Engine Barrel"
 sm = library.get(s["asset"]["id"], s["asset"]["version"]) if ok and s.get("asset") else {}
 check("existing job: static asset (no clips) still done and validated in three.js", ok and s["status"] == "done" and s.get("validation") in PASSING
       and (sm.get("engine_check") or {}).get("status") == "passed" and not (sm.get("engine_check") or {}).get("clips"), s)
+ok, sl = fc.call("generate", {"brief": "a square sail that billows in the wind", "name": "Engine Sail"}, timeout=1500)
+slm = library.get(sl["asset"]["id"], sl["asset"]["version"]) if ok and sl.get("asset") else {}
+sle = slm.get("engine_check") or {}
+check("morph-only clips (sail fill/luff, billow weight): job done and each clip moves", ok and sl["status"] == "done" and sl.get("validation") in PASSING
+      and sorted(c["name"] for c in sle.get("clips", [])) == ["fill", "luff"] and all(c["moves"] for c in sle["clips"]), (sl, sle.get("clips"), sle.get("reason")))
+sail_glb = os.path.join(slm.get("dir", ""), sle.get("glb", "")) if slm else ""
 fc.close()
 
 # ---------------------------------------------------------------- 3 + 4: per-clip motion, with the real engine
@@ -101,6 +109,16 @@ if os.path.exists(glb):
           and "engine_clip_motion:Jump" in e.get("reason", ""), (static, e.get("reason")))
 else:
     check("character GLB available for the per-clip tests", False, glb)
+if os.path.exists(sail_glb):
+    sres = {"build": {"actions": ["fill", "luff"]}}; smain = {"profile": "web-pbr" if "web-pbr" in os.path.basename(sail_glb) else "three-web-toon"}
+    sg = os.path.join(work, "sail.glb"); shutil.copy(sail_glb, sg)
+    e = pipeline.engine_verify(sg, smain, "meshcraft_template", sres, work, log)
+    check("real sail GLB: the morph-only clips pass the per-clip check", e["status"] == "passed" and [c["moves"] for c in e["clips"]] == [True, True], e.get("clips"))
+    sf = os.path.join(work, "sail_frozen.glb"); freeze(sg, sf); e = pipeline.engine_verify(sf, smain, "meshcraft_template", sres, work, log)
+    check("sail with its morph keyframes frozen → both clips fail on motion alone", e["status"] == "failed" and not any(c["moves"] for c in e["clips"])
+          and only_motion_fails(e), (e.get("clips"), e.get("reason")))
+else:
+    check("sail GLB available for the morph tests", False, sail_glb)
 
 # ---------------------------------------------------------------- 2: invalid or unloadable assets cannot pass
 trunc = os.path.join(work, "truncated.glb"); open(trunc, "wb").write(open(glb, "rb").read()[:600] if os.path.exists(glb) else b"glTF")
