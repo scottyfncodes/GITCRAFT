@@ -13,6 +13,10 @@
 # 3. Instructions: a managed block in ~/.claude/CLAUDE.md (loaded in every project)
 #    and the `gitcraft` skill in ~/.claude/skills/gitcraft. Text outside the
 #    block is never touched. GITCRAFT_GLOBAL_INSTRUCTIONS=0 skips this step.
+# 4. Session hook: a user-level SessionStart hook in ~/.claude/settings.json (every project) that finishes
+#    deferred or interrupted installs in the background, e.g. Blender after GITCRAFT_MESHCRAFT=later. The repo's
+#    own .claude/settings.json hook only runs when GITCRAFT is the session's project. Other settings are left as
+#    they are. GITCRAFT_GLOBAL_HOOK=0 skips this step.
 set -uo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 src="$(dirname "$here")"
@@ -54,4 +58,28 @@ print(f"gitcraft: global instructions {'updated' if new != cur else 'up to date'
 PY
   rm -rf "$claude_dir/skills/gitcraft" && cp -R "$src/global/skills/gitcraft" "$claude_dir/skills/gitcraft" \
     && echo "gitcraft: skill installed at $claude_dir/skills/gitcraft"
+fi
+
+# 4) user-level SessionStart hook (every project): background-finish what setup deferred or didn't finish
+if [[ "${GITCRAFT_GLOBAL_HOOK:-1}" != 0 ]]; then
+  mkdir -p "$claude_dir"
+  python3 - "$claude_dir/settings.json" "$runtime/scripts/session-start.sh" <<'PY'
+import json, os, sys
+dest, script = sys.argv[1], sys.argv[2]
+try: cfg = json.load(open(dest))
+except FileNotFoundError: cfg = {}
+except ValueError:
+    print(f"gitcraft: {dest} isn't valid JSON; session hook not installed (fix it and re-run install-global.sh)"); sys.exit(0)
+groups = cfg.setdefault("hooks", {}).setdefault("SessionStart", [])
+mine = {"type": "command", "command": f'"{script}" --global', "timeout": 30}
+# drop an older copy of our entry (matched by the script path), keep everything else
+for g in groups: g["hooks"] = [h for h in g.get("hooks", []) if "/.gitcraft/runtime/scripts/session-start.sh" not in h.get("command", "") and script not in h.get("command", "")]
+groups[:] = [g for g in groups if g.get("hooks")]
+groups.append({"hooks": [mine]})
+new = json.dumps(cfg, indent=2) + "\n"
+cur = open(dest).read() if os.path.exists(dest) else ""
+if new != cur:
+    tmp = dest + ".gitcraft.tmp"; open(tmp, "w").write(new); os.replace(tmp, dest)
+print(f"gitcraft: session hook {'installed' if new != cur else 'up to date'} in {dest}")
+PY
 fi
