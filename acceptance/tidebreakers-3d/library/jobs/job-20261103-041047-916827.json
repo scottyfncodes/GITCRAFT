@@ -1,0 +1,40 @@
+{
+ "id": "job-20261103-041047-916827",
+ "tool": "blockbench_import",
+ "asset_id": "reef_crab_blockbench",
+ "request": {
+  "asset_id": "reef_crab_blockbench",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft",
+  "parent_job": "job-20261103-041046-13fcfb",
+  "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/reef_crab_blockbench.bbmodel",
+  "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
+  "profiles": [
+   "three-web-toon",
+   "web-pbr",
+   "unity-fbx"
+  ]
+ },
+ "status": "done",
+ "created": "2026-11-03T04:10:47Z",
+ "attempts": [
+  {
+   "n": 1,
+   "started": "2026-11-03T04:10:47Z",
+   "change": null,
+   "manual": false,
+   "status": "done",
+   "seconds": 39.8,
+   "finished": "2026-11-03T04:11:27Z"
+  }
+ ],
+ "error": null,
+ "parent": "job-20261103-041046-13fcfb",
+ "updated": "2026-11-03T04:11:27Z",
+ "library": {
+  "asset": "reef_crab_blockbench",
+  "version": 1,
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/reef_crab_blockbench/v1",
+  "same_as": null,
+  "files": 13
+ }
+}

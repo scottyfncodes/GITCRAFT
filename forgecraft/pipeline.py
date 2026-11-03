@@ -62,6 +62,22 @@ def _main_glb(res):
     return glbs[0] if glbs else None
 
 
+def glb_contents(path):
+    """The clips and skin joints a GLB really carries (its JSON chunk), or None when it can't be read.
+    The library record lists what ships, not only what the last step added (a Mixamo merge keeps
+    the character's own clips)."""
+    try:
+        with open(path, "rb") as f:
+            head = f.read(20)
+            if head[:4] != b"glTF": return None
+            n = int.from_bytes(head[12:16], "little"); j = json.loads(f.read(n))
+    except (OSError, ValueError):
+        return None
+    skins = j.get("skins") or []
+    return {"clips": [a.get("name") or f"clip_{i}" for i, a in enumerate(j.get("animations") or [])],
+            "skins": len(skins), "joints": max((len(s.get("joints") or []) for s in skins), default=0)}
+
+
 def _sha(p):
     try: return library.sha256(p)
     except OSError: return None
@@ -254,7 +270,8 @@ def _run(rec, spec, work, log):
     thumb = next((p for p in prev if "three_quarter" in p and "-" not in os.path.basename(p).split("three_quarter")[-1]), prev[0] if prev else None)
     rt = main.get("roundtrip") if main else None
     objs = (res.get("build") or {}).get("objects") or []
-    info = {"title": name, "kind": req.get("kind") or req.get("template") or ("scene" if chosen == "meshcraft_scene" else None),
+    gc = (glb_contents(glb) if glb else None) or {"clips": [], "skins": 0}
+    info = {"title": name, "kind": "scene" if chosen == "meshcraft_scene" else (req.get("kind") or req.get("template")),
             "source_tool": " → ".join(sources),
             "route": {k: plan.get(k) for k in ("route", "chosen", "preferred", "fallback_used", "explanation")},
             "license": {"asset": spec.get("license", "Owned by the project that commissioned it"), "tools": [LICENSES[s] for s in sources if s in LICENSES],
@@ -262,10 +279,10 @@ def _run(rec, spec, work, log):
             "provenance": {"forgecraft_job": rec["id"], "meshcraft_job": (res.get("job") or {}).get("id"), "inputs": inputs,
                            "blender": probe["backends"]["blender"].get("version"), "machine": rec["compute"]["machine"], "recorded": _now()},
             "generation": dict(gen_info, request=spec.get("brief")),
-            "rig": ({"armatures": rt["armatures"], "convention": "Mixamo skeleton (22 mixamorig:* bones)" if req.get("template") == "deckhand" or chosen == "mixamo"
-                     else "MeshCraft rig"} if rt and rt.get("armatures") else None),
+            "rig": ({"armatures": (rt or {}).get("armatures") or gc["skins"], "convention": "Mixamo skeleton (22 mixamorig:* bones)" if req.get("template") == "deckhand" or chosen == "mixamo"
+                     else "MeshCraft rig"} if (rt and rt.get("armatures")) or gc["skins"] else None),
             "geometry": {"triangles": (rt or {}).get("triangles") or md.get("triangles"), "size_m": (rt or {}).get("size_m"), "meshes": (rt or {}).get("meshes")},
-            "animations": [{"name": c} for c in (md.get("clips") or [])],
+            "animations": [{"name": c} for c in (gc["clips"] or md.get("clips") or [])],
             "sockets": sorted(o for o in objs if o.startswith("socket_")),
             "previews": {"thumbnail": thumb, "views": prev},
             "engine_check": eng, "deliverable_validation": {"status": deliv, "meshcraft": summ, "engine_check": eng["status"]},

@@ -1,23 +1,23 @@
 {
  "cpu": {
-  "model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "model": "Intel(R) Xeon(R) Processor @ 2.80GHz",
   "threads": 4,
   "arch": "x86_64"
  },
  "ram": {
   "total_gb": 15.7,
-  "available_gb": 14.9
+  "available_gb": 14.6
  },
  "gpus": [],
  "gpu_note": "no NVIDIA driver (nvidia-smi not found): Cycles renders and bakes on the CPU",
  "disk": [
   {
-   "root": "/home/user/GITCRAFT",
-   "free_gb": 13.1
+   "root": "/home/user",
+   "free_gb": 18.5
   }
  ],
  "python": "3.13.18",
- "os": "Linux 6.18.44-fc-v185",
+ "os": "Linux 6.18.44-fc-v230",
  "sandbox": "landlock-abi7+nonet",
  "network": "denied by the sandbox",
  "capabilities": {
@@ -56,7 +56,7 @@
   "image_to_3d": {
    "available": false,
    "how": "ForgeCraft generate with a reference image: TripoSR / Hunyuan3D \u2192 MeshCraft process_mesh",
-   "reason": "TripoSR: missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights); Hunyuan3D: local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
+   "reason": "TripoSR: missing: code, torch, weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights); Hunyuan3D: local needs hy3dgen + an NVIDIA GPU with \u22656 GB VRAM (\u226516 GB with texture); no CUDA GPU here; remote HF Space needs gradio_client and network access to huggingface.co (unreachable); set FORGECRAFT_HUNYUAN_LICENSE=accepted after confirming the Tencent Hunyuan 3D Community License (not licensed in the EU, UK or South Korea)"
   }
  },
  "backends": {
@@ -103,14 +103,13 @@
    "note": "no CUDA GPU: Draft Meshing from the SfM point cloud (coarser)"
   },
   "triposr": {
-   "code": true,
-   "torch": true,
+   "code": false,
+   "torch": false,
    "weights": false,
    "weights_source": null,
    "device": "cpu",
-   "weights_downloadable": false,
    "available": false,
-   "reason": "missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
+   "reason": "missing: code, torch, weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
   },
   "hunyuan3d": {
    "local": {
@@ -122,7 +121,7 @@
     "available": false
    },
    "remote": {
-    "gradio_client": true,
+    "gradio_client": false,
     "space": "tencent/Hunyuan3D-2",
     "reachable": false,
     "available": false
@@ -157,10 +156,10 @@
   "cpu_threads": 4,
   "ram": {
    "total_gb": 15.7,
-   "available_gb": 14.9
+   "available_gb": 14.6
   },
   "gpus": [],
-  "disk_free_gb": 13.1,
+  "disk_free_gb": 18.5,
   "network": {
    "allowed_by_gitcraft": false
   }

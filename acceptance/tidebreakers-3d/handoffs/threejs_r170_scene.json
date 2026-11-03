@@ -12,7 +12,149 @@
    "check": "engine_mixed_materials",
    "level": "pass",
    "detail": "26 textured + 0 vertex-coloured of 27 meshes (scene)"
+  },
+  {
+   "check": "engine_clip:Attack",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Idle",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Interact",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Jump",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Run",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Sneak_Walk",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Walk",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:Walking",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_clip:float_bob",
+   "level": "pass",
+   "detail": "clip present"
+  },
+  {
+   "check": "engine_all_clips_played",
+   "level": "pass",
+   "detail": "9 of 9 clips played one at a time"
+  },
+  {
+   "check": "engine_clip_motion:float_bob",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 0.05196 at 25/50/75% of 2s)"
+  },
+  {
+   "check": "engine_clip_motion:Attack",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.19975 at 25/50/75% of 1s)"
+  },
+  {
+   "check": "engine_clip_motion:Idle",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 0.08809 at 25/50/75% of 2s)"
+  },
+  {
+   "check": "engine_clip_motion:Interact",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.16136 at 25/50/75% of 1.6s)"
+  },
+  {
+   "check": "engine_clip_motion:Jump",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.99619 at 25/50/75% of 1.333s)"
+  },
+  {
+   "check": "engine_clip_motion:Run",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.92169 at 25/50/75% of 0.667s)"
+  },
+  {
+   "check": "engine_clip_motion:Sneak_Walk",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.99878 at 25/50/75% of 1.067s)"
+  },
+  {
+   "check": "engine_clip_motion:Walk",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.9703 at 25/50/75% of 1.067s)"
+  },
+  {
+   "check": "engine_clip_motion:Walking",
+   "level": "pass",
+   "detail": "moves the asset (max change in node transforms or morph weights 1.99878 at 25/50/75% of 1.067s)"
   }
  ],
- "screenshot": "previews/tidebreakers_turtle_cay_scene_engine_check.png"
+ "screenshot": "previews/tidebreakers_turtle_cay_scene_engine_check.png",
+ "clips": [
+  {
+   "name": "float_bob",
+   "moves": true,
+   "max_delta": 0.05196
+  },
+  {
+   "name": "Attack",
+   "moves": true,
+   "max_delta": 1.19975
+  },
+  {
+   "name": "Idle",
+   "moves": true,
+   "max_delta": 0.08809
+  },
+  {
+   "name": "Interact",
+   "moves": true,
+   "max_delta": 1.16136
+  },
+  {
+   "name": "Jump",
+   "moves": true,
+   "max_delta": 1.99619
+  },
+  {
+   "name": "Run",
+   "moves": true,
+   "max_delta": 1.92169
+  },
+  {
+   "name": "Sneak_Walk",
+   "moves": true,
+   "max_delta": 1.99878
+  },
+  {
+   "name": "Walk",
+   "moves": true,
+   "max_delta": 1.9703
+  },
+  {
+   "name": "Walking",
+   "moves": true,
+   "max_delta": 1.99878
+  }
+ ]
 }

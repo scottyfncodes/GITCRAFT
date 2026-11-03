@@ -3,10 +3,10 @@
  "brief": {
   "asset_id": "salvage_raft_photogrammetry_scan",
   "template": "mesh_import",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft",
   "title": "Salvage Raft (photogrammetry scan)",
   "params": {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshroom_out/texturedMesh.obj",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshroom_out/texturedMesh.obj",
    "crop": 0.22,
    "target_size": 2.4,
    "max_tris": 20000
@@ -29,7 +29,7 @@
    "scan"
   ],
   "library": true,
-  "parent_job": "job-20261102-213039-f3ad85"
+  "parent_job": "job-20261103-041157-ba7d6e"
  },
  "steps": [
   {
@@ -40,7 +40,7 @@
   {
    "step": "preview",
    "ok": true,
-   "seconds": 9.1
+   "seconds": 13.11
   },
   {
    "step": "validate_scene",
@@ -50,22 +50,22 @@
   {
    "step": "export",
    "ok": true,
-   "seconds": 7.1
+   "seconds": 10.17
   },
   {
    "step": "contact_sheet",
    "ok": true,
-   "seconds": 0.15
+   "seconds": 0.19
   }
  ],
  "build": {
   "blend": {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/source/salvage_raft_photogrammetry_scan.blend",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/source/salvage_raft_photogrammetry_scan.blend",
    "kind": "blend",
-   "bytes": 130168,
-   "sha256": "fa0f764485d918d8eacec265ee1c58a6ba6284ad995b822373c95bc472809ead"
+   "bytes": 97468,
+   "sha256": "48adeb30a266d60e9d7d8da92c6942f55858e342a2bef0b09489350609986729"
   },
-  "seconds": 0.26,
+  "seconds": 0.2,
   "roles": {},
   "objects": [
    "salvage_raft_photogrammetry_scan",
@@ -81,104 +81,104 @@
  },
  "previews": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_three_quarter.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_three_quarter.png",
    "kind": "preview",
-   "bytes": 120435,
-   "sha256": "635518347165d61cf49b25cf29a464c8caf62eb3b41edb5f45f153cc72e8df12",
+   "bytes": 119071,
+   "sha256": "27a39379b15fafa50e14d47a579ba7445b6c6a3102f11d20104b79f0dcc600c4",
    "view": "three_quarter",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_front.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_front.png",
    "kind": "preview",
-   "bytes": 81626,
-   "sha256": "8c49588700af040fd80997bc0935bc9cafe976568e166ed28f4dab815b198728",
+   "bytes": 88140,
+   "sha256": "51681842ade703d5f619d38465fde5d8e8daa47572db69ba6804f6276a0db16b",
    "view": "front",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_side.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_side.png",
    "kind": "preview",
-   "bytes": 82617,
-   "sha256": "a52a874afa0eeaa55c3c02c63eb62c36e259b1ef7530057d63c9142ef90c40f3",
+   "bytes": 85691,
+   "sha256": "396a0deced9f390cc5fd043066332897abec88612d5306f8c7748d6b41ec364d",
    "view": "side",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/previews/salvage_raft_photogrammetry_scan_sheet.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_sheet.png",
    "kind": "contact_sheet",
-   "bytes": 126102,
-   "sha256": "29ee381105298e6e04140be031ec2c406175959d6293fe3fb46c48af5daedccb"
+   "bytes": 135344,
+   "sha256": "4454ef328bf2b2bfb2b26e13795a58fffa51ea98b11d866fc89e2072557c60b3"
   }
  ],
  "exports": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
    "kind": "export",
-   "bytes": 5133632,
-   "sha256": "e675fa9763ed9a5dc35a83e0f40331b6c3c61d8ffffbd71d382bc94f078e4d12",
+   "bytes": 5020660,
+   "sha256": "a7376479b7a43d4372e4783bd0d15fb5897595728ff42a23bfb14ca4dff9845f",
    "profile": "three-web-toon",
    "format": "glb",
    "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
    "extras": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb",
      "kind": "lod",
-     "bytes": 5059348,
-     "sha256": "67dea78e3781537b6d720d7de28611a34db796a05c0ae9de29cc4ed95743517b",
+     "bytes": 5004588,
+     "sha256": "1fb46e0248f172325e4b14fe66b9215082c856b33a66adb93d98d8be510d9fa8",
      "ratio": 0.5,
-     "triangles": 581
+     "triangles": 118
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb",
      "kind": "lod",
-     "bytes": 5022672,
-     "sha256": "6b2e1b404b4aa76132abe64df97e32815127b0422dcb4d66d7820df5c0ab6212",
+     "bytes": 4997024,
+     "sha256": "6dab31931fb4d7229c5bb41fa2914b1019fc9946ca8fec0bdbdd280f548cdfea",
      "ratio": 0.25,
-     "triangles": 290
+     "triangles": 58
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb",
      "kind": "collision",
-     "bytes": 11328,
-     "sha256": "a3fd803e1134986f3132d874a04671de2f80c350a3babb24e802c6001604c07e",
+     "bytes": 4772,
+     "sha256": "0e258b4d891ace1bdfee9e56c31a23ff4fc57b39565cfd7cd5fc3f5263f68cf3",
      "shape": "convex_hull",
-     "triangles": 134
+     "triangles": 50
     }
    ],
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb",
      "kind": "sidecar",
-     "bytes": 11328,
-     "sha256": "a3fd803e1134986f3132d874a04671de2f80c350a3babb24e802c6001604c07e"
+     "bytes": 4772,
+     "sha256": "0e258b4d891ace1bdfee9e56c31a23ff4fc57b39565cfd7cd5fc3f5263f68cf3"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb",
      "kind": "sidecar",
-     "bytes": 5022672,
-     "sha256": "6b2e1b404b4aa76132abe64df97e32815127b0422dcb4d66d7820df5c0ab6212"
+     "bytes": 4997024,
+     "sha256": "6dab31931fb4d7229c5bb41fa2914b1019fc9946ca8fec0bdbdd280f548cdfea"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb",
      "kind": "sidecar",
-     "bytes": 5059348,
-     "sha256": "67dea78e3781537b6d720d7de28611a34db796a05c0ae9de29cc4ed95743517b"
+     "bytes": 5004588,
+     "sha256": "1fb46e0248f172325e4b14fe66b9215082c856b33a66adb93d98d8be510d9fa8"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
     "objects": [
      "salvage_raft_photogrammetry_scan (EMPTY)",
      "texturedMesh (MESH)"
     ],
-    "triangles": 1163,
+    "triangles": 238,
     "materials": [
      "material_1001"
     ],
@@ -186,24 +186,24 @@
     "armatures": 0,
     "size_m": [
      2.4,
-     2.389,
-     0.26
+     2.353,
+     0.396
     ],
-    "min_z": 0.0
+    "min_z": -0.0
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
    "kind": "export",
-   "bytes": 1166752,
-   "sha256": "079dbd9e32606d2871e9060cb50212d7edb9fe25aaa0b7159f29fe611110c7a7",
+   "bytes": 785928,
+   "sha256": "1d5bc9caee032d0a37cac9cfb7b2fecf6c04ca801db84ac78aa8bb9279ecb512",
    "profile": "web-pbr",
    "format": "glb",
    "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
    "bake": {
     "maps": {
-     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
-     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png"
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png"
     },
     "resolution": 1024,
     "attempts": [
@@ -215,25 +215,25 @@
    },
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
      "kind": "sidecar",
-     "bytes": 988180,
-     "sha256": "3a514b81f74f1ce247a274f261eaba5f52b1bcdced03d3c11d78697dc10ad751"
+     "bytes": 724423,
+     "sha256": "ec1dc8e4ce24b46c27cf47bc8b3601924ab6697e3dbab443e6d0f814f35ab742"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png",
      "kind": "sidecar",
-     "bytes": 57161,
-     "sha256": "4815ca34ef894704dca802944162c4ae07cbdbf4ddbc24189af1dad9a811b214"
+     "bytes": 34464,
+     "sha256": "dc6ec627914513c76620fe448c3718cd3e5c734fd87237b9f7981da459737f2f"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
     "objects": [
      "salvage_raft_photogrammetry_scan (EMPTY)",
      "texturedMesh (MESH)"
     ],
-    "triangles": 1163,
+    "triangles": 238,
     "materials": [
      "GC_Baked"
     ],
@@ -241,17 +241,17 @@
     "armatures": 0,
     "size_m": [
      2.4,
-     2.389,
-     0.26
+     2.353,
+     0.396
     ],
-    "min_z": 0.0
+    "min_z": -0.0
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft/exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx",
    "kind": "export",
-   "bytes": 5211452,
-   "sha256": "e1c27e8d37eeaf42aa49ece823e9639bdfec581799ef5cc5f60af32a913c0509",
+   "bytes": 4799244,
+   "sha256": "7f74ed9f84939513ba8c7cff90978f43a36f50d6e3c081a93d0a96f17967fcf3",
    "profile": "unity-fbx",
    "format": "fbx",
    "engine": "Unity / Unreal (FBX)",
@@ -268,8 +268,8 @@
    {
     "check": "triangle_budget",
     "level": "pass",
-    "detail": "1163 triangles (budget 20000)",
-    "tris": 1163
+    "detail": "238 triangles (budget 20000)",
+    "tris": 238
    },
    {
     "check": "degenerate_faces",
@@ -279,7 +279,7 @@
    {
     "check": "non_manifold_edges",
     "level": "info",
-    "detail": "97 non-manifold edges (expected for kit-bashed props built from closed parts)"
+    "detail": "30 non-manifold edges (expected for kit-bashed props built from closed parts)"
    },
    {
     "check": "applied_scale",
@@ -300,7 +300,7 @@
    {
     "check": "origin_centered",
     "level": "pass",
-    "detail": "footprint centre (-0.000, 0.000)"
+    "detail": "footprint centre (0.000, 0.000)"
    },
    {
     "check": "materials_assigned",
@@ -352,7 +352,7 @@
    {
     "check": "roundtrip_reimport",
     "level": "pass",
-    "detail": "re-imported salvage_raft_photogrammetry_scan.three-web-toon.glb: 1163 tris, size [2.4, 2.389, 0.26] m, clips []",
+    "detail": "re-imported salvage_raft_photogrammetry_scan.three-web-toon.glb: 238 tris, size [2.4, 2.353, 0.396] m, clips []",
     "file": "salvage_raft_photogrammetry_scan.three-web-toon.glb"
    },
    {
@@ -384,7 +384,7 @@
    {
     "check": "roundtrip_reimport",
     "level": "pass",
-    "detail": "re-imported salvage_raft_photogrammetry_scan.web-pbr.glb: 1163 tris, size [2.4, 2.389, 0.26] m, clips []",
+    "detail": "re-imported salvage_raft_photogrammetry_scan.web-pbr.glb: 238 tris, size [2.4, 2.353, 0.396] m, clips []",
     "file": "salvage_raft_photogrammetry_scan.web-pbr.glb"
    }
   ],
@@ -395,5 +395,5 @@
    "info": 3
   }
  },
- "seconds": 17.1
+ "seconds": 24.4
 }

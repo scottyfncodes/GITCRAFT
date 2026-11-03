@@ -1,12 +1,12 @@
 {
- "id": "job-20261102-212533-3587f0",
+ "id": "job-20261103-040549-4e0ce2",
  "tool": "run_pipeline",
  "asset_id": "tidebreakers_coastal_sloop",
  "request": {
   "brief": {
    "asset_id": "tidebreakers_coastal_sloop",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212532-a3232c/meshcraft",
-   "parent_job": "job-20261102-212532-a3232c",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft",
+   "parent_job": "job-20261103-040547-8b6cac",
    "template": "boat",
    "params": {
     "seed": 692,
@@ -20,7 +20,7 @@
      "crimson"
     ]
    },
-   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
    "title": "TIDEBREAKERS Coastal Sloop",
    "tags": [
     "tidebreakers"
@@ -52,25 +52,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-02T21:25:33Z",
+ "created": "2026-11-03T04:05:49Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:25:33Z",
+   "started": "2026-11-03T04:05:49Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 20.6,
+   "seconds": 24.4,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.4
+     "seconds": 0.84
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 15.75
+     "seconds": 17.49
     },
     {
      "step": "validate_scene",
@@ -80,20 +80,20 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 3.1
+     "seconds": 4.4
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.21
+     "seconds": 0.28
     }
    ],
-   "finished": "2026-11-02T21:25:54Z"
+   "finished": "2026-11-03T04:06:13Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-212532-a3232c",
- "updated": "2026-11-02T21:25:54Z",
+ "parent": "job-20261103-040547-8b6cac",
+ "updated": "2026-11-03T04:06:13Z",
  "library": {
   "asset": "tidebreakers_coastal_sloop",
   "version": 1,

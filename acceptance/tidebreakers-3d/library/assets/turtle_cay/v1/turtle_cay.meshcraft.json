@@ -2,15 +2,15 @@
  "asset_id": "turtle_cay",
  "brief": {
   "asset_id": "turtle_cay",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft",
-  "parent_job": "job-20261102-212823-4de3b5",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft",
+  "parent_job": "job-20261103-040908-1ffdc0",
   "template": "island",
   "params": {
    "seed": 7,
    "radius": 15,
    "palms": 7
   },
-  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
   "title": "Turtle Cay",
   "tags": [
    "tidebreakers"
@@ -40,12 +40,12 @@
   {
    "step": "build",
    "ok": true,
-   "seconds": 1.29
+   "seconds": 2.76
   },
   {
    "step": "preview",
    "ok": true,
-   "seconds": 17.9
+   "seconds": 19.67
   },
   {
    "step": "validate_scene",
@@ -55,22 +55,22 @@
   {
    "step": "export",
    "ok": true,
-   "seconds": 2.25
+   "seconds": 3.37
   },
   {
    "step": "contact_sheet",
    "ok": true,
-   "seconds": 0.22
+   "seconds": 0.23
   }
  ],
  "build": {
   "blend": {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/source/turtle_cay.blend",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/source/turtle_cay.blend",
    "kind": "blend",
-   "bytes": 319532,
-   "sha256": "086e89e3851c926ad20b687b1e35d73c7eb2beabd457d5af382cd353f929ebfc"
+   "bytes": 317656,
+   "sha256": "82a676274666f6e95c7d761cd8453b29afd21320db3b5b18b03935697bf2c012"
   },
-  "seconds": 1.24,
+  "seconds": 2.67,
   "roles": {
    "sand_f7d9a0": "#F7D9A0",
    "grass_3fa55a": "#3FA55A",
@@ -102,64 +102,64 @@
  },
  "previews": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_three_quarter.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/previews/turtle_cay_three_quarter.png",
    "kind": "preview",
-   "bytes": 110250,
-   "sha256": "0a7bf8d3ff78288fcfc24a315282011d755cf0ef5acc7c8048f8510d941219a0",
+   "bytes": 110286,
+   "sha256": "2d49545ba5baa376fb3c9f61cd1313be4426857dd92f16017de48c59bd8ce8f8",
    "view": "three_quarter",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_front.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/previews/turtle_cay_front.png",
    "kind": "preview",
-   "bytes": 92164,
-   "sha256": "e83d9dde98e12c1115afd450d2010e1188a8dc7684c9310a738386a1a51d9610",
+   "bytes": 92165,
+   "sha256": "fcb6bd85d223d5c67cf8731c5398f948f2529190ca3d99c0f377d29c67548a6c",
    "view": "front",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_side.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/previews/turtle_cay_side.png",
    "kind": "preview",
-   "bytes": 92435,
-   "sha256": "a32e485210d5e7337f02b38872de87f3b8a6ac9eef77b8e5aba1def64ebfc2f8",
+   "bytes": 92443,
+   "sha256": "29e790f67407f9c8b0273d17089e6bb7a0a5d70bfcc7f2fa971d860dde0133b6",
    "view": "side",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_top.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/previews/turtle_cay_top.png",
    "kind": "preview",
-   "bytes": 143403,
-   "sha256": "981d4a888ef9a4afa99a5eff7c9130a274be3c76a538462ee4add01b414f36c5",
+   "bytes": 143362,
+   "sha256": "8939d9819a8e2cd8f13d3ce1afa2ec95b78f6dc73abdfcdd85a36e467b682beb",
    "view": "top",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/previews/turtle_cay_sheet.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/previews/turtle_cay_sheet.png",
    "kind": "contact_sheet",
-   "bytes": 138544,
-   "sha256": "45982c07a97584408e77f97b7825fa8dd43d244eb3269d8fd9f0c20c90b47e5f"
+   "bytes": 146325,
+   "sha256": "17acec0d96030f4ed30dbc4d3dc2e477825e518f5466272173a8a7477236135e"
   }
  ],
  "exports": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.glb",
    "kind": "export",
-   "bytes": 790132,
-   "sha256": "e2b3ab0f9ae271c4494da2e0451159c6b511bd06d4c026be4f8156fbbaebca54",
+   "bytes": 790136,
+   "sha256": "4713b29e73c395542d91dd0e3a87706cf1104c8d045a80487393636eaf46f6fe",
    "profile": "three-web-toon",
    "format": "glb",
    "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
    "extras": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb",
      "kind": "lod",
      "bytes": 544716,
      "sha256": "d9591c6bfc4a64602a546d888580142389452dfd96f78e2b32dfd541f8352d10",
@@ -167,7 +167,7 @@
      "triangles": 5365
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb",
      "kind": "lod",
      "bytes": 279080,
      "sha256": "d79896a6c219e4a65e0f73071b64c3944ba263ef75d9ef0dc1ac0c12b7b0bc35",
@@ -175,7 +175,7 @@
      "triangles": 2668
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.collision.glb",
      "kind": "collision",
      "bytes": 12892,
      "sha256": "efe0c8f0a4e4cd88dfdd8ca6a78c1327786324f54ad977d4fd0f6f9a7d0229ce",
@@ -185,26 +185,26 @@
    ],
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.collision.glb",
      "kind": "sidecar",
      "bytes": 12892,
      "sha256": "efe0c8f0a4e4cd88dfdd8ca6a78c1327786324f54ad977d4fd0f6f9a7d0229ce"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.lod25.glb",
      "kind": "sidecar",
      "bytes": 279080,
      "sha256": "d79896a6c219e4a65e0f73071b64c3944ba263ef75d9ef0dc1ac0c12b7b0bc35"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.lod50.glb",
      "kind": "sidecar",
      "bytes": 544716,
      "sha256": "d9591c6bfc4a64602a546d888580142389452dfd96f78e2b32dfd541f8352d10"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.three-web-toon.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.three-web-toon.glb",
     "objects": [
      "socket_dock (EMPTY)",
      "socket_spawn (EMPTY)",
@@ -239,17 +239,17 @@
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.web-pbr.glb",
    "kind": "export",
-   "bytes": 1396800,
-   "sha256": "f03f2a180d86718fa20ed5b9160cb660c9e823865dbe1ff6064fe6d8bca7a938",
+   "bytes": 1396804,
+   "sha256": "1d302043a4dd50daf2c737972d61ea19df944ae637fce89430274c61e19b0e4c",
    "profile": "web-pbr",
    "format": "glb",
    "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
    "bake": {
     "maps": {
-     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.basecolor.png",
-     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.orm.png"
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.web-pbr.orm.png"
     },
     "resolution": 1024,
     "attempts": [
@@ -261,20 +261,20 @@
    },
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.basecolor.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.web-pbr.basecolor.png",
      "kind": "sidecar",
      "bytes": 435175,
      "sha256": "37a72ece260ae2a245e346a3a2166d2c26bb272d682fd42faf5ffe4378ab1921"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.orm.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.web-pbr.orm.png",
      "kind": "sidecar",
      "bytes": 184917,
      "sha256": "b103cbb478c7c625858da8f2deb2f75f4aae4b6f901799e28044347079bf2d0a"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.web-pbr.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.web-pbr.glb",
     "objects": [
      "socket_dock (EMPTY)",
      "socket_spawn (EMPTY)",
@@ -296,16 +296,16 @@
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.unity-fbx.fbx",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.unity-fbx.fbx",
    "kind": "export",
    "bytes": 336700,
-   "sha256": "c5e864186665f732fd2fb9efb5ccc471485ec13bf24716c1a0b07a058701e4dd",
+   "sha256": "0dc3091fad934281e561cd62bfb5db840e77f2289314b0bc2f454587ed33f97f",
    "profile": "unity-fbx",
    "format": "fbx",
    "engine": "Unity / Unreal (FBX)",
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212823-4de3b5/meshcraft/exports/turtle_cay.unity-fbx.atlas.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040908-1ffdc0/meshcraft/exports/turtle_cay.unity-fbx.atlas.png",
      "kind": "sidecar",
      "bytes": 315,
      "sha256": "908f962b4f22d8442a0bcc0c2c0b8891ceb70316e9219dd103b07c2eb6dc2153"
@@ -450,5 +450,5 @@
    "info": 3
   }
  },
- "seconds": 22.4
+ "seconds": 27.2
 }

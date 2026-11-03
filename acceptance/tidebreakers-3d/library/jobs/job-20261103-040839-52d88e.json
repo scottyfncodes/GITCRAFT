@@ -1,15 +1,11 @@
 {
- "id": "job-20261102-212618-3214cb",
+ "id": "job-20261103-040839-52d88e",
  "tool": "generate",
- "asset_id": "upgrade_lashed_cargo_crates",
+ "asset_id": "floating_salvage",
  "request": {
-  "brief": "boat upgrade component: Lashed Cargo Crates",
-  "name": "Upgrade: Lashed Cargo Crates",
-  "kind": "upgrade",
-  "template_params": {
-   "upgrade": "cargo_crate"
-  },
-  "bake": 512,
+  "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
+  "name": "Floating Salvage",
+  "bake": 1024,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -20,33 +16,33 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:26:18Z",
+ "created": "2026-11-03T04:08:39Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:26:18Z",
+   "started": "2026-11-03T04:08:39Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:26:18Z",
+     "started": "2026-11-03T04:08:39Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:26:18Z",
+     "finished": "2026-11-03T04:08:39Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:26:18Z",
+     "started": "2026-11-03T04:08:39Z",
      "info": {
-      "meshcraft_job": "job-20261102-212618-19cc2e",
+      "meshcraft_job": "job-20261103-040840-40807a",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -56,58 +52,58 @@
        "info": 3
       },
       "library": {
-       "asset": "upgrade_lashed_cargo_crates",
+       "asset": "floating_salvage",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:26:39Z",
-     "seconds": 21.5
+     "finished": "2026-11-03T04:09:05Z",
+     "seconds": 25.94
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:26:39Z",
+     "started": "2026-11-03T04:09:05Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:26:42Z",
-     "seconds": 2.2
+     "finished": "2026-11-03T04:09:08Z",
+     "seconds": 3.49
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:26:42Z",
+     "started": "2026-11-03T04:09:08Z",
      "info": {
-      "asset": "upgrade_lashed_cargo_crates",
+      "asset": "floating_salvage",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-02T21:26:42Z",
-     "seconds": 0.01
+     "finished": "2026-11-03T04:09:08Z",
+     "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:26:42Z",
+   "finished": "2026-11-03T04:09:08Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212618-19cc2e"
+  "job-20261103-040840-40807a"
  ],
- "updated": "2026-11-02T21:26:42Z",
+ "updated": "2026-11-03T04:09:08Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Lashed Cargo Crates",
+   "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
    "intents": [],
-   "kind": "upgrade",
-   "template": "boat_upgrade",
+   "kind": "salvage",
+   "template": "salvage",
    "params": {
-    "seed": 78,
-    "upgrade": "cargo_crate"
+    "seed": 752
    },
    "images": 0,
-   "name": "boat upgrade component: Lashed Cargo Crates"
+   "name": "floating salvage: lashed crate, barrel and buoy on driftwood"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -162,9 +158,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_lashed_cargo_crates",
+  "id": "floating_salvage",
   "version": 1,
-  "name": "Upgrade: Lashed Cargo Crates",
+  "name": "Floating Salvage",
   "validation": "passed"
  }
 }

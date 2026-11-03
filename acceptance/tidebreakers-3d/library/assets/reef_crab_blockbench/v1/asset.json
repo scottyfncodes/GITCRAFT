@@ -1,7 +1,7 @@
 {
  "id": "reef_crab_blockbench",
  "version": 1,
- "created": "2026-11-02T21:30:13Z",
+ "created": "2026-11-03T04:11:27Z",
  "tool": "blockbench_import",
  "template": "bbmodel",
  "tags": [
@@ -11,25 +11,25 @@
  ],
  "brief": {
   "asset_id": "reef_crab_blockbench",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft",
-  "parent_job": "job-20261102-212944-1f93ea",
-  "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/reef_crab_blockbench.bbmodel",
-  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft",
+  "parent_job": "job-20261103-041046-13fcfb",
+  "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/reef_crab_blockbench.bbmodel",
+  "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
   "profiles": [
    "three-web-toon",
    "web-pbr",
    "unity-fbx"
   ]
  },
- "job": "job-20261102-212945-3b6806",
+ "job": "job-20261103-041047-916827",
  "same_as": null,
  "inputs": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/reef_crab_blockbench.bbmodel",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/reef_crab_blockbench.bbmodel",
    "sha256": "7ccd0fd33fbc7d475c2a1a873e8c9f3e9b9b7f93899d56d42340eab1ced491fd"
   },
   {
-   "path": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "path": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
    "sha256": "768522f8d4b53b21428a6244f92de5a16f8e5a2bf1fe84fd634beb4a93934d3f"
   }
  ],
@@ -49,18 +49,18 @@
   {
    "path": "source/reef_crab_blockbench.blend",
    "kind": "blend",
-   "bytes": 107946,
-   "sha256": "acf78887d0932c1266d85247925ca8cf7f21f6d028ca33b69c467e509ae2f852",
-   "content": "acf78887d0932c1266d85247925ca8cf7f21f6d028ca33b69c467e509ae2f852",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/source/reef_crab_blockbench.blend"
+   "bytes": 107948,
+   "sha256": "483a6bf03cdcdb02b0bc5f0f9bf67e61d075564473f8362cad0a5f75d4ecc43c",
+   "content": "483a6bf03cdcdb02b0bc5f0f9bf67e61d075564473f8362cad0a5f75d4ecc43c",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/source/reef_crab_blockbench.blend"
   },
   {
    "path": "exports/reef_crab_blockbench.three-web-toon.glb",
    "kind": "export",
-   "bytes": 27756,
-   "sha256": "f0b6172f246f1e85dee2648bd962d040aac9744cb7207a1d0e7fa486de39d758",
+   "bytes": 27760,
+   "sha256": "c90be9df0a893b6988b00a2207dfb9cfab1a9a4d9ab07db6de1bc2df0894f74d",
    "content": "a2543a0811f5512e2f3086cd484054e2ce2053399b2dfc04bfd23cfb738ba888",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.three-web-toon.glb"
   },
   {
    "path": "exports/reef_crab_blockbench.three-web-toon.lod50.glb",
@@ -68,7 +68,7 @@
    "bytes": 27552,
    "sha256": "5037d604fa89967fdb09cae5d123d70bb75ce446025fb1d9b32634f1b5fafbd7",
    "content": "46b85abe2d02f7dc0a3ad9614798746b71b37dda86e6c2e30801ae742a29c07d",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.three-web-toon.lod50.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/reef_crab_blockbench.three-web-toon.lod25.glb",
@@ -76,7 +76,7 @@
    "bytes": 17700,
    "sha256": "0c2f80619e0afd8753aa6a308a98d77247b73a3969cce4132a985647a665db21",
    "content": "80eea6ccb147c52725fbc28002ac426ce77dc7b7f48171e52da2e1c54f2ab8b9",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.three-web-toon.lod25.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/reef_crab_blockbench.three-web-toon.collision.glb",
@@ -84,15 +84,15 @@
    "bytes": 4000,
    "sha256": "9c0b7538bc9c3a97f484faed4b4aeb612322f82532fa1558e89e9dc0af112554",
    "content": "0c574a74d3eb4e4a988392755500044d86d67cfd4e14dda19152a8248068fe68",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.three-web-toon.collision.glb"
   },
   {
    "path": "exports/reef_crab_blockbench.web-pbr.glb",
    "kind": "export",
-   "bytes": 90660,
-   "sha256": "2550dcaccceba781fb8d4d29720b5245e914319975f2be11cb6e3c5a6b50ad65",
+   "bytes": 90664,
+   "sha256": "866879cadc373f87026a4035199a616edacd0ee267cff6a22d728a248218c5c4",
    "content": "69ebd7a76929cc804bd1fa8c8049f68b8b5abeaea619d44771d4f8f14addeaad",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.web-pbr.glb"
   },
   {
    "path": "exports/reef_crab_blockbench.web-pbr.basecolor.png",
@@ -100,7 +100,7 @@
    "bytes": 34036,
    "sha256": "635a858ad74be4cee7cf8ecbbbcc499229686165c44b1ad8983eeece24fee1d1",
    "content": "635a858ad74be4cee7cf8ecbbbcc499229686165c44b1ad8983eeece24fee1d1",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.web-pbr.basecolor.png"
   },
   {
    "path": "exports/reef_crab_blockbench.web-pbr.orm.png",
@@ -108,15 +108,15 @@
    "bytes": 29449,
    "sha256": "398429632329883b5455eef8816fdfdb4cde1b0c39380344401d6373b3896329",
    "content": "398429632329883b5455eef8816fdfdb4cde1b0c39380344401d6373b3896329",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.web-pbr.orm.png"
   },
   {
    "path": "exports/reef_crab_blockbench.unity-fbx.fbx",
    "kind": "export",
    "bytes": 77932,
-   "sha256": "49e0304bf1140aa55a99d7ec1a4004271dd80c65ebd79624d31d89e4f95d3f39",
+   "sha256": "c26c54b880a49c84ca8c0dac2033682be93d4e074fa0babf21c04c8f52a3f5ef",
    "content": "fbx-size:77932",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.unity-fbx.fbx"
   },
   {
    "path": "exports/reef_crab_blockbench.unity-fbx.atlas.png",
@@ -124,31 +124,31 @@
    "bytes": 274,
    "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
    "content": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/exports/reef_crab_blockbench.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/exports/reef_crab_blockbench.unity-fbx.atlas.png"
   },
   {
    "path": "previews/reef_crab_blockbench_three_quarter.png",
    "kind": "preview",
-   "bytes": 136099,
-   "sha256": "4f107b70f7ac574005493942754b321490d3e5cec717834235f6f3ea4bb11b50",
-   "content": "4f107b70f7ac574005493942754b321490d3e5cec717834235f6f3ea4bb11b50",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/previews/reef_crab_blockbench_three_quarter.png"
+   "bytes": 136052,
+   "sha256": "7effb5f582d93c83c7b43e2e6c3af635ae97b5dd7d0b2f6757d3aea922de3878",
+   "content": "7effb5f582d93c83c7b43e2e6c3af635ae97b5dd7d0b2f6757d3aea922de3878",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/previews/reef_crab_blockbench_three_quarter.png"
   },
   {
    "path": "previews/reef_crab_blockbench_front.png",
    "kind": "preview",
    "bytes": 107797,
-   "sha256": "9486f47f17bb0a496cced869c53bd1405f66964b9118ee58715cbbb42f7d7428",
-   "content": "9486f47f17bb0a496cced869c53bd1405f66964b9118ee58715cbbb42f7d7428",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/previews/reef_crab_blockbench_front.png"
+   "sha256": "63a23897495994a55a2df624bbc8181854280385d22176ebc04445343a3d0948",
+   "content": "63a23897495994a55a2df624bbc8181854280385d22176ebc04445343a3d0948",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/previews/reef_crab_blockbench_front.png"
   },
   {
    "path": "previews/reef_crab_blockbench_side.png",
    "kind": "preview",
    "bytes": 103581,
-   "sha256": "d41d5f3f6eca069dfbeb80db561db2d7b7539d8de989de4d2ba81c14b69cd1b8",
-   "content": "d41d5f3f6eca069dfbeb80db561db2d7b7539d8de989de4d2ba81c14b69cd1b8",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/meshcraft/previews/reef_crab_blockbench_side.png"
+   "sha256": "bae10f9c973552709f34df48a81b95b8e32bc8e9221f00dfe9cccf8d12590c3b",
+   "content": "bae10f9c973552709f34df48a81b95b8e32bc8e9221f00dfe9cccf8d12590c3b",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/meshcraft/previews/reef_crab_blockbench_side.png"
   }
  ],
  "title": "Reef Crab (Blockbench)",
@@ -176,11 +176,11 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261102-212944-1f93ea",
-  "meshcraft_job": "job-20261102-212945-3b6806",
+  "forgecraft_job": "job-20261103-041046-13fcfb",
+  "meshcraft_job": "job-20261103-041047-916827",
   "inputs": [
    {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/reef_crab_blockbench.bbmodel",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/reef_crab_blockbench.bbmodel",
     "sha256": "7ccd0fd33fbc7d475c2a1a873e8c9f3e9b9b7f93899d56d42340eab1ced491fd"
    }
   ],
@@ -190,13 +190,13 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-02T21:30:16Z"
+  "recorded": "2026-11-03T04:11:30Z"
  },
  "generation": {
   "method": "blockbench template",
   "template": "crab",
   "bbmodel": {
-   "bbmodel": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212944-1f93ea/reef_crab_blockbench.bbmodel",
+   "bbmodel": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041046-13fcfb/reef_crab_blockbench.bbmodel",
    "template": "crab",
    "cubes": 18,
    "texture": [
@@ -249,7 +249,8 @@
     "detail": "lowest point y=0 m"
    }
   ],
-  "screenshot": "previews/reef_crab_blockbench_engine_check.png"
+  "screenshot": "previews/reef_crab_blockbench_engine_check.png",
+  "clips": []
  },
  "deliverable_validation": {
   "status": "passed",
@@ -262,7 +263,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261102-212944-1f93ea",
+  "forgecraft_job": "job-20261103-041046-13fcfb",
   "route": "voxel",
   "tool": "blockbench"
  }

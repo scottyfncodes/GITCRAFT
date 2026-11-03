@@ -1,7 +1,7 @@
 {
  "id": "tidebreakers_turtle_cay_scene",
  "version": 1,
- "created": "2026-11-02T21:36:38Z",
+ "created": "2026-11-03T04:20:19Z",
  "tool": "compose_scene",
  "template": "scene",
  "tags": [
@@ -11,8 +11,8 @@
  ],
  "brief": {
   "asset_id": "tidebreakers_turtle_cay_scene",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft",
-  "parent_job": "job-20261102-213609-6659ae",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft",
+  "parent_job": "job-20261103-041934-c437c7",
   "items": [
    {
     "asset": "turtle_cay",
@@ -87,7 +87,7 @@
   ],
   "samples": 48
  },
- "job": "job-20261102-213610-58ab9b",
+ "job": "job-20261103-041935-c8a2bb",
  "same_as": null,
  "inputs": [],
  "validation": {
@@ -120,10 +120,10 @@
   {
    "path": "source/tidebreakers_turtle_cay_scene.blend",
    "kind": "blend",
-   "bytes": 2950689,
-   "sha256": "c5c469030e0650580887518aa345ebe784016de6a32a72651662843b0ce44e50",
-   "content": "c5c469030e0650580887518aa345ebe784016de6a32a72651662843b0ce44e50",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/source/tidebreakers_turtle_cay_scene.blend"
+   "bytes": 2950703,
+   "sha256": "6fab226c2db27daabd74d432ca48b561dd513876fa71f11818a01c154a1ecc68",
+   "content": "6fab226c2db27daabd74d432ca48b561dd513876fa71f11818a01c154a1ecc68",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/source/tidebreakers_turtle_cay_scene.blend"
   },
   {
    "path": "exports/tidebreakers_turtle_cay_scene.scene.glb",
@@ -131,27 +131,27 @@
    "bytes": 3924944,
    "sha256": "927db82456e64d6cfe054c94dac63273f044c6f88e56ce7c97e41425cb63fde2",
    "content": "13d4c33004523b0092bea183e613390b2a741c23ac518e010f88f584f0e72cee",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/exports/tidebreakers_turtle_cay_scene.scene.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/exports/tidebreakers_turtle_cay_scene.scene.glb"
   },
   {
    "path": "previews/tidebreakers_turtle_cay_scene_hero.png",
    "kind": "preview",
-   "bytes": 895387,
-   "sha256": "1efd5564e537fef7a7104b408196aa5231f9afb18bc2b922c1101deae611c5c1",
-   "content": "1efd5564e537fef7a7104b408196aa5231f9afb18bc2b922c1101deae611c5c1",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/previews/tidebreakers_turtle_cay_scene_hero.png"
+   "bytes": 895228,
+   "sha256": "f6a067eae072a9dd134b20953bc3295f92f5c71d802720d71c1ce2d125481181",
+   "content": "f6a067eae072a9dd134b20953bc3295f92f5c71d802720d71c1ce2d125481181",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/previews/tidebreakers_turtle_cay_scene_hero.png"
   },
   {
    "path": "previews/tidebreakers_turtle_cay_scene_three_quarter.png",
    "kind": "preview",
-   "bytes": 252925,
-   "sha256": "4cb953757908b24d9b8ccf7b6efd02c09bb61f43fa930acaaefae24d02a2a8f7",
-   "content": "4cb953757908b24d9b8ccf7b6efd02c09bb61f43fa930acaaefae24d02a2a8f7",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213609-6659ae/meshcraft/previews/tidebreakers_turtle_cay_scene_three_quarter.png"
+   "bytes": 252883,
+   "sha256": "f6d5b809ee36094c1cd67219d079c4c821605283c08a53ecd62ed3fadfceb47c",
+   "content": "f6d5b809ee36094c1cd67219d079c4c821605283c08a53ecd62ed3fadfceb47c",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/previews/tidebreakers_turtle_cay_scene_three_quarter.png"
   }
  ],
  "title": "TIDEBREAKERS Turtle Cay Scene",
- "kind": "island",
+ "kind": "scene",
  "source_tool": "meshcraft",
  "route": {
   "route": "meshcraft_scene",
@@ -171,8 +171,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261102-213609-6659ae",
-  "meshcraft_job": "job-20261102-213610-58ab9b",
+  "forgecraft_job": "job-20261103-041934-c437c7",
+  "meshcraft_job": "job-20261103-041935-c8a2bb",
   "inputs": [
    {
     "asset": "turtle_cay",
@@ -217,7 +217,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-02T21:36:40Z"
+  "recorded": "2026-11-03T04:20:24Z"
  },
  "generation": {
   "method": "scene composition",
@@ -294,6 +294,9 @@
  },
  "animations": [
   {
+   "name": "float_bob"
+  },
+  {
    "name": "Attack"
   },
   {
@@ -316,9 +319,6 @@
   },
   {
    "name": "Walking"
-  },
-  {
-   "name": "float_bob"
   }
  ],
  "sockets": [],
@@ -343,9 +343,151 @@
     "check": "engine_mixed_materials",
     "level": "pass",
     "detail": "26 textured + 0 vertex-coloured of 27 meshes (scene)"
+   },
+   {
+    "check": "engine_clip:Attack",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Idle",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Interact",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Jump",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Run",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Sneak_Walk",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Walk",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:Walking",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_clip:float_bob",
+    "level": "pass",
+    "detail": "clip present"
+   },
+   {
+    "check": "engine_all_clips_played",
+    "level": "pass",
+    "detail": "9 of 9 clips played one at a time"
+   },
+   {
+    "check": "engine_clip_motion:float_bob",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 0.05196 at 25/50/75% of 2s)"
+   },
+   {
+    "check": "engine_clip_motion:Attack",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.19975 at 25/50/75% of 1s)"
+   },
+   {
+    "check": "engine_clip_motion:Idle",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 0.08809 at 25/50/75% of 2s)"
+   },
+   {
+    "check": "engine_clip_motion:Interact",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.16136 at 25/50/75% of 1.6s)"
+   },
+   {
+    "check": "engine_clip_motion:Jump",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.99619 at 25/50/75% of 1.333s)"
+   },
+   {
+    "check": "engine_clip_motion:Run",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.92169 at 25/50/75% of 0.667s)"
+   },
+   {
+    "check": "engine_clip_motion:Sneak_Walk",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.99878 at 25/50/75% of 1.067s)"
+   },
+   {
+    "check": "engine_clip_motion:Walk",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.9703 at 25/50/75% of 1.067s)"
+   },
+   {
+    "check": "engine_clip_motion:Walking",
+    "level": "pass",
+    "detail": "moves the asset (max change in node transforms or morph weights 1.99878 at 25/50/75% of 1.067s)"
    }
   ],
-  "screenshot": "previews/tidebreakers_turtle_cay_scene_engine_check.png"
+  "screenshot": "previews/tidebreakers_turtle_cay_scene_engine_check.png",
+  "clips": [
+   {
+    "name": "float_bob",
+    "moves": true,
+    "max_delta": 0.05196
+   },
+   {
+    "name": "Attack",
+    "moves": true,
+    "max_delta": 1.19975
+   },
+   {
+    "name": "Idle",
+    "moves": true,
+    "max_delta": 0.08809
+   },
+   {
+    "name": "Interact",
+    "moves": true,
+    "max_delta": 1.16136
+   },
+   {
+    "name": "Jump",
+    "moves": true,
+    "max_delta": 1.99619
+   },
+   {
+    "name": "Run",
+    "moves": true,
+    "max_delta": 1.92169
+   },
+   {
+    "name": "Sneak_Walk",
+    "moves": true,
+    "max_delta": 1.99878
+   },
+   {
+    "name": "Walk",
+    "moves": true,
+    "max_delta": 1.9703
+   },
+   {
+    "name": "Walking",
+    "moves": true,
+    "max_delta": 1.99878
+   }
+  ]
  },
  "deliverable_validation": {
   "status": "passed-with-warnings",
@@ -358,7 +500,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261102-213609-6659ae",
+  "forgecraft_job": "job-20261103-041934-c437c7",
   "route": "meshcraft_scene",
   "tool": "meshcraft_scene"
  }

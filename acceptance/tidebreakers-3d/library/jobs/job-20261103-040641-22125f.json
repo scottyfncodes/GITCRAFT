@@ -1,19 +1,19 @@
 {
- "id": "job-20261102-212557-b9062c",
+ "id": "job-20261103-040641-22125f",
  "tool": "run_pipeline",
- "asset_id": "upgrade_canvas_mainsail",
+ "asset_id": "upgrade_lashed_cargo_crates",
  "request": {
   "brief": {
-   "asset_id": "upgrade_canvas_mainsail",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212556-d69640/meshcraft",
-   "parent_job": "job-20261102-212556-d69640",
+   "asset_id": "upgrade_lashed_cargo_crates",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft",
+   "parent_job": "job-20261103-040640-c482ba",
    "template": "boat_upgrade",
    "params": {
-    "seed": 812,
-    "upgrade": "sail_canvas"
+    "seed": 78,
+    "upgrade": "cargo_crate"
    },
-   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Canvas Mainsail",
+   "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Upgrade: Lashed Cargo Crates",
    "tags": [
     "tidebreakers"
    ],
@@ -40,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-02T21:25:57Z",
+ "created": "2026-11-03T04:06:41Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:25:57Z",
+   "started": "2026-11-03T04:06:41Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 18.7,
+   "seconds": 25.6,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.13
+     "seconds": 0.22
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 17.51
+     "seconds": 16.63
     },
     {
      "step": "validate_scene",
@@ -68,24 +68,24 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 0.54
+     "seconds": 7.82
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.2
+     "seconds": 0.34
     }
    ],
-   "finished": "2026-11-02T21:26:16Z"
+   "finished": "2026-11-03T04:07:07Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-212556-d69640",
- "updated": "2026-11-02T21:26:16Z",
+ "parent": "job-20261103-040640-c482ba",
+ "updated": "2026-11-03T04:07:07Z",
  "library": {
-  "asset": "upgrade_canvas_mainsail",
+  "asset": "upgrade_lashed_cargo_crates",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_canvas_mainsail/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_lashed_cargo_crates/v1",
   "same_as": null,
   "files": 16
  }

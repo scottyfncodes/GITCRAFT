@@ -1,113 +1,114 @@
 {
- "id": "job-20261102-212823-4de3b5",
+ "id": "job-20261103-040640-c482ba",
  "tool": "generate",
- "asset_id": "turtle_cay",
+ "asset_id": "upgrade_lashed_cargo_crates",
  "request": {
-  "brief": "small tropical island with palms, rocks, a stilt hut and a dock",
-  "name": "Turtle Cay",
-  "bake": 1024,
+  "brief": "boat upgrade component: Lashed Cargo Crates",
+  "name": "Upgrade: Lashed Cargo Crates",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "cargo_crate"
+  },
+  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
    "unity-fbx"
   ],
-  "template_params": {
-   "seed": 7
-  },
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:28:23Z",
+ "created": "2026-11-03T04:06:40Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:28:23Z",
+   "started": "2026-11-03T04:06:40Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:28:23Z",
+     "started": "2026-11-03T04:06:40Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:28:23Z",
+     "finished": "2026-11-03T04:06:40Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:28:23Z",
+     "started": "2026-11-03T04:06:40Z",
      "info": {
-      "meshcraft_job": "job-20261102-212824-4a065a",
+      "meshcraft_job": "job-20261103-040641-22125f",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 17,
-       "warn": 1,
+       "pass": 18,
+       "warn": 0,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "turtle_cay",
+       "asset": "upgrade_lashed_cargo_crates",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:28:46Z",
-     "seconds": 23.19
+     "finished": "2026-11-03T04:07:07Z",
+     "seconds": 26.89
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:28:46Z",
+     "started": "2026-11-03T04:07:07Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:28:49Z",
-     "seconds": 2.58
+     "finished": "2026-11-03T04:07:11Z",
+     "seconds": 3.45
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:28:49Z",
+     "started": "2026-11-03T04:07:11Z",
      "info": {
-      "asset": "turtle_cay",
+      "asset": "upgrade_lashed_cargo_crates",
       "version": 1,
-      "validation": "passed-with-warnings"
+      "validation": "passed"
      },
-     "finished": "2026-11-02T21:28:49Z",
-     "seconds": 0.01
+     "finished": "2026-11-03T04:07:11Z",
+     "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:28:49Z",
+   "finished": "2026-11-03T04:07:11Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212824-4a065a"
+  "job-20261103-040641-22125f"
  ],
- "updated": "2026-11-02T21:28:49Z",
+ "updated": "2026-11-03T04:07:11Z",
  "plan": {
   "request": {
-   "brief": "small tropical island with palms, rocks, a stilt hut and a dock",
+   "brief": "boat upgrade component: Lashed Cargo Crates",
    "intents": [],
-   "kind": "island",
-   "template": "island",
+   "kind": "upgrade",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 107,
-    "radius": 15,
-    "palms": 7
+    "seed": 78,
+    "upgrade": "cargo_crate"
    },
    "images": 0,
-   "name": "small tropical island with palms, rocks, a stilt hut and a d"
+   "name": "boat upgrade component: Lashed Cargo Crates"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -123,8 +124,8 @@
     "tool": "blockbench",
     "label": "Blockbench .bbmodel \u2192 MeshCraft",
     "owner": "meshcraft",
-    "available": false,
-    "detail": "no Blockbench template for this kind of object"
+    "available": true,
+    "detail": "CPU, seconds"
    },
    {
     "tool": "hunyuan3d",
@@ -162,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "turtle_cay",
+  "id": "upgrade_lashed_cargo_crates",
   "version": 1,
-  "name": "Turtle Cay",
-  "validation": "passed-with-warnings"
+  "name": "Upgrade: Lashed Cargo Crates",
+  "validation": "passed"
  }
 }

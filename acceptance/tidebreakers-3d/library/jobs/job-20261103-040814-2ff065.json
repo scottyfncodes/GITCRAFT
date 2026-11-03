@@ -1,19 +1,19 @@
 {
- "id": "job-20261102-212642-a73ef8",
+ "id": "job-20261103-040814-2ff065",
  "tool": "run_pipeline",
- "asset_id": "upgrade_brass_compass",
+ "asset_id": "upgrade_copper_banded_hull",
  "request": {
   "brief": {
-   "asset_id": "upgrade_brass_compass",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212642-06f08e/meshcraft",
-   "parent_job": "job-20261102-212642-06f08e",
+   "asset_id": "upgrade_copper_banded_hull",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft",
+   "parent_job": "job-20261103-040813-674eed",
    "template": "boat_upgrade",
    "params": {
-    "seed": 263,
-    "upgrade": "compass_brass"
+    "seed": 173,
+    "upgrade": "hull_copper"
    },
-   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Brass Compass",
+   "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Upgrade: Copper-Banded Hull",
    "tags": [
     "tidebreakers"
    ],
@@ -40,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-02T21:26:42Z",
+ "created": "2026-11-03T04:08:14Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:26:42Z",
+   "started": "2026-11-03T04:08:14Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 21.2,
+   "seconds": 20.5,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.13
+     "seconds": 0.5
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 18.62
+     "seconds": 17.56
     },
     {
      "step": "validate_scene",
@@ -68,24 +68,24 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 1.8
+     "seconds": 1.45
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.24
+     "seconds": 0.33
     }
    ],
-   "finished": "2026-11-02T21:27:03Z"
+   "finished": "2026-11-03T04:08:35Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-212642-06f08e",
- "updated": "2026-11-02T21:27:03Z",
+ "parent": "job-20261103-040813-674eed",
+ "updated": "2026-11-03T04:08:35Z",
  "library": {
-  "asset": "upgrade_brass_compass",
+  "asset": "upgrade_copper_banded_hull",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_brass_compass/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_copper_banded_hull/v1",
   "same_as": null,
   "files": 16
  }

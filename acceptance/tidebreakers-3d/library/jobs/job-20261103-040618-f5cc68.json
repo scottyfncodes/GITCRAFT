@@ -1,18 +1,19 @@
 {
- "id": "job-20261102-212756-8b29bb",
+ "id": "job-20261103-040618-f5cc68",
  "tool": "run_pipeline",
- "asset_id": "floating_salvage",
+ "asset_id": "upgrade_canvas_mainsail",
  "request": {
   "brief": {
-   "asset_id": "floating_salvage",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212756-9ccc9e/meshcraft",
-   "parent_job": "job-20261102-212756-9ccc9e",
-   "template": "salvage",
+   "asset_id": "upgrade_canvas_mainsail",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft",
+   "parent_job": "job-20261103-040617-de647a",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 752
+    "seed": 812,
+    "upgrade": "sail_canvas"
    },
-   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Floating Salvage",
+   "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Upgrade: Canvas Mainsail",
    "tags": [
     "tidebreakers"
    ],
@@ -31,7 +32,7 @@
     ]
    },
    "bake": {
-    "resolution": 1024,
+    "resolution": 512,
     "fallbacks": [
      512
     ]
@@ -39,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-02T21:27:56Z",
+ "created": "2026-11-03T04:06:18Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:27:56Z",
+   "started": "2026-11-03T04:06:18Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 24.2,
+   "seconds": 18.6,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.18
+     "seconds": 0.26
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 20.97
+     "seconds": 16.48
     },
     {
      "step": "validate_scene",
@@ -67,7 +68,7 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 2.34
+     "seconds": 0.93
     },
     {
      "step": "contact_sheet",
@@ -75,16 +76,16 @@
      "seconds": 0.25
     }
    ],
-   "finished": "2026-11-02T21:28:20Z"
+   "finished": "2026-11-03T04:06:37Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-212756-9ccc9e",
- "updated": "2026-11-02T21:28:20Z",
+ "parent": "job-20261103-040617-de647a",
+ "updated": "2026-11-03T04:06:37Z",
  "library": {
-  "asset": "floating_salvage",
+  "asset": "upgrade_canvas_mainsail",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/floating_salvage/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_canvas_mainsail/v1",
   "same_as": null,
   "files": 16
  }

@@ -1,15 +1,15 @@
 {
- "id": "job-20261102-213017-c4f44c",
+ "id": "job-20261103-041132-e77a59",
  "tool": "mixamo_apply",
  "asset_id": "deckhand_pip",
  "request": {
   "asset_id": "deckhand_pip",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213016-c47f5b/meshcraft",
-  "parent_job": "job-20261102-213016-c47f5b",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft",
+  "parent_job": "job-20261103-041131-db4693",
   "character": "/root/.gitcraft/3d-library-tidebreakers/assets/deckhand_pip/v1/source/deckhand_pip.blend",
   "animations": [
-   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo/Walking.fbx",
-   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
+   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Walking.fbx",
+   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
   ],
   "profiles": [
    "three-web-toon",
@@ -18,21 +18,21 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:30:17Z",
+ "created": "2026-11-03T04:11:32Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:30:17Z",
+   "started": "2026-11-03T04:11:32Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 19.5,
-   "finished": "2026-11-02T21:30:36Z"
+   "seconds": 19.9,
+   "finished": "2026-11-03T04:11:52Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-213016-c47f5b",
- "updated": "2026-11-02T21:30:36Z",
+ "parent": "job-20261103-041131-db4693",
+ "updated": "2026-11-03T04:11:52Z",
  "library": {
   "asset": "deckhand_pip",
   "version": 2,

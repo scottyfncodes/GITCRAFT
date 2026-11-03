@@ -1,7 +1,7 @@
 {
  "id": "upgrade_copper_banded_hull",
  "version": 1,
- "created": "2026-11-02T21:27:53Z",
+ "created": "2026-11-03T04:08:35Z",
  "tool": "run_pipeline",
  "template": "boat_upgrade",
  "tags": [
@@ -12,14 +12,14 @@
  ],
  "brief": {
   "asset_id": "upgrade_copper_banded_hull",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft",
-  "parent_job": "job-20261102-212737-6ee111",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft",
+  "parent_job": "job-20261103-040813-674eed",
   "template": "boat_upgrade",
   "params": {
    "seed": 173,
    "upgrade": "hull_copper"
   },
-  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
   "title": "Upgrade: Copper-Banded Hull",
   "tags": [
    "tidebreakers"
@@ -45,11 +45,11 @@
    ]
   }
  },
- "job": "job-20261102-212737-8cd39c",
+ "job": "job-20261103-040814-2ff065",
  "same_as": null,
  "inputs": [
   {
-   "path": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "path": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
    "sha256": "768522f8d4b53b21428a6244f92de5a16f8e5a2bf1fe84fd634beb4a93934d3f"
   }
  ],
@@ -72,18 +72,18 @@
   {
    "path": "source/upgrade_copper_banded_hull.blend",
    "kind": "blend",
-   "bytes": 124700,
-   "sha256": "b63c92738eb47db32335c93965e20ee957115a72c2820910aa4822318d7e50c4",
-   "content": "b63c92738eb47db32335c93965e20ee957115a72c2820910aa4822318d7e50c4",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/source/upgrade_copper_banded_hull.blend"
+   "bytes": 124706,
+   "sha256": "6de67012afdf654920d90b2e06eb4931a52effa9cb7017e24fc3506aef4547ad",
+   "content": "6de67012afdf654920d90b2e06eb4931a52effa9cb7017e24fc3506aef4547ad",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/source/upgrade_copper_banded_hull.blend"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.three-web-toon.glb",
    "kind": "export",
-   "bytes": 131172,
-   "sha256": "c233ee949cca86fc05bbb24429200658215fb48e121ebbfe6fd1670aee988e59",
+   "bytes": 131176,
+   "sha256": "62a5e2f235c4e9f587716155af76a99ad749c961e108ed799f5dea07d795cc34",
    "content": "3c40e3407c276b21a0fb9f5b7457128084c1c812d3d4bb702174eeb920df9f7b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.glb"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.three-web-toon.lod50.glb",
@@ -91,7 +91,7 @@
    "bytes": 94268,
    "sha256": "29993408283b3da3cf7429f1cf3d83b93b467ebad8477a5067515d757eb3e05e",
    "content": "1a1ea8f270dc5dfab6ea5f64552c0ec6670e5fae1a415c804e65671a6e4e5a0a",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod50.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.three-web-toon.lod25.glb",
@@ -99,7 +99,7 @@
    "bytes": 51000,
    "sha256": "d8b2a92cb40a15de1ece1dd7958b19dd88cc8b68c734d7365ab35b3b7d0b85fb",
    "content": "7070f5b7ca588f29e33d448514b7a3e334f32afedbf359c11867d909b0ee52c5",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod25.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.three-web-toon.collision.glb",
@@ -107,15 +107,15 @@
    "bytes": 50220,
    "sha256": "3d1cfa93b0fc90acb2f40e73371141c110e5502d34a2f472b3785f2309c46f8f",
    "content": "2dfa6da80764b96c206c4939b8fcde931c527e60f55712c74ac59c6225f11bbe",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.three-web-toon.collision.glb"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.web-pbr.glb",
    "kind": "export",
-   "bytes": 283428,
-   "sha256": "7d545bbb20665f36be5f9b270f2d5f99faa0e5e9b500b80c7221bacb9bc0b97d",
+   "bytes": 283432,
+   "sha256": "3bee8a4ae8a803ba26e05c3c5268d4873223faffe1aa4cd166b060d6458c5be2",
    "content": "439748c98b2a4eac1f3d975a6f0f7aed60c710229f9a539559c4e75a2859d94a",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.glb"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.web-pbr.basecolor.png",
@@ -123,7 +123,7 @@
    "bytes": 99374,
    "sha256": "ff88667464c669110a4c02845ef0cbc4b162f146ec1bed21ff94cbfeb60fb421",
    "content": "ff88667464c669110a4c02845ef0cbc4b162f146ec1bed21ff94cbfeb60fb421",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.basecolor.png"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.web-pbr.orm.png",
@@ -131,15 +131,15 @@
    "bytes": 53767,
    "sha256": "e15f7efc2c7083a9160aebcc67ff97ba331fd11aba1ed0755c75bcbafe90dbbc",
    "content": "e15f7efc2c7083a9160aebcc67ff97ba331fd11aba1ed0755c75bcbafe90dbbc",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.web-pbr.orm.png"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.unity-fbx.fbx",
    "kind": "export",
    "bytes": 68940,
-   "sha256": "25798220bab05ab24ecacec13daea4e52d5856e58927b181a0fb7bc511964b32",
+   "sha256": "70e9276e7bf574662823b24e2f2e0fb8719cf5da637b2db58a5a19da486a5318",
    "content": "fbx-size:68940",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.unity-fbx.fbx"
   },
   {
    "path": "exports/upgrade_copper_banded_hull.unity-fbx.atlas.png",
@@ -147,55 +147,55 @@
    "bytes": 274,
    "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
    "content": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/exports/upgrade_copper_banded_hull.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/exports/upgrade_copper_banded_hull.unity-fbx.atlas.png"
   },
   {
    "path": "previews/upgrade_copper_banded_hull_three_quarter.png",
    "kind": "preview",
-   "bytes": 91499,
-   "sha256": "af6f5e11b8db69e6e7999c17c6c9d0cc8ef6de54a0583702084a154e194be77e",
-   "content": "af6f5e11b8db69e6e7999c17c6c9d0cc8ef6de54a0583702084a154e194be77e",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_three_quarter.png"
+   "bytes": 91606,
+   "sha256": "4593dcf103beb67aa0a99b1a4e77fc9e69a4bbb58415b6a9d97210f1ec119315",
+   "content": "4593dcf103beb67aa0a99b1a4e77fc9e69a4bbb58415b6a9d97210f1ec119315",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/previews/upgrade_copper_banded_hull_three_quarter.png"
   },
   {
    "path": "previews/upgrade_copper_banded_hull_front.png",
    "kind": "preview",
    "bytes": 70790,
-   "sha256": "e46c2f8f4672c1d6b6b753141eeb52504804db58d51f789aa3e9afc01ecd48c2",
-   "content": "e46c2f8f4672c1d6b6b753141eeb52504804db58d51f789aa3e9afc01ecd48c2",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_front.png"
+   "sha256": "b43dac3308fa8170b6d4bfceae8ae885114c06ce5bda4a8ee1972e9007b2ed52",
+   "content": "b43dac3308fa8170b6d4bfceae8ae885114c06ce5bda4a8ee1972e9007b2ed52",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/previews/upgrade_copper_banded_hull_front.png"
   },
   {
    "path": "previews/upgrade_copper_banded_hull_side.png",
    "kind": "preview",
-   "bytes": 78403,
-   "sha256": "6ef6df697979354feceedd459bd50843e1b662a29be40b76165cf057175aa3a7",
-   "content": "6ef6df697979354feceedd459bd50843e1b662a29be40b76165cf057175aa3a7",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_side.png"
+   "bytes": 78306,
+   "sha256": "1f9b1183ded2527529a90f9d5f93bde9edb85179b11dbcdfb03727f434535037",
+   "content": "1f9b1183ded2527529a90f9d5f93bde9edb85179b11dbcdfb03727f434535037",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/previews/upgrade_copper_banded_hull_side.png"
   },
   {
    "path": "previews/upgrade_copper_banded_hull_top.png",
    "kind": "preview",
-   "bytes": 129583,
-   "sha256": "86147dcc771697dd5272d8c8b34536aa0991c75f466a197c9509162e47f542ce",
-   "content": "86147dcc771697dd5272d8c8b34536aa0991c75f466a197c9509162e47f542ce",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_top.png"
+   "bytes": 129558,
+   "sha256": "dd2e4beb91ff1c7368af8b7eee6527f869eb4123748c72225680b933b588982f",
+   "content": "dd2e4beb91ff1c7368af8b7eee6527f869eb4123748c72225680b933b588982f",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/previews/upgrade_copper_banded_hull_top.png"
   },
   {
    "path": "previews/upgrade_copper_banded_hull_sheet.png",
    "kind": "preview",
-   "bytes": 102913,
-   "sha256": "0bf9b479e485416255c3f309a6ce44f7cdceeb1b942234e009b10a1bcdfc5b76",
-   "content": "0bf9b479e485416255c3f309a6ce44f7cdceeb1b942234e009b10a1bcdfc5b76",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/previews/upgrade_copper_banded_hull_sheet.png"
+   "bytes": 109402,
+   "sha256": "4ae12ba5de1e050f0707efad831980df717cd3db4e84dba2ed9f9f58d6dd3f45",
+   "content": "4ae12ba5de1e050f0707efad831980df717cd3db4e84dba2ed9f9f58d6dd3f45",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/previews/upgrade_copper_banded_hull_sheet.png"
   },
   {
    "path": "upgrade_copper_banded_hull.meshcraft.json",
    "kind": "report",
-   "bytes": 12351,
-   "sha256": "be98804435fad66bc1516f648af9f5848c602a9ba9b8c55303a18b91e43b9c2f",
-   "content": "be98804435fad66bc1516f648af9f5848c602a9ba9b8c55303a18b91e43b9c2f",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft/upgrade_copper_banded_hull.meshcraft.json"
+   "bytes": 12354,
+   "sha256": "72014767d4cddebce502aa74f256fe8b40f95377ee561eb83b6184c9b4bab94a",
+   "content": "72014767d4cddebce502aa74f256fe8b40f95377ee561eb83b6184c9b4bab94a",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft/upgrade_copper_banded_hull.meshcraft.json"
   }
  ],
  "title": "Upgrade: Copper-Banded Hull",
@@ -219,8 +219,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261102-212737-6ee111",
-  "meshcraft_job": "job-20261102-212737-8cd39c",
+  "forgecraft_job": "job-20261103-040813-674eed",
+  "meshcraft_job": "job-20261103-040814-2ff065",
   "inputs": [],
   "blender": "5.2.3",
   "machine": {
@@ -228,7 +228,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-02T21:27:56Z"
+  "recorded": "2026-11-03T04:08:39Z"
  },
  "generation": {
   "method": "meshcraft template",
@@ -278,7 +278,8 @@
     "detail": "1/1 meshes have a base colour map (texture-baked export)"
    }
   ],
-  "screenshot": "previews/upgrade_copper_banded_hull_engine_check.png"
+  "screenshot": "previews/upgrade_copper_banded_hull_engine_check.png",
+  "clips": []
  },
  "deliverable_validation": {
   "status": "passed",
@@ -291,7 +292,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261102-212737-6ee111",
+  "forgecraft_job": "job-20261103-040813-674eed",
   "route": "template",
   "tool": "meshcraft_template"
  }

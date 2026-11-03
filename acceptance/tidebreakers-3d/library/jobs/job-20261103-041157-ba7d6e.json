@@ -1,10 +1,10 @@
 {
- "id": "job-20261102-213039-f3ad85",
+ "id": "job-20261103-041157-ba7d6e",
  "tool": "generate",
  "asset_id": "salvage_raft_photogrammetry_scan",
  "request": {
   "images": [
-   "/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/photos"
+   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos"
   ],
   "name": "Salvage Raft (photogrammetry scan)",
   "max_tris": 20000,
@@ -26,33 +26,33 @@
   "brief": "photogrammetry reconstruction"
  },
  "status": "done",
- "created": "2026-11-02T21:30:39Z",
+ "created": "2026-11-03T04:11:57Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:30:39Z",
+   "started": "2026-11-03T04:11:57Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:30:39Z",
+     "started": "2026-11-03T04:11:57Z",
      "info": {
       "chosen": "meshroom",
       "route": "photogrammetry",
       "fallback_used": false,
       "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
      },
-     "finished": "2026-11-02T21:30:39Z",
+     "finished": "2026-11-03T04:11:57Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:30:39Z",
+     "started": "2026-11-03T04:11:57Z",
      "info": {
-      "meshcraft_job": "job-20261102-213549-b7bff1",
+      "meshcraft_job": "job-20261103-041906-ac491d",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -66,42 +66,43 @@
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:36:07Z",
-     "seconds": 327.54
+     "finished": "2026-11-03T04:19:31Z",
+     "seconds": 453.98
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:36:07Z",
+     "started": "2026-11-03T04:19:31Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:36:09Z",
-     "seconds": 2.03
+     "finished": "2026-11-03T04:19:34Z",
+     "seconds": 3.2
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:36:09Z",
+     "started": "2026-11-03T04:19:34Z",
      "info": {
       "asset": "salvage_raft_photogrammetry_scan",
       "version": 1,
       "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-02T21:36:09Z",
+     "finished": "2026-11-03T04:19:34Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:36:09Z",
+   "finished": "2026-11-03T04:19:34Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-213549-b7bff1"
+  "job-20261103-041906-ac491d"
  ],
- "updated": "2026-11-02T21:36:09Z",
+ "updated": "2026-11-03T04:19:34Z",
  "plan": {
   "request": {
    "brief": "photogrammetry reconstruction",
@@ -131,7 +132,7 @@
     "label": "TripoSR (image \u2192 mesh) \u2192 MeshCraft",
     "owner": "forgecraft",
     "available": false,
-    "detail": "missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
+    "detail": "missing: code, torch, weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
    },
    {
     "tool": "hunyuan3d",

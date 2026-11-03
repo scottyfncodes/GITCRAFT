@@ -1,13 +1,13 @@
 {
- "id": "job-20261102-212642-06f08e",
+ "id": "job-20261103-040813-674eed",
  "tool": "generate",
- "asset_id": "upgrade_brass_compass",
+ "asset_id": "upgrade_copper_banded_hull",
  "request": {
-  "brief": "boat upgrade component: Brass Compass",
-  "name": "Upgrade: Brass Compass",
+  "brief": "boat upgrade component: Copper-Banded Hull",
+  "name": "Upgrade: Copper-Banded Hull",
   "kind": "upgrade",
   "template_params": {
-   "upgrade": "compass_brass"
+   "upgrade": "hull_copper"
   },
   "bake": 512,
   "profiles": [
@@ -20,33 +20,33 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:26:42Z",
+ "created": "2026-11-03T04:08:13Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:26:42Z",
+   "started": "2026-11-03T04:08:13Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:26:42Z",
+     "started": "2026-11-03T04:08:13Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:26:42Z",
-     "seconds": 0.01
+     "finished": "2026-11-03T04:08:13Z",
+     "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:26:42Z",
+     "started": "2026-11-03T04:08:13Z",
      "info": {
-      "meshcraft_job": "job-20261102-212642-a73ef8",
+      "meshcraft_job": "job-20261103-040814-2ff065",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -56,58 +56,59 @@
        "info": 3
       },
       "library": {
-       "asset": "upgrade_brass_compass",
+       "asset": "upgrade_copper_banded_hull",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:27:04Z",
-     "seconds": 21.93
+     "finished": "2026-11-03T04:08:35Z",
+     "seconds": 21.85
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:27:04Z",
+     "started": "2026-11-03T04:08:35Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:27:06Z",
-     "seconds": 2.04
+     "finished": "2026-11-03T04:08:39Z",
+     "seconds": 3.72
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:27:06Z",
+     "started": "2026-11-03T04:08:39Z",
      "info": {
-      "asset": "upgrade_brass_compass",
+      "asset": "upgrade_copper_banded_hull",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-02T21:27:06Z",
+     "finished": "2026-11-03T04:08:39Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:27:06Z",
+   "finished": "2026-11-03T04:08:39Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212642-a73ef8"
+  "job-20261103-040814-2ff065"
  ],
- "updated": "2026-11-02T21:27:06Z",
+ "updated": "2026-11-03T04:08:39Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Brass Compass",
+   "brief": "boat upgrade component: Copper-Banded Hull",
    "intents": [],
    "kind": "upgrade",
    "template": "boat_upgrade",
    "params": {
-    "seed": 263,
-    "upgrade": "compass_brass"
+    "seed": 173,
+    "upgrade": "hull_copper"
    },
    "images": 0,
-   "name": "boat upgrade component: Brass Compass"
+   "name": "boat upgrade component: Copper-Banded Hull"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -162,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_brass_compass",
+  "id": "upgrade_copper_banded_hull",
   "version": 1,
-  "name": "Upgrade: Brass Compass",
+  "name": "Upgrade: Copper-Banded Hull",
   "validation": "passed"
  }
 }

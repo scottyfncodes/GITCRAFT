@@ -1,15 +1,13 @@
 {
- "id": "job-20261102-212556-d69640",
+ "id": "job-20261103-041015-d72006",
  "tool": "generate",
- "asset_id": "upgrade_canvas_mainsail",
+ "asset_id": "grand_treasure_chest",
  "request": {
-  "brief": "boat upgrade component: Canvas Mainsail",
-  "name": "Upgrade: Canvas Mainsail",
-  "kind": "upgrade",
+  "brief": "grand treasure chest",
+  "name": "Grand Treasure Chest",
   "template_params": {
-   "upgrade": "sail_canvas"
+   "tier": "grand"
   },
-  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -20,94 +18,94 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:25:56Z",
+ "created": "2026-11-03T04:10:15Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:25:56Z",
+   "started": "2026-11-03T04:10:15Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:25:56Z",
+     "started": "2026-11-03T04:10:15Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:25:56Z",
+     "finished": "2026-11-03T04:10:15Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:25:56Z",
+     "started": "2026-11-03T04:10:15Z",
      "info": {
-      "meshcraft_job": "job-20261102-212557-b9062c",
+      "meshcraft_job": "job-20261103-041016-f2de28",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 17,
-       "warn": 1,
+       "pass": 22,
+       "warn": 0,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "upgrade_canvas_mainsail",
+       "asset": "grand_treasure_chest",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:26:16Z",
-     "seconds": 19.45
+     "finished": "2026-11-03T04:10:42Z",
+     "seconds": 27.37
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:26:16Z",
+     "started": "2026-11-03T04:10:42Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:26:18Z",
-     "seconds": 2.05
+     "finished": "2026-11-03T04:10:46Z",
+     "seconds": 3.47
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:26:18Z",
+     "started": "2026-11-03T04:10:46Z",
      "info": {
-      "asset": "upgrade_canvas_mainsail",
+      "asset": "grand_treasure_chest",
       "version": 1,
-      "validation": "passed-with-warnings"
+      "validation": "passed"
      },
-     "finished": "2026-11-02T21:26:18Z",
-     "seconds": 0.01
+     "finished": "2026-11-03T04:10:46Z",
+     "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:26:18Z",
+   "finished": "2026-11-03T04:10:46Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212557-b9062c"
+  "job-20261103-041016-f2de28"
  ],
- "updated": "2026-11-02T21:26:18Z",
+ "updated": "2026-11-03T04:10:46Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Canvas Mainsail",
+   "brief": "grand treasure chest",
    "intents": [],
-   "kind": "upgrade",
-   "template": "boat_upgrade",
+   "kind": null,
+   "template": "chest",
    "params": {
-    "seed": 812,
-    "upgrade": "sail_canvas"
+    "seed": 545
    },
    "images": 0,
-   "name": "boat upgrade component: Canvas Mainsail"
+   "name": "grand treasure chest"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -162,9 +160,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_canvas_mainsail",
+  "id": "grand_treasure_chest",
   "version": 1,
-  "name": "Upgrade: Canvas Mainsail",
-  "validation": "passed-with-warnings"
+  "name": "Grand Treasure Chest",
+  "validation": "passed"
  }
 }

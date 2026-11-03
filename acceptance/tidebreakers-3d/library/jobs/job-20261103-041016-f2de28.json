@@ -1,18 +1,18 @@
 {
- "id": "job-20261102-212919-116546",
+ "id": "job-20261103-041016-f2de28",
  "tool": "run_pipeline",
  "asset_id": "grand_treasure_chest",
  "request": {
   "brief": {
    "asset_id": "grand_treasure_chest",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212918-4bce16/meshcraft",
-   "parent_job": "job-20261102-212918-4bce16",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft",
+   "parent_job": "job-20261103-041015-d72006",
    "template": "chest",
    "params": {
     "seed": 545,
     "tier": "grand"
    },
-   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
    "title": "Grand Treasure Chest",
    "tags": [
     "tidebreakers"
@@ -34,48 +34,48 @@
   }
  },
  "status": "done",
- "created": "2026-11-02T21:29:19Z",
+ "created": "2026-11-03T04:10:16Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:29:19Z",
+   "started": "2026-11-03T04:10:16Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 23.4,
+   "seconds": 26.1,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.16
+     "seconds": 0.26
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 18.81
+     "seconds": 19.28
     },
     {
      "step": "validate_scene",
      "ok": true,
-     "seconds": 0.01
+     "seconds": 0.0
     },
     {
      "step": "export",
      "ok": true,
-     "seconds": 3.48
+     "seconds": 5.2
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.35
+     "seconds": 0.49
     }
    ],
-   "finished": "2026-11-02T21:29:42Z"
+   "finished": "2026-11-03T04:10:42Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-212918-4bce16",
- "updated": "2026-11-02T21:29:42Z",
+ "parent": "job-20261103-041015-d72006",
+ "updated": "2026-11-03T04:10:42Z",
  "library": {
   "asset": "grand_treasure_chest",
   "version": 1,

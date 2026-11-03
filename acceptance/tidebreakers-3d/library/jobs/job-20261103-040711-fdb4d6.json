@@ -1,123 +1,114 @@
 {
- "id": "job-20261102-212532-a3232c",
+ "id": "job-20261103-040711-fdb4d6",
  "tool": "generate",
- "asset_id": "tidebreakers_coastal_sloop",
+ "asset_id": "upgrade_brass_compass",
  "request": {
-  "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
-  "name": "TIDEBREAKERS Coastal Sloop",
-  "bake": 1024,
+  "brief": "boat upgrade component: Brass Compass",
+  "name": "Upgrade: Brass Compass",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "compass_brass"
+  },
+  "bake": 512,
   "profiles": [
    "three-web-toon",
-   "three-web-atlas",
    "web-pbr",
-   "unity-fbx",
-   "obj-static",
-   "stl-print",
-   "godot-glb"
+   "unity-fbx"
   ],
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:25:32Z",
+ "created": "2026-11-03T04:07:11Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:25:32Z",
+   "started": "2026-11-03T04:07:11Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:25:32Z",
+     "started": "2026-11-03T04:07:11Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:25:32Z",
+     "finished": "2026-11-03T04:07:11Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:25:32Z",
+     "started": "2026-11-03T04:07:11Z",
      "info": {
-      "meshcraft_job": "job-20261102-212533-3587f0",
+      "meshcraft_job": "job-20261103-040712-0c4408",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 27,
+       "pass": 18,
        "warn": 0,
        "fail": 0,
-       "info": 5
+       "info": 3
       },
       "library": {
-       "asset": "tidebreakers_coastal_sloop",
+       "asset": "upgrade_brass_compass",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:25:54Z",
-     "seconds": 21.92
+     "finished": "2026-11-03T04:07:34Z",
+     "seconds": 22.76
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:25:54Z",
+     "started": "2026-11-03T04:07:34Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:25:56Z",
-     "seconds": 2.47
+     "finished": "2026-11-03T04:07:37Z",
+     "seconds": 3.19
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:25:56Z",
+     "started": "2026-11-03T04:07:37Z",
      "info": {
-      "asset": "tidebreakers_coastal_sloop",
+      "asset": "upgrade_brass_compass",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-02T21:25:56Z",
+     "finished": "2026-11-03T04:07:37Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:25:56Z",
+   "finished": "2026-11-03T04:07:37Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212533-3587f0"
+  "job-20261103-040712-0c4408"
  ],
- "updated": "2026-11-02T21:25:56Z",
+ "updated": "2026-11-03T04:07:37Z",
  "plan": {
   "request": {
-   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
-   "intents": [
-    "stylized"
-   ],
-   "kind": "boat",
-   "template": "boat",
+   "brief": "boat upgrade component: Brass Compass",
+   "intents": [],
+   "kind": "upgrade",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 692,
-    "vessel": "sloop",
-    "paint": [
-     "#4FB39A",
-     "#F2EAD8"
-    ],
-    "sail_colors": [
-     "#F1E6CC",
-     "crimson"
-    ]
+    "seed": 263,
+    "upgrade": "compass_brass"
    },
    "images": 0,
-   "name": "stylized low-poly player boat: the Coastal Sloop, seafoam hu"
+   "name": "boat upgrade component: Brass Compass"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -172,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "tidebreakers_coastal_sloop",
+  "id": "upgrade_brass_compass",
   "version": 1,
-  "name": "TIDEBREAKERS Coastal Sloop",
+  "name": "Upgrade: Brass Compass",
   "validation": "passed"
  }
 }
