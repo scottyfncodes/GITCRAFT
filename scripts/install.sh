@@ -97,7 +97,7 @@ for entry in "${todo[@]}"; do
 done
 
 # Machine-readable result for doctor.sh and for anything orchestrating installs. meshcraft and
-# forgecraft are ok | failed | off (GITCRAFT_MESHCRAFT=0) | pending (written before the 3D step,
+# forgecraft are ok | failed | off (GITCRAFT_MESHCRAFT=0/none) | later | pending (written before the 3D step,
 # so a run cut off during the Blender download says so); "skipped" leaves them out.
 write_status() {
 python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
@@ -123,7 +123,8 @@ PY
 # are already in the runtime, registered and documented instead of left unregistered.
 mesh_state=skipped forge_state=skipped
 want_mesh=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " meshcraft " && ! " ${want[*]} " =~ " forgecraft " ]] && want_mesh=0   # forgecraft needs MeshCraft's Blender
-if [[ "$GITCRAFT_MESHCRAFT" != 1 ]]; then mesh_state=off forge_state=off
+if [[ "$GITCRAFT_MESHCRAFT" == later ]]; then mesh_state=later forge_state=later   # the SessionStart hook builds it
+elif [[ "$GITCRAFT_MESHCRAFT" != 1 ]]; then mesh_state=off forge_state=off
 elif ((want_mesh)); then mesh_state=pending forge_state=pending; fi
 "$here/install-global.sh"   # runtime copy in ~/.gitcraft/runtime, user-scope registration, global instructions
 write_status

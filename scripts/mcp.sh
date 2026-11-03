@@ -22,7 +22,12 @@ done
 [[ -n "$pkg" ]] || { echo "gitcraft: unknown tool '$name'" >&2; exit 2; }
 
 bin="$GITCRAFT_BIN/$pkg"
-[[ "$name" == meshcraft || "$name" == forgecraft ]] && bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"   # ForgeCraft drives MeshCraft's Blender
+# MeshCraft runs on its Blender venv's Python. Before Blender is installed it starts on the system Python, answers
+# the handshake and waits for the install (gitcraft3d/deferred.py), so a session that began first still gets it.
+# ForgeCraft always runs on the system Python and drives MeshCraft's Blender per job.
+if [[ "$name" == meshcraft ]]; then
+  if gitcraft_mesh_ready; then bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"; else bin="$(command -v python3)"; fi
+elif [[ "$name" == forgecraft ]]; then bin="$(command -v python3)"; fi
 if [[ ! -x "$bin" ]]; then
   echo "gitcraft: $pkg isn't built yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
   exit 1
@@ -80,6 +85,10 @@ writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
 [[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache")
+# Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
+# may start before Blender is installed, so create its folder now: the install fills it in later and the running
+# server can then read and run it (gitcraft3d/deferred.py).
+[[ "$name" == meshcraft || "$name" == forgecraft ]] && mkdir -p "$GITCRAFT_HOME/meshcraft" "$FORGECRAFT_HOME"
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done

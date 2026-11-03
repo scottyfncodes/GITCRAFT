@@ -26,6 +26,8 @@ const page_html = `<!doctype html><html><head><script type="importmap">{"imports
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// Meshopt-compressed GLBs (EXT_meshopt_compression) load like they would in a game; the decoder ships with three
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 const opts = ${JSON.stringify({ clip: args.clip || null, time: Number(args.time || 0), material: args.material || 'game-toon', allClips: args['all-clips'] === '1' })};
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(${size}, ${size}, false); renderer.setClearColor(0xd6ecee);
@@ -37,7 +39,9 @@ const grad = new THREE.DataTexture(new Uint8Array([90,90,90,255,150,150,150,255,
 grad.minFilter = grad.magFilter = THREE.NearestFilter; grad.needsUpdate = true;
 const report = { ok: true };
 try {
-  const gltf = await new GLTFLoader().loadAsync('http://gc.local/asset.glb');
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const gltf = await loader.loadAsync('http://gc.local/asset.glb');
+  report.extensions = gltf.parser.json.extensionsUsed || [];
   const root = gltf.scene; scene.add(root);
   let meshes = 0, withColor = 0, withMap = 0, tris = 0;
   root.traverse((o) => {

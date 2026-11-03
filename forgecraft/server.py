@@ -12,7 +12,7 @@ import json, os, sys, threading, traceback
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE); sys.path.insert(0, os.path.dirname(HERE))
 import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
-from gitcraft3d import hardware, jobs, library, routing
+from gitcraft3d import hardware, jobs, library, routing, deferred
 import meshcraft as mc
 import pipeline
 
@@ -115,25 +115,41 @@ def call(name, a):
 def main():
     out = sys.stdout
     lock = threading.Lock()
+    # Before MeshCraft's Blender is installed, list only forgecraft_status and announce the full list once it is
+    # (tools/list_changed): see gitcraft3d/deferred.py. Registered early, usable as soon as the install finishes.
+    waiting = [not deferred.ready()]
 
     def send(m):
         with lock: out.write(json.dumps(m, default=str) + "\n"); out.flush()
+    if waiting[0]:
+        def blender_arrived():
+            waiting[0] = False
+            send({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
+        deferred.Watcher(blender_arrived)
     for line in sys.stdin:
         try: msg = json.loads(line)
         except ValueError: continue
         mid, method, p = msg.get("id"), msg.get("method"), msg.get("params") or {}
         if mid is None: continue  # notifications
         if method == "initialize":
-            send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": p.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {}},
+            send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": p.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {"listChanged": True}},
                   "serverInfo": {"name": "forgecraft", "version": VERSION},
                   "instructions": "GITCRAFT 3D Department orchestrator. Start with hardware_probe or route; generate runs the whole production pipeline (MeshCraft does the Blender work); library_export hands assets to other tools."}})
         elif method == "tools/list":
-            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()]}})
+            listed = ([{"name": "forgecraft_status", "description": "ForgeCraft status. " + deferred.install_hint("ForgeCraft"),
+                        "inputSchema": {"type": "object", "properties": {}}}] if waiting[0]
+                      else [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()])
+            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": listed}})
         elif method == "tools/call":
             name, args = p.get("name"), p.get("arguments") or {}
 
             def work(mid=mid, name=name, args=args):
                 try:
+                    if waiting[0] and not deferred.ready():
+                        if name != "forgecraft_status": raise RuntimeError(deferred.install_hint("ForgeCraft"))
+                        r = deferred.status("ForgeCraft")
+                        send({"jsonrpc": "2.0", "id": mid, "result": {"content": [{"type": "text", "text": json.dumps(r, indent=1)}]}})
+                        return
                     r = call(name, args)
                     err = isinstance(r, dict) and r.get("status") in ("failed", "blocked")
                     send({"jsonrpc": "2.0", "id": mid, "result": {"isError": err, "content": [{"type": "text", "text": json.dumps(r, indent=1, default=str)}]}})

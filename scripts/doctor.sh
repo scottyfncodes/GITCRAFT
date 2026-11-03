@@ -31,9 +31,10 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
   IFS=: read -r name _ pkg <<<"$entry"
   if [[ "$name" == meshcraft || "$name" == forgecraft ]]; then
     if gitcraft_mesh_ready; then inst=yes
-    elif [[ "$(last_state "$name")" == off || ( "$GITCRAFT_MESHCRAFT" != 1 && ! -e "$GITCRAFT_HOME/meshcraft/venv" ) ]]; then
-      # turned off on purpose: report it, don't count it as a problem
-      say "$(printf '  %-13s %-10s %-11s %s' "$name" off off "skipped (GITCRAFT_MESHCRAFT=0)")"; off_note=1; continue
+    elif [[ "$(last_state "$name")" == off || "$(last_state "$name")" == later || ( "$GITCRAFT_MESHCRAFT" != 1 && ! -e "$GITCRAFT_HOME/meshcraft/venv" ) ]]; then
+      # turned off on purpose: report it, don't count it as a problem (still registered unless =none: it waits for Blender)
+      reg=$([[ " $registered " == *" $name "* ]] && echo yes || echo no)
+      say "$(printf '  %-13s %-10s %-11s %s' "$name" off "$reg" "not installed (GITCRAFT_MESHCRAFT=${GITCRAFT_MESHCRAFT}); waits for Blender")"; off_note=1; continue
     elif [[ -e "$GITCRAFT_HOME/meshcraft/venv" ]]; then
       inst=PARTIAL
       if [[ "$(last_state meshcraft)" == failed ]]; then
@@ -90,7 +91,8 @@ PY
 
 if ((off_note)); then
   say ""
-  say "  3D tools are off (GITCRAFT_MESHCRAFT=0). To add them: unset it and run scripts/install.sh meshcraft forgecraft"
+  say "  3D tools aren't installed. Run scripts/install.sh meshcraft forgecraft: the registered servers pick them up in the"
+  say "  running session (tools/list_changed). In a setup script with a time limit, use GITCRAFT_MESHCRAFT=later."
 fi
 if gitcraft_mesh_ready; then
   say ""

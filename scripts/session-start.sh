@@ -10,6 +10,12 @@ for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
   [[ -x "$GITCRAFT_BIN/$pkg" ]] || missing+=("$name")
 done
+# 3D: finish a Blender install the setup deferred (GITCRAFT_MESHCRAFT=later) or that was cut off (still "pending").
+# The servers are already registered and pick the tools up as soon as it lands (gitcraft3d/deferred.py).
+mesh_last=$(python3 -c 'import json,os,sys;print(json.load(open(os.path.join(sys.argv[1],"status.json"))).get("tools",{}).get("meshcraft",{}).get("state",""))' "$GITCRAFT_HOME" 2>/dev/null)
+if [[ "$GITCRAFT_MESHCRAFT" != none && ( "$mesh_last" == later || "$mesh_last" == pending ) ]] && ! gitcraft_mesh_ready; then
+  missing+=(meshcraft forgecraft)
+fi
 
 "$here/install-global.sh" >/dev/null 2>&1   # keeps ~/.gitcraft/runtime, user-scope registration and global instructions current
 

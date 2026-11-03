@@ -57,13 +57,28 @@ ROOTS = [os.path.realpath(r) for r in os.environ.get("GITCRAFT_ROOTS", os.enviro
 import queue, threading
 from engine import blockbench, mixamo              # standard library only: usable before Blender loads
 import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
-from gitcraft3d import hardware, library, jobs, routing
+from gitcraft3d import hardware, library, jobs, routing, deferred
 bpy = core = kit = Palette = None
 _import_error = []
 
+# How this process runs its Blender tools (see gitcraft3d/deferred.py):
+#   "in-process": started on the MeshCraft venv's Python (the normal path)
+#   "bridge":     started before Blender was installed; Blender calls go to the venv's one-shot `--call`
+#   "waiting":    Blender isn't installed yet; only meshcraft_status is listed until it is
+def _mode():
+    vpy = deferred.blender_python()
+    if vpy and os.path.realpath(sys.executable) == os.path.realpath(vpy): return "in-process"
+    try:
+        import importlib.util
+        if importlib.util.find_spec("bpy") is not None: return "in-process"   # a bpy on this interpreter (dev setups)
+    except Exception:
+        pass
+    return "bridge" if vpy else "waiting"
+MODE = [_mode()]
+
 def _load():
     global bpy, core, kit, Palette
-    if bpy is not None or _import_error: return
+    if bpy is not None or _import_error or MODE[0] != "in-process": return
     try:
         with contextlib.redirect_stdout(sys.stderr):   # bpy prints on import; stdout is the MCP channel
             import bpy as _bpy
@@ -130,6 +145,14 @@ def run_script(path, blend=None, save=True, args=None):
     if blend and save:
         bpy.ops.wm.save_mainfile(filepath=blend); out["saved"] = blend
     return out
+
+
+def _audit(a):
+    from engine import audit
+    for p in a.get("parts", []):
+        if p.get("file"): _need(p["file"])
+    if a.get("scene"): _need(a["scene"])
+    return audit.run(a)
 
 
 def _asset_id(a):
@@ -279,6 +302,13 @@ TOOLS = {
                   lambda a: engine_check(a["glb"], a.get("out"), a.get("clip"), a.get("time"), a.get("contract"), a.get("material", "game-toon"), int(a.get("size", 640)), bool(a.get("all_clips")))),
  "run_pipeline": ("The full workflow for one brief: build → preview → validate → export → validate exports (incl. Khronos) → contact sheet → manifest → report JSON.",
                   S({"brief": BRIEF}, ["brief"]), run_pipeline),
+ "audit_overlaps": ("Overlap audit for an assembly: parts (model files, material/region/node subsets of one, or box/cylinder proxies, "
+                    "each with a transform) or an assembled scene file, optional motion ranges for moving nodes, and contacts that touch on "
+                    "purpose. Builds a BVH per part and reports every pair whose triangles intersect, sweeping every combination of the "
+                    "motion poses (static pairs once). Coordinates: glTF (Y up, default) or Blender. See engine/audit.py and the README.",
+                    S({"parts": ARR, "scene": STR, "motion": ARR, "contacts": ARR, "frame": {"type": "string", "enum": ["gltf", "blender"]},
+                       "max_poses": NUM}),
+                    lambda a: _audit(a)),
  "run_script": ("Assisted modelling: run a Python script from the workspace inside Blender (globals: bpy, kit, args, Palette), optionally against a .blend which is then saved. Runs inside the sandbox.",
                 S({"path": STR, "blend": STR, "save": BOOL, "args": OBJ}, ["path"]),
                 lambda a: run_script(a["path"], a.get("blend"), a.get("save", True), a.get("args"))),
@@ -338,8 +368,10 @@ NO_BLENDER = {"hardware_probe", "blockbench_build", "blockbench_inspect", "mixam
               "library_search", "library_get", "library_export"}
 
 
+_send_lock = threading.Lock()
 def send(msg):
-    sys.__stdout__.write(json.dumps(msg, default=str) + "\n"); sys.__stdout__.flush()
+    with _send_lock:   # the Blender watcher thread may send tools/list_changed
+        sys.__stdout__.write(json.dumps(msg, default=str) + "\n"); sys.__stdout__.flush()
 
 
 def call(name, args):
@@ -350,6 +382,53 @@ def call(name, args):
         if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0])
     with contextlib.redirect_stdout(sys.stderr):
         return TOOLS[name][2](args)
+
+
+def _bridged(name, args):
+    """Run a Blender tool through the venv's one-shot mode. Used only by a server that started before Blender was
+    installed; the next session runs in-process."""
+    py = deferred.blender_python()
+    if not py: raise RuntimeError(deferred.install_hint("MeshCraft"))
+    import tempfile
+    fd, path = tempfile.mkstemp(suffix=".json", prefix="meshcraft_call_"); os.close(fd)
+    try:
+        json.dump(args, open(path, "w"))
+        r = subprocess.run([py, os.path.abspath(__file__), "--call", name, "@" + path], capture_output=True, text=True, timeout=6 * 3600)
+        last = [l for l in r.stdout.splitlines() if l.strip().startswith("{")]
+        if not last: raise RuntimeError(f"MeshCraft (bridge) gave no result: {r.stderr[-1500:]}")
+        out = json.loads(last[-1])
+        if not out.get("ok"): raise RuntimeError(out.get("error", "failed") + "\n" + out.get("trace", ""))
+        return out["result"]
+    finally:
+        os.unlink(path)
+
+
+def run_tool(name, args):
+    """tools/call: in-process, or bridged when this server started before Blender was installed."""
+    if name not in TOOLS: raise ValueError(f"unknown tool {name}")
+    if MODE[0] == "waiting":
+        if name == "meshcraft_status": return deferred.status("MeshCraft")
+        raise RuntimeError(deferred.install_hint("MeshCraft"))
+    if name in NO_BLENDER:
+        with contextlib.redirect_stdout(sys.stderr):
+            return TOOLS[name][2](args)
+    if MODE[0] == "bridge":
+        res = _bridged(name, args)
+        if name == "meshcraft_status" and isinstance(res, dict):
+            res["mode"] = "bridge: this server started before Blender was installed; new sessions run in-process"
+        return res
+    _load()
+    if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0] + " (run scripts/doctor.sh)")
+    with contextlib.redirect_stdout(sys.stderr):
+        res = TOOLS[name][2](args)
+    if name == "meshcraft_status" and isinstance(res, dict): res["mode"] = "in-process"
+    return res
+
+
+def tool_list():
+    if MODE[0] == "waiting":
+        return [{"name": "meshcraft_status", "description": "MeshCraft status. " + deferred.install_hint("MeshCraft"), "inputSchema": S({})}]
+    return [{"name": n, "description": d, "inputSchema": s} for n, (d, s, _) in TOOLS.items()]
 
 
 def main():
@@ -367,6 +446,11 @@ def main():
         for line in sys.stdin: inbox.put(line)
         inbox.put(None)
     threading.Thread(target=reader, daemon=True).start()
+    if MODE[0] == "waiting":
+        def blender_arrived():
+            MODE[0] = "bridge"
+            send({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
+        deferred.Watcher(blender_arrived)
     while True:
         try:
             line = inbox.get(timeout=0.5)
@@ -379,19 +463,14 @@ def main():
         mid, method = msg.get("id"), msg.get("method")
         if method == "initialize":
             send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": msg.get("params", {}).get("protocolVersion", "2025-06-18"),
-                  "capabilities": {"tools": {}}, "serverInfo": {"name": "meshcraft", "title": "MeshCraft (Blender)", "version": "1.0.0"},
+                  "capabilities": {"tools": {"listChanged": True}}, "serverInfo": {"name": "meshcraft", "title": "MeshCraft (Blender)", "version": "1.0.0"},
                   "instructions": "3D production for GITCRAFT. Start with meshcraft_status and list_templates; run_pipeline does the whole brief → deliverables workflow. Export profiles include three-web-toon (vertex-colour toon), web-pbr (baked texture maps) and stl-print. Blockbench (.bbmodel) and Mixamo hand-offs: blockbench_* and mixamo_* tools; hardware_probe says what this machine can do."}})
         elif method == "tools/list":
-            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [{"name": n, "description": d, "inputSchema": s} for n, (d, s, _) in TOOLS.items()]}})
+            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": tool_list()}})
         elif method == "tools/call":
             p = msg.get("params", {}); name, args = p.get("name"), p.get("arguments") or {}
             try:
-                if name not in TOOLS: raise ValueError(f"unknown tool {name}")
-                if name not in NO_BLENDER:
-                    _load()
-                    if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0] + " (run scripts/doctor.sh)")
-                with contextlib.redirect_stdout(sys.stderr):
-                    res = TOOLS[name][2](args)
+                res = run_tool(name, args)
                 send({"jsonrpc": "2.0", "id": mid, "result": {"content": [{"type": "text", "text": json.dumps(res, default=str)}]}})
             except Exception as e:
                 tb = traceback.format_exc(limit=4)
