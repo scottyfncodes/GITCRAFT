@@ -1,10 +1,10 @@
 {
- "id": "job-20261103-041157-ba7d6e",
+ "id": "job-20261103-044749-150e8a",
  "tool": "generate",
  "asset_id": "salvage_raft_photogrammetry_scan",
  "request": {
   "images": [
-   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos"
+   "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos"
   ],
   "name": "Salvage Raft (photogrammetry scan)",
   "max_tris": 20000,
@@ -26,33 +26,33 @@
   "brief": "photogrammetry reconstruction"
  },
  "status": "done",
- "created": "2026-11-03T04:11:57Z",
+ "created": "2026-11-03T04:47:49Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:11:57Z",
+   "started": "2026-11-03T04:47:49Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:11:57Z",
+     "started": "2026-11-03T04:47:49Z",
      "info": {
       "chosen": "meshroom",
       "route": "photogrammetry",
       "fallback_used": false,
       "explanation": "Several photos of a real object or place: reconstruct the actual geometry instead of inventing it."
      },
-     "finished": "2026-11-03T04:11:57Z",
+     "finished": "2026-11-03T04:47:49Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:11:57Z",
+     "started": "2026-11-03T04:47:49Z",
      "info": {
-      "meshcraft_job": "job-20261103-041906-ac491d",
+      "meshcraft_job": "job-20261103-045318-00774d",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -66,43 +66,43 @@
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:19:31Z",
-     "seconds": 453.98
+     "finished": "2026-11-03T04:53:44Z",
+     "seconds": 354.75
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:19:31Z",
+     "started": "2026-11-03T04:53:44Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:19:34Z",
-     "seconds": 3.2
+     "finished": "2026-11-03T04:53:47Z",
+     "seconds": 3.34
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:19:34Z",
+     "started": "2026-11-03T04:53:47Z",
      "info": {
       "asset": "salvage_raft_photogrammetry_scan",
       "version": 1,
       "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-03T04:19:34Z",
+     "finished": "2026-11-03T04:53:47Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:19:34Z",
+   "finished": "2026-11-03T04:53:47Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-041906-ac491d"
+  "job-20261103-045318-00774d"
  ],
- "updated": "2026-11-03T04:19:34Z",
+ "updated": "2026-11-03T04:53:47Z",
  "plan": {
   "request": {
    "brief": "photogrammetry reconstruction",

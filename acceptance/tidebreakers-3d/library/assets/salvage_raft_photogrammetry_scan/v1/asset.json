@@ -1,7 +1,7 @@
 {
  "id": "salvage_raft_photogrammetry_scan",
  "version": 1,
- "created": "2026-11-03T04:19:30Z",
+ "created": "2026-11-03T04:53:43Z",
  "tool": "run_pipeline",
  "template": "mesh_import",
  "tags": [
@@ -12,10 +12,10 @@
  "brief": {
   "asset_id": "salvage_raft_photogrammetry_scan",
   "template": "mesh_import",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft",
   "title": "Salvage Raft (photogrammetry scan)",
   "params": {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshroom_out/texturedMesh.obj",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshroom_out/texturedMesh.obj",
    "crop": 0.22,
    "target_size": 2.4,
    "max_tris": 20000
@@ -38,9 +38,9 @@
    "scan"
   ],
   "library": true,
-  "parent_job": "job-20261103-041157-ba7d6e"
+  "parent_job": "job-20261103-044749-150e8a"
  },
- "job": "job-20261103-041906-ac491d",
+ "job": "job-20261103-045318-00774d",
  "same_as": null,
  "inputs": [],
  "validation": {
@@ -52,7 +52,7 @@
    "info": 3
   }
  },
- "triangles": 238,
+ "triangles": 1451,
  "clips": [],
  "contract": {
   "root": "salvage_raft_photogrammetry_scan"
@@ -61,114 +61,114 @@
   {
    "path": "source/salvage_raft_photogrammetry_scan.blend",
    "kind": "blend",
-   "bytes": 97468,
-   "sha256": "48adeb30a266d60e9d7d8da92c6942f55858e342a2bef0b09489350609986729",
-   "content": "48adeb30a266d60e9d7d8da92c6942f55858e342a2bef0b09489350609986729",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/source/salvage_raft_photogrammetry_scan.blend"
+   "bytes": 140353,
+   "sha256": "4680f7b2a8af67779c9bd86e02458af4a1f0e6d9e44cfeb0e90c9f70f491c6bd",
+   "content": "4680f7b2a8af67779c9bd86e02458af4a1f0e6d9e44cfeb0e90c9f70f491c6bd",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/source/salvage_raft_photogrammetry_scan.blend"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
    "kind": "export",
-   "bytes": 5020660,
-   "sha256": "a7376479b7a43d4372e4783bd0d15fb5897595728ff42a23bfb14ca4dff9845f",
-   "content": "ed1f4572787938b00a4c284f745797175eb44e41f22bdc6b21a301ae99a97841",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb"
+   "bytes": 4281564,
+   "sha256": "5f9b657a92e66e99deb0732b88d69f9bf34681e1d3d2bf8425c6064f50b8721c",
+   "content": "ad4ff3993bbb12e1ee7aaf21cef6d163a885d77b2e686ef2711a9de4a1a59b81",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.glb"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb",
    "kind": "lod",
-   "bytes": 5004588,
-   "sha256": "1fb46e0248f172325e4b14fe66b9215082c856b33a66adb93d98d8be510d9fa8",
-   "content": "5707f622afc49a5534ff34a49c9c28402f58ba57c2c59078fe4f9dcd93ba62c3",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb"
+   "bytes": 4189004,
+   "sha256": "381d3ac926ffbdcc34141dbe1b826549b2fb6fcfd1bf74d7d848293b5f87e682",
+   "content": "93d415c5e73338e77c695e39c6623ab3b748539098a257dd34abae584df1fd61",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb",
    "kind": "lod",
-   "bytes": 4997024,
-   "sha256": "6dab31931fb4d7229c5bb41fa2914b1019fc9946ca8fec0bdbdd280f548cdfea",
-   "content": "363cedf7237390fcc0b25d88bdd451e8e686bdab7028231ca7bbfbe324612552",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb"
+   "bytes": 4143264,
+   "sha256": "1a3d8e2373d683451a42a40d763b5b4140156e001743ef25ef9e3b6dd0a4b7fa",
+   "content": "b9aeb05a0f4a64e499e1e70aa219e2f7caf4b5065ce7fbdc6f4a2f363d9904fc",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb",
    "kind": "collision",
-   "bytes": 4772,
-   "sha256": "0e258b4d891ace1bdfee9e56c31a23ff4fc57b39565cfd7cd5fc3f5263f68cf3",
-   "content": "6843c986a378079b7e5f2895639e149a156cac4f61665f887b5d86776d4db7a6",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb"
+   "bytes": 13352,
+   "sha256": "3cd757f70666d0392f8361f55177f4d24a8d34c1d52d196950fab9db2080cd6e",
+   "content": "69af6b17cdba554011098a6e3c4b9c6e8a45a8625cf0a48c2cb8edbb8b572066",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.three-web-toon.collision.glb"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
    "kind": "export",
-   "bytes": 785928,
-   "sha256": "1d5bc9caee032d0a37cac9cfb7b2fecf6c04ca801db84ac78aa8bb9279ecb512",
-   "content": "aa298535ddf320bf30f1397cadc1e5c538c9b00c84347aa72237e9d9d86c367d",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb"
+   "bytes": 1034784,
+   "sha256": "419b8ef2a4c73f5ebf754872adce875c3c663b611c6735dadb09444e13ae3be8",
+   "content": "7558cc28d418954a0cafb4bd5d0b43a94520b7c32eec42b856fb66a5d15a41d4",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.glb"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
    "kind": "sidecar",
-   "bytes": 724423,
-   "sha256": "ec1dc8e4ce24b46c27cf47bc8b3601924ab6697e3dbab443e6d0f814f35ab742",
-   "content": "ec1dc8e4ce24b46c27cf47bc8b3601924ab6697e3dbab443e6d0f814f35ab742",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png"
+   "bytes": 841637,
+   "sha256": "8eb9ed0360c054a46a039cfafa2e8f0be6ece9a8b2349a419bc2c09af34f2146",
+   "content": "8eb9ed0360c054a46a039cfafa2e8f0be6ece9a8b2349a419bc2c09af34f2146",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png",
    "kind": "sidecar",
-   "bytes": 34464,
-   "sha256": "dc6ec627914513c76620fe448c3718cd3e5c734fd87237b9f7981da459737f2f",
-   "content": "dc6ec627914513c76620fe448c3718cd3e5c734fd87237b9f7981da459737f2f",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png"
+   "bytes": 42357,
+   "sha256": "243d6adb3d15f0d2adb656ff27982b26e2ce52fb6a457a65dbbccd56608769fd",
+   "content": "243d6adb3d15f0d2adb656ff27982b26e2ce52fb6a457a65dbbccd56608769fd",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.web-pbr.orm.png"
   },
   {
    "path": "exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx",
    "kind": "export",
-   "bytes": 4799244,
-   "sha256": "7f74ed9f84939513ba8c7cff90978f43a36f50d6e3c081a93d0a96f17967fcf3",
-   "content": "fbx-size:4799244",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx"
+   "bytes": 4075132,
+   "sha256": "b4312423f9296f232eb05942dbb7d243f4b4965e8baec1aeb4b1d1acb5c13db2",
+   "content": "fbx-size:4075132",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/exports/salvage_raft_photogrammetry_scan.unity-fbx.fbx"
   },
   {
    "path": "previews/salvage_raft_photogrammetry_scan_three_quarter.png",
    "kind": "preview",
-   "bytes": 119071,
-   "sha256": "27a39379b15fafa50e14d47a579ba7445b6c6a3102f11d20104b79f0dcc600c4",
-   "content": "27a39379b15fafa50e14d47a579ba7445b6c6a3102f11d20104b79f0dcc600c4",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_three_quarter.png"
+   "bytes": 126917,
+   "sha256": "5cd4575d0e2072f78bb36ac3799207cc014ba254661add70cad10ea978fdb1af",
+   "content": "5cd4575d0e2072f78bb36ac3799207cc014ba254661add70cad10ea978fdb1af",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/previews/salvage_raft_photogrammetry_scan_three_quarter.png"
   },
   {
    "path": "previews/salvage_raft_photogrammetry_scan_front.png",
    "kind": "preview",
-   "bytes": 88140,
-   "sha256": "51681842ade703d5f619d38465fde5d8e8daa47572db69ba6804f6276a0db16b",
-   "content": "51681842ade703d5f619d38465fde5d8e8daa47572db69ba6804f6276a0db16b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_front.png"
+   "bytes": 77469,
+   "sha256": "745413805e1b06dc18cb33e1a706e8e4fff30b69dc776b3c6c39d248ff0be8bf",
+   "content": "745413805e1b06dc18cb33e1a706e8e4fff30b69dc776b3c6c39d248ff0be8bf",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/previews/salvage_raft_photogrammetry_scan_front.png"
   },
   {
    "path": "previews/salvage_raft_photogrammetry_scan_side.png",
    "kind": "preview",
-   "bytes": 85691,
-   "sha256": "396a0deced9f390cc5fd043066332897abec88612d5306f8c7748d6b41ec364d",
-   "content": "396a0deced9f390cc5fd043066332897abec88612d5306f8c7748d6b41ec364d",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_side.png"
+   "bytes": 77497,
+   "sha256": "a68374dc69bc1e0792c26d556ad726fa80666b026067b2306e0b5e9f3ffcac72",
+   "content": "a68374dc69bc1e0792c26d556ad726fa80666b026067b2306e0b5e9f3ffcac72",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/previews/salvage_raft_photogrammetry_scan_side.png"
   },
   {
    "path": "previews/salvage_raft_photogrammetry_scan_sheet.png",
    "kind": "preview",
-   "bytes": 135344,
-   "sha256": "4454ef328bf2b2bfb2b26e13795a58fffa51ea98b11d866fc89e2072557c60b3",
-   "content": "4454ef328bf2b2bfb2b26e13795a58fffa51ea98b11d866fc89e2072557c60b3",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/previews/salvage_raft_photogrammetry_scan_sheet.png"
+   "bytes": 131735,
+   "sha256": "9ba552c8eb2c8bd8823d7781321b3a7defacce7342060bba02f41f6733cde3ea",
+   "content": "9ba552c8eb2c8bd8823d7781321b3a7defacce7342060bba02f41f6733cde3ea",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/previews/salvage_raft_photogrammetry_scan_sheet.png"
   },
   {
    "path": "salvage_raft_photogrammetry_scan.meshcraft.json",
    "kind": "report",
-   "bytes": 12033,
-   "sha256": "deadf860d758898c583fe375e430627dbbfba610db352b59d67dd63d2bab8e01",
-   "content": "deadf860d758898c583fe375e430627dbbfba610db352b59d67dd63d2bab8e01",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft/salvage_raft_photogrammetry_scan.meshcraft.json"
+   "bytes": 12043,
+   "sha256": "bcb2f759fb63bd5fb421006235157d58d624a1243fa56010f3a174acb7d5436c",
+   "content": "bcb2f759fb63bd5fb421006235157d58d624a1243fa56010f3a174acb7d5436c",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044749-150e8a/meshcraft/salvage_raft_photogrammetry_scan.meshcraft.json"
   }
  ],
  "title": "Salvage Raft (photogrammetry scan)",
@@ -196,151 +196,151 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261103-041157-ba7d6e",
-  "meshcraft_job": "job-20261103-041906-ac491d",
+  "forgecraft_job": "job-20261103-044749-150e8a",
+  "meshcraft_job": "job-20261103-045318-00774d",
   "inputs": [
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_00.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_00.jpg",
     "sha256": "c1680d9c9d289afabf5df8f8037a89ec40bae34c3123a199fd13508d484e7c07"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_01.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_01.jpg",
     "sha256": "26b227b98fb024d0d30ceb4b47b80c9b0d44ac211c7b32a50283caafd74cac45"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_02.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_02.jpg",
     "sha256": "35761827dcc222397b0874673148f974c42d2a1170df0d9c8ce2afe50fdba0c6"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_03.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_03.jpg",
     "sha256": "c857ff59cd15fa91670d69c328899cc0426fbd5b4f89e535955844e0ca8483c8"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_04.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_04.jpg",
     "sha256": "17e29b51a46f27c14d2ff0cd48f8279f52870839aab84b7126d9ffc881fe773f"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_05.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_05.jpg",
     "sha256": "71b619231decd0bceba033c0fa93cd675d9199305b2fbd325ed4cc29d7ec1c75"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_06.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_06.jpg",
     "sha256": "900da93dc8ed491f1587a31b1395cdda3cedbf5537cc896b52d925b351e7c08b"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_07.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_07.jpg",
     "sha256": "4159112df0e45c0a108e35c7bbbd9a04d1559cdb89c1cbd82c01f933a11728e3"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_08.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_08.jpg",
     "sha256": "944d947a85f0a5117014cecf6ebcff46748436104883b2e869971358efe5a095"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_09.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_09.jpg",
     "sha256": "048967b43467cd46bfab91f76bdc4b2f46ee9ecdde1b2e8414041a2e1bab80b9"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_10.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_10.jpg",
     "sha256": "747fe1221fac02afd7ae026754ce0664fc5519a582471837510a362e57e87929"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_11.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_11.jpg",
     "sha256": "b76e06e1709392494ddb2a0acbcec1b7ac3400b2712a04f239d4d650f5d04a0b"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_12.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_12.jpg",
     "sha256": "9e0b78a731416bf8f919d6d00196bf602bb6cb47ba3a4d7007f1eb40a7f05eba"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_13.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_13.jpg",
     "sha256": "8f0d875e60e18700a1a26f3df53dfae2d0b611f38d2ed20c90d8c12b0d7af4c0"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_14.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_14.jpg",
     "sha256": "fb1829c5d1d523e25aa002d4848be9fdca481f7982c55cfce41791ef2f239179"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_15.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_15.jpg",
     "sha256": "725e4696a97ff7b4fb1bf803f6572232030087d889b922916a81e284e64e4392"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_16.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_16.jpg",
     "sha256": "edb6aa11639c3f524402315340ad13730867b2b39f7ac887a8c476677a57a46b"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_0_17.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_0_17.jpg",
     "sha256": "3af9f5cc9eae9a2b49cda2e0cc243e9272602de5d21954cbe33513ac71e5761f"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_00.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_00.jpg",
     "sha256": "90361cfc3766ce8c39d81a24b4a0a4efac2a5b9d9e6e3c5870bc685d24e94983"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_01.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_01.jpg",
     "sha256": "911bd122a101883a8de4357bbd1b6e89ba3f24aecef3a2cbb99fe8279f8917cd"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_02.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_02.jpg",
     "sha256": "7097d2283d9b72bf41fd898acf18ffa500af1f1c09b882d13c0be19978718731"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_03.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_03.jpg",
     "sha256": "0ad73e2a425255655211e831b9fbeb799c41ec93d2a00479be95f8071ed79ce8"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_04.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_04.jpg",
     "sha256": "8178b373b8c5d813b3441204ab7b3d7a976edc4d128c4603a1d3f19ab76c1784"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_05.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_05.jpg",
     "sha256": "4143906fa032c901363ef58f740e7e45dd34aea288875b1adcc4b3df9c0a000c"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_06.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_06.jpg",
     "sha256": "e9a08db04e102fe10fb6e10b3aefee3b2a1a76edcfa27c6b23bbe1e2d00097f9"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_07.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_07.jpg",
     "sha256": "8d9c6d0460d42dfa481a7eadd4e7417d8f6d6f433efe971b69ac43646044cdcc"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_08.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_08.jpg",
     "sha256": "66c500cf807dd2ea2aa66c915525f8da7138bed1a9c5931ec53930972b7e39f4"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_09.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_09.jpg",
     "sha256": "8018b77ef6984d369778115ac012e0608656cfb2364d6bd112f2ea4af83b1aa1"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_10.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_10.jpg",
     "sha256": "b7a08d328a8365ca277b23a6fa0e45c976c69a4552c03a82a2ce5b55a698db95"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_11.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_11.jpg",
     "sha256": "1222a432b4e0e84b13800f17da8e2d00a447f8be50e744d5fb7b3da6b45c0e8c"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_12.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_12.jpg",
     "sha256": "749cff2e6ed275d5c1cca5701c6125ee4eb381f1a03a7e9e55b841d6d58387ed"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_13.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_13.jpg",
     "sha256": "27df22f758ccab6d2d35c8a991b937f61ea3e75adf11cc9d512681b56f62203f"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_14.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_14.jpg",
     "sha256": "65952d3b390aec9c4490e894687f9bf41786c4ecb4aab69ac83fab4e32bf7eeb"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_15.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_15.jpg",
     "sha256": "855511fad0d2104fd81994e37314bbeb16793936ee2f4f3bb4f4f7b5402dae6a"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_16.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_16.jpg",
     "sha256": "e3eb64d66dd1c79a9f231c61c83490894c4f74f9aad4635c1c4c6dc4225e60fb"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/photos/view_1_17.jpg",
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/photos/view_1_17.jpg",
     "sha256": "da0d2264767697d3565eb9b2fbd8e5dad676039d35a67e49e6362104f9b5cbd3"
    }
   ],
@@ -350,13 +350,13 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-03T04:19:34Z"
+  "recorded": "2026-11-03T04:53:47Z"
  },
  "generation": {
   "pipeline": "photogrammetryDraft",
   "images": 36,
   "cameras_reconstructed": 36,
-  "seconds": 428.3,
+  "seconds": 328.0,
   "version": "2023.3.0",
   "textured": true,
   "method": "meshroom",
@@ -365,11 +365,11 @@
  },
  "rig": null,
  "geometry": {
-  "triangles": 238,
+  "triangles": 1451,
   "size_m": [
    2.4,
-   2.353,
-   0.396
+   2.391,
+   0.29
   ],
   "meshes": null
  },
@@ -419,7 +419,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261103-041157-ba7d6e",
+  "forgecraft_job": "job-20261103-044749-150e8a",
   "route": "photogrammetry",
   "tool": "meshroom"
  }

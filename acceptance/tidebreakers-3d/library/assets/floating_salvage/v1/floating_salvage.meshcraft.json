@@ -2,8 +2,8 @@
  "asset_id": "floating_salvage",
  "brief": {
   "asset_id": "floating_salvage",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft",
-  "parent_job": "job-20261103-040839-52d88e",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft",
+  "parent_job": "job-20261103-044439-b3755f",
   "template": "salvage",
   "params": {
    "seed": 752
@@ -38,12 +38,12 @@
   {
    "step": "build",
    "ok": true,
-   "seconds": 0.29
+   "seconds": 0.25
   },
   {
    "step": "preview",
    "ok": true,
-   "seconds": 19.58
+   "seconds": 17.98
   },
   {
    "step": "validate_scene",
@@ -53,7 +53,7 @@
   {
    "step": "export",
    "ok": true,
-   "seconds": 3.6
+   "seconds": 3.61
   },
   {
    "step": "contact_sheet",
@@ -63,12 +63,12 @@
  ],
  "build": {
   "blend": {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/source/floating_salvage.blend",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/source/floating_salvage.blend",
    "kind": "blend",
-   "bytes": 120104,
-   "sha256": "e30390bc2be31b8e8a897040f9a353312f7d0c72f963f85fc9c13d08af92c72e"
+   "bytes": 120105,
+   "sha256": "e923b5ad695e509e177550cd8442657f709f47b95ff4e26d81f03897f73f412b"
   },
-  "seconds": 0.19,
+  "seconds": 0.16,
   "roles": {
    "plank_d9954f": "#D9954F",
    "wood_5e331b": "#5E331B",
@@ -98,47 +98,47 @@
  },
  "previews": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/previews/floating_salvage_three_quarter.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/previews/floating_salvage_three_quarter.png",
    "kind": "preview",
    "bytes": 139317,
-   "sha256": "15cc102919977b7ead1df633573dc9289d3248f27ed1b85c3a5f3a3c3928ac9b",
+   "sha256": "62faac30912a47c751e19380a237a7b10a29d24edce5d3cad8047652d82cef2c",
    "view": "three_quarter",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/previews/floating_salvage_front.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/previews/floating_salvage_front.png",
    "kind": "preview",
    "bytes": 109930,
-   "sha256": "9b0e5fc6ddfc0c58f3db0686415105f7578b0bd3fdad04f3afb1d0b35c0247b8",
+   "sha256": "e8c8fd7cd6a441b9afc0453d7bfe9781e9b6c760d9faaf821727f6c7d0423dcd",
    "view": "front",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/previews/floating_salvage_side.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/previews/floating_salvage_side.png",
    "kind": "preview",
    "bytes": 111430,
-   "sha256": "83bef34ad293ae235b8fe1565584f7b9504862007047a80fff865601a4a4f6e9",
+   "sha256": "4fb669f035da1e3eb0e6980dc619f30303dacda3c8244fa4b424822cc9dd0f4f",
    "view": "side",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/previews/floating_salvage_top.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/previews/floating_salvage_top.png",
    "kind": "preview",
    "bytes": 162457,
-   "sha256": "eda0b83feb4471494465ec20cc927d581df67df19e1c201ed7e92bbf838711a2",
+   "sha256": "6a0105923c71c0f117dade4ff2b586638f3a59c89f17ed194542e281f1a0fad6",
    "view": "top",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/previews/floating_salvage_sheet.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/previews/floating_salvage_sheet.png",
    "kind": "contact_sheet",
    "bytes": 188753,
    "sha256": "f17f6f6d31f2f72214bb75859ee0de55ff79ad1d9f40ccf85cf2002a21500229"
@@ -146,16 +146,16 @@
  ],
  "exports": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.glb",
    "kind": "export",
    "bytes": 97972,
-   "sha256": "420350484f3ad8784a656c0a9552943a823b94d5d05197b4f294ea0a7dc8ceae",
+   "sha256": "d2c119d07def83228a4ff82d8377642093ca093a0ef76a6474571063292a82c4",
    "profile": "three-web-toon",
    "format": "glb",
    "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
    "extras": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb",
      "kind": "lod",
      "bytes": 66248,
      "sha256": "e50c52c1a2f1c5d5ba4c4756546d9b3a4a58ddf67da1c247e35da9e5ad94045e",
@@ -163,7 +163,7 @@
      "triangles": 593
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb",
      "kind": "lod",
      "bytes": 38616,
      "sha256": "5e0ce1a4e484e775dc3b3b32a790f1c7056d821ec2c1bb50bcac824a92dfa3a9",
@@ -171,7 +171,7 @@
      "triangles": 294
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.collision.glb",
      "kind": "collision",
      "bytes": 8264,
      "sha256": "ae2d95dbc4f600aaf89dc69b8e8994e8c88f0ea5f0a18e5de37a4c2e229bab53",
@@ -181,26 +181,26 @@
    ],
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.collision.glb",
      "kind": "sidecar",
      "bytes": 8264,
      "sha256": "ae2d95dbc4f600aaf89dc69b8e8994e8c88f0ea5f0a18e5de37a4c2e229bab53"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.lod25.glb",
      "kind": "sidecar",
      "bytes": 38616,
      "sha256": "5e0ce1a4e484e775dc3b3b32a790f1c7056d821ec2c1bb50bcac824a92dfa3a9"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.lod50.glb",
      "kind": "sidecar",
      "bytes": 66248,
      "sha256": "e50c52c1a2f1c5d5ba4c4756546d9b3a4a58ddf67da1c247e35da9e5ad94045e"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.three-web-toon.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.three-web-toon.glb",
     "objects": [
      "floating_salvage (EMPTY)",
      "floating_salvage_mesh (MESH)"
@@ -230,17 +230,17 @@
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.web-pbr.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.web-pbr.glb",
    "kind": "export",
    "bytes": 251416,
-   "sha256": "d1a54513ec8942781bd302407bcee11d943cdb5d46f1b2b3398e1113e560d97a",
+   "sha256": "de04da05e6159b959dc1d7cdc5d57a2f48dbc8e08f39951513d68651f476df1d",
    "profile": "web-pbr",
    "format": "glb",
    "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
    "bake": {
     "maps": {
-     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.web-pbr.basecolor.png",
-     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.web-pbr.orm.png"
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.web-pbr.orm.png"
     },
     "resolution": 1024,
     "attempts": [
@@ -252,20 +252,20 @@
    },
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.web-pbr.basecolor.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.web-pbr.basecolor.png",
      "kind": "sidecar",
      "bytes": 104140,
      "sha256": "f5946851537da6b66576d53b949fb35fa385cad30933452d2364a8e5498dc3d0"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.web-pbr.orm.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.web-pbr.orm.png",
      "kind": "sidecar",
      "bytes": 57552,
      "sha256": "4662f1b550e0439b34d33590ce52c2bedf25186c35597cf688359bf390ace4fc"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.web-pbr.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.web-pbr.glb",
     "objects": [
      "floating_salvage (EMPTY)",
      "floating_salvage_mesh (MESH)"
@@ -287,16 +287,16 @@
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.unity-fbx.fbx",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.unity-fbx.fbx",
    "kind": "export",
    "bytes": 57180,
-   "sha256": "8fc320b0c3510326d0fab07d801630d74e0d96ed8a3cfba1bc3df5a8db073e9e",
+   "sha256": "a2fc69e10f0b2da014f02d9f0118e10dcbcd6afde9c756ca122f82e1f5f17459",
    "profile": "unity-fbx",
    "format": "fbx",
    "engine": "Unity / Unreal (FBX)",
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft/exports/floating_salvage.unity-fbx.atlas.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft/exports/floating_salvage.unity-fbx.atlas.png",
      "kind": "sidecar",
      "bytes": 301,
      "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03"
@@ -441,5 +441,5 @@
    "info": 3
   }
  },
- "seconds": 24.5
+ "seconds": 22.8
 }

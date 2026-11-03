@@ -1,12 +1,12 @@
 {
- "id": "job-20261103-040549-4e0ce2",
+ "id": "job-20261103-044155-326de8",
  "tool": "run_pipeline",
  "asset_id": "tidebreakers_coastal_sloop",
  "request": {
   "brief": {
    "asset_id": "tidebreakers_coastal_sloop",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft",
-   "parent_job": "job-20261103-040547-8b6cac",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft",
+   "parent_job": "job-20261103-044153-5a497f",
    "template": "boat",
    "params": {
     "seed": 692,
@@ -52,25 +52,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:05:49Z",
+ "created": "2026-11-03T04:41:55Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:05:49Z",
+   "started": "2026-11-03T04:41:55Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 24.4,
+   "seconds": 24.8,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.84
+     "seconds": 0.63
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 17.49
+     "seconds": 18.05
     },
     {
      "step": "validate_scene",
@@ -80,20 +80,20 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 4.4
+     "seconds": 4.43
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.28
+     "seconds": 0.3
     }
    ],
-   "finished": "2026-11-03T04:06:13Z"
+   "finished": "2026-11-03T04:42:19Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040547-8b6cac",
- "updated": "2026-11-03T04:06:13Z",
+ "parent": "job-20261103-044153-5a497f",
+ "updated": "2026-11-03T04:42:19Z",
  "library": {
   "asset": "tidebreakers_coastal_sloop",
   "version": 1,

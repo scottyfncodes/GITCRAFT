@@ -1,15 +1,13 @@
 {
- "id": "job-20261103-040737-75c270",
+ "id": "job-20261103-044608-2eb224",
  "tool": "generate",
- "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+ "asset_id": "grand_treasure_chest",
  "request": {
-  "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
-  "name": "Upgrade: Ship's Wheel & Ash Rudder",
-  "kind": "upgrade",
+  "brief": "grand treasure chest",
+  "name": "Grand Treasure Chest",
   "template_params": {
-   "upgrade": "rudder_ash"
+   "tier": "grand"
   },
-  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -20,95 +18,94 @@
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:07:37Z",
+ "created": "2026-11-03T04:46:08Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:07:37Z",
+   "started": "2026-11-03T04:46:08Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:07:37Z",
+     "started": "2026-11-03T04:46:08Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:07:37Z",
+     "finished": "2026-11-03T04:46:08Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:07:37Z",
+     "started": "2026-11-03T04:46:08Z",
      "info": {
-      "meshcraft_job": "job-20261103-040738-c23a44",
+      "meshcraft_job": "job-20261103-044609-0da125",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 18,
+       "pass": 22,
        "warn": 0,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "upgrade_ship_s_wheel_ash_rudder",
+       "asset": "grand_treasure_chest",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:08:10Z",
-     "seconds": 33.26
+     "finished": "2026-11-03T04:46:35Z",
+     "seconds": 26.62
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:08:10Z",
+     "started": "2026-11-03T04:46:35Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:08:13Z",
-     "seconds": 3.24
+     "finished": "2026-11-03T04:46:38Z",
+     "seconds": 3.41
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:08:13Z",
+     "started": "2026-11-03T04:46:38Z",
      "info": {
-      "asset": "upgrade_ship_s_wheel_ash_rudder",
+      "asset": "grand_treasure_chest",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-03T04:08:13Z",
+     "finished": "2026-11-03T04:46:38Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:08:13Z",
+   "finished": "2026-11-03T04:46:38Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040738-c23a44"
+  "job-20261103-044609-0da125"
  ],
- "updated": "2026-11-03T04:08:13Z",
+ "updated": "2026-11-03T04:46:38Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
+   "brief": "grand treasure chest",
    "intents": [],
-   "kind": "upgrade",
-   "template": "boat_upgrade",
+   "kind": null,
+   "template": "chest",
    "params": {
-    "seed": 777,
-    "upgrade": "rudder_ash"
+    "seed": 545
    },
    "images": 0,
-   "name": "boat upgrade component: Ship's Wheel & Ash Rudder"
+   "name": "grand treasure chest"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -163,9 +160,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_ship_s_wheel_ash_rudder",
+  "id": "grand_treasure_chest",
   "version": 1,
-  "name": "Upgrade: Ship's Wheel & Ash Rudder",
+  "name": "Grand Treasure Chest",
   "validation": "passed"
  }
 }

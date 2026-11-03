@@ -1,13 +1,13 @@
 {
- "id": "job-20261103-040711-fdb4d6",
+ "id": "job-20261103-044245-72d0eb",
  "tool": "generate",
- "asset_id": "upgrade_brass_compass",
+ "asset_id": "upgrade_lashed_cargo_crates",
  "request": {
-  "brief": "boat upgrade component: Brass Compass",
-  "name": "Upgrade: Brass Compass",
+  "brief": "boat upgrade component: Lashed Cargo Crates",
+  "name": "Upgrade: Lashed Cargo Crates",
   "kind": "upgrade",
   "template_params": {
-   "upgrade": "compass_brass"
+   "upgrade": "cargo_crate"
   },
   "bake": 512,
   "profiles": [
@@ -20,33 +20,33 @@
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:07:11Z",
+ "created": "2026-11-03T04:42:45Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:07:11Z",
+   "started": "2026-11-03T04:42:45Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:07:11Z",
+     "started": "2026-11-03T04:42:45Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:07:11Z",
+     "finished": "2026-11-03T04:42:45Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:07:11Z",
+     "started": "2026-11-03T04:42:45Z",
      "info": {
-      "meshcraft_job": "job-20261103-040712-0c4408",
+      "meshcraft_job": "job-20261103-044246-d4485f",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -56,59 +56,59 @@
        "info": 3
       },
       "library": {
-       "asset": "upgrade_brass_compass",
+       "asset": "upgrade_lashed_cargo_crates",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:07:34Z",
-     "seconds": 22.76
+     "finished": "2026-11-03T04:43:12Z",
+     "seconds": 27.0
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:07:34Z",
+     "started": "2026-11-03T04:43:12Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:07:37Z",
-     "seconds": 3.19
+     "finished": "2026-11-03T04:43:15Z",
+     "seconds": 3.04
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:07:37Z",
+     "started": "2026-11-03T04:43:15Z",
      "info": {
-      "asset": "upgrade_brass_compass",
+      "asset": "upgrade_lashed_cargo_crates",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-03T04:07:37Z",
+     "finished": "2026-11-03T04:43:15Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:07:37Z",
+   "finished": "2026-11-03T04:43:15Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040712-0c4408"
+  "job-20261103-044246-d4485f"
  ],
- "updated": "2026-11-03T04:07:37Z",
+ "updated": "2026-11-03T04:43:15Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Brass Compass",
+   "brief": "boat upgrade component: Lashed Cargo Crates",
    "intents": [],
    "kind": "upgrade",
    "template": "boat_upgrade",
    "params": {
-    "seed": 263,
-    "upgrade": "compass_brass"
+    "seed": 78,
+    "upgrade": "cargo_crate"
    },
    "images": 0,
-   "name": "boat upgrade component: Brass Compass"
+   "name": "boat upgrade component: Lashed Cargo Crates"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -163,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_brass_compass",
+  "id": "upgrade_lashed_cargo_crates",
   "version": 1,
-  "name": "Upgrade: Brass Compass",
+  "name": "Upgrade: Lashed Cargo Crates",
   "validation": "passed"
  }
 }

@@ -1,11 +1,11 @@
 {
- "id": "job-20261103-041935-c8a2bb",
+ "id": "job-20261103-045348-c10366",
  "tool": "compose_scene",
  "asset_id": "tidebreakers_turtle_cay_scene",
  "request": {
   "asset_id": "tidebreakers_turtle_cay_scene",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft",
-  "parent_job": "job-20261103-041934-c437c7",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-045347-303d4f/meshcraft",
+  "parent_job": "job-20261103-045347-303d4f",
   "items": [
    {
     "asset": "turtle_cay",
@@ -81,21 +81,21 @@
   "samples": 48
  },
  "status": "done",
- "created": "2026-11-03T04:19:35Z",
+ "created": "2026-11-03T04:53:48Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:19:35Z",
+   "started": "2026-11-03T04:53:48Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 44.4,
-   "finished": "2026-11-03T04:20:19Z"
+   "seconds": 44.5,
+   "finished": "2026-11-03T04:54:33Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-041934-c437c7",
- "updated": "2026-11-03T04:20:19Z",
+ "parent": "job-20261103-045347-303d4f",
+ "updated": "2026-11-03T04:54:33Z",
  "library": {
   "asset": "tidebreakers_turtle_cay_scene",
   "version": 1,

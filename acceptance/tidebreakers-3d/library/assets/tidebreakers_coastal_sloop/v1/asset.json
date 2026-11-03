@@ -1,7 +1,7 @@
 {
  "id": "tidebreakers_coastal_sloop",
  "version": 1,
- "created": "2026-11-03T04:06:13Z",
+ "created": "2026-11-03T04:42:19Z",
  "tool": "run_pipeline",
  "template": "boat",
  "tags": [
@@ -11,8 +11,8 @@
  ],
  "brief": {
   "asset_id": "tidebreakers_coastal_sloop",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft",
-  "parent_job": "job-20261103-040547-8b6cac",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft",
+  "parent_job": "job-20261103-044153-5a497f",
   "template": "boat",
   "params": {
    "seed": 692,
@@ -56,7 +56,7 @@
    ]
   }
  },
- "job": "job-20261103-040549-4e0ce2",
+ "job": "job-20261103-044155-326de8",
  "same_as": null,
  "inputs": [
   {
@@ -83,18 +83,18 @@
   {
    "path": "source/tidebreakers_coastal_sloop.blend",
    "kind": "blend",
-   "bytes": 179743,
-   "sha256": "1e1143f54d28ae6d054f0ef8c12e6253c838c35333e4dfaabb973d318e05c1e4",
-   "content": "1e1143f54d28ae6d054f0ef8c12e6253c838c35333e4dfaabb973d318e05c1e4",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/source/tidebreakers_coastal_sloop.blend"
+   "bytes": 179746,
+   "sha256": "d195b26832257f195170f03556b0ce3edb9c84ac09cc699f09d2528476cf8a23",
+   "content": "d195b26832257f195170f03556b0ce3edb9c84ac09cc699f09d2528476cf8a23",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/source/tidebreakers_coastal_sloop.blend"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.three-web-toon.glb",
    "kind": "export",
    "bytes": 312656,
-   "sha256": "fcae287b853c103dfd5a555cc3716f1ab6bb2e02f8593bb36ed2fe51857b1d6d",
+   "sha256": "f4bdd1d6fa8b577f6de1ef64d8d6604ca4cfecbf82670aeb802011e5e45da3a8",
    "content": "a1c6fe8afda2e9a30b359f0656665b6587c7d9911284293bbaaf1be23bb1770e",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.three-web-toon.lod50.glb",
@@ -102,7 +102,7 @@
    "bytes": 221484,
    "sha256": "ca793fee327abf4b312a6803bd06f43e78b930aad8fee935cc9b87d05cacf658",
    "content": "1be1b441c132f6e8289cdbf528669861219d16fc577698f28bc3496c9377cc6f",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod50.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.three-web-toon.lod25.glb",
@@ -110,7 +110,7 @@
    "bytes": 121832,
    "sha256": "5594d5d15b919262307838db2684c13d64f897e1d4e664629ff0e66ada9aa538",
    "content": "c2e7fdbe9e1be2f06a872a7c8291b1f82209883cfb5fbc2c549686f20dc38592",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod25.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.three-web-toon.collision.glb",
@@ -118,15 +118,15 @@
    "bytes": 29256,
    "sha256": "296c6543c60e181f7671dd23991f2c317c5821dbedde2bb1268241ae2d9b4dab",
    "content": "95ce524be169068d1af36c3cee9e2021b98f2c3b39274cdddf685eb9efe99417",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.three-web-toon.collision.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.three-web-atlas.glb",
    "kind": "export",
    "bytes": 369572,
-   "sha256": "8545bfd1cf2a1457d0b95c6fd214ad8edf74fbc5433698b4343a1053f5b5a568",
+   "sha256": "019cf01380f3e0b310313ea39aef011b7ef2944293b7c1fcf7dc2c0965989412",
    "content": "0100dc38ee995f22aa53a4c899a60f04786373d10842d184fb8f86058f9d8e26",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.three-web-atlas.atlas.png",
@@ -134,15 +134,15 @@
    "bytes": 301,
    "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
    "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.three-web-atlas.atlas.png"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.web-pbr.glb",
    "kind": "export",
    "bytes": 668040,
-   "sha256": "c8dcbfdb82def9fa68a6ad0955a83c51428bab73d1b1bb28b586f2819ee21fa6",
+   "sha256": "f0ea1a200ca13805d8e1a890b214e954de7d7d6bc3d1eb3ad742a1bab6216945",
    "content": "5149706d1ce53feda633b14b735c8f3985aebc30166800f3150f302a3743cc6b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.web-pbr.basecolor.png",
@@ -150,7 +150,7 @@
    "bytes": 242009,
    "sha256": "01588660243d4740f8083bc0d47e824c10e674c667dedb3b25a3bef0e56c0270",
    "content": "01588660243d4740f8083bc0d47e824c10e674c667dedb3b25a3bef0e56c0270",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.basecolor.png"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.web-pbr.emissive.png",
@@ -158,7 +158,7 @@
    "bytes": 16090,
    "sha256": "5715c49cd3e24a90a54bb308475c24e64ea47622f3f6a989f7ee9003e44dee35",
    "content": "5715c49cd3e24a90a54bb308475c24e64ea47622f3f6a989f7ee9003e44dee35",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.emissive.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.emissive.png"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.web-pbr.orm.png",
@@ -166,15 +166,15 @@
    "bytes": 109850,
    "sha256": "a46ce0adf33ac021c597aed5b9474845e48c4e5ed7a75e4cee404e0760747a44",
    "content": "a46ce0adf33ac021c597aed5b9474845e48c4e5ed7a75e4cee404e0760747a44",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.web-pbr.orm.png"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.unity-fbx.fbx",
    "kind": "export",
    "bytes": 137692,
-   "sha256": "db52c12cd6bd5152a88a82944c05bd749733ac9abba7f421b068d604aec72062",
+   "sha256": "d0eb678a23c95dc53af0c66cf4207a3b6de09f9ffc2935515c09433368e872d7",
    "content": "fbx-size:137692",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.unity-fbx.fbx"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.unity-fbx.atlas.png",
@@ -182,7 +182,7 @@
    "bytes": 301,
    "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
    "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.unity-fbx.atlas.png"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.obj-static.obj",
@@ -190,7 +190,7 @@
    "bytes": 305781,
    "sha256": "cd367d9940242856455b1d94d0bbfd40f2fb7c5640edb70d5932d6e41dffdb36",
    "content": "cd367d9940242856455b1d94d0bbfd40f2fb7c5640edb70d5932d6e41dffdb36",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.obj"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.obj"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.obj-static.atlas.png",
@@ -198,7 +198,7 @@
    "bytes": 301,
    "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
    "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.atlas.png"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.obj-static.mtl",
@@ -206,7 +206,7 @@
    "bytes": 289,
    "sha256": "9abe481dea24b810da1df2046a3db242358a0c5778f995e3e1d8147d76dbbacb",
    "content": "9abe481dea24b810da1df2046a3db242358a0c5778f995e3e1d8147d76dbbacb",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.mtl"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.obj-static.mtl"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.stl-print.stl",
@@ -214,15 +214,15 @@
    "bytes": 219684,
    "sha256": "6de1f8c10fc803d41acbf5536ebc21ebd7f5e2fb2bab93424e1fbed4693f9fae",
    "content": "6de1f8c10fc803d41acbf5536ebc21ebd7f5e2fb2bab93424e1fbed4693f9fae",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.stl-print.stl"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.stl-print.stl"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.godot-glb.glb",
    "kind": "export",
    "bytes": 369564,
-   "sha256": "03f98da3c4ebac03af4ebe476909e6dc205dd2e8e2c7c486e55cae1efcdfd1d8",
+   "sha256": "244a9ae58d026d7e9e1e9b48f7632585c5f1948c090994819980247ef6da2a64",
    "content": "475b40114be566cba0130f733ba9b1109d3c0cd5a490710f3e058792f170e267",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.glb"
   },
   {
    "path": "exports/tidebreakers_coastal_sloop.godot-glb.atlas.png",
@@ -230,39 +230,39 @@
    "bytes": 301,
    "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
    "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/exports/tidebreakers_coastal_sloop.godot-glb.atlas.png"
   },
   {
    "path": "previews/tidebreakers_coastal_sloop_three_quarter.png",
    "kind": "preview",
    "bytes": 114489,
-   "sha256": "933518a9fbc46bf12e14a29ddb34e9e8553030b33b4e8690c25ac0df298e3541",
-   "content": "933518a9fbc46bf12e14a29ddb34e9e8553030b33b4e8690c25ac0df298e3541",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/previews/tidebreakers_coastal_sloop_three_quarter.png"
+   "sha256": "25d38c0cc33f61d22379e2c334d06d2faaff883db78a7ff66f4b03d3e33a2985",
+   "content": "25d38c0cc33f61d22379e2c334d06d2faaff883db78a7ff66f4b03d3e33a2985",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/previews/tidebreakers_coastal_sloop_three_quarter.png"
   },
   {
    "path": "previews/tidebreakers_coastal_sloop_front.png",
    "kind": "preview",
    "bytes": 91682,
-   "sha256": "b890846c03f02d0487b39fef06339e5cec9071bc075ff551e152b14edabf379b",
-   "content": "b890846c03f02d0487b39fef06339e5cec9071bc075ff551e152b14edabf379b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/previews/tidebreakers_coastal_sloop_front.png"
+   "sha256": "90a7e1f55175da33d476d0e110873ea870e09317b9ba28c10ce02f046d239149",
+   "content": "90a7e1f55175da33d476d0e110873ea870e09317b9ba28c10ce02f046d239149",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/previews/tidebreakers_coastal_sloop_front.png"
   },
   {
    "path": "previews/tidebreakers_coastal_sloop_side.png",
    "kind": "preview",
    "bytes": 128584,
-   "sha256": "cbe4f88580967cead5b574e9e04fc44767e059c93aca5526de1f7a65352379df",
-   "content": "cbe4f88580967cead5b574e9e04fc44767e059c93aca5526de1f7a65352379df",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/previews/tidebreakers_coastal_sloop_side.png"
+   "sha256": "6eed3584f7fd3ec3c9cf51d2add465d91bd0e9c165af5d5021fc8d4d07644fd1",
+   "content": "6eed3584f7fd3ec3c9cf51d2add465d91bd0e9c165af5d5021fc8d4d07644fd1",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/previews/tidebreakers_coastal_sloop_side.png"
   },
   {
    "path": "previews/tidebreakers_coastal_sloop_top.png",
    "kind": "preview",
    "bytes": 112688,
-   "sha256": "134efce90e8f5cccc3995c07a5746319fbcf75825c8420a6c4c71c7e2a2ad1d2",
-   "content": "134efce90e8f5cccc3995c07a5746319fbcf75825c8420a6c4c71c7e2a2ad1d2",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/previews/tidebreakers_coastal_sloop_top.png"
+   "sha256": "1d9b3facce3e6c71f8acd7bbc0dc0491b4f36833ba25e31065972c468d2e4daf",
+   "content": "1d9b3facce3e6c71f8acd7bbc0dc0491b4f36833ba25e31065972c468d2e4daf",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/previews/tidebreakers_coastal_sloop_top.png"
   },
   {
    "path": "previews/tidebreakers_coastal_sloop_sheet.png",
@@ -270,15 +270,15 @@
    "bytes": 139918,
    "sha256": "8ad31630969d4c4b5dfbba9c0e4a5ddd04872cb258df5dfc3b8aeeef2df7e600",
    "content": "8ad31630969d4c4b5dfbba9c0e4a5ddd04872cb258df5dfc3b8aeeef2df7e600",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/previews/tidebreakers_coastal_sloop_sheet.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/previews/tidebreakers_coastal_sloop_sheet.png"
   },
   {
    "path": "tidebreakers_coastal_sloop.meshcraft.json",
    "kind": "report",
    "bytes": 21703,
-   "sha256": "a9ca0f01dc35f61e94691fa44007f1c05b172627809ddf45ef3f3d7177551394",
-   "content": "a9ca0f01dc35f61e94691fa44007f1c05b172627809ddf45ef3f3d7177551394",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040547-8b6cac/meshcraft/tidebreakers_coastal_sloop.meshcraft.json"
+   "sha256": "feb44b7d74cfdb13beda0385020b4974bdd2512f189c158aba69dd629afd0972",
+   "content": "feb44b7d74cfdb13beda0385020b4974bdd2512f189c158aba69dd629afd0972",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044153-5a497f/meshcraft/tidebreakers_coastal_sloop.meshcraft.json"
   }
  ],
  "title": "TIDEBREAKERS Coastal Sloop",
@@ -302,8 +302,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261103-040547-8b6cac",
-  "meshcraft_job": "job-20261103-040549-4e0ce2",
+  "forgecraft_job": "job-20261103-044153-5a497f",
+  "meshcraft_job": "job-20261103-044155-326de8",
   "inputs": [],
   "blender": "5.2.3",
   "machine": {
@@ -311,7 +311,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-03T04:06:17Z"
+  "recorded": "2026-11-03T04:42:23Z"
  },
  "generation": {
   "method": "meshcraft template",
@@ -390,7 +390,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261103-040547-8b6cac",
+  "forgecraft_job": "job-20261103-044153-5a497f",
   "route": "template",
   "tool": "meshcraft_template"
  }

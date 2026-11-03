@@ -1,5 +1,5 @@
 {
- "id": "job-20261103-041046-13fcfb",
+ "id": "job-20261103-044638-516beb",
  "tool": "generate",
  "asset_id": "reef_crab_blockbench",
  "request": {
@@ -15,33 +15,33 @@
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:10:46Z",
+ "created": "2026-11-03T04:46:38Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:10:46Z",
+   "started": "2026-11-03T04:46:38Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:10:46Z",
+     "started": "2026-11-03T04:46:38Z",
      "info": {
       "chosen": "blockbench",
       "route": "voxel",
       "fallback_used": false,
       "explanation": "Blocky / voxel style is Blockbench's format; the .bbmodel stays hand-editable in Blockbench."
      },
-     "finished": "2026-11-03T04:10:46Z",
+     "finished": "2026-11-03T04:46:38Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:10:46Z",
+     "started": "2026-11-03T04:46:38Z",
      "info": {
-      "meshcraft_job": "job-20261103-041047-916827",
+      "meshcraft_job": "job-20261103-044639-300a7b",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -55,43 +55,43 @@
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:11:27Z",
-     "seconds": 41.19
+     "finished": "2026-11-03T04:47:20Z",
+     "seconds": 41.4
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:11:27Z",
+     "started": "2026-11-03T04:47:20Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:11:30Z",
-     "seconds": 3.4
+     "finished": "2026-11-03T04:47:23Z",
+     "seconds": 3.26
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:11:30Z",
+     "started": "2026-11-03T04:47:23Z",
      "info": {
       "asset": "reef_crab_blockbench",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-03T04:11:30Z",
+     "finished": "2026-11-03T04:47:23Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:11:30Z",
+   "finished": "2026-11-03T04:47:23Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-041047-916827"
+  "job-20261103-044639-300a7b"
  ],
- "updated": "2026-11-03T04:11:30Z",
+ "updated": "2026-11-03T04:47:23Z",
  "plan": {
   "request": {
    "brief": "blocky voxel reef crab creature",

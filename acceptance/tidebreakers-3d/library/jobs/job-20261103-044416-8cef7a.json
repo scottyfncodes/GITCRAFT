@@ -1,19 +1,19 @@
 {
- "id": "job-20261103-040641-22125f",
+ "id": "job-20261103-044416-8cef7a",
  "tool": "run_pipeline",
- "asset_id": "upgrade_lashed_cargo_crates",
+ "asset_id": "upgrade_copper_banded_hull",
  "request": {
   "brief": {
-   "asset_id": "upgrade_lashed_cargo_crates",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft",
-   "parent_job": "job-20261103-040640-c482ba",
+   "asset_id": "upgrade_copper_banded_hull",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044415-41e4db/meshcraft",
+   "parent_job": "job-20261103-044415-41e4db",
    "template": "boat_upgrade",
    "params": {
-    "seed": 78,
-    "upgrade": "cargo_crate"
+    "seed": 173,
+    "upgrade": "hull_copper"
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Lashed Cargo Crates",
+   "title": "Upgrade: Copper-Banded Hull",
    "tags": [
     "tidebreakers"
    ],
@@ -40,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:06:41Z",
+ "created": "2026-11-03T04:44:16Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:06:41Z",
+   "started": "2026-11-03T04:44:16Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 25.6,
+   "seconds": 19.5,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.22
+     "seconds": 0.46
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 16.63
+     "seconds": 16.66
     },
     {
      "step": "validate_scene",
@@ -68,24 +68,24 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 7.82
+     "seconds": 1.51
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.34
+     "seconds": 0.27
     }
    ],
-   "finished": "2026-11-03T04:07:07Z"
+   "finished": "2026-11-03T04:44:35Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040640-c482ba",
- "updated": "2026-11-03T04:07:07Z",
+ "parent": "job-20261103-044415-41e4db",
+ "updated": "2026-11-03T04:44:35Z",
  "library": {
-  "asset": "upgrade_lashed_cargo_crates",
+  "asset": "upgrade_copper_banded_hull",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_lashed_cargo_crates/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_copper_banded_hull/v1",
   "same_as": null,
   "files": 16
  }

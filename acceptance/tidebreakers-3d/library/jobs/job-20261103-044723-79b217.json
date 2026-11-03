@@ -1,12 +1,12 @@
 {
- "id": "job-20261103-041131-db4693",
+ "id": "job-20261103-044723-79b217",
  "tool": "generate",
  "asset_id": "deckhand_pip",
  "request": {
   "character": "deckhand_pip",
   "animations": [
-   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Walking.fbx",
-   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
+   "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Walking.fbx",
+   "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
   ],
   "name": "Deckhand Pip",
   "tags": [
@@ -16,33 +16,33 @@
   "brief": "Deckhand Pip"
  },
  "status": "done",
- "created": "2026-11-03T04:11:31Z",
+ "created": "2026-11-03T04:47:23Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:11:31Z",
+   "started": "2026-11-03T04:47:23Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:11:31Z",
+     "started": "2026-11-03T04:47:23Z",
      "info": {
       "chosen": "mixamo",
       "route": "mixamo",
       "fallback_used": false,
       "explanation": "merge Mixamo clips: MeshCraft mixamo_apply"
      },
-     "finished": "2026-11-03T04:11:31Z",
+     "finished": "2026-11-03T04:47:23Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:11:31Z",
+     "started": "2026-11-03T04:47:23Z",
      "info": {
-      "meshcraft_job": "job-20261103-041132-e77a59",
+      "meshcraft_job": "job-20261103-044724-be37fa",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -56,43 +56,43 @@
        "version": 2
       }
      },
-     "finished": "2026-11-03T04:11:52Z",
-     "seconds": 21.17
+     "finished": "2026-11-03T04:47:44Z",
+     "seconds": 20.64
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:11:52Z",
+     "started": "2026-11-03T04:47:44Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:11:56Z",
-     "seconds": 3.52
+     "finished": "2026-11-03T04:47:48Z",
+     "seconds": 3.56
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:11:56Z",
+     "started": "2026-11-03T04:47:48Z",
      "info": {
       "asset": "deckhand_pip",
       "version": 2,
       "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-03T04:11:56Z",
+     "finished": "2026-11-03T04:47:48Z",
      "seconds": 0.01
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:11:56Z",
+   "finished": "2026-11-03T04:47:48Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-041132-e77a59"
+  "job-20261103-044724-be37fa"
  ],
- "updated": "2026-11-03T04:11:56Z",
+ "updated": "2026-11-03T04:47:48Z",
  "plan": {
   "request": {
    "brief": "Deckhand Pip",

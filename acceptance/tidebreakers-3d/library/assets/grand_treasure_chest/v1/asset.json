@@ -1,7 +1,7 @@
 {
  "id": "grand_treasure_chest",
  "version": 1,
- "created": "2026-11-03T04:10:42Z",
+ "created": "2026-11-03T04:46:35Z",
  "tool": "run_pipeline",
  "template": "chest",
  "tags": [
@@ -11,8 +11,8 @@
  ],
  "brief": {
   "asset_id": "grand_treasure_chest",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft",
-  "parent_job": "job-20261103-041015-d72006",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft",
+  "parent_job": "job-20261103-044608-2eb224",
   "template": "chest",
   "params": {
    "seed": 545,
@@ -38,7 +38,7 @@
    ]
   }
  },
- "job": "job-20261103-041016-f2de28",
+ "job": "job-20261103-044609-0da125",
  "same_as": null,
  "inputs": [
   {
@@ -89,18 +89,18 @@
   {
    "path": "source/grand_treasure_chest.blend",
    "kind": "blend",
-   "bytes": 144736,
-   "sha256": "2eed6e331f9203de32b6aac3a9b88f54faa332455024ec1a21c4e5961f91620c",
-   "content": "2eed6e331f9203de32b6aac3a9b88f54faa332455024ec1a21c4e5961f91620c",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/source/grand_treasure_chest.blend"
+   "bytes": 144732,
+   "sha256": "8f65ef4826aadcbe8c8e070ac07c77a2366a6a9410fcc8b908e7864dba32c880",
+   "content": "8f65ef4826aadcbe8c8e070ac07c77a2366a6a9410fcc8b908e7864dba32c880",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/source/grand_treasure_chest.blend"
   },
   {
    "path": "exports/grand_treasure_chest.three-web-toon.glb",
    "kind": "export",
    "bytes": 186760,
-   "sha256": "881d31681d6fb1c2c18630fd89f2079c8a90307b2c0a372a96794df2917ae228",
+   "sha256": "62d51266cbedddef92e2f30f3ccd9d4bf7bdb4f2461fc218be3f53a27099e015",
    "content": "b268c81f0c340ee2ae2201c8d05e9f5cc21089f6bbd33a8b0655c62b477e8be8",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.three-web-toon.glb"
   },
   {
    "path": "exports/grand_treasure_chest.three-web-toon.lod50.glb",
@@ -108,7 +108,7 @@
    "bytes": 131044,
    "sha256": "5469c3aef08e43554888847abbcbc25b7bc9dbb58b0cd49ab9c6af898209b5c6",
    "content": "69c5c3a214b7b4a7e4efdef5e2087631a3b197925d57591e0193995750381d94",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.three-web-toon.lod50.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/grand_treasure_chest.three-web-toon.lod25.glb",
@@ -116,7 +116,7 @@
    "bytes": 72236,
    "sha256": "2de6467583c755e32f0596a8ac79580bff6642c5f8cee0b49fbadf0360513aaf",
    "content": "68ef96b7da575b7afb16fbbf819a4e829ba09317861f2f64972a002b341f18bb",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.three-web-toon.lod25.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/grand_treasure_chest.three-web-toon.collision.glb",
@@ -124,15 +124,15 @@
    "bytes": 11288,
    "sha256": "261986213f29608e133ab25016c01ae4dce6397184effb08f5c5c89f279c6f98",
    "content": "1a97fb7f01a8ee0ddae00ac9a06078045aceb7c0de9076c7685ac86b1af3096a",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.three-web-toon.collision.glb"
   },
   {
    "path": "exports/grand_treasure_chest.web-pbr.glb",
    "kind": "export",
    "bytes": 444068,
-   "sha256": "d23de2c8b5f46a763c68d3b114566c8959858cefa9b1e0d16d59b157f7623934",
+   "sha256": "4c56d23fafd3754bf490c0bbada68dbdf15a8f62e6ab39c507c7186f4597767d",
    "content": "3d878b43eba50b0fc0a33dee4fa7a6e0f1fc5185bc60ad6fd9ea68214468ea9c",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.web-pbr.glb"
   },
   {
    "path": "exports/grand_treasure_chest.web-pbr.basecolor.png",
@@ -140,7 +140,7 @@
    "bytes": 176183,
    "sha256": "5b4af19e1addc3ccea7b21e476085d7a5e1b4952fe4c3e720d5ea3a6b1ec3b3b",
    "content": "5b4af19e1addc3ccea7b21e476085d7a5e1b4952fe4c3e720d5ea3a6b1ec3b3b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.web-pbr.basecolor.png"
   },
   {
    "path": "exports/grand_treasure_chest.web-pbr.orm.png",
@@ -148,15 +148,15 @@
    "bytes": 91195,
    "sha256": "6fe8bef9d8413b09df443b8f83302f4b7bc429c3cb31f6c13807991ff7b6ff80",
    "content": "6fe8bef9d8413b09df443b8f83302f4b7bc429c3cb31f6c13807991ff7b6ff80",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.web-pbr.orm.png"
   },
   {
    "path": "exports/grand_treasure_chest.unity-fbx.fbx",
    "kind": "export",
    "bytes": 95660,
-   "sha256": "21e4d181f95de5eae965377d6b3af7aa3d6445a614b2325cb0bc9faaa72fb3ec",
+   "sha256": "a1f0083fde546d159192593debabfff7f609aef31b252c3f34835948f08d4c3c",
    "content": "fbx-size:95660",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.unity-fbx.fbx"
   },
   {
    "path": "exports/grand_treasure_chest.unity-fbx.atlas.png",
@@ -164,39 +164,39 @@
    "bytes": 301,
    "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
    "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/exports/grand_treasure_chest.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/exports/grand_treasure_chest.unity-fbx.atlas.png"
   },
   {
    "path": "previews/grand_treasure_chest_three_quarter.png",
    "kind": "preview",
    "bytes": 196507,
-   "sha256": "811b83e96da0a4013236fb593200e30f46879b8259ac8d0c0ae7f627ecc30ba6",
-   "content": "811b83e96da0a4013236fb593200e30f46879b8259ac8d0c0ae7f627ecc30ba6",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/previews/grand_treasure_chest_three_quarter.png"
+   "sha256": "ee8b7a9bd6cb8d4f35cac20fc66f0bfe98f4e593d627bee3cf1a451a7e788289",
+   "content": "ee8b7a9bd6cb8d4f35cac20fc66f0bfe98f4e593d627bee3cf1a451a7e788289",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/previews/grand_treasure_chest_three_quarter.png"
   },
   {
    "path": "previews/grand_treasure_chest_front.png",
    "kind": "preview",
    "bytes": 153981,
-   "sha256": "2b4555d004b7894294e91e987a04fb14ee97f1415f1b8edbccb2afa0e041a7d4",
-   "content": "2b4555d004b7894294e91e987a04fb14ee97f1415f1b8edbccb2afa0e041a7d4",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/previews/grand_treasure_chest_front.png"
+   "sha256": "965e83ed552f12abe303e5e76d61aa875c86feff9d6aaf8271811c9852c11c13",
+   "content": "965e83ed552f12abe303e5e76d61aa875c86feff9d6aaf8271811c9852c11c13",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/previews/grand_treasure_chest_front.png"
   },
   {
    "path": "previews/grand_treasure_chest_side.png",
    "kind": "preview",
    "bytes": 127355,
-   "sha256": "28b41b6edd98f6339f46981a83cbdf599115db02a7c0d1d2d0dad8354154357e",
-   "content": "28b41b6edd98f6339f46981a83cbdf599115db02a7c0d1d2d0dad8354154357e",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/previews/grand_treasure_chest_side.png"
+   "sha256": "f2e591c8c35d7003a6d7b0befb8a8c2c82171fa0a48be488cc1c3d17970ee5d2",
+   "content": "f2e591c8c35d7003a6d7b0befb8a8c2c82171fa0a48be488cc1c3d17970ee5d2",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/previews/grand_treasure_chest_side.png"
   },
   {
    "path": "previews/grand_treasure_chest_top.png",
    "kind": "preview",
    "bytes": 123154,
-   "sha256": "1c2c666dd1d2a99c14e32f7663ad92dbb7a4f2ac2d106900f13e504035d76b1b",
-   "content": "1c2c666dd1d2a99c14e32f7663ad92dbb7a4f2ac2d106900f13e504035d76b1b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/previews/grand_treasure_chest_top.png"
+   "sha256": "ae8c87ce4af0617aeda45b212679195e61d11f79fcf14be261c2b29ac41affe0",
+   "content": "ae8c87ce4af0617aeda45b212679195e61d11f79fcf14be261c2b29ac41affe0",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/previews/grand_treasure_chest_top.png"
   },
   {
    "path": "previews/grand_treasure_chest_sheet.png",
@@ -204,15 +204,15 @@
    "bytes": 224146,
    "sha256": "dbf39a57e11c51cfb3b956d446ed96642f129dda482b1adc96e67b2b7ceb3c0e",
    "content": "dbf39a57e11c51cfb3b956d446ed96642f129dda482b1adc96e67b2b7ceb3c0e",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/previews/grand_treasure_chest_sheet.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/previews/grand_treasure_chest_sheet.png"
   },
   {
    "path": "grand_treasure_chest.meshcraft.json",
    "kind": "report",
-   "bytes": 14023,
-   "sha256": "e6442302276056daf125e64d69b1df10a76be07fd8e987663272d698a0f1fbe9",
-   "content": "e6442302276056daf125e64d69b1df10a76be07fd8e987663272d698a0f1fbe9",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft/grand_treasure_chest.meshcraft.json"
+   "bytes": 14025,
+   "sha256": "126c0224ad078a166ccc4ef8629d7f3af84765df76e6d0ee9ca43117717fe470",
+   "content": "126c0224ad078a166ccc4ef8629d7f3af84765df76e6d0ee9ca43117717fe470",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft/grand_treasure_chest.meshcraft.json"
   }
  ],
  "title": "Grand Treasure Chest",
@@ -236,8 +236,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261103-041015-d72006",
-  "meshcraft_job": "job-20261103-041016-f2de28",
+  "forgecraft_job": "job-20261103-044608-2eb224",
+  "meshcraft_job": "job-20261103-044609-0da125",
   "inputs": [],
   "blender": "5.2.3",
   "machine": {
@@ -245,7 +245,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-03T04:10:46Z"
+  "recorded": "2026-11-03T04:46:38Z"
  },
  "generation": {
   "method": "meshcraft template",
@@ -382,7 +382,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261103-041015-d72006",
+  "forgecraft_job": "job-20261103-044608-2eb224",
   "route": "template",
   "tool": "meshcraft_template"
  }

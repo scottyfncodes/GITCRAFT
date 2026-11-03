@@ -1,19 +1,23 @@
 {
- "id": "job-20261103-040814-2ff065",
+ "id": "job-20261103-044537-baac7e",
  "tool": "run_pipeline",
- "asset_id": "upgrade_copper_banded_hull",
+ "asset_id": "deckhand_pip",
  "request": {
   "brief": {
-   "asset_id": "upgrade_copper_banded_hull",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040813-674eed/meshcraft",
-   "parent_job": "job-20261103-040813-674eed",
-   "template": "boat_upgrade",
+   "asset_id": "deckhand_pip",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044536-8e4f4b/meshcraft",
+   "parent_job": "job-20261103-044536-8e4f4b",
+   "template": "deckhand",
    "params": {
-    "seed": 173,
-    "upgrade": "hull_copper"
+    "seed": 117,
+    "colors": {
+     "vest": "crimson",
+     "bandana": "coral"
+    },
+    "weapon": true
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Copper-Banded Hull",
+   "title": "Deckhand Pip",
    "tags": [
     "tidebreakers"
    ],
@@ -29,10 +33,16 @@
      "front",
      "side",
      "top"
+    ],
+    "poses": [
+     {
+      "clip": "Attack",
+      "at": "end"
+     }
     ]
    },
    "bake": {
-    "resolution": 512,
+    "resolution": 1024,
     "fallbacks": [
      512
     ]
@@ -40,53 +50,53 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:08:14Z",
+ "created": "2026-11-03T04:45:37Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:08:14Z",
+   "started": "2026-11-03T04:45:37Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 20.5,
+   "seconds": 27.2,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.5
+     "seconds": 0.44
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 17.56
+     "seconds": 20.32
     },
     {
      "step": "validate_scene",
      "ok": true,
-     "seconds": 0.0
+     "seconds": 0.01
     },
     {
      "step": "export",
      "ok": true,
-     "seconds": 1.45
+     "seconds": 4.76
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.33
+     "seconds": 0.22
     }
    ],
-   "finished": "2026-11-03T04:08:35Z"
+   "finished": "2026-11-03T04:46:04Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040813-674eed",
- "updated": "2026-11-03T04:08:35Z",
+ "parent": "job-20261103-044536-8e4f4b",
+ "updated": "2026-11-03T04:46:04Z",
  "library": {
-  "asset": "upgrade_copper_banded_hull",
+  "asset": "deckhand_pip",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_copper_banded_hull/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/deckhand_pip/v1",
   "same_as": null,
-  "files": 16
+  "files": 15
  }
 }

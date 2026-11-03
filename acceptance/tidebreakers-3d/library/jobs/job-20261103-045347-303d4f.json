@@ -1,5 +1,5 @@
 {
- "id": "job-20261103-041934-c437c7",
+ "id": "job-20261103-045347-303d4f",
  "tool": "generate",
  "asset_id": "tidebreakers_turtle_cay_scene",
  "request": {
@@ -81,33 +81,33 @@
   "brief": "TIDEBREAKERS Turtle Cay Scene scene"
  },
  "status": "done",
- "created": "2026-11-03T04:19:34Z",
+ "created": "2026-11-03T04:53:47Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:19:34Z",
+   "started": "2026-11-03T04:53:47Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:19:34Z",
+     "started": "2026-11-03T04:53:47Z",
      "info": {
       "chosen": "meshcraft_scene",
       "route": "meshcraft_scene",
       "fallback_used": false,
       "explanation": "compose a scene: MeshCraft compose_scene"
      },
-     "finished": "2026-11-03T04:19:34Z",
+     "finished": "2026-11-03T04:53:47Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:19:34Z",
+     "started": "2026-11-03T04:53:47Z",
      "info": {
-      "meshcraft_job": "job-20261103-041935-c8a2bb",
+      "meshcraft_job": "job-20261103-045348-c10366",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -121,43 +121,43 @@
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:20:20Z",
-     "seconds": 45.58
+     "finished": "2026-11-03T04:54:33Z",
+     "seconds": 45.81
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:20:20Z",
+     "started": "2026-11-03T04:54:33Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:20:24Z",
-     "seconds": 4.24
+     "finished": "2026-11-03T04:54:37Z",
+     "seconds": 4.18
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:20:24Z",
+     "started": "2026-11-03T04:54:37Z",
      "info": {
       "asset": "tidebreakers_turtle_cay_scene",
       "version": 1,
       "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-03T04:20:24Z",
+     "finished": "2026-11-03T04:54:37Z",
      "seconds": 0.01
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:20:24Z",
+   "finished": "2026-11-03T04:54:37Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-041935-c8a2bb"
+  "job-20261103-045348-c10366"
  ],
- "updated": "2026-11-03T04:20:24Z",
+ "updated": "2026-11-03T04:54:37Z",
  "plan": {
   "request": {
    "brief": "TIDEBREAKERS Turtle Cay Scene scene",

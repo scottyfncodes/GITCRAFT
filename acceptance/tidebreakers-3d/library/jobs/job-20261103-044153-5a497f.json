@@ -1,114 +1,124 @@
 {
- "id": "job-20261103-040640-c482ba",
+ "id": "job-20261103-044153-5a497f",
  "tool": "generate",
- "asset_id": "upgrade_lashed_cargo_crates",
+ "asset_id": "tidebreakers_coastal_sloop",
  "request": {
-  "brief": "boat upgrade component: Lashed Cargo Crates",
-  "name": "Upgrade: Lashed Cargo Crates",
-  "kind": "upgrade",
-  "template_params": {
-   "upgrade": "cargo_crate"
-  },
-  "bake": 512,
+  "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+  "name": "TIDEBREAKERS Coastal Sloop",
+  "bake": 1024,
   "profiles": [
    "three-web-toon",
+   "three-web-atlas",
    "web-pbr",
-   "unity-fbx"
+   "unity-fbx",
+   "obj-static",
+   "stl-print",
+   "godot-glb"
   ],
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:06:40Z",
+ "created": "2026-11-03T04:41:53Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:06:40Z",
+   "started": "2026-11-03T04:41:53Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:06:40Z",
+     "started": "2026-11-03T04:41:53Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:06:40Z",
-     "seconds": 0.0
+     "finished": "2026-11-03T04:41:53Z",
+     "seconds": 0.01
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:06:40Z",
+     "started": "2026-11-03T04:41:53Z",
      "info": {
-      "meshcraft_job": "job-20261103-040641-22125f",
+      "meshcraft_job": "job-20261103-044155-326de8",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 18,
+       "pass": 27,
        "warn": 0,
        "fail": 0,
-       "info": 3
+       "info": 5
       },
       "library": {
-       "asset": "upgrade_lashed_cargo_crates",
+       "asset": "tidebreakers_coastal_sloop",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:07:07Z",
-     "seconds": 26.89
+     "finished": "2026-11-03T04:42:20Z",
+     "seconds": 27.02
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:07:07Z",
+     "started": "2026-11-03T04:42:20Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:07:11Z",
-     "seconds": 3.45
+     "finished": "2026-11-03T04:42:23Z",
+     "seconds": 3.4
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:07:11Z",
+     "started": "2026-11-03T04:42:23Z",
      "info": {
-      "asset": "upgrade_lashed_cargo_crates",
+      "asset": "tidebreakers_coastal_sloop",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-03T04:07:11Z",
+     "finished": "2026-11-03T04:42:23Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:07:11Z",
+   "finished": "2026-11-03T04:42:23Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040641-22125f"
+  "job-20261103-044155-326de8"
  ],
- "updated": "2026-11-03T04:07:11Z",
+ "updated": "2026-11-03T04:42:23Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Lashed Cargo Crates",
-   "intents": [],
-   "kind": "upgrade",
-   "template": "boat_upgrade",
+   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+   "intents": [
+    "stylized"
+   ],
+   "kind": "boat",
+   "template": "boat",
    "params": {
-    "seed": 78,
-    "upgrade": "cargo_crate"
+    "seed": 692,
+    "vessel": "sloop",
+    "paint": [
+     "#4FB39A",
+     "#F2EAD8"
+    ],
+    "sail_colors": [
+     "#F1E6CC",
+     "crimson"
+    ]
    },
    "images": 0,
-   "name": "boat upgrade component: Lashed Cargo Crates"
+   "name": "stylized low-poly player boat: the Coastal Sloop, seafoam hu"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -163,9 +173,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_lashed_cargo_crates",
+  "id": "tidebreakers_coastal_sloop",
   "version": 1,
-  "name": "Upgrade: Lashed Cargo Crates",
+  "name": "TIDEBREAKERS Coastal Sloop",
   "validation": "passed"
  }
 }
