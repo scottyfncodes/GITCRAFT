@@ -42,6 +42,11 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
         problems+=("$name: the Blender install didn't finish (often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
       fi
     else inst=NO; fi
+  elif [[ "$name" == studiocraft ]]; then
+    if gitcraft_studio_ready; then inst=yes
+    elif [[ "$(last_state studiocraft)" == off || "$GITCRAFT_STUDIO" != 1 ]]; then
+      say "$(printf '  %-13s %-10s %-11s %s' "$name" off off "skipped (GITCRAFT_STUDIO=0)")"; continue
+    else inst=NO; fi
   else
     inst=$([[ -x "$GITCRAFT_BIN/$pkg" ]] && echo yes || echo NO)
   fi
@@ -105,6 +110,23 @@ print(f"machine: {hw['cpu_threads']} CPU threads, {hw['ram']['total_gb']} GB RAM
 for k, v in d["backends"].items():
     det = v.get("version") or (", ".join(v["templates"]) if v.get("templates") else None) or v.get("reason") or v.get("mode") or ""
     print(f"{k:11s} {'available  ' if v.get('available') else 'unavailable'} {det[:110]}")
+PY
+)
+fi
+
+if gitcraft_studio_ready; then
+  say ""
+  say "  Studio departments (studiocraft; also ForgeCraft departments / department_run):"
+  studio_json=$(GITCRAFT_STUDIO_HOME="$GITCRAFT_STUDIO_HOME" "$GITCRAFT_STUDIO_HOME/venv/bin/python" "$here/../studio/cli.py" --call studio_status '{}' 2>/dev/null)
+  while IFS= read -r line; do say "    $line"; done < <(python3 - "$studio_json" <<'PY'
+import json, sys
+try: d = json.loads(sys.argv[1])
+except Exception: print("could not read the studio status (run studio/cli.py list)"); sys.exit()
+for x in d["departments"]:
+    acts = x["actions"]; ready = [a for a, v in acts.items() if v == "ready"]; blocked = {a: v for a, v in acts.items() if v != "ready"}
+    line = f"{x['department']:15s} {len(ready)}/{len(acts)} actions ready"
+    if blocked: line += "; blocked: " + "; ".join(f"{a} ({v[9:][:70]})" for a, v in list(blocked.items())[:3])
+    print(line)
 PY
 )
 fi

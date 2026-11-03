@@ -100,16 +100,16 @@ done
 # forgecraft are ok | failed | off (GITCRAFT_MESHCRAFT=0) | pending (written before the 3D step,
 # so a run cut off during the Blender download says so); "skipped" leaves them out.
 write_status() {
-python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
+python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "$studio_state" "${GITCRAFT_TOOLS[@]}" <<'PY'
 import json, os, sys, time
-out, bindir, failed, mesh, forge, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4], sys.argv[5], sys.argv[6:]
+out, bindir, failed, mesh, forge, studio, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7:]
 st = {"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tools": {}}
 for e in tools:
     name, _, pkg = e.split(":")
     ok = os.access(os.path.join(bindir, pkg), os.X_OK) and name not in failed
     ver = open(os.path.join(bindir, name + ".version")).read().strip() if os.path.exists(os.path.join(bindir, name + ".version")) else None
     st["tools"][name] = {"state": "ok" if ok else "failed", "version": ver}
-for name, state in (("meshcraft", mesh), ("forgecraft", forge)):
+for name, state in (("meshcraft", mesh), ("forgecraft", forge), ("studiocraft", studio)):
     if state != "skipped":
         v = os.path.join(bindir, name + ".version")
         st["tools"][name] = {"state": state, "version": open(v).read().strip() if os.path.exists(v) else None}
@@ -121,7 +121,17 @@ PY
 # Register the 2D tools before the 3D step. Blender is a ~400 MB download; when a run is cut off
 # during it (a cloud setup script past its time limit, a closed terminal), the seven tools above
 # are already in the runtime, registered and documented instead of left unregistered.
-mesh_state=skipped forge_state=skipped
+mesh_state=skipped forge_state=skipped studio_state=skipped
+# 2b) GITCRAFT Studio (the departments): small, no Blender needed, so it installs and registers with the 2D tools.
+want_studio=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " studiocraft " ]] && want_studio=0
+if [[ "$GITCRAFT_STUDIO" != 1 ]]; then studio_state=off
+elif ((want_studio)); then
+  if gitcraft_studio_ready && [[ $update -eq 0 ]]; then echo "gitcraft: studiocraft already installed"; studio_state=ok
+  else "$here/install-studio.sh" core && studio_state=ok || { studio_state=failed; failed+=(studiocraft); }; fi
+  if [[ $studio_state == ok && "$GITCRAFT_STUDIO_VOICE" == 1 && ( ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" || $update -eq 1 ) ]]; then
+    "$here/install-studio.sh" voice || echo "gitcraft: studio voice runtime not installed; audiocraft_voice will report blocked (scripts/install-studio.sh voice)" >&2
+  fi
+fi
 want_mesh=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " meshcraft " && ! " ${want[*]} " =~ " forgecraft " ]] && want_mesh=0   # forgecraft needs MeshCraft's Blender
 if [[ "$GITCRAFT_MESHCRAFT" != 1 ]]; then mesh_state=off forge_state=off
 elif ((want_mesh)); then mesh_state=pending forge_state=pending; fi
