@@ -64,7 +64,9 @@ One implementation per capability. "Entry points" are the MCP tools; tools marke
 | Previews, contact sheets | MeshCraft | `engine/core.py` (Cycles CPU) | builds |
 | Geometry validation, Khronos validator, Blender re-import | MeshCraft | `engine/core.py`, `engine_check/validate.mjs` | `validate_asset`, builds |
 | Export profiles (GLB toon/atlas/PBR, FBX, OBJ, STL, Godot) | MeshCraft | `meshcraft/profiles/*.json` + `engine/core.py` | `export_asset`, builds |
-| Engine check (three.js r170 in Chromium) | MeshCraft (ForgeCraft orders it per deliverable) | `engine_check/three_check.mjs` | meshcraft `engine_check`; forgecraft `generate` stage |
+| Engine check (three.js r170 in Chromium) | MeshCraft (ForgeCraft orders it per deliverable) | `engine_check/three_check.mjs` | meshcraft `engine_check` (`all_clips` plays every clip on its own and fails any that moves neither node transforms nor morph-target weights); forgecraft `generate` stage |
+
+**Deliverable status (ForgeCraft).** A built asset is not proof that it loads or plays. `passed` / `passed-with-warnings` need an engine check that actually ran and passed, with every clip present and moving. A load failure, a missing clip or a clip that does not move makes it `failed`. If the check could not run at all (no GLB, MeshCraft's engine check not installed or erroring, no checks returned), the deliverable is `blocked` and the job ends `blocked` with the reason; the asset stays in the library, labelled `blocked`. Tests: `tests/test_forgecraft_engine.py`.
 | Photogrammetry | ForgeCraft (generator) → MeshCraft (cleanup) | `forgecraft/backends/meshroom.py` | forgecraft `photogrammetry` |
 | Image/text → 3D (AI) | ForgeCraft (generator) → MeshCraft (cleanup) | `forgecraft/backends/triposr.py`, `hunyuan3d.py` | forgecraft `generate` |
 | Licence, provenance, deliverable validation records | ForgeCraft | `forgecraft/pipeline.py` → `library.annotate` | `generate` and every ForgeCraft job |

@@ -67,6 +67,48 @@ def _sha(p):
     except OSError: return None
 
 
+def deliverable_status(summ, eng):
+    """The deliverable's status. A successful build is not proof that the asset loads or plays:
+    only an engine check that actually ran and passed can make it `passed`. When the check could
+    not run (no GLB, MeshCraft's engine check unavailable or erroring, no checks returned) the
+    status is `blocked`, never a pass."""
+    if (summ or {}).get("fail") or eng.get("status") == "failed": return "failed"
+    if eng.get("status") != "passed": return "blocked"
+    return "passed-with-warnings" if (summ or {}).get("warn") else "passed"
+
+
+def engine_verify(glb, main, chosen, res, work, log, rec=None):
+    """Load the main GLB in three@0.170 through MeshCraft's engine_check and, when the asset has
+    clips, play every clip on its own and require each to move the asset."""
+    if not glb or not os.path.exists(glb):
+        return {"status": "skipped", "reason": "no GLB export, so nothing could be loaded in three.js"}
+    if rec: jobs.stage(rec, "engine_check", "running")
+    build = res.get("build") or {}
+    clips = build.get("actions") or [c["clip"] for c in res.get("clips", []) if isinstance(c, dict) and c.get("clip")]
+    args = {"glb": glb, "material": "authored" if (main or {}).get("profile") in ("web-pbr", "scene-glb") or chosen != "meshcraft_template" else "game-toon",
+            "size": 512, "out": os.path.join(work, "engine_check.png")}
+    contract = dict(build.get("contract") or {})
+    if clips:
+        args.update(clip=clips[0], time=0.4, all_clips=True)
+        contract["clips"] = sorted(set(contract.get("clips") or []) | set(clips))   # every expected clip must be in the file
+    if contract: args["contract"] = contract
+    try:
+        e = mc.call("engine_check", args, log, 300, extra_roots=[work])
+        checks = e.get("checks") or []
+        if not checks:
+            eng = {"status": "error", "reason": "the engine check returned no checks"}
+        else:
+            fails = [c for c in checks if c.get("level") == "fail"]
+            eng = {"status": "passed" if not fails else "failed", "glb": os.path.relpath(glb, os.path.dirname(os.path.dirname(glb))), "three": e.get("three") or e.get("revision"),
+                   "checks": checks[:60], "screenshot": args["out"],
+                   "clips": [{"name": m["name"], "moves": m["max_delta"] > 1e-4, "max_delta": m["max_delta"]} for m in e.get("clip_motion") or []]}
+            if fails: eng["reason"] = "; ".join(f"{c['check']}: {c.get('detail')}" for c in fails)[:600]
+    except Exception as ex:
+        eng = {"status": "error", "reason": f"the three.js engine check could not run: {ex}"[:600]}
+    if rec: jobs.stage(rec, "engine_check", "done" if eng["status"] == "passed" else "failed", info={"status": eng["status"], "reason": eng.get("reason")})
+    return eng
+
+
 # ------------------------------------------------------------------ main entry
 def run(spec, job_id=None, manual=None):
     """Run (or re-run) a ForgeCraft job synchronously. Returns the job record."""
@@ -203,23 +245,8 @@ def _run(rec, spec, work, log):
     md = library.get(lib["asset"], lib["version"])
     main = _main_glb(res)
     glb = os.path.join(md["dir"], "exports", os.path.basename(main["path"])) if main else None
-    eng = {"status": "skipped", "reason": "no GLB export"}
-    if glb and os.path.exists(glb):
-        jobs.stage(rec, "engine_check", "running")
-        clips = (res.get("build") or {}).get("actions") or [c["clip"] for c in res.get("clips", []) if isinstance(c, dict) and c.get("clip")]
-        args = {"glb": glb, "material": "authored" if main.get("profile") in ("web-pbr", "scene-glb") or chosen != "meshcraft_template" else "game-toon",
-                "size": 512, "out": os.path.join(work, "engine_check.png")}
-        if clips: args.update(clip=clips[0], time=0.4)
-        if (res.get("build") or {}).get("contract"): args["contract"] = res["build"]["contract"]
-        try:
-            e = mc.call("engine_check", args, log, 300, extra_roots=[work])
-            fails = [c for c in e.get("checks", []) if c.get("level") == "fail"]
-            eng = {"status": "passed" if not fails else "failed", "glb": os.path.relpath(glb, md["dir"]), "three": e.get("three") or e.get("revision"),
-                   "checks": e.get("checks", [])[:20], "screenshot": args["out"]}
-        except Exception as ex:
-            eng = {"status": "error", "reason": str(ex)[:400]}
-        jobs.stage(rec, "engine_check", "done" if eng["status"] != "failed" else "failed", info={"status": eng["status"]})
-    deliv = "failed" if summ.get("fail") or eng["status"] == "failed" else ("passed" if eng["status"] == "passed" and not summ.get("warn") else "passed-with-warnings")
+    eng = engine_verify(glb, main, chosen, res, work, log, rec)
+    deliv = deliverable_status(summ, eng)
 
     # 10. record: one library version, MeshCraft's record + ForgeCraft's orchestration
     jobs.stage(rec, "record", "running")
@@ -257,7 +284,10 @@ def _run(rec, spec, work, log):
         jobs.stage(rec, "handoff", "running")
         h = library.export(lib["asset"], spec["handoff_dir"], lib["version"]); rec["handoff"] = h["dir"]
         jobs.stage(rec, "handoff", "done", info={"dir": h["dir"], "verified": h["verified"]})
-    if deliv == "failed": raise RuntimeError(f"deliverable failed validation: meshcraft {summ}, engine check {eng['status']}")
+    if deliv == "failed": raise RuntimeError(f"deliverable failed validation: meshcraft {summ}, engine check {eng['status']}: {eng.get('reason', '')}")
+    if deliv == "blocked":
+        raise Blocked(f"built and recorded as {lib['asset']} v{lib['version']}, but NOT verified: {eng.get('reason') or eng['status']}. "
+                      "A built asset is not proof that it loads or plays; install MeshCraft's engine check (scripts/install.sh meshcraft) and retry the job")
     return "done_with_fallback" if (res.get("job") or {}).get("status") == "done_with_fallback" else "done"
 
 
