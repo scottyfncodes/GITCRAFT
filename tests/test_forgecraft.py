@@ -102,6 +102,10 @@ if ok and okf:
     names = [a["name"] for a in (v2.get("animations") or [])]
     check("mixamo_apply record: the new version keeps its rig and lists every clip it ships (own six + Walking), as the Character Studio reads it",
           ok2 and (v2.get("rig") or {}).get("armatures", 0) >= 1 and len(names) == 7 and "Walking" in names, {"rig": v2.get("rig"), "animations": names})
+    ok1, v1 = mcl.call("library_get", {"asset": mx["asset"]["id"], "version": 1}) if ok else (False, {})
+    check("mixamo_apply record: the merged version keeps the character's size (same mesh)",
+          ok1 and ok2 and (v2.get("geometry") or {}).get("size_m") and (v2.get("geometry") or {}).get("size_m") == (v1.get("geometry") or {}).get("size_m"),
+          {"v1": (v1.get("geometry") or {}).get("size_m"), "v2": (v2.get("geometry") or {}).get("size_m")})
     ok, up = fc.call("mixamo_prepare_upload", {"asset": d["asset"]["id"], "out": os.path.join(ws, "upload.fbx")}, timeout=600)
     check("mixamo_prepare_upload (delegated): mesh-only FBX for Mixamo", ok and os.path.getsize(os.path.join(ws, "upload.fbx")) > 1000, up)
 
