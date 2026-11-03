@@ -22,12 +22,21 @@ else
 fi
 
 registered=$(python3 -c 'import json,os;print(" ".join(json.load(open(os.path.expanduser("~/.claude.json"))).get("mcpServers",{})))' 2>/dev/null)
+# State the last install recorded per tool (status.json), e.g. "off" when GITCRAFT_MESHCRAFT=0 skipped 3D.
+last_state() { python3 -c 'import json,os,sys;print(json.load(open(os.path.join(sys.argv[1],"status.json"))).get("tools",{}).get(sys.argv[2],{}).get("state",""))' "$GITCRAFT_HOME" "$1" 2>/dev/null; }
+off_note=0
 say ""
 say "  tool          installed  registered  build"
 for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_TOOLS[@]}"}; do
   IFS=: read -r name _ pkg <<<"$entry"
   if [[ "$name" == meshcraft || "$name" == forgecraft ]]; then
-    inst=$([[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] && echo yes || echo NO)
+    if gitcraft_mesh_ready; then inst=yes
+    elif [[ "$(last_state "$name")" == off || ( "$GITCRAFT_MESHCRAFT" != 1 && ! -e "$GITCRAFT_HOME/meshcraft/venv" ) ]]; then
+      # turned off on purpose: report it, don't count it as a problem
+      say "$(printf '  %-13s %-10s %-11s %s' "$name" off off "skipped (GITCRAFT_MESHCRAFT=0)")"; off_note=1; continue
+    elif [[ -e "$GITCRAFT_HOME/meshcraft/venv" ]]; then
+      inst=PARTIAL; problems+=("$name: the Blender install didn't finish (venv without bpy; often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
+    else inst=NO; fi
   else
     inst=$([[ -x "$GITCRAFT_BIN/$pkg" ]] && echo yes || echo NO)
   fi
@@ -42,7 +51,7 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
     fi
   fi
   say "$(printf '  %-13s %-10s %-11s %s' "$name" "$inst" "$reg" "$build")"
-  [[ $inst == yes ]] || problems+=("$name is not installed: run scripts/install.sh $name")
+  [[ $inst == yes || $inst == PARTIAL ]] || problems+=("$name is not installed: run scripts/install.sh $name")
   [[ $reg == yes ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")
 done
 
@@ -74,7 +83,11 @@ print("skill:        " + (sk if os.path.exists(sk) else f"missing: {sk} (run scr
 PY
 )
 
-if [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]]; then
+if ((off_note)); then
+  say ""
+  say "  3D tools are off (GITCRAFT_MESHCRAFT=0). To add them: unset it and run scripts/install.sh meshcraft forgecraft"
+fi
+if gitcraft_mesh_ready; then
   say ""
   say "  3D Department capabilities (meshcraft + forgecraft):"
   while IFS= read -r line; do say "    $line"; done < <(python3 - "$here/.." <<'PY'
@@ -107,7 +120,7 @@ PY
   say "  audit:    $calls tool calls logged, $fails failed, $refused refused by policy ($audit)"
 fi
 if [[ -f "$GITCRAFT_HOME/status.json" ]]; then
-  bad=$(python3 -c 'import json,os;s=json.load(open(os.path.expanduser("~/.gitcraft/status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state")!="ok"))' 2>/dev/null)
+  bad=$(python3 -c 'import json,os;s=json.load(open(os.path.expanduser("~/.gitcraft/status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state") not in ("ok","off")))' 2>/dev/null)
   [[ -n "$bad" ]] && problems+=("last install reported failures for: $bad (see $GITCRAFT_LOG/install.log)")
 fi
 
