@@ -105,7 +105,7 @@ if ok and okf:
     ok, up = fc.call("mixamo_prepare_upload", {"asset": d["asset"]["id"], "out": os.path.join(ws, "upload.fbx")}, timeout=600)
     check("mixamo_prepare_upload (delegated): mesh-only FBX for Mixamo", ok and os.path.getsize(os.path.join(ws, "upload.fbx")) > 1000, up)
 
-ok, sc = fc.call("compose_scene", {"name": "Test Scene", "samples": 2, "resolution": [160, 90],
+ok, sc = fc.call("compose_scene", {"name": "Test Cay Scene", "samples": 2, "resolution": [160, 90],
                                     "items": [{"asset": "test_barrel", "name": "barrel"}, {"asset": "voxel_crab", "name": "crab", "location": [2, 0, 0]}]}, timeout=1200)
 check("compose_scene (delegated): scene GLB from library assets, engine-checked, recorded with its inputs", ok and sc["status"] == "done", sc)
 ok2, scm = mcl.call("library_get", {"asset": sc["asset"]["id"]}) if ok and sc.get("asset") else (False, {})
