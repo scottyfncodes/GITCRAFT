@@ -1,7 +1,7 @@
 {
  "id": "tidebreakers_turtle_cay_scene",
  "version": 1,
- "created": "2026-11-03T04:20:19Z",
+ "created": "2026-11-03T04:54:33Z",
  "tool": "compose_scene",
  "template": "scene",
  "tags": [
@@ -11,8 +11,8 @@
  ],
  "brief": {
   "asset_id": "tidebreakers_turtle_cay_scene",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft",
-  "parent_job": "job-20261103-041934-c437c7",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-045347-303d4f/meshcraft",
+  "parent_job": "job-20261103-045347-303d4f",
   "items": [
    {
     "asset": "turtle_cay",
@@ -87,7 +87,7 @@
   ],
   "samples": 48
  },
- "job": "job-20261103-041935-c8a2bb",
+ "job": "job-20261103-045348-c10366",
  "same_as": null,
  "inputs": [],
  "validation": {
@@ -120,10 +120,10 @@
   {
    "path": "source/tidebreakers_turtle_cay_scene.blend",
    "kind": "blend",
-   "bytes": 2950703,
-   "sha256": "6fab226c2db27daabd74d432ca48b561dd513876fa71f11818a01c154a1ecc68",
-   "content": "6fab226c2db27daabd74d432ca48b561dd513876fa71f11818a01c154a1ecc68",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/source/tidebreakers_turtle_cay_scene.blend"
+   "bytes": 2950704,
+   "sha256": "3f2fab3934894112c44ac44f3f522ee4444a7f8ea4fb346ca7e41fd07cdf8897",
+   "content": "3f2fab3934894112c44ac44f3f522ee4444a7f8ea4fb346ca7e41fd07cdf8897",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-045347-303d4f/meshcraft/source/tidebreakers_turtle_cay_scene.blend"
   },
   {
    "path": "exports/tidebreakers_turtle_cay_scene.scene.glb",
@@ -131,23 +131,23 @@
    "bytes": 3924944,
    "sha256": "927db82456e64d6cfe054c94dac63273f044c6f88e56ce7c97e41425cb63fde2",
    "content": "13d4c33004523b0092bea183e613390b2a741c23ac518e010f88f584f0e72cee",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/exports/tidebreakers_turtle_cay_scene.scene.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-045347-303d4f/meshcraft/exports/tidebreakers_turtle_cay_scene.scene.glb"
   },
   {
    "path": "previews/tidebreakers_turtle_cay_scene_hero.png",
    "kind": "preview",
    "bytes": 895228,
-   "sha256": "f6a067eae072a9dd134b20953bc3295f92f5c71d802720d71c1ce2d125481181",
-   "content": "f6a067eae072a9dd134b20953bc3295f92f5c71d802720d71c1ce2d125481181",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/previews/tidebreakers_turtle_cay_scene_hero.png"
+   "sha256": "fb355464b5e62d8a654552219fdc92d4db55d551ec4d66f1daa706f16f190721",
+   "content": "fb355464b5e62d8a654552219fdc92d4db55d551ec4d66f1daa706f16f190721",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-045347-303d4f/meshcraft/previews/tidebreakers_turtle_cay_scene_hero.png"
   },
   {
    "path": "previews/tidebreakers_turtle_cay_scene_three_quarter.png",
    "kind": "preview",
    "bytes": 252883,
-   "sha256": "f6d5b809ee36094c1cd67219d079c4c821605283c08a53ecd62ed3fadfceb47c",
-   "content": "f6d5b809ee36094c1cd67219d079c4c821605283c08a53ecd62ed3fadfceb47c",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041934-c437c7/meshcraft/previews/tidebreakers_turtle_cay_scene_three_quarter.png"
+   "sha256": "1c2d189b06e7fe21553cb903696e558fe58ec0fc86f7c56213e613698275a5fe",
+   "content": "1c2d189b06e7fe21553cb903696e558fe58ec0fc86f7c56213e613698275a5fe",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-045347-303d4f/meshcraft/previews/tidebreakers_turtle_cay_scene_three_quarter.png"
   }
  ],
  "title": "TIDEBREAKERS Turtle Cay Scene",
@@ -171,8 +171,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261103-041934-c437c7",
-  "meshcraft_job": "job-20261103-041935-c8a2bb",
+  "forgecraft_job": "job-20261103-045347-303d4f",
+  "meshcraft_job": "job-20261103-045348-c10366",
   "inputs": [
    {
     "asset": "turtle_cay",
@@ -217,7 +217,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-03T04:20:24Z"
+  "recorded": "2026-11-03T04:54:37Z"
  },
  "generation": {
   "method": "scene composition",
@@ -500,7 +500,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261103-041934-c437c7",
+  "forgecraft_job": "job-20261103-045347-303d4f",
   "route": "meshcraft_scene",
   "tool": "meshcraft_scene"
  }

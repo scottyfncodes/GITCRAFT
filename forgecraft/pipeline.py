@@ -195,6 +195,7 @@ def _run(rec, spec, work, log):
     out = os.path.join(work, "meshcraft")
     common = {"asset_id": asset_id, "out_dir": out, "parent_job": rec["id"]}
     T = lim["timeouts_s"]["blender"]
+    base_geo = {}
     gen_info, sources, inputs = {}, [], [{"path": p, "sha256": _sha(p)} for p in images if os.path.isfile(p)]
 
     # 2–8. generate (external generator if needed) and MeshCraft production
@@ -244,6 +245,7 @@ def _run(rec, spec, work, log):
             md0 = library.get(ch); common["asset_id"] = asset_id = rec["asset_id"] = md0["id"]
             ch = os.path.join(md0["dir"], next(f["path"] for f in md0["files"] if f["kind"] == "blend"))
             inputs.append({"asset": md0["id"], "version": md0["version"]})
+            base_geo = md0.get("geometry") or {}   # a clip merge keeps the mesh: same size as the version it extends
         inputs += [{"path": a, "sha256": _sha(a)} for a in spec.get("animations", [])]
         res = mc.call("mixamo_apply", dict(common, character=ch, animations=spec.get("animations", []), profiles=_profiles(spec, ["three-web-toon", "web-pbr", "unity-fbx"])),
                       log, T, extra_roots=[os.path.dirname(a) for a in spec.get("animations", [])])
@@ -281,7 +283,8 @@ def _run(rec, spec, work, log):
             "generation": dict(gen_info, request=spec.get("brief")),
             "rig": ({"armatures": (rt or {}).get("armatures") or gc["skins"], "convention": "Mixamo skeleton (22 mixamorig:* bones)" if req.get("template") == "deckhand" or chosen == "mixamo"
                      else "MeshCraft rig"} if (rt and rt.get("armatures")) or gc["skins"] else None),
-            "geometry": {"triangles": (rt or {}).get("triangles") or md.get("triangles"), "size_m": (rt or {}).get("size_m"), "meshes": (rt or {}).get("meshes")},
+            "geometry": {"triangles": (rt or {}).get("triangles") or md.get("triangles"), "size_m": (rt or {}).get("size_m") or base_geo.get("size_m"),
+                         "meshes": (rt or {}).get("meshes")},
             "animations": [{"name": c} for c in (gc["clips"] or md.get("clips") or [])],
             "sockets": sorted(o for o in objs if o.startswith("socket_")),
             "previews": {"thumbnail": thumb, "views": prev},

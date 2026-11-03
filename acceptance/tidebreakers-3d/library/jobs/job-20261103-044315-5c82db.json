@@ -1,11 +1,15 @@
 {
- "id": "job-20261103-040839-52d88e",
+ "id": "job-20261103-044315-5c82db",
  "tool": "generate",
- "asset_id": "floating_salvage",
+ "asset_id": "upgrade_brass_compass",
  "request": {
-  "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
-  "name": "Floating Salvage",
-  "bake": 1024,
+  "brief": "boat upgrade component: Brass Compass",
+  "name": "Upgrade: Brass Compass",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "compass_brass"
+  },
+  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -16,33 +20,33 @@
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:08:39Z",
+ "created": "2026-11-03T04:43:15Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:08:39Z",
+   "started": "2026-11-03T04:43:15Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:08:39Z",
+     "started": "2026-11-03T04:43:15Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:08:39Z",
+     "finished": "2026-11-03T04:43:15Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:08:39Z",
+     "started": "2026-11-03T04:43:15Z",
      "info": {
-      "meshcraft_job": "job-20261103-040840-40807a",
+      "meshcraft_job": "job-20261103-044316-16473e",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
@@ -52,58 +56,59 @@
        "info": 3
       },
       "library": {
-       "asset": "floating_salvage",
+       "asset": "upgrade_brass_compass",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:09:05Z",
-     "seconds": 25.94
+     "finished": "2026-11-03T04:43:37Z",
+     "seconds": 22.05
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:09:05Z",
+     "started": "2026-11-03T04:43:37Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:09:08Z",
-     "seconds": 3.49
+     "finished": "2026-11-03T04:43:40Z",
+     "seconds": 3.29
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:09:08Z",
+     "started": "2026-11-03T04:43:40Z",
      "info": {
-      "asset": "floating_salvage",
+      "asset": "upgrade_brass_compass",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-03T04:09:08Z",
+     "finished": "2026-11-03T04:43:40Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:09:08Z",
+   "finished": "2026-11-03T04:43:40Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040840-40807a"
+  "job-20261103-044316-16473e"
  ],
- "updated": "2026-11-03T04:09:08Z",
+ "updated": "2026-11-03T04:43:40Z",
  "plan": {
   "request": {
-   "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
+   "brief": "boat upgrade component: Brass Compass",
    "intents": [],
-   "kind": "salvage",
-   "template": "salvage",
+   "kind": "upgrade",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 752
+    "seed": 263,
+    "upgrade": "compass_brass"
    },
    "images": 0,
-   "name": "floating salvage: lashed crate, barrel and buoy on driftwood"
+   "name": "boat upgrade component: Brass Compass"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -158,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "floating_salvage",
+  "id": "upgrade_brass_compass",
   "version": 1,
-  "name": "Floating Salvage",
+  "name": "Upgrade: Brass Compass",
   "validation": "passed"
  }
 }

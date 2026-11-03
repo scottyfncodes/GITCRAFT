@@ -1,18 +1,19 @@
 {
- "id": "job-20261103-040840-40807a",
+ "id": "job-20261103-044246-d4485f",
  "tool": "run_pipeline",
- "asset_id": "floating_salvage",
+ "asset_id": "upgrade_lashed_cargo_crates",
  "request": {
   "brief": {
-   "asset_id": "floating_salvage",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040839-52d88e/meshcraft",
-   "parent_job": "job-20261103-040839-52d88e",
-   "template": "salvage",
+   "asset_id": "upgrade_lashed_cargo_crates",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft",
+   "parent_job": "job-20261103-044245-72d0eb",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 752
+    "seed": 78,
+    "upgrade": "cargo_crate"
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Floating Salvage",
+   "title": "Upgrade: Lashed Cargo Crates",
    "tags": [
     "tidebreakers"
    ],
@@ -31,7 +32,7 @@
     ]
    },
    "bake": {
-    "resolution": 1024,
+    "resolution": 512,
     "fallbacks": [
      512
     ]
@@ -39,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:08:40Z",
+ "created": "2026-11-03T04:42:46Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:08:40Z",
+   "started": "2026-11-03T04:42:46Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 24.5,
+   "seconds": 25.8,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.29
+     "seconds": 0.23
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 19.58
+     "seconds": 16.91
     },
     {
      "step": "validate_scene",
@@ -67,24 +68,24 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 3.6
+     "seconds": 7.83
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.29
+     "seconds": 0.31
     }
    ],
-   "finished": "2026-11-03T04:09:05Z"
+   "finished": "2026-11-03T04:43:11Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040839-52d88e",
- "updated": "2026-11-03T04:09:05Z",
+ "parent": "job-20261103-044245-72d0eb",
+ "updated": "2026-11-03T04:43:11Z",
  "library": {
-  "asset": "floating_salvage",
+  "asset": "upgrade_lashed_cargo_crates",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/floating_salvage/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_lashed_cargo_crates/v1",
   "same_as": null,
   "files": 16
  }

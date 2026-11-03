@@ -2,8 +2,8 @@
  "asset_id": "upgrade_canvas_mainsail",
  "brief": {
   "asset_id": "upgrade_canvas_mainsail",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft",
-  "parent_job": "job-20261103-040617-de647a",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft",
+  "parent_job": "job-20261103-044223-46ad73",
   "template": "boat_upgrade",
   "params": {
    "seed": 812,
@@ -39,12 +39,12 @@
   {
    "step": "build",
    "ok": true,
-   "seconds": 0.26
+   "seconds": 0.18
   },
   {
    "step": "preview",
    "ok": true,
-   "seconds": 16.48
+   "seconds": 15.54
   },
   {
    "step": "validate_scene",
@@ -54,22 +54,22 @@
   {
    "step": "export",
    "ok": true,
-   "seconds": 0.93
+   "seconds": 0.78
   },
   {
    "step": "contact_sheet",
    "ok": true,
-   "seconds": 0.25
+   "seconds": 0.24
   }
  ],
  "build": {
   "blend": {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/source/upgrade_canvas_mainsail.blend",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/source/upgrade_canvas_mainsail.blend",
    "kind": "blend",
-   "bytes": 103704,
-   "sha256": "acf9b04efd8a870a165bf2550741bb665d8daa4123b36fda1318344f839cae27"
+   "bytes": 103699,
+   "sha256": "dde18a9bdcb5ff27fce28d697295f01968e75c1292b08dc3a3f19f5251e9d9e0"
   },
-  "seconds": 0.13,
+  "seconds": 0.1,
   "roles": {
    "cloth_f6ead0": "#F6EAD0",
    "wood_9a5a2e": "#9A5A2E",
@@ -88,47 +88,47 @@
  },
  "previews": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/previews/upgrade_canvas_mainsail_three_quarter.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/previews/upgrade_canvas_mainsail_three_quarter.png",
    "kind": "preview",
    "bytes": 109664,
-   "sha256": "17d1fd0775d0c38b1bb38fb60ca07ffdefb7827ce4b5acf2b2e7d24e602f1772",
+   "sha256": "c3f8b268cab2e0260532a9e4bbc2357c0f96f9ac3a38d22eca961eaa973632d7",
    "view": "three_quarter",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/previews/upgrade_canvas_mainsail_front.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/previews/upgrade_canvas_mainsail_front.png",
    "kind": "preview",
    "bytes": 97902,
-   "sha256": "7285c7f429a233c2d1699d4c1d1dd3813fd76aaac8b729f4dce3524810fe36ab",
+   "sha256": "8d59c465a8c41eb1d469e26b01fa7938e90be0176141a0153c2038bbcfe097cd",
    "view": "front",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/previews/upgrade_canvas_mainsail_side.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/previews/upgrade_canvas_mainsail_side.png",
    "kind": "preview",
    "bytes": 127638,
-   "sha256": "30e85eae1930f440423cbdb89f7c20b2cab343dadd1bb86f3d7b88c85b1ced2f",
+   "sha256": "27a158cdc2293ef15fbc27826a06475c4a008ae65f552c242b5cece056265249",
    "view": "side",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/previews/upgrade_canvas_mainsail_top.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/previews/upgrade_canvas_mainsail_top.png",
    "kind": "preview",
    "bytes": 81123,
-   "sha256": "845f388dccb0cfb09bfd3c07c3419e5962deff8163ade74ceb18f4b7cecc5ce5",
+   "sha256": "8422f91693ab9614fa9a836905bb14afeaeaafb5b02ab846fad9aa4c42ae2cb0",
    "view": "top",
    "clip": null,
    "pose": null,
    "size": 512
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/previews/upgrade_canvas_mainsail_sheet.png",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/previews/upgrade_canvas_mainsail_sheet.png",
    "kind": "contact_sheet",
    "bytes": 106724,
    "sha256": "3c6d35228016d29a9f2d1197c4e86c2219c0a8b845b6db899cf5f31d27172825"
@@ -136,16 +136,16 @@
  ],
  "exports": [
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.glb",
    "kind": "export",
    "bytes": 44952,
-   "sha256": "abb389c3c0cbb1cfb7d8f7ad0d5082e44a34b1174943b1de85b0833159578177",
+   "sha256": "01c43590a8499f4b77332487a6eca3a3d3c386848c070b02087b90471a863f60",
    "profile": "three-web-toon",
    "format": "glb",
    "engine": "Three.js (GLTFLoader) \u2014 vertex-colour toon pipeline",
    "extras": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod50.glb",
      "kind": "lod",
      "bytes": 32880,
      "sha256": "473a349d485204f9635d93d5274b8319c83d8e9e119075e08639f887bad74e21",
@@ -153,7 +153,7 @@
      "triangles": 294
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod25.glb",
      "kind": "lod",
      "bytes": 17456,
      "sha256": "d5a86b4b87b22d7e478df52a2581b9dc2bb616428b469dcc5d653e97b5c22156",
@@ -161,7 +161,7 @@
      "triangles": 140
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.collision.glb",
      "kind": "collision",
      "bytes": 7208,
      "sha256": "6d4a3490c37fb786b516e53567276211e5f0708a45058f3fc1aa43e94a713a8b",
@@ -171,26 +171,26 @@
    ],
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.collision.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.collision.glb",
      "kind": "sidecar",
      "bytes": 7208,
      "sha256": "6d4a3490c37fb786b516e53567276211e5f0708a45058f3fc1aa43e94a713a8b"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod25.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod25.glb",
      "kind": "sidecar",
      "bytes": 17456,
      "sha256": "d5a86b4b87b22d7e478df52a2581b9dc2bb616428b469dcc5d653e97b5c22156"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod50.glb",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.lod50.glb",
      "kind": "sidecar",
      "bytes": 32880,
      "sha256": "473a349d485204f9635d93d5274b8319c83d8e9e119075e08639f887bad74e21"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.three-web-toon.glb",
     "objects": [
      "upgrade_canvas_mainsail (EMPTY)",
      "upgrade_canvas_mainsail_mesh (MESH)"
@@ -212,17 +212,17 @@
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.glb",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.glb",
    "kind": "export",
    "bytes": 78292,
-   "sha256": "e2bdb87cc5ea2e09e65f91ba2f34ba90b60805e0d4c22d9f3f7fa59fe8c1def2",
+   "sha256": "6139221035e2ef045fd9018c01ff388ed5744cff28cd830f610d1ee5ba24f354",
    "profile": "web-pbr",
    "format": "glb",
    "engine": "Any glTF PBR engine (three.js MeshStandardMaterial, Babylon.js, PlayCanvas, Godot, Unity glTFast)",
    "bake": {
     "maps": {
-     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.basecolor.png",
-     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.orm.png"
+     "basecolor": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.basecolor.png",
+     "orm": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.orm.png"
     },
     "resolution": 512,
     "attempts": [
@@ -234,20 +234,20 @@
    },
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.basecolor.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.basecolor.png",
      "kind": "sidecar",
      "bytes": 25137,
      "sha256": "2c6c223867bc2d0e382186a539eff86e13cc3d6f2b110b36df0d0c79f95cd929"
     },
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.orm.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.orm.png",
      "kind": "sidecar",
      "bytes": 10062,
      "sha256": "259308669141d84d42a69bcc52fe7445a8fcf308a78cf102a538bda1c7f840e5"
     }
    ],
    "roundtrip": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.glb",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.web-pbr.glb",
     "objects": [
      "upgrade_canvas_mainsail (EMPTY)",
      "upgrade_canvas_mainsail_mesh (MESH)"
@@ -267,16 +267,16 @@
    }
   },
   {
-   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.unity-fbx.fbx",
+   "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.unity-fbx.fbx",
    "kind": "export",
    "bytes": 37484,
-   "sha256": "eedb7317049ae1ad02942e2772a8f0d36975f5a3005868ea7051795cff686170",
+   "sha256": "0d3f6b6e4a6340e796a197c8b19a41949ce373d8bd89fb3b6d2e805fe10bed60",
    "profile": "unity-fbx",
    "format": "fbx",
    "engine": "Unity / Unreal (FBX)",
    "sidecars": [
     {
-     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft/exports/upgrade_canvas_mainsail.unity-fbx.atlas.png",
+     "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft/exports/upgrade_canvas_mainsail.unity-fbx.atlas.png",
      "kind": "sidecar",
      "bytes": 274,
      "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf"
@@ -415,5 +415,5 @@
    "info": 3
   }
  },
- "seconds": 18.6
+ "seconds": 17.3
 }

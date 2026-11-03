@@ -205,7 +205,7 @@ pages.characters = (main, arg) => {
   main.innerHTML = `<div class="hero"><div><h1>3D Character Studio</h1><p>Characters are built and rigged by MeshCraft (deckhand template) on a 22-bone skeleton that uses Mixamo's bone names, so clips downloaded from mixamo.com apply by name. Each clip exports as its own glTF animation.</p></div></div>
   <div class="grid2"><section class="panel">${sel ? `<h2>${esc(sel.name)} <span class="pill kind">v${sel.version}</span></h2><div id="cv"></div>
     <dl class="kv" style="margin-top:12px"><dt>Rig</dt><dd>${esc(sel.rig.convention || "rigged")}</dd><dt>Clips</dt><dd>${sel.animations.map((a) => esc(a.name) + (a.seconds ? ` <small>(${a.seconds}s${a.loop ? ", loop" : ""})</small>` : "")).join(" · ")}</dd>
-    <dt>Geometry</dt><dd>${num(sel.geometry.triangles)} triangles · ${sel.geometry.dimensions_m.join(" × ")} m</dd><dt>Source</dt><dd>${esc(sel.source_tool)}</dd></dl>
+    <dt>Geometry</dt><dd>${num(sel.geometry.triangles)} triangles${(sel.geometry.dimensions_m || []).length ? ` · ${sel.geometry.dimensions_m.join(" × ")} m` : ""}</dd><dt>Source</dt><dd>${esc(sel.source_tool)}</dd></dl>
     ${sel.rig.bone_names ? `<details style="margin-top:10px"><summary>Bones</summary><p><small>${sel.rig.bone_names.map(esc).join(", ")}</small></p></details>` : ""}` : "<p>No characters yet.</p>"}
     <h3 style="margin-top:16px">All characters</h3><div class="cards">${chars.map((m) => card(m, m === sel)).join("")}</div></section>
   <section><div class="panel"><h2>Create a character</h2>
@@ -293,7 +293,7 @@ pages.library = (main, arg, ver) => {
   $("#dv").append(viewerBox(m));
   const tabs = {
     overview: () => `<dl class="kv"><dt>Brief</dt><dd>${esc(m.brief)}</dd><dt>Source tool</dt><dd>${esc(m.source_tool)}</dd><dt>Routing</dt><dd>${esc(m.route?.chosen || "")}${m.route?.fallback_used ? " (fallback)" : ""}: ${esc(m.route?.explanation || "")}</dd>
-      <dt>Triangles</dt><dd>${num(m.geometry.triangles)}</dd><dt>Size</dt><dd>${(m.geometry.dimensions_m || []).join(" × ")} m (Blender X×Y×Z; glTF is Y-up, forward +Z)</dd>
+      <dt>Triangles</dt><dd>${num(m.geometry.triangles)}</dd><dt>Size</dt><dd>${(m.geometry.dimensions_m || []).length ? `${m.geometry.dimensions_m.join(" × ")} m (Blender X×Y×Z; glTF is Y-up, forward +Z)` : "not recorded"}</dd>
       <dt>Materials</dt><dd>${m.materials.map(esc).join(", ")}</dd><dt>Textures</dt><dd>${m.textures.map((t) => esc(t.name)).join("<br>") || "vertex colours (toon) / per-profile atlas"}</dd>
       <dt>Rig</dt><dd>${m.rig ? esc(m.rig.convention) : "none"}</dd><dt>Animations</dt><dd>${m.animations.map((x) => esc(x.name) + (x.seconds ? ` ${x.seconds}s` : "")).join(", ") || "none"}</dd>
       <dt>Sockets</dt><dd>${m.sockets.map((s) => esc(s.name)).join(", ") || "none"}</dd><dt>Generation</dt><dd><pre>${esc(JSON.stringify(m.generation, null, 1))}</pre></dd></dl>

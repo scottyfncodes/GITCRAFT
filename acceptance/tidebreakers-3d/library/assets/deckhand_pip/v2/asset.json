@@ -1,7 +1,7 @@
 {
  "id": "deckhand_pip",
  "version": 2,
- "created": "2026-11-03T04:11:52Z",
+ "created": "2026-11-03T04:47:44Z",
  "tool": "mixamo_apply",
  "template": "mixamo",
  "tags": [
@@ -12,12 +12,12 @@
  ],
  "brief": {
   "asset_id": "deckhand_pip",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft",
-  "parent_job": "job-20261103-041131-db4693",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft",
+  "parent_job": "job-20261103-044723-79b217",
   "character": "/root/.gitcraft/3d-library-tidebreakers/assets/deckhand_pip/v1/source/deckhand_pip.blend",
   "animations": [
-   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Walking.fbx",
-   "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
+   "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Walking.fbx",
+   "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Sneak Walk.fbx"
   ],
   "profiles": [
    "three-web-toon",
@@ -25,20 +25,20 @@
    "unity-fbx"
   ]
  },
- "job": "job-20261103-041132-e77a59",
+ "job": "job-20261103-044724-be37fa",
  "same_as": null,
  "inputs": [
   {
    "path": "/root/.gitcraft/3d-library-tidebreakers/assets/deckhand_pip/v1/source/deckhand_pip.blend",
-   "sha256": "e5bb567e392ce1baa34d8658497fc4bda1b23ecd6967dd204cfa2e43beda4316"
+   "sha256": "f2d0162a1e129002210aa4da9e9fcf39e75016b83bb61465a2b362b1131d3e3d"
   },
   {
-   "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Walking.fbx",
-   "sha256": "05ca07e409a7314cfe2a219fdda8456033c8a5627781ba9e3f0c5a11c25f1a67"
+   "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Walking.fbx",
+   "sha256": "530aee65151ff428fe505fc6fd4e08d3cc2c0e6400bdf9bd41cb3031b96ee5cb"
   },
   {
-   "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Sneak Walk.fbx",
-   "sha256": "e55060f983a56b9f5efd5fef88667547e730d2935ed8622261aa38ffe72e9843"
+   "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Sneak Walk.fbx",
+   "sha256": "9cbb0c34c97ff12800b3ee72c1996fba4e3e74a1c370add12d08b1ee4ba1491f"
   }
  ],
  "validation": {
@@ -60,18 +60,18 @@
   {
    "path": "source/deckhand_pip.blend",
    "kind": "blend",
-   "bytes": 180026,
-   "sha256": "fe3242b5cd14d35670511487f4a47483065fae6a5bf56374886c803ede2b4354",
-   "content": "fe3242b5cd14d35670511487f4a47483065fae6a5bf56374886c803ede2b4354",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/source/deckhand_pip.blend"
+   "bytes": 180025,
+   "sha256": "0037e56fc6ced5af756ffe567d67efafe2f19126ffdd3dc2b0b4c011a23d8d74",
+   "content": "0037e56fc6ced5af756ffe567d67efafe2f19126ffdd3dc2b0b4c011a23d8d74",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/source/deckhand_pip.blend"
   },
   {
    "path": "exports/deckhand_pip.three-web-toon.glb",
    "kind": "export",
    "bytes": 291904,
-   "sha256": "30347fbaf7cca451de43ef694b51287e4462998210455a65c3360f7eed6e1c8d",
+   "sha256": "38272e5716dd556ae855452da69d6c72acc6e22d41ef5fcdf8e12379dea5c0b0",
    "content": "15581ba8416be3a791d2852d63f3c553c04e125544cf9050d5c83d4a5effbd4c",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.three-web-toon.glb"
   },
   {
    "path": "exports/deckhand_pip.three-web-toon.collision.glb",
@@ -79,15 +79,15 @@
    "bytes": 9084,
    "sha256": "6efdd6474f6655ee21f9f7b01df6d8c7588ffdd482334ef1097c42edb6275bd6",
    "content": "89815cf449c21ad86bfa26ea3aca56592c1e64790c1358d27f1c00802eee0ec6",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.three-web-toon.collision.glb"
   },
   {
    "path": "exports/deckhand_pip.web-pbr.glb",
    "kind": "export",
    "bytes": 494932,
-   "sha256": "f7d090ff57bc66f63f656c7dff463a18658bfbd30b288d2e639d28bc721014d5",
+   "sha256": "58e019d4b37cb723fc25bed2402ebb84cb757a116653f03033826bc58624b95e",
    "content": "65ef74ea0548a1fdfc3a555140b017d0dbf1ae50fcecb75a742b29ba80c68344",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.web-pbr.glb"
   },
   {
    "path": "exports/deckhand_pip.web-pbr.basecolor.png",
@@ -95,7 +95,7 @@
    "bytes": 138150,
    "sha256": "545c7d8a3ffdbad6ff0df1f1d703e2b47a3734d9973010dc8ddcd771dd00e36f",
    "content": "545c7d8a3ffdbad6ff0df1f1d703e2b47a3734d9973010dc8ddcd771dd00e36f",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.web-pbr.basecolor.png"
   },
   {
    "path": "exports/deckhand_pip.web-pbr.orm.png",
@@ -103,15 +103,15 @@
    "bytes": 75850,
    "sha256": "613e495ca2deece09eba986c2ce52ba2381378fa01687a753f55fcae230fd31d",
    "content": "613e495ca2deece09eba986c2ce52ba2381378fa01687a753f55fcae230fd31d",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.web-pbr.orm.png"
   },
   {
    "path": "exports/deckhand_pip.unity-fbx.fbx",
    "kind": "export",
    "bytes": 1016476,
-   "sha256": "8f624f41d44040e64f1701c4d9adbc5cf81383d01e7b29ebce2387a52a00052c",
+   "sha256": "7b1c5c8fdbeeb0a4e40802e32a065fde9e013eccd44aa78c2f93af02bb8c11ed",
    "content": "fbx-size:1016476",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.unity-fbx.fbx"
   },
   {
    "path": "exports/deckhand_pip.unity-fbx.atlas.png",
@@ -119,31 +119,31 @@
    "bytes": 301,
    "sha256": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
    "content": "434f3e1a1023d9f51244a6d4dfd13c9db60af84dbb2baa217a43ff4fc3087a03",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/exports/deckhand_pip.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/exports/deckhand_pip.unity-fbx.atlas.png"
   },
   {
    "path": "previews/deckhand_pip_three_quarter.png",
    "kind": "preview",
    "bytes": 127681,
-   "sha256": "b297295f3013639e0515c10caffe96740e3864c207fa0fc3caea49cb3d50993e",
-   "content": "b297295f3013639e0515c10caffe96740e3864c207fa0fc3caea49cb3d50993e",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/previews/deckhand_pip_three_quarter.png"
+   "sha256": "3fc6fdf2b630bc48bbbb10bae62a47659c6a8ef7261f5df9a6f162e1ff47c593",
+   "content": "3fc6fdf2b630bc48bbbb10bae62a47659c6a8ef7261f5df9a6f162e1ff47c593",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/previews/deckhand_pip_three_quarter.png"
   },
   {
    "path": "previews/deckhand_pip_front.png",
    "kind": "preview",
    "bytes": 130186,
-   "sha256": "857358929e013ae9ef8dd9f359e704bf21c4ac2723f5a5e34e8a8b2f0354d9e5",
-   "content": "857358929e013ae9ef8dd9f359e704bf21c4ac2723f5a5e34e8a8b2f0354d9e5",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/previews/deckhand_pip_front.png"
+   "sha256": "fae36c36d7d37283429ff5e9938b1ab3fff8c3d084c7ed7ac714d6d059b2a024",
+   "content": "fae36c36d7d37283429ff5e9938b1ab3fff8c3d084c7ed7ac714d6d059b2a024",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/previews/deckhand_pip_front.png"
   },
   {
    "path": "previews/deckhand_pip_side.png",
    "kind": "preview",
    "bytes": 108905,
-   "sha256": "607d788f0202545c05dadcbe552808d07aab3dfe4bf183a96111c8e5e61a011d",
-   "content": "607d788f0202545c05dadcbe552808d07aab3dfe4bf183a96111c8e5e61a011d",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041131-db4693/meshcraft/previews/deckhand_pip_side.png"
+   "sha256": "8110323dea7e9d4cf7604e8c7d3d59d527bb6f127cb72a57d2407adce9f570a0",
+   "content": "8110323dea7e9d4cf7604e8c7d3d59d527bb6f127cb72a57d2407adce9f570a0",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044723-79b217/meshcraft/previews/deckhand_pip_side.png"
   }
  ],
  "title": "Deckhand Pip",
@@ -171,20 +171,20 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261103-041131-db4693",
-  "meshcraft_job": "job-20261103-041132-e77a59",
+  "forgecraft_job": "job-20261103-044723-79b217",
+  "meshcraft_job": "job-20261103-044724-be37fa",
   "inputs": [
    {
     "asset": "deckhand_pip",
     "version": 1
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Walking.fbx",
-    "sha256": "05ca07e409a7314cfe2a219fdda8456033c8a5627781ba9e3f0c5a11c25f1a67"
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Walking.fbx",
+    "sha256": "530aee65151ff428fe505fc6fd4e08d3cc2c0e6400bdf9bd41cb3031b96ee5cb"
    },
    {
-    "path": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Sneak Walk.fbx",
-    "sha256": "e55060f983a56b9f5efd5fef88667547e730d2935ed8622261aa38ffe72e9843"
+    "path": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Sneak Walk.fbx",
+    "sha256": "9cbb0c34c97ff12800b3ee72c1996fba4e3e74a1c370add12d08b1ee4ba1491f"
    }
   ],
   "blender": "5.2.3",
@@ -193,14 +193,14 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-03T04:11:56Z"
+  "recorded": "2026-11-03T04:47:48Z"
  },
  "generation": {
   "method": "mixamo clip merge",
   "clips": [
    {
     "clip": "Walking",
-    "file": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Walking.fbx",
+    "file": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Walking.fbx",
     "frames": [
      2,
      32
@@ -214,7 +214,7 @@
    },
    {
     "clip": "Sneak_Walk",
-    "file": "/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/Sneak Walk.fbx",
+    "file": "/home/user/pilot/acc-fa3ff73/tidebreakers-3d/work/mixamo/Sneak Walk.fbx",
     "frames": [
      2,
      32
@@ -236,7 +236,11 @@
  },
  "geometry": {
   "triangles": 1488,
-  "size_m": null,
+  "size_m": [
+   1.432,
+   0.44,
+   1.798
+  ],
   "meshes": null
  },
  "animations": [
@@ -405,7 +409,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261103-041131-db4693",
+  "forgecraft_job": "job-20261103-044723-79b217",
   "route": "mixamo",
   "tool": "mixamo"
  }

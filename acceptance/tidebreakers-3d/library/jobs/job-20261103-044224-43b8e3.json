@@ -1,19 +1,19 @@
 {
- "id": "job-20261103-040738-c23a44",
+ "id": "job-20261103-044224-43b8e3",
  "tool": "run_pipeline",
- "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+ "asset_id": "upgrade_canvas_mainsail",
  "request": {
   "brief": {
-   "asset_id": "upgrade_ship_s_wheel_ash_rudder",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft",
-   "parent_job": "job-20261103-040737-75c270",
+   "asset_id": "upgrade_canvas_mainsail",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044223-46ad73/meshcraft",
+   "parent_job": "job-20261103-044223-46ad73",
    "template": "boat_upgrade",
    "params": {
-    "seed": 777,
-    "upgrade": "rudder_ash"
+    "seed": 812,
+    "upgrade": "sail_canvas"
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Ship's Wheel & Ash Rudder",
+   "title": "Upgrade: Canvas Mainsail",
    "tags": [
     "tidebreakers"
    ],
@@ -40,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:07:38Z",
+ "created": "2026-11-03T04:42:24Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:07:38Z",
+   "started": "2026-11-03T04:42:24Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 31.9,
+   "seconds": 17.3,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.26
+     "seconds": 0.18
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 17.42
+     "seconds": 15.54
     },
     {
      "step": "validate_scene",
@@ -68,7 +68,7 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 13.34
+     "seconds": 0.78
     },
     {
      "step": "contact_sheet",
@@ -76,16 +76,16 @@
      "seconds": 0.24
     }
    ],
-   "finished": "2026-11-03T04:08:10Z"
+   "finished": "2026-11-03T04:42:41Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040737-75c270",
- "updated": "2026-11-03T04:08:10Z",
+ "parent": "job-20261103-044223-46ad73",
+ "updated": "2026-11-03T04:42:41Z",
  "library": {
-  "asset": "upgrade_ship_s_wheel_ash_rudder",
+  "asset": "upgrade_canvas_mainsail",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_ship_s_wheel_ash_rudder/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_canvas_mainsail/v1",
   "same_as": null,
   "files": 16
  }

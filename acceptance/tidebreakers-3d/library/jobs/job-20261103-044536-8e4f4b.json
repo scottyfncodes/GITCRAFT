@@ -1,124 +1,117 @@
 {
- "id": "job-20261103-040547-8b6cac",
+ "id": "job-20261103-044536-8e4f4b",
  "tool": "generate",
- "asset_id": "tidebreakers_coastal_sloop",
+ "asset_id": "deckhand_pip",
  "request": {
-  "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
-  "name": "TIDEBREAKERS Coastal Sloop",
+  "brief": "animated pirate deckhand character, coral bandana, crimson vest",
+  "name": "Deckhand Pip",
   "bake": 1024,
   "profiles": [
    "three-web-toon",
-   "three-web-atlas",
    "web-pbr",
-   "unity-fbx",
-   "obj-static",
-   "stl-print",
-   "godot-glb"
+   "unity-fbx"
   ],
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:05:47Z",
+ "created": "2026-11-03T04:45:36Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:05:47Z",
+   "started": "2026-11-03T04:45:36Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:05:47Z",
+     "started": "2026-11-03T04:45:36Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:05:47Z",
-     "seconds": 0.01
+     "finished": "2026-11-03T04:45:36Z",
+     "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:05:47Z",
+     "started": "2026-11-03T04:45:36Z",
      "info": {
-      "meshcraft_job": "job-20261103-040549-4e0ce2",
+      "meshcraft_job": "job-20261103-044537-baac7e",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 27,
-       "warn": 0,
+       "pass": 19,
+       "warn": 1,
        "fail": 0,
-       "info": 5
+       "info": 3
       },
       "library": {
-       "asset": "tidebreakers_coastal_sloop",
+       "asset": "deckhand_pip",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:06:14Z",
-     "seconds": 26.94
+     "finished": "2026-11-03T04:46:05Z",
+     "seconds": 28.42
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:06:14Z",
+     "started": "2026-11-03T04:46:05Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:06:17Z",
-     "seconds": 3.5
+     "finished": "2026-11-03T04:46:08Z",
+     "seconds": 3.56
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:06:17Z",
+     "started": "2026-11-03T04:46:08Z",
      "info": {
-      "asset": "tidebreakers_coastal_sloop",
+      "asset": "deckhand_pip",
       "version": 1,
-      "validation": "passed"
+      "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-03T04:06:17Z",
+     "finished": "2026-11-03T04:46:08Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:06:17Z",
+   "finished": "2026-11-03T04:46:08Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040549-4e0ce2"
+  "job-20261103-044537-baac7e"
  ],
- "updated": "2026-11-03T04:06:17Z",
+ "updated": "2026-11-03T04:46:08Z",
  "plan": {
   "request": {
-   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+   "brief": "animated pirate deckhand character, coral bandana, crimson vest",
    "intents": [
-    "stylized"
+    "animated",
+    "character"
    ],
-   "kind": "boat",
-   "template": "boat",
+   "kind": "character",
+   "template": "deckhand",
    "params": {
-    "seed": 692,
-    "vessel": "sloop",
-    "paint": [
-     "#4FB39A",
-     "#F2EAD8"
-    ],
-    "sail_colors": [
-     "#F1E6CC",
-     "crimson"
-    ]
+    "seed": 117,
+    "colors": {
+     "vest": "crimson",
+     "bandana": "coral"
+    },
+    "weapon": true
    },
    "images": 0,
-   "name": "stylized low-poly player boat: the Coastal Sloop, seafoam hu"
+   "name": "animated pirate deckhand character, coral bandana, crimson v"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -134,8 +127,8 @@
     "tool": "blockbench",
     "label": "Blockbench .bbmodel \u2192 MeshCraft",
     "owner": "meshcraft",
-    "available": true,
-    "detail": "CPU, seconds"
+    "available": false,
+    "detail": "no Blockbench template for this kind of object"
    },
    {
     "tool": "hunyuan3d",
@@ -173,9 +166,9 @@
   }
  },
  "asset": {
-  "id": "tidebreakers_coastal_sloop",
+  "id": "deckhand_pip",
   "version": 1,
-  "name": "TIDEBREAKERS Coastal Sloop",
-  "validation": "passed"
+  "name": "Deckhand Pip",
+  "validation": "passed-with-warnings"
  }
 }

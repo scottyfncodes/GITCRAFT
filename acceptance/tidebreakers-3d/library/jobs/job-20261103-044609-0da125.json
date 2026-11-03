@@ -1,19 +1,19 @@
 {
- "id": "job-20261103-040618-f5cc68",
+ "id": "job-20261103-044609-0da125",
  "tool": "run_pipeline",
- "asset_id": "upgrade_canvas_mainsail",
+ "asset_id": "grand_treasure_chest",
  "request": {
   "brief": {
-   "asset_id": "upgrade_canvas_mainsail",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040617-de647a/meshcraft",
-   "parent_job": "job-20261103-040617-de647a",
-   "template": "boat_upgrade",
+   "asset_id": "grand_treasure_chest",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044608-2eb224/meshcraft",
+   "parent_job": "job-20261103-044608-2eb224",
+   "template": "chest",
    "params": {
-    "seed": 812,
-    "upgrade": "sail_canvas"
+    "seed": 545,
+    "tier": "grand"
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Canvas Mainsail",
+   "title": "Grand Treasure Chest",
    "tags": [
     "tidebreakers"
    ],
@@ -30,62 +30,56 @@
      "side",
      "top"
     ]
-   },
-   "bake": {
-    "resolution": 512,
-    "fallbacks": [
-     512
-    ]
    }
   }
  },
  "status": "done",
- "created": "2026-11-03T04:06:18Z",
+ "created": "2026-11-03T04:46:09Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:06:18Z",
+   "started": "2026-11-03T04:46:09Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 18.6,
+   "seconds": 25.3,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.26
+     "seconds": 0.32
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 16.48
+     "seconds": 18.44
     },
     {
      "step": "validate_scene",
      "ok": true,
-     "seconds": 0.0
+     "seconds": 0.01
     },
     {
      "step": "export",
      "ok": true,
-     "seconds": 0.93
+     "seconds": 5.34
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.25
+     "seconds": 0.42
     }
    ],
-   "finished": "2026-11-03T04:06:37Z"
+   "finished": "2026-11-03T04:46:35Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040617-de647a",
- "updated": "2026-11-03T04:06:37Z",
+ "parent": "job-20261103-044608-2eb224",
+ "updated": "2026-11-03T04:46:35Z",
  "library": {
-  "asset": "upgrade_canvas_mainsail",
+  "asset": "grand_treasure_chest",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_canvas_mainsail/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/grand_treasure_chest/v1",
   "same_as": null,
   "files": 16
  }

@@ -1,111 +1,114 @@
 {
- "id": "job-20261103-041015-d72006",
+ "id": "job-20261103-044507-848877",
  "tool": "generate",
- "asset_id": "grand_treasure_chest",
+ "asset_id": "turtle_cay",
  "request": {
-  "brief": "grand treasure chest",
-  "name": "Grand Treasure Chest",
-  "template_params": {
-   "tier": "grand"
-  },
+  "brief": "small tropical island with palms, rocks, a stilt hut and a dock",
+  "name": "Turtle Cay",
+  "bake": 1024,
   "profiles": [
    "three-web-toon",
    "web-pbr",
    "unity-fbx"
   ],
+  "template_params": {
+   "seed": 7
+  },
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:10:15Z",
+ "created": "2026-11-03T04:45:07Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:10:15Z",
+   "started": "2026-11-03T04:45:07Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:10:15Z",
+     "started": "2026-11-03T04:45:07Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:10:15Z",
+     "finished": "2026-11-03T04:45:07Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:10:15Z",
+     "started": "2026-11-03T04:45:07Z",
      "info": {
-      "meshcraft_job": "job-20261103-041016-f2de28",
+      "meshcraft_job": "job-20261103-044507-5ed268",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 22,
-       "warn": 0,
+       "pass": 17,
+       "warn": 1,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "grand_treasure_chest",
+       "asset": "turtle_cay",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:10:42Z",
-     "seconds": 27.37
+     "finished": "2026-11-03T04:45:33Z",
+     "seconds": 26.14
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:10:42Z",
+     "started": "2026-11-03T04:45:33Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:10:46Z",
-     "seconds": 3.47
+     "finished": "2026-11-03T04:45:36Z",
+     "seconds": 3.54
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:10:46Z",
+     "started": "2026-11-03T04:45:36Z",
      "info": {
-      "asset": "grand_treasure_chest",
+      "asset": "turtle_cay",
       "version": 1,
-      "validation": "passed"
+      "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-03T04:10:46Z",
+     "finished": "2026-11-03T04:45:36Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:10:46Z",
+   "finished": "2026-11-03T04:45:36Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-041016-f2de28"
+  "job-20261103-044507-5ed268"
  ],
- "updated": "2026-11-03T04:10:46Z",
+ "updated": "2026-11-03T04:45:36Z",
  "plan": {
   "request": {
-   "brief": "grand treasure chest",
+   "brief": "small tropical island with palms, rocks, a stilt hut and a dock",
    "intents": [],
-   "kind": null,
-   "template": "chest",
+   "kind": "island",
+   "template": "island",
    "params": {
-    "seed": 545
+    "seed": 107,
+    "radius": 15,
+    "palms": 7
    },
    "images": 0,
-   "name": "grand treasure chest"
+   "name": "small tropical island with palms, rocks, a stilt hut and a d"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -121,8 +124,8 @@
     "tool": "blockbench",
     "label": "Blockbench .bbmodel \u2192 MeshCraft",
     "owner": "meshcraft",
-    "available": true,
-    "detail": "CPU, seconds"
+    "available": false,
+    "detail": "no Blockbench template for this kind of object"
    },
    {
     "tool": "hunyuan3d",
@@ -160,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "grand_treasure_chest",
+  "id": "turtle_cay",
   "version": 1,
-  "name": "Grand Treasure Chest",
-  "validation": "passed"
+  "name": "Turtle Cay",
+  "validation": "passed-with-warnings"
  }
 }

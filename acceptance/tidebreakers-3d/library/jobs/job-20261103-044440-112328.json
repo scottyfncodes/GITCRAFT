@@ -1,19 +1,18 @@
 {
- "id": "job-20261103-040712-0c4408",
+ "id": "job-20261103-044440-112328",
  "tool": "run_pipeline",
- "asset_id": "upgrade_brass_compass",
+ "asset_id": "floating_salvage",
  "request": {
   "brief": {
-   "asset_id": "upgrade_brass_compass",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040711-fdb4d6/meshcraft",
-   "parent_job": "job-20261103-040711-fdb4d6",
-   "template": "boat_upgrade",
+   "asset_id": "floating_salvage",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044439-b3755f/meshcraft",
+   "parent_job": "job-20261103-044439-b3755f",
+   "template": "salvage",
    "params": {
-    "seed": 263,
-    "upgrade": "compass_brass"
+    "seed": 752
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Brass Compass",
+   "title": "Floating Salvage",
    "tags": [
     "tidebreakers"
    ],
@@ -32,7 +31,7 @@
     ]
    },
    "bake": {
-    "resolution": 512,
+    "resolution": 1024,
     "fallbacks": [
      512
     ]
@@ -40,25 +39,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:07:12Z",
+ "created": "2026-11-03T04:44:40Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:07:12Z",
+   "started": "2026-11-03T04:44:40Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 21.5,
+   "seconds": 22.8,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.23
+     "seconds": 0.25
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 17.21
+     "seconds": 17.98
     },
     {
      "step": "validate_scene",
@@ -68,24 +67,24 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 3.15
+     "seconds": 3.61
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.31
+     "seconds": 0.29
     }
    ],
-   "finished": "2026-11-03T04:07:33Z"
+   "finished": "2026-11-03T04:45:03Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040711-fdb4d6",
- "updated": "2026-11-03T04:07:33Z",
+ "parent": "job-20261103-044439-b3755f",
+ "updated": "2026-11-03T04:45:03Z",
  "library": {
-  "asset": "upgrade_brass_compass",
+  "asset": "floating_salvage",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_brass_compass/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/floating_salvage/v1",
   "same_as": null,
   "files": 16
  }

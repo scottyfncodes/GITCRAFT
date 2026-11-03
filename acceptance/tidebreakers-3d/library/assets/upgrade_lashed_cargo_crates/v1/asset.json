@@ -1,7 +1,7 @@
 {
  "id": "upgrade_lashed_cargo_crates",
  "version": 1,
- "created": "2026-11-03T04:07:07Z",
+ "created": "2026-11-03T04:43:11Z",
  "tool": "run_pipeline",
  "template": "boat_upgrade",
  "tags": [
@@ -12,8 +12,8 @@
  ],
  "brief": {
   "asset_id": "upgrade_lashed_cargo_crates",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft",
-  "parent_job": "job-20261103-040640-c482ba",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft",
+  "parent_job": "job-20261103-044245-72d0eb",
   "template": "boat_upgrade",
   "params": {
    "seed": 78,
@@ -45,7 +45,7 @@
    ]
   }
  },
- "job": "job-20261103-040641-22125f",
+ "job": "job-20261103-044246-d4485f",
  "same_as": null,
  "inputs": [
   {
@@ -73,17 +73,17 @@
    "path": "source/upgrade_lashed_cargo_crates.blend",
    "kind": "blend",
    "bytes": 101267,
-   "sha256": "71cd438a7da22e57a1fde3184956c9e151a6f5a09ee275bdead8bde5cd257ad6",
-   "content": "71cd438a7da22e57a1fde3184956c9e151a6f5a09ee275bdead8bde5cd257ad6",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/source/upgrade_lashed_cargo_crates.blend"
+   "sha256": "ce2f73b47ca51b128239027f1371e63f52271387dd6b971d4cc679c68a45a61e",
+   "content": "ce2f73b47ca51b128239027f1371e63f52271387dd6b971d4cc679c68a45a61e",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/source/upgrade_lashed_cargo_crates.blend"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.three-web-toon.glb",
    "kind": "export",
    "bytes": 39744,
-   "sha256": "e57fc2e85f36f25e69ca6d0ae223b8e04b1790a2c7251933a4950b0e63c85a24",
+   "sha256": "d761b5a7dd6721bda829077476acdea0409365bb733ad9e4a1e6eddcdee90cf5",
    "content": "b332deccc998daf5600c989b2ea5754ed712e5833996af07b3c0798533fbb8fd",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.glb"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.three-web-toon.lod50.glb",
@@ -91,7 +91,7 @@
    "bytes": 28368,
    "sha256": "88026bb3685e3adc5f1eb37d4ccabdd637a8699cb5a9c9e2ebc65b0c070a75a7",
    "content": "a0028534bfba9241b6c3730ff573e0bf075d363e1b529eb3e3c9a75b32a42ab0",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.lod50.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.three-web-toon.lod25.glb",
@@ -99,7 +99,7 @@
    "bytes": 15612,
    "sha256": "b3639141dc262686707f0b2c9be9d0394373a32247e7cb4dc5b95331a2f07cef",
    "content": "7c33e723624b8f1009ef916c4884e1506eb7fcc50a31560f43a88c4f725aa440",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.lod25.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.three-web-toon.collision.glb",
@@ -107,15 +107,15 @@
    "bytes": 13136,
    "sha256": "f4321261d951b2f9b5d719205f7a728488e146fd753b7777932a67da06c08584",
    "content": "0cc385af166329168b94aa580599a59c1a8db14a592d229505e7d0a996622c3b",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.three-web-toon.collision.glb"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.web-pbr.glb",
    "kind": "export",
    "bytes": 105356,
-   "sha256": "fb66675a06fe0054b78dde46f40afd7aba40fccaa8add9ec321e0f987fd4059c",
+   "sha256": "20c414da9d6c9bb2aa19da8e5bb76ac91d91b9e5ea081a5620fbc71828142ddf",
    "content": "979d7700d6162088403ef285f674064e9030007755319b62bd3723b1a9a8e9f0",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.web-pbr.glb"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.web-pbr.basecolor.png",
@@ -123,7 +123,7 @@
    "bytes": 48155,
    "sha256": "d794dd226f5b0e0f1d9fd7cb12874e82f57a605db4c77db9e99dd391503e9c56",
    "content": "d794dd226f5b0e0f1d9fd7cb12874e82f57a605db4c77db9e99dd391503e9c56",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.web-pbr.basecolor.png"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.web-pbr.orm.png",
@@ -131,15 +131,15 @@
    "bytes": 22408,
    "sha256": "41817595a93e94a4759c1d523b51d65bc4643de8abbae88fbb1279100b23c8c4",
    "content": "41817595a93e94a4759c1d523b51d65bc4643de8abbae88fbb1279100b23c8c4",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.web-pbr.orm.png"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.unity-fbx.fbx",
    "kind": "export",
    "bytes": 32828,
-   "sha256": "1ccd85adbc58a9ae79e3fdedfb22da2320bed18deec5b83717384a95247a4c8c",
+   "sha256": "954afebcb0e27c51802a73a1446958dddd61a5dba835d0a3d8c4cdcce54fc8fe",
    "content": "fbx-size:32828",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.unity-fbx.fbx"
   },
   {
    "path": "exports/upgrade_lashed_cargo_crates.unity-fbx.atlas.png",
@@ -147,39 +147,39 @@
    "bytes": 274,
    "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
    "content": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/exports/upgrade_lashed_cargo_crates.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/exports/upgrade_lashed_cargo_crates.unity-fbx.atlas.png"
   },
   {
    "path": "previews/upgrade_lashed_cargo_crates_three_quarter.png",
    "kind": "preview",
    "bytes": 153953,
-   "sha256": "8259c69713d67bea1dcc5f9aff1532fad712855113126aebcf4fe135a579acda",
-   "content": "8259c69713d67bea1dcc5f9aff1532fad712855113126aebcf4fe135a579acda",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/previews/upgrade_lashed_cargo_crates_three_quarter.png"
+   "sha256": "7a5a229a5599667a45a33a38b08fe0b9ba03b1d7ea3f55467484d7c64eca5d4e",
+   "content": "7a5a229a5599667a45a33a38b08fe0b9ba03b1d7ea3f55467484d7c64eca5d4e",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/previews/upgrade_lashed_cargo_crates_three_quarter.png"
   },
   {
    "path": "previews/upgrade_lashed_cargo_crates_front.png",
    "kind": "preview",
    "bytes": 141270,
-   "sha256": "34fe33e3c13e2d701888af7b74470f0962ccaa713c0dc71a57581bcf71848838",
-   "content": "34fe33e3c13e2d701888af7b74470f0962ccaa713c0dc71a57581bcf71848838",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/previews/upgrade_lashed_cargo_crates_front.png"
+   "sha256": "c56740b1b043de9360ab4ccd7a9df058b22335eb34473a7a21f8996d05e9c9db",
+   "content": "c56740b1b043de9360ab4ccd7a9df058b22335eb34473a7a21f8996d05e9c9db",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/previews/upgrade_lashed_cargo_crates_front.png"
   },
   {
    "path": "previews/upgrade_lashed_cargo_crates_side.png",
    "kind": "preview",
    "bytes": 112027,
-   "sha256": "04a9cec22b4bc3fc9f7db840f8d734c660883c7693bd9b3222757047b7244189",
-   "content": "04a9cec22b4bc3fc9f7db840f8d734c660883c7693bd9b3222757047b7244189",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/previews/upgrade_lashed_cargo_crates_side.png"
+   "sha256": "fa1fdbe4e7fab574f49f121d16f7fffa7a125faa27f7792b66ecd56eee3ea738",
+   "content": "fa1fdbe4e7fab574f49f121d16f7fffa7a125faa27f7792b66ecd56eee3ea738",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/previews/upgrade_lashed_cargo_crates_side.png"
   },
   {
    "path": "previews/upgrade_lashed_cargo_crates_top.png",
    "kind": "preview",
    "bytes": 103266,
-   "sha256": "6a83f0fbccdb93eafdcd6589454ab7073ed374e0e68e6755b4ce12c3eaa94d46",
-   "content": "6a83f0fbccdb93eafdcd6589454ab7073ed374e0e68e6755b4ce12c3eaa94d46",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/previews/upgrade_lashed_cargo_crates_top.png"
+   "sha256": "1f6c9d9c37ba6fe1dc3ad8281dcc740ba9e0ec69c944648f130528e97aa93dbc",
+   "content": "1f6c9d9c37ba6fe1dc3ad8281dcc740ba9e0ec69c944648f130528e97aa93dbc",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/previews/upgrade_lashed_cargo_crates_top.png"
   },
   {
    "path": "previews/upgrade_lashed_cargo_crates_sheet.png",
@@ -187,15 +187,15 @@
    "bytes": 175855,
    "sha256": "ea727aabe1a4c4ab71ecc9f48b349352820b3c4e16845527c1a1523ea523c1a8",
    "content": "ea727aabe1a4c4ab71ecc9f48b349352820b3c4e16845527c1a1523ea523c1a8",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/previews/upgrade_lashed_cargo_crates_sheet.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/previews/upgrade_lashed_cargo_crates_sheet.png"
   },
   {
    "path": "upgrade_lashed_cargo_crates.meshcraft.json",
    "kind": "report",
    "bytes": 12423,
-   "sha256": "a4eced667a017ad7975ca9f56032bbcd8eb75e4cda84ae083131275703b86dc3",
-   "content": "a4eced667a017ad7975ca9f56032bbcd8eb75e4cda84ae083131275703b86dc3",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040640-c482ba/meshcraft/upgrade_lashed_cargo_crates.meshcraft.json"
+   "sha256": "b7cb701db612147012b8c91485e7cdcd651e15b2c58468937c8f0aaeaa3cde9e",
+   "content": "b7cb701db612147012b8c91485e7cdcd651e15b2c58468937c8f0aaeaa3cde9e",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044245-72d0eb/meshcraft/upgrade_lashed_cargo_crates.meshcraft.json"
   }
  ],
  "title": "Upgrade: Lashed Cargo Crates",
@@ -219,8 +219,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261103-040640-c482ba",
-  "meshcraft_job": "job-20261103-040641-22125f",
+  "forgecraft_job": "job-20261103-044245-72d0eb",
+  "meshcraft_job": "job-20261103-044246-d4485f",
   "inputs": [],
   "blender": "5.2.3",
   "machine": {
@@ -228,7 +228,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-03T04:07:11Z"
+  "recorded": "2026-11-03T04:43:15Z"
  },
  "generation": {
   "method": "meshcraft template",
@@ -292,7 +292,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261103-040640-c482ba",
+  "forgecraft_job": "job-20261103-044245-72d0eb",
   "route": "template",
   "tool": "meshcraft_template"
  }

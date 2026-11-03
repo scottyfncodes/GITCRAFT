@@ -1,23 +1,19 @@
 {
- "id": "job-20261103-040942-3190f0",
+ "id": "job-20261103-044341-67e096",
  "tool": "run_pipeline",
- "asset_id": "deckhand_pip",
+ "asset_id": "upgrade_ship_s_wheel_ash_rudder",
  "request": {
   "brief": {
-   "asset_id": "deckhand_pip",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040941-68faca/meshcraft",
-   "parent_job": "job-20261103-040941-68faca",
-   "template": "deckhand",
+   "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044340-7b03fb/meshcraft",
+   "parent_job": "job-20261103-044340-7b03fb",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 117,
-    "colors": {
-     "vest": "crimson",
-     "bandana": "coral"
-    },
-    "weapon": true
+    "seed": 777,
+    "upgrade": "rudder_ash"
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Deckhand Pip",
+   "title": "Upgrade: Ship's Wheel & Ash Rudder",
    "tags": [
     "tidebreakers"
    ],
@@ -33,16 +29,10 @@
      "front",
      "side",
      "top"
-    ],
-    "poses": [
-     {
-      "clip": "Attack",
-      "at": "end"
-     }
     ]
    },
    "bake": {
-    "resolution": 1024,
+    "resolution": 512,
     "fallbacks": [
      512
     ]
@@ -50,53 +40,53 @@
   }
  },
  "status": "done",
- "created": "2026-11-03T04:09:42Z",
+ "created": "2026-11-03T04:43:41Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:09:42Z",
+   "started": "2026-11-03T04:43:41Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 29.2,
+   "seconds": 30.4,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.41
+     "seconds": 0.24
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 21.77
+     "seconds": 15.81
     },
     {
      "step": "validate_scene",
      "ok": true,
-     "seconds": 0.01
+     "seconds": 0.0
     },
     {
      "step": "export",
      "ok": true,
-     "seconds": 5.09
+     "seconds": 13.55
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.24
+     "seconds": 0.22
     }
    ],
-   "finished": "2026-11-03T04:10:11Z"
+   "finished": "2026-11-03T04:44:11Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-040941-68faca",
- "updated": "2026-11-03T04:10:11Z",
+ "parent": "job-20261103-044340-7b03fb",
+ "updated": "2026-11-03T04:44:11Z",
  "library": {
-  "asset": "deckhand_pip",
+  "asset": "upgrade_ship_s_wheel_ash_rudder",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/deckhand_pip/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_ship_s_wheel_ash_rudder/v1",
   "same_as": null,
-  "files": 15
+  "files": 16
  }
 }

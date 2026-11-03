@@ -1,114 +1,114 @@
 {
- "id": "job-20261103-040908-1ffdc0",
+ "id": "job-20261103-044340-7b03fb",
  "tool": "generate",
- "asset_id": "turtle_cay",
+ "asset_id": "upgrade_ship_s_wheel_ash_rudder",
  "request": {
-  "brief": "small tropical island with palms, rocks, a stilt hut and a dock",
-  "name": "Turtle Cay",
-  "bake": 1024,
+  "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
+  "name": "Upgrade: Ship's Wheel & Ash Rudder",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "rudder_ash"
+  },
+  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
    "unity-fbx"
   ],
-  "template_params": {
-   "seed": 7
-  },
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:09:08Z",
+ "created": "2026-11-03T04:43:40Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:09:08Z",
+   "started": "2026-11-03T04:43:40Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:09:08Z",
+     "started": "2026-11-03T04:43:40Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:09:08Z",
+     "finished": "2026-11-03T04:43:40Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:09:08Z",
+     "started": "2026-11-03T04:43:40Z",
      "info": {
-      "meshcraft_job": "job-20261103-040910-0033d5",
+      "meshcraft_job": "job-20261103-044341-67e096",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 17,
-       "warn": 1,
+       "pass": 18,
+       "warn": 0,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "turtle_cay",
+       "asset": "upgrade_ship_s_wheel_ash_rudder",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:09:37Z",
-     "seconds": 28.73
+     "finished": "2026-11-03T04:44:12Z",
+     "seconds": 31.57
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:09:37Z",
+     "started": "2026-11-03T04:44:12Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:09:41Z",
-     "seconds": 3.65
+     "finished": "2026-11-03T04:44:15Z",
+     "seconds": 3.32
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:09:41Z",
+     "started": "2026-11-03T04:44:15Z",
      "info": {
-      "asset": "turtle_cay",
+      "asset": "upgrade_ship_s_wheel_ash_rudder",
       "version": 1,
-      "validation": "passed-with-warnings"
+      "validation": "passed"
      },
-     "finished": "2026-11-03T04:09:41Z",
+     "finished": "2026-11-03T04:44:15Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:09:41Z",
+   "finished": "2026-11-03T04:44:15Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040910-0033d5"
+  "job-20261103-044341-67e096"
  ],
- "updated": "2026-11-03T04:09:41Z",
+ "updated": "2026-11-03T04:44:15Z",
  "plan": {
   "request": {
-   "brief": "small tropical island with palms, rocks, a stilt hut and a dock",
+   "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
    "intents": [],
-   "kind": "island",
-   "template": "island",
+   "kind": "upgrade",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 107,
-    "radius": 15,
-    "palms": 7
+    "seed": 777,
+    "upgrade": "rudder_ash"
    },
    "images": 0,
-   "name": "small tropical island with palms, rocks, a stilt hut and a d"
+   "name": "boat upgrade component: Ship's Wheel & Ash Rudder"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -124,8 +124,8 @@
     "tool": "blockbench",
     "label": "Blockbench .bbmodel \u2192 MeshCraft",
     "owner": "meshcraft",
-    "available": false,
-    "detail": "no Blockbench template for this kind of object"
+    "available": true,
+    "detail": "CPU, seconds"
    },
    {
     "tool": "hunyuan3d",
@@ -163,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "turtle_cay",
+  "id": "upgrade_ship_s_wheel_ash_rudder",
   "version": 1,
-  "name": "Turtle Cay",
-  "validation": "passed-with-warnings"
+  "name": "Upgrade: Ship's Wheel & Ash Rudder",
+  "validation": "passed"
  }
 }

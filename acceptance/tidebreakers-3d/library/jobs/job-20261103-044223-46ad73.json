@@ -1,13 +1,13 @@
 {
- "id": "job-20261103-040813-674eed",
+ "id": "job-20261103-044223-46ad73",
  "tool": "generate",
- "asset_id": "upgrade_copper_banded_hull",
+ "asset_id": "upgrade_canvas_mainsail",
  "request": {
-  "brief": "boat upgrade component: Copper-Banded Hull",
-  "name": "Upgrade: Copper-Banded Hull",
+  "brief": "boat upgrade component: Canvas Mainsail",
+  "name": "Upgrade: Canvas Mainsail",
   "kind": "upgrade",
   "template_params": {
-   "upgrade": "hull_copper"
+   "upgrade": "sail_canvas"
   },
   "bake": 512,
   "profiles": [
@@ -20,95 +20,95 @@
   ]
  },
  "status": "done",
- "created": "2026-11-03T04:08:13Z",
+ "created": "2026-11-03T04:42:23Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:08:13Z",
+   "started": "2026-11-03T04:42:23Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-03T04:08:13Z",
+     "started": "2026-11-03T04:42:23Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-03T04:08:13Z",
+     "finished": "2026-11-03T04:42:23Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-03T04:08:13Z",
+     "started": "2026-11-03T04:42:23Z",
      "info": {
-      "meshcraft_job": "job-20261103-040814-2ff065",
+      "meshcraft_job": "job-20261103-044224-43b8e3",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 18,
-       "warn": 0,
+       "pass": 17,
+       "warn": 1,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "upgrade_copper_banded_hull",
+       "asset": "upgrade_canvas_mainsail",
        "version": 1
       }
      },
-     "finished": "2026-11-03T04:08:35Z",
-     "seconds": 21.85
+     "finished": "2026-11-03T04:42:42Z",
+     "seconds": 18.49
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-03T04:08:35Z",
+     "started": "2026-11-03T04:42:42Z",
      "info": {
       "status": "passed",
       "reason": null
      },
-     "finished": "2026-11-03T04:08:39Z",
-     "seconds": 3.72
+     "finished": "2026-11-03T04:42:45Z",
+     "seconds": 3.01
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-03T04:08:39Z",
+     "started": "2026-11-03T04:42:45Z",
      "info": {
-      "asset": "upgrade_copper_banded_hull",
+      "asset": "upgrade_canvas_mainsail",
       "version": 1,
-      "validation": "passed"
+      "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-03T04:08:39Z",
+     "finished": "2026-11-03T04:42:45Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-03T04:08:39Z",
+   "finished": "2026-11-03T04:42:45Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261103-040814-2ff065"
+  "job-20261103-044224-43b8e3"
  ],
- "updated": "2026-11-03T04:08:39Z",
+ "updated": "2026-11-03T04:42:45Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Copper-Banded Hull",
+   "brief": "boat upgrade component: Canvas Mainsail",
    "intents": [],
    "kind": "upgrade",
    "template": "boat_upgrade",
    "params": {
-    "seed": 173,
-    "upgrade": "hull_copper"
+    "seed": 812,
+    "upgrade": "sail_canvas"
    },
    "images": 0,
-   "name": "boat upgrade component: Copper-Banded Hull"
+   "name": "boat upgrade component: Canvas Mainsail"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -163,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_copper_banded_hull",
+  "id": "upgrade_canvas_mainsail",
   "version": 1,
-  "name": "Upgrade: Copper-Banded Hull",
-  "validation": "passed"
+  "name": "Upgrade: Canvas Mainsail",
+  "validation": "passed-with-warnings"
  }
 }

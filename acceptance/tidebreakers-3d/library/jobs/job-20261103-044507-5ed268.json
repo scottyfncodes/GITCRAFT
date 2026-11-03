@@ -1,19 +1,20 @@
 {
- "id": "job-20261103-041016-f2de28",
+ "id": "job-20261103-044507-5ed268",
  "tool": "run_pipeline",
- "asset_id": "grand_treasure_chest",
+ "asset_id": "turtle_cay",
  "request": {
   "brief": {
-   "asset_id": "grand_treasure_chest",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041015-d72006/meshcraft",
-   "parent_job": "job-20261103-041015-d72006",
-   "template": "chest",
+   "asset_id": "turtle_cay",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-044507-848877/meshcraft",
+   "parent_job": "job-20261103-044507-848877",
+   "template": "island",
    "params": {
-    "seed": 545,
-    "tier": "grand"
+    "seed": 7,
+    "radius": 15,
+    "palms": 7
    },
    "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Grand Treasure Chest",
+   "title": "Turtle Cay",
    "tags": [
     "tidebreakers"
    ],
@@ -30,56 +31,62 @@
      "side",
      "top"
     ]
+   },
+   "bake": {
+    "resolution": 1024,
+    "fallbacks": [
+     512
+    ]
    }
   }
  },
  "status": "done",
- "created": "2026-11-03T04:10:16Z",
+ "created": "2026-11-03T04:45:07Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-03T04:10:16Z",
+   "started": "2026-11-03T04:45:07Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 26.1,
+   "seconds": 24.9,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.26
+     "seconds": 2.56
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 19.28
+     "seconds": 17.8
     },
     {
      "step": "validate_scene",
      "ok": true,
-     "seconds": 0.0
+     "seconds": 0.01
     },
     {
      "step": "export",
      "ok": true,
-     "seconds": 5.2
+     "seconds": 3.26
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.49
+     "seconds": 0.24
     }
    ],
-   "finished": "2026-11-03T04:10:42Z"
+   "finished": "2026-11-03T04:45:32Z"
   }
  ],
  "error": null,
- "parent": "job-20261103-041015-d72006",
- "updated": "2026-11-03T04:10:42Z",
+ "parent": "job-20261103-044507-848877",
+ "updated": "2026-11-03T04:45:32Z",
  "library": {
-  "asset": "grand_treasure_chest",
+  "asset": "turtle_cay",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/grand_treasure_chest/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/turtle_cay/v1",
   "same_as": null,
   "files": 16
  }
