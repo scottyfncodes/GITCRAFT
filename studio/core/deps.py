@@ -91,7 +91,7 @@ def check_one(dep_id, spec):
         r.update(available=False, reason=spec.get("reason", "not installable here"))
     else:
         r.update(available=False, reason=f"unknown dependency kind {kind}")
-    _memo[key] = r
+    if r["available"]: _memo[key] = r   # only cache what was found: a runtime installed later is seen on the next check
     return r
 
 

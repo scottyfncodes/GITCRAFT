@@ -20,7 +20,8 @@
 #   GITCRAFT_REPO_URL=<url|path>      install from a fork or local clone
 #   GITCRAFT_GLOBAL_INSTRUCTIONS=0    skip the CLAUDE.md block and the skill
 #   GITCRAFT_MESHCRAFT=0              skip the 3D tools (Blender is ~400 MB)
-#   GITCRAFT_STUDIO=0                 skip the Studio departments; GITCRAFT_STUDIO_VOICE=0 skips only the voice model
+#   GITCRAFT_STUDIO=0                 skip the Studio departments
+#   GITCRAFT_STUDIO_VOICE=later|0     voice model in the background at the first session / not at all
 #   extra arguments go to install.sh  (e.g. --update, or tool names)
 set -uo pipefail
 repo_url="${GITCRAFT_REPO_URL:-https://github.com/scottyfncodes/GITCRAFT}"

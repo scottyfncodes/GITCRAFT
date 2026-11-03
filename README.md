@@ -54,7 +54,21 @@ Paste this one line into the environment's **Setup script** (cloud environment m
 curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
 ```
 
-Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all ten servers connected** and the GITCRAFT instructions loaded. Nothing has to be attached. It takes a few minutes on a new container (the tools are ~400 MB prebuilt; MeshCraft's Blender is another ~400 MB, skip it with `GITCRAFT_MESHCRAFT=0`; the Studio's runtimes ~400 MB more, skip them with `GITCRAFT_STUDIO=0`, or only the voice model with `GITCRAFT_STUDIO_VOICE=0`).
+Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all ten servers connected** and the GITCRAFT instructions loaded. Nothing has to be attached. It takes a few minutes on a new container (the tools are ~400 MB prebuilt; MeshCraft's Blender is another ~400 MB).
+
+**3D tools and setup-script time limits.** Blender is the slow part. With `GITCRAFT_MESHCRAFT=later` (`GITCRAFT_MESHCRAFT=later bash` in the line above), setup registers MeshCraft and ForgeCraft at once and leaves the Blender download to a user-level SessionStart hook (in `~/.claude/settings.json`, installed by setup), which builds it in the background at the start of the first session, in whatever project that session opens. `GITCRAFT_GLOBAL_HOOK=0` leaves that hook out. The servers connect at session start either way. Until Blender lands, each lists a single status tool. When the install finishes, they announce their full tool lists (`tools/list_changed`) and the running session picks them up, with no `/mcp`. The same happens when you run `scripts/install.sh meshcraft forgecraft` during a session.
+
+| `GITCRAFT_MESHCRAFT` | Blender installed | 3D servers registered |
+|---|---|---|
+| `1` (default) | during setup | yes |
+| `later` | in the background when a session starts | yes |
+| `0` | not until you run `scripts/install.sh meshcraft forgecraft` | yes (they wait for the install) |
+| `none` | no | no |
+
+Before this, the two 3D servers were only registered once Blender was installed, and the launcher refused to start them before then. Claude Code reads MCP servers when a session starts, so a session that began first never got them: not after `install.sh`, not after the background build. `tests/test_mcp_deferred_session.py` proves the fix with real Claude Code sessions:
+- a session that starts without Blender connects both servers;
+- the same session gains MeshCraft's tools when Blender lands mid-session, and runs a Blender tool;
+- a fresh session runs everything in-process.
 
 ### Workstation
 

@@ -7,16 +7,16 @@ source "$here/tools.sh"
 if ! command -v claude >/dev/null; then
   # Setup scripts can run before the CLI is on PATH: write the user-scope
   # entries straight into ~/.claude.json (the same place `claude mcp add -s user` writes).
-  python3 - "$here" "$GITCRAFT_BIN" "$(gitcraft_mesh_ready && echo 1 || echo 0)" "$(gitcraft_studio_ready && echo 1 || echo 0)" "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}" <<'PY'
+  python3 - "$here" "$GITCRAFT_BIN" "$([[ "$GITCRAFT_MESHCRAFT" != none ]] && echo 1 || echo 0)" "$(gitcraft_studio_ready && echo 1 || echo 0)" "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}" <<'PY'
 import json, os, sys
-here, bindir, mesh_ready, studio_ready, tools = sys.argv[1], sys.argv[2], sys.argv[3] == "1", sys.argv[4] == "1", sys.argv[5:]
+here, bindir, mesh_wanted, studio_ready, tools = sys.argv[1], sys.argv[2], sys.argv[3] == "1", sys.argv[4] == "1", sys.argv[5:]
 cfg_path = os.path.expanduser("~/.claude.json")
 try: cfg = json.load(open(cfg_path))
 except Exception: cfg = {}
 servers = cfg.setdefault("mcpServers", {})
 for entry in tools:
     name, _, pkg = entry.split(":")
-    ready = mesh_ready if name in ("meshcraft", "forgecraft") else studio_ready if name == "studiocraft" else os.access(os.path.join(bindir, pkg), os.X_OK)
+    ready = mesh_wanted if name in ("meshcraft", "forgecraft") else studio_ready if name == "studiocraft" else os.access(os.path.join(bindir, pkg), os.X_OK)
     if ready:
         servers[name] = {"type": "stdio", "command": os.path.join(here, "mcp.sh"), "args": [name], "env": {}}
         print(f"gitcraft: registered {name} (wrote ~/.claude.json)")
@@ -28,7 +28,10 @@ fi
 
 for entry in "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
-  if [[ "$name" == meshcraft || "$name" == forgecraft || "$name" == studiocraft ]]; then gitcraft_extra_ready "$name" || continue   # a finished install, not a half-installed venv
+  # the 3D servers are registered before Blender is in: Claude Code only reads MCP servers when a session starts, and
+  # they wait for the install and then announce their tools (gitcraft3d/deferred.py). GITCRAFT_MESHCRAFT=none: not at all.
+  if [[ "$name" == meshcraft || "$name" == forgecraft ]]; then [[ "$GITCRAFT_MESHCRAFT" != none ]] || continue
+  elif [[ "$name" == studiocraft ]]; then gitcraft_studio_ready || continue   # a finished core venv, not a half-installed one
   else [[ -x "$GITCRAFT_BIN/$pkg" ]] || continue; fi
   claude mcp remove -s user "$name" >/dev/null 2>&1
   if claude mcp add -s user "$name" -- "$here/mcp.sh" "$name" >/dev/null 2>&1; then
