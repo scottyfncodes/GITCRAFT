@@ -18,7 +18,12 @@ GITCRAFT_TOOLS=(
 #               does its Blender work through MeshCraft; runtimes in ~/.gitcraft/forgecraft
 # Both share gitcraft3d/ (library, jobs, probe, router) and one asset library ($GITCRAFT_3D_LIBRARY).
 GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft)
-GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"   # 0 skips installing MeshCraft (it downloads Blender, ~400 MB)
+# 3D tools (MeshCraft's Blender is a ~400 MB download):
+#   1      install now (default)
+#   later  register now, build Blender in the background when a session starts (for setup scripts with a time limit)
+#   0      don't install; still registered, so `scripts/install.sh meshcraft forgecraft` works in a running session
+#   none   no 3D tools at all (not registered)
+GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"
 
 GITCRAFT_HOME="${GITCRAFT_HOME:-$HOME/.gitcraft}"
 GITCRAFT_BIN="$GITCRAFT_HOME/bin"
