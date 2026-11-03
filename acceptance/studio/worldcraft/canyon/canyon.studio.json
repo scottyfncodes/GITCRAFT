@@ -1,0 +1,415 @@
+{
+ "department": "worldcraft",
+ "action": "terrain",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "worldcraft/canyon",
+ "request": {
+  "preset": "canyon",
+  "climate": "arid",
+  "seed": 7,
+  "name": "canyon",
+  "out_dir": "(acceptance)",
+  "resolution": 257,
+  "mesh_resolution": 129,
+  "roughness": 0.5,
+  "erosion": 12,
+  "erosion_strength": 0.5,
+  "thermal": 20,
+  "vegetation": 1.0,
+  "tree_spacing": 6,
+  "rocks": 0.6,
+  "rock_spacing": 10
+ },
+ "created": "2026-11-03T22:30:55+00:00",
+ "seconds": 7.78,
+ "outputs": [
+  {
+   "path": "canyon_height16.png",
+   "role": "heightmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "I;16",
+   "sha256": "f388182e7048ed6f44c6f099e1d0101f29b230b5bafd6160f71cbb5df1fe20fb",
+   "bytes": 104268
+  },
+  {
+   "path": "canyon_normal.png",
+   "role": "normal_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "444e774bae85fb5c1424e90cf85b253f531c4509809dd8c674176683ce265420",
+   "bytes": 76329
+  },
+  {
+   "path": "canyon_splat.png",
+   "role": "splatmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGBA",
+   "sha256": "c4a0081dcea587da597abc402b38d9988283c90158a6a078d96a33017da7e806",
+   "bytes": 44064
+  },
+  {
+   "path": "canyon_biomes.png",
+   "role": "biome_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "19aad4cf882e27889b13f88aea402c96c83f0614b4ce2f52ab96128e3a5fe4f3",
+   "bytes": 3274
+  },
+  {
+   "path": "canyon_preview.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "1ce4422e28760861bd57b2f2029ad32a10f680de45b0c25f56332dadcfd6dc9c",
+   "bytes": 73335
+  },
+  {
+   "path": "masks/canyon_water.png",
+   "role": "mask:water",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "9ca56a3732f5de6b269601b091981f5720387396d5b8eceff04037015195a029",
+   "bytes": 150
+  },
+  {
+   "path": "masks/canyon_cliff.png",
+   "role": "mask:cliff",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "95c09224203c28ef25a41068dd96803037d6b271cadf9c418560eb7bbe5909a0",
+   "bytes": 2188
+  },
+  {
+   "path": "masks/canyon_beach.png",
+   "role": "mask:beach",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "d65ae7cc42e2934d03fd0606243c384c083f638338d5b32b943f6cddce2291c9",
+   "bytes": 323
+  },
+  {
+   "path": "masks/canyon_forest.png",
+   "role": "mask:forest",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "18e6a77263bf6c2830ae3b7adf7803d15cc36b02746f207d82b4f4e341ea2a56",
+   "bytes": 143
+  },
+  {
+   "path": "masks/canyon_moisture.png",
+   "role": "mask:moisture",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "3f1fbac54001df206ca661d7c845b536300f03c31eaa99d0ae2c0396e85739b0",
+   "bytes": 18489
+  },
+  {
+   "path": "masks/canyon_slope.png",
+   "role": "mask:slope",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "e5c8476838dde3e09d162357b9c92dfc5c3e4f19211c49547afc732b72abb2f2",
+   "bytes": 43116
+  },
+  {
+   "path": "canyon_scatter.json",
+   "role": "scatter",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "rocks",
+    "units",
+    "vegetation"
+   ],
+   "sha256": "1905f8391ea02b672f25ea27a4699e1fd156e4d0808cfdb59cc8a2085bd7de33",
+   "bytes": 654131
+  },
+  {
+   "path": "canyon_coastline.json",
+   "role": "coastline",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "polylines",
+    "units"
+   ],
+   "sha256": "a8afbbd477be38ea1cf39e2b0eec89708c60f5f2c0dcc4ec3262287aa8885f58",
+   "bytes": 43
+  },
+  {
+   "path": "canyon.glb",
+   "role": "mesh",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 32768,
+   "animations": [],
+   "materials": 1,
+   "sha256": "7d88840c978ac9c623d3c477a20883fafe6d0cea887204fff1358caea38f4e70",
+   "bytes": 930068
+  },
+  {
+   "path": "canyon.terrain.json",
+   "role": "manifest",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "biome_cells",
+    "biomes",
+    "height_scale_m",
+    "heightmap",
+    "land_fraction",
+    "preset",
+    "resolution",
+    "rocks",
+    "sea_level",
+    "sea_level_height_m",
+    "seed",
+    "splat_channels",
+    "vegetation",
+    "world_size_m"
+   ],
+   "sha256": "690225aab668fa46dc6fe4086c269dc13b7c8d90475faa48a6315546185b9abd",
+   "bytes": 1024
+  },
+  {
+   "path": "canyon_engine.png",
+   "role": "engine_screenshot",
+   "format": "png",
+   "ok": true,
+   "width": 800,
+   "height": 600,
+   "mode": "RGB",
+   "sha256": "c09fbd8feeb2bf21b821e2cd0f0716dd17fbca7519ed520a2bdea35828e43c32",
+   "bytes": 166594
+  }
+ ],
+ "checks": [
+  {
+   "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 0,
+    "first": [
+     "INFO UNUSED_OBJECT: This object may be unused. @ /meshes/0/primitives/0/attributes/TEXCOORD_0"
+    ]
+   }
+  },
+  {
+   "name": "terrain GLB: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 32768,
+    "errors": null
+   }
+  },
+  {
+   "name": "heightfield has relief",
+   "ok": true,
+   "detail": 0.242
+  },
+  {
+   "name": "terrain is all land",
+   "ok": true,
+   "detail": 1.0
+  },
+  {
+   "name": "splat weights sum to 1",
+   "ok": true
+  }
+ ],
+ "tools": {
+  "studio_world": {
+   "name": "GITCRAFT WorldCraft generators (noise, erosion, biomes, scatter, surface nets, FFT ocean)",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (engine check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "base shape",
+   "seconds": 0.26,
+   "preset": "canyon"
+  },
+  {
+   "stage": "eroded",
+   "seconds": 0.34,
+   "iterations": 12
+  },
+  {
+   "stage": "biomes",
+   "seconds": 0.06
+  },
+  {
+   "stage": "scatter",
+   "seconds": 5.52,
+   "vegetation": 3102,
+   "rocks": 2919,
+   "coast_lines": 0
+  }
+ ],
+ "notes": [],
+ "terrain": {
+  "preset": "canyon",
+  "seed": 7,
+  "resolution": 257,
+  "world_size_m": 1200,
+  "height_scale_m": 120,
+  "sea_level": 0.0,
+  "sea_level_height_m": 0.0,
+  "heightmap": "canyon_height16.png (16-bit, 0 = lowest, 65535 = height_scale_m)",
+  "splat_channels": {
+   "R": "sand",
+   "G": "grass",
+   "B": "rock",
+   "A": "snow"
+  },
+  "biomes": {
+   "deep_water": [
+    24,
+    70,
+    120
+   ],
+   "shallow_water": [
+    52,
+    136,
+    168
+   ],
+   "beach": [
+    226,
+    205,
+    150
+   ],
+   "grassland": [
+    124,
+    170,
+    78
+   ],
+   "forest": [
+    62,
+    122,
+    58
+   ],
+   "jungle": [
+    38,
+    110,
+    52
+   ],
+   "desert": [
+    214,
+    186,
+    120
+   ],
+   "savanna": [
+    176,
+    172,
+    90
+   ],
+   "swamp": [
+    82,
+    104,
+    66
+   ],
+   "tundra": [
+    150,
+    160,
+    130
+   ],
+   "rock": [
+    120,
+    112,
+    104
+   ],
+   "snow": [
+    240,
+    244,
+    248
+   ]
+  },
+  "biome_cells": {
+   "shallow_water": 1,
+   "beach": 413,
+   "grassland": 240,
+   "desert": 55854,
+   "savanna": 1,
+   "rock": 9540
+  },
+  "land_fraction": 1.0,
+  "vegetation": 3102,
+  "rocks": 2919
+ },
+ "engine": {
+  "ok": true,
+  "meshes": 1,
+  "triangles": 32768,
+  "vertex_colored_meshes": 1,
+  "clips": [],
+  "bounds": {
+   "min": [
+    -600,
+    0.023,
+    -600
+   ],
+   "max": [
+    600,
+    119.96,
+    600
+   ]
+  },
+  "centre_colours": 195
+ }
+}

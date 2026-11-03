@@ -1,0 +1,23 @@
+{
+ "tile_size_m": 48,
+ "resolution": 128,
+ "wind_mps": 9,
+ "direction_deg": 30,
+ "loop_seconds": 8,
+ "frames": 32,
+ "fps": 4.0,
+ "significant_wave_height_m": 1.734,
+ "height_range_m": [
+  -1.443,
+  1.535
+ ],
+ "flipbook": {
+  "cols": 6,
+  "rows": 6,
+  "frame": [
+   128,
+   128
+  ]
+ },
+ "usage": "Tile the normal flipbook over the water plane (UV repeat = world_size / tile_size_m), advance one frame every 1/fps s; it loops in time and space."
+}

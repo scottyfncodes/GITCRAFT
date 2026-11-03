@@ -185,7 +185,7 @@ def run(dept, action, params=None, register=None):
         if v["ok"]: o["sha256"] = sha256(p); o["bytes"] = os.path.getsize(p)
         else: bad.append(f"{o['path']}: {v.get('error')}")
         outputs.append(o)
-    checks = res.pop("checks", [])
+    checks = [dict(c, ok=bool(c.get("ok"))) for c in res.pop("checks", [])]   # numpy bools → real booleans
     failed_checks = [c for c in checks if not c.get("ok")]
     ok = not bad and not failed_checks and outputs
     tools = {t: m["tools"].get(t, {"name": t}) for t in ctx.tools_used}

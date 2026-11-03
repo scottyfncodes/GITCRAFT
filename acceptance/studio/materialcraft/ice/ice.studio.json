@@ -1,0 +1,263 @@
+{
+ "department": "materialcraft",
+ "action": "generate",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "materialcraft/ice",
+ "request": {
+  "material": "ice",
+  "resolution": 256,
+  "name": "ice",
+  "out_dir": "(acceptance)",
+  "scale": 1.0,
+  "dirt": 0,
+  "moss": 0,
+  "wear": 0,
+  "wet": 0,
+  "style": "pbr",
+  "toon_bands": 4,
+  "normal_strength": 4.0,
+  "normal_convention": "opengl",
+  "tile_meters": 2.0
+ },
+ "created": "2026-11-03T22:31:18+00:00",
+ "seconds": 1.75,
+ "outputs": [
+  {
+   "path": "ice_basecolor.png",
+   "role": "basecolor",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "52af82abbaaa57f9e823cd4e2cda03e39a659a0eea67365c8248c866a8d6daa1",
+   "bytes": 87883
+  },
+  {
+   "path": "ice_normal.png",
+   "role": "normal (opengl)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "9b56de31108de315aa8a5080ab3bbc906aeed6de7bbea58cafb82180ba27b435",
+   "bytes": 144430
+  },
+  {
+   "path": "ice_roughness.png",
+   "role": "roughness",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "c16128159826e6a454e8564406f9d49b65ac7f9de02cb7373843b3b279181d20",
+   "bytes": 23387
+  },
+  {
+   "path": "ice_metallic.png",
+   "role": "metallic",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "39962cd5bc9f4f0446341d3e6e0c6c37336ddeb2e026a17a3d06bb6cb3266daf",
+   "bytes": 141
+  },
+  {
+   "path": "ice_ao.png",
+   "role": "ao",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "7ae34046e521335827015c89b1a3b342aa5cdc30ab2fa6a2c8b32ab240bb9a24",
+   "bytes": 15577
+  },
+  {
+   "path": "ice_height16.png",
+   "role": "height",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "I;16",
+   "sha256": "e78fce8dabc33eebddae1a97fa9c93ee2e4173ba91bda22bbef6893f7dbb0a38",
+   "bytes": 119257
+  },
+  {
+   "path": "ice_orm.png",
+   "role": "orm (R=AO G=roughness B=metallic, glTF)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "a96ca44e8dd74bf77d5a54df8ca8e57e5f4ec4f37835b04e09e55c4d21a06c06",
+   "bytes": 40809
+  },
+  {
+   "path": "ice_tiled2x2.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "62c311d4835a7d0177e8e7e8d9896863cd5024ae91dbc5e24ad6479705e6f392",
+   "bytes": 185245
+  },
+  {
+   "path": "ice.material.json",
+   "role": "material",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "averages",
+    "emissiveTexture",
+    "name",
+    "normalTexture",
+    "occlusionTexture",
+    "pbrMetallicRoughness",
+    "three",
+    "tiling_m"
+   ],
+   "sha256": "a8e9587db79e0d72ddb3f38370c9e3da82f779878068dba448a1dac974bbf494",
+   "bytes": 730
+  },
+  {
+   "path": "ice_sphere.glb",
+   "role": "sample",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 4096,
+   "animations": [],
+   "materials": 1,
+   "sha256": "6cdb1b5c885d52b8296c160a38952fd2600d6189b434d8788348ef6c6115c24a",
+   "bytes": 367972
+  },
+  {
+   "path": "ice_render.png",
+   "role": "render",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "7e3f570c4177d182de9abcea3ff3643524fcda7eabdbfed573b255ed57dd9dd3",
+   "bytes": 231468
+  }
+ ],
+ "checks": [
+  {
+   "name": "material sphere: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 1,
+    "first": [
+     "WARNING MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations. @ /meshes/0/primitives/0/material"
+    ]
+   }
+  },
+  {
+   "name": "material sphere: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 4096,
+    "errors": null
+   }
+  },
+  {
+   "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+   "ok": true,
+   "detail": {
+    "basecolor": 0.803,
+    "height": 0.783,
+    "normal": 0.841,
+    "roughness": 0.765
+   }
+  },
+  {
+   "name": "normal map vectors are unit length",
+   "ok": true,
+   "detail": 0.0
+  },
+  {
+   "name": "maps are in range and not flat",
+   "ok": true,
+   "detail": 0.0916
+  }
+ ],
+ "tools": {
+  "studio_materials": {
+   "name": "GITCRAFT MaterialCraft generators",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (render check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "generated",
+   "seconds": 0.16,
+   "material": "ice"
+  }
+ ],
+ "notes": [],
+ "material": {
+  "name": "ice",
+  "pbrMetallicRoughness": {
+   "baseColorTexture": "ice_basecolor.png",
+   "metallicRoughnessTexture": "ice_orm.png",
+   "metallicFactor": 1.0,
+   "roughnessFactor": 1.0
+  },
+  "normalTexture": "ice_normal.png",
+  "occlusionTexture": "ice_orm.png",
+  "emissiveTexture": null,
+  "tiling_m": 2.0,
+  "three": {
+   "type": "MeshStandardMaterial",
+   "map": "ice_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+   "normalMap": "ice_normal.png",
+   "roughnessMap": "ice_orm.png",
+   "metalnessMap": "ice_orm.png",
+   "aoMap": "ice_orm.png",
+   "displacementMap": "ice_height16.png (optional)",
+   "emissiveMap": null
+  },
+  "averages": {
+   "basecolor_srgb": [
+    0.729,
+    0.858,
+    0.925
+   ],
+   "roughness": 0.091,
+   "metallic": 0.0
+  }
+ }
+}

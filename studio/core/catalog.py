@@ -265,8 +265,9 @@ def license_report(project=None):
     rows = [r for r in search(project=project, limit=100000) if r["exists"]]
     by = {}
     for r in rows: by.setdefault(r["license"] or "UNKNOWN", []).append(r["rel"] if project else r["path"])
-    restricted = {k: v for k, v in by.items() if re.search(r"NC|NonCommercial|ND|Proprietary|Research", k, re.I)}
-    copyleft = {k: v for k, v in by.items() if re.search(r"GPL|SA|MPL", k)}
+    # SPDX-style tokens only: "-NC", "-ND" (case-sensitive), or the spelled-out terms
+    restricted = {k: v for k, v in by.items() if re.search(r"(?<![A-Za-z])(NC|ND)(?![A-Za-z])|NonCommercial|NoDerivatives|[Pp]roprietary|[Rr]esearch[- ]only|[Nn]on-commercial", k)}
+    copyleft = {k: v for k, v in by.items() if re.search(r"GPL|(?<![A-Za-z])MPL|(?<![A-Za-z])SA(?![A-Za-z])|ShareAlike", k)}
     attrib = sorted({(r["rel"] if project else r["path"], r["attribution"]) for r in rows if r.get("attribution")})
     return {"total": len(rows), "by_license": {k: len(v) for k, v in by.items()}, "unknown": by.get("UNKNOWN", []),
             "restricted": restricted, "copyleft": copyleft, "attributions": [{"path": p, "attribution": a} for p, a in attrib]}

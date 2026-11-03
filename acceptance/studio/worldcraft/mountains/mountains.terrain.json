@@ -1,0 +1,89 @@
+{
+ "preset": "mountains",
+ "seed": 7,
+ "resolution": 257,
+ "world_size_m": 3000,
+ "height_scale_m": 450,
+ "sea_level": 0.0,
+ "sea_level_height_m": 0.0,
+ "heightmap": "mountains_height16.png (16-bit, 0 = lowest, 65535 = height_scale_m)",
+ "splat_channels": {
+  "R": "sand",
+  "G": "grass",
+  "B": "rock",
+  "A": "snow"
+ },
+ "biomes": {
+  "deep_water": [
+   24,
+   70,
+   120
+  ],
+  "shallow_water": [
+   52,
+   136,
+   168
+  ],
+  "beach": [
+   226,
+   205,
+   150
+  ],
+  "grassland": [
+   124,
+   170,
+   78
+  ],
+  "forest": [
+   62,
+   122,
+   58
+  ],
+  "jungle": [
+   38,
+   110,
+   52
+  ],
+  "desert": [
+   214,
+   186,
+   120
+  ],
+  "savanna": [
+   176,
+   172,
+   90
+  ],
+  "swamp": [
+   82,
+   104,
+   66
+  ],
+  "tundra": [
+   150,
+   160,
+   130
+  ],
+  "rock": [
+   120,
+   112,
+   104
+  ],
+  "snow": [
+   240,
+   244,
+   248
+  ]
+ },
+ "biome_cells": {
+  "shallow_water": 1,
+  "beach": 75,
+  "grassland": 524,
+  "tundra": 19660,
+  "rock": 22222,
+  "snow": 23567
+ },
+ "land_fraction": 1.0,
+ "vegetation": 1627,
+ "rocks": 8124
+}

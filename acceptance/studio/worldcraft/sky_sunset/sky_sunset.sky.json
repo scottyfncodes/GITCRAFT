@@ -1,0 +1,20 @@
+{
+ "sun_direction_yup": [
+  -0.9839,
+  0.0436,
+  0.1735
+ ],
+ "sun_elevation_deg": 2.5,
+ "sun_azimuth_deg": 260,
+ "engine": "blender",
+ "ambient_rgb": [
+  0.5171,
+  0.5669,
+  0.579
+ ],
+ "horizon_rgb": [
+  0.706,
+  0.5738,
+  0.1668
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "image": "smoke_flipbook.png",
+ "frames": 24,
+ "cols": 5,
+ "rows": 5,
+ "frame_width": 128,
+ "frame_height": 128,
+ "fps": 24,
+ "loop": true,
+ "blending": "normal",
+ "alpha": "straight (not premultiplied)"
+}

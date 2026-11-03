@@ -1,0 +1,14 @@
+{
+ "folder": "/tmp/gitcraft-studio-acceptance",
+ "assets": 714,
+ "by_kind": {
+  "audio": 43,
+  "map": 5,
+  "model": 37,
+  "image": 612,
+  "video": 16,
+  "document": 1
+ },
+ "invalid": [],
+ "errors": []
+}

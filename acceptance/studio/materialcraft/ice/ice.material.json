@@ -1,0 +1,32 @@
+{
+ "name": "ice",
+ "pbrMetallicRoughness": {
+  "baseColorTexture": "ice_basecolor.png",
+  "metallicRoughnessTexture": "ice_orm.png",
+  "metallicFactor": 1.0,
+  "roughnessFactor": 1.0
+ },
+ "normalTexture": "ice_normal.png",
+ "occlusionTexture": "ice_orm.png",
+ "emissiveTexture": null,
+ "tiling_m": 2.0,
+ "three": {
+  "type": "MeshStandardMaterial",
+  "map": "ice_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+  "normalMap": "ice_normal.png",
+  "roughnessMap": "ice_orm.png",
+  "metalnessMap": "ice_orm.png",
+  "aoMap": "ice_orm.png",
+  "displacementMap": "ice_height16.png (optional)",
+  "emissiveMap": null
+ },
+ "averages": {
+  "basecolor_srgb": [
+   0.729,
+   0.858,
+   0.925
+  ],
+  "roughness": 0.091,
+  "metallic": 0.0
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "name": "lava",
+ "pbrMetallicRoughness": {
+  "baseColorTexture": "lava_basecolor.png",
+  "metallicRoughnessTexture": "lava_orm.png",
+  "metallicFactor": 1.0,
+  "roughnessFactor": 1.0
+ },
+ "normalTexture": "lava_normal.png",
+ "occlusionTexture": "lava_orm.png",
+ "emissiveTexture": "lava_emission.png",
+ "tiling_m": 2.0,
+ "three": {
+  "type": "MeshStandardMaterial",
+  "map": "lava_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+  "normalMap": "lava_normal.png",
+  "roughnessMap": "lava_orm.png",
+  "metalnessMap": "lava_orm.png",
+  "aoMap": "lava_orm.png",
+  "displacementMap": "lava_height16.png (optional)",
+  "emissiveMap": "lava_emission.png"
+ },
+ "averages": {
+  "basecolor_srgb": [
+   0.32,
+   0.203,
+   0.124
+  ],
+  "roughness": 0.817,
+  "metallic": 0.0
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "name": "cobblestone",
+ "pbrMetallicRoughness": {
+  "baseColorTexture": "cobblestone_basecolor.png",
+  "metallicRoughnessTexture": "cobblestone_orm.png",
+  "metallicFactor": 1.0,
+  "roughnessFactor": 1.0
+ },
+ "normalTexture": "cobblestone_normal.png",
+ "occlusionTexture": "cobblestone_orm.png",
+ "emissiveTexture": null,
+ "tiling_m": 2.0,
+ "three": {
+  "type": "MeshStandardMaterial",
+  "map": "cobblestone_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+  "normalMap": "cobblestone_normal.png",
+  "roughnessMap": "cobblestone_orm.png",
+  "metalnessMap": "cobblestone_orm.png",
+  "aoMap": "cobblestone_orm.png",
+  "displacementMap": "cobblestone_height16.png (optional)",
+  "emissiveMap": null
+ },
+ "averages": {
+  "basecolor_srgb": [
+   0.415,
+   0.431,
+   0.342
+  ],
+  "roughness": 0.778,
+  "metallic": 0.0
+ }
+}
