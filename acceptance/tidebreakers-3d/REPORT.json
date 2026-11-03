@@ -1,5 +1,5 @@
 {
- "started": "2026-11-02T21:25:32Z",
+ "started": "2026-11-03T04:05:46Z",
  "engine": "three.js r170 (TIDEBREAKERS package.json)",
  "architecture": "ForgeCraft orchestrates (route, engine check, record, hand-off); MeshCraft does every Blender step; one shared library",
  "assets": {
@@ -9,9 +9,9 @@
    "title": "TIDEBREAKERS Coastal Sloop",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212532-a3232c",
+   "forgecraft_job": "job-20261103-040547-8b6cac",
    "meshcraft_jobs": [
-    "job-20261102-212533-3587f0"
+    "job-20261103-040549-4e0ce2"
    ],
    "triangles": 4392,
    "size_m": [
@@ -38,7 +38,7 @@
     "socket_storage"
    ],
    "validation": "passed",
-   "seconds": 24.4,
+   "seconds": 30.5,
    "exports": [
     "exports/tidebreakers_coastal_sloop.three-web-toon.glb",
     "exports/tidebreakers_coastal_sloop.three-web-atlas.glb",
@@ -55,9 +55,9 @@
    "title": "Upgrade: Canvas Mainsail",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212556-d69640",
+   "forgecraft_job": "job-20261103-040617-de647a",
    "meshcraft_jobs": [
-    "job-20261102-212557-b9062c"
+    "job-20261103-040618-f5cc68"
    ],
    "triangles": 588,
    "size_m": [
@@ -73,7 +73,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed-with-warnings",
-   "seconds": 21.5,
+   "seconds": 23.2,
    "exports": [
     "exports/upgrade_canvas_mainsail.three-web-toon.glb",
     "exports/upgrade_canvas_mainsail.web-pbr.glb",
@@ -86,9 +86,9 @@
    "title": "Upgrade: Lashed Cargo Crates",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212618-3214cb",
+   "forgecraft_job": "job-20261103-040640-c482ba",
    "meshcraft_jobs": [
-    "job-20261102-212618-19cc2e"
+    "job-20261103-040641-22125f"
    ],
    "triangles": 492,
    "size_m": [
@@ -104,7 +104,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 23.7,
+   "seconds": 30.4,
    "exports": [
     "exports/upgrade_lashed_cargo_crates.three-web-toon.glb",
     "exports/upgrade_lashed_cargo_crates.web-pbr.glb",
@@ -117,9 +117,9 @@
    "title": "Upgrade: Brass Compass",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212642-06f08e",
+   "forgecraft_job": "job-20261103-040711-fdb4d6",
    "meshcraft_jobs": [
-    "job-20261102-212642-a73ef8"
+    "job-20261103-040712-0c4408"
    ],
    "triangles": 698,
    "size_m": [
@@ -135,7 +135,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 24.0,
+   "seconds": 26.0,
    "exports": [
     "exports/upgrade_brass_compass.three-web-toon.glb",
     "exports/upgrade_brass_compass.web-pbr.glb",
@@ -148,9 +148,9 @@
    "title": "Upgrade: Ship's Wheel & Ash Rudder",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212706-619b42",
+   "forgecraft_job": "job-20261103-040737-75c270",
    "meshcraft_jobs": [
-    "job-20261102-212706-4e51bd"
+    "job-20261103-040738-c23a44"
    ],
    "triangles": 1016,
    "size_m": [
@@ -166,7 +166,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 30.9,
+   "seconds": 36.5,
    "exports": [
     "exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb",
     "exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb",
@@ -179,9 +179,9 @@
    "title": "Upgrade: Copper-Banded Hull",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212737-6ee111",
+   "forgecraft_job": "job-20261103-040813-674eed",
    "meshcraft_jobs": [
-    "job-20261102-212737-8cd39c"
+    "job-20261103-040814-2ff065"
    ],
    "triangles": 1912,
    "size_m": [
@@ -197,7 +197,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 19.0,
+   "seconds": 25.6,
    "exports": [
     "exports/upgrade_copper_banded_hull.three-web-toon.glb",
     "exports/upgrade_copper_banded_hull.web-pbr.glb",
@@ -210,9 +210,9 @@
    "title": "Floating Salvage",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212756-9ccc9e",
+   "forgecraft_job": "job-20261103-040839-52d88e",
    "meshcraft_jobs": [
-    "job-20261102-212756-8b29bb"
+    "job-20261103-040840-40807a"
    ],
    "triangles": 1188,
    "size_m": [
@@ -230,7 +230,7 @@
    ],
    "sockets": [],
    "validation": "passed",
-   "seconds": 27.4,
+   "seconds": 29.5,
    "exports": [
     "exports/floating_salvage.three-web-toon.glb",
     "exports/floating_salvage.web-pbr.glb",
@@ -243,9 +243,9 @@
    "title": "Turtle Cay",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212823-4de3b5",
+   "forgecraft_job": "job-20261103-040908-1ffdc0",
    "meshcraft_jobs": [
-    "job-20261102-212824-4a065a"
+    "job-20261103-040910-0033d5"
    ],
    "triangles": 10732,
    "size_m": [
@@ -264,7 +264,7 @@
     "socket_spawn"
    ],
    "validation": "passed-with-warnings",
-   "seconds": 25.8,
+   "seconds": 32.4,
    "exports": [
     "exports/turtle_cay.three-web-toon.glb",
     "exports/turtle_cay.web-pbr.glb",
@@ -277,9 +277,9 @@
    "title": "Deckhand Pip",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212849-76b489",
+   "forgecraft_job": "job-20261103-040941-68faca",
    "meshcraft_jobs": [
-    "job-20261102-212849-57ba71"
+    "job-20261103-040942-3190f0"
    ],
    "triangles": 1488,
    "size_m": [
@@ -302,7 +302,7 @@
    ],
    "sockets": [],
    "validation": "passed-with-warnings",
-   "seconds": 29.3,
+   "seconds": 34.0,
    "exports": [
     "exports/deckhand_pip.three-web-toon.glb",
     "exports/deckhand_pip.web-pbr.glb",
@@ -315,9 +315,9 @@
    "title": "Grand Treasure Chest",
    "route": "meshcraft_template",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-212918-4bce16",
+   "forgecraft_job": "job-20261103-041015-d72006",
    "meshcraft_jobs": [
-    "job-20261102-212919-116546"
+    "job-20261103-041016-f2de28"
    ],
    "triangles": 2456,
    "size_m": [
@@ -336,7 +336,7 @@
    ],
    "sockets": [],
    "validation": "passed",
-   "seconds": 26.3,
+   "seconds": 30.9,
    "exports": [
     "exports/grand_treasure_chest.three-web-toon.glb",
     "exports/grand_treasure_chest.web-pbr.glb",
@@ -349,9 +349,9 @@
    "title": "Reef Crab (Blockbench)",
    "route": "blockbench",
    "source_tool": "blockbench \u2192 meshcraft",
-   "forgecraft_job": "job-20261102-212944-1f93ea",
+   "forgecraft_job": "job-20261103-041046-13fcfb",
    "meshcraft_jobs": [
-    "job-20261102-212945-3b6806"
+    "job-20261103-041047-916827"
    ],
    "triangles": 216,
    "size_m": null,
@@ -363,7 +363,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed",
-   "seconds": 31.4,
+   "seconds": 44.6,
    "exports": [
     "exports/reef_crab_blockbench.three-web-toon.glb",
     "exports/reef_crab_blockbench.web-pbr.glb",
@@ -374,8 +374,14 @@
    "id": "deckhand_pip",
    "version": 2,
    "animations": [
-    "Walking",
-    "Sneak_Walk"
+    "Attack",
+    "Idle",
+    "Interact",
+    "Jump",
+    "Run",
+    "Sneak_Walk",
+    "Walk",
+    "Walking"
    ],
    "note": "clips are Mixamo-layout fixtures written by tests/fixtures/mixamo_fixture.py, not downloads from mixamo.com"
   },
@@ -385,15 +391,15 @@
    "title": "Salvage Raft (photogrammetry scan)",
    "route": "meshroom",
    "source_tool": "meshroom \u2192 meshcraft",
-   "forgecraft_job": "job-20261102-213039-f3ad85",
+   "forgecraft_job": "job-20261103-041157-ba7d6e",
    "meshcraft_jobs": [
-    "job-20261102-213549-b7bff1"
+    "job-20261103-041906-ac491d"
    ],
-   "triangles": 1163,
+   "triangles": 238,
    "size_m": [
     2.4,
-    2.389,
-    0.26
+    2.353,
+    0.396
    ],
    "textures": [
     "exports/salvage_raft_photogrammetry_scan.web-pbr.basecolor.png",
@@ -402,7 +408,7 @@
    "animations": [],
    "sockets": [],
    "validation": "passed-with-warnings",
-   "seconds": 329.7,
+   "seconds": 457.4,
    "exports": [
     "exports/salvage_raft_photogrammetry_scan.three-web-toon.glb",
     "exports/salvage_raft_photogrammetry_scan.web-pbr.glb",
@@ -415,9 +421,9 @@
    "title": "TIDEBREAKERS Turtle Cay Scene",
    "route": "meshcraft_scene",
    "source_tool": "meshcraft",
-   "forgecraft_job": "job-20261102-213609-6659ae",
+   "forgecraft_job": "job-20261103-041934-c437c7",
    "meshcraft_jobs": [
-    "job-20261102-213610-58ab9b"
+    "job-20261103-041935-c8a2bb"
    ],
    "triangles": 26742,
    "size_m": [
@@ -427,6 +433,7 @@
    ],
    "textures": [],
    "animations": [
+    "float_bob",
     "Attack",
     "Idle",
     "Interact",
@@ -434,12 +441,11 @@
     "Run",
     "Sneak_Walk",
     "Walk",
-    "Walking",
-    "float_bob"
+    "Walking"
    ],
    "sockets": [],
    "validation": "passed-with-warnings",
-   "seconds": 31.6,
+   "seconds": 49.9,
    "exports": [
     "exports/tidebreakers_turtle_cay_scene.scene.glb"
    ],
@@ -465,7 +471,7 @@
   {
    "check": "player_boat: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212533-3587f0']"
+   "detail": "['job-20261103-040549-4e0ce2']"
   },
   {
    "check": "player_boat: real geometry (4392 tris, [3.868, 12.297, 11.28] m)",
@@ -510,7 +516,7 @@
   {
    "check": "upgrade_sail_canvas: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212557-b9062c']"
+   "detail": "['job-20261103-040618-f5cc68']"
   },
   {
    "check": "upgrade_sail_canvas: real geometry (588 tris, [0.582, 4.531, 7.322] m)",
@@ -545,7 +551,7 @@
   {
    "check": "upgrade_cargo_crate: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212618-19cc2e']"
+   "detail": "['job-20261103-040641-22125f']"
   },
   {
    "check": "upgrade_cargo_crate: real geometry (492 tris, [1.76, 0.786, 1.76] m)",
@@ -580,7 +586,7 @@
   {
    "check": "upgrade_compass_brass: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212642-a73ef8']"
+   "detail": "['job-20261103-040712-0c4408']"
   },
   {
    "check": "upgrade_compass_brass: real geometry (698 tris, [0.771, 0.51, 1.26] m)",
@@ -615,7 +621,7 @@
   {
    "check": "upgrade_rudder_ash: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212706-4e51bd']"
+   "detail": "['job-20261103-040738-c23a44']"
   },
   {
    "check": "upgrade_rudder_ash: real geometry (1016 tris, [1.35, 0.32, 1.775] m)",
@@ -650,7 +656,7 @@
   {
    "check": "upgrade_hull_copper: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212737-8cd39c']"
+   "detail": "['job-20261103-040814-2ff065']"
   },
   {
    "check": "upgrade_hull_copper: real geometry (1912 tris, [3.205, 9.641, 1.444] m)",
@@ -685,7 +691,7 @@
   {
    "check": "salvage: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212756-8b29bb']"
+   "detail": "['job-20261103-040840-40807a']"
   },
   {
    "check": "salvage: real geometry (1188 tris, [2.499, 2.452, 1.456] m)",
@@ -725,7 +731,7 @@
   {
    "check": "island: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212824-4a065a']"
+   "detail": "['job-20261103-040910-0033d5']"
   },
   {
    "check": "island: real geometry (10732 tris, [32.062, 32.185, 11.027] m)",
@@ -765,7 +771,7 @@
   {
    "check": "character: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212849-57ba71']"
+   "detail": "['job-20261103-040942-3190f0']"
   },
   {
    "check": "character: real geometry (1488 tris, [1.432, 0.44, 1.798] m)",
@@ -805,7 +811,7 @@
   {
    "check": "meshcraft_chest: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212919-116546']"
+   "detail": "['job-20261103-041016-f2de28']"
   },
   {
    "check": "meshcraft_chest: real geometry (2456 tris, [2.175, 2.544, 2.602] m)",
@@ -850,7 +856,7 @@
   {
    "check": "creature: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-212945-3b6806']"
+   "detail": "['job-20261103-041047-916827']"
   },
   {
    "check": "creature: real geometry (216 tris, None m)",
@@ -880,12 +886,12 @@
   {
    "check": "mixamo: FBX clips merged by bone name into a new character version",
    "ok": true,
-   "detail": "{'job': 'job-20261102-213016-c47f5b', 'status': 'done', 'error': None, 'asset': {'id': 'deckhand_pip', 'version': 2, 'name': 'Deckhand Pip', 'validation': 'passed-with-warnings'}, 'route': {'route': 'mixamo', 'chosen': 'mixamo', 'fallback_used': False, 'explanation': 'merge Mixamo clips: MeshCraft m"
+   "detail": "{'job': 'job-20261103-041131-db4693', 'status': 'done', 'error': None, 'asset': {'id': 'deckhand_pip', 'version': 2, 'name': 'Deckhand Pip', 'validation': 'passed-with-warnings'}, 'route': {'route': 'mixamo', 'chosen': 'mixamo', 'fallback_used': False, 'explanation': 'merge Mixamo clips: MeshCraft m"
   },
   {
    "check": "mixamo: mesh-only T-pose FBX ready for mixamo.com upload",
    "ok": true,
-   "detail": "{'fbx': {'path': '/home/user/GITCRAFT/acceptance/tidebreakers-3d/work/mixamo/deckhand_pip_mixamo_upload.fbx', 'kind': 'mixamo_upload', 'bytes': 53756, 'sha256': 'f7450473e7ddbc1ee7a67785adc12b0bad2dbd23600a2fa87b989313f4f64a4d'}, 'triangles': 1488, 'size_m': [1.617, 0.44, 2.05], 'seconds': 0.03, 'no"
+   "detail": "{'fbx': {'path': '/home/user/pilot/acc-21abdeb/tidebreakers-3d/work/mixamo/deckhand_pip_mixamo_upload.fbx', 'kind': 'mixamo_upload', 'bytes': 53756, 'sha256': '387b28a0834c0c75e6e4e77013bf29451388e86149038a0cc18665631c86dc93'}, 'triangles': 1488, 'size_m': [1.617, 0.44, 2.05], 'seconds': 0.05, 'note"
   },
   {
    "check": "photogrammetry_scan: generated via meshroom",
@@ -900,12 +906,12 @@
   {
    "check": "photogrammetry_scan: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-213549-b7bff1']"
+   "detail": "['job-20261103-041906-ac491d']"
   },
   {
-   "check": "photogrammetry_scan: real geometry (1163 tris, [2.4, 2.389, 0.26] m)",
+   "check": "photogrammetry_scan: real geometry (238 tris, [2.4, 2.353, 0.396] m)",
    "ok": true,
-   "detail": "{'triangles': 1163, 'size_m': [2.4, 2.389, 0.26], 'meshes': None}"
+   "detail": "{'triangles': 238, 'size_m': [2.4, 2.353, 0.396], 'meshes': None}"
   },
   {
    "check": "photogrammetry_scan: MeshCraft validation + Khronos + three.js r170 engine check",
@@ -940,7 +946,7 @@
   {
    "check": "scene: ForgeCraft delegated the Blender work to a MeshCraft child job",
    "ok": true,
-   "detail": "['job-20261102-213610-58ab9b']"
+   "detail": "['job-20261103-041935-c8a2bb']"
   },
   {
    "check": "scene: real geometry (26742 tris, [160.0, 160.0, 12.0] m)",
@@ -980,17 +986,17 @@
   {
    "check": "handoff \u2192 FilmCraft: 48 preview renders edited into an MP4 review reel",
    "ok": true,
-   "detail": "{'cancel': 'jobs.cancel', 'job': 1, 'offlineMedia': [], 'path': '/home/user/GITCRAFT/acceptance/tidebreakers-3d/handoffs/tidebreakers_3d_review_reel.mp4', 'poll': 'jobs.list', 'result': {'bytes': 338818, 'frames': 576, 'path': '/home/user/GITCRAFT/acceptance/tidebreakers-3d/handoffs/tidebreakers_3d_"
+   "detail": "{'cancel': 'jobs.cancel', 'job': 1, 'offlineMedia': [], 'path': '/home/user/pilot/acc-21abdeb/tidebreakers-3d/handoffs/tidebreakers_3d_review_reel.mp4', 'poll': 'jobs.list', 'result': {'bytes': 333843, 'frames': 576, 'path': '/home/user/pilot/acc-21abdeb/tidebreakers-3d/handoffs/tidebreakers_3d_revi"
   },
   {
    "check": "handoff \u2192 DesignCraft: asset sheet laid out from 13 preview renders",
    "ok": true,
-   "detail": "{'height': 1100, 'path': '/home/user/GITCRAFT/acceptance/tidebreakers-3d/handoffs/tidebreakers_3d_asset_sheet.png', 'width': 1600}"
+   "detail": "{'height': 1100, 'path': '/home/user/pilot/acc-21abdeb/tidebreakers-3d/handoffs/tidebreakers_3d_asset_sheet.png', 'width': 1600}"
   },
   {
    "check": "three.js r170: the composed scene GLB loads in GLTFLoader with every check passing",
    "ok": true,
-   "detail": "[{'check': 'engine_load', 'level': 'pass', 'detail': 'GLTFLoader (three@0.170) loaded the file'}, {'check': 'engine_mixed_materials', 'level': 'pass', 'detail': '26 textured + 0 vertex-coloured of 27 meshes (scene)'}]"
+   "detail": "[{'check': 'engine_load', 'level': 'pass', 'detail': 'GLTFLoader (three@0.170) loaded the file'}, {'check': 'engine_mixed_materials', 'level': 'pass', 'detail': '26 textured + 0 vertex-coloured of 27 meshes (scene)'}, {'check': 'engine_clip:Attack', 'level': 'pass', 'detail': 'clip present'}, {'chec"
   },
   {
    "check": "three.js r170: the scene screenshot shows the scene (12% of pixels differ from the background)",
@@ -1002,7 +1008,7 @@
   "filmcraft": {
    "input_frames": 48,
    "output": "handoffs/tidebreakers_3d_review_reel.mp4",
-   "bytes": 338818
+   "bytes": 333843
   },
   "designcraft": {
    "thumbnails": 13,
@@ -1013,7 +1019,26 @@
    "screenshot": "handoffs/threejs_r170_scene.png",
    "checks": [
     "engine_load",
-    "engine_mixed_materials"
+    "engine_mixed_materials",
+    "engine_clip:Attack",
+    "engine_clip:Idle",
+    "engine_clip:Interact",
+    "engine_clip:Jump",
+    "engine_clip:Run",
+    "engine_clip:Sneak_Walk",
+    "engine_clip:Walk",
+    "engine_clip:Walking",
+    "engine_clip:float_bob",
+    "engine_all_clips_played",
+    "engine_clip_motion:float_bob",
+    "engine_clip_motion:Attack",
+    "engine_clip_motion:Idle",
+    "engine_clip_motion:Interact",
+    "engine_clip_motion:Jump",
+    "engine_clip_motion:Run",
+    "engine_clip_motion:Sneak_Walk",
+    "engine_clip_motion:Walk",
+    "engine_clip_motion:Walking"
    ]
   }
  },
@@ -1021,10 +1046,10 @@
   "cpu_threads": 4,
   "ram": {
    "total_gb": 15.7,
-   "available_gb": 14.9
+   "available_gb": 14.6
   },
   "gpus": [],
-  "disk_free_gb": 13.1,
+  "disk_free_gb": 18.5,
   "network": {
    "allowed_by_gitcraft": false
   }
@@ -1048,7 +1073,7 @@
   },
   "triposr": {
    "available": false,
-   "detail": "missing: weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
+   "detail": "missing: code, torch, weights (huggingface.co/stabilityai/TripoSR unreachable and not cached) (scripts/install-3d.sh ai weights)"
   },
   "hunyuan3d": {
    "available": false,
@@ -1072,8 +1097,8 @@
  "library": {
   "path": "library/",
   "assets": 13,
-  "bytes": 55926591
+  "bytes": 54709854
  },
- "finished": "2026-11-02T21:36:44Z",
+ "finished": "2026-11-03T04:20:32Z",
  "result": "110/110 checks passed"
 }

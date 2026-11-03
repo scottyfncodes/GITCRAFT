@@ -1,15 +1,15 @@
 {
- "id": "job-20261102-213549-b7bff1",
+ "id": "job-20261103-041906-ac491d",
  "tool": "run_pipeline",
  "asset_id": "salvage_raft_photogrammetry_scan",
  "request": {
   "brief": {
    "asset_id": "salvage_raft_photogrammetry_scan",
    "template": "mesh_import",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshcraft",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshcraft",
    "title": "Salvage Raft (photogrammetry scan)",
    "params": {
-    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-213039-f3ad85/meshroom_out/texturedMesh.obj",
+    "path": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-041157-ba7d6e/meshroom_out/texturedMesh.obj",
     "crop": 0.22,
     "target_size": 2.4,
     "max_tris": 20000
@@ -32,19 +32,19 @@
     "scan"
    ],
    "library": true,
-   "parent_job": "job-20261102-213039-f3ad85"
+   "parent_job": "job-20261103-041157-ba7d6e"
   }
  },
  "status": "done",
- "created": "2026-11-02T21:35:49Z",
+ "created": "2026-11-03T04:19:06Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:35:49Z",
+   "started": "2026-11-03T04:19:06Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 17.1,
+   "seconds": 24.4,
    "steps": [
     {
      "step": "build",
@@ -54,7 +54,7 @@
     {
      "step": "preview",
      "ok": true,
-     "seconds": 9.1
+     "seconds": 13.11
     },
     {
      "step": "validate_scene",
@@ -64,20 +64,20 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 7.1
+     "seconds": 10.17
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.15
+     "seconds": 0.19
     }
    ],
-   "finished": "2026-11-02T21:36:07Z"
+   "finished": "2026-11-03T04:19:30Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-213039-f3ad85",
- "updated": "2026-11-02T21:36:07Z",
+ "parent": "job-20261103-041157-ba7d6e",
+ "updated": "2026-11-03T04:19:30Z",
  "library": {
   "asset": "salvage_raft_photogrammetry_scan",
   "version": 1,

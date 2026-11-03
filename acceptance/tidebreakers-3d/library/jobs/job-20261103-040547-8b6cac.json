@@ -1,113 +1,124 @@
 {
- "id": "job-20261102-212706-619b42",
+ "id": "job-20261103-040547-8b6cac",
  "tool": "generate",
- "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+ "asset_id": "tidebreakers_coastal_sloop",
  "request": {
-  "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
-  "name": "Upgrade: Ship's Wheel & Ash Rudder",
-  "kind": "upgrade",
-  "template_params": {
-   "upgrade": "rudder_ash"
-  },
-  "bake": 512,
+  "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+  "name": "TIDEBREAKERS Coastal Sloop",
+  "bake": 1024,
   "profiles": [
    "three-web-toon",
+   "three-web-atlas",
    "web-pbr",
-   "unity-fbx"
+   "unity-fbx",
+   "obj-static",
+   "stl-print",
+   "godot-glb"
   ],
   "tags": [
    "tidebreakers"
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:27:06Z",
+ "created": "2026-11-03T04:05:47Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:27:06Z",
+   "started": "2026-11-03T04:05:47Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:27:06Z",
+     "started": "2026-11-03T04:05:47Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:27:06Z",
-     "seconds": 0.0
+     "finished": "2026-11-03T04:05:47Z",
+     "seconds": 0.01
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:27:06Z",
+     "started": "2026-11-03T04:05:47Z",
      "info": {
-      "meshcraft_job": "job-20261102-212706-4e51bd",
+      "meshcraft_job": "job-20261103-040549-4e0ce2",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 18,
+       "pass": 27,
        "warn": 0,
        "fail": 0,
-       "info": 3
+       "info": 5
       },
       "library": {
-       "asset": "upgrade_ship_s_wheel_ash_rudder",
+       "asset": "tidebreakers_coastal_sloop",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:27:35Z",
-     "seconds": 28.86
+     "finished": "2026-11-03T04:06:14Z",
+     "seconds": 26.94
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:27:35Z",
+     "started": "2026-11-03T04:06:14Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:27:37Z",
-     "seconds": 2.03
+     "finished": "2026-11-03T04:06:17Z",
+     "seconds": 3.5
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:27:37Z",
+     "started": "2026-11-03T04:06:17Z",
      "info": {
-      "asset": "upgrade_ship_s_wheel_ash_rudder",
+      "asset": "tidebreakers_coastal_sloop",
       "version": 1,
       "validation": "passed"
      },
-     "finished": "2026-11-02T21:27:37Z",
+     "finished": "2026-11-03T04:06:17Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:27:37Z",
+   "finished": "2026-11-03T04:06:17Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212706-4e51bd"
+  "job-20261103-040549-4e0ce2"
  ],
- "updated": "2026-11-02T21:27:37Z",
+ "updated": "2026-11-03T04:06:17Z",
  "plan": {
   "request": {
-   "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
-   "intents": [],
-   "kind": "upgrade",
-   "template": "boat_upgrade",
+   "brief": "stylized low-poly player boat: the Coastal Sloop, seafoam hull, red stripe sails",
+   "intents": [
+    "stylized"
+   ],
+   "kind": "boat",
+   "template": "boat",
    "params": {
-    "seed": 777,
-    "upgrade": "rudder_ash"
+    "seed": 692,
+    "vessel": "sloop",
+    "paint": [
+     "#4FB39A",
+     "#F2EAD8"
+    ],
+    "sail_colors": [
+     "#F1E6CC",
+     "crimson"
+    ]
    },
    "images": 0,
-   "name": "boat upgrade component: Ship's Wheel & Ash Rudder"
+   "name": "stylized low-poly player boat: the Coastal Sloop, seafoam hu"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -162,9 +173,9 @@
   }
  },
  "asset": {
-  "id": "upgrade_ship_s_wheel_ash_rudder",
+  "id": "tidebreakers_coastal_sloop",
   "version": 1,
-  "name": "Upgrade: Ship's Wheel & Ash Rudder",
+  "name": "TIDEBREAKERS Coastal Sloop",
   "validation": "passed"
  }
 }

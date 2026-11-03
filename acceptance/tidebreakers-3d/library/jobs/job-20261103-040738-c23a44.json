@@ -1,19 +1,19 @@
 {
- "id": "job-20261102-212737-8cd39c",
+ "id": "job-20261103-040738-c23a44",
  "tool": "run_pipeline",
- "asset_id": "upgrade_copper_banded_hull",
+ "asset_id": "upgrade_ship_s_wheel_ash_rudder",
  "request": {
   "brief": {
-   "asset_id": "upgrade_copper_banded_hull",
-   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212737-6ee111/meshcraft",
-   "parent_job": "job-20261102-212737-6ee111",
+   "asset_id": "upgrade_ship_s_wheel_ash_rudder",
+   "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft",
+   "parent_job": "job-20261103-040737-75c270",
    "template": "boat_upgrade",
    "params": {
-    "seed": 173,
-    "upgrade": "hull_copper"
+    "seed": 777,
+    "upgrade": "rudder_ash"
    },
-   "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
-   "title": "Upgrade: Copper-Banded Hull",
+   "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
+   "title": "Upgrade: Ship's Wheel & Ash Rudder",
    "tags": [
     "tidebreakers"
    ],
@@ -40,25 +40,25 @@
   }
  },
  "status": "done",
- "created": "2026-11-02T21:27:37Z",
+ "created": "2026-11-03T04:07:38Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:27:37Z",
+   "started": "2026-11-03T04:07:38Z",
    "change": null,
    "manual": false,
    "status": "done",
-   "seconds": 16.2,
+   "seconds": 31.9,
    "steps": [
     {
      "step": "build",
      "ok": true,
-     "seconds": 0.25
+     "seconds": 0.26
     },
     {
      "step": "preview",
      "ok": true,
-     "seconds": 14.34
+     "seconds": 17.42
     },
     {
      "step": "validate_scene",
@@ -68,24 +68,24 @@
     {
      "step": "export",
      "ok": true,
-     "seconds": 1.01
+     "seconds": 13.34
     },
     {
      "step": "contact_sheet",
      "ok": true,
-     "seconds": 0.19
+     "seconds": 0.24
     }
    ],
-   "finished": "2026-11-02T21:27:53Z"
+   "finished": "2026-11-03T04:08:10Z"
   }
  ],
  "error": null,
- "parent": "job-20261102-212737-6ee111",
- "updated": "2026-11-02T21:27:53Z",
+ "parent": "job-20261103-040737-75c270",
+ "updated": "2026-11-03T04:08:10Z",
  "library": {
-  "asset": "upgrade_copper_banded_hull",
+  "asset": "upgrade_ship_s_wheel_ash_rudder",
   "version": 1,
-  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_copper_banded_hull/v1",
+  "dir": "/root/.gitcraft/3d-library-tidebreakers/assets/upgrade_ship_s_wheel_ash_rudder/v1",
   "same_as": null,
   "files": 16
  }

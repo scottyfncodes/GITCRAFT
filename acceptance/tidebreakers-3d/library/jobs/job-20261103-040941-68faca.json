@@ -1,13 +1,11 @@
 {
- "id": "job-20261102-212918-4bce16",
+ "id": "job-20261103-040941-68faca",
  "tool": "generate",
- "asset_id": "grand_treasure_chest",
+ "asset_id": "deckhand_pip",
  "request": {
-  "brief": "grand treasure chest",
-  "name": "Grand Treasure Chest",
-  "template_params": {
-   "tier": "grand"
-  },
+  "brief": "animated pirate deckhand character, coral bandana, crimson vest",
+  "name": "Deckhand Pip",
+  "bake": 1024,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -18,93 +16,102 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:29:18Z",
+ "created": "2026-11-03T04:09:41Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:29:18Z",
+   "started": "2026-11-03T04:09:41Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:29:18Z",
+     "started": "2026-11-03T04:09:41Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:29:18Z",
+     "finished": "2026-11-03T04:09:41Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:29:18Z",
+     "started": "2026-11-03T04:09:41Z",
      "info": {
-      "meshcraft_job": "job-20261102-212919-116546",
+      "meshcraft_job": "job-20261103-040942-3190f0",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 22,
-       "warn": 0,
+       "pass": 19,
+       "warn": 1,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "grand_treasure_chest",
+       "asset": "deckhand_pip",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:29:42Z",
-     "seconds": 24.15
+     "finished": "2026-11-03T04:10:11Z",
+     "seconds": 30.48
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:29:42Z",
+     "started": "2026-11-03T04:10:11Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:29:44Z",
-     "seconds": 2.15
+     "finished": "2026-11-03T04:10:15Z",
+     "seconds": 3.49
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:29:44Z",
+     "started": "2026-11-03T04:10:15Z",
      "info": {
-      "asset": "grand_treasure_chest",
+      "asset": "deckhand_pip",
       "version": 1,
-      "validation": "passed"
+      "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-02T21:29:44Z",
+     "finished": "2026-11-03T04:10:15Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:29:44Z",
+   "finished": "2026-11-03T04:10:15Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212919-116546"
+  "job-20261103-040942-3190f0"
  ],
- "updated": "2026-11-02T21:29:44Z",
+ "updated": "2026-11-03T04:10:15Z",
  "plan": {
   "request": {
-   "brief": "grand treasure chest",
-   "intents": [],
-   "kind": null,
-   "template": "chest",
+   "brief": "animated pirate deckhand character, coral bandana, crimson vest",
+   "intents": [
+    "animated",
+    "character"
+   ],
+   "kind": "character",
+   "template": "deckhand",
    "params": {
-    "seed": 545
+    "seed": 117,
+    "colors": {
+     "vest": "crimson",
+     "bandana": "coral"
+    },
+    "weapon": true
    },
    "images": 0,
-   "name": "grand treasure chest"
+   "name": "animated pirate deckhand character, coral bandana, crimson v"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -120,8 +127,8 @@
     "tool": "blockbench",
     "label": "Blockbench .bbmodel \u2192 MeshCraft",
     "owner": "meshcraft",
-    "available": true,
-    "detail": "CPU, seconds"
+    "available": false,
+    "detail": "no Blockbench template for this kind of object"
    },
    {
     "tool": "hunyuan3d",
@@ -159,9 +166,9 @@
   }
  },
  "asset": {
-  "id": "grand_treasure_chest",
+  "id": "deckhand_pip",
   "version": 1,
-  "name": "Grand Treasure Chest",
-  "validation": "passed"
+  "name": "Deckhand Pip",
+  "validation": "passed-with-warnings"
  }
 }

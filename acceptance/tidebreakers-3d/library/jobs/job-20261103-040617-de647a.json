@@ -1,11 +1,15 @@
 {
- "id": "job-20261102-212756-9ccc9e",
+ "id": "job-20261103-040617-de647a",
  "tool": "generate",
- "asset_id": "floating_salvage",
+ "asset_id": "upgrade_canvas_mainsail",
  "request": {
-  "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
-  "name": "Floating Salvage",
-  "bake": 1024,
+  "brief": "boat upgrade component: Canvas Mainsail",
+  "name": "Upgrade: Canvas Mainsail",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "sail_canvas"
+  },
+  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -16,93 +20,95 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:27:56Z",
+ "created": "2026-11-03T04:06:17Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:27:56Z",
+   "started": "2026-11-03T04:06:17Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:27:56Z",
+     "started": "2026-11-03T04:06:17Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:27:56Z",
+     "finished": "2026-11-03T04:06:17Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:27:56Z",
+     "started": "2026-11-03T04:06:17Z",
      "info": {
-      "meshcraft_job": "job-20261102-212756-8b29bb",
+      "meshcraft_job": "job-20261103-040618-f5cc68",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 18,
-       "warn": 0,
+       "pass": 17,
+       "warn": 1,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "floating_salvage",
+       "asset": "upgrade_canvas_mainsail",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:28:21Z",
-     "seconds": 24.93
+     "finished": "2026-11-03T04:06:37Z",
+     "seconds": 19.88
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:28:21Z",
+     "started": "2026-11-03T04:06:37Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:28:23Z",
-     "seconds": 2.43
+     "finished": "2026-11-03T04:06:40Z",
+     "seconds": 3.28
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:28:23Z",
+     "started": "2026-11-03T04:06:40Z",
      "info": {
-      "asset": "floating_salvage",
+      "asset": "upgrade_canvas_mainsail",
       "version": 1,
-      "validation": "passed"
+      "validation": "passed-with-warnings"
      },
-     "finished": "2026-11-02T21:28:23Z",
-     "seconds": 0.0
+     "finished": "2026-11-03T04:06:40Z",
+     "seconds": 0.01
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:28:23Z",
+   "finished": "2026-11-03T04:06:40Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212756-8b29bb"
+  "job-20261103-040618-f5cc68"
  ],
- "updated": "2026-11-02T21:28:23Z",
+ "updated": "2026-11-03T04:06:40Z",
  "plan": {
   "request": {
-   "brief": "floating salvage: lashed crate, barrel and buoy on driftwood",
+   "brief": "boat upgrade component: Canvas Mainsail",
    "intents": [],
-   "kind": "salvage",
-   "template": "salvage",
+   "kind": "upgrade",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 752
+    "seed": 812,
+    "upgrade": "sail_canvas"
    },
    "images": 0,
-   "name": "floating salvage: lashed crate, barrel and buoy on driftwood"
+   "name": "boat upgrade component: Canvas Mainsail"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -157,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "floating_salvage",
+  "id": "upgrade_canvas_mainsail",
   "version": 1,
-  "name": "Floating Salvage",
-  "validation": "passed"
+  "name": "Upgrade: Canvas Mainsail",
+  "validation": "passed-with-warnings"
  }
 }

@@ -1,7 +1,7 @@
 {
  "id": "upgrade_ship_s_wheel_ash_rudder",
  "version": 1,
- "created": "2026-11-02T21:27:34Z",
+ "created": "2026-11-03T04:08:10Z",
  "tool": "run_pipeline",
  "template": "boat_upgrade",
  "tags": [
@@ -12,14 +12,14 @@
  ],
  "brief": {
   "asset_id": "upgrade_ship_s_wheel_ash_rudder",
-  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft",
-  "parent_job": "job-20261102-212706-619b42",
+  "out_dir": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft",
+  "parent_job": "job-20261103-040737-75c270",
   "template": "boat_upgrade",
   "params": {
    "seed": 777,
    "upgrade": "rudder_ash"
   },
-  "palette": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+  "palette": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
   "title": "Upgrade: Ship's Wheel & Ash Rudder",
   "tags": [
    "tidebreakers"
@@ -45,11 +45,11 @@
    ]
   }
  },
- "job": "job-20261102-212706-4e51bd",
+ "job": "job-20261103-040738-c23a44",
  "same_as": null,
  "inputs": [
   {
-   "path": "/home/user/GITCRAFT/forgecraft/palettes/tidebreakers-palette.json",
+   "path": "/home/user/wt/fix-green/forgecraft/palettes/tidebreakers-palette.json",
    "sha256": "768522f8d4b53b21428a6244f92de5a16f8e5a2bf1fe84fd634beb4a93934d3f"
   }
  ],
@@ -72,18 +72,18 @@
   {
    "path": "source/upgrade_ship_s_wheel_ash_rudder.blend",
    "kind": "blend",
-   "bytes": 111715,
-   "sha256": "09e3277c9731e1973b1518b256ae7c5c158829f1e361ec632cb10191190ab307",
-   "content": "09e3277c9731e1973b1518b256ae7c5c158829f1e361ec632cb10191190ab307",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/source/upgrade_ship_s_wheel_ash_rudder.blend"
+   "bytes": 111727,
+   "sha256": "d493958f2e3e0410f90624c4d27fd551321ba574a5192c7fb3cb5299d05ae319",
+   "content": "d493958f2e3e0410f90624c4d27fd551321ba574a5192c7fb3cb5299d05ae319",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/source/upgrade_ship_s_wheel_ash_rudder.blend"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb",
    "kind": "export",
-   "bytes": 79316,
-   "sha256": "5af11956b47b8b0bad5ce699a4dc334f5c62b49f9c0f7007a04f0ad1e585a727",
+   "bytes": 79320,
+   "sha256": "0c2ca36c80da70d34a67be69e5d8d0ff3ddc41e5a29c465eb5e1fa78fb6d758e",
    "content": "ce191a205aca88fdf66887c50d6d041abb6bac1be03cf57e32931d59a0f97085",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.glb"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod50.glb",
@@ -91,7 +91,7 @@
    "bytes": 54532,
    "sha256": "9162d836af1936b10b0b2f30bb0815ab3eebd02f30d1d33db52b29d3d62b61d1",
    "content": "48f228247e913e6b3a8105604e9b9eaa1ac5abaacaf83bacaf8b435e789a0a94",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod50.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod50.glb"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod25.glb",
@@ -99,7 +99,7 @@
    "bytes": 29580,
    "sha256": "497895a445e7e82b968d05ba1518cbdab50996ed1a263263feeb8f6508161480",
    "content": "fb12058ccc888c7e7f6512a26b376f5e74938d3b8139a058baa0bf2aad0e9ea5",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod25.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.lod25.glb"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.collision.glb",
@@ -107,15 +107,15 @@
    "bytes": 8124,
    "sha256": "2fb9079dbe6ed88a362537e98cfe00f92af532392ea4c0979daa85cfb4bd2ca2",
    "content": "529fa95b6cc0125577fdbcb43f6801f172c848b58a6182b314e526a11c7bcb14",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.collision.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.three-web-toon.collision.glb"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb",
    "kind": "export",
-   "bytes": 160092,
-   "sha256": "5c665bf456d7dce54a40c677f77899f5f3b79fed2279b261c48dc020ac6116b5",
+   "bytes": 160096,
+   "sha256": "e0651c8354c6a97604cf72f9e9722ba03ea7092f87c16b7387757efe4f600879",
    "content": "8d6297df662f77ee6b62d898fac7f5efc5b94331202745330fe38e9ba2afef87",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.glb"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.basecolor.png",
@@ -123,7 +123,7 @@
    "bytes": 57906,
    "sha256": "a490302cf9f3d5ad7464e5dddcd82183e995bc82f060954f02e75fb22e5eb310",
    "content": "a490302cf9f3d5ad7464e5dddcd82183e995bc82f060954f02e75fb22e5eb310",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.basecolor.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.basecolor.png"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.orm.png",
@@ -131,15 +131,15 @@
    "bytes": 28899,
    "sha256": "3e8b072453b838947024123b9ba27d089dce3a3a6a432d1bb93c8daff09b6af5",
    "content": "3e8b072453b838947024123b9ba27d089dce3a3a6a432d1bb93c8daff09b6af5",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.orm.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.web-pbr.orm.png"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.fbx",
    "kind": "export",
    "bytes": 44476,
-   "sha256": "b414dd624fa541e25d293528ad2f8334820677a2ce46323b9a45e82411b05a3b",
+   "sha256": "8f0a84cd66dcd0acfde62aae036371a951326dd81c817c5fedf70847706f5541",
    "content": "fbx-size:44476",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.fbx"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.fbx"
   },
   {
    "path": "exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.atlas.png",
@@ -147,55 +147,55 @@
    "bytes": 274,
    "sha256": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
    "content": "488367ca56211703fe46a2762c57e4d0d96836ea4e7a4b12d57d0f1c802dbebf",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.atlas.png"
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/exports/upgrade_ship_s_wheel_ash_rudder.unity-fbx.atlas.png"
   },
   {
    "path": "previews/upgrade_ship_s_wheel_ash_rudder_three_quarter.png",
    "kind": "preview",
-   "bytes": 137241,
-   "sha256": "15e30632424f880d32b60051d008f4a5a911f3e1cf463dc791f2bdcd878b0e99",
-   "content": "15e30632424f880d32b60051d008f4a5a911f3e1cf463dc791f2bdcd878b0e99",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_three_quarter.png"
+   "bytes": 137269,
+   "sha256": "a580026b5f1a4ef194423dcc9c5766805e9867c9e1cdd13025fe3c5956f53b66",
+   "content": "a580026b5f1a4ef194423dcc9c5766805e9867c9e1cdd13025fe3c5956f53b66",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_three_quarter.png"
   },
   {
    "path": "previews/upgrade_ship_s_wheel_ash_rudder_front.png",
    "kind": "preview",
-   "bytes": 149619,
-   "sha256": "7dc1957984d39bf84d9053d99887e06f0b9b8a454106afcac40848ffb3607fda",
-   "content": "7dc1957984d39bf84d9053d99887e06f0b9b8a454106afcac40848ffb3607fda",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_front.png"
+   "bytes": 149641,
+   "sha256": "aa72786099de151b479d315d8166d0a250856e1b7059d0cb27c9720751771fe1",
+   "content": "aa72786099de151b479d315d8166d0a250856e1b7059d0cb27c9720751771fe1",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_front.png"
   },
   {
    "path": "previews/upgrade_ship_s_wheel_ash_rudder_side.png",
    "kind": "preview",
    "bytes": 101735,
-   "sha256": "69a19317b7adc6c5d905f262b3325a25395d0a5da7d4fb25f64b921dc17a467f",
-   "content": "69a19317b7adc6c5d905f262b3325a25395d0a5da7d4fb25f64b921dc17a467f",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_side.png"
+   "sha256": "4732d1fb6f4ad2c85c969cdf140f2690f95db6c75c618f52ee17d4d69dd3ef61",
+   "content": "4732d1fb6f4ad2c85c969cdf140f2690f95db6c75c618f52ee17d4d69dd3ef61",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_side.png"
   },
   {
    "path": "previews/upgrade_ship_s_wheel_ash_rudder_top.png",
    "kind": "preview",
    "bytes": 76039,
-   "sha256": "13bbb4fb249ac509c3f64229c9c09b3905ec8ca818ae3d89fafc6498d1eb53c1",
-   "content": "13bbb4fb249ac509c3f64229c9c09b3905ec8ca818ae3d89fafc6498d1eb53c1",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_top.png"
+   "sha256": "e93bfcb501de0cce2e723f31eca25e9156cbc8501c156ab1f239b62841c808eb",
+   "content": "e93bfcb501de0cce2e723f31eca25e9156cbc8501c156ab1f239b62841c808eb",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_top.png"
   },
   {
    "path": "previews/upgrade_ship_s_wheel_ash_rudder_sheet.png",
    "kind": "preview",
-   "bytes": 136090,
-   "sha256": "7c742f5f38883437ca423bbb9f7a224d2bbe5ab460a896c2bf13620f465d2c69",
-   "content": "7c742f5f38883437ca423bbb9f7a224d2bbe5ab460a896c2bf13620f465d2c69",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_sheet.png"
+   "bytes": 142719,
+   "sha256": "b088f6716d9c0ae15a3062b9785fb17b3d6fdf4dade7c70fb2c10d8d54f1ba5c",
+   "content": "b088f6716d9c0ae15a3062b9785fb17b3d6fdf4dade7c70fb2c10d8d54f1ba5c",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/previews/upgrade_ship_s_wheel_ash_rudder_sheet.png"
   },
   {
    "path": "upgrade_ship_s_wheel_ash_rudder.meshcraft.json",
    "kind": "report",
-   "bytes": 12651,
-   "sha256": "fb8071331051f05fa0129a3d9cdbc3e06d1d3ac5091145462ef2edf4f868d59a",
-   "content": "fb8071331051f05fa0129a3d9cdbc3e06d1d3ac5091145462ef2edf4f868d59a",
-   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261102-212706-619b42/meshcraft/upgrade_ship_s_wheel_ash_rudder.meshcraft.json"
+   "bytes": 12657,
+   "sha256": "6e90f8e5adbea23ccb5d32e7fd87c8930283168821f14289447c7f93acefc87c",
+   "content": "6e90f8e5adbea23ccb5d32e7fd87c8930283168821f14289447c7f93acefc87c",
+   "source": "/root/.gitcraft/3d-library-tidebreakers/jobs/job-20261103-040737-75c270/meshcraft/upgrade_ship_s_wheel_ash_rudder.meshcraft.json"
   }
  ],
  "title": "Upgrade: Ship's Wheel & Ash Rudder",
@@ -219,8 +219,8 @@
   "ai_generated": false
  },
  "provenance": {
-  "forgecraft_job": "job-20261102-212706-619b42",
-  "meshcraft_job": "job-20261102-212706-4e51bd",
+  "forgecraft_job": "job-20261103-040737-75c270",
+  "meshcraft_job": "job-20261103-040738-c23a44",
   "inputs": [],
   "blender": "5.2.3",
   "machine": {
@@ -228,7 +228,7 @@
    "ram_gb": 15.7,
    "gpus": []
   },
-  "recorded": "2026-11-02T21:27:37Z"
+  "recorded": "2026-11-03T04:08:13Z"
  },
  "generation": {
   "method": "meshcraft template",
@@ -278,7 +278,8 @@
     "detail": "1/1 meshes have a base colour map (texture-baked export)"
    }
   ],
-  "screenshot": "previews/upgrade_ship_s_wheel_ash_rudder_engine_check.png"
+  "screenshot": "previews/upgrade_ship_s_wheel_ash_rudder_engine_check.png",
+  "clips": []
  },
  "deliverable_validation": {
   "status": "passed",
@@ -291,7 +292,7 @@
   "engine_check": "passed"
  },
  "orchestration": {
-  "forgecraft_job": "job-20261102-212706-619b42",
+  "forgecraft_job": "job-20261103-040737-75c270",
   "route": "template",
   "tool": "meshcraft_template"
  }

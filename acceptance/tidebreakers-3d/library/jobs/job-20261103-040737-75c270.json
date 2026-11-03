@@ -1,11 +1,15 @@
 {
- "id": "job-20261102-212849-76b489",
+ "id": "job-20261103-040737-75c270",
  "tool": "generate",
- "asset_id": "deckhand_pip",
+ "asset_id": "upgrade_ship_s_wheel_ash_rudder",
  "request": {
-  "brief": "animated pirate deckhand character, coral bandana, crimson vest",
-  "name": "Deckhand Pip",
-  "bake": 1024,
+  "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
+  "name": "Upgrade: Ship's Wheel & Ash Rudder",
+  "kind": "upgrade",
+  "template_params": {
+   "upgrade": "rudder_ash"
+  },
+  "bake": 512,
   "profiles": [
    "three-web-toon",
    "web-pbr",
@@ -16,101 +20,95 @@
   ]
  },
  "status": "done",
- "created": "2026-11-02T21:28:49Z",
+ "created": "2026-11-03T04:07:37Z",
  "attempts": [
   {
    "n": 1,
-   "started": "2026-11-02T21:28:49Z",
+   "started": "2026-11-03T04:07:37Z",
    "change": null,
    "manual": false,
    "stages": [
     {
      "stage": "route",
      "state": "done",
-     "started": "2026-11-02T21:28:49Z",
+     "started": "2026-11-03T04:07:37Z",
      "info": {
       "chosen": "meshcraft_template",
       "route": "template",
       "fallback_used": false,
       "explanation": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile."
      },
-     "finished": "2026-11-02T21:28:49Z",
+     "finished": "2026-11-03T04:07:37Z",
      "seconds": 0.0
     },
     {
      "stage": "generate",
      "state": "done",
-     "started": "2026-11-02T21:28:49Z",
+     "started": "2026-11-03T04:07:37Z",
      "info": {
-      "meshcraft_job": "job-20261102-212849-57ba71",
+      "meshcraft_job": "job-20261103-040738-c23a44",
       "meshcraft_status": "done",
       "fallback": null,
       "validation": {
-       "pass": 19,
-       "warn": 1,
+       "pass": 18,
+       "warn": 0,
        "fail": 0,
        "info": 3
       },
       "library": {
-       "asset": "deckhand_pip",
+       "asset": "upgrade_ship_s_wheel_ash_rudder",
        "version": 1
       }
      },
-     "finished": "2026-11-02T21:29:16Z",
-     "seconds": 26.93
+     "finished": "2026-11-03T04:08:10Z",
+     "seconds": 33.26
     },
     {
      "stage": "engine_check",
      "state": "done",
-     "started": "2026-11-02T21:29:16Z",
+     "started": "2026-11-03T04:08:10Z",
      "info": {
-      "status": "passed"
+      "status": "passed",
+      "reason": null
      },
-     "finished": "2026-11-02T21:29:18Z",
-     "seconds": 2.38
+     "finished": "2026-11-03T04:08:13Z",
+     "seconds": 3.24
     },
     {
      "stage": "record",
      "state": "done",
-     "started": "2026-11-02T21:29:18Z",
+     "started": "2026-11-03T04:08:13Z",
      "info": {
-      "asset": "deckhand_pip",
+      "asset": "upgrade_ship_s_wheel_ash_rudder",
       "version": 1,
-      "validation": "passed-with-warnings"
+      "validation": "passed"
      },
-     "finished": "2026-11-02T21:29:18Z",
+     "finished": "2026-11-03T04:08:13Z",
      "seconds": 0.0
     }
    ],
    "status": "done",
-   "finished": "2026-11-02T21:29:18Z",
+   "finished": "2026-11-03T04:08:13Z",
    "error": null
   }
  ],
  "error": null,
  "children": [
-  "job-20261102-212849-57ba71"
+  "job-20261103-040738-c23a44"
  ],
- "updated": "2026-11-02T21:29:18Z",
+ "updated": "2026-11-03T04:08:13Z",
  "plan": {
   "request": {
-   "brief": "animated pirate deckhand character, coral bandana, crimson vest",
-   "intents": [
-    "animated",
-    "character"
-   ],
-   "kind": "character",
-   "template": "deckhand",
+   "brief": "boat upgrade component: Ship's Wheel & Ash Rudder",
+   "intents": [],
+   "kind": "upgrade",
+   "template": "boat_upgrade",
    "params": {
-    "seed": 117,
-    "colors": {
-     "vest": "crimson",
-     "bandana": "coral"
-    },
-    "weapon": true
+    "seed": 777,
+    "upgrade": "rudder_ash"
    },
    "images": 0,
-   "name": "animated pirate deckhand character, coral bandana, crimson v"
+   "name": "boat upgrade component: Ship's Wheel & Ash Rudder"
   },
   "route": "template",
   "why": "A MeshCraft template fits: deterministic Blender modelling in the project palette, validated and exported per engine profile.",
@@ -126,8 +124,8 @@
     "tool": "blockbench",
     "label": "Blockbench .bbmodel \u2192 MeshCraft",
     "owner": "meshcraft",
-    "available": false,
-    "detail": "no Blockbench template for this kind of object"
+    "available": true,
+    "detail": "CPU, seconds"
    },
    {
     "tool": "hunyuan3d",
@@ -165,9 +163,9 @@
   }
  },
  "asset": {
-  "id": "deckhand_pip",
+  "id": "upgrade_ship_s_wheel_ash_rudder",
   "version": 1,
-  "name": "Deckhand Pip",
-  "validation": "passed-with-warnings"
+  "name": "Upgrade: Ship's Wheel & Ash Rudder",
+  "validation": "passed"
  }
 }
