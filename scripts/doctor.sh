@@ -52,7 +52,7 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
   fi
   say "$(printf '  %-13s %-10s %-11s %s' "$name" "$inst" "$reg" "$build")"
   [[ $inst == yes || $inst == PARTIAL ]] || problems+=("$name is not installed: run scripts/install.sh $name")
-  [[ $reg == yes ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")
+  [[ $reg == yes || $inst == PARTIAL ]] || problems+=("$name is not registered: run scripts/register.sh, then /mcp")
 done
 
 # Global availability: the servers must start from ~/.gitcraft/runtime, not from a checkout that
