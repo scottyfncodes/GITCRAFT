@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini game (TestCraft fixture)</title>
+<style>html,body{margin:0;height:100%;background:#0f1720;overflow:hidden}canvas{display:block;width:100vw;height:100vh}</style></head>
+<body><canvas id="c"></canvas>
+<script>
+// A minimal canvas game used by GITCRAFT's TestCraft tests: arrow keys move the player, coins add score,
+// a wall blocks movement (collision), and window.game exposes state for assertions.
+const c = document.getElementById('c'), g = c.getContext('2d');
+const game = window.game = { x: 60, y: 200, score: 0, frames: 0, coins: [{x: 200, y: 200}, {x: 320, y: 200}], wall: {x: 420, y: 120, w: 20, h: 200}, keys: {} };
+function resize() { c.width = innerWidth; c.height = innerHeight; } resize(); addEventListener('resize', resize);
+addEventListener('keydown', e => game.keys[e.key] = true); addEventListener('keyup', e => game.keys[e.key] = false);
+function step() {
+  const s = 4, nx = game.x + (game.keys.ArrowRight ? s : 0) - (game.keys.ArrowLeft ? s : 0);
+  const w = game.wall; if (!(nx + 12 > w.x && nx - 12 < w.x + w.w && game.y + 12 > w.y && game.y - 12 < w.y + w.h)) game.x = nx;
+  game.coins = game.coins.filter(k => { if (Math.hypot(k.x - game.x, k.y - game.y) < 20) { game.score++; return false; } return true; });
+  g.fillStyle = '#0f1720'; g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = '#5b6b7d'; g.fillRect(w.x, w.y, w.w, w.h);
+  g.fillStyle = '#f5c542'; for (const k of game.coins) { g.beginPath(); g.arc(k.x, k.y, 8, 0, 7); g.fill(); }
+  g.fillStyle = '#4fd1a5'; g.fillRect(game.x - 12, game.y - 12, 24, 24);
+  g.fillStyle = '#fff'; g.font = '16px sans-serif'; g.fillText('score ' + game.score, 12, 24);
+  game.frames++; requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+</script></body></html>
