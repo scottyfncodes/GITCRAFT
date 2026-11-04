@@ -116,24 +116,29 @@ try {
       } catch (e) { R.start.error = String(e).slice(0, 160); }
     }
     if (!R.start.method && req.auto_start !== false) {
-      const hit = await page.evaluate(() => {
-        const re = /^\s*(▶\s*)?(play|start|new game|new run|continue|tap to (play|start)|press start|begin|go!?|let'?s go|start game|play now|start run|launch)\b/i;
-        const cands = [...document.querySelectorAll('button, [role=button], a, div, span')].filter((el) => {
-          const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
-          return r.width > 10 && r.height > 10 && cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity > 0.05 && re.test(el.innerText || '') && (el.innerText || '').length < 40;
-        });
-        cands.sort((a, b) => (a.tagName === 'BUTTON' ? -1 : 0) - (b.tagName === 'BUTTON' ? -1 : 0) || a.innerText.length - b.innerText.length);
-        let el = cands[0];
-        if (!el) {   // no start wording: the dominant button on the title screen (at least twice the area of any other)
-          const bs = [...document.querySelectorAll('button, [role=button]')].map((b) => [b, b.getBoundingClientRect()]).filter(([b, r]) => r.width > 40 && r.height > 24 && getComputedStyle(b).visibility !== 'hidden' && (b.innerText || '').trim().length < 24).sort((a, b) => b[1].width * b[1].height - a[1].width * a[1].height);
-          if (bs.length && (bs.length === 1 || bs[0][1].width * bs[0][1].height >= 2 * bs[1][1].width * bs[1][1].height)) el = bs[0][0];
-        }
-        if (!el) return null; const r = el.getBoundingClientRect(); return { text: el.innerText.trim().slice(0, 40), x: r.x + r.width / 2, y: r.y + r.height / 2 };
-      });
-      if (hit) {
+      // a title screen often leads to an intro card ("Wake up, Captain!" … LET'S GO): follow up to 4 start/continue prompts
+      const chain = [];
+      for (let step = 0; step < 4; step++) {
+        const hit = await page.evaluate((first) => {
+          const re = first ? /^\s*(▶\s*)?(play|start|new game|new run|continue|tap to (play|start)|press start|begin|go!?|let['’`]?s go|start game|play now|start run|launch|set sail)\b/i
+                           : /^\s*(▶\s*)?(play|start|continue|tap to (play|start)|begin|go!?|let['’`]?s go|ok|okay|got it|next|start game|play now)\b/i;
+          const cands = [...document.querySelectorAll('button, [role=button], a, div, span')].filter((el) => {
+            const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
+            return r.width > 10 && r.height > 10 && r.bottom > 0 && r.top < innerHeight && cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity > 0.05 && re.test(el.innerText || '') && (el.innerText || '').length < 40;
+          });
+          cands.sort((a, b) => (a.tagName === 'BUTTON' ? -1 : 0) - (b.tagName === 'BUTTON' ? -1 : 0) || a.innerText.length - b.innerText.length);
+          let el = cands[0];
+          if (!el && first) {   // no start wording: the dominant button on the title screen (at least twice the area of any other)
+            const bs = [...document.querySelectorAll('button, [role=button]')].map((b) => [b, b.getBoundingClientRect()]).filter(([b, r]) => r.width > 40 && r.height > 24 && getComputedStyle(b).visibility !== 'hidden' && (b.innerText || '').trim().length < 24).sort((a, b) => b[1].width * b[1].height - a[1].width * a[1].height);
+            if (bs.length && (bs.length === 1 || bs[0][1].width * bs[0][1].height >= 2 * bs[1][1].width * bs[1][1].height)) el = bs[0][0];
+          }
+          if (!el) return null; const r = el.getBoundingClientRect(); return { text: el.innerText.trim().slice(0, 40), x: r.x + r.width / 2, y: r.y + r.height / 2 };
+        }, step === 0);
+        if (!hit) break;
         if (touch) await page.touchscreen.tap(hit.x, hit.y); else await page.mouse.click(hit.x, hit.y);
-        R.start = { method: 'button', text: hit.text };
-      } else R.start = { method: 'none', note: 'no start button found; probes run on the first screen' };
+        chain.push(hit.text); await page.waitForTimeout(900);
+      }
+      R.start = chain.length ? { method: 'button', text: chain[0], chain } : { method: 'none', note: 'no start button found; probes run on the first screen' };
     }
     await page.waitForTimeout(900);
     R.start.ms = Date.now() - ts;
