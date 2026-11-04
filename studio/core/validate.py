@@ -139,6 +139,12 @@ def _bvh(path):
     return {}
 
 
+def _hdr(path):
+    h = open(path, "rb").read(64)
+    if not h.startswith((b"#?RADIANCE", b"#?RGBE")): raise ValueError("not a Radiance .hdr")
+    return {}
+
+
 def _text(path):
     open(path, encoding="utf-8").read(); return {}
 
@@ -157,4 +163,4 @@ def _fbx(path):
 
 CHECKS = {"png": _image, "jpeg": _image, "webp": _image, "gif": _image, "wav": _wav, "ogg": _ffprobe, "mp3": _ffprobe, "flac": _ffprobe,
           "mp4": _ffprobe, "webm": _ffprobe, "glb": _glb, "json": _json, "tiled": _tiled, "svg": _svg, "pdf": _pdf, "blend": _blend,
-          "midi": _midi, "bvh": _bvh, "text": _text, "csv": _text, "html": _html, "fbx": _fbx, "obj": _text}
+          "midi": _midi, "bvh": _bvh, "hdr": _hdr, "text": _text, "csv": _text, "html": _html, "fbx": _fbx, "obj": _text}

@@ -298,4 +298,93 @@ def scatter(ctx, p):
             "checks": [{"name": "instances placed", "ok": len(out) > 0, "detail": by}]}
 
 
-ACTIONS = {"terrain": terrain, "caves": caves, "sky": sky, "ocean": ocean, "scatter": scatter}
+# ---------------------------------------------------------------- CC0 libraries (Poly Haven)
+def _ph_pick(ctx, p, kind):
+    from core import sources as SRC
+    ctx.used("cc0_sources")
+    if p.get("id"):
+        info = SRC.polyhaven_info(p["id"])
+        return [{"source": "polyhaven", "id": p["id"], "name": info.get("name"), "tags": info.get("tags", [])[:8], "categories": info.get("categories", []),
+                 "authors": list((info.get("authors") or {}).keys()), "page": f"https://polyhaven.com/a/{p['id']}", "license": SRC.LICENSE}]
+    c = SRC.polyhaven_search(kind, p.get("query") or "", p["candidates"])
+    if not c: raise StudioError(f"no CC0 {kind[:-1]} on Poly Haven matches {p.get('query')!r}", hint="try broader words, or list_only: true")
+    return c
+
+
+def _listing(ctx, p, cands, default):
+    from core import sources as SRC
+    short = [{k: c.get(k) for k in ("source", "id", "name", "tags", "page")} for c in cands]
+    jp = ctx.path((p.get("name") or default) + ".candidates.json"); json.dump(short, open(jp, "w"), indent=1)
+    return {"outputs": [{"path": jp, "role": "candidates", "format": "json"}], "checks": [{"name": "found CC0 candidates", "ok": bool(short), "detail": len(short)}],
+            "candidates": short, "output_license": SRC.LICENSE}
+
+
+def _credit(c): return f"{c.get('name') or c['id']} by {', '.join(c.get('authors') or ['unknown'])} ({c['page']}), CC0"
+
+
+def hdri(ctx, p):
+    """A CC0 HDRI from Poly Haven: the .hdr, a tone-mapped preview, a cubemap and lighting values."""
+    import cc0
+    from core import sources as SRC
+    cands = _ph_pick(ctx, p, "hdris")
+    if p["list_only"]: return _listing(ctx, p, cands, "cc0_hdris")
+    c = cands[0]; stem = p.get("name") or c["id"]
+    files = SRC.polyhaven_files(c["id"]).get("hdri", {})
+    entry = (files.get(p["resolution"]) or {}).get("hdr")
+    if not entry: raise StudioError(f"{c['id']} has no {p['resolution']} .hdr", hint="pick another resolution")
+    data = SRC.fetch_checked(entry); ctx.stage("downloaded", id=c["id"], bytes=len(data))
+    E = cc0.read_hdr(data)
+    hp = ctx.path(f"{stem}.hdr"); open(hp, "wb").write(data)
+    ldr = cc0.tonemap(E, p["exposure"])
+    outs = [{"path": hp, "role": "equirect_hdr", "format": "hdr"}, {"path": _img(ldr, ctx.path(f"{stem}_equirect.png")), "role": "equirect (tone-mapped)", "format": "png"}]
+    faces = _cubemap(ldr, p["cube_size"]); names = ["px", "nx", "py", "ny", "pz", "nz"]
+    for nm, f in zip(names, faces): outs.append({"path": _img(f, ctx.path(f"cubemap/{stem}_{nm}.png")), "role": f"cube:{nm}", "format": "png"})
+    sheet = media.contact_sheet([ctx.path(f"cubemap/{stem}_{n}.png") for n in names], ctx.path(f"{stem}_cubemap_sheet.png"), cols=6, cell=160, labels=names)
+    outs.append({"path": sheet, "role": "preview", "format": "png"})
+    sun, sun_el, contrast = cc0.brightest_direction(E)
+    H = E.shape[0]
+    light = {"source": {k: c.get(k) for k in ("source", "id", "name", "page", "authors")}, "license": SRC.LICENSE,
+             "sun_direction_yup": sun, "sun_elevation_deg": sun_el, "sun_contrast": round(contrast, 1),
+             "ambient_rgb_linear": [round(float(v), 4) for v in E[: H // 2].reshape(-1, 3).mean(0)],
+             "three": {"usage": "new RGBELoader().load('" + os.path.basename(hp) + "', t => { t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = t; scene.background = t; })",
+                       "loader": "three/addons/loaders/RGBELoader.js"}}
+    lp = ctx.path(f"{stem}.sky.json"); json.dump(light, open(lp, "w"), indent=1); outs.append({"path": lp, "role": "lighting", "format": "json"})
+    checks = [{"name": "HDR decoded, 2:1 equirect", "ok": E.shape[1] == 2 * E.shape[0], "detail": list(E.shape[:2])},
+              {"name": "true high dynamic range (peak above 1.0)", "ok": float(E.max()) > 1.0, "detail": round(float(E.max()), 2)},
+              {"name": "cube faces are seamless at their shared edges", "ok": _cube_seam_ok(faces)}]
+    return {"outputs": outs, "checks": checks, "lighting": light, "candidates": [{k: x.get(k) for k in ("id", "name", "page")} for x in cands],
+            "output_license": SRC.LICENSE, "attribution": _credit(c)}
+
+
+def fetch_model(ctx, p):
+    """A CC0 model from Poly Haven, packed into one GLB with its textures and checked in three.js."""
+    import cc0
+    from core import sources as SRC
+    cands = _ph_pick(ctx, p, "models")
+    if p["list_only"]: return _listing(ctx, p, cands, "cc0_models")
+    # the mesh (.bin) does not shrink with the texture resolution: pick the best match whose whole download fits the
+    # budget (some scans are hundreds of MB, far too heavy for a phone game)
+    budget = p["max_mb"] * SRC.MB; skipped = []; c = entry = None
+    for cand in cands:
+        e = ((SRC.polyhaven_files(cand["id"]).get("gltf") or {}).get(p["resolution"]) or {}).get("gltf")
+        if not e: skipped.append({"id": cand["id"], "why": f"no {p['resolution']} glTF"}); continue
+        size = e.get("size", 0) + sum(v.get("size", 0) for v in (e.get("include") or {}).values())
+        if size > budget: skipped.append({"id": cand["id"], "why": f"{size // SRC.MB} MB > max_mb {p['max_mb']}"}); continue
+        c, entry = cand, e; break
+    if not entry: raise StudioError(f"no match fits {p['max_mb']} MB: {skipped}", hint="raise max_mb, use a lower resolution, or try other words")
+    if skipped: ctx.note(f"skipped (too large or missing): {skipped}")
+    stem = p.get("name") or c["id"]
+    inc = entry.get("include") or {}
+    def fetch(uri):
+        if uri not in inc: raise StudioError(f"{c['id']}: the glTF references {uri!r}, which is not in Poly Haven's file list")
+        return SRC.fetch_checked(inc[uri])
+    glb_bytes = cc0.pack_glb(SRC.fetch_checked(entry), fetch)
+    glb = ctx.path(f"{stem}.glb"); open(glb, "wb").write(glb_bytes); ctx.stage("packed", id=c["id"], bytes=len(glb_bytes))
+    shot = ctx.path(f"{stem}_render.png")
+    checks, _, rep = webpages.glb_checks(glb, shot, "CC0 model"); ctx.used("three", "gltf_validator")
+    return {"outputs": [{"path": glb, "role": "model", "format": "glb"}, {"path": shot, "role": "engine_screenshot", "format": "png"}],
+            "checks": checks, "model": {"source": {k: c.get(k) for k in ("source", "id", "name", "page", "authors")}, "bytes": len(glb_bytes)},
+            "candidates": [{k: x.get(k) for k in ("id", "name", "page")} for x in cands], "output_license": SRC.LICENSE, "attribution": _credit(c)}
+
+
+ACTIONS = {"terrain": terrain, "caves": caves, "sky": sky, "ocean": ocean, "scatter": scatter, "hdri": hdri, "fetch_model": fetch_model}

@@ -151,6 +151,8 @@ are deferred (see the acquisition report).
 - "A tropical island, a sunset skybox and animated sea normals" → `worldcraft_terrain`, `worldcraft_sky`, `worldcraft_ocean`
 - "A looping torch fire and a crate that shatters" → `fxcraft_emitter`, `fxcraft_destruction`
 - "Mossy cobblestone and rusty metal at 1K" → `materialcraft_generate`
+- "Real photo-scanned snow and rock materials, an alpine HDRI sky, a CC0 crate model" → `materialcraft_fetch`, `worldcraft_hdri`,
+  `worldcraft_fetch_model` (Poly Haven / ambientCG, CC0; `list_only: true` to see the matches first)
 - "A roguelike floor and a completable platformer level for a 3-tile jump" → `levelcraft_generate`
 - "A golden-hour orbit of the island, a title card, and cut them into a teaser with the theme" → `cinematiccraft_shot`, `_title_card`, `_assemble`
 - "Smoke-test the build on phone and desktop, then check it holds 30 fps" → `testcraft_smoke`, `testcraft_perf`

@@ -83,3 +83,14 @@ if new != cur:
 print(f"gitcraft: session hook {'installed' if new != cur else 'up to date'} in {dest}")
 PY
 fi
+
+# 5) network allowance for StudioCraft's CC0 library actions (materialcraft_fetch, worldcraft_hdri, worldcraft_fetch_model):
+#    HTTPS to these hosts only, through netgate (docs/security.md). GITCRAFT_CC0_SOURCES=0 leaves them out. Only GITCRAFT's
+#    own marked block is touched; anything else in ~/.gitcraft/allow-hosts stays as it is.
+allow="$GITCRAFT_HOME/allow-hosts"
+if [[ "${GITCRAFT_CC0_SOURCES:-1}" != 0 ]] && ! grep -q "^# gitcraft:cc0-sources" "$allow" 2>/dev/null; then
+  { echo "# gitcraft:cc0-sources (Poly Haven + ambientCG, CC0 assets for studiocraft; remove this block to revoke)"
+    for h in api.polyhaven.com dl.polyhaven.org ambientcg.com acg-download.struffelproductions.com; do echo "studiocraft: $h"; done
+    echo "# gitcraft:cc0-sources end"; } >> "$allow"
+  echo "gitcraft: studiocraft may reach the CC0 libraries (Poly Haven, ambientCG) over HTTPS ($allow)"
+fi

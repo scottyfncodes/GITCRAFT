@@ -102,6 +102,16 @@ def check_one(dep_id, spec):
     elif kind == "files":
         files = [expand(f) for f in spec["files"]]; missing = [f for f in files if not os.path.isfile(f)]
         r.update(available=not missing, reason=f"missing: {', '.join(missing)}" if missing else None)
+    elif kind == "hosts":
+        # network for a sandboxed tool: netgate must allow every host (GITCRAFT_NETGATE lists the allowed patterns);
+        # unsandboxed (cli, tests) the environment's own network policy decides at call time
+        sandboxed = "nonet" in (os.environ.get("GITCRAFT_SANDBOX") or "")   # set by sandbox.py when TCP is denied
+        allowed = [h for h in (os.environ.get("GITCRAFT_NETGATE") or "").split(",") if h]
+        def ok_host(h): return any(h == a or (a.startswith("*.") and h.endswith(a[1:]) and h != a[2:]) for a in allowed)
+        miss = [h for h in spec["hosts"] if not ok_host(h)] if sandboxed else []
+        r.update(available=not miss, hosts=spec["hosts"],
+                 reason=None if not miss else f"no network allowance for {', '.join(miss)} (studiocraft runs sandboxed: add them to ~/.gitcraft/allow-hosts as "
+                                              f"`studiocraft: <host>` and to the environment's allowed domains, then start a new session)")
     elif kind == "gpu":
         ok = bool(shutil.which("nvidia-smi")) and _version(["nvidia-smi", "-L"]) not in (None, "")
         r.update(available=ok, reason=None if ok else "no NVIDIA GPU on this machine")

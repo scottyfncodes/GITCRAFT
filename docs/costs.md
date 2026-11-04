@@ -16,6 +16,7 @@ in, and there are no keys for OpenAI, ElevenLabs, Meshy, Tripo, Stability or sim
 | 3D | Blender 5.2 (bpy), pygltflib, three.js, Khronos glTF-Validator, Blockbench format | GPL (software only, not your models), MIT, Apache-2.0 | free |
 | 3D, opt-in | TripoSR, Meshroom | MIT, MPL-2.0 | free (TripoSR: ~3 GB install, about 1.5 min per photo on CPU) |
 | Studio | numpy, Pillow, FFmpeg, Phaser, Playwright/Chromium, SQLite, three.quarks, LDtk schema, jsonschema | BSD/MIT/Apache/LGPL-GPL/public domain | free |
+| CC0 asset libraries | Poly Haven (materials, HDRIs, models), ambientCG (materials) | CC0-1.0 (public domain; credit recorded as a courtesy) | free, no account; both are funded by donations and Patreon, nothing is gated |
 | Studio models | Kokoro-82M voice, MediaPipe Pose, ACE-Step 1.5 (opt-in), UniRig (opt-in) | Apache-2.0, Apache-2.0, MIT, MIT | free downloads (GitHub releases, Google's public bucket, Hugging Face) |
 | CI | GitHub Actions (tests, weekly builds, weekly later-setup check) | — | free: the repo is **public**, and standard runners are free for public repos |
 

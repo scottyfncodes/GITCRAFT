@@ -114,7 +114,7 @@ def write_glb(path, meshes, animations=None, name="gitcraft"):
             data = open(png, "rb").read()
             while len(bin_) % 4: bin_.append(0)
             off = len(bin_); bin_.extend(data); views.append({"buffer": 0, "byteOffset": off, "byteLength": len(data)})
-            images.append({"bufferView": len(views) - 1, "mimeType": "image/png"})
+            images.append({"bufferView": len(views) - 1, "mimeType": "image/jpeg" if data[:3] == b"\xff\xd8\xff" else "image/png"})
             if not samplers: samplers.append({"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497})
             textures.append({"sampler": 0, "source": len(images) - 1}); return {"index": len(textures) - 1}
         if mat.get("texture"): pbr["baseColorTexture"] = tex(mat["texture"])
