@@ -70,6 +70,14 @@ Before this, the two 3D servers were only registered once Blender was installed,
 - the same session gains MeshCraft's tools when Blender lands mid-session, and runs a Blender tool;
 - a fresh session runs everything in-process.
 
+**Studio departments in setup.** StudioCraft installs after the seven 2D tools are registered, so a slow or cut-off Studio install never leaves them out; it is registered as soon as its core runtime is in, and the user-level SessionStart hook finishes an interrupted Studio install (or a deferred voice model) in the background at the next session. Measured fresh setups with cold caches and `GITCRAFT_MESHCRAFT=0`: 18–25 s without Studio, 30–33 s with Studio and the voice model deferred, about 38 s with everything. Each Studio download step has a time limit (`GITCRAFT_STUDIO_STEP_TIMEOUT`, default 120 s), since one run lost 5.5 minutes to a stalled pip download; a step that hits it is retried by the hook and doesn't fail the setup.
+
+| Variable | Effect |
+|---|---|
+| `GITCRAFT_STUDIO=0` | no Studio departments |
+| `GITCRAFT_STUDIO_VOICE=later` | voice model (~115 MB + onnxruntime) installed in the background at the first session; `audiocraft_voice` sees it on its next call |
+| `GITCRAFT_STUDIO_VOICE=0` | no voice model (`audiocraft_voice` reports blocked) |
+
 ### Workstation
 
 Run the same line once in a terminal. `~/.claude.json` and `~/.claude/` persist, so every later session in every project inherits it; run it again to update. Requirements: Linux x86_64 (prebuilt binaries), Python 3 (3.11/3.13 for MeshCraft), Node/npm (optional, for the 3D engine check), Linux 5.13+ for the kernel sandbox.

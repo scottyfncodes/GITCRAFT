@@ -88,13 +88,16 @@ Result format (all actions):
 ## Install
 
 `scripts/install.sh` (and therefore `scripts/setup-env.sh` and the SessionStart hook) installs the Studio
-with the 2D tools, before the Blender download, and registers `studiocraft` at user scope:
+after the 2D tools are registered and before the Blender download, then registers `studiocraft` at user
+scope. A cut-off or timed-out Studio step is recorded in `status.json`, named by `doctor.sh`, and finished
+in the background by the user-level SessionStart hook:
 
 ```bash
 scripts/install-studio.sh            # core: studio venv + Node runtime
 scripts/install-studio.sh voice      # + Kokoro voice (pip + ~115 MB GitHub release download, SHA-256 checked)
 scripts/install.sh meshcraft         # Blender, for animcraft / cinematiccraft / worldcraft sky / fxcraft destruction
-GITCRAFT_STUDIO=0 / GITCRAFT_STUDIO_VOICE=0   # opt out (setup-env.sh passes these through)
+GITCRAFT_STUDIO=0                    # no Studio
+GITCRAFT_STUDIO_VOICE=later | 0      # voice model in the background at the first session / not at all
 scripts/doctor.sh                    # shows every department's ready/blocked actions
 ```
 
