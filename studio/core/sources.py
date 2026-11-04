@@ -108,8 +108,9 @@ def fetch_checked(entry, max_bytes=256 * MB):
 
 
 # ---------------------------------------------------------------- ambientCG
-def ambientcg_search(query, limit=8, data_type="Material"):
-    q = urllib.parse.urlencode({"type": data_type, "q": query or "", "include": "downloadData,tagData,displayData", "limit": max(1, min(limit, 30)), "sort": "Popular"})
+def ambientcg_search(query, limit=8, data_type="Material", asset_id=None):
+    args = {"id": asset_id} if asset_id else {"type": data_type, "q": query or "", "limit": max(1, min(limit, 30)), "sort": "Popular"}
+    q = urllib.parse.urlencode(dict(args, include="downloadData,tagData,displayData"))
     d = get_json(f"https://ambientcg.com/api/v2/full_json?{q}")
     words = _words(query); out = []
     for a in d.get("foundAssets", []):

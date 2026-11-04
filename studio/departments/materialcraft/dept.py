@@ -158,7 +158,7 @@ def _candidates(p):
             info = SRC.polyhaven_info(p["id"])
             return [{"source": "polyhaven", "id": p["id"], "name": info.get("name"), "tags": info.get("tags", [])[:8], "categories": info.get("categories", []),
                      "authors": list((info.get("authors") or {}).keys()), "page": f"https://polyhaven.com/a/{p['id']}", "license": SRC.LICENSE}]
-        found = [c for c in SRC.ambientcg_search(p["id"], limit=5) if c["id"].lower() == p["id"].lower()]
+        found = [c for c in SRC.ambientcg_search(None, asset_id=p["id"]) if c["id"].lower() == p["id"].lower()]
         if not found: raise StudioError(f"no material {p['id']!r} on {'ambientCG' if src != 'polyhaven' else 'Poly Haven'}")
         return found
     if src in ("auto", "polyhaven"): out += SRC.polyhaven_search("textures", q, n)

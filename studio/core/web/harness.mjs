@@ -21,7 +21,7 @@ try {
   const { chromium } = require(pwPath);
   const nm = process.env.STUDIO_NODE_MODULES;
   const exe = [process.env.CHROMIUM_PATH, '/opt/pw-browsers/chromium'].find((p) => p && existsSync(p));
-  const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--disable-background-networking', '--disable-component-update', '--no-first-run', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--no-proxy-server', '--disable-background-networking', '--disable-component-update', '--no-first-run', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const [w, h] = req.size || [640, 480];
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   const MIME = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.glb': 'model/gltf-binary', '.html': 'text/html', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.tmj': 'application/json', '.css': 'text/css' };

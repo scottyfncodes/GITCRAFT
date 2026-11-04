@@ -138,6 +138,8 @@ run("worldcraft_fetch_model", {"query": "wooden crate", "list_only": True, "out_
     "worldcraft: CC0 model search on Poly Haven", need=True)
 run("materialcraft_fetch", {"query": "rusty metal", "source": "ambientcg", "list_only": True, "out_dir": f"{ws}/cc0/acg", "name": "rust"},
     "materialcraft: CC0 material search on ambientCG", need=True)
+run("materialcraft_fetch", {"id": "Metal021", "out_dir": f"{ws}/cc0/acg_metal", "name": "metal021"},
+    "materialcraft: CC0 material from ambientCG by id (zip read safely, metalness kept)", need=True)
 
 # ---- FXCraft
 r = run("fxcraft_flipbook", {"effect": "fire", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/fire"}, "fxcraft: fire flipbook loops exactly", need=True)
