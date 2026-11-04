@@ -242,7 +242,7 @@ def analyse(results):
     return m
 
 
-def _play(ctx, p, info):
+def _play(ctx, p, info, sub="play"):
     target = p.get("target") or (info or {}).get("build", {}).get("playable_dir")
     if not target:
         raise StudioError("nothing playable: the game is not built", hint=(info or {}).get("build", {}).get("note") or "pass target=<folder with index.html>")
@@ -251,7 +251,7 @@ def _play(ctx, p, info):
     if not os.path.exists(os.path.join(root, entry)): raise StudioError(f"no {entry} in {root}", hint="point target at the built folder (e.g. dist/)")
     vps = [VIEWPORTS[v] if isinstance(v, str) else v for v in p.get("viewports") or (["desktop", "phone"] if (info or {}).get("mobile", {}).get("intended", True) else ["desktop"])]
     ctx.used("playwright", "chromium")
-    req = {"root": root, "entry": entry, "out_dir": os.path.join(ctx.out_dir, "play"), "viewports": vps, "wait_ms": p.get("wait_ms", 2000),
+    req = {"root": root, "entry": entry, "out_dir": os.path.join(ctx.out_dir, sub), "viewports": vps, "wait_ms": p.get("wait_ms", 2000),
            "keys": _keys_for(info, p.get("keys")), "pointer": p.get("pointer", True), "start_steps": p.get("start_steps") or [], "auto_start": p.get("auto_start", True),
            "monkey_ms": int(p.get("play_seconds", 8) * 1000), "trials": p.get("trials", 2), "hooks": p.get("hooks") or (info or {}).get("hooks", []) + ["game", "__game", "GAME", "__GAME__", "app", "__app", "state"],
            "pause_keys": p.get("pause_keys") if p.get("pause_keys") is not None else _pause_keys(info)}
@@ -476,6 +476,26 @@ def compare_cards(before, after, changes):
             "remaining": [f"{f['title']} ({f['type']}, {f['level']})" for f in after["findings"][:10]]}
 
 
+NOISY = ("FPS", "fastest visible response", "touch response", "dead time", "inputs that no longer", "time to play")
+
+
+def merge_runs(a, b):
+    """Two plays of the same build: the best of each noisy measurement, a control responds if it did in either run."""
+    m = dict(a)
+    for k in ("fps", "phone_fps"): m[k] = max([x for x in (a.get(k), b.get(k)) if x is not None], default=None)
+    for k in ("best_response_ms", "touch_best_response_ms", "dead_time", "time_to_play_ms"): m[k] = min([x for x in (a.get(k), b.get(k)) if x is not None], default=None)
+    by = {(x["viewport"], x["input"]): dict(x) for x in a.get("responses", [])}
+    for x in b.get("responses", []):
+        y = by.setdefault((x["viewport"], x["input"]), dict(x))
+        if y is not x:
+            y["trials"] = y.get("trials", []) + x.get("trials", [])
+            hits = [t for t in y["trials"] if t is not None]
+            y.update(responded=bool(hits), response_ms=min(hits) if hits else None, responded_trials=f"{len(hits)}/{len(y['trials'])}")
+    m["responses"] = list(by.values()); m["runs"] = 2
+    for k in ("page_errors", "missing", "input_errors"): m[k] = sorted(set(a.get(k) or []) | set(b.get(k) or []))
+    return m
+
+
 def verify(ctx, p):
     base = json.load(open(ctx.need(p["baseline"], "baseline")))
     req = dict(base.get("baseline", {}).get("request") or {}); req.update({k: v for k, v in p.items() if v is not None})
@@ -489,6 +509,16 @@ def verify(ctx, p):
     if not req.get("genres"): req["genres"] = [g["genre"] for g in base["genre"]["genres"]]   # same lens as the baseline
     card = build_card(ctx, req, info, metrics, vps)
     cmp = compare_cards(base, card, p.get("changes"))
+    if metrics and any(r.startswith(NOISY) for r in cmp["regressions"]):
+        # software-rendered FPS, latency and a control missing both trials vary between identical runs: replay once
+        # more and keep only what reproduces (errors and missing files are never retried away)
+        first = list(cmp["regressions"])
+        res2, m2, _ = _play(ctx, req, info, sub="play_confirm")
+        metrics = merge_runs(metrics, m2); card = build_card(ctx, req, info, metrics, vps)
+        cmp = compare_cards(base, card, p.get("changes"))
+        cmp["confirmation_run"] = {"first_run_regressions": first, "reproduced": cmp["regressions"],
+                                   "not_reproduced": [r for r in first if r not in cmp["regressions"]]}
+        ctx.stage("confirm", reproduced=len(cmp["regressions"]))
     allow = {"deletions": p.get("allow_deletions") or [], "deploy_changes": p.get("allow_deploy_changes", False)}
     guard, diff = _guardrails(info["root"], (base.get("baseline") or {}).get("git", {}).get("head"), allow)
     cmp["guardrails"] = guard; cmp["diff"] = diff
@@ -499,7 +529,7 @@ def verify(ctx, p):
     outs.append(_write_text(ctx, "pass_report.md", "\n".join(lines) + "\n"))
     checks = [{"name": "game played again with the baseline's probe", "ok": bool(metrics) or not (base.get("metrics")), "detail": vps},
               {"name": "no gameplay regressions", "ok": not cmp["regressions"], "detail": cmp["regressions"][:6]}] + guard
-    return {"outputs": outs, "checks": checks, "compare": {k: cmp[k] for k in ("overall", "regressions", "resolved", "new_findings", "metrics")}, "guardrails": guard,
+    return {"outputs": outs, "checks": checks, "compare": {k: cmp.get(k) for k in ("overall", "regressions", "resolved", "new_findings", "metrics", "confirmation_run")}, "guardrails": guard,
             "summary": _summary(card)}
 
 

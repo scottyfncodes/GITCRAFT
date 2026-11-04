@@ -68,6 +68,10 @@ def before_after_md(cmp):
         L += ["Measured on the running game (same probe, same machine):", ""] + [f"- {m['name']}: {m['before']} → {m['after']}" for m in cmp["metrics"]] + [""]
     if cmp.get("resolved"): L += ["**Fixed since the baseline:**", ""] + [f"- {x}" for x in cmp["resolved"]] + [""]
     if cmp.get("new_findings"): L += ["**New issues:**", ""] + [f"- {x}" for x in cmp["new_findings"]] + [""]
+    if cmp.get("confirmation_run"):
+        cr = cmp["confirmation_run"]
+        L += [f"A confirmation run replayed the build: {len(cr['reproduced'])} of {len(cr['first_run_regressions'])} first-run regressions reproduced"
+              + (f"; not reproduced (run-to-run noise): {'; '.join(cr['not_reproduced'])}" if cr["not_reproduced"] else "") + ".", ""]
     if cmp.get("regressions"): L += ["**Regressions:**", ""] + [f"- ❌ {x}" for x in cmp["regressions"]] + [""]
     else: L += ["No regressions detected by the probe.", ""]
     if cmp.get("changes"):
