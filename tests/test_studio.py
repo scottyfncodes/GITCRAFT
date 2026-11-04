@@ -44,7 +44,7 @@ tools = {t["name"]: t for t in c.tools()}
 check("studiocraft lists discovery tools and one tool per department action", {"studio_status", "department_describe", "route", "run"} <= set(tools) and len(tools) >= 50, len(tools))
 ok, st = c.call("studio_status")
 depts = {d["department"]: d for d in st["departments"]}
-check("nine departments discovered", set(depts) == {"audiocraft", "animcraft", "worldcraft", "fxcraft", "materialcraft", "levelcraft", "cinematiccraft", "testcraft", "assetcraft"}, sorted(depts))
+check("ten departments discovered", set(depts) == {"audiocraft", "animcraft", "worldcraft", "fxcraft", "materialcraft", "levelcraft", "cinematiccraft", "testcraft", "assetcraft", "playcraft"}, sorted(depts))
 ready = lambda d, a: depts[d]["actions"].get(a) == "ready"
 ok, man = c.call("department_describe", {"department": "audiocraft"})
 check("manifest: request schemas, dependencies with live status, licensed tools", ok and all(k in man for k in ("actions", "dependencies_status", "tools", "examples", "limits")) and

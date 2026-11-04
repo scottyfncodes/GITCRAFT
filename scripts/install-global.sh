@@ -56,8 +56,11 @@ if new != cur:
     tmp = dest + ".gitcraft.tmp"; open(tmp, "w").write(new); os.replace(tmp, dest)
 print(f"gitcraft: global instructions {'updated' if new != cur else 'up to date'} in {dest}")
 PY
-  rm -rf "$claude_dir/skills/gitcraft" && cp -R "$src/global/skills/gitcraft" "$claude_dir/skills/gitcraft" \
-    && echo "gitcraft: skill installed at $claude_dir/skills/gitcraft"
+  for skill in "$src"/global/skills/*/; do   # gitcraft (tool selection), playcraft (the game-design pass)
+    s=$(basename "$skill")
+    rm -rf "$claude_dir/skills/$s" && cp -R "$src/global/skills/$s" "$claude_dir/skills/$s" \
+      && echo "gitcraft: skill installed at $claude_dir/skills/$s"
+  done
 fi
 
 # 4) user-level SessionStart hook (every project): background-finish what setup deferred or didn't finish

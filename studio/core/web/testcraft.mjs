@@ -5,26 +5,19 @@
 // works inside the GITCRAFT sandbox); any other host is blocked and reported.
 // Steps: {press: key} {hold: key, ms} {down: key} {up: key} {click: [x, y]} {tap: [x, y]} {wait: ms}
 //        {screenshot: name} {eval: "js expr", as: name} {assert: "js expr", name} {type: text}
-import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { launch, serveGame, contextOptions } from './gamepage.mjs';
 
 const req = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const done = (o) => { writeFileSync(req._result, JSON.stringify(o)); process.exit(0); };
 try {
-  const require = createRequire(import.meta.url);
-  const pwPath = [process.env.PLAYWRIGHT_MODULE, '/opt/node-tools/node_modules/playwright', 'playwright'].find((p) => { try { return p && require.resolve(p); } catch { return false; } });
-  const { chromium, devices } = require(pwPath);
-  const exe = [process.env.CHROMIUM_PATH, '/opt/pw-browsers/chromium'].find((p) => p && existsSync(p));
-  const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--no-proxy-server', '--disable-background-networking', '--disable-component-update', '--no-first-run', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-  const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.gif': 'image/gif', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.wav': 'audio/wav',
-    '.ogg': 'audio/ogg', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.tmj': 'application/json', '.ico': 'image/x-icon', '.txt': 'text/plain' };
+  const { browser, devices } = await launch();
   const root = path.resolve(req.root);
   mkdirSync(req.out_dir, { recursive: true });
   const results = [];
   for (const vp of req.viewports) {
-    const ctxOpts = vp.device && devices[vp.device] ? { ...devices[vp.device] } : { viewport: { width: vp.width, height: vp.height }, isMobile: !!vp.mobile, hasTouch: !!vp.mobile, deviceScaleFactor: vp.scale || 1 };
+    const ctxOpts = contextOptions(vp, devices);
     if (req.record_video) ctxOpts.recordVideo = { dir: path.join(req.out_dir, 'video-' + vp.name), size: ctxOpts.viewport };
     const context = await browser.newContext(ctxOpts);
     const page = await context.newPage();
@@ -35,15 +28,7 @@ try {
       window.__frames = []; let last = performance.now();
       const tick = (t) => { window.__frames.push(t - last); last = t; requestAnimationFrame(tick); }; requestAnimationFrame(tick);
     });
-    await page.route('**/*', async (route) => {
-      const u = new URL(route.request().url());
-      if (u.host !== 'game.local') { R.blocked.push(u.href.slice(0, 200)); return route.abort(); }
-      R.requests++;
-      let rel = decodeURIComponent(u.pathname); if (rel.endsWith('/')) rel += 'index.html';
-      const file = path.join(root, rel);
-      if (!file.startsWith(root) || !existsSync(file)) { R.missing.push(rel); return route.fulfill({ status: 404, body: 'not found' }); }
-      return route.fulfill({ status: 200, contentType: MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', body: readFileSync(file) });
-    });
+    await serveGame(page, root, R);
     const t0 = Date.now();
     try { await page.goto('http://game.local/' + (req.entry || 'index.html'), { waitUntil: 'load', timeout: 30000 }); R.load_ms = Date.now() - t0; }
     catch (e) { R.page_errors.push('navigation: ' + String(e).slice(0, 200)); }

@@ -22,6 +22,7 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
                                                                             department_*      ▼
                                                                     studiocraft (studio/): audiocraft · animcraft · worldcraft · fxcraft
                                                                     materialcraft · levelcraft · cinematiccraft · testcraft · assetcraft
+                                                                    playcraft (game design + gameplay quality: plays the game, scores it)
                                                                     (Blender via MeshCraft's venv · Node/Chromium · FFmpeg · Kokoro)
 ```
 
@@ -42,7 +43,7 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
 | `forgecraft/` | ForgeCraft, the 3D Department orchestrator: MCP server, job pipeline (route → generate → engine check → record → hand-off), the MeshCraft bridge, external generators (Meshroom, TripoSR, Hunyuan3D), UI. No Blender code. See `docs/3d-department.md` |
 | `meshcraft/` | MeshCraft, the 3D modelling specialist: MCP server (`server.py`, also `--call` for ForgeCraft), engine (`engine/`: kit, templates, procedural builders, mesh import, bake, scene composition, Blockbench, Mixamo, preview, validation, export), export profiles, engine check (three.js r170 + Khronos) |
 | `gitcraft3d/` | Shared by both 3D servers: the asset library, job store, hardware probe and router (`rules.json`) |
-| `studio/` | StudioCraft, the department layer: MCP server and CLI, the department contract (`core/contract.py`: request validation, dependency checks, output validation, provenance, catalogue), routing, the AssetCraft catalogue, and nine departments in `studio/departments/` (manifest + code). See `docs/studio.md` |
+| `studio/` | StudioCraft, the department layer: MCP server and CLI, the department contract (`core/contract.py`: request validation, dependency checks, output validation, provenance, catalogue), routing, the AssetCraft catalogue, and ten departments in `studio/departments/` (nine production departments plus PLAYCRAFT, game design and gameplay quality, `docs/playcraft.md`) (manifest + code). See `docs/studio.md` |
 | `scripts/install-studio.sh` | Installs the Studio runtimes into `~/.gitcraft/studio` (core venv, Node runtime, optional Kokoro voice) |
 | `tests/` | MCP test client, the policy test, the MeshCraft, ForgeCraft and Studio tests, the TIDEBREAKERS 3D acceptance test |
 

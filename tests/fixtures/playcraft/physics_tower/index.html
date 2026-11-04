@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>TOPPLE</title>
+<style>html,body{margin:0;height:100%;background:#1b2330;overflow:hidden}canvas{display:block;width:100vw;height:100vh;touch-action:none}
+#hud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:12px;color:#fff;font:16px system-ui}</style></head>
+<body><div id="hud">Shots 0 · Fallen 0</div><canvas id="c"></canvas>
+<script>
+// TOPPLE fixture: fixed-step (120 Hz) box physics, seeded RNG, drag-to-shoot, shake + debris, chain reactions.
+const cv = document.getElementById('c'), cx = cv.getContext('2d');
+let W, H; const resize = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; }; resize(); addEventListener('resize', resize);
+let seed = 7; const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;   // seeded: deterministic
+const FIXED_DT = 1 / 120, G = 900;
+const game = window.game = { score: 0, shots: 0, fallen: 0, chain: 0, level: 1, best: +(localStorage.getItem('topple.best') || 0) };
+let boxes = [], ball = null, debris = [], shake = 0, aim = null;
+function build() {
+  boxes = []; const gx = W * 0.68, gy = H - 40;
+  for (let r = 0; r < 6; r++) for (let i = 0; i < 2; i++) boxes.push({ x: gx + i * 42, y: gy - 20 - r * 40, vx: 0, vy: 0, w: 40, h: 40, down: false, col: `hsl(${20 + rng() * 30},60%,${45 + rng() * 15}%)` });
+}
+build();
+function shoot(px, py) { const dx = 120 - px, dy = (H - 80) - py; ball = { x: 120, y: H - 80, vx: dx * 4, vy: dy * 4, r: 12 }; game.shots++; }
+cv.addEventListener('pointerdown', (e) => { aim = { x: e.clientX, y: e.clientY }; });
+cv.addEventListener('pointermove', (e) => { if (aim) { aim.x = e.clientX; aim.y = e.clientY; } });
+cv.addEventListener('pointerup', (e) => { if (aim) { shoot(e.clientX, e.clientY + 60); aim = null; } });
+addEventListener('keydown', (e) => { if (e.code === 'Space') shoot(60, H - 140); });
+function burst(x, y, n) { for (let i = 0; i < n; i++) debris.push({ x, y, vx: (rng() - .5) * 300, vy: -rng() * 300, t: .6 }); }
+function step(dt) {
+  if (ball) { ball.vy += G * dt; ball.x += ball.vx * dt; ball.y += ball.vy * dt; if (ball.y > H - 12) { ball.y = H - 12; ball.vy *= -0.4; ball.vx *= 0.8; }
+    for (const b of boxes) if (!b.hit && Math.abs(ball.x - (b.x + 20)) < 30 && Math.abs(ball.y - (b.y + 20)) < 30) { b.hit = true; b.vx = ball.vx * 0.6; b.vy = -200; burst(b.x + 20, b.y + 20, 12); shake = Math.min(1, shake + 0.4); }
+    if (ball.x > W + 50 || Math.abs(ball.vx) < 5) ball = null; }
+  for (const b of boxes) { if (!b.hit) continue; b.vy += G * dt; b.x += b.vx * dt; b.y += b.vy * dt;
+    if (b.y > H - 40) { b.y = H - 40; if (!b.down) { b.down = true; game.fallen++; game.chain++; game.score += 10 * game.chain; burst(b.x + 20, H - 20, 8); shake = Math.min(1, shake + 0.25); } b.vx *= 0.9; b.vy = 0; }
+    for (const o of boxes) if (o !== b && !o.hit && Math.abs(o.x - b.x) < 40 && Math.abs(o.y - b.y) < 40 && Math.hypot(b.vx, b.vy) > 150) { o.hit = true; o.vx = b.vx * 0.5; o.vy = -80; } }   // chain reaction
+  for (const d of debris) { d.vy += G * dt; d.x += d.vx * dt; d.y += d.vy * dt; d.t -= dt; } debris = debris.filter((d) => d.t > 0);
+  shake = Math.max(0, shake - dt * 2);
+}
+let acc = 0, last = performance.now();
+function frame(t) {
+  acc += Math.min(0.1, (t - last) / 1000); last = t;   // clamp dt, fixed step
+  while (acc >= FIXED_DT) { step(FIXED_DT); acc -= FIXED_DT; }
+  const s = shake * shake * 12; cx.setTransform(1, 0, 0, 1, (rng() - .5) * s, (rng() - .5) * s);
+  cx.fillStyle = '#28354a'; cx.fillRect(-20, -20, W + 40, H + 40); cx.fillStyle = '#3d5a3a'; cx.fillRect(-20, H - 20, W + 40, 40);
+  for (const b of boxes) { cx.fillStyle = b.col; cx.fillRect(b.x, b.y, b.w, b.h); }
+  cx.fillStyle = '#fff'; if (ball) { cx.beginPath(); cx.arc(ball.x, ball.y, ball.r, 0, 7); cx.fill(); }
+  cx.fillStyle = '#e8c07a'; for (const d of debris) cx.fillRect(d.x, d.y, 4, 4);
+  if (aim) { cx.strokeStyle = '#fff8'; cx.beginPath(); cx.moveTo(120, H - 80); cx.lineTo(aim.x, aim.y); cx.stroke(); }   // aim line
+  document.getElementById('hud').textContent = `Shots ${game.shots} · Fallen ${game.fallen} · Score ${game.score}`;
+  if (game.fallen === boxes.length && (!game.best || game.shots < game.best)) { game.best = game.shots; localStorage.setItem('topple.best', game.best); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>

@@ -1,0 +1,5 @@
+html, body { margin: 0; height: 100%; background: #20163a; overflow: hidden; font: 16px system-ui; color: #fff; }
+canvas { display: block; width: 100vw; height: 100vh; }
+#hud { position: fixed; top: 10px; left: 12px; font-size: 20px; }
+#mute { position: fixed; top: 8px; right: 8px; width: 28px; height: 28px; font-size: 14px; border: 0; border-radius: 6px; }
+#mute.off { opacity: .5; }

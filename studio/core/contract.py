@@ -203,7 +203,7 @@ def run(dept, action, params=None, register=None):
     rec_path = os.path.join(out_dir, f"{slugify(params.get('name') or action)}.studio.json")
     json.dump(record, open(rec_path, "w"), indent=1, default=str)
     record["record"] = rec_path
-    if (register if register is not None else params.get("register", True)) and ok and dept != "assetcraft":
+    if (register if register is not None else params.get("register", True)) and ok and dept != "assetcraft" and m.get("register_outputs", True):
         try:
             from . import catalog
             record["catalog"] = catalog.register_run(record)
