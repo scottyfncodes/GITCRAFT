@@ -473,7 +473,12 @@ def compare_cards(before, after, changes):
     if bm.get("responses") and am.get("responses"):
         metrics.append({"name": "probed inputs with a visible response", "before": f"{rb}/{len(bm['responses'])}", "after": f"{ra}/{len(am['responses'])}"})
         # a control that responded before and failed every trial now (one miss in a live game is not a regression)
-        lost = [r["input"] + " (" + r["viewport"] + ")" for r in bm["responses"] if r["responded"] and any(x["input"] == r["input"] and x["viewport"] == r["viewport"] and not x["responded"] for x in am["responses"])]
+        # and only for a control that responded in every baseline trial: an intermittent one (measured on Fart Flight: a
+        # short drag responded in 1/12 and 3/12 trials of identical builds) has no reliable "before" to regress from
+        steady = lambda r: r["responded"] and all(t is not None for t in r.get("trials") or [r.get("response_ms")]) and len(r.get("trials") or []) >= 2
+        lost = [r["input"] + " (" + r["viewport"] + ")" for r in bm["responses"] if steady(r) and any(x["input"] == r["input"] and x["viewport"] == r["viewport"] and not x["responded"] for x in am["responses"])]
+        flaky = [r["input"] + " (" + r["viewport"] + ")" for r in bm["responses"] if r["responded"] and not steady(r)]
+        if flaky: metrics.append({"name": "intermittent controls (responded in some trials only, not used for regressions)", "before": ", ".join(flaky), "after": ""})
         if lost: regress.append("inputs that no longer change the screen: " + ", ".join(lost))
     bf = {f["id"]: f for f in before["findings"]}; af = {f["id"]: f for f in after["findings"]}
     resolved = [f"{bf[i]['title']} ({bf[i]['level']} → now passing)" for i in bf if i not in af]
