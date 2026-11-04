@@ -87,7 +87,15 @@ mocap() {
     mv "$dst.part" "$dst"
   done
   if ! ldconfig -p 2>/dev/null | grep -q 'libEGL.so.1'; then
-    echo "gitcraft-studio: libEGL.so.1 not found: MediaPipe cannot load until the system EGL libraries are installed (apt-get install libegl1 libgles2)" >&2
+    # MediaPipe loads the system EGL/GLES libraries. As root with apt (cloud containers), install them; a fresh
+    # container has an empty package index, so update it first.
+    if [[ $(id -u) == 0 ]] && command -v apt-get >/dev/null; then
+      echo "gitcraft-studio: installing the system EGL/GLES libraries for MediaPipe (libegl1, libgles2)"
+      { limit apt-get update -qq && DEBIAN_FRONTEND=noninteractive limit apt-get install -y -qq libegl1 libgles2; } >>"$log" 2>&1 ||
+        echo "gitcraft-studio: apt-get could not install libegl1/libgles2 (see $log); animcraft_mocap will report blocked" >&2
+    fi
+    ldconfig -p 2>/dev/null | grep -q 'libEGL.so.1' ||
+      echo "gitcraft-studio: libEGL.so.1 not found: MediaPipe cannot load until the system EGL libraries are installed (apt-get install libegl1 libgles2)" >&2
   fi
   echo "gitcraft-studio: mocap ready (MediaPipe Pose Landmarker full + heavy)"
 }
