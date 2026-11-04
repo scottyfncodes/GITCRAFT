@@ -72,20 +72,11 @@ voice() {
 }
 
 MP_URL="https://storage.googleapis.com/mediapipe-models/pose_landmarker"
-MP_FILES=("full:4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad"
+MP_FILES=("full:5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1"
           "heavy:64437af838a65d18e5ba7a0d39b465540069bc8aae8308de3e318aad31fcbc7b")
 mocap() {
   echo "gitcraft-studio: mocap venv (mediapipe) → $SH/mocap-venv"
   mkvenv "$SH/mocap-venv" "$repo/studio/requirements-mocap.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: mocap venv FAILED or timed out after ${STEP_LIMIT}s (see $log)" >&2; return 1; }
-  mkdir -p "$SH/models/mediapipe"
-  for e in "${MP_FILES[@]}"; do
-    m=${e%%:*}; sum=${e##*:}; dst="$SH/models/mediapipe/pose_landmarker_$m.task"
-    if [[ -f "$dst" ]] && echo "$sum  $dst" | sha256sum -c --quiet 2>/dev/null; then continue; fi
-    echo "gitcraft-studio: downloading pose_landmarker_$m.task"
-    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" -o "$dst.part" "$MP_URL/pose_landmarker_$m/float16/1/pose_landmarker_$m.task" || { echo "gitcraft-studio: download of pose_landmarker_$m failed" >&2; rm -f "$dst.part"; return 1; }
-    echo "$sum  $dst.part" | sha256sum -c --quiet || { echo "gitcraft-studio: pose_landmarker_$m checksum mismatch; not installed" >&2; rm -f "$dst.part"; return 1; }
-    mv "$dst.part" "$dst"
-  done
   if ! ldconfig -p 2>/dev/null | grep -q 'libEGL.so.1'; then
     # MediaPipe loads the system EGL/GLES libraries. As root with apt (cloud containers), install them; a fresh
     # container has an empty package index, so update it first.
@@ -97,6 +88,15 @@ mocap() {
     ldconfig -p 2>/dev/null | grep -q 'libEGL.so.1' ||
       echo "gitcraft-studio: libEGL.so.1 not found: MediaPipe cannot load until the system EGL libraries are installed (apt-get install libegl1 libgles2)" >&2
   fi
+  mkdir -p "$SH/models/mediapipe"
+  for e in "${MP_FILES[@]}"; do
+    m=${e%%:*}; sum=${e##*:}; dst="$SH/models/mediapipe/pose_landmarker_$m.task"
+    if [[ -f "$dst" ]] && echo "$sum  $dst" | sha256sum -c --quiet 2>/dev/null; then continue; fi
+    echo "gitcraft-studio: downloading pose_landmarker_$m.task"
+    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" -o "$dst.part" "$MP_URL/pose_landmarker_$m/float16/1/pose_landmarker_$m.task" || { echo "gitcraft-studio: download of pose_landmarker_$m failed" >&2; rm -f "$dst.part"; return 1; }
+    echo "$sum  $dst.part" | sha256sum -c --quiet || { echo "gitcraft-studio: pose_landmarker_$m checksum mismatch; not installed" >&2; rm -f "$dst.part"; return 1; }
+    mv "$dst.part" "$dst"
+  done
   echo "gitcraft-studio: mocap ready (MediaPipe Pose Landmarker full + heavy)"
 }
 
