@@ -36,9 +36,9 @@ library. They have no network.
 | Precise 3D build with a project palette and engine profile | meshcraft `run_pipeline` | forgecraft `library_export` |
 | Sound effects, ambience loops, adaptive music + MIDI, voice lines, loudness, loops, OGG/MP3 | studiocraft `audiocraft_*` | cinematiccraft (trailer music bed) |
 | Rig a character, procedural clips, retarget Mixamo/BVH, mocap from video or a photo, physics, sprite sheets | studiocraft `animcraft_*` | meshcraft/forgecraft (the model), testcraft (playback) |
-| Terrain/islands, heightmaps + splatmaps, scatter, caves, skyboxes, ocean normals | studiocraft `worldcraft_*` | materialcraft (ground textures), cinematiccraft (flyover) |
+| Terrain/islands, heightmaps + splatmaps, scatter, caves, skyboxes, ocean normals; CC0 HDRIs and models (`worldcraft_hdri`, `worldcraft_fetch_model`: Poly Haven) | studiocraft `worldcraft_*` | materialcraft (ground textures), cinematiccraft (flyover) |
 | Fire/smoke/explosion flipbooks, three.js emitters, destruction | studiocraft `fxcraft_*` | photocraft (touch-ups) |
-| Seamless PBR materials, weathering, toon ramps, make an image tile | studiocraft `materialcraft_*` | meshcraft (apply/bake) |
+| Seamless PBR materials, weathering, toon ramps, make an image tile; real CC0 scanned materials (`materialcraft_fetch`: Poly Haven, ambientCG) | studiocraft `materialcraft_*` | meshcraft (apply/bake) |
 | Dungeons, platformer levels, overworld maps, towns (Tiled + blockout GLB) | studiocraft `levelcraft_*` | photocraft/vectorcraft (real tileset art) |
 | Camera moves, storyboards, title cards, teaser assembly, gameplay capture | studiocraft `cinematiccraft_*` | filmcraft (hand edit), effectcraft (titles) |
 | Smoke/gameplay/FPS/visual-regression/asset tests of a web game | studiocraft `testcraft_*` | — |

@@ -64,6 +64,12 @@
    "name": "Khronos glTF-Validator",
    "license": "Apache-2.0",
    "version": "2.0.0-dev.3.10"
+  },
+  "cc0_sources": {
+   "name": "CC0 libraries: Poly Haven (api.polyhaven.com) and ambientCG (ambientcg.com)",
+   "license": "CC0-1.0 (assets); GITCRAFT client code",
+   "version": "API v1 / v2",
+   "source": "studio/core/sources.py"
   }
  },
  "dependencies": {
@@ -95,6 +101,20 @@
    "kind": "playwright",
    "license": "Apache-2.0 (Playwright), BSD (Chromium)",
    "install": "npm i -g playwright && npx playwright install chromium"
+  },
+  "cc0_sources": {
+   "kind": "hosts",
+   "hosts": [
+    "api.polyhaven.com",
+    "dl.polyhaven.org",
+    "ambientcg.com",
+    "acg-download.struffelproductions.com"
+   ],
+   "license": "CC0-1.0",
+   "install": "GITCRAFT setup adds these hosts to ~/.gitcraft/allow-hosts for studiocraft; the environment's network policy must allow them too",
+   "alternatives": [
+    "procedural actions (materialcraft_generate, worldcraft_sky)"
+   ]
   }
  },
  "actions": {
@@ -349,6 +369,94 @@
     "swatches",
     "material swatches",
     "look development"
+   ]
+  },
+  "fetch": {
+   "summary": "A CC0 PBR material from Poly Haven or ambientCG by search words or id: downloaded (checksummed), normalised to the MaterialCraft map set (basecolor, normal, roughness, AO, height, glTF ORM), rendered on a sphere in three.js and seam-checked. Licence CC0, credit recorded.",
+   "requires": [
+    "numpy",
+    "pillow",
+    "cc0_sources",
+    "three",
+    "gltf_validator",
+    "browser"
+   ],
+   "params": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "search words, e.g. 'fresh snow', 'mossy rock', 'rusty corrugated metal'"
+     },
+     "id": {
+      "type": "string",
+      "description": "exact asset id (Poly Haven ids are lower_case, e.g. snow_02; ambientCG ids look like Snow015)"
+     },
+     "source": {
+      "type": "string",
+      "enum": [
+       "auto",
+       "polyhaven",
+       "ambientcg"
+      ],
+      "default": "auto"
+     },
+     "resolution": {
+      "type": "string",
+      "enum": [
+       "1k",
+       "2k",
+       "4k"
+      ],
+      "default": "1k",
+      "description": "1k suits phones; 2k/4k for close-ups"
+     },
+     "normal_convention": {
+      "type": "string",
+      "enum": [
+       "opengl",
+       "directx"
+      ],
+      "default": "opengl",
+      "description": "three.js/glTF use OpenGL"
+     },
+     "list_only": {
+      "type": "boolean",
+      "default": false,
+      "description": "only list matching CC0 materials (writes <name>.candidates.json)"
+     },
+     "candidates": {
+      "type": "integer",
+      "default": 6,
+      "minimum": 1,
+      "maximum": 20
+     }
+    }
+   },
+   "outputs": [
+    "<name>_basecolor/_normal/_roughness/_ao/_height (library files, not recompressed)",
+    "<name>_orm.png",
+    "<name>.material.json",
+    "<name>_sphere.glb",
+    "<name>_render.png",
+    "<name>_tiled2x2.png"
+   ],
+   "keywords": [
+    "poly haven",
+    "polyhaven",
+    "ambientcg",
+    "cc0 texture",
+    "cc0 material",
+    "download texture",
+    "real texture",
+    "photo texture",
+    "scanned material",
+    "free texture",
+    "cc0",
+    "download",
+    "photo",
+    "photoscanned",
+    "real material"
    ]
   }
  },

@@ -127,6 +127,18 @@ for kind, size in (("dungeon", (48, 36)), ("platformer", (96, 20)), ("overworld"
             f"levelcraft: {kind} solved, Tiled TMJ loads in Phaser 3, LDtk validates + reads back, blockout GLB", need=True)
     if r: check(f"levelcraft: {kind} LDtk project written", any(o["path"].endswith(".ldtk") for o in r["outputs"]), [o["path"] for o in r["outputs"]])
 
+# ---- CC0 libraries (Poly Haven, ambientCG): need the network; a machine without it reports blocked (SKIP)
+r = run("materialcraft_fetch", {"id": "snow_02", "source": "polyhaven", "out_dir": f"{ws}/cc0/snow", "name": "snow"},
+        "materialcraft: CC0 material from Poly Haven (checksummed, seamless, renders in three.js)", need=True)
+if r: check("materialcraft: fetched material recorded as CC0 with a credit", r.get("output_license") == "CC0-1.0" and "polyhaven.com" in (r.get("attribution") or ""), r.get("attribution"))
+r = run("worldcraft_hdri", {"id": "kloofendal_48d_partly_cloudy_puresky", "out_dir": f"{ws}/cc0/sky", "name": "puresky"},
+        "worldcraft: CC0 HDRI from Poly Haven (.hdr decoded, cubemap, lighting)", need=True)
+if r: check("worldcraft: HDRI sun direction points up", (r.get("lighting") or {}).get("sun_direction_yup", [0, -1, 0])[1] > 0, r.get("lighting"))
+run("worldcraft_fetch_model", {"query": "wooden crate", "list_only": True, "out_dir": f"{ws}/cc0/models", "name": "crates"},
+    "worldcraft: CC0 model search on Poly Haven", need=True)
+run("materialcraft_fetch", {"query": "rusty metal", "source": "ambientcg", "list_only": True, "out_dir": f"{ws}/cc0/acg", "name": "rust"},
+    "materialcraft: CC0 material search on ambientCG", need=True)
+
 # ---- FXCraft
 r = run("fxcraft_flipbook", {"effect": "fire", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/fire"}, "fxcraft: fire flipbook loops exactly", need=True)
 run("fxcraft_emitter", {"effect": "explosion", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/boom"}, "fxcraft: explosion emitter plays in three.js", need=True)
@@ -198,7 +210,7 @@ c.close()
 # ---- routing (no runtime needed)
 c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=env)
 for brief, want in (("a seamless rain ambience", ("audiocraft", "ambience")), ("mossy cobblestone texture", ("materialcraft", "generate")), ("explosion sprite sheet for phaser", ("fxcraft", "flipbook")),
-                    ("rig my character", ("animcraft", "autorig")), ("motion capture from a video of me dancing", ("animcraft", "mocap")), ("record gameplay video of my game", ("cinematiccraft", "capture")), ("check fps on mobile", ("testcraft", "perf")), ("golden hour orbit cutscene", ("cinematiccraft", "shot")),
+                    ("rig my character", ("animcraft", "autorig")), ("motion capture from a video of me dancing", ("animcraft", "mocap")), ("record gameplay video of my game", ("cinematiccraft", "capture")), ("download a cc0 snow texture from poly haven", ("materialcraft", "fetch")), ("hdri sky environment map", ("worldcraft", "hdri")), ("check fps on mobile", ("testcraft", "perf")), ("golden hour orbit cutscene", ("cinematiccraft", "shot")),
                     ("a roguelike dungeon level", ("levelcraft", "generate")), ("find unused assets", ("assetcraft", "unused")), ("sunset skybox", ("worldcraft", "sky"))):
     ok, r = c.call("route", {"brief": brief}); ch = r.get("chosen") or {}
     check(f"route: {brief!r} → {want[0]}.{want[1]}", (ch.get("department"), ch.get("action")) == want, (ch.get("department"), ch.get("action")))

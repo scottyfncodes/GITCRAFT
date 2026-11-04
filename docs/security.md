@@ -57,6 +57,13 @@ studiocraft: huggingface.co
 
 or `GITCRAFT_ALLOW_HOSTS_<TOOL>=host,host` / `GITCRAFT_ALLOW_HOSTS=...` (all tools) in the environment that starts Claude Code.
 
+**Default allowance (CC0 libraries).** GITCRAFT's setup adds one marked block for StudioCraft's CC0 library actions
+(`materialcraft_fetch`, `worldcraft_hdri`, `worldcraft_fetch_model`): `api.polyhaven.com`, `dl.polyhaven.org`, `ambientcg.com` and
+`acg-download.struffelproductions.com` (where ambientCG's downloads redirect), HTTPS only and logged like any other netgate traffic.
+Delete the `# gitcraft:cc0-sources` block to revoke it; `GITCRAFT_CC0_SOURCES=0` keeps setup from adding it. The environment's
+own network policy must allow the same hosts. Downloads are treated as untrusted: size caps, Poly Haven md5 checks, zips read
+member by member (no extraction paths), images decoded only by Pillow, and a minimal Radiance `.hdr` decoder.
+
 How it works: `scripts/mcp.sh` starts `scripts/netgate.py`, an HTTPS CONNECT proxy on a random `127.0.0.1` port,
 outside the sandbox. The tool's `HTTPS_PROXY` points at it, and the sandbox gets `--no-net --allow-connect <port>`:
 the kernel allows TCP to that one port and nothing else, so the tool cannot reach any other host, nor the

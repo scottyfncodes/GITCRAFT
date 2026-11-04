@@ -68,6 +68,12 @@
    "name": "Khronos glTF-Validator",
    "license": "Apache-2.0",
    "version": "2.0.0-dev.3.10"
+  },
+  "cc0_sources": {
+   "name": "CC0 libraries: Poly Haven (api.polyhaven.com) and ambientCG (ambientcg.com)",
+   "license": "CC0-1.0 (assets); GITCRAFT client code",
+   "version": "API v1 / v2",
+   "source": "studio/core/sources.py"
   }
  },
  "dependencies": {
@@ -107,6 +113,20 @@
    "kind": "playwright",
    "license": "Apache-2.0 (Playwright), BSD (Chromium)",
    "install": "npm i -g playwright && npx playwright install chromium"
+  },
+  "cc0_sources": {
+   "kind": "hosts",
+   "hosts": [
+    "api.polyhaven.com",
+    "dl.polyhaven.org",
+    "ambientcg.com",
+    "acg-download.struffelproductions.com"
+   ],
+   "license": "CC0-1.0",
+   "install": "GITCRAFT setup adds these hosts to ~/.gitcraft/allow-hosts for studiocraft; the environment's network policy must allow them too",
+   "alternatives": [
+    "procedural actions (materialcraft_generate, worldcraft_sky)"
+   ]
   }
  },
  "actions": {
@@ -367,7 +387,6 @@
     "sky",
     "skybox",
     "cubemap",
-    "hdri",
     "environment map"
    ]
   },
@@ -506,6 +525,146 @@
     "place trees",
     "vegetation placement",
     "foliage"
+   ]
+  },
+  "hdri": {
+   "summary": "A CC0 HDRI sky/environment from Poly Haven by search words or id: the .hdr (checksummed), a tone-mapped equirect preview, a 6-face cubemap and lighting values (sun direction, ambient colour). Licence CC0, credit recorded.",
+   "requires": [
+    "numpy",
+    "pillow",
+    "cc0_sources"
+   ],
+   "params": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "e.g. 'snowy mountain', 'overcast sea', 'sunset pure sky'"
+     },
+     "id": {
+      "type": "string"
+     },
+     "resolution": {
+      "type": "string",
+      "enum": [
+       "1k",
+       "2k",
+       "4k"
+      ],
+      "default": "1k"
+     },
+     "exposure": {
+      "type": "number",
+      "default": 0.0,
+      "description": "stops applied to the LDR preview/cubemap"
+     },
+     "cube_size": {
+      "type": "integer",
+      "default": 512,
+      "minimum": 64,
+      "maximum": 2048
+     },
+     "list_only": {
+      "type": "boolean",
+      "default": false
+     },
+     "candidates": {
+      "type": "integer",
+      "default": 6,
+      "minimum": 1,
+      "maximum": 20
+     }
+    }
+   },
+   "outputs": [
+    "<name>.hdr",
+    "<name>_equirect.png",
+    "cubemap/<name>_{px,nx,py,ny,pz,nz}.png",
+    "<name>.sky.json"
+   ],
+   "keywords": [
+    "hdri",
+    "hdr sky",
+    "environment map",
+    "poly haven",
+    "polyhaven",
+    "real sky",
+    "photo sky",
+    "image based lighting",
+    "ibl",
+    "cc0",
+    "download",
+    "photo",
+    "real hdri",
+    "photographed sky"
+   ]
+  },
+  "fetch_model": {
+   "summary": "A CC0 3D model from Poly Haven by search words or id (props, nature, furniture): downloaded with its textures (checksummed), packed into one GLB, Khronos-validated and rendered in three.js. Licence CC0, credit recorded.",
+   "requires": [
+    "numpy",
+    "pillow",
+    "cc0_sources",
+    "three",
+    "gltf_validator",
+    "browser"
+   ],
+   "params": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "e.g. 'pine tree', 'wooden crate', 'rock boulder'"
+     },
+     "id": {
+      "type": "string"
+     },
+     "resolution": {
+      "type": "string",
+      "enum": [
+       "1k",
+       "2k",
+       "4k"
+      ],
+      "default": "1k",
+      "description": "texture resolution"
+     },
+     "list_only": {
+      "type": "boolean",
+      "default": false
+     },
+     "candidates": {
+      "type": "integer",
+      "default": 6,
+      "minimum": 1,
+      "maximum": 20
+     },
+     "max_mb": {
+      "type": "integer",
+      "default": 40,
+      "minimum": 1,
+      "maximum": 1024,
+      "description": "download budget for mesh + textures; larger matches are skipped"
+     }
+    }
+   },
+   "outputs": [
+    "<name>.glb",
+    "<name>_render.png"
+   ],
+   "keywords": [
+    "poly haven model",
+    "cc0 model",
+    "download model",
+    "free 3d model",
+    "scanned prop",
+    "photoscanned",
+    "cc0",
+    "download",
+    "scanned",
+    "poly haven",
+    "polyhaven",
+    "free model"
    ]
   }
  },
