@@ -9,6 +9,23 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$here/tools.sh"
 mkdir -p "$GITCRAFT_LOG"
 
+# Self-update (global hook only; GITCRAFT_AUTO_UPDATE=0 turns it off). Cloud environments cache the setup
+# script's result, so a new session can start from a GITCRAFT copy older than main. In the background: pull the
+# clone setup-env.sh made (~/.gitcraft/repo); when it moved, refresh the runtime and registration from it and run
+# this hook again from the new code (which then finishes anything the new version adds). Takes effect for the
+# servers from the next session; the current one keeps the code it started with.
+repo_clone="$GITCRAFT_HOME/repo"
+if ((global)) && [[ "${GITCRAFT_AUTO_UPDATE:-1}" != 0 && -z "${GITCRAFT_UPDATED:-}" && -d "$repo_clone/.git" ]]; then
+  setsid nohup bash -c '
+    before=$(git -C "$1" rev-parse HEAD 2>/dev/null)
+    timeout 60 git -C "$1" pull -q --ff-only 2>/dev/null || exit 0
+    after=$(git -C "$1" rev-parse HEAD 2>/dev/null)
+    [[ "$before" == "$after" ]] && exit 0
+    echo "gitcraft: updated $1 ${before:0:7} -> ${after:0:7} $(date -u +%FT%TZ)"
+    "$1/scripts/install-global.sh" && GITCRAFT_UPDATED=1 "$2/scripts/session-start.sh" --global
+  ' _ "$repo_clone" "$GITCRAFT_HOME/runtime" >>"$GITCRAFT_LOG/update.log" 2>&1 < /dev/null &
+fi
+
 missing=()
 for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
@@ -32,6 +49,18 @@ if [[ "$GITCRAFT_STUDIO" == 1 ]]; then
   if [[ "$studio_last" != off ]] && ! gitcraft_studio_ready; then missing+=(studiocraft); fi
   if [[ "$voice_last" == later || "$voice_last" == pending ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
     [[ " ${missing[*]} " == *" studiocraft "* ]] || missing+=(studiocraft); studio_voice=1
+  fi
+fi
+
+# Mocap (opt-in: install-studio.sh mocap): finish an install that stopped part-way (models or the system EGL library
+# missing), in the background, at most one at a time.
+if [[ -d "$GITCRAFT_STUDIO_HOME/mocap-venv" ]] && { ! ls "$GITCRAFT_STUDIO_HOME"/models/mediapipe/pose_landmarker_full.task >/dev/null 2>&1 || { [[ $(uname) == Linux ]] &&
+     ! { ldconfig -p 2>/dev/null | grep -q libEGL.so.1; }; }; }; then
+  mlock="$GITCRAFT_HOME/mocap.lock"
+  if command -v flock >/dev/null; then
+    setsid nohup flock -n "$mlock" "$here/install-studio.sh" mocap >>"$GITCRAFT_LOG/install.log" 2>&1 < /dev/null &
+  else
+    setsid nohup "$here/install-studio.sh" mocap >>"$GITCRAFT_LOG/install.log" 2>&1 < /dev/null &
   fi
 fi
 
