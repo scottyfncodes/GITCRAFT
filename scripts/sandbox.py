@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run a command inside a Landlock filesystem (and optional network) sandbox.
 
-    sandbox.py [--rw DIR]... [--ro DIR]... [--rx DIR]... [--no-net] [--require] -- CMD ARGS...
+    sandbox.py [--rw DIR]... [--ro DIR]... [--rx DIR]... [--no-net [--allow-connect PORT]...] [--require] -- CMD ARGS...
 
 Landlock is a Linux security module (kernel 5.13+) that lets an unprivileged
 process give up access to everything except the paths it names. The rules are
@@ -13,6 +13,8 @@ outside the listed directories, whatever its own settings say.
 --ro   read beneath DIR
 --rx   read + execute beneath DIR
 --no-net  deny all TCP bind/connect (Landlock ABI >= 4)
+--allow-connect PORT  with --no-net: still allow TCP connect to this port (e.g. the local netgate proxy that
+          lets through only the hosts in GITCRAFT_ALLOW_HOSTS; Landlock cannot filter by host itself)
 --require fail instead of running unsandboxed when Landlock is unavailable
 
 Paths that don't exist are skipped. Exit code 126 means the sandbox could not
@@ -38,6 +40,11 @@ class RulesetAttr(ctypes.Structure):
                 ("scoped", ctypes.c_uint64)]
 
 
+class NetPort(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [("allowed_access", ctypes.c_uint64), ("port", ctypes.c_uint64)]
+
+
 class PathBeneath(ctypes.Structure):
     _pack_ = 1
     _fields_ = [("allowed_access", ctypes.c_uint64), ("parent_fd", ctypes.c_int32)]
@@ -57,12 +64,13 @@ def fs_rights(abi):
 
 
 def main(argv):
-    rw, ro, rx, no_net, require = [], [], [], False, False
+    rw, ro, rx, no_net, require, ports = [], [], [], False, False, []
     i = 0
     while i < len(argv) and argv[i] != "--":
         a = argv[i]
         if a in ("--rw", "--ro", "--rx"):
             {"--rw": rw, "--ro": ro, "--rx": rx}[a].append(argv[i + 1]); i += 2; continue
+        if a == "--allow-connect": ports.append(int(argv[i + 1])); i += 2; continue
         if a == "--no-net": no_net = True
         elif a == "--require": require = True
         else: log(f"unknown option {a}"); return 2
@@ -104,13 +112,18 @@ def main(argv):
     for p in ro: add(p, read)
     for p in rx: add(p, read | EXECUTE)
     for p in rw: add(p, write | read)
+    if no_net and abi >= 4:
+        for port in ports:
+            rule = NetPort(NET_CONNECT_TCP, port)
+            if libc.syscall(SYS_add_rule, ctypes.c_int(fd), ctypes.c_int(RULE_NET_PORT), ctypes.byref(rule), ctypes.c_uint32(0)) < 0:
+                log(f"could not allow connect to port {port}: {os.strerror(ctypes.get_errno())}"); return 126
 
     if libc.prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0:
         log("prctl(NO_NEW_PRIVS) failed"); return 126
     if libc.syscall(SYS_restrict_self, ctypes.c_int(fd), ctypes.c_uint32(0)) < 0:
         log(f"landlock_restrict_self failed: {os.strerror(ctypes.get_errno())}"); return 126
     os.close(fd)
-    os.environ["GITCRAFT_SANDBOX"] = f"landlock-abi{abi}" + ("+nonet" if no_net and abi >= 4 else "")
+    os.environ["GITCRAFT_SANDBOX"] = f"landlock-abi{abi}" + ("+nonet" if no_net and abi >= 4 else "") + ("+netgate" if ports and no_net and abi >= 4 else "")
     try:
         os.execvp(cmd[0], cmd)
     except OSError as e:

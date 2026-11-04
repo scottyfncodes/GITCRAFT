@@ -89,7 +89,10 @@ def call(name, args):
         if r.returncode != 0 or not lines: raise RuntimeError(f"studio {name} failed: {(r.stderr or '')[-1500:]}")
         return json.loads(lines[-1])
     if name == "studio_status":
-        return {"studio": VERSION, "roots": roots(), "hardware": _hardware(), "departments": contract.overview()}
+        return {"studio": VERSION, "roots": roots(), "hardware": _hardware(), "sandbox": os.environ.get("GITCRAFT_SANDBOX"),
+                "network": {"allowed_hosts": [h for h in (os.environ.get("GITCRAFT_NETGATE") or "").split(",") if h] or None,
+                            "note": "HTTPS to these hosts only, through netgate" if os.environ.get("GITCRAFT_NETGATE") else "no network"},
+                "departments": contract.overview()}
     if name == "department_describe": return contract.describe(args["department"])
     if name == "route": return routing.route(args.get("brief", ""))
     if name == "run": return contract.run(args["department"], args["action"], args.get("params") or {})

@@ -116,6 +116,26 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done
   [[ "$GITCRAFT_ALLOW_NET" == 1 ]] || policy+=(--no-net)
+  # Per-host allowances (scripts/netgate.py): GITCRAFT_ALLOW_HOSTS_<TOOL>, else GITCRAFT_ALLOW_HOSTS, else the
+  # ~/.gitcraft/allow-hosts file (one pattern per line, `tool: pattern` for one tool). Landlock then allows TCP to
+  # the local netgate port only, and netgate lets through only those hosts (HTTPS, port 443), logged in net.jsonl.
+  allow_var="GITCRAFT_ALLOW_HOSTS_${name^^}"; allow_hosts="${!allow_var:-${GITCRAFT_ALLOW_HOSTS:-}}"
+  if [[ -z "$allow_hosts" && -f "$GITCRAFT_HOME/allow-hosts" ]]; then
+    allow_hosts=$(sed -e 's/#.*//' "$GITCRAFT_HOME/allow-hosts" | awk -v t="$name" 'NF==0{next} /:/{split($0,a,":"); gsub(/ /,"",a[1]); if (a[1]==t) {gsub(/ /,"",a[2]); print a[2]}; next} {gsub(/ /,""); print}' | paste -sd, -)
+  fi
+  if [[ -n "$allow_hosts" && "$GITCRAFT_ALLOW_NET" != 1 ]]; then
+    pf="$state/netgate.port"; rm -f "$pf"
+    NETGATE_UPSTREAM="${HTTPS_PROXY:-${https_proxy:-}}" GITCRAFT_HOME="$GITCRAFT_HOME" \
+      python3 "$here/netgate.py" --allow "$allow_hosts" --tool "$name" --parent $$ --port-file "$pf" </dev/null >/dev/null 2>>"$GITCRAFT_LOG/netgate.log" &
+    for _ in $(seq 50); do [[ -s "$pf" ]] && break; sleep 0.1; done
+    if [[ -s "$pf" ]]; then
+      gate="http://127.0.0.1:$(cat "$pf")"; policy+=(--allow-connect "$(cat "$pf")")
+      export HTTPS_PROXY="$gate" https_proxy="$gate" HTTP_PROXY="$gate" http_proxy="$gate" ALL_PROXY="$gate" NO_PROXY="" no_proxy=""
+      export GITCRAFT_NETGATE="$allow_hosts"
+    else
+      echo "gitcraft: netgate did not start (see $GITCRAFT_LOG/netgate.log); $name runs with no network" >&2
+    fi
+  fi
   [[ "$GITCRAFT_SANDBOX" == require ]] && policy+=(--require)
   cmd=(python3 "$here/sandbox.py" "${policy[@]}" -- "${cmd[@]}")
 fi
