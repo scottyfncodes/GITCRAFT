@@ -149,7 +149,9 @@ if r: check("fxcraft: three.quarks JSON + usage written", {".quarks.json", ".qua
 
 # ---- TestCraft
 run("testcraft_smoke", {"target": GAME, "viewports": ["desktop", "phone"], "out_dir": f"{ws}/qa/smoke"}, "testcraft: smoke test on desktop + phone", need=True)
-run("testcraft_play", {"target": GAME, "steps": [{"hold": "ArrowRight", "ms": 1500}, {"assert": "window.game.score >= 2", "name": "collects both coins"},
+# the fixture moves 4 px per frame: 3 s reaches the second coin (x 320) at >= ~22 fps, the floor testcraft_perf assumes;
+# slow CI runners render well under 60 fps in SwiftShader (1.5 s made this flaky)
+run("testcraft_play", {"target": GAME, "steps": [{"hold": "ArrowRight", "ms": 3000}, {"assert": "window.game.score >= 2", "name": "collects both coins"},
                                                   {"hold": "ArrowRight", "ms": 2000}, {"assert": "window.game.x < 420", "name": "the wall blocks the player"}], "out_dir": f"{ws}/qa/play"},
     "testcraft: scripted gameplay with state assertions", need=True)
 run("testcraft_perf", {"target": GAME, "seconds": 2, "min_fps": 20, "out_dir": f"{ws}/qa/perf"}, "testcraft: FPS profile", need=True)
