@@ -41,6 +41,9 @@ GITCRAFT_LOG="$GITCRAFT_HOME/logs"
 GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
 GITCRAFT_STUDIO_HOME="${GITCRAFT_STUDIO_HOME:-$GITCRAFT_HOME/studio}"         # studio venvs, voice models, Node runtime
 GITCRAFT_ASSET_CATALOG="${GITCRAFT_ASSET_CATALOG:-$GITCRAFT_HOME/assetcraft/catalog.sqlite}"   # AssetCraft catalogue (all projects)
+# PLAYCRAFT's Game Quality History (all games): outside the runtime, so upgrades never touch it; the committed
+# archive <GITCRAFT>/history/playcraft is imported into it automatically
+GITCRAFT_PLAYCRAFT_HISTORY="${GITCRAFT_PLAYCRAFT_HISTORY:-$GITCRAFT_HOME/playcraft/history}"
 FORGECRAFT_HOME="${FORGECRAFT_HOME:-$GITCRAFT_HOME/forgecraft}"               # Meshroom, AI venv, model cache
 # The 3D asset library + job records shared by meshcraft and forgecraft. Older variables still work;
 # a pre-consolidation ~/.gitcraft/meshcraft-library is used in place (same format).

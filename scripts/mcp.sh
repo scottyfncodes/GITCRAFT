@@ -75,15 +75,15 @@ case "$name" in
   meshcraft)   mkdir -p "$GITCRAFT_3D_LIBRARY"; export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_3D_LIBRARY FORGECRAFT_HOME
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
   # The 3D Department pipeline (stdlib Python); spawns Blender, Meshroom and the AI backends as children.
-  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")"
+  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY"
                export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME GITCRAFT_3D_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache" \
-                      GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG
+                      GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_PLAYCRAFT_HISTORY
                # HOME inside the sandbox is the tool's state folder (Chromium and Blender write caches there)
                cmd=(env HOME="$state/data" python3 "$repo/forgecraft/server.py") ;;
   # The Studio departments (studio/): Python in the studio venv; spawns Blender (MeshCraft's), Node/Chromium,
   # FFmpeg and the voice venv as children, all inside this sandbox.
-  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")"
-               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY
+  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY GITCRAFT_PLAYCRAFT_HISTORY
                cmd=(env HOME="$state/data" "$bin" "$repo/studio/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
@@ -95,8 +95,8 @@ cmd+=("$@")
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
-[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")")
-[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")")
+[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY")
+[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY")
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).
