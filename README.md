@@ -124,6 +124,12 @@ In a session, `/mcp` lists the servers; asking Claude "which GITCRAFT tools and 
 
 Every tool runs in a Landlock kernel sandbox: it can only read and write your workspace roots and its own state folder, and has no network. A guard in front of each server gives readable refusals and keeps an audit log with file hashes of every handoff. See [docs/security.md](docs/security.md).
 
+## Cost
+
+Every tool GITCRAFT installs or calls is free, with licences that allow commercial use of what you make; paid or
+restricted options (GPU tools, Hunyuan3D, a paid Claude session in CI) are opt-in. The audit and the watch list
+of places where free could turn into paid: [docs/costs.md](docs/costs.md).
+
 ## Manual commands
 
 ```
