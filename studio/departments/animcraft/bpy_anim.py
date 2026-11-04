@@ -8,6 +8,7 @@
              in world space, with hip translation scaled by leg length
   physics    drop/scatter objects onto a ground with Bullet rigid bodies, baked to keyframes
   sprites    render each clip from N directions with an orthographic camera (sprite sheets)
+  bvh_info   import a BVH and report its bones, frame range and the world direction of named bones per frame
 
 Clips are actions stashed in muted NLA tracks and exported with export_animation_mode=ACTIONS (one
 glTF animation per clip), the same pattern MeshCraft uses."""
@@ -552,5 +553,22 @@ def mode_sprites(req):
     return {"sequences": out}
 
 
-MODES = {"demo": mode_demo, "autorig": mode_autorig, "animate": mode_animate, "retarget": mode_retarget, "physics": mode_physics, "sprites": mode_sprites}
+def mode_bvh_info(req):
+    """Blender reads the BVH back: bone count, canonical names, frames, and per-frame world directions of the
+    requested bones (to compare against the solver's own forward kinematics)."""
+    import bpy
+    S.reset(); objs = S.import_any(req["input"]); arm = next(o for o in objs if o.type == "ARMATURE")
+    act = arm.animation_data.action if arm.animation_data else None
+    f0, f1 = (int(act.frame_range[0]), int(act.frame_range[1])) if act else (1, 1)
+    sc = bpy.context.scene; dirs = {b: [] for b in req.get("bones", []) if b in arm.pose.bones}
+    for f in range(f0, f1 + 1):
+        sc.frame_set(f); bpy.context.view_layer.update()
+        for b in dirs:
+            pb = arm.pose.bones[b]; h = arm.matrix_world @ pb.head; t = arm.matrix_world @ pb.tail
+            dirs[b].append([t.x - h.x, t.y - h.y, t.z - h.z])
+    return {"bones": len(arm.data.bones), "canonical": sorted({canon(b.name) for b in arm.data.bones if canon(b.name)}),
+            "frames": f1 - f0 + 1, "fps": sc.render.fps, "directions": dirs}
+
+
+MODES = {"bvh_info": mode_bvh_info, "demo": mode_demo, "autorig": mode_autorig, "animate": mode_animate, "retarget": mode_retarget, "physics": mode_physics, "sprites": mode_sprites}
 S.main(lambda req: dict(MODES[req["mode"]](req), seconds=None))

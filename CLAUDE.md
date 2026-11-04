@@ -88,7 +88,7 @@ project without this repo attached. Sources: `global/`.
 - One department = `studio/departments/<name>/manifest.json` + `dept.py`; the contract is
   `studio/core/contract.py`. Blender work runs in MeshCraft's venv (`bpy_*.py` scripts);
   never add a second Blender. Browser checks use `studio/core/web/*.mjs`.
-- Runtimes live in `~/.gitcraft/studio` (`scripts/install-studio.sh [voice|all]`); nothing
+- Runtimes live in `~/.gitcraft/studio` (`scripts/install-studio.sh [voice|mocap|music|unirig|all]`); nothing
   large is committed. Choices, scores, licences and deferrals: `docs/studio-acquisition.md`.
 
 ## Control room (local web UI)

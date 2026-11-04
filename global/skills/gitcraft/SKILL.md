@@ -35,7 +35,7 @@ library. They have no network.
 | 3D asset from a brief (props, characters, ships, islands, scenes) | forgecraft `route` → `generate` | meshcraft (templates, profiles), filmcraft/designcraft (showcase) |
 | Precise 3D build with a project palette and engine profile | meshcraft `run_pipeline` | forgecraft `library_export` |
 | Sound effects, ambience loops, adaptive music + MIDI, voice lines, loudness, loops, OGG/MP3 | studiocraft `audiocraft_*` | cinematiccraft (trailer music bed) |
-| Rig a character, procedural clips, retarget Mixamo/BVH, physics, sprite sheets | studiocraft `animcraft_*` | meshcraft/forgecraft (the model), testcraft (playback) |
+| Rig a character, procedural clips, retarget Mixamo/BVH, mocap from video or a photo, physics, sprite sheets | studiocraft `animcraft_*` | meshcraft/forgecraft (the model), testcraft (playback) |
 | Terrain/islands, heightmaps + splatmaps, scatter, caves, skyboxes, ocean normals | studiocraft `worldcraft_*` | materialcraft (ground textures), cinematiccraft (flyover) |
 | Fire/smoke/explosion flipbooks, three.js emitters, destruction | studiocraft `fxcraft_*` | photocraft (touch-ups) |
 | Seamless PBR materials, weathering, toon ramps, make an image tile | studiocraft `materialcraft_*` | meshcraft (apply/bake) |

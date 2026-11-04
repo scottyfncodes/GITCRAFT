@@ -38,7 +38,7 @@ jobs:
       - name: System packages
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          sudo apt-get install -y -qq ffmpeg libegl1 libgles2   # EGL/GLES: MediaPipe (AnimCraft mocap)
           pip install -q uv
 
       - name: Playwright + Chromium

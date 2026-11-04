@@ -16,7 +16,8 @@ try:
     import numpy, PIL  # noqa: F401
 except ImportError:
     _vpy = os.path.join(os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.expanduser("~/.gitcraft/studio"), "venv", "bin", "python")
-    if os.access(_vpy, os.X_OK) and os.path.realpath(sys.executable) != os.path.realpath(_vpy):
+    # compare prefixes: a venv's python is a symlink to the same interpreter binary
+    if os.access(_vpy, os.X_OK) and os.path.realpath(sys.prefix) != os.path.realpath(os.path.dirname(os.path.dirname(_vpy))):
         os.execv(_vpy, [_vpy] + sys.argv)
     raise
 sys.path.insert(0, HERE)
@@ -70,6 +71,23 @@ def run(tool, args, label, need=None, timeout=1800, expect_checks=True):
     return r if good else None
 
 
+def mocap_take(target):
+    """AnimCraft mocap on a real photo (MediaPipe's own test image, fetched at test time) turned into a short
+    swaying clip: landmarks → BVH → Blender import → retarget onto the auto-rigged hero."""
+    if not ready("animcraft", "mocap"): return skip("animcraft: mocap", depts["animcraft"]["actions"].get("mocap"))
+    import subprocess, urllib.request
+    d = f"{ws}/anim/mocap_src"; os.makedirs(d, exist_ok=True); jpg = f"{d}/pose.jpg"
+    try: urllib.request.urlretrieve("https://storage.googleapis.com/mediapipe-assets/pose.jpg", jpg)
+    except Exception as e: return skip("animcraft: mocap", f"test photo unreachable ({e})")
+    for i, a in enumerate([0, 4, 8, 12, 8, 4, 0, -4, -8, -12, -8, -4]):
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", jpg, "-vf", f"rotate={a}*PI/180:fillcolor=white,scale=640:-2", f"{d}/f_{i:02d}.png"], check=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-framerate", "12", "-i", f"{d}/f_%02d.png", "-pix_fmt", "yuv420p", f"{d}/take.mp4"], check=True)
+    r = run("animcraft_mocap", {"input": f"{d}/take.mp4", "fps": 12, "target": target, "out_dir": f"{ws}/anim/mocap", "name": "take"},
+            "animcraft: mocap video → BVH (FK + Blender checked) → retargeted onto the hero", need=True)
+    if r: check("animcraft: mocap BVH has every frame", r["mocap"]["bvh"]["frames"] == 12 and r["mocap"]["detected_frames"] >= 10, r["mocap"])
+    run("animcraft_mocap", {"input": jpg, "out_dir": f"{ws}/anim/mocap_still", "name": "still"}, "animcraft: mocap from a single photo (eased pose clip)", need=True)
+
+
 # ---- AudioCraft
 r = run("audiocraft_sfx", {"preset": "coin", "variations": 2, "out_dir": f"{ws}/audio/sfx"}, "audiocraft: sfx (2 variations, WAV + OGG, measured)", need=True)
 if r: check("audiocraft: sfx registered in the catalogue", r.get("catalog", {}).get("registered", 0) >= 4, r.get("catalog"))
@@ -105,11 +123,15 @@ if r: check("materialcraft: seam got smaller", r["seam"]["after"] < r["seam"]["b
 
 # ---- LevelCraft
 for kind, size in (("dungeon", (48, 36)), ("platformer", (96, 20)), ("overworld", (64, 48))):
-    run("levelcraft_generate", {"kind": kind, "width": size[0], "height": size[1], "seed": 3, "out_dir": f"{ws}/levels/{kind}"}, f"levelcraft: {kind} solved, Tiled TMJ loads in Phaser 3, blockout GLB", need=True)
+    r = run("levelcraft_generate", {"kind": kind, "width": size[0], "height": size[1], "seed": 3, "out_dir": f"{ws}/levels/{kind}"},
+            f"levelcraft: {kind} solved, Tiled TMJ loads in Phaser 3, LDtk validates + reads back, blockout GLB", need=True)
+    if r: check(f"levelcraft: {kind} LDtk project written", any(o["path"].endswith(".ldtk") for o in r["outputs"]), [o["path"] for o in r["outputs"]])
 
 # ---- FXCraft
 r = run("fxcraft_flipbook", {"effect": "fire", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/fire"}, "fxcraft: fire flipbook loops exactly", need=True)
 run("fxcraft_emitter", {"effect": "explosion", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/boom"}, "fxcraft: explosion emitter plays in three.js", need=True)
+r = run("fxcraft_quarks", {"effect": "magic", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/quarks"}, "fxcraft: three.quarks system reloads with QuarksLoader and simulates", need=True)
+if r: check("fxcraft: three.quarks JSON + usage written", {".quarks.json", ".quarks.usage.json"} <= {o["path"][o["path"].index(".quarks"):] for o in r["outputs"] if ".quarks" in o["path"]})
 
 # ---- TestCraft
 run("testcraft_smoke", {"target": GAME, "viewports": ["desktop", "phone"], "out_dir": f"{ws}/qa/smoke"}, "testcraft: smoke test on desktop + phone", need=True)
@@ -135,6 +157,7 @@ if not QUICK:
         run("animcraft_autorig", {"input": f"{ws}/anim/demo/demo_humanoid.glb", "naming": "mixamo", "out_dir": f"{ws}/anim/rig", "name": "hero_mixamo"}, "animcraft: Mixamo-named rig", need=True)
         run("animcraft_retarget", {"source": f"{ws}/anim/clips/hero_anim.glb", "clip": "walk", "target": f"{ws}/anim/rig/hero_mixamo.glb", "out_dir": f"{ws}/anim/retarget"},
             "animcraft: retarget walk across bone naming schemes", need=True)
+        mocap_take(f"{ws}/anim/rig/hero.glb")
         run("animcraft_spritesheet", {"input": f"{ws}/anim/clips/hero_anim.glb", "clips": ["walk"], "directions": 2, "frames": 4, "size": 64, "samples": 4, "out_dir": f"{ws}/anim/sprites"},
             "animcraft: sprite sheets from a 3D clip", need=True)
     run("animcraft_physics", {"count": 4, "frames": 48, "out_dir": f"{ws}/anim/physics"}, "animcraft: rigid-body drop settles on the ground", need=True)
@@ -175,7 +198,7 @@ c.close()
 # ---- routing (no runtime needed)
 c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=env)
 for brief, want in (("a seamless rain ambience", ("audiocraft", "ambience")), ("mossy cobblestone texture", ("materialcraft", "generate")), ("explosion sprite sheet for phaser", ("fxcraft", "flipbook")),
-                    ("rig my character", ("animcraft", "autorig")), ("check fps on mobile", ("testcraft", "perf")), ("golden hour orbit cutscene", ("cinematiccraft", "shot")),
+                    ("rig my character", ("animcraft", "autorig")), ("motion capture from a video of me dancing", ("animcraft", "mocap")), ("record gameplay video of my game", ("cinematiccraft", "capture")), ("check fps on mobile", ("testcraft", "perf")), ("golden hour orbit cutscene", ("cinematiccraft", "shot")),
                     ("a roguelike dungeon level", ("levelcraft", "generate")), ("find unused assets", ("assetcraft", "unused")), ("sunset skybox", ("worldcraft", "sky"))):
     ok, r = c.call("route", {"brief": brief}); ch = r.get("chosen") or {}
     check(f"route: {brief!r} → {want[0]}.{want[1]}", (ch.get("department"), ch.get("action")) == want, (ch.get("department"), ch.get("action")))

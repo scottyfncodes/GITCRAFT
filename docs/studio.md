@@ -95,11 +95,25 @@ in the background by the user-level SessionStart hook:
 ```bash
 scripts/install-studio.sh            # core: studio venv + Node runtime
 scripts/install-studio.sh voice      # + Kokoro voice (pip + ~115 MB GitHub release download, SHA-256 checked)
+scripts/install-studio.sh mocap      # + MediaPipe Pose for animcraft_mocap (pip + ~40 MB pinned models, SHA-256 checked;
+                                     #   needs the system EGL/GLES libraries: apt-get install libegl1 libgles2)
+scripts/install-studio.sh music      # opt-in: ACE-Step 1.5 for audiocraft_music_model (~10 GB; weights from huggingface.co)
+scripts/install-studio.sh unirig     # GPU machines only: UniRig for animcraft_autorig_ml (CUDA, weights from huggingface.co)
 scripts/install.sh meshcraft         # Blender, for animcraft / cinematiccraft / worldcraft sky / fxcraft destruction
 GITCRAFT_STUDIO=0                    # no Studio
 GITCRAFT_STUDIO_VOICE=later | 0      # voice model in the background at the first session / not at all
 scripts/doctor.sh                    # shows every department's ready/blocked actions
 ```
+
+`studiocraft` is registered on the first install pass, before its runtime exists (Claude Code reads MCP
+servers only at session start). Until the runtime lands it lists only `studio_status`, which says how to
+install; when the install finishes it sends `notifications/tools/list_changed` and the session sees every
+department tool without `/mcp`.
+
+`music` and `unirig` need huggingface.co. Default cloud environments block it: allow `huggingface.co`,
+`*.hf.co` and `cdn-lfs.huggingface.co` in the environment's network policy for the install, and, for a tool
+that must reach a host at run time, give it a per-host allowance with netgate (`GITCRAFT_ALLOW_HOSTS_<TOOL>`,
+see [security.md](security.md#per-host-network-allowances-netgate)).
 
 System tools used when present: FFmpeg (`apt-get install ffmpeg`), Playwright + Chromium (preinstalled in
 Claude Code cloud containers; otherwise `npm i -g playwright && npx playwright install chromium`).
@@ -130,6 +144,9 @@ are deferred (see the acquisition report).
 - "Give the game an adventure theme that gets more intense in fights" → `audiocraft_music` (use the `.layers.json` intensity levels)
 - "Rig this character, give it idle/walk/run, and make 8-direction sprites of the walk" → `animcraft_autorig` → `animcraft_animate` → `animcraft_spritesheet`
 - "Put this Mixamo walk on my character" → `animcraft_retarget`
+- "Turn this dance video into an animation for my hero" → `animcraft_mocap` with `target` (MediaPipe → BVH → retarget)
+- "A three.quarks magic burst I can load in my three.js game" → `fxcraft_quarks`
+- "An LDtk project for a cave level" → `levelcraft_generate` (writes `.ldtk` next to the `.tmj`)
 - "A tropical island, a sunset skybox and animated sea normals" → `worldcraft_terrain`, `worldcraft_sky`, `worldcraft_ocean`
 - "A looping torch fire and a crate that shatters" → `fxcraft_emitter`, `fxcraft_destruction`
 - "Mossy cobblestone and rusty metal at 1K" → `materialcraft_generate`
@@ -185,8 +202,11 @@ copyleft/share-alike ones.
 
 ## Known limitations
 
-- Music is procedural (solid, loopable, editable via MIDI), not a generative-model track; ACE-Step 1.5
-  (MIT) is the deferred upgrade (needs Hugging Face access, practical only on a GPU).
+- Default music is procedural (solid, loopable, editable via MIDI). `audiocraft_music_model` (ACE-Step 1.5,
+  MIT) is opt-in: it needs `install-studio.sh music` with Hugging Face access and is slow without a GPU. Its
+  adapter was written against ACE-Step v0.1.8's documented API and is untested end to end here (no HF access).
+- `animcraft_mocap` is monocular: one person, no root travel (hip-centred landmarks), no fingers or face.
+- `animcraft_autorig_ml` (UniRig) needs an NVIDIA GPU; its installer and adapter are untested on CPU-only machines.
 - AnimCraft rigs from landmarks: expects a T/A-pose humanoid facing forward, a level quadruped, or a straight
   chain; clips are clean procedural blocking, retargeted mocap gives natural motion.
 - Terrain erosion is a fast stream-power approximation; flipbooks are 2D particle simulations (no volumetric
@@ -194,4 +214,5 @@ copyleft/share-alike ones.
 - Cycles renders on CPU only; EEVEE needs a GPU context.
 - TestCraft serves local folders through request interception: games that need a live backend show as
   blocked requests; WebGL runs on SwiftShader so FPS is relative.
-- Tiled TMJ only (no native LDtk writer yet).
+- LDtk output is a single level per project with IntGrid collision, an auto tile layer and entities; it is
+  validated against the official 1.5.3 schema, not opened in the LDtk app.

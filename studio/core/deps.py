@@ -31,6 +31,21 @@ def _site_has(py, module):
     return any(glob.glob(p) for p in pats)
 
 
+WEIGHTS = ("model.safetensors", "model.safetensors.index.json", "pytorch_model.bin", "diffusion_pytorch_model.safetensors",
+           "diffusion_pytorch_model.safetensors.index.json", "diffusion_pytorch_model.bin")
+
+
+def _has_weights(d):
+    return os.path.isdir(d) and any(os.path.exists(os.path.join(d, w)) for w in WEIGHTS)
+
+
+def _has_lib(name):
+    """A system shared library (lib<name>.so*) in the usual places; no ldconfig (it may not run in the sandbox)."""
+    dirs = ["/lib", "/usr/lib", "/lib64", "/usr/lib64", "/usr/local/lib"] + glob.glob("/usr/lib/*-linux-gnu") + glob.glob("/lib/*-linux-gnu")
+    dirs += [d for d in os.environ.get("LD_LIBRARY_PATH", "").split(":") if d]
+    return any(glob.glob(os.path.join(d, f"lib{name}.so*")) for d in dirs)
+
+
 def _version(cmd):
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
@@ -51,9 +66,12 @@ def check_one(dep_id, spec):
     elif kind == "venv":
         py = expand(spec["python"]); ok = os.access(py, os.X_OK) and _site_has(py, spec["module"])
         files = [expand(f) for f in spec.get("files", [])]; missing = [f for f in files if not os.path.isfile(f)]
-        r.update(available=ok and not missing, python=py,
-                 reason=None if ok and not missing else (f"{spec['module']} not installed in {os.path.dirname(os.path.dirname(py))}" if not ok
-                                                         else f"model files missing: {', '.join(os.path.basename(m) for m in missing)}"))
+        libs = [l for l in spec.get("system_libs", []) if not _has_lib(l)]   # e.g. MediaPipe's libEGL/libGLESv2
+        missing += [w for w in map(expand, spec.get("weights_dirs", [])) if not _has_weights(w)]   # e.g. ACE-Step checkpoints
+        r.update(available=ok and not missing and not libs, python=py,
+                 reason=None if ok and not missing and not libs else (f"{spec['module']} not installed in {os.path.dirname(os.path.dirname(py))}" if not ok
+                                                         else f"model files missing: {', '.join(os.path.basename(m) for m in missing)}" if missing
+                                                         else f"system libraries missing: {', '.join('lib' + l for l in libs)} ({spec.get('system_install', 'install them with the system package manager')})"))
     elif kind == "binary":
         p = shutil.which(spec["bin"])
         r.update(available=bool(p), path=p, version=_version(spec["version_cmd"]) if p and spec.get("version_cmd") else None,

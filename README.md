@@ -28,12 +28,12 @@ Nine departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, thre
 
 | | |
 |---|---|
-| **AudioCraft** | SFX, seamless ambiences, adaptive music stems + MIDI, voice lines (54 voices, CPU), loop points, loudness, conversion |
-| **AnimCraft** | auto-rig with heat weights, procedural clips, retargeting, physics, sprite sheets |
+| **AudioCraft** | SFX, seamless ambiences, adaptive music stems + MIDI, voice lines (54 voices, CPU), opt-in ACE-Step songs, loop points, loudness, conversion |
+| **AnimCraft** | auto-rig with heat weights, procedural clips, retargeting, mocap from video (MediaPipe → BVH), physics, sprite sheets |
 | **WorldCraft** | eroded terrains with biomes, heightmaps/splatmaps, scatter, caves, physical skies + cubemaps, looping FFT oceans |
-| **FXCraft** | flipbook effects (exact loops), three.js emitters, Voronoi destruction |
+| **FXCraft** | flipbook effects (exact loops), three.js emitters, three.quarks systems, Voronoi destruction |
 | **MaterialCraft** | seamless PBR materials with weathering, glTF material spheres, toon ramps |
-| **LevelCraft** | dungeons, caves, completable platformers, overworlds, towns → Tiled + blockout GLB, checked in Phaser |
+| **LevelCraft** | dungeons, caves, completable platformers, overworlds, towns → Tiled + LDtk + blockout GLB, checked in Phaser |
 | **CinematicCraft** | camera moves rendered in Cycles + engine camera paths, storyboards, title cards, teasers, gameplay capture |
 | **TestCraft** | smoke, gameplay, FPS, visual regression, asset integrity and animation tests in Chromium |
 | **AssetCraft** | catalogue, versions, duplicates, unused assets, licences + ATTRIBUTION.md, safe integration |
