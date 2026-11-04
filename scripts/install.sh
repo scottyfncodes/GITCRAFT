@@ -149,7 +149,8 @@ write_status
 #     as its core venv is complete; the voice model (the slowest part) comes after that, or later.
 if [[ $studio_state == pending ]]; then
   if gitcraft_studio_ready && [[ $update -eq 0 ]]; then echo "gitcraft: studiocraft already installed"; studio_state=ok
-  else "$here/install-studio.sh" core && studio_state=ok || { studio_state=failed; failed+=(studiocraft); }; fi
+  # not fatal: the seven 2D tools are registered already, status.json records it and the SessionStart hook retries it
+  else "$here/install-studio.sh" core && studio_state=ok || { studio_state=failed; echo "gitcraft: studiocraft not installed this time (recorded; the SessionStart hook retries it, or run scripts/install.sh studiocraft)" >&2; }; fi
   if [[ $studio_state == ok ]]; then "$here/install-global.sh" >/dev/null && echo "gitcraft: studiocraft registered"; fi
   write_status
   if [[ $studio_state == ok && $voice_state == pending ]]; then

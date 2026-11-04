@@ -22,17 +22,22 @@ want=("${@:-core}")
 fail=0
 py=$(command -v python3.13 || command -v python3.12 || command -v python3.11 || command -v python3)
 
+# Each download step has a time limit: a stalled mirror must not eat a cloud setup script's budget (one fresh
+# setup spent 5.5 minutes in a stalled `pip install numpy`). A step that times out fails, install.sh records it,
+# and the SessionStart hook retries it in the background.
+STEP_LIMIT="${GITCRAFT_STUDIO_STEP_TIMEOUT:-120}"
+limit() { if command -v timeout >/dev/null; then timeout "$STEP_LIMIT" "$@"; else "$@"; fi; }
 mkvenv() {   # mkvenv <dir> <requirements>
-  if command -v uv >/dev/null; then uv venv -q --allow-existing -p "$py" "$1" && VIRTUAL_ENV="$1" uv pip install -q -r "$2"
-  else { [[ -x "$1/bin/python" ]] || "$py" -m venv "$1"; } && "$1/bin/pip" install -q -r "$2"; fi
+  if command -v uv >/dev/null; then uv venv -q --allow-existing -p "$py" "$1" && VIRTUAL_ENV="$1" limit uv pip install -q -r "$2"
+  else { [[ -x "$1/bin/python" ]] || "$py" -m venv "$1"; } && limit "$1/bin/pip" install -q -r "$2"; fi
 }
 
 core() {
   echo "gitcraft-studio: core venv (numpy, Pillow) → $SH/venv"
-  mkvenv "$SH/venv" "$repo/studio/requirements.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: core venv FAILED (see $log)" >&2; return 1; }
+  mkvenv "$SH/venv" "$repo/studio/requirements.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: core venv FAILED or timed out after ${STEP_LIMIT}s (see $log)" >&2; return 1; }
   if command -v npm >/dev/null; then
     mkdir -p "$SH/node"; cp "$repo/studio/node/package.json" "$repo/studio/node/package-lock.json" "$SH/node/"
-    if (cd "$SH/node" && npm ci --silent --no-audit --no-fund) >>"$log" 2>&1; then echo "gitcraft-studio: node runtime ready (three 0.170.0, phaser 3.90.0, gltf-validator)"
+    if (cd "$SH/node" && limit npm ci --silent --no-audit --no-fund) >>"$log" 2>&1; then echo "gitcraft-studio: node runtime ready (three 0.170.0, phaser 3.90.0, gltf-validator)"
     else echo "gitcraft-studio: npm ci failed; engine checks will report blocked (see $log)" >&2; fi
   else
     echo "gitcraft-studio: npm not found; engine checks (three.js, Phaser) will report blocked" >&2
@@ -46,13 +51,13 @@ KOKORO_FILES=("kokoro-v1.0.int8.onnx:6e742170d309016e5891a994e1ce1559c702a2ccd00
               "voices-v1.0.bin:bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d")
 voice() {
   echo "gitcraft-studio: voice venv (kokoro-onnx, onnxruntime) → $SH/voice-venv"
-  mkvenv "$SH/voice-venv" "$repo/studio/requirements-voice.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: voice venv FAILED (see $log)" >&2; return 1; }
+  mkvenv "$SH/voice-venv" "$repo/studio/requirements-voice.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: voice venv FAILED or timed out after ${STEP_LIMIT}s (see $log)" >&2; return 1; }
   mkdir -p "$SH/models/kokoro"
   for e in "${KOKORO_FILES[@]}"; do
     f=${e%%:*}; sum=${e##*:}; dst="$SH/models/kokoro/$f"
     if [[ -f "$dst" ]] && echo "$sum  $dst" | sha256sum -c --quiet 2>/dev/null; then continue; fi
     echo "gitcraft-studio: downloading $f"
-    curl -fsSL --retry 3 -o "$dst.part" "$KOKORO_URL/$f" || { echo "gitcraft-studio: download of $f failed (GitHub release blocked?)" >&2; rm -f "$dst.part"; return 1; }
+    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" -o "$dst.part" "$KOKORO_URL/$f" || { echo "gitcraft-studio: download of $f failed (GitHub release blocked?)" >&2; rm -f "$dst.part"; return 1; }
     echo "$sum  $dst.part" | sha256sum -c --quiet || { echo "gitcraft-studio: $f checksum mismatch; not installed" >&2; rm -f "$dst.part"; return 1; }
     mv "$dst.part" "$dst"
   done
