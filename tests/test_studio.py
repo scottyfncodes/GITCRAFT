@@ -11,6 +11,14 @@ Actions whose runtime is not installed must report `blocked` (never a fake resul
 as SKIP with the reason, not counted as passes. Exit 1 on any failure."""
 import json, os, shutil, subprocess, sys, tempfile, time
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(HERE)
+# the harness itself makes and compares images (Pillow, numpy): use the Studio's venv when this Python lacks them
+try:
+    import numpy, PIL  # noqa: F401
+except ImportError:
+    _vpy = os.path.join(os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.expanduser("~/.gitcraft/studio"), "venv", "bin", "python")
+    if os.access(_vpy, os.X_OK) and os.path.realpath(sys.executable) != os.path.realpath(_vpy):
+        os.execv(_vpy, [_vpy] + sys.argv)
+    raise
 sys.path.insert(0, HERE)
 from mcp_client import Client
 
