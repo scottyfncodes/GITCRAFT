@@ -1,0 +1,116 @@
+{
+ "project": "/home/user/fart-flight",
+ "server": [
+  "/root/.gitcraft/runtime/scripts/mcp.sh",
+  "studiocraft"
+ ],
+ "cwd": "/home/user/fart-flight",
+ "checks": [
+  {
+   "check": "studiocraft is registered from the GITCRAFT runtime, not a project checkout",
+   "ok": true,
+   "detail": "['/root/.gitcraft/runtime/scripts/mcp.sh', 'studiocraft']"
+  },
+  {
+   "check": "PLAYCRAFT tools are available from this repository",
+   "ok": true,
+   "detail": "72"
+  },
+  {
+   "check": "playcraft_pass ran on the game (108.5 s)",
+   "ok": true,
+   "detail": "None"
+  },
+  {
+   "check": "outputs landed inside the game's workspace, not in GITCRAFT",
+   "ok": true,
+   "detail": "/home/user/fart-flight/gitcraft-out/playcraft/baseline"
+  },
+  {
+   "check": "the game was played in the browser",
+   "ok": true,
+   "detail": "{'played': True, 'viewports': ['desktop', 'phone']}"
+  },
+  {
+   "check": "at least one control produced a verified response",
+   "ok": true,
+   "detail": "[('key Space', True), ('key ArrowUp', True), ('key KeyW', True), ('key Enter', True), ('click centre', True), ('drag / pull back', True), ('tap centre', True), ('hold centre', True), ('swipe / pull back', False), ('tap left third', False), ('tap right third', True)]"
+  },
+  {
+   "check": "every criterion has an evidence level",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "findings are ranked with recommendations",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "report written",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "seconds": 108.5,
+ "summary": {
+  "overall": {
+   "score": 75,
+   "confidence": "medium",
+   "coverage": 1.0,
+   "strong_evidence_share": 0.32,
+   "note": null
+  },
+  "categories": {
+   "core_gameplay": 83,
+   "game_feel": 76,
+   "controls": 75,
+   "progression": 70,
+   "difficulty": 67,
+   "player_experience": 80,
+   "replayability": 70,
+   "technical": 73,
+   "presentation": 77,
+   "mobile": 82
+  },
+  "genres": [
+   "arcade"
+  ],
+  "top_findings": [
+   "1. Frame rate holds during play (design, observed)",
+   "2. Input forgiveness (buffering, deadzones, grace windows) (design, inferred)",
+   "3. Effects can be calmed (reduced motion / shake setting) (design, inferred)",
+   "4. Automated tests exist (design, inferred)",
+   "5. Balance is measured (simulations, solvers, playtest bots) (design, inferred)",
+   "6. Frame rate on the phone viewport (design, observed)",
+   "7. Text is legible on the target device (\u2265 12 px) (design, verified)",
+   "8. Control settings (sensitivity, remap, invert) (design, inferred)"
+  ]
+ },
+ "genres": [
+  [
+   "arcade",
+   1.0
+  ]
+ ],
+ "played": {
+  "played": true,
+  "viewports": [
+   "desktop",
+   "phone"
+  ]
+ },
+ "plan": [
+  "2. High-impact, low-effort feel and flow: Input forgiveness (buffering, deadzones, grace windows); Automated tests exist; Text is legible on the target device (\u2265 12 px); Touch targets \u2265 44 px",
+  "3. Deeper design work: Frame rate holds during play; Balance is measured (simulations, solvers, playtest bots); Frame rate on the phone viewport"
+ ],
+ "engineering": null,
+ "overall": {
+  "score": 75,
+  "confidence": "medium",
+  "coverage": 1.0,
+  "strong_evidence_share": 0.32,
+  "note": null
+ },
+ "ok": true
+}

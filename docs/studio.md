@@ -1,7 +1,7 @@
 # GITCRAFT Studio — the department layer
 
 GITCRAFT already had the 2D tools (PhotoCraft, VectorCraft, DesignCraft, PdfCraft, LightCraft, FilmCraft,
-EffectCraft) and the 3D Department (ForgeCraft orchestrating MeshCraft). The Studio adds nine
+EffectCraft) and the 3D Department (ForgeCraft orchestrating MeshCraft). The Studio adds ten
 departments for everything else a game or app needs, served by one MCP server, **`studiocraft`**, and
 reachable from ForgeCraft through `departments`, `department_route` and `department_run`.
 
@@ -16,6 +16,7 @@ reachable from ForgeCraft through `departments`, `department_route` and `departm
 | **CinematicCraft** | Camera moves (8) with lighting presets (6), Cycles renders → MP4 + .blend + engine camera path; storyboards (PNG/PDF); title cards; trailer assembly with crossfades + music; gameplay capture | **Blender Cycles**, FFmpeg (x264, xfade, loudnorm), Playwright |
 | **TestCraft** | Smoke tests on desktop/phone/tablet, scripted gameplay with state assertions and video, FPS/frame-time/heap profiles, visual regression, asset integrity, animation playback, Vitest/Jest, HTML reports | **Playwright + Chromium**, Khronos validator |
 | **AssetCraft** | One catalogue for every project: auto-registration of every output, scan, search, versions, exact + perceptual duplicates, unused assets, dependencies, licence report + ATTRIBUTION.md, verify, safe integration, 3D-library sync, HTML catalogue | SQLite (stdlib), Pillow, FFmpeg |
+| **PLAYCRAFT** | Game design and gameplay quality: discovery + genre identification (15 profiles), a Chromium play probe (per-control response, dead time, FPS, pause, touch targets, text size), 10-category scorecard with evidence levels, ranked plan, verify with regressions + git-diff guardrails, combined GITCRAFT + PLAYCRAFT pass. See [playcraft.md](playcraft.md) | Playwright + Chromium, numpy, Pillow |
 
 How the tools were chosen, scored, and what was deferred or rejected: [studio-acquisition.md](studio-acquisition.md).
 

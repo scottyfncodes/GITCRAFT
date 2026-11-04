@@ -1,0 +1,1714 @@
+{
+ "_doc": "PLAYCRAFT genre intelligence. A game gets every genre whose score is close enough to the best (multi-label). Each profile: doc_keywords (README/docs, strongest evidence), code_keywords (source), weights (category multipliers for the overall score), priorities (what matters most in this genre), questions (genre-specific prompts per discipline), criteria (genre checks: `signals` are core signal ids, `patterns` are extra source regexes; any match = present), testing (how to test this genre), avoid (systems that do not belong). Recommendations here override the generic ones for this genre.",
+ "genres": {
+  "physics_puzzle": {
+   "title": "Physics puzzle / destruction",
+   "doc_keywords": [
+    "physics",
+    "puzzle",
+    "destruction",
+    "demolition",
+    "collapse",
+    "chain reaction",
+    "topple",
+    "knock down",
+    "fracture",
+    "shatter",
+    "tower",
+    "slingshot",
+    "trick shot",
+    "trajectory",
+    "weak spot",
+    "debris",
+    "rubble"
+   ],
+   "code_keywords": [
+    "rapier",
+    "matter-js",
+    "cannon",
+    "planck",
+    "box2d",
+    "fracture",
+    "voronoi",
+    "debris",
+    "restitution",
+    "impulse"
+   ],
+   "weights": {
+    "core_gameplay": 1.2,
+    "game_feel": 1.4,
+    "controls": 1.1,
+    "progression": 0.8,
+    "difficulty": 1.1,
+    "player_experience": 1.0,
+    "replayability": 0.9,
+    "technical": 1.3,
+    "presentation": 1.0,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "physics consistency (same shot, same result)",
+    "satisfying destruction",
+    "emergent chain reactions",
+    "skill shots that read as skill",
+    "impact feedback scaled to the size of the event",
+    "fast retry"
+   ],
+   "questions": {
+    "design_architect": [
+     "Is there a clear target and a readable way to cause the outcome, or does the player just spam until things fall?",
+     "Do multiple solutions exist, and does the game recognise the clever one?"
+    ],
+    "game_feel": [
+     "Does a big collapse feel bigger than a small knock (shake, slow-mo and sound scaled by mass/impulse)?",
+     "Does the aim/release feel intentional (anticipation, release snap, a beat before impact)?"
+    ],
+    "loop_designer": [
+     "How long between a shot and the next decision? Is the player watching settling debris for too long?"
+    ],
+    "difficulty_balance": [
+     "Can every level be solved with the real controls (automated solver/par runs)?",
+     "Are there degenerate one-shot exploits?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "pp.fixed_step",
+     "category": "technical",
+     "discipline": "difficulty_balance",
+     "title": "Fixed-step, deterministic physics",
+     "signals": [
+      "fixed_step",
+      "determinism"
+     ],
+     "recommendation": "Step the physics at a fixed rate (e.g. 60/120 Hz with an accumulator) and seed every random source, so the same shot always gives the same outcome; players can only learn a system that is consistent.",
+     "impact": 4,
+     "effort": 3,
+     "risk": 2
+    },
+    {
+     "id": "pp.chain_reactions",
+     "category": "core_gameplay",
+     "discipline": "design_architect",
+     "title": "Emergent chain reactions",
+     "signals": [
+      "chain_reaction"
+     ],
+     "recommendation": "Let falling pieces transfer damage (impulse above a threshold breaks what they land on) and celebrate the chain with a counter; chains turn one good shot into a story.",
+     "impact": 4,
+     "effort": 3,
+     "risk": 2
+    },
+    {
+     "id": "pp.destruction",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Destruction reads physically (debris, dust, pieces)",
+     "signals": [
+      "destruction"
+     ],
+     "recommendation": "Break objects into a few pieces with debris and dust on impact rather than deleting them; scale particles by impulse, not per hit.",
+     "impact": 4,
+     "effort": 3,
+     "risk": 2
+    },
+    {
+     "id": "pp.shot_quality",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Skill shots are recognised",
+     "patterns": [
+      "perfect",
+      "bank shot",
+      "trick ?shot",
+      "skill ?shot",
+      "shot ?quality",
+      "clean hit",
+      "headline"
+     ],
+     "recommendation": "Name the skill when it happens (BANK SHOT, CHAIN x5) with a short, readable callout; recognition is what turns physics accidents into mastery.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "pp.aim_preview",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Aim preview / trajectory guide",
+     "patterns": [
+      "trajectory",
+      "aim ?line",
+      "aimguide",
+      "guide",
+      "predict",
+      "arc preview"
+     ],
+     "recommendation": "Show a short trajectory preview (to the first contact, not the full path) so aiming is a decision, not a guess.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "pp.solvable",
+     "category": "difficulty",
+     "discipline": "difficulty_balance",
+     "title": "Levels proven solvable (solver / par tests)",
+     "signals": [
+      "tune_tests"
+     ],
+     "recommendation": "Add a headless test that finishes every level with the real controls (a scripted or searched solution) and records par; it catches impossible levels and exploits before players do.",
+     "impact": 3,
+     "effort": 3,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Determinism: replay the same input twice and compare the settled state",
+    "Solver: finish each level headlessly with the real controls; record par",
+    "Impact feedback: shake/particles scale with impulse (small knock < collapse)",
+    "Settle time: seconds from shot to next decision"
+   ],
+   "avoid": [
+    "shot timers that rush a thinking game",
+    "random damage rolls that break consistency",
+    "energy systems that gate retries"
+   ]
+  },
+  "arcade": {
+   "title": "Arcade",
+   "doc_keywords": [
+    "arcade",
+    "high score",
+    "endless",
+    "one-button",
+    "one button",
+    "flappy",
+    "score attack",
+    "retro",
+    "dodge",
+    "survive as long",
+    "runner",
+    "combo",
+    "lives"
+   ],
+   "code_keywords": [
+    "highscore",
+    "highScore",
+    "bestScore",
+    "gameOver",
+    "combo",
+    "lives",
+    "spawnRate",
+    "speedUp"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.4,
+    "controls": 1.3,
+    "progression": 0.7,
+    "difficulty": 1.2,
+    "player_experience": 1.1,
+    "replayability": 1.3,
+    "technical": 1.1,
+    "presentation": 1.0,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "instant restart",
+    "readable score and near-miss feedback",
+    "tight, immediate controls",
+    "a difficulty ramp you can feel",
+    "one more go"
+   ],
+   "questions": {
+    "loop_designer": [
+     "How many seconds from death to playing again?",
+     "What changes between minute 1 and minute 3 of a run?"
+    ],
+    "game_feel": [
+     "Does a near-miss feel like a near-miss (slow-mo, sound, callout)?",
+     "Is every point scored visible where the eye already is?"
+    ],
+    "retention_replay": [
+     "Is the best score always in view? Is there a reason to beat it (unlock, rank, grade)?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "ar.instant_restart",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Instant restart after failure",
+     "signals": [
+      "restart"
+     ],
+     "recommendation": "Restart on the same button that plays, within a second of the crash animation; no menus between runs.",
+     "impact": 5,
+     "effort": 1,
+     "risk": 1
+    },
+    {
+     "id": "ar.near_miss",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Near-miss / close-call feedback",
+     "patterns": [
+      "near ?miss",
+      "close ?call",
+      "close ?one",
+      "graze",
+      "squeak"
+     ],
+     "recommendation": "Detect near misses and reward them (a beat of slow-mo, a sound, a small bonus); it turns danger into excitement.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "ar.high_score",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Persistent best score",
+     "signals": [
+      "highscore",
+      "save"
+     ],
+     "all": true,
+     "recommendation": "Save the best score and show it on the start and game-over screens with the gap to beat.",
+     "impact": 4,
+     "effort": 1,
+     "risk": 1
+    },
+    {
+     "id": "ar.ramp",
+     "category": "difficulty",
+     "discipline": "difficulty_balance",
+     "title": "Difficulty ramps within a run",
+     "signals": [
+      "ramp"
+     ],
+     "recommendation": "Ramp speed/spawn density with distance or time on a curve that plateaus; the player should feel minute 2 is harder than minute 1.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 2
+    },
+    {
+     "id": "ar.score_feedback",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Score changes are celebrated where the player looks",
+     "patterns": [
+      "popup",
+      "floating ?text",
+      "score ?pop",
+      "\\+\\d+",
+      "combo",
+      "bonus"
+     ],
+     "recommendation": "Pop the points at the place they were earned and pulse the score counter; feedback must arrive where the eye already is.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Time from game over to the next run (target < 2 s)",
+    "Run length distribution of a bot with simple inputs",
+    "Score/spawn curves over time from exposed state",
+    "Input \u2192 response under 100 ms"
+   ],
+   "avoid": [
+    "long tutorials",
+    "currencies and upgrade trees that make the core skill irrelevant",
+    "daily login rewards"
+   ]
+  },
+  "platformer": {
+   "title": "Platformer",
+   "doc_keywords": [
+    "platformer",
+    "jump",
+    "double jump",
+    "wall jump",
+    "platforms",
+    "side-scroller",
+    "run and jump",
+    "metroidvania"
+   ],
+   "code_keywords": [
+    "jump",
+    "grounded",
+    "onGround",
+    "gravity",
+    "coyote",
+    "wallJump"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.4,
+    "controls": 1.5,
+    "progression": 0.9,
+    "difficulty": 1.1,
+    "player_experience": 1.0,
+    "replayability": 0.9,
+    "technical": 1.0,
+    "presentation": 1.0,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "jump forgiveness (coyote time, jump buffering)",
+    "variable jump height",
+    "acceleration and friction curves",
+    "camera that looks ahead",
+    "checkpoints and instant respawn"
+   ],
+   "questions": {
+    "controls_device": [
+     "Can the player jump a few frames after leaving a ledge and a few frames before landing?",
+     "Does releasing jump early cut the jump?"
+    ],
+    "game_feel": [
+     "Is there squash on landing and a dust puff, and does the character turn around without sliding?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "pf.coyote_buffer",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Coyote time and jump buffering",
+     "signals": [
+      "input_buffer"
+     ],
+     "recommendation": "Accept a jump ~80-120 ms after leaving a ledge (coyote time) and remember a jump pressed ~100 ms before landing (buffer). Players blame themselves less and the controls feel 'tight'.",
+     "impact": 5,
+     "effort": 1,
+     "risk": 1
+    },
+    {
+     "id": "pf.variable_jump",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Variable jump height",
+     "patterns": [
+      "jump.{0,40}(release|cut|hold|variable)",
+      "(release|cut).{0,20}jump"
+     ],
+     "recommendation": "Cut upward velocity when jump is released early so short taps make short hops.",
+     "impact": 4,
+     "effort": 1,
+     "risk": 1
+    },
+    {
+     "id": "pf.accel",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Acceleration and friction curves",
+     "patterns": [
+      "accel",
+      "friction",
+      "decel"
+     ],
+     "recommendation": "Use separate ground/air acceleration and friction instead of instant velocity; tune turnaround to be faster than start-up.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 2
+    },
+    {
+     "id": "pf.checkpoints",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Checkpoints and fast respawn",
+     "patterns": [
+      "checkpoint",
+      "respawn"
+     ],
+     "recommendation": "Respawn at the last checkpoint in under a second.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Scripted jump timing tests (coyote/buffer windows) against exposed state",
+    "Max jump distance vs level gaps (every gap is clearable)",
+    "Respawn time after a death"
+   ],
+   "avoid": [
+    "floaty jumps without gravity tuning",
+    "unskippable death animations"
+   ]
+  },
+  "survival": {
+   "title": "Survival",
+   "doc_keywords": [
+    "survival",
+    "survive",
+    "scavenge",
+    "salvage",
+    "craft",
+    "crafting",
+    "hunger",
+    "thirst",
+    "fuel",
+    "oxygen",
+    "resources",
+    "scarcity",
+    "shelter",
+    "storm",
+    "night falls",
+    "permadeath"
+   ],
+   "code_keywords": [
+    "fuel",
+    "hunger",
+    "thirst",
+    "oxygen",
+    "stamina",
+    "hull",
+    "salvage",
+    "craft",
+    "recipe"
+   ],
+   "weights": {
+    "core_gameplay": 1.2,
+    "game_feel": 0.9,
+    "controls": 1.0,
+    "progression": 1.3,
+    "difficulty": 1.3,
+    "player_experience": 1.1,
+    "replayability": 1.0,
+    "technical": 1.0,
+    "presentation": 1.2,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "survival tension from real resource pressure",
+    "scarcity that forces choices",
+    "exploration that pays off",
+    "environmental storytelling",
+    "meaningful navigation (landmarks, not just markers)",
+    "fair, telegraphed failure"
+   ],
+   "questions": {
+    "design_architect": [
+     "What does the player have to give up to get what they need? If nothing, there is no tension.",
+     "Does the world tell its story through places and finds?"
+    ],
+    "loop_designer": [
+     "Is there a moment every few minutes where the player must decide to push further or turn back?"
+    ],
+    "difficulty_balance": [
+     "Can the player run out of the critical resource, and do they see it coming?",
+     "Is the early game too generous (no pressure) or too punishing (death before learning)?"
+    ],
+    "player_experience": [
+     "Can the player navigate by landmarks and the map, or only by following a marker?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "sv.resources",
+     "category": "core_gameplay",
+     "discipline": "design_architect",
+     "title": "Resource pressure exists",
+     "signals": [
+      "survival_resources"
+     ],
+     "recommendation": "Make one resource the clock (fuel, oxygen, hull) and make the player choose between spending it and exploring further.",
+     "impact": 5,
+     "effort": 3,
+     "risk": 2
+    },
+    {
+     "id": "sv.warning",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Failure is telegraphed (low-resource warnings)",
+     "patterns": [
+      "low ?fuel",
+      "warning",
+      "critical",
+      "alarm",
+      "running low",
+      "danger"
+     ],
+     "recommendation": "Warn before failure: a gauge colour change at 25%, a sound at 10%, a clear 'turn back' moment.",
+     "impact": 4,
+     "effort": 1,
+     "risk": 1
+    },
+    {
+     "id": "sv.exploration_payoff",
+     "category": "progression",
+     "discipline": "progression",
+     "title": "Exploration pays off (discoveries, finds, catalogue)",
+     "signals": [
+      "exploration",
+      "collectibles"
+     ],
+     "all": true,
+     "recommendation": "Put something worth finding behind every detour (a story find, a rare resource, a shortcut) and log it in a catalogue.",
+     "impact": 4,
+     "effort": 3,
+     "risk": 1
+    },
+    {
+     "id": "sv.navigation",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Navigation aids (map, compass, landmarks)",
+     "patterns": [
+      "minimap",
+      "compass",
+      "waypoint",
+      "landmark",
+      "map ?screen",
+      "chart"
+     ],
+     "recommendation": "Give a map and a compass but make landmarks visible from afar; navigation should be a skill, not a marker-follow.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "sv.atmosphere",
+     "category": "presentation",
+     "discipline": "presentation",
+     "title": "Day/night or weather that changes play",
+     "signals": [
+      "day_night"
+     ],
+     "recommendation": "Tie night/storms to real risk (visibility, damage, fuel burn) so atmosphere becomes tension.",
+     "impact": 3,
+     "effort": 3,
+     "risk": 2
+    },
+    {
+     "id": "sv.story",
+     "category": "presentation",
+     "discipline": "presentation",
+     "title": "Environmental storytelling",
+     "signals": [
+      "storytelling"
+     ],
+     "recommendation": "Tell the world's story through places and finds (logs, wrecks, notes) rather than cutscenes.",
+     "impact": 3,
+     "effort": 3,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Resource curve: simulate a session and plot the critical resource (does it ever get tight?)",
+    "Time-to-first-death for a careless bot vs a careful one",
+    "Every critical warning appears before the failure"
+   ],
+   "avoid": [
+    "timers that punish exploration without warning",
+    "daily rewards and energy refills",
+    "inventory busywork without decisions"
+   ]
+  },
+  "simulation": {
+   "title": "Simulation",
+   "doc_keywords": [
+    "simulation",
+    "simulator",
+    "realistic",
+    "weather",
+    "vehicle",
+    "flight",
+    "pilot",
+    "drive",
+    "patrol",
+    "career",
+    "day in the life",
+    "operate"
+   ],
+   "code_keywords": [
+    "simulate",
+    "weather",
+    "throttle",
+    "vehicle",
+    "aerodynamic",
+    "suspension"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.2,
+    "controls": 1.2,
+    "progression": 1.1,
+    "difficulty": 0.9,
+    "player_experience": 1.2,
+    "replayability": 1.0,
+    "technical": 1.1,
+    "presentation": 1.2,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "systems the player can read (gauges, feedback)",
+    "vehicle/handling feel",
+    "consistent rules",
+    "time controls",
+    "a reason to master the simulation"
+   ],
+   "questions": {
+    "design_architect": [
+     "Which part of the simulation does the player act on, and can they see it respond?"
+    ],
+    "controls_device": [
+     "Do vehicles feel different from each other and from walking?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "sim.readout",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Systems are readable (gauges, indicators)",
+     "patterns": [
+      "gauge",
+      "meter",
+      "indicator",
+      "readout",
+      "dial",
+      "forecast",
+      "scanner"
+     ],
+     "recommendation": "Surface the simulated state the player acts on (gauges, forecasts, scanner readouts) in one glance.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "sim.time",
+     "category": "player_experience",
+     "discipline": "loop_designer",
+     "title": "Time controls (skip, sleep, speed)",
+     "patterns": [
+      "timeScale",
+      "fast ?forward",
+      "skip",
+      "sleep",
+      "speed ?up time"
+     ],
+     "recommendation": "Let the player skip dead time (sleep, fast-forward, travel) so the simulation never becomes waiting.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "sim.rules_tested",
+     "category": "technical",
+     "discipline": "difficulty_balance",
+     "title": "Simulation rules covered by tests",
+     "signals": [
+      "tests"
+     ],
+     "recommendation": "Unit-test the rules (handling limits, weather effects) so tuning changes do not silently break play.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Handling envelope tests (top speed, climb angle) from the sim directly",
+    "Time-skip and save/restore round trips"
+   ],
+   "avoid": [
+    "realism that removes decisions",
+    "menus for every action"
+   ]
+  },
+  "strategy": {
+   "title": "Strategy",
+   "doc_keywords": [
+    "strategy",
+    "tactics",
+    "turn-based",
+    "turn based",
+    "rts",
+    "units",
+    "army",
+    "conquer",
+    "tower defense",
+    "tower defence",
+    "chess",
+    "deck",
+    "card game"
+   ],
+   "code_keywords": [
+    "turn",
+    "units",
+    "pathfind",
+    "astar",
+    "opponent",
+    "deck"
+   ],
+   "weights": {
+    "core_gameplay": 1.4,
+    "game_feel": 0.8,
+    "controls": 1.0,
+    "progression": 1.0,
+    "difficulty": 1.4,
+    "player_experience": 1.2,
+    "replayability": 1.2,
+    "technical": 1.0,
+    "presentation": 0.9,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "meaningful decisions with visible consequences",
+    "perfect information display (previews, tooltips)",
+    "a competent opponent",
+    "undo/forgiveness for misclicks",
+    "multiple viable strategies"
+   ],
+   "questions": {
+    "design_architect": [
+     "Is there a dominant strategy? Do two good players play differently?"
+    ],
+    "player_experience": [
+     "Can the player predict the result of an action before committing (damage preview, range)?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "st.preview",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Outcome previews and tooltips",
+     "patterns": [
+      "tooltip",
+      "preview",
+      "forecast",
+      "predict"
+     ],
+     "recommendation": "Preview the outcome of every action before it is committed (damage, range, cost).",
+     "impact": 5,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "st.undo",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Undo / confirm for irreversible actions",
+     "patterns": [
+      "undo",
+      "confirm"
+     ],
+     "recommendation": "Allow undo of the last move (or confirm irreversible ones) so mistakes are about strategy, not input.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "st.ai",
+     "category": "difficulty",
+     "discipline": "difficulty_balance",
+     "title": "Opponent AI",
+     "patterns": [
+      "\\bai\\b",
+      "opponent",
+      "enemy ?turn",
+      "minimax",
+      "utility"
+     ],
+     "recommendation": "Give the AI a readable plan and difficulty levels; test it against scripted strategies.",
+     "impact": 4,
+     "effort": 4,
+     "risk": 2
+    }
+   ],
+   "testing": [
+    "AI vs AI matches across seeds (win rates per strategy)",
+    "Exploit search for dominant openings"
+   ],
+   "avoid": [
+    "real-time pressure on a thinking game without a pause",
+    "pay-to-win units"
+   ]
+  },
+  "roguelike": {
+   "title": "Roguelike / roguelite",
+   "doc_keywords": [
+    "roguelike",
+    "roguelite",
+    "permadeath",
+    "procedural",
+    "runs",
+    "each run",
+    "relic",
+    "dungeon",
+    "meta progression",
+    "seed"
+   ],
+   "code_keywords": [
+    "seed",
+    "procedural",
+    "relic",
+    "perk",
+    "runState"
+   ],
+   "weights": {
+    "core_gameplay": 1.3,
+    "game_feel": 1.1,
+    "controls": 1.0,
+    "progression": 1.2,
+    "difficulty": 1.3,
+    "player_experience": 1.0,
+    "replayability": 1.5,
+    "technical": 1.0,
+    "presentation": 0.9,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "run variety",
+    "build-defining choices",
+    "seeded, shareable runs",
+    "fast restart",
+    "meta progression that widens options rather than inflating stats"
+   ],
+   "questions": {
+    "loop_designer": [
+     "Do two runs feel different by minute 5?"
+    ],
+    "progression": [
+     "Does meta progression add options or just numbers?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "rl.seeded",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Seeded runs",
+     "signals": [
+      "determinism"
+     ],
+     "recommendation": "Seed the generator per run and show the seed so good runs can be shared and bugs reproduced.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "rl.variety",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Run variety (procedural content, build choices)",
+     "signals": [
+      "procedural"
+     ],
+     "recommendation": "Vary layouts and offer build-defining picks every few minutes.",
+     "impact": 5,
+     "effort": 4,
+     "risk": 2
+    },
+    {
+     "id": "rl.meta",
+     "category": "progression",
+     "discipline": "progression",
+     "title": "Meta progression between runs",
+     "signals": [
+      "unlocks",
+      "save"
+     ],
+     "all": true,
+     "recommendation": "Unlock new options (characters, items) between runs rather than permanent stat inflation.",
+     "impact": 3,
+     "effort": 3,
+     "risk": 2
+    }
+   ],
+   "testing": [
+    "Generate 100 seeds: every layout is completable",
+    "Run-length and win-rate distribution per build"
+   ],
+   "avoid": [
+    "meta grinding required to win",
+    "runs longer than the session the platform allows"
+   ]
+  },
+  "incremental": {
+   "title": "Incremental / idle",
+   "doc_keywords": [
+    "idle",
+    "incremental",
+    "clicker",
+    "prestige",
+    "offline progress",
+    "upgrade",
+    "generators",
+    "tap to earn"
+   ],
+   "code_keywords": [
+    "prestige",
+    "offline",
+    "perSecond",
+    "multiplier",
+    "generator",
+    "tick"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.0,
+    "controls": 0.8,
+    "progression": 1.6,
+    "difficulty": 1.2,
+    "player_experience": 1.1,
+    "replayability": 1.2,
+    "technical": 1.0,
+    "presentation": 0.9,
+    "mobile": 1.1
+   },
+   "priorities": [
+    "pacing of unlocks",
+    "readable big numbers",
+    "offline progress",
+    "prestige that changes play",
+    "satisfying number feedback"
+   ],
+   "questions": {
+    "progression": [
+     "How long between new unlocks at hour 1 and hour 5?",
+     "Does prestige change strategy or only multiply?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "inc.offline",
+     "category": "progression",
+     "discipline": "progression",
+     "title": "Offline progress",
+     "patterns": [
+      "offline",
+      "lastSeen",
+      "away ?time",
+      "timeAway"
+     ],
+     "recommendation": "Compute progress while away (capped) and show a welcome-back summary.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "inc.numbers",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Large-number formatting",
+     "patterns": [
+      "formatNumber",
+      "toExponential",
+      "abbrev",
+      "suffix",
+      "\\b1e\\d"
+     ],
+     "recommendation": "Format large numbers with suffixes (1.2K, 3.4M) consistently.",
+     "impact": 3,
+     "effort": 1,
+     "risk": 1
+    },
+    {
+     "id": "inc.prestige",
+     "category": "progression",
+     "discipline": "progression",
+     "title": "Prestige / reset layer",
+     "patterns": [
+      "prestige",
+      "rebirth",
+      "ascend"
+     ],
+     "recommendation": "Add a reset layer that grants a new mechanic, not just a multiplier.",
+     "impact": 3,
+     "effort": 3,
+     "risk": 2
+    }
+   ],
+   "testing": [
+    "Simulate 10 h of optimal play: time between unlocks never exceeds the target"
+   ],
+   "avoid": [
+    "paywalls on pacing",
+    "notifications that nag"
+   ]
+  },
+  "racing": {
+   "title": "Racing",
+   "doc_keywords": [
+    "racing",
+    "race against",
+    "lap",
+    "laps",
+    "drift",
+    "kart",
+    "time trial",
+    "race track",
+    "racetrack",
+    "finish line",
+    "racers",
+    "ai pilots",
+    "grand prix",
+    "courses"
+   ],
+   "code_keywords": [
+    "lap",
+    "checkpoint",
+    "drift",
+    "boost",
+    "nitro",
+    "racer"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.4,
+    "controls": 1.4,
+    "progression": 1.0,
+    "difficulty": 1.1,
+    "player_experience": 1.0,
+    "replayability": 1.2,
+    "technical": 1.2,
+    "presentation": 1.1,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "sense of speed",
+    "handling feel and drift",
+    "readable track (checkpoints, racing line)",
+    "fair AI",
+    "time trials and ghosts"
+   ],
+   "questions": {
+    "game_feel": [
+     "Does speed feel fast (FOV, camera, particles, sound pitch)?"
+    ],
+    "difficulty_balance": [
+     "Does the AI rubber-band so hard that the player's lead is meaningless?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "rc.speed_sense",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Sense of speed (FOV, speed lines, camera)",
+     "patterns": [
+      "fov",
+      "speed ?lines",
+      "motion ?blur",
+      "wind"
+     ],
+     "recommendation": "Widen FOV and pull the camera back slightly with speed; add speed lines and pitch the engine sound with RPM.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "rc.ghost",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Time trial / ghost",
+     "patterns": [
+      "ghost",
+      "time ?trial",
+      "best ?lap",
+      "split"
+     ],
+     "recommendation": "Record the best lap as a ghost and show splits at checkpoints.",
+     "impact": 4,
+     "effort": 3,
+     "risk": 1
+    },
+    {
+     "id": "rc.checkpoints",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Checkpoints / lap structure",
+     "patterns": [
+      "checkpoint",
+      "\\blap",
+      "gate"
+     ],
+     "recommendation": "Make checkpoints and the next gate always readable; reset to the track quickly.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "AI lap-time spread vs player bot",
+    "Track completion by an autopilot on every course"
+   ],
+   "avoid": [
+    "loot-box cars",
+    "upgrade grinds that replace driving skill"
+   ]
+  },
+  "exploration": {
+   "title": "Exploration / adventure",
+   "doc_keywords": [
+    "explore",
+    "exploration",
+    "open world",
+    "discover",
+    "adventure",
+    "journey",
+    "world map",
+    "secrets",
+    "valley",
+    "island",
+    "wander",
+    "landmark",
+    "free roam",
+    "free patrol",
+    "anywhere",
+    "region",
+    "places",
+    "the world",
+    "wilderness",
+    "hidden around"
+   ],
+   "code_keywords": [
+    "discover",
+    "landmark",
+    "minimap",
+    "fogOfWar",
+    "catalog",
+    "explore"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.1,
+    "controls": 1.1,
+    "progression": 1.1,
+    "difficulty": 0.8,
+    "player_experience": 1.2,
+    "replayability": 1.0,
+    "technical": 1.0,
+    "presentation": 1.4,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "traversal that feels good on its own",
+    "landmarks and curiosity",
+    "discoveries that are logged and rewarded",
+    "a world that reacts",
+    "secrets"
+   ],
+   "questions": {
+    "loop_designer": [
+     "What makes the player turn off the road? Can they see something interesting from where they stand?"
+    ],
+    "presentation": [
+     "Does the world move and react (wind, wildlife, weather) when the player stands still?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "ex.discoveries",
+     "category": "progression",
+     "discipline": "progression",
+     "title": "Discoveries are logged (catalogue, journal, map)",
+     "patterns": [
+      "discover",
+      "catalog",
+      "journal",
+      "codex",
+      "badge",
+      "found"
+     ],
+     "recommendation": "Log every discovery somewhere the player revisits (catalogue, board, map) with a count of what's left.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "ex.secrets",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Secrets and hidden things",
+     "signals": [
+      "collectibles"
+     ],
+     "recommendation": "Hide a few things off the main paths and hint at them (a glint, a sound, a companion reacting).",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "ex.map",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Map / orientation",
+     "patterns": [
+      "minimap",
+      "map",
+      "compass",
+      "waypoint"
+     ],
+     "recommendation": "A map that marks discoveries and the player, opened from one button.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Traversal: time to cross the world by each means",
+    "Every discovery reachable (scripted route or nav check)"
+   ],
+   "avoid": [
+    "checklist icons everywhere",
+    "collectibles with no meaning"
+   ]
+  },
+  "sandbox": {
+   "title": "Sandbox",
+   "doc_keywords": [
+    "sandbox",
+    "free play",
+    "creative mode",
+    "build anything",
+    "no goals",
+    "toy",
+    "experiment",
+    "level editor"
+   ],
+   "code_keywords": [
+    "sandbox",
+    "editor",
+    "freePlay",
+    "creative"
+   ],
+   "weights": {
+    "core_gameplay": 1.1,
+    "game_feel": 1.2,
+    "controls": 1.1,
+    "progression": 0.6,
+    "difficulty": 0.6,
+    "player_experience": 1.2,
+    "replayability": 1.4,
+    "technical": 1.1,
+    "presentation": 1.1,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "expressive tools",
+    "emergent interactions",
+    "saving and sharing creations",
+    "undo"
+   ],
+   "questions": {
+    "design_architect": [
+     "What can the player make or cause that the designer did not script?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "sb.mode",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Sandbox / free-play mode",
+     "signals": [
+      "sandbox_mode"
+     ],
+     "recommendation": "Offer a goal-free mode with every tool unlocked.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "sb.share",
+     "category": "replayability",
+     "discipline": "retention_replay",
+     "title": "Save and share creations",
+     "signals": [
+      "share"
+     ],
+     "recommendation": "Let players save, name and share a creation (a code or a link).",
+     "impact": 3,
+     "effort": 3,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Stress: spawn many objects and measure frame time",
+    "Save/load round-trip of a creation"
+   ],
+   "avoid": [
+    "forced objectives in free play"
+   ]
+  },
+  "action": {
+   "title": "Action",
+   "doc_keywords": [
+    "action",
+    "combat",
+    "fight",
+    "shooter",
+    "enemies",
+    "boss",
+    "hack and slash",
+    "brawler",
+    "beat 'em up",
+    "bullet hell",
+    "weapons"
+   ],
+   "code_keywords": [
+    "enemy",
+    "attack",
+    "damage",
+    "health",
+    "boss",
+    "weapon",
+    "bullet",
+    "hitbox"
+   ],
+   "weights": {
+    "core_gameplay": 1.2,
+    "game_feel": 1.5,
+    "controls": 1.4,
+    "progression": 1.0,
+    "difficulty": 1.2,
+    "player_experience": 1.0,
+    "replayability": 1.0,
+    "technical": 1.1,
+    "presentation": 1.1,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "hit feedback (hit-stop, flash, knockback, sound)",
+    "telegraphed enemy attacks",
+    "invulnerability windows and dodges",
+    "readable chaos"
+   ],
+   "questions": {
+    "game_feel": [
+     "When a hit lands, does time stop for a few frames and does the target react?"
+    ],
+    "difficulty_balance": [
+     "Can the player see every attack coming?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "ac.hit_feedback",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Hit feedback (hit-stop, flash, knockback)",
+     "signals": [
+      "hitstop",
+      "flash"
+     ],
+     "recommendation": "On a landed hit: 40-80 ms hit-stop, a white flash on the target, knockback along the hit direction, a punchy sound. Scale by damage.",
+     "impact": 5,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "ac.telegraph",
+     "category": "difficulty",
+     "discipline": "difficulty_balance",
+     "title": "Enemy attacks are telegraphed",
+     "patterns": [
+      "telegraph",
+      "wind ?up",
+      "windup",
+      "warning",
+      "anticipat"
+     ],
+     "recommendation": "Give every enemy attack a wind-up pose/flash proportional to its damage.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "ac.iframes",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Invulnerability frames / dodge",
+     "patterns": [
+      "invuln",
+      "invincib",
+      "iframe",
+      "i-frame",
+      "dodge",
+      "roll"
+     ],
+     "recommendation": "Brief invulnerability after taking damage and on dodge prevents unfair multi-hits.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Damage taken per minute by a bot; hit feedback events per hit",
+    "Every attack has a telegraph \u2265 300 ms"
+   ],
+   "avoid": [
+    "screen shake on every bullet",
+    "damage sponges"
+   ]
+  },
+  "sports": {
+   "title": "Sports",
+   "doc_keywords": [
+    "sports",
+    "golf",
+    "baseball",
+    "football",
+    "soccer",
+    "basketball",
+    "tennis",
+    "pinball",
+    "bowling",
+    "snowboard",
+    "skate",
+    "ski",
+    "match",
+    "pitch",
+    "swing",
+    "putt",
+    "trick",
+    "big air"
+   ],
+   "code_keywords": [
+    "swing",
+    "putt",
+    "pitch",
+    "inning",
+    "goal",
+    "trick",
+    "landing"
+   ],
+   "weights": {
+    "core_gameplay": 1.2,
+    "game_feel": 1.4,
+    "controls": 1.4,
+    "progression": 1.0,
+    "difficulty": 1.1,
+    "player_experience": 1.0,
+    "replayability": 1.1,
+    "technical": 1.1,
+    "presentation": 1.1,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "timing/power input that rewards skill",
+    "satisfying contact moments",
+    "readable result feedback",
+    "match structure"
+   ],
+   "questions": {
+    "controls_device": [
+     "Is the skill in the input (timing, power) visible and learnable?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "sp.timing",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Timing / power input with feedback",
+     "patterns": [
+      "power ?meter",
+      "timing",
+      "perfect",
+      "sweet ?spot",
+      "charge"
+     ],
+     "recommendation": "Show the timing/power window and rate each attempt (perfect/good/early/late).",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "sp.contact",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Contact moment feels impactful",
+     "signals": [
+      "hitstop",
+      "audio"
+     ],
+     "recommendation": "Freeze 2-3 frames on contact, a crisp sound and a camera punch on great contact.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "Input window tests: the perfect window exists and is reachable",
+    "Result distribution for a bot at different skill levels"
+   ],
+   "avoid": [
+    "stat upgrades that replace timing skill"
+   ]
+  },
+  "management_builder": {
+   "title": "Management / builder",
+   "doc_keywords": [
+    "builder",
+    "base building",
+    "management",
+    "tycoon",
+    "colony",
+    "city builder",
+    "place buildings",
+    "economy",
+    "station grows",
+    "structural",
+    "build up",
+    "buildings appear",
+    "construct",
+    "blueprint"
+   ],
+   "code_keywords": [
+    "place",
+    "build",
+    "economy",
+    "income",
+    "grid",
+    "blueprint",
+    "structural",
+    "stability"
+   ],
+   "weights": {
+    "core_gameplay": 1.2,
+    "game_feel": 1.0,
+    "controls": 1.1,
+    "progression": 1.4,
+    "difficulty": 1.1,
+    "player_experience": 1.3,
+    "replayability": 1.1,
+    "technical": 1.0,
+    "presentation": 1.0,
+    "mobile": 1.0
+   },
+   "priorities": [
+    "placement preview and snapping",
+    "economy feedback (where does money come from and go)",
+    "visible growth",
+    "structural feedback before failure",
+    "undo/demolish"
+   ],
+   "questions": {
+    "progression": [
+     "Does the base visibly grow as the player progresses?"
+    ],
+    "player_experience": [
+     "Can the player see income/expenses and the effect of a build before placing it?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "mb.placement",
+     "category": "controls",
+     "discipline": "controls_device",
+     "title": "Placement preview / snapping",
+     "patterns": [
+      "ghost",
+      "preview",
+      "snap",
+      "blueprint",
+      "placement"
+     ],
+     "recommendation": "Show a ghost of the piece with valid/invalid colouring and snap to the grid before placing.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "mb.economy",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Economy feedback",
+     "patterns": [
+      "income",
+      "expense",
+      "funds",
+      "budget",
+      "balance sheet",
+      "cost"
+     ],
+     "recommendation": "Show cost before buying and a running income/expense summary.",
+     "impact": 3,
+     "effort": 2,
+     "risk": 1
+    },
+    {
+     "id": "mb.stability",
+     "category": "game_feel",
+     "discipline": "game_feel",
+     "title": "Structural stability feedback",
+     "patterns": [
+      "stress",
+      "stability",
+      "load",
+      "support",
+      "creak"
+     ],
+     "recommendation": "Colour or creak stressed parts before they fail so collapses feel caused, not random.",
+     "impact": 3,
+     "effort": 3,
+     "risk": 2
+    }
+   ],
+   "testing": [
+    "Economy simulation: funds over a long session never stall or explode",
+    "Undo/demolish round-trips"
+   ],
+   "avoid": [
+    "build timers that just make the player wait",
+    "premium currencies"
+   ]
+  },
+  "hybrid_experimental": {
+   "title": "Hybrid / experimental",
+   "doc_keywords": [
+    "experimental",
+    "unusual",
+    "genre-bending",
+    "hybrid",
+    "mix of",
+    "meets",
+    "narrative",
+    "art game",
+    "toy"
+   ],
+   "code_keywords": [],
+   "weights": {},
+   "priorities": [
+    "a clear identity: what is the one thing only this game does",
+    "onboarding of an unfamiliar mechanic",
+    "each borrowed genre's core done well enough"
+   ],
+   "questions": {
+    "design_architect": [
+     "Can the pitch be said in one sentence? Which genre's expectations does the player bring, and does the game meet or deliberately subvert them?"
+    ]
+   },
+   "criteria": [
+    {
+     "id": "hx.onboarding",
+     "category": "player_experience",
+     "discipline": "player_experience",
+     "title": "Unfamiliar mechanics are taught by doing",
+     "signals": [
+      "tutorial"
+     ],
+     "recommendation": "Teach each unfamiliar mechanic in a safe first encounter (show, then let them try) instead of a text wall.",
+     "impact": 4,
+     "effort": 2,
+     "risk": 1
+    }
+   ],
+   "testing": [
+    "First-session test: can a bot following on-screen prompts reach the first goal?"
+   ],
+   "avoid": [
+    "forcing the game into one genre's checklist"
+   ]
+  }
+ }
+}

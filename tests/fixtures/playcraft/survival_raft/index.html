@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DRIFTWOOD</title>
+<style>html,body{margin:0;height:100%;background:#0d2733;overflow:hidden;font:15px system-ui;color:#e8f1f2}canvas{display:block;width:100vw;height:100vh}
+#hud{position:fixed;top:10px;left:12px}#warn{position:fixed;top:40px;left:12px;color:#ff8a65;display:none}
+#start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0d2733ee}
+#start button{font:20px system-ui;padding:14px 32px;border-radius:10px;border:0;background:#f4b942}</style></head>
+<body><canvas id="c"></canvas><div id="hud"></div><div id="warn">LOW FUEL — turn back</div>
+<div id="start"><h1>DRIFTWOOD</h1><p>Fuel is the clock. Salvage, explore, get home.</p><button id="go">Start</button></div>
+<script>
+// DRIFTWOOD fixture: fuel pressure, salvage, discoveries journal (saved), day/night storms, warning before failure.
+const cv = document.getElementById('c'), cx = cv.getContext('2d');
+let W, H; const resize = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; }; resize(); addEventListener('resize', resize);
+const game = window.game = { fuel: 100, scrap: 0, discovered: JSON.parse(localStorage.getItem('drift.journal') || '[]'), x: 0, y: 0, day: 0, playing: false, alive: true };
+const islands = [[300, -200, 'Gull Rock'], [-500, 300, 'Old Pier'], [900, 600, 'Tin Atoll']];
+let wrecks = Array.from({ length: 12 }, (_, i) => ({ x: Math.cos(i * 2.4) * (200 + i * 70), y: Math.sin(i * 2.4) * (200 + i * 70) }));
+const keys = {}; addEventListener('keydown', (e) => { keys[e.code] = true; if (e.code === 'Space') salvage(); }); addEventListener('keyup', (e) => { keys[e.code] = false; });
+let drag = null; cv.addEventListener('pointerdown', (e) => drag = { x: e.clientX, y: e.clientY }); cv.addEventListener('pointermove', (e) => { if (drag) { drag.dx = e.clientX - drag.x; drag.dy = e.clientY - drag.y; } }); cv.addEventListener('pointerup', () => drag = null);
+document.getElementById('go').onclick = () => { document.getElementById('start').style.display = 'none'; game.playing = true; };
+function salvage() { const w = wrecks.find((w) => Math.hypot(w.x - game.x, w.y - game.y) < 60); if (w) { wrecks = wrecks.filter((o) => o !== w); game.fuel = Math.min(100, game.fuel + 25); game.scrap += 3; } }
+let last = performance.now(), wave = 0;
+function frame(t) {
+  const dt = Math.min(0.05, (t - last) / 1000); last = t; wave += dt;
+  if (game.playing && game.alive) {
+    let vx = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0), vy = (keys.ArrowDown || keys.KeyS ? 1 : 0) - (keys.ArrowUp || keys.KeyW ? 1 : 0);
+    if (drag && drag.dx !== undefined) { vx = Math.sign(drag.dx); vy = Math.sign(drag.dy); }
+    const night = Math.sin(game.day) < 0, burn = night ? 3 : 1.5;   // storms at night burn more fuel
+    if (vx || vy) { game.x += vx * 140 * dt; game.y += vy * 140 * dt; game.fuel -= burn * dt; }
+    game.day += dt * 0.2;
+    for (const [ix, iy, name] of islands) if (Math.hypot(ix - game.x, iy - game.y) < 120 && !game.discovered.includes(name)) { game.discovered.push(name); localStorage.setItem('drift.journal', JSON.stringify(game.discovered)); }
+    if (game.fuel <= 0) game.alive = false;
+  }
+  const night = Math.sin(game.day) < 0;
+  cx.fillStyle = night ? '#08161d' : '#14485a'; cx.fillRect(0, 0, W, H);
+  cx.strokeStyle = '#ffffff22'; for (let i = 0; i < 30; i++) { const y = (i * 37 - game.y * 0.5 + Math.sin(wave + i) * 6) % H; cx.beginPath(); cx.moveTo(0, (y + H) % H); cx.lineTo(W, (y + H) % H + 8); cx.stroke(); }
+  const ox = W / 2 - game.x, oy = H / 2 - game.y;
+  cx.fillStyle = '#c2a36b'; for (const [ix, iy] of islands) { cx.beginPath(); cx.arc(ix + ox, iy + oy, 60, 0, 7); cx.fill(); }
+  cx.fillStyle = '#8d6e63'; for (const w of wrecks) cx.fillRect(w.x + ox - 8, w.y + oy - 5, 16, 10);
+  cx.fillStyle = '#f4b942'; cx.fillRect(W / 2 - 12, H / 2 - 8, 24, 16);
+  document.getElementById('hud').textContent = `Fuel ${game.fuel.toFixed(0)}% · Scrap ${game.scrap} · Journal ${game.discovered.length}/${islands.length}` + (game.alive ? '' : ' · OUT OF FUEL');
+  document.getElementById('warn').style.display = game.fuel < 25 && game.alive ? 'block' : 'none';   // warning before failure
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>

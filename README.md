@@ -24,7 +24,7 @@ ForgeCraft orchestrates the 3D Department. It routes each request to the best av
 
 ## Studio departments: StudioCraft
 
-Nine departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, three.js, Phaser, Playwright, numpy) behind one contract: validated requests, honest `blocked` results when a runtime is missing, validated and hashed outputs, a provenance + licence record per run, and automatic registration in a cross-project asset catalogue.
+Ten departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, three.js, Phaser, Playwright, numpy) behind one contract: validated requests, honest `blocked` results when a runtime is missing, validated and hashed outputs, a provenance + licence record per run, and automatic registration in a cross-project asset catalogue.
 
 | | |
 |---|---|
@@ -37,6 +37,7 @@ Nine departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, thre
 | **CinematicCraft** | camera moves rendered in Cycles + engine camera paths, storyboards, title cards, teasers, gameplay capture |
 | **TestCraft** | smoke, gameplay, FPS, visual regression, asset integrity and animation tests in Chromium |
 | **AssetCraft** | catalogue, versions, duplicates, unused assets, licences + ATTRIBUTION.md, safe integration |
+| **PLAYCRAFT** | game design and gameplay quality: plays the built game on desktop + phone, scores 10 categories with evidence levels, ranks improvements by genre (15 profiles), verifies changes with guardrails. "Run PLAYCRAFT on this game" — [docs/playcraft.md](docs/playcraft.md) |
 
 ForgeCraft discovers and routes to them (`departments`, `department_route`, `department_run`). Docs: [docs/studio.md](docs/studio.md); how each tool was chosen, licensed and verified: [docs/studio-acquisition.md](docs/studio-acquisition.md). Proofs: `acceptance/studio/`. Test: `tests/test_studio.py`.
 

@@ -56,7 +56,7 @@ TOOLS = {
  "job_get": ("One job: attempts, stages with timing and errors, routing plan, compute needs, child jobs.", S(job=STR)),
  "job_retry": ("Re-run a failed or blocked job with its original request (ForgeCraft jobs re-run here; MeshCraft jobs in MeshCraft).", S(job=STR, wait=BOOL)),
  # --- the GITCRAFT Studio departments (studio/): the same code StudioCraft serves
- "departments": ("Every GITCRAFT Studio department (audiocraft, animcraft, worldcraft, fxcraft, materialcraft, levelcraft, cinematiccraft, testcraft, assetcraft) with its actions and whether each can run on this machine (and why not). With `department`: that department's full manifest (request/output formats, dependencies, licences, examples).",
+ "departments": ("Every GITCRAFT Studio department (audiocraft, animcraft, worldcraft, fxcraft, materialcraft, levelcraft, cinematiccraft, testcraft, assetcraft, playcraft) with its actions and whether each can run on this machine (and why not). With `department`: that department's full manifest (request/output formats, dependencies, licences, examples).",
                  S(department=STR)),
  "department_route": ("Route a brief across the whole studio: the 3D Department's plan (this server's `route`) plus the best-matching Studio department actions with proposed parameters.",
                       S(brief=STR, images=ARR())),

@@ -18,7 +18,7 @@ GITCRAFT_TOOLS=(
 #               does its Blender work through MeshCraft; runtimes in ~/.gitcraft/forgecraft
 # Both share gitcraft3d/ (library, jobs, probe, router) and one asset library ($GITCRAFT_3D_LIBRARY).
 #   studiocraft the Studio departments (studio/): audiocraft, animcraft, worldcraft, fxcraft, materialcraft,
-#               levelcraft, cinematiccraft, testcraft, assetcraft — one MCP server; runtimes in ~/.gitcraft/studio
+#               levelcraft, cinematiccraft, testcraft, assetcraft, playcraft — one MCP server; runtimes in ~/.gitcraft/studio
 #               (needs no Blender; its Blender actions use MeshCraft's and report `blocked` without it)
 GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft studiocraft:studio:studiocraft)
 # 3D tools (MeshCraft's Blender is a ~400 MB download):

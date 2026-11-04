@@ -1,0 +1,121 @@
+{
+ "project": "/home/user/scottyfncodes/demo-day",
+ "server": [
+  "/root/.gitcraft/runtime/scripts/mcp.sh",
+  "studiocraft"
+ ],
+ "cwd": "/home/user/scottyfncodes/demo-day",
+ "checks": [
+  {
+   "check": "studiocraft is registered from the GITCRAFT runtime, not a project checkout",
+   "ok": true,
+   "detail": "['/root/.gitcraft/runtime/scripts/mcp.sh', 'studiocraft']"
+  },
+  {
+   "check": "PLAYCRAFT tools are available from this repository",
+   "ok": true,
+   "detail": "72"
+  },
+  {
+   "check": "playcraft_pass ran on the game (175.2 s)",
+   "ok": true,
+   "detail": "None"
+  },
+  {
+   "check": "outputs landed inside the game's workspace, not in GITCRAFT",
+   "ok": true,
+   "detail": "/home/user/scottyfncodes/demo-day/gitcraft-out/playcraft/acceptance"
+  },
+  {
+   "check": "the game was played in the browser",
+   "ok": true,
+   "detail": "{'played': True, 'viewports': ['desktop', 'phone']}"
+  },
+  {
+   "check": "at least one control produced a verified response",
+   "ok": true,
+   "detail": "[('key ArrowUp', True), ('key ArrowRight', True), ('key ArrowLeft', True), ('key ArrowDown', True), ('key Enter', True), ('click centre', True), ('drag / pull back', True), ('tap centre', True), ('hold centre', True), ('swipe / pull back', True), ('tap left third', True), ('tap right third', True)]"
+  },
+  {
+   "check": "every criterion has an evidence level",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "findings are ranked with recommendations",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "report written",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "seconds": 175.2,
+ "summary": {
+  "overall": {
+   "score": 76,
+   "confidence": "medium",
+   "coverage": 1.0,
+   "strong_evidence_share": 0.3,
+   "note": null
+  },
+  "categories": {
+   "core_gameplay": 82,
+   "game_feel": 78,
+   "controls": 75,
+   "progression": 70,
+   "difficulty": 69,
+   "player_experience": 87,
+   "replayability": 70,
+   "technical": 78,
+   "presentation": 65,
+   "mobile": 82
+  },
+  "genres": [
+   "physics_puzzle",
+   "sports"
+  ],
+  "top_findings": [
+   "1. Frame rate holds during play (design, observed)",
+   "2. Input forgiveness (buffering, deadzones, grace windows) (design, inferred)",
+   "3. Frame rate on the phone viewport (design, observed)",
+   "4. Touch targets \u2265 44 px (design, verified)",
+   "5. Control settings (sensitivity, remap, invert) (design, inferred)",
+   "6. The world moves when the player is idle (design, observed)",
+   "7. Assist / difficulty options (design, inferred)",
+   "8. Sound design and music (design, inferred)"
+  ]
+ },
+ "genres": [
+  [
+   "physics_puzzle",
+   1.0
+  ],
+  [
+   "sports",
+   0.62
+  ]
+ ],
+ "played": {
+  "played": true,
+  "viewports": [
+   "desktop",
+   "phone"
+  ]
+ },
+ "plan": [
+  "2. High-impact, low-effort feel and flow: Input forgiveness (buffering, deadzones, grace windows); Touch targets \u2265 44 px",
+  "3. Deeper design work: Frame rate holds during play; Frame rate on the phone viewport; Sound design and music"
+ ],
+ "engineering": null,
+ "overall": {
+  "score": 76,
+  "confidence": "medium",
+  "coverage": 1.0,
+  "strong_evidence_share": 0.3,
+  "note": null
+ },
+ "ok": true
+}
