@@ -74,6 +74,7 @@ def before_after_md(cmp):
               + (f"; not reproduced (run-to-run noise): {'; '.join(cr['not_reproduced'])}" if cr["not_reproduced"] else "") + ".", ""]
     if cmp.get("regressions"): L += ["**Regressions:**", ""] + [f"- ❌ {x}" for x in cmp["regressions"]] + [""]
     else: L += ["No regressions detected by the probe.", ""]
+    if cmp.get("warnings"): L += ["**Check on a real device:**", ""] + [f"- {x}" for x in cmp["warnings"]] + [""]
     if cmp.get("changes"):
         L += ["**What changed and why:**", ""] + [f"- **{c.get('title')}** — {c.get('why', '')}" + (f" (`{'`, `'.join(os.path.basename(f) if os.path.isabs(f) else f for f in c.get('files', []))}`)" if c.get("files") else "") for c in cmp["changes"]] + [""]
     if cmp.get("guardrails"):

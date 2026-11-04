@@ -456,8 +456,13 @@ def compare_cards(before, after, changes):
         if bm.get(k) is None and am.get(k) is None: return
         metrics.append({"name": name, "before": bm.get(k), "after": am.get(k)})
         if bm.get(k) is not None and am.get(k) is not None and worse_if(bm[k], am[k], tol): regress.append(f"{name}: {bm[k]} → {am[k]}")
-    num("FPS (desktop, software rendering)", "fps", lambda b, a, t: a < b * (1 - t), 0.25)
-    num("FPS (phone)", "phone_fps", lambda b, a, t: a < b * (1 - t), 0.25)
+    # headless software-rendered FPS is reported but does not gate: identical builds of Fart Flight measured 10.4 and
+    # 26.1 fps in back-to-back runs (frame p50 snapping to 100 / 33 ms). A drop is a "check on a real device" warning.
+    warn = []
+    for name, k in (("FPS (desktop, software rendering)", "fps"), ("FPS (phone, software rendering)", "phone_fps")):
+        if bm.get(k) is None and am.get(k) is None: continue
+        metrics.append({"name": name, "before": bm.get(k), "after": am.get(k)})
+        if bm.get(k) and am.get(k) is not None and am[k] < bm[k] * 0.75: warn.append(f"{name}: {bm[k]} → {am[k]} (software rendering varies this much between identical builds; check on a real device)")
     # latency is read from the screen, one frame at a time: a change smaller than two frames is below what the probe resolves
     # (measured: at ~8 fps the best touch response of identical builds ranged 79-356 ms between runs)
     frame = lambda k: max(bm.get(k) or 16.7, am.get(k) or 16.7)
@@ -485,12 +490,12 @@ def compare_cards(before, after, changes):
     new = [f"{af[i]['title']} ({af[i]['level']}): {report._short(af[i]['evidence'], 120)}" for i in af if i not in bf]
     for i in af:
         if i in bf and af[i]["level"] == "verified" and bf[i]["status"] == "partial" and af[i]["status"] == "fail": regress.append(f"{af[i]['title']} got worse")
-    return {"categories": cats, "overall": {"before": ob, "after": oa, "delta": (oa - ob) if oa is not None and ob is not None else None},
+    return {"warnings": warn, "categories": cats, "overall": {"before": ob, "after": oa, "delta": (oa - ob) if oa is not None and ob is not None else None},
             "metrics": metrics, "regressions": regress, "resolved": resolved, "new_findings": new, "changes": changes or [],
             "remaining": [f"{f['title']} ({f['type']}, {f['level']})" for f in after["findings"][:10]]}
 
 
-NOISY = ("FPS", "fastest visible response", "touch response", "dead time", "inputs that no longer", "time to play")
+NOISY = ("fastest visible response", "touch response", "dead time", "inputs that no longer", "time to play")
 
 
 def merge_runs(a, b):
@@ -543,7 +548,7 @@ def verify(ctx, p):
     outs.append(_write_text(ctx, "pass_report.md", "\n".join(lines) + "\n"))
     checks = [{"name": "game played again with the baseline's probe", "ok": bool(metrics) or not (base.get("metrics")), "detail": vps},
               {"name": "no gameplay regressions", "ok": not cmp["regressions"], "detail": cmp["regressions"][:6]}] + guard
-    return {"outputs": outs, "checks": checks, "compare": {k: cmp.get(k) for k in ("overall", "regressions", "resolved", "new_findings", "metrics", "confirmation_run")}, "guardrails": guard,
+    return {"outputs": outs, "checks": checks, "compare": {k: cmp.get(k) for k in ("overall", "regressions", "warnings", "resolved", "new_findings", "metrics", "confirmation_run")}, "guardrails": guard,
             "summary": _summary(card)}
 
 

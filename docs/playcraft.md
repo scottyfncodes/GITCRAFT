@@ -145,8 +145,7 @@ PLAYCRAFT pass in one out_dir and merges them into one plan:
 - touches production data (`*.sqlite`, `prod*/`, …)
 - is on `main`/`master`
 
-and when the replay shows a regression that reproduces (a noise-prone regression — FPS, latency, a control that missed both trials, dead time — triggers a second replay, and only what reproduces counts; errors and missing files are never retried away): new page/missing/input errors, a control that no longer responds,
-FPS down >25 %, response time up by 1.5× and by more than 50 ms or two frames (whichever is larger: the probe reads the screen a frame at a time), dead time up by >15 points, time-to-play up by 1.5×.
+and when the replay shows a regression that reproduces (a noise-prone regression — latency, a lost control, dead time — triggers a second replay, and only what reproduces counts; errors and missing files are never retried away): new page/missing/input errors, a control that responded in every baseline trial and in none now, response time up by 1.5× and by more than 50 ms or two frames (whichever is larger: the probe reads the screen a frame at a time), dead time up by >15 points, time-to-play up by 1.5×.
 
 ## Integration
 
@@ -165,7 +164,10 @@ FPS down >25 %, response time up by 1.5× and by more than 50 ms or two frames (
 
 - Builds are not run inside the sandbox (no package registry): build with the game's own toolchain and pass `target`.
 - Headless Chromium renders WebGL in software: absolute FPS is far below a real phone's GPU and is scored as
-  observed; never claim device performance from it.
+  observed; never claim device performance from it. It is also unstable between runs (identical Fart Flight builds
+  measured 10.4 and 26.1 fps back to back), so verify reports an FPS drop as "check on a real device", never as a regression.
+- Some controls respond only intermittently to a generic probe (a short drag on Fart Flight: 1/12 and 3/12 trials on
+  identical builds); verify lists them as intermittent and does not use them for regressions.
 - The probe plays generically. It gets past a title screen with a start button (or `start_steps`), but it does
   not play to win: level completion, balance and progression pacing need exposed state, the project's own
   scripted playtests/solvers (`evidence`), or recorded `judgements`.
