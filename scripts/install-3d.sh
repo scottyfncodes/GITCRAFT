@@ -46,9 +46,25 @@ meshroom() {
 ai() {
   [[ -d "$MC/TripoSR/.git" ]] || git clone -q --depth 1 https://github.com/VAST-AI-Research/TripoSR "$MC/TripoSR" || return 1
   [[ -x "$MC/ai-venv/bin/python" ]] || python3 -m venv "$MC/ai-venv" || return 1
+  # No NVIDIA GPU: the CPU build of PyTorch (~200 MB) instead of the default CUDA build (~4 GB of GPU libraries
+  # that cannot be used here).
+  if ! { command -v nvidia-smi >/dev/null && nvidia-smi -L >/dev/null 2>&1; }; then
+    echo "gitcraft-3d: no NVIDIA GPU: installing the CPU build of PyTorch"
+    "$MC/ai-venv/bin/pip" install -q torch --index-url https://download.pytorch.org/whl/cpu || { echo "gitcraft-3d: CPU PyTorch install failed" >&2; return 1; }
+  fi
   echo "gitcraft-3d: installing PyTorch + TripoSR/Hunyuan3D dependencies (large)"
-  "$MC/ai-venv/bin/pip" install -q torch omegaconf einops trimesh rembg huggingface-hub "transformers<5" xatlas imageio gradio_client \
-    "git+https://github.com/tatsy/torchmcubes.git" || { echo "gitcraft-3d: AI dependencies failed; see pip output" >&2; return 1; }
+  "$MC/ai-venv/bin/pip" install -q torch omegaconf einops trimesh "rembg[cpu]" huggingface-hub "transformers<5" xatlas "imageio[ffmpeg]" moderngl gradio_client \
+    || { echo "gitcraft-3d: AI dependencies failed; see pip output" >&2; return 1; }
+  # torchmcubes (TripoSR's mesh extraction) builds against the PyTorch installed above: no build isolation
+  if ! "$MC/ai-venv/bin/python" -c "import torchmcubes" 2>/dev/null; then
+    "$MC/ai-venv/bin/pip" install -q scikit-build-core pybind11 cmake ninja &&
+    "$MC/ai-venv/bin/pip" install -q --no-build-isolation "git+https://github.com/tatsy/torchmcubes.git" \
+      || { echo "gitcraft-3d: torchmcubes build failed (needs a C++ compiler); see pip output" >&2; return 1; }
+  fi
+  # Hunyuan3D-2 runs locally only on an NVIDIA GPU (its remote mode needs just gradio_client, installed above)
+  if ! { command -v nvidia-smi >/dev/null && nvidia-smi -L >/dev/null 2>&1; }; then
+    echo "gitcraft-3d: no NVIDIA GPU: skipping the local Hunyuan3D-2 install (TripoSR runs on CPU)"; return 0
+  fi
   if [[ ! -d "$MC/Hunyuan3D-2/.git" ]]; then git clone -q --depth 1 https://github.com/Tencent-Hunyuan/Hunyuan3D-2 "$MC/Hunyuan3D-2" || return 1; fi
   "$MC/ai-venv/bin/pip" install -q -e "$MC/Hunyuan3D-2" || echo "gitcraft-3d: hy3dgen install failed (needs a CUDA toolchain for its extensions on GPU machines)" >&2
 }
@@ -56,9 +72,11 @@ ai() {
 weights() {
   HF_HOME="$MC/hf-cache" "$MC/ai-venv/bin/python" - <<'PY'
 from huggingface_hub import snapshot_download
-for repo in ("stabilityai/TripoSR",):
+for repo in ("stabilityai/TripoSR", "facebook/dino-vitb16"):   # TripoSR loads the DINO ViT-B/16 encoder (Apache-2.0)
     print("gitcraft-3d: fetched", snapshot_download(repo))
 PY
+  # rembg's background-removal model (u2net, ~170 MB, GitHub release) for TripoSR's photo preprocessing
+  U2NET_HOME="$MC/u2net" "$MC/ai-venv/bin/python" -c 'import rembg; rembg.new_session("u2net"); print("gitcraft-3d: rembg u2net model ready")' 
 }
 
 for w in "${want[@]}"; do
