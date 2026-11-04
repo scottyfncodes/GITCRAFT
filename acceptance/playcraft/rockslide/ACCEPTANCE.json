@@ -1,0 +1,131 @@
+{
+ "project": "/home/user/rockslide",
+ "server": [
+  "/root/.gitcraft/runtime/scripts/mcp.sh",
+  "studiocraft"
+ ],
+ "cwd": "/home/user/rockslide",
+ "checks": [
+  {
+   "check": "studiocraft is registered from the GITCRAFT runtime, not a project checkout",
+   "ok": true,
+   "detail": "['/root/.gitcraft/runtime/scripts/mcp.sh', 'studiocraft']"
+  },
+  {
+   "check": "PLAYCRAFT tools are available from this repository",
+   "ok": true,
+   "detail": "72"
+  },
+  {
+   "check": "playcraft_pass ran on the game (166.0 s)",
+   "ok": true,
+   "detail": "None"
+  },
+  {
+   "check": "outputs landed inside the game's workspace, not in GITCRAFT",
+   "ok": true,
+   "detail": "/home/user/rockslide/gitcraft-out/playcraft/acceptance"
+  },
+  {
+   "check": "the game was played in the browser",
+   "ok": true,
+   "detail": "{'played': True, 'viewports': ['desktop', 'phone']}"
+  },
+  {
+   "check": "at least one control produced a verified response",
+   "ok": true,
+   "detail": "[('key Space', True), ('key ArrowUp', False), ('key ArrowRight', True), ('key ArrowLeft', True), ('key ArrowDown', True), ('key KeyW', True), ('click centre', False), ('drag / pull back', False), ('tap centre', True), ('hold centre', False), ('swipe / pull back', True), ('tap left third', True), ('tap right third', False)]"
+  },
+  {
+   "check": "every criterion has an evidence level",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "findings are ranked with recommendations",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "report written",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "seconds": 166.0,
+ "summary": {
+  "overall": {
+   "score": 76,
+   "confidence": "low",
+   "coverage": 1.0,
+   "strong_evidence_share": 0.3,
+   "note": "Low confidence: much of this rests on source evidence; record judgements from playing (playcraft_assess judgements) and point `evidence` at the project's own test reports."
+  },
+  "categories": {
+   "core_gameplay": 82,
+   "game_feel": 73,
+   "controls": 77,
+   "progression": 70,
+   "difficulty": 69,
+   "player_experience": 75,
+   "replayability": 70,
+   "technical": 78,
+   "presentation": 83,
+   "mobile": 85
+  },
+  "genres": [
+   "simulation",
+   "exploration",
+   "physics_puzzle",
+   "sports"
+  ],
+  "top_findings": [
+   "1. Frame rate holds during play (design, observed)",
+   "2. Text is legible on the target device (\u2265 12 px) (design, verified)",
+   "3. Hit-stop / slow motion on key moments (design, inferred)",
+   "4. Each probed control produces a visible response (design, observed)",
+   "5. Frame rate on the phone viewport (design, observed)",
+   "6. Assist / difficulty options (design, inferred)",
+   "7. Haptics on key moments (where supported) (design, inferred)",
+   "8. Skill shots are recognised (design, inferred)"
+  ]
+ },
+ "genres": [
+  [
+   "simulation",
+   1.0
+  ],
+  [
+   "exploration",
+   0.84
+  ],
+  [
+   "physics_puzzle",
+   0.46
+  ],
+  [
+   "sports",
+   0.46
+  ]
+ ],
+ "played": {
+  "played": true,
+  "viewports": [
+   "desktop",
+   "phone"
+  ]
+ },
+ "plan": [
+  "2. High-impact, low-effort feel and flow: Text is legible on the target device (\u2265 12 px); Hit-stop / slow motion on key moments; Each probed control produces a visible response",
+  "3. Deeper design work: Frame rate holds during play; Frame rate on the phone viewport"
+ ],
+ "engineering": null,
+ "overall": {
+  "score": 76,
+  "confidence": "low",
+  "coverage": 1.0,
+  "strong_evidence_share": 0.3,
+  "note": "Low confidence: much of this rests on source evidence; record judgements from playing (playcraft_assess judgements) and point `evidence` at the project's own test reports."
+ },
+ "ok": true
+}

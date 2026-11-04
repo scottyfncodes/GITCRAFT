@@ -1,0 +1,120 @@
+{
+ "project": "/home/user/scottyfncodes/tidebreakers",
+ "server": [
+  "/root/.gitcraft/runtime/scripts/mcp.sh",
+  "studiocraft"
+ ],
+ "cwd": "/home/user/scottyfncodes/tidebreakers",
+ "checks": [
+  {
+   "check": "studiocraft is registered from the GITCRAFT runtime, not a project checkout",
+   "ok": true,
+   "detail": "['/root/.gitcraft/runtime/scripts/mcp.sh', 'studiocraft']"
+  },
+  {
+   "check": "PLAYCRAFT tools are available from this repository",
+   "ok": true,
+   "detail": "72"
+  },
+  {
+   "check": "playcraft_pass ran on the game (264.8 s)",
+   "ok": true,
+   "detail": "None"
+  },
+  {
+   "check": "outputs landed inside the game's workspace, not in GITCRAFT",
+   "ok": true,
+   "detail": "/home/user/scottyfncodes/tidebreakers/gitcraft-out/playcraft/acceptance"
+  },
+  {
+   "check": "the game was played in the browser",
+   "ok": true,
+   "detail": "{'played': True, 'viewports': ['desktop', 'phone']}"
+  },
+  {
+   "check": "at least one control produced a verified response",
+   "ok": true,
+   "detail": "[('key Space', True), ('key ArrowUp', True), ('key ArrowRight', True), ('click centre', True), ('drag / pull back', True), ('tap centre', True), ('hold centre', True), ('swipe / pull back', True), ('tap left third', True), ('tap right third', True)]"
+  },
+  {
+   "check": "every criterion has an evidence level",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "findings are ranked with recommendations",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "report written",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "seconds": 264.8,
+ "summary": {
+  "overall": {
+   "score": 76,
+   "confidence": "low",
+   "coverage": 1.0,
+   "strong_evidence_share": 0.29,
+   "note": "Low confidence: much of this rests on source evidence; record judgements from playing (playcraft_assess judgements) and point `evidence` at the project's own test reports."
+  },
+  "categories": {
+   "core_gameplay": 83,
+   "game_feel": 76,
+   "controls": 76,
+   "progression": 70,
+   "difficulty": 65,
+   "player_experience": 57,
+   "replayability": 70,
+   "technical": 92,
+   "presentation": 81,
+   "mobile": 89
+  },
+  "genres": [
+   "survival",
+   "exploration"
+  ],
+  "top_findings": [
+   "1. Playable quickly (load + start \u2264 3 s) (design, observed)",
+   "2. Text is legible on the target device (\u2265 12 px) (design, verified)",
+   "3. Input forgiveness (buffering, deadzones, grace windows) (design, inferred)",
+   "4. Balance is measured (simulations, solvers, playtest bots) (design, inferred)",
+   "5. Browser gestures do not fight the game (touch-action, no zoom) (design, verified)",
+   "6. Effects can be calmed (reduced motion / shake setting) (design, inferred)",
+   "7. More than one input method (keyboard + pointer/touch, gamepad) (design, inferred)"
+  ]
+ },
+ "genres": [
+  [
+   "survival",
+   1.0
+  ],
+  [
+   "exploration",
+   0.83
+  ]
+ ],
+ "played": {
+  "played": true,
+  "viewports": [
+   "desktop",
+   "phone"
+  ]
+ },
+ "plan": [
+  "2. High-impact, low-effort feel and flow: Text is legible on the target device (\u2265 12 px); Input forgiveness (buffering, deadzones, grace windows); Browser gestures do not fight the game (touch-action, no zoom); More than one input method (keyboard + pointer/touch, gamepad)",
+  "3. Deeper design work: Playable quickly (load + start \u2264 3 s); Balance is measured (simulations, solvers, playtest bots)"
+ ],
+ "engineering": null,
+ "overall": {
+  "score": 76,
+  "confidence": "low",
+  "coverage": 1.0,
+  "strong_evidence_share": 0.29,
+  "note": "Low confidence: much of this rests on source evidence; record judgements from playing (playcraft_assess judgements) and point `evidence` at the project's own test reports."
+ },
+ "ok": true
+}
