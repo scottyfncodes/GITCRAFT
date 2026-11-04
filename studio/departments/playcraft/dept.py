@@ -219,6 +219,12 @@ def analyse(results):
         dom = R.get("dom") or R.get("dom_loaded") or {}
         v.update({k: dom.get(k) for k in ("viewport_meta", "canvas_touch_action", "body_touch_action", "small_targets", "small_target_count", "interactive", "min_font_px", "min_font_text")})
         v["overflow_px"] = max(0, (dom.get("scroll_width") or 0) - (dom.get("inner_width") or 0))
+        end = R.get("dom_end") or {}   # the screen after play too (game-over cards have buttons the start screen does not)
+        seen = {(t["text"], t["w"], t["h"]) for t in v.get("small_targets") or []}
+        extra = [dict(t, screen="after play") for t in end.get("small_targets") or [] if (t["text"], t["w"], t["h"]) not in seen]
+        if extra: v["small_targets"] = (v.get("small_targets") or []) + extra; v["small_target_count"] = (v.get("small_target_count") or 0) + len(extra)
+        if end.get("min_font_px") is not None and (v.get("min_font_px") is None or end["min_font_px"] < v["min_font_px"]):
+            v["min_font_px"], v["min_font_text"] = end["min_font_px"], end.get("min_font_text")
         m["viewports"][vp] = v
         for x in m["responses"]:
             if x["viewport"] == vp: x["slow"] = bool(v.get("fps") and v["fps"] < 10)
