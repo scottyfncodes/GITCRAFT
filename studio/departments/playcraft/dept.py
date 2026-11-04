@@ -230,6 +230,8 @@ def analyse(results):
             if x["viewport"] == vp: x["slow"] = bool(v.get("fps") and v["fps"] < 10)
     vs = m["viewports"]; desk = next((v for k, v in vs.items() if not v.get("touch")), None); phone = next((v for k, v in vs.items() if v.get("touch")), None)
     m["loaded_any"] = any(v["loaded"] for v in vs.values())
+    m["renderer"] = next((R.get("renderer") for R in results if R.get("renderer")), None)
+    m["software_gl"] = bool(m["renderer"] and re.search(r"swiftshader|llvmpipe|software|softpipe", m["renderer"], re.I))
     if desk:
         m.update(fps=desk.get("fps"), frame_p95=desk.get("frame_p95"), frame_p50=desk.get("frame_p50"), dead_time=desk.get("dead_time"), monkey_s=desk.get("monkey_s"), idle_motion=desk.get("idle_motion"),
                  load_ms=desk.get("load_ms"), start_ms=(desk.get("start") or {}).get("ms"), pause=desk.get("pause"), hooks_found=desk.get("hooks_found"), state_changed=desk.get("state_changed"))

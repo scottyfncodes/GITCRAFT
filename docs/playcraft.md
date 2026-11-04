@@ -56,10 +56,10 @@ created with `preserveDrawingBuffer`) and counts DOM mutations. With that:
 | Controls probed | Keys found in the source (play keys, not pause/menu keys), click and drag on desktop; tap, hold, swipe/pull-back, left/right taps on touch | verified |
 | Dead time | Share of frames with no change during a seeded mixed-input session | observed |
 | Idle motion | Mean frame-to-frame change with no input (is the world alive?) | observed |
-| Frame rate | rAF timing in a clean window with no canvas reads (FPS, p50, p95) | observed (software WebGL) |
+| Frame rate | rAF timing in a clean window with no canvas reads (FPS, p50, p95) | observed on a GPU; **not tested** (measured, shown, not scored) when the browser reports a software renderer (SwiftShader/llvmpipe) |
 | Pause | A primary action, then the pause key: does motion stop? Tested last so a pause menu cannot swallow other probes | verified (works) / observed (did not stop) |
 | Game state | Numbers on exposed objects (`window.game`, globals the source assigns) before and after play | verified |
-| Phone DOM | viewport meta, `touch-action` on the play surface, visible controls under 44 px, smallest visible text, horizontal overflow | verified |
+| Phone DOM | viewport meta, `touch-action` on the play surface, visible controls under 44 px (on the start and the after-play screen; elements under 8 px are visually-hidden labels, not targets), smallest visible text, horizontal overflow | verified |
 | Errors | page errors, console errors, missing files, errors raised by inputs | verified |
 
 ## Scoring

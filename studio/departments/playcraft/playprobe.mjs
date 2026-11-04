@@ -90,7 +90,7 @@ try {
     const audit = async () => page.evaluate(() => {
       const vis = (el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity > 0.05 && r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth; };
       const inter = [...document.querySelectorAll('button, a[href], [role=button], input, select, [onclick], [data-action]')].filter(vis);
-      const small = inter.map((el) => { const r = el.getBoundingClientRect(); return { text: (el.innerText || el.getAttribute('aria-label') || el.tagName).trim().slice(0, 40), w: Math.round(r.width), h: Math.round(r.height) }; }).filter((t) => t.w < 44 || t.h < 44);
+      const small = inter.map((el) => { const r = el.getBoundingClientRect(); return { text: (el.innerText || el.getAttribute('aria-label') || el.tagName).trim().slice(0, 40), w: Math.round(r.width), h: Math.round(r.height) }; }).filter((t) => (t.w < 44 || t.h < 44) && t.w >= 8 && t.h >= 8);   // < 8 px: visually-hidden labels, not targets
       let minFont = null, minText = null; const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
       while (walker.nextNode()) { const n = walker.currentNode; const el = n.parentElement; if (!el || !n.textContent.trim() || !vis(el)) continue; const f = parseFloat(getComputedStyle(el).fontSize); if (minFont === null || f < minFont) { minFont = f; minText = n.textContent.trim().slice(0, 40); } }
       const c = [...document.querySelectorAll('canvas')].sort((a, b) => b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0];
@@ -99,6 +99,7 @@ try {
         interactive: inter.length, small_targets: small.slice(0, 12), small_target_count: small.length, min_font_px: minFont, min_font_text: minText,
         scroll_width: document.documentElement.scrollWidth, inner_width: innerWidth, inner_height: innerHeight, canvases: [...document.querySelectorAll('canvas')].map((x) => [x.width, x.height]), title: document.title };
     });
+    R.renderer = await page.evaluate(() => { try { const g = document.createElement('canvas').getContext('webgl'); const e = g && g.getExtension('WEBGL_debug_renderer_info'); return e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : (g ? g.getParameter(g.RENDERER) : null); } catch { return null; } });
     R.dom_loaded = await audit();
     // ---- get past the title screen: explicit steps, else the most likely start button
     R.start = { method: null };

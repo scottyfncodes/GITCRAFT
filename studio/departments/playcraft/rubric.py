@@ -159,6 +159,10 @@ def _probe(c, m, profile):
         n = len(m["page_errors"]); return ("pass" if n == 0 else "fail"), "verified", (m["page_errors"][:3] if n else "0 page errors (console errors: %d)" % len(m["console_errors"]))
     if k == "missing":
         n = len(m["missing"]); return ("pass" if n == 0 else "fail"), "verified", (m["missing"][:5] if n else "no missing files")
+    if k in ("fps", "phone_fps") and m.get("software_gl"):
+        f = m.get(k)
+        return "unknown", "not_tested", (f"not representative: the browser rendered on {m.get('renderer')} (software), measured {f} fps; "
+                                         "identical builds vary 2-3x between runs here. Test frame rate on a real device")
     if k == "fps":
         f = m.get("fps")
         if f is None: return None
