@@ -1,0 +1,32 @@
+{
+ "name": "planks",
+ "pbrMetallicRoughness": {
+  "baseColorTexture": "planks_basecolor.png",
+  "metallicRoughnessTexture": "planks_orm.png",
+  "metallicFactor": 1.0,
+  "roughnessFactor": 1.0
+ },
+ "normalTexture": "planks_normal.png",
+ "occlusionTexture": "planks_orm.png",
+ "emissiveTexture": null,
+ "tiling_m": 2.0,
+ "three": {
+  "type": "MeshStandardMaterial",
+  "map": "planks_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+  "normalMap": "planks_normal.png",
+  "roughnessMap": "planks_orm.png",
+  "metalnessMap": "planks_orm.png",
+  "aoMap": "planks_orm.png",
+  "displacementMap": "planks_height16.png (optional)",
+  "emissiveMap": null
+ },
+ "averages": {
+  "basecolor_srgb": [
+   0.475,
+   0.324,
+   0.191
+  ],
+  "roughness": 0.706,
+  "metallic": 0.0
+ }
+}

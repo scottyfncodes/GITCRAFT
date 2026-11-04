@@ -25,7 +25,8 @@ project without this repo attached. Sources: `global/`.
 | `filmcraft`   | Non-linear video editor                     | Cutting, trimming, color, audio, exporting video |
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
 | `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ/STL export (toon or baked PBR), Three.js engine check, Blockbench and Mixamo hand-offs, the shared versioned asset library (`$GITCRAFT_3D_LIBRARY`, default `~/.gitcraft/3d-library`) and job records. The 3D Department's specialist: does every Blender step |
-| `forgecraft`  | 3D Department orchestrator (`forgecraft/`)  | Any 3D request: routes to MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D, has MeshCraft do the Blender work, engine-checks, records licence/provenance, hands off; same library and jobs as MeshCraft |
+| `forgecraft`  | 3D Department orchestrator (`forgecraft/`)  | Any 3D request: routes to MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D, has MeshCraft do the Blender work, engine-checks, records licence/provenance, hands off; same library and jobs as MeshCraft. Also discovers/routes/runs the Studio departments (`departments`, `department_route`, `department_run`) |
+| `studiocraft` | The Studio departments (`studio/`)          | AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft, TestCraft, AssetCraft: one `<department>_<action>` tool per action, plus `studio_status`, `department_describe`, `route`, `run`. See `docs/studio.md` |
 
 ## How to use them
 
@@ -77,6 +78,19 @@ project without this repo attached. Sources: `global/`.
 - Never add Blender code to `forgecraft/`: it belongs in `meshcraft/engine/`.
   Shared library/jobs/probe/routing code belongs in `gitcraft3d/`.
 
+## Studio departments (StudioCraft)
+
+- Start with `studio_status` (what can run here, and why not) or `route`. Every action
+  validates its request, reports `blocked` with the install command when a runtime is
+  missing (never a substitute), validates + hashes every output, writes
+  `<out_dir>/<name>.studio.json` (tools, licences, outputs) and registers outputs in the
+  AssetCraft catalogue (`$GITCRAFT_ASSET_CATALOG`).
+- One department = `studio/departments/<name>/manifest.json` + `dept.py`; the contract is
+  `studio/core/contract.py`. Blender work runs in MeshCraft's venv (`bpy_*.py` scripts);
+  never add a second Blender. Browser checks use `studio/core/web/*.mjs`.
+- Runtimes live in `~/.gitcraft/studio` (`scripts/install-studio.sh [voice|all]`); nothing
+  large is committed. Choices, scores, licences and deferrals: `docs/studio-acquisition.md`.
+
 ## Control room (local web UI)
 
 `scripts/ui.sh` serves a phone-friendly UI for every GITCRAFT tool on 127.0.0.1
@@ -106,6 +120,7 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   from a separate project; it tests the committed branch).
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
   `scripts/mcp.sh` need updating to match if you add one.
+- `tests/test_studio.py` must pass after any change under `studio/` (`--quick` skips the Blender actions).
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`
   (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
 - Never commit model weights or Meshroom: they install into

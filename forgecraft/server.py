@@ -15,8 +15,9 @@ import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
 from gitcraft3d import hardware, jobs, library, routing, deferred
 import meshcraft as mc
 import pipeline
+import studio
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 S = lambda **p: {"type": "object", "properties": p}
 STR, INT, BOOL, OBJ, NUM = {"type": "string"}, {"type": "integer"}, {"type": "boolean"}, {"type": "object"}, {"type": "number"}
 ARR = lambda t=STR: {"type": "array", "items": t}
@@ -54,6 +55,13 @@ TOOLS = {
  "jobs_list": ("Recent jobs (ForgeCraft orchestration jobs and the MeshCraft jobs they started) with status.", S(limit=INT, status=STR)),
  "job_get": ("One job: attempts, stages with timing and errors, routing plan, compute needs, child jobs.", S(job=STR)),
  "job_retry": ("Re-run a failed or blocked job with its original request (ForgeCraft jobs re-run here; MeshCraft jobs in MeshCraft).", S(job=STR, wait=BOOL)),
+ # --- the GITCRAFT Studio departments (studio/): the same code StudioCraft serves
+ "departments": ("Every GITCRAFT Studio department (audiocraft, animcraft, worldcraft, fxcraft, materialcraft, levelcraft, cinematiccraft, testcraft, assetcraft) with its actions and whether each can run on this machine (and why not). With `department`: that department's full manifest (request/output formats, dependencies, licences, examples).",
+                 S(department=STR)),
+ "department_route": ("Route a brief across the whole studio: the 3D Department's plan (this server's `route`) plus the best-matching Studio department actions with proposed parameters.",
+                      S(brief=STR, images=ARR())),
+ "department_run": ("Run a Studio department action: {department, action, params}. Requests are validated, missing dependencies give status `blocked` with the reason, outputs are validated and hashed, a .studio.json provenance record is written and outputs are registered in the AssetCraft catalogue.",
+                    S(department=STR, action=STR, params=OBJ)),
 }
 
 
@@ -109,6 +117,18 @@ def call(name, a):
         if not a.get("wait", True):
             threading.Thread(target=pipeline.retry, args=(rec["id"],), daemon=True).start(); return {"job": rec["id"], "status": "started"}
         return pipeline.summary(pipeline.retry(rec["id"]))
+    if name == "departments":
+        return studio.call("department_describe", {"department": a["department"]}) if a.get("department") else studio.call("studio_status", {})
+    if name == "department_route":
+        three = routing.route(a.get("brief", ""), routing.expand_images(a.get("images") or []), hardware.probe(_roots()))
+        dept = studio.call("route", {"brief": a.get("brief", "")})
+        chosen = dept.get("chosen") if isinstance(dept, dict) else None
+        threed_words = bool((dept or {}).get("three_d")) or bool(a.get("images"))
+        pick = "3d" if threed_words or not chosen else "studio"
+        return {"brief": a.get("brief"), "use": pick, "three_d": three, "studio": dept,
+                "next": ("forgecraft generate with this brief" if pick == "3d" else f"department_run {{department: {chosen['department']!r}, action: {chosen['action']!r}, params: {json.dumps(chosen['params'])}}}")}
+    if name == "department_run":
+        return studio.call("run", {"department": a["department"], "action": a["action"], "params": a.get("params") or {}})
     raise KeyError(f"unknown tool {name}")
 
 
@@ -134,7 +154,7 @@ def main():
         if method == "initialize":
             send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": p.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {"listChanged": True}},
                   "serverInfo": {"name": "forgecraft", "version": VERSION},
-                  "instructions": "GITCRAFT 3D Department orchestrator. Start with hardware_probe or route; generate runs the whole production pipeline (MeshCraft does the Blender work); library_export hands assets to other tools."}})
+                  "instructions": "GITCRAFT 3D Department orchestrator, and the router across the whole studio. Start with hardware_probe or route; generate runs the whole production pipeline (MeshCraft does the Blender work); library_export hands assets to other tools. For audio, animation, worlds, FX, materials, levels, cinematics, QA and asset management use departments / department_route / department_run (the GITCRAFT Studio departments)."}})
         elif method == "tools/list":
             listed = ([{"name": "forgecraft_status", "description": "ForgeCraft status. " + deferred.install_hint("ForgeCraft"),
                         "inputSchema": {"type": "object", "properties": {}}}] if waiting[0]

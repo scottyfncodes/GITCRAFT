@@ -1,0 +1,29 @@
+{
+ "lines": [
+  {
+   "id": "captain_01",
+   "character": "captain",
+   "voice": "bm_george",
+   "text": "Hoist the sails, the tide waits for no one!",
+   "file": "captain_01.wav",
+   "seconds": 2.942
+  },
+  {
+   "id": "parrot_01",
+   "character": "parrot",
+   "voice": "af_sky",
+   "text": "Squawk! No one! No one!",
+   "file": "parrot_01.wav",
+   "seconds": 1.376
+  },
+  {
+   "id": "narrator_01",
+   "character": "narrator",
+   "voice": "af_heart",
+   "text": "And so the little ship slipped out of the harbour before dawn.",
+   "file": "narrator_01.wav",
+   "seconds": 2.728
+  }
+ ],
+ "engine": "Kokoro-82M v1.0 (kokoro-onnx, int8)"
+}

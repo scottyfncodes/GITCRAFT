@@ -17,13 +17,21 @@ GITCRAFT_TOOLS=(
 #   forgecraft  orchestrator: routing, Meshroom/TripoSR/Hunyuan3D, jobs, hand-offs, UI (forgecraft/);
 #               does its Blender work through MeshCraft; runtimes in ~/.gitcraft/forgecraft
 # Both share gitcraft3d/ (library, jobs, probe, router) and one asset library ($GITCRAFT_3D_LIBRARY).
-GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft)
+#   studiocraft the Studio departments (studio/): audiocraft, animcraft, worldcraft, fxcraft, materialcraft,
+#               levelcraft, cinematiccraft, testcraft, assetcraft — one MCP server; runtimes in ~/.gitcraft/studio
+#               (needs no Blender; its Blender actions use MeshCraft's and report `blocked` without it)
+GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft studiocraft:studio:studiocraft)
 # 3D tools (MeshCraft's Blender is a ~400 MB download):
 #   1      install now (default)
 #   later  register now, build Blender in the background when a session starts (for setup scripts with a time limit)
 #   0      don't install; still registered, so `scripts/install.sh meshcraft forgecraft` works in a running session
 #   none   no 3D tools at all (not registered)
 GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"
+# Studio departments (studiocraft): 1 installs the core runtime (venv + Node packages, ~250 MB), 0 skips it.
+GITCRAFT_STUDIO="${GITCRAFT_STUDIO:-1}"
+# Studio voice runtime (Kokoro model ~115 MB + onnxruntime): 1 install now, later = in the background when a
+# session starts (the global SessionStart hook), 0 = not at all (audiocraft_voice reports blocked).
+GITCRAFT_STUDIO_VOICE="${GITCRAFT_STUDIO_VOICE:-1}"
 
 GITCRAFT_HOME="${GITCRAFT_HOME:-$HOME/.gitcraft}"
 GITCRAFT_BIN="$GITCRAFT_HOME/bin"
@@ -31,6 +39,8 @@ GITCRAFT_SRC="$GITCRAFT_HOME/src"
 GITCRAFT_TARGET="$GITCRAFT_HOME/target"
 GITCRAFT_LOG="$GITCRAFT_HOME/logs"
 GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
+GITCRAFT_STUDIO_HOME="${GITCRAFT_STUDIO_HOME:-$GITCRAFT_HOME/studio}"         # studio venvs, voice models, Node runtime
+GITCRAFT_ASSET_CATALOG="${GITCRAFT_ASSET_CATALOG:-$GITCRAFT_HOME/assetcraft/catalog.sqlite}"   # AssetCraft catalogue (all projects)
 FORGECRAFT_HOME="${FORGECRAFT_HOME:-$GITCRAFT_HOME/forgecraft}"               # Meshroom, AI venv, model cache
 # The 3D asset library + job records shared by meshcraft and forgecraft. Older variables still work;
 # a pre-consolidation ~/.gitcraft/meshcraft-library is used in place (same format).
@@ -79,4 +89,19 @@ gitcraft_denied() {
 gitcraft_mesh_ready() {
   [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] || return 1
   compgen -G "$GITCRAFT_HOME/meshcraft/venv/lib/python*/site-packages/bpy-*.dist-info" >/dev/null
+}
+
+# StudioCraft counts as installed when its core venv has numpy (checked from metadata, no import).
+gitcraft_studio_ready() {
+  [[ -x "$GITCRAFT_STUDIO_HOME/venv/bin/python" ]] || return 1
+  compgen -G "$GITCRAFT_STUDIO_HOME/venv/lib/python*/site-packages/numpy-*.dist-info" >/dev/null
+}
+
+# Is an extra tool ready to register? (ArtCraft tools: their binary exists.)
+gitcraft_extra_ready() {
+  case "$1" in
+    meshcraft|forgecraft) gitcraft_mesh_ready ;;
+    studiocraft) gitcraft_studio_ready ;;
+    *) return 1 ;;
+  esac
 }

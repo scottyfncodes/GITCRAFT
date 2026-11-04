@@ -1,0 +1,267 @@
+{
+ "department": "materialcraft",
+ "action": "generate",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "materialcraft/cobblestone",
+ "request": {
+  "material": "cobblestone",
+  "resolution": 256,
+  "name": "cobblestone",
+  "moss": 0.5,
+  "dirt": 0.3,
+  "out_dir": "(acceptance)",
+  "scale": 1.0,
+  "wear": 0,
+  "wet": 0,
+  "style": "pbr",
+  "toon_bands": 4,
+  "normal_strength": 4.0,
+  "normal_convention": "opengl",
+  "tile_meters": 2.0
+ },
+ "created": "2026-11-03T22:31:08+00:00",
+ "seconds": 2.04,
+ "outputs": [
+  {
+   "path": "cobblestone_basecolor.png",
+   "role": "basecolor",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "18a140ef89c384d6830a04ec6838e3427bf8f72eae9f1c90e225cce2dde1d943",
+   "bytes": 113957
+  },
+  {
+   "path": "cobblestone_normal.png",
+   "role": "normal (opengl)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "444ab4205c92db9f9bf5935e1d65ff43ec708c6fd615d97d592ca85024fc7af4",
+   "bytes": 160650
+  },
+  {
+   "path": "cobblestone_roughness.png",
+   "role": "roughness",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "024b6f5d1925940a524182e6a97c47db536fd26654c8a806f03f4f49b2da69ed",
+   "bytes": 29760
+  },
+  {
+   "path": "cobblestone_metallic.png",
+   "role": "metallic",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "39962cd5bc9f4f0446341d3e6e0c6c37336ddeb2e026a17a3d06bb6cb3266daf",
+   "bytes": 141
+  },
+  {
+   "path": "cobblestone_ao.png",
+   "role": "ao",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "df95b5d7ef6e3dfe264d40506816a43f2212d750e7013c797f759c128cb741ec",
+   "bytes": 31880
+  },
+  {
+   "path": "cobblestone_height16.png",
+   "role": "height",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "I;16",
+   "sha256": "7c5bd0840deb96574c65df49fd3c5922fb43f28fc1f265717e77962bbd4e46d5",
+   "bytes": 124963
+  },
+  {
+   "path": "cobblestone_orm.png",
+   "role": "orm (R=AO G=roughness B=metallic, glTF)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "63025622d115a6c68a19a3c0f847483aee11c02a343ea846a48a1066f13e3024",
+   "bytes": 73257
+  },
+  {
+   "path": "cobblestone_tiled2x2.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "bfbf303966747cea7a7a4473d667ee89cc4734cd33f2a10490a520b01fd92a7c",
+   "bytes": 236964
+  },
+  {
+   "path": "cobblestone.material.json",
+   "role": "material",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "averages",
+    "emissiveTexture",
+    "name",
+    "normalTexture",
+    "occlusionTexture",
+    "pbrMetallicRoughness",
+    "three",
+    "tiling_m"
+   ],
+   "sha256": "71b2635281ce3150d3dcfb29c47b74c6356759e12109f192796197e1d6dc8844",
+   "bytes": 818
+  },
+  {
+   "path": "cobblestone_sphere.glb",
+   "role": "sample",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 4096,
+   "animations": [],
+   "materials": 1,
+   "sha256": "feb73923d6e4aa5bdff8ea5355bbee0398ad48ed1807cce79a3b03ac756b0412",
+   "bytes": 442748
+  },
+  {
+   "path": "cobblestone_render.png",
+   "role": "render",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "07bfb2a5357e25bf65b1302e29d874d8dfa66f019aaadd080ee75b73950037b5",
+   "bytes": 223240
+  }
+ ],
+ "checks": [
+  {
+   "name": "material sphere: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 1,
+    "first": [
+     "WARNING MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations. @ /meshes/0/primitives/0/material"
+    ]
+   }
+  },
+  {
+   "name": "material sphere: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 4096,
+    "errors": null
+   }
+  },
+  {
+   "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+   "ok": true,
+   "detail": {
+    "basecolor": 0.828,
+    "height": 0.939,
+    "normal": 0.941,
+    "roughness": 0.835
+   }
+  },
+  {
+   "name": "normal map vectors are unit length",
+   "ok": true,
+   "detail": 0.0
+  },
+  {
+   "name": "maps are in range and not flat",
+   "ok": true,
+   "detail": 0.0892
+  }
+ ],
+ "tools": {
+  "studio_materials": {
+   "name": "GITCRAFT MaterialCraft generators",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (render check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "generated",
+   "seconds": 0.17,
+   "material": "cobblestone"
+  },
+  {
+   "stage": "weathered",
+   "seconds": 0.15
+  }
+ ],
+ "notes": [],
+ "material": {
+  "name": "cobblestone",
+  "pbrMetallicRoughness": {
+   "baseColorTexture": "cobblestone_basecolor.png",
+   "metallicRoughnessTexture": "cobblestone_orm.png",
+   "metallicFactor": 1.0,
+   "roughnessFactor": 1.0
+  },
+  "normalTexture": "cobblestone_normal.png",
+  "occlusionTexture": "cobblestone_orm.png",
+  "emissiveTexture": null,
+  "tiling_m": 2.0,
+  "three": {
+   "type": "MeshStandardMaterial",
+   "map": "cobblestone_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+   "normalMap": "cobblestone_normal.png",
+   "roughnessMap": "cobblestone_orm.png",
+   "metalnessMap": "cobblestone_orm.png",
+   "aoMap": "cobblestone_orm.png",
+   "displacementMap": "cobblestone_height16.png (optional)",
+   "emissiveMap": null
+  },
+  "averages": {
+   "basecolor_srgb": [
+    0.415,
+    0.431,
+    0.342
+   ],
+   "roughness": 0.778,
+   "metallic": 0.0
+  }
+ }
+}

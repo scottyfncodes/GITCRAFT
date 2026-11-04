@@ -21,6 +21,19 @@ if [[ "$GITCRAFT_MESHCRAFT" != none && ( "$mesh_last" == later || "$mesh_last" =
   missing+=(meshcraft forgecraft)
 fi
 
+# Studio: finish a core install that was cut off ("pending"/"failed" and not complete), and install a voice model
+# that setup deferred (GITCRAFT_STUDIO_VOICE=later) or didn't finish. A deferred voice model reaches the running
+# studiocraft server on its next call (its dependency checks only cache what was found).
+studio_last=$(python3 -c 'import json,os,sys;t=json.load(open(os.path.join(sys.argv[1],"status.json"))).get("tools",{});print(t.get("studiocraft",{}).get("state",""), t.get("studiocraft-voice",{}).get("state",""))' "$GITCRAFT_HOME" 2>/dev/null)
+read -r studio_last voice_last <<<"$studio_last"
+studio_voice=0
+if [[ "$GITCRAFT_STUDIO" == 1 ]]; then
+  if [[ "$studio_last" == pending || "$studio_last" == failed ]] && ! gitcraft_studio_ready; then missing+=(studiocraft); fi
+  if [[ "$voice_last" == later || "$voice_last" == pending ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
+    [[ " ${missing[*]} " == *" studiocraft "* ]] || missing+=(studiocraft); studio_voice=1
+  fi
+fi
+
 ((global)) || "$here/install-global.sh" >/dev/null 2>&1   # keeps ~/.gitcraft/runtime, user-scope registration and global instructions current
 
 if ((${#missing[@]} == 0)); then
@@ -38,6 +51,8 @@ else
   { echo "gitcraft: background build started $(date -u +%FT%TZ) by the $( ((global)) && echo "global " )SessionStart hook: ${missing[*]}"; } >"$GITCRAFT_LOG/install.log"
   # this hook's job is to install: a session-wide GITCRAFT_MESHCRAFT=later/0 must not make install.sh skip Blender again
   export GITCRAFT_MESHCRAFT=$([[ "$GITCRAFT_MESHCRAFT" == none ]] && echo none || echo 1)
+  # likewise a deferred voice model is installed now, not deferred again
+  [[ $studio_voice == 1 || " ${missing[*]} " == *" studiocraft "* ]] && export GITCRAFT_STUDIO_VOICE=$([[ "$GITCRAFT_STUDIO_VOICE" == 0 ]] && echo 0 || echo 1)
   if command -v flock >/dev/null; then
     setsid nohup flock -n "$lock" "$here/install.sh" "${missing[@]}" >>"$GITCRAFT_LOG/install.log" 2>&1 < /dev/null &
   else
@@ -45,4 +60,4 @@ else
   fi
   echo "GITCRAFT: building ${missing[*]} in the background (log: $GITCRAFT_LOG/install.log)."
 fi
-echo "GITCRAFT: MeshCraft and ForgeCraft announce their tools when their build finishes; other tools need /mcp."
+echo "GITCRAFT: MeshCraft and ForgeCraft announce their tools when their build finishes; a deferred voice model is picked up by studiocraft on its next call; other tools need /mcp."

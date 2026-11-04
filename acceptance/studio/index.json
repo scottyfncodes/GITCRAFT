@@ -1,0 +1,2367 @@
+{
+ "generated": "2026-11-03T22:35:28Z",
+ "commit": "c9827f2",
+ "runs": [
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "coin pickup \u00d73 variations",
+   "status": "ok",
+   "seconds": 1.0,
+   "checks": [
+    {
+     "name": "coin_01.wav is audible and unclipped",
+     "ok": true
+    },
+    {
+     "name": "coin_02.wav is audible and unclipped",
+     "ok": true
+    },
+    {
+     "name": "coin_03.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/coin/coin_01.ogg",
+    "audiocraft/coin/coin_01_waveform.png",
+    "audiocraft/coin/coin_02.ogg",
+    "audiocraft/coin/coin_02_waveform.png",
+    "audiocraft/coin/coin_03.ogg",
+    "audiocraft/coin/coin_03_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "explosion SFX",
+   "status": "ok",
+   "seconds": 0.6,
+   "checks": [
+    {
+     "name": "explosion.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/explosion/explosion.ogg",
+    "audiocraft/explosion/explosion_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "laser SFX",
+   "status": "ok",
+   "seconds": 0.5,
+   "checks": [
+    {
+     "name": "laser.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/laser/laser.ogg",
+    "audiocraft/laser/laser_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "jump SFX",
+   "status": "ok",
+   "seconds": 0.5,
+   "checks": [
+    {
+     "name": "jump.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/jump/jump.ogg",
+    "audiocraft/jump/jump_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "footstep SFX",
+   "status": "ok",
+   "seconds": 0.4,
+   "checks": [
+    {
+     "name": "footstep.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/footstep/footstep.ogg",
+    "audiocraft/footstep/footstep_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "splash SFX",
+   "status": "ok",
+   "seconds": 0.5,
+   "checks": [
+    {
+     "name": "splash.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/splash/splash.ogg",
+    "audiocraft/splash/splash_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "sfx",
+   "title": "magic SFX",
+   "status": "ok",
+   "seconds": 0.5,
+   "checks": [
+    {
+     "name": "magic.wav is audible and unclipped",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/magic/magic.ogg",
+    "audiocraft/magic/magic_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "ambience",
+   "title": "12 s seamless ocean loop (OGG LOOPSTART/LOOPLENGTH)",
+   "status": "ok",
+   "seconds": 1.1,
+   "checks": [
+    {
+     "name": "loops seamlessly",
+     "ok": true
+    },
+    {
+     "name": "duration",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/ocean_loop/ocean_loop.ogg",
+    "audiocraft/ocean_loop/ocean_loop_waveform.png"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "ambience",
+   "title": "12 s seamless forest loop",
+   "status": "ok",
+   "seconds": 1.0,
+   "checks": [
+    {
+     "name": "loops seamlessly",
+     "ok": true
+    },
+    {
+     "name": "duration",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/forest_loop/forest_loop.ogg"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "music",
+   "title": "adventure theme: mix, MIDI, adaptive layers manifest",
+   "status": "ok",
+   "seconds": 1.9,
+   "checks": [
+    {
+     "name": "loops seamlessly",
+     "ok": true
+    },
+    {
+     "name": "stems are sample-aligned",
+     "ok": true
+    },
+    {
+     "name": "length is whole bars",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/adventure_theme/adventure_theme.ogg",
+    "audiocraft/adventure_theme/adventure_theme_waveform.png",
+    "audiocraft/adventure_theme/adventure_theme.mid",
+    "audiocraft/adventure_theme/adventure_theme.layers.json"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "voice",
+   "title": "three voiced lines (Kokoro-82M, CPU)",
+   "status": "ok",
+   "seconds": 4.8,
+   "checks": [
+    {
+     "name": "captain_01: speech present and plausibly paced",
+     "ok": true
+    },
+    {
+     "name": "parrot_01: speech present and plausibly paced",
+     "ok": true
+    },
+    {
+     "name": "narrator_01: speech present and plausibly paced",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/harbour_scene/captain_01.ogg",
+    "audiocraft/harbour_scene/parrot_01.ogg",
+    "audiocraft/harbour_scene/narrator_01.ogg",
+    "audiocraft/harbour_scene/harbour_scene.dialogue.json"
+   ],
+   "tools": {
+    "kokoro": "Apache-2.0 (weights), MIT (kokoro-onnx, onnxruntime); phonemizer + espeak-ng are GPL-3.0",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "loop",
+   "title": "loop point recovered from audio with a 1.3 s intro",
+   "status": "ok",
+   "seconds": 4.3,
+   "checks": [
+    {
+     "name": "loops seamlessly",
+     "ok": true
+    },
+    {
+     "name": "loop match quality (correlation \u2265 0.5)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/theme_with_intro/theme_with_intro_marked.ogg",
+    "audiocraft/theme_with_intro/theme_with_intro.loop.json"
+   ],
+   "tools": {
+    "studio_synth": "same as GITCRAFT",
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "audiocraft",
+   "action": "process",
+   "title": "EBU R128 normalised to \u221216 LUFS",
+   "status": "ok",
+   "seconds": 1.8,
+   "checks": [
+    {
+     "name": "no clipping",
+     "ok": true
+    },
+    {
+     "name": "loudness -16 LUFS \u00b11",
+     "ok": true
+    }
+   ],
+   "files": [
+    "audiocraft/theme_-16LUFS/theme_-16LUFS.ogg"
+   ],
+   "tools": {
+    "ffmpeg": "LGPL-2.1+ (this Ubuntu build is configured --enable-gpl: GPL-2.0+)"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "terrain",
+   "title": "island terrain (tropical)",
+   "status": "ok",
+   "seconds": 3.5,
+   "checks": [
+    {
+     "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "terrain GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "heightfield has relief",
+     "ok": true
+    },
+    {
+     "name": "island/coast has land and water",
+     "ok": true
+    },
+    {
+     "name": "splat weights sum to 1",
+     "ok": true
+    },
+    {
+     "name": "coastline extracted",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/island/island_height16.png",
+    "worldcraft/island/island_splat.png",
+    "worldcraft/island/island_preview.png",
+    "worldcraft/island/island_scatter.json",
+    "worldcraft/island/island_coastline.json",
+    "worldcraft/island/island.glb",
+    "worldcraft/island/island.terrain.json",
+    "worldcraft/island/island_engine.png"
+   ],
+   "tools": {
+    "studio_world": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "terrain",
+   "title": "archipelago terrain (tropical)",
+   "status": "ok",
+   "seconds": 6.7,
+   "checks": [
+    {
+     "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "terrain GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "heightfield has relief",
+     "ok": true
+    },
+    {
+     "name": "island/coast has land and water",
+     "ok": true
+    },
+    {
+     "name": "splat weights sum to 1",
+     "ok": true
+    },
+    {
+     "name": "coastline extracted",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/archipelago/archipelago_height16.png",
+    "worldcraft/archipelago/archipelago_splat.png",
+    "worldcraft/archipelago/archipelago_preview.png",
+    "worldcraft/archipelago/archipelago.terrain.json",
+    "worldcraft/archipelago/archipelago_engine.png"
+   ],
+   "tools": {
+    "studio_world": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "terrain",
+   "title": "mountains terrain (cold)",
+   "status": "ok",
+   "seconds": 9.1,
+   "checks": [
+    {
+     "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "terrain GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "heightfield has relief",
+     "ok": true
+    },
+    {
+     "name": "terrain is all land",
+     "ok": true
+    },
+    {
+     "name": "splat weights sum to 1",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/mountains/mountains_height16.png",
+    "worldcraft/mountains/mountains_splat.png",
+    "worldcraft/mountains/mountains_preview.png",
+    "worldcraft/mountains/mountains.terrain.json",
+    "worldcraft/mountains/mountains_engine.png"
+   ],
+   "tools": {
+    "studio_world": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "terrain",
+   "title": "canyon terrain (arid)",
+   "status": "ok",
+   "seconds": 8.0,
+   "checks": [
+    {
+     "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "terrain GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "heightfield has relief",
+     "ok": true
+    },
+    {
+     "name": "terrain is all land",
+     "ok": true
+    },
+    {
+     "name": "splat weights sum to 1",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/canyon/canyon_height16.png",
+    "worldcraft/canyon/canyon_splat.png",
+    "worldcraft/canyon/canyon_preview.png",
+    "worldcraft/canyon/canyon.terrain.json",
+    "worldcraft/canyon/canyon_engine.png"
+   ],
+   "tools": {
+    "studio_world": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "caves",
+   "title": "cave system (closed surface-nets mesh)",
+   "status": "ok",
+   "seconds": 2.0,
+   "checks": [
+    {
+     "name": "cave GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "cave GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "cave surface is closed (\u226599% of edges shared by exactly two triangles)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/cave/cave.glb",
+    "worldcraft/cave/cave_engine.png",
+    "worldcraft/cave/cave_slices.png"
+   ],
+   "tools": {
+    "studio_world": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "sky",
+   "title": "sunset sky (Blender Nishita) + cubemap",
+   "status": "ok",
+   "seconds": 1.7,
+   "checks": [
+    {
+     "name": "equirect is 2:1",
+     "ok": true
+    },
+    {
+     "name": "sky is not blank",
+     "ok": true
+    },
+    {
+     "name": "cube faces are seamless at their shared edges",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/sky_sunset/sky_sunset_equirect.png",
+    "worldcraft/sky_sunset/sky_sunset_cubemap_sheet.png",
+    "worldcraft/sky_sunset/sky_sunset.sky.json"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "sky",
+   "title": "noon sky (Blender Nishita) + cubemap",
+   "status": "ok",
+   "seconds": 1.7,
+   "checks": [
+    {
+     "name": "equirect is 2:1",
+     "ok": true
+    },
+    {
+     "name": "sky is not blank",
+     "ok": true
+    },
+    {
+     "name": "cube faces are seamless at their shared edges",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/sky_noon/sky_noon_equirect.png",
+    "worldcraft/sky_noon/sky_noon_cubemap_sheet.png",
+    "worldcraft/sky_noon/sky_noon.sky.json"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "sky",
+   "title": "night sky (Blender Nishita) + cubemap",
+   "status": "ok",
+   "seconds": 2.2,
+   "checks": [
+    {
+     "name": "equirect is 2:1",
+     "ok": true
+    },
+    {
+     "name": "sky is not blank",
+     "ok": true
+    },
+    {
+     "name": "cube faces are seamless at their shared edges",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/sky_night/sky_night_equirect.png",
+    "worldcraft/sky_night/sky_night_cubemap_sheet.png",
+    "worldcraft/sky_night/sky_night.sky.json"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)"
+   },
+   "error": null
+  },
+  {
+   "department": "worldcraft",
+   "action": "ocean",
+   "title": "FFT ocean (loops in time and space)",
+   "status": "ok",
+   "seconds": 2.6,
+   "checks": [
+    {
+     "name": "ocean tile GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "ocean tile GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "loops in time (frame at t=period equals t=0)",
+     "ok": true
+    },
+    {
+     "name": "tiles in space (edge columns match)",
+     "ok": true
+    },
+    {
+     "name": "wave height matches the wind (Pierson\u2013Moskowitz)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "worldcraft/ocean/ocean_normal_flipbook.png",
+    "worldcraft/ocean/ocean.ocean.json",
+    "worldcraft/ocean/ocean_engine.png"
+   ],
+   "tools": {
+    "studio_world": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "generate",
+   "title": "cobblestone PBR material",
+   "status": "ok",
+   "seconds": 2.3,
+   "checks": [
+    {
+     "name": "material sphere: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "material sphere: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+     "ok": true
+    },
+    {
+     "name": "normal map vectors are unit length",
+     "ok": true
+    },
+    {
+     "name": "maps are in range and not flat",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/cobblestone/cobblestone_tiled2x2.png",
+    "materialcraft/cobblestone/cobblestone.material.json",
+    "materialcraft/cobblestone/cobblestone_render.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "generate",
+   "title": "rust PBR material",
+   "status": "ok",
+   "seconds": 2.1,
+   "checks": [
+    {
+     "name": "material sphere: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "material sphere: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+     "ok": true
+    },
+    {
+     "name": "normal map vectors are unit length",
+     "ok": true
+    },
+    {
+     "name": "maps are in range and not flat",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/rust/rust_tiled2x2.png",
+    "materialcraft/rust/rust.material.json",
+    "materialcraft/rust/rust_render.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "generate",
+   "title": "planks PBR material",
+   "status": "ok",
+   "seconds": 2.1,
+   "checks": [
+    {
+     "name": "material sphere: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "material sphere: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+     "ok": true
+    },
+    {
+     "name": "normal map vectors are unit length",
+     "ok": true
+    },
+    {
+     "name": "maps are in range and not flat",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/planks/planks_tiled2x2.png",
+    "materialcraft/planks/planks.material.json",
+    "materialcraft/planks/planks_render.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "generate",
+   "title": "lava PBR material",
+   "status": "ok",
+   "seconds": 2.0,
+   "checks": [
+    {
+     "name": "material sphere: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "material sphere: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+     "ok": true
+    },
+    {
+     "name": "normal map vectors are unit length",
+     "ok": true
+    },
+    {
+     "name": "maps are in range and not flat",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/lava/lava_tiled2x2.png",
+    "materialcraft/lava/lava.material.json",
+    "materialcraft/lava/lava_render.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "generate",
+   "title": "brick PBR material",
+   "status": "ok",
+   "seconds": 2.0,
+   "checks": [
+    {
+     "name": "material sphere: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "material sphere: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+     "ok": true
+    },
+    {
+     "name": "normal map vectors are unit length",
+     "ok": true
+    },
+    {
+     "name": "maps are in range and not flat",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/brick/brick_tiled2x2.png",
+    "materialcraft/brick/brick.material.json",
+    "materialcraft/brick/brick_render.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "generate",
+   "title": "ice PBR material",
+   "status": "ok",
+   "seconds": 2.0,
+   "checks": [
+    {
+     "name": "material sphere: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "material sphere: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+     "ok": true
+    },
+    {
+     "name": "normal map vectors are unit length",
+     "ok": true
+    },
+    {
+     "name": "maps are in range and not flat",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/ice/ice_tiled2x2.png",
+    "materialcraft/ice/ice.material.json",
+    "materialcraft/ice/ice_render.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "materialcraft",
+   "action": "library",
+   "title": "all 21 materials",
+   "status": "ok",
+   "seconds": 1.0,
+   "checks": [
+    {
+     "name": "every material generated",
+     "ok": true
+    }
+   ],
+   "files": [
+    "materialcraft/swatches/swatches.png"
+   ],
+   "tools": {
+    "studio_materials": "same as GITCRAFT"
+   },
+   "error": null
+  },
+  {
+   "department": "levelcraft",
+   "action": "generate",
+   "title": "dungeon level (Tiled + Phaser check + blockout)",
+   "status": "ok",
+   "seconds": 3.1,
+   "checks": [
+    {
+     "name": "exit reachable from start",
+     "ok": true
+    },
+    {
+     "name": "every floor tile connected",
+     "ok": true
+    },
+    {
+     "name": "no entity inside a wall",
+     "ok": true
+    },
+    {
+     "name": "collision rectangles cover exactly the solid tiles",
+     "ok": true
+    },
+    {
+     "name": "loads in Phaser 3 (tilemap, tileset, object layers, solid-tile collision)",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "levelcraft/dungeon/dungeon.tmj",
+    "levelcraft/dungeon/dungeon_tileset.png",
+    "levelcraft/dungeon/dungeon_preview.png",
+    "levelcraft/dungeon/dungeon_phaser.png",
+    "levelcraft/dungeon/dungeon_blockout.png"
+   ],
+   "tools": {
+    "studio_levels": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "phaser": "MIT",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "levelcraft",
+   "action": "generate",
+   "title": "cave level (Tiled + Phaser check + blockout)",
+   "status": "ok",
+   "seconds": 3.3,
+   "checks": [
+    {
+     "name": "exit reachable from start",
+     "ok": true
+    },
+    {
+     "name": "every floor tile connected",
+     "ok": true
+    },
+    {
+     "name": "no entity inside a wall",
+     "ok": true
+    },
+    {
+     "name": "collision rectangles cover exactly the solid tiles",
+     "ok": true
+    },
+    {
+     "name": "loads in Phaser 3 (tilemap, tileset, object layers, solid-tile collision)",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "levelcraft/cave/cave.tmj",
+    "levelcraft/cave/cave_tileset.png",
+    "levelcraft/cave/cave_preview.png",
+    "levelcraft/cave/cave_phaser.png",
+    "levelcraft/cave/cave_blockout.png"
+   ],
+   "tools": {
+    "studio_levels": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "phaser": "MIT",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "levelcraft",
+   "action": "generate",
+   "title": "platformer level (Tiled + Phaser check + blockout)",
+   "status": "ok",
+   "seconds": 3.1,
+   "checks": [
+    {
+     "name": "completable: exit reachable with jump 4\u00d75 tiles",
+     "ok": true
+    },
+    {
+     "name": "checkpoints reachable",
+     "ok": true
+    },
+    {
+     "name": "collision rectangles cover exactly the solid tiles",
+     "ok": true
+    },
+    {
+     "name": "loads in Phaser 3 (tilemap, tileset, object layers, solid-tile collision)",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "levelcraft/platformer/platformer.tmj",
+    "levelcraft/platformer/platformer_tileset.png",
+    "levelcraft/platformer/platformer_preview.png",
+    "levelcraft/platformer/platformer_phaser.png",
+    "levelcraft/platformer/platformer_blockout.png"
+   ],
+   "tools": {
+    "studio_levels": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "phaser": "MIT",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "levelcraft",
+   "action": "generate",
+   "title": "overworld level (Tiled + Phaser check + blockout)",
+   "status": "ok",
+   "seconds": 4.1,
+   "checks": [
+    {
+     "name": "every settlement connected by road",
+     "ok": true
+    },
+    {
+     "name": "has settlements",
+     "ok": true
+    },
+    {
+     "name": "collision rectangles cover exactly the solid tiles",
+     "ok": true
+    },
+    {
+     "name": "loads in Phaser 3 (tilemap, tileset, object layers, solid-tile collision)",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "levelcraft/overworld/overworld.tmj",
+    "levelcraft/overworld/overworld_tileset.png",
+    "levelcraft/overworld/overworld_preview.png",
+    "levelcraft/overworld/overworld_phaser.png",
+    "levelcraft/overworld/overworld_blockout.png"
+   ],
+   "tools": {
+    "studio_levels": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "phaser": "MIT",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "levelcraft",
+   "action": "generate",
+   "title": "settlement level (Tiled + Phaser check + blockout)",
+   "status": "ok",
+   "seconds": 3.2,
+   "checks": [
+    {
+     "name": "every building door reaches the plaza by road",
+     "ok": true
+    },
+    {
+     "name": "collision rectangles cover exactly the solid tiles",
+     "ok": true
+    },
+    {
+     "name": "loads in Phaser 3 (tilemap, tileset, object layers, solid-tile collision)",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "blockout GLB: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "levelcraft/settlement/settlement.tmj",
+    "levelcraft/settlement/settlement_tileset.png",
+    "levelcraft/settlement/settlement_preview.png",
+    "levelcraft/settlement/settlement_phaser.png",
+    "levelcraft/settlement/settlement_blockout.png"
+   ],
+   "tools": {
+    "studio_levels": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "phaser": "MIT",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "fire flipbook",
+   "status": "ok",
+   "seconds": 1.3,
+   "checks": [
+    {
+     "name": "every frame has visible content",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "loops exactly (frame N equals frame 0)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/fire/fire_flipbook.png",
+    "fxcraft/fire/fire_flipbook.json",
+    "fxcraft/fire/fire_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "smoke flipbook",
+   "status": "ok",
+   "seconds": 1.2,
+   "checks": [
+    {
+     "name": "every frame has visible content",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "loops exactly (frame N equals frame 0)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/smoke/smoke_flipbook.png",
+    "fxcraft/smoke/smoke_flipbook.json",
+    "fxcraft/smoke/smoke_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "magic flipbook",
+   "status": "ok",
+   "seconds": 1.7,
+   "checks": [
+    {
+     "name": "every frame has visible content",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "loops exactly (frame N equals frame 0)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/magic/magic_flipbook.png",
+    "fxcraft/magic/magic_flipbook.json",
+    "fxcraft/magic/magic_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "energy flipbook",
+   "status": "ok",
+   "seconds": 1.4,
+   "checks": [
+    {
+     "name": "every frame has visible content",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "loops exactly (frame N equals frame 0)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/energy/energy_flipbook.png",
+    "fxcraft/energy/energy_flipbook.json",
+    "fxcraft/energy/energy_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "explosion flipbook",
+   "status": "ok",
+   "seconds": 0.8,
+   "checks": [
+    {
+     "name": "effect is visible (peak frame alpha)",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "one-shot fades out (last frame \u2264 25% of peak alpha)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/explosion/explosion_flipbook.png",
+    "fxcraft/explosion/explosion_flipbook.json",
+    "fxcraft/explosion/explosion_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "sparks flipbook",
+   "status": "ok",
+   "seconds": 0.9,
+   "checks": [
+    {
+     "name": "effect is visible (peak frame alpha)",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "one-shot fades out (last frame \u2264 25% of peak alpha)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/sparks/sparks_flipbook.png",
+    "fxcraft/sparks/sparks_flipbook.json",
+    "fxcraft/sparks/sparks_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "dust flipbook",
+   "status": "ok",
+   "seconds": 0.7,
+   "checks": [
+    {
+     "name": "effect is visible (peak frame alpha)",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "one-shot fades out (last frame \u2264 25% of peak alpha)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/dust/dust_flipbook.png",
+    "fxcraft/dust/dust_flipbook.json",
+    "fxcraft/dust/dust_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "splash flipbook",
+   "status": "ok",
+   "seconds": 0.7,
+   "checks": [
+    {
+     "name": "effect is visible (peak frame alpha)",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "one-shot fades out (last frame \u2264 25% of peak alpha)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/splash/splash_flipbook.png",
+    "fxcraft/splash/splash_flipbook.json",
+    "fxcraft/splash/splash_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "lightning flipbook",
+   "status": "ok",
+   "seconds": 0.8,
+   "checks": [
+    {
+     "name": "effect is visible (peak frame alpha)",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "one-shot fades out (last frame \u2264 25% of peak alpha)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/lightning/lightning_flipbook.png",
+    "fxcraft/lightning/lightning_flipbook.json",
+    "fxcraft/lightning/lightning_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "flipbook",
+   "title": "snow flipbook",
+   "status": "ok",
+   "seconds": 1.3,
+   "checks": [
+    {
+     "name": "every frame has visible content",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "loops exactly (frame N equals frame 0)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/snow/snow_flipbook.png",
+    "fxcraft/snow/snow_flipbook.json",
+    "fxcraft/snow/snow_preview.gif"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "emitter",
+   "title": "torch emitter played in three.js",
+   "status": "ok",
+   "seconds": 2.8,
+   "checks": [
+    {
+     "name": "every frame has visible content",
+     "ok": true
+    },
+    {
+     "name": "frames animate (consecutive frames differ)",
+     "ok": true
+    },
+    {
+     "name": "loops exactly (frame N equals frame 0)",
+     "ok": true
+    },
+    {
+     "name": "plays in three.js r170 with fxcraft-particles.js (particles alive, pixels drawn)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/torch/torch_flipbook.png",
+    "fxcraft/torch/torch.fx.json",
+    "fxcraft/torch/fxcraft-particles.js",
+    "fxcraft/torch/torch_engine.png"
+   ],
+   "tools": {
+    "studio_fx": "same as GITCRAFT",
+    "numpy": "BSD-3-Clause",
+    "ffmpeg": "LGPL/GPL",
+    "three": "MIT"
+   },
+   "error": null
+  },
+  {
+   "department": "fxcraft",
+   "action": "destruction",
+   "title": "crate Voronoi destruction with physics",
+   "status": "ok",
+   "seconds": 4.8,
+   "checks": [
+    {
+     "name": "destruction GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "destruction GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "fractured into 14 pieces (\u00b130%)",
+     "ok": true
+    },
+    {
+     "name": "pieces fly apart (bounds grow in the simulation)",
+     "ok": true
+    },
+    {
+     "name": "animation exported",
+     "ok": true
+    }
+   ],
+   "files": [
+    "fxcraft/crate_shatter/crate_shatter.glb",
+    "fxcraft/crate_shatter/crate_shatter_contact.png",
+    "fxcraft/crate_shatter/crate_shatter_engine.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "demo_character",
+   "title": "demo humanoid mesh",
+   "status": "ok",
+   "seconds": 2.3,
+   "checks": [
+    {
+     "name": "demo mesh: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "demo mesh: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/hero_mesh/hero_mesh.glb"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "autorig",
+   "title": "auto-rig (heat weights)",
+   "status": "ok",
+   "seconds": 2.5,
+   "checks": [
+    {
+     "name": "rigged GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "rigged GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "skinned (glTF skin with joints)",
+     "ok": true
+    },
+    {
+     "name": "every vertex is weighted to a bone",
+     "ok": true
+    },
+    {
+     "name": "every bone influences the mesh",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/hero_rig/hero_rig.glb",
+    "animcraft/hero_rig/hero_rig_engine.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "animate",
+   "title": "5 clips, each verified moving in three.js",
+   "status": "ok",
+   "seconds": 27.8,
+   "checks": [
+    {
+     "name": "Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "clip 'idle' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "clip 'jump' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "clip 'run' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "clip 'walk' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "clip 'wave' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "every requested clip exported",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/hero_anim/hero_anim.glb",
+    "animcraft/hero_anim/hero_anim_clips.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "demo_character",
+   "title": "1.2 m demo humanoid",
+   "status": "ok",
+   "seconds": 2.5,
+   "checks": [
+    {
+     "name": "demo mesh: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "demo mesh: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/kid_mesh/kid_mesh.glb"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "autorig",
+   "title": "Mixamo-named rig",
+   "status": "ok",
+   "seconds": 2.7,
+   "checks": [
+    {
+     "name": "rigged GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "rigged GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "skinned (glTF skin with joints)",
+     "ok": true
+    },
+    {
+     "name": "every vertex is weighted to a bone",
+     "ok": true
+    },
+    {
+     "name": "every bone influences the mesh",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/kid_mixamo/kid_mixamo.glb"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "retarget",
+   "title": "walk retargeted 1.8 m \u2192 1.2 m across bone naming schemes",
+   "status": "ok",
+   "seconds": 6.7,
+   "checks": [
+    {
+     "name": "Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "core bones mapped (\u2265 10)",
+     "ok": true
+    },
+    {
+     "name": "clip 'walk' plays in three.js r170 (model moves)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/kid_walk/kid_walk.glb",
+    "animcraft/kid_walk/kid_walk_clips.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "spritesheet",
+   "title": "4-direction walk sprite sheets",
+   "status": "ok",
+   "seconds": 6.1,
+   "checks": [
+    {
+     "name": "walk_dir0: no empty frames",
+     "ok": true
+    },
+    {
+     "name": "walk_dir0: frames animate",
+     "ok": true
+    },
+    {
+     "name": "walk_dir1: no empty frames",
+     "ok": true
+    },
+    {
+     "name": "walk_dir1: frames animate",
+     "ok": true
+    },
+    {
+     "name": "walk_dir2: no empty frames",
+     "ok": true
+    },
+    {
+     "name": "walk_dir2: frames animate",
+     "ok": true
+    },
+    {
+     "name": "walk_dir3: no empty frames",
+     "ok": true
+    },
+    {
+     "name": "walk_dir3: frames animate",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/hero/hero_walk_dir0.png",
+    "animcraft/hero/hero_walk_dir0.json",
+    "animcraft/hero/hero_walk_dir0.gif",
+    "animcraft/hero/hero_walk_dir1.png",
+    "animcraft/hero/hero_walk_dir1.json",
+    "animcraft/hero/hero_walk_dir1.gif",
+    "animcraft/hero/hero_walk_dir2.png",
+    "animcraft/hero/hero_walk_dir2.json",
+    "animcraft/hero/hero_walk_dir2.gif",
+    "animcraft/hero/hero_walk_dir3.png",
+    "animcraft/hero/hero_walk_dir3.json",
+    "animcraft/hero/hero_walk_dir3.gif"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "demo_character",
+   "title": "demo quadruped",
+   "status": "ok",
+   "seconds": 2.5,
+   "checks": [
+    {
+     "name": "demo mesh: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "demo mesh: loads and renders in three.js r170",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/dog_mesh/dog_mesh.glb"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "autorig",
+   "title": "quadruped rig",
+   "status": "ok",
+   "seconds": 2.6,
+   "checks": [
+    {
+     "name": "rigged GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "rigged GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "skinned (glTF skin with joints)",
+     "ok": true
+    },
+    {
+     "name": "every vertex is weighted to a bone",
+     "ok": true
+    },
+    {
+     "name": "every bone influences the mesh",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/dog_rig/dog_rig.glb"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "animate",
+   "title": "quadruped walk + idle",
+   "status": "ok",
+   "seconds": 12.1,
+   "checks": [
+    {
+     "name": "Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "clip 'idle' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "clip 'walk' plays in three.js r170 (model moves)",
+     "ok": true
+    },
+    {
+     "name": "every requested clip exported",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/dog_anim/dog_anim.glb",
+    "animcraft/dog_anim/dog_anim_clips.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "animcraft",
+   "action": "physics",
+   "title": "rigid-body drop",
+   "status": "ok",
+   "seconds": 2.5,
+   "checks": [
+    {
+     "name": "physics GLB: Khronos glTF-Validator, 0 errors",
+     "ok": true
+    },
+    {
+     "name": "physics GLB: loads and renders in three.js r170",
+     "ok": true
+    },
+    {
+     "name": "bodies fell and came to rest on the ground (not through it)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "animcraft/drop/drop.glb",
+    "animcraft/drop/drop_engine.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (outputs are not covered)",
+    "three": "MIT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "cinematiccraft",
+   "action": "title_card",
+   "title": "animated title card",
+   "status": "ok",
+   "seconds": 9.7,
+   "checks": [
+    {
+     "name": "duration 3 s",
+     "ok": true
+    },
+    {
+     "name": "title is legible on the still (contrast)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "cinematiccraft/title/title.mp4",
+    "cinematiccraft/title/title.png"
+   ],
+   "tools": {
+    "studio_cine": "same as GITCRAFT",
+    "ffmpeg": "GPL-2.0+ build (x264 is GPL)"
+   },
+   "error": null
+  },
+  {
+   "department": "cinematiccraft",
+   "action": "shot",
+   "title": "golden-hour island orbit (Cycles) + camera path",
+   "status": "ok",
+   "seconds": 87.5,
+   "checks": [
+    {
+     "name": "video is 3 s (\u00b11 frame)",
+     "ok": true
+    },
+    {
+     "name": "the camera moves (frames change)",
+     "ok": true
+    },
+    {
+     "name": "camera path has a key per frame",
+     "ok": true
+    },
+    {
+     "name": "first frame is not blank",
+     "ok": true
+    }
+   ],
+   "files": [
+    "cinematiccraft/island_orbit/island_orbit.mp4",
+    "cinematiccraft/island_orbit/island_orbit.camera.json",
+    "cinematiccraft/island_orbit/island_orbit_contact.png"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (renders are not covered)",
+    "ffmpeg": "GPL-2.0+ build (x264 is GPL)"
+   },
+   "error": null
+  },
+  {
+   "department": "cinematiccraft",
+   "action": "storyboard",
+   "title": "storyboard sheet",
+   "status": "ok",
+   "seconds": 4.0,
+   "checks": [
+    {
+     "name": "3 panels",
+     "ok": true
+    },
+    {
+     "name": "panels are not blank",
+     "ok": true
+    }
+   ],
+   "files": [
+    "cinematiccraft/storyboard/storyboard.png",
+    "cinematiccraft/storyboard/storyboard.pdf"
+   ],
+   "tools": {
+    "blender": "GPL-2.0-or-later (renders are not covered)"
+   },
+   "error": null
+  },
+  {
+   "department": "cinematiccraft",
+   "action": "assemble",
+   "title": "teaser: title \u2192 orbit \u2192 map, music bed",
+   "status": "ok",
+   "seconds": 5.6,
+   "checks": [
+    {
+     "name": "length \u2248 7.00 s",
+     "ok": true
+    },
+    {
+     "name": "resolution 1280\u00d7720",
+     "ok": true
+    },
+    {
+     "name": "has an audio track",
+     "ok": true
+    }
+   ],
+   "files": [
+    "cinematiccraft/teaser/teaser.mp4",
+    "cinematiccraft/teaser/teaser_poster.png"
+   ],
+   "tools": {
+    "ffmpeg": "GPL-2.0+ build (x264 is GPL)"
+   },
+   "error": null
+  },
+  {
+   "department": "cinematiccraft",
+   "action": "capture",
+   "title": "gameplay capture of the fixture game",
+   "status": "ok",
+   "seconds": 4.9,
+   "checks": [
+    {
+     "name": "capture recorded",
+     "ok": true
+    },
+    {
+     "name": "no page errors",
+     "ok": true
+    }
+   ],
+   "files": [
+    "cinematiccraft/gameplay/gameplay.mp4"
+   ],
+   "tools": {
+    "playwright": "Apache-2.0 / BSD",
+    "ffmpeg": "GPL-2.0+ build (x264 is GPL)"
+   },
+   "error": null
+  },
+  {
+   "department": "testcraft",
+   "action": "smoke",
+   "title": "smoke test on desktop, phone, tablet",
+   "status": "ok",
+   "seconds": 13.0,
+   "checks": [
+    {
+     "name": "desktop: no page errors",
+     "ok": true
+    },
+    {
+     "name": "desktop: no console errors",
+     "ok": true
+    },
+    {
+     "name": "desktop: no missing files",
+     "ok": true
+    },
+    {
+     "name": "desktop: renders something (not a blank screen)",
+     "ok": true
+    },
+    {
+     "name": "desktop: no horizontal overflow",
+     "ok": true
+    },
+    {
+     "name": "desktop: has a sized canvas",
+     "ok": true
+    },
+    {
+     "name": "phone: no page errors",
+     "ok": true
+    },
+    {
+     "name": "phone: no console errors",
+     "ok": true
+    },
+    {
+     "name": "phone: no missing files",
+     "ok": true
+    },
+    {
+     "name": "phone: renders something (not a blank screen)",
+     "ok": true
+    },
+    {
+     "name": "phone: no horizontal overflow",
+     "ok": true
+    },
+    {
+     "name": "phone: has a sized canvas",
+     "ok": true
+    },
+    {
+     "name": "tablet: no page errors",
+     "ok": true
+    },
+    {
+     "name": "tablet: no console errors",
+     "ok": true
+    },
+    {
+     "name": "tablet: no missing files",
+     "ok": true
+    },
+    {
+     "name": "tablet: renders something (not a blank screen)",
+     "ok": true
+    },
+    {
+     "name": "tablet: no horizontal overflow",
+     "ok": true
+    },
+    {
+     "name": "tablet: has a sized canvas",
+     "ok": true
+    }
+   ],
+   "files": [
+    "testcraft/smoke/desktop_loaded.png",
+    "testcraft/smoke/phone_loaded.png",
+    "testcraft/smoke/tablet_loaded.png",
+    "testcraft/smoke/smoke_report.html"
+   ],
+   "tools": {
+    "playwright": "Apache-2.0",
+    "chromium": "BSD-3-Clause"
+   },
+   "error": null
+  },
+  {
+   "department": "testcraft",
+   "action": "play",
+   "title": "scripted gameplay with state assertions",
+   "status": "ok",
+   "seconds": 6.3,
+   "checks": [
+    {
+     "name": "desktop: no page errors during play",
+     "ok": true
+    },
+    {
+     "name": "desktop: collects both coins",
+     "ok": true
+    },
+    {
+     "name": "desktop: the wall blocks the player (collision)",
+     "ok": true
+    },
+    {
+     "name": "desktop: the screen changed while playing (game responds)",
+     "ok": true
+    }
+   ],
+   "files": [
+    "testcraft/play/desktop_after_move.png",
+    "testcraft/play/play_report.html"
+   ],
+   "tools": {
+    "playwright": "Apache-2.0",
+    "chromium": "BSD-3-Clause"
+   },
+   "error": null
+  },
+  {
+   "department": "testcraft",
+   "action": "perf",
+   "title": "FPS / frame-time profile",
+   "status": "ok",
+   "seconds": 5.2,
+   "checks": [
+    {
+     "name": "desktop: average FPS \u2265 30",
+     "ok": true
+    },
+    {
+     "name": "desktop: p95 frame time \u2264 50 ms",
+     "ok": true
+    },
+    {
+     "name": "desktop: no page errors",
+     "ok": true
+    }
+   ],
+   "files": [
+    "testcraft/perf/perf_report.html"
+   ],
+   "tools": {
+    "playwright": "Apache-2.0",
+    "chromium": "BSD-3-Clause"
+   },
+   "error": null
+  },
+  {
+   "department": "testcraft",
+   "action": "assets",
+   "title": "asset integrity of every WorldCraft output",
+   "status": "ok",
+   "seconds": 1.1,
+   "checks": [
+    {
+     "name": "102 assets open and validate",
+     "ok": true
+    }
+   ],
+   "files": [
+    "testcraft/world_assets/world_assets_report.html"
+   ],
+   "tools": {
+    "studio_testcraft": "same as GITCRAFT",
+    "gltf_validator": "Apache-2.0"
+   },
+   "error": null
+  },
+  {
+   "department": "assetcraft",
+   "action": "scan",
+   "title": "catalogue every acceptance output",
+   "status": "ok",
+   "seconds": 5.8,
+   "checks": [
+    {
+     "name": "assets catalogued",
+     "ok": true
+    },
+    {
+     "name": "every asset opens as its format",
+     "ok": true
+    }
+   ],
+   "files": [
+    "assetcraft/scan/scan.json"
+   ],
+   "tools": {},
+   "error": null
+  },
+  {
+   "department": "assetcraft",
+   "action": "license_report",
+   "title": "licence inventory + ATTRIBUTION.md",
+   "status": "ok",
+   "seconds": 0.1,
+   "checks": [
+    {
+     "name": "no non-commercial / no-derivatives assets",
+     "ok": true
+    },
+    {
+     "name": "every asset has a licence",
+     "ok": true
+    }
+   ],
+   "files": [
+    "assetcraft/licenses/licenses.json",
+    "assetcraft/licenses/ATTRIBUTION.md"
+   ],
+   "tools": {},
+   "error": null
+  },
+  {
+   "department": "assetcraft",
+   "action": "catalog_page",
+   "title": "browsable HTML catalogue",
+   "status": "ok",
+   "seconds": 0.1,
+   "checks": [
+    {
+     "name": "assets listed",
+     "ok": true
+    }
+   ],
+   "files": [
+    "assetcraft/catalog/catalog.html"
+   ],
+   "tools": {},
+   "error": null
+  }
+ ]
+}

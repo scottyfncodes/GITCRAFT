@@ -1,0 +1,32 @@
+{
+ "name": "brick",
+ "pbrMetallicRoughness": {
+  "baseColorTexture": "brick_basecolor.png",
+  "metallicRoughnessTexture": "brick_orm.png",
+  "metallicFactor": 1.0,
+  "roughnessFactor": 1.0
+ },
+ "normalTexture": "brick_normal.png",
+ "occlusionTexture": "brick_orm.png",
+ "emissiveTexture": null,
+ "tiling_m": 2.0,
+ "three": {
+  "type": "MeshStandardMaterial",
+  "map": "brick_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+  "normalMap": "brick_normal.png",
+  "roughnessMap": "brick_orm.png",
+  "metalnessMap": "brick_orm.png",
+  "aoMap": "brick_orm.png",
+  "displacementMap": "brick_height16.png (optional)",
+  "emissiveMap": null
+ },
+ "averages": {
+  "basecolor_srgb": [
+   0.605,
+   0.37,
+   0.245
+  ],
+  "roughness": 0.8,
+  "metallic": 0.0
+ }
+}

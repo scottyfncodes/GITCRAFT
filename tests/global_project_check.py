@@ -44,8 +44,8 @@ before_checkout = subprocess.run(["git", "-C", checkout, "status", "--porcelain"
 
 # --- discovery: every registered server answers from the other project, none of them launched from a checkout
 names = sorted(n for n, s in servers.items() if str(s.get("command", "")).endswith("/scripts/mcp.sh"))
-check("nine GITCRAFT servers registered at user scope", set(names) >= {"photocraft", "vectorcraft", "designcraft", "pdfcraft", "lightcraft", "filmcraft",
-                                                                      "effectcraft", "meshcraft", "forgecraft"}, names)
+check("ten GITCRAFT servers registered at user scope", set(names) >= {"photocraft", "vectorcraft", "designcraft", "pdfcraft", "lightcraft", "filmcraft",
+                                                                     "effectcraft", "meshcraft", "forgecraft", "studiocraft"}, names)
 check("registered commands live in ~/.gitcraft/runtime, not in a GITCRAFT checkout",
       all("/.gitcraft/runtime/" in servers[n]["command"] and not servers[n]["command"].startswith(checkout + "/") for n in names),
       {n: servers[n]["command"] for n in names})

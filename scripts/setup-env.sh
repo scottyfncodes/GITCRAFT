@@ -11,8 +11,8 @@
 # session in every project inherits it. Re-run it to update.
 #
 # What it does: clones GITCRAFT to ~/.gitcraft/repo, installs the seven ArtCraft tools
-# (prebuilt), MeshCraft (Blender bpy) and ForgeCraft, copies the launcher and tool code to
-# ~/.gitcraft/runtime, registers all nine MCP servers at user scope from that runtime,
+# (prebuilt), the Studio departments (StudioCraft), MeshCraft (Blender bpy) and ForgeCraft, copies the
+# launcher and tool code to ~/.gitcraft/runtime, registers all ten MCP servers at user scope from that runtime,
 # installs the GITCRAFT instruction block in ~/.claude/CLAUDE.md and the `gitcraft` skill,
 # then prints a health check.
 #
@@ -20,6 +20,8 @@
 #   GITCRAFT_REPO_URL=<url|path>      install from a fork or local clone
 #   GITCRAFT_GLOBAL_INSTRUCTIONS=0    skip the CLAUDE.md block and the skill
 #   GITCRAFT_MESHCRAFT=0              skip the 3D tools (Blender is ~400 MB)
+#   GITCRAFT_STUDIO=0                 skip the Studio departments
+#   GITCRAFT_STUDIO_VOICE=later|0     voice model in the background at the first session / not at all
 #   extra arguments go to install.sh  (e.g. --update, or tool names)
 set -uo pipefail
 repo_url="${GITCRAFT_REPO_URL:-https://github.com/scottyfncodes/GITCRAFT}"

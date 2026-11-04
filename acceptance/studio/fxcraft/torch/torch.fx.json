@@ -1,0 +1,55 @@
+{
+ "format": "gitcraft-fx/1",
+ "effect": "fire",
+ "blending": "additive",
+ "max_particles": 256,
+ "flipbook": {
+  "image": "torch_flipbook.png",
+  "frames": 32,
+  "cols": 6,
+  "rows": 6,
+  "frame_width": 128,
+  "frame_height": 128,
+  "fps": 24,
+  "loop": true,
+  "blending": "additive",
+  "alpha": "straight (not premultiplied)"
+ },
+ "emitter": {
+  "rate": 26,
+  "lifetime": [
+   0.6,
+   1.0
+  ],
+  "speed": [
+   0.6,
+   1.1
+  ],
+  "direction": [
+   0,
+   1,
+   0
+  ],
+  "spread_deg": 12,
+  "gravity": [
+   0,
+   0.6,
+   0
+  ],
+  "size": [
+   0.9,
+   0.4
+  ],
+  "alpha": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "area": [
+   0.25,
+   0.05,
+   0.25
+  ]
+ },
+ "runtime": "fxcraft-particles.js (three.js) \u2014 or read this JSON in any engine: emitter = spawn rules, flipbook = atlas animation"
+}

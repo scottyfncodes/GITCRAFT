@@ -1,0 +1,420 @@
+{
+ "department": "worldcraft",
+ "action": "terrain",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "worldcraft/archipelago",
+ "request": {
+  "preset": "archipelago",
+  "climate": "tropical",
+  "seed": 7,
+  "name": "archipelago",
+  "out_dir": "(acceptance)",
+  "resolution": 257,
+  "mesh_resolution": 129,
+  "roughness": 0.5,
+  "erosion": 12,
+  "erosion_strength": 0.5,
+  "thermal": 20,
+  "vegetation": 1.0,
+  "tree_spacing": 6,
+  "rocks": 0.6,
+  "rock_spacing": 10
+ },
+ "created": "2026-11-03T22:30:38+00:00",
+ "seconds": 6.49,
+ "outputs": [
+  {
+   "path": "archipelago_height16.png",
+   "role": "heightmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "I;16",
+   "sha256": "a42754033d8a403c5fe7d856827b199b38b5d6341132be5b73aa247cbaf34ec9",
+   "bytes": 98181
+  },
+  {
+   "path": "archipelago_normal.png",
+   "role": "normal_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "713daacd641293cab4a9d551a15586ac662be767e527c096cb9d7dec21f60102",
+   "bytes": 39528
+  },
+  {
+   "path": "archipelago_splat.png",
+   "role": "splatmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGBA",
+   "sha256": "1e10bbdc29a98d59033f7904c1adb7480d16218a6bb6e63bee51bae3fdffb933",
+   "bytes": 8084
+  },
+  {
+   "path": "archipelago_biomes.png",
+   "role": "biome_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "41c1df39212ce639fbaa8354fae0e050c4d1754d8a31399865cc197f9272c8d8",
+   "bytes": 34759
+  },
+  {
+   "path": "archipelago_preview.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "fc140336b73acd678f8b07099fe85c491205a552c3257349e94267a2a3ce43a0",
+   "bytes": 42073
+  },
+  {
+   "path": "masks/archipelago_water.png",
+   "role": "mask:water",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "73510ab501b82707f6cde1ed3067168c9ef050bcc382459aefc1011f4c12221a",
+   "bytes": 1372
+  },
+  {
+   "path": "masks/archipelago_cliff.png",
+   "role": "mask:cliff",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "18e6a77263bf6c2830ae3b7adf7803d15cc36b02746f207d82b4f4e341ea2a56",
+   "bytes": 143
+  },
+  {
+   "path": "masks/archipelago_beach.png",
+   "role": "mask:beach",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "a3df717b3a0bc96b4a656ac2edc74d739896fa993d19085d90f6add836b4842c",
+   "bytes": 1454
+  },
+  {
+   "path": "masks/archipelago_forest.png",
+   "role": "mask:forest",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "ff087d8584d9ddef7492c562fc156aa390cf5dfbe137ca04c9b10996f927ef2e",
+   "bytes": 969
+  },
+  {
+   "path": "masks/archipelago_moisture.png",
+   "role": "mask:moisture",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "e9338af234439797e0371863bbfb15c5c28732a5c8d506904572293dd5da82e9",
+   "bytes": 10677
+  },
+  {
+   "path": "masks/archipelago_slope.png",
+   "role": "mask:slope",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "8aa6322b43e8adb32782fe861f384a6c770a7d3202b40a06684982151556eb67",
+   "bytes": 27746
+  },
+  {
+   "path": "archipelago_scatter.json",
+   "role": "scatter",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "rocks",
+    "units",
+    "vegetation"
+   ],
+   "sha256": "a787fbb8049c4882e121fc5d9cf8f9526edc2da4f9eed1ce8577bf7aad8806b6",
+   "bytes": 215230
+  },
+  {
+   "path": "archipelago_coastline.json",
+   "role": "coastline",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "polylines",
+    "units"
+   ],
+   "sha256": "359df227c800d6510ca5d446ed457c7523c0e330429ee5e0a25127a1c268876d",
+   "bytes": 17897
+  },
+  {
+   "path": "archipelago.glb",
+   "role": "mesh",
+   "format": "glb",
+   "ok": true,
+   "meshes": 2,
+   "nodes": 2,
+   "triangles": 32770,
+   "animations": [],
+   "materials": 2,
+   "sha256": "a51a8c3d9d165625ba3cccf1e254a142a8d2de3991616c2f11add762016430a1",
+   "bytes": 930908
+  },
+  {
+   "path": "archipelago.terrain.json",
+   "role": "manifest",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "biome_cells",
+    "biomes",
+    "height_scale_m",
+    "heightmap",
+    "land_fraction",
+    "preset",
+    "resolution",
+    "rocks",
+    "sea_level",
+    "sea_level_height_m",
+    "seed",
+    "splat_channels",
+    "vegetation",
+    "world_size_m"
+   ],
+   "sha256": "b81fd636738664b66c99909790c4b841caab2def3d17a28897bbe94346843f82",
+   "bytes": 1044
+  },
+  {
+   "path": "archipelago_engine.png",
+   "role": "engine_screenshot",
+   "format": "png",
+   "ok": true,
+   "width": 800,
+   "height": 600,
+   "mode": "RGB",
+   "sha256": "e2c9d7154f4608b5d41169bd330eae0e16adec8f333e70437ff05347c6e2e530",
+   "bytes": 48549
+  }
+ ],
+ "checks": [
+  {
+   "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 0,
+    "first": [
+     "INFO UNUSED_OBJECT: This object may be unused. @ /meshes/0/primitives/0/attributes/TEXCOORD_0"
+    ]
+   }
+  },
+  {
+   "name": "terrain GLB: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 2,
+    "triangles": 32770,
+    "errors": null
+   }
+  },
+  {
+   "name": "heightfield has relief",
+   "ok": true,
+   "detail": 0.154
+  },
+  {
+   "name": "island/coast has land and water",
+   "ok": true,
+   "detail": 0.144
+  },
+  {
+   "name": "splat weights sum to 1",
+   "ok": true
+  },
+  {
+   "name": "coastline extracted",
+   "ok": true,
+   "detail": 5
+  }
+ ],
+ "tools": {
+  "studio_world": {
+   "name": "GITCRAFT WorldCraft generators (noise, erosion, biomes, scatter, surface nets, FFT ocean)",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (engine check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "base shape",
+   "seconds": 0.22,
+   "preset": "archipelago"
+  },
+  {
+   "stage": "eroded",
+   "seconds": 0.29,
+   "iterations": 12
+  },
+  {
+   "stage": "biomes",
+   "seconds": 0.05
+  },
+  {
+   "stage": "scatter",
+   "seconds": 4.48,
+   "vegetation": 1830,
+   "rocks": 13,
+   "coast_lines": 5
+  }
+ ],
+ "notes": [],
+ "terrain": {
+  "preset": "archipelago",
+  "seed": 7,
+  "resolution": 257,
+  "world_size_m": 1024,
+  "height_scale_m": 40,
+  "sea_level": 0.32,
+  "sea_level_height_m": 12.8,
+  "heightmap": "archipelago_height16.png (16-bit, 0 = lowest, 65535 = height_scale_m)",
+  "splat_channels": {
+   "R": "sand",
+   "G": "grass",
+   "B": "rock",
+   "A": "snow"
+  },
+  "biomes": {
+   "deep_water": [
+    24,
+    70,
+    120
+   ],
+   "shallow_water": [
+    52,
+    136,
+    168
+   ],
+   "beach": [
+    226,
+    205,
+    150
+   ],
+   "grassland": [
+    124,
+    170,
+    78
+   ],
+   "forest": [
+    62,
+    122,
+    58
+   ],
+   "jungle": [
+    38,
+    110,
+    52
+   ],
+   "desert": [
+    214,
+    186,
+    120
+   ],
+   "savanna": [
+    176,
+    172,
+    90
+   ],
+   "swamp": [
+    82,
+    104,
+    66
+   ],
+   "tundra": [
+    150,
+    160,
+    130
+   ],
+   "rock": [
+    120,
+    112,
+    104
+   ],
+   "snow": [
+    240,
+    244,
+    248
+   ]
+  },
+  "biome_cells": {
+   "deep_water": 51252,
+   "shallow_water": 5281,
+   "beach": 1236,
+   "forest": 3177,
+   "jungle": 3907,
+   "swamp": 1196
+  },
+  "land_fraction": 0.144,
+  "vegetation": 1830,
+  "rocks": 13
+ },
+ "engine": {
+  "ok": true,
+  "meshes": 2,
+  "triangles": 32770,
+  "vertex_colored_meshes": 1,
+  "clips": [],
+  "bounds": {
+   "min": [
+    -588.8,
+    -12.788,
+    -588.8
+   ],
+   "max": [
+    588.8,
+    26.928,
+    588.8
+   ]
+  },
+  "centre_colours": 377
+ }
+}

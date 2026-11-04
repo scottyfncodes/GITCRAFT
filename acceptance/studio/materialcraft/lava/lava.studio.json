@@ -1,0 +1,274 @@
+{
+ "department": "materialcraft",
+ "action": "generate",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "materialcraft/lava",
+ "request": {
+  "material": "lava",
+  "resolution": 256,
+  "name": "lava",
+  "out_dir": "(acceptance)",
+  "scale": 1.0,
+  "dirt": 0,
+  "moss": 0,
+  "wear": 0,
+  "wet": 0,
+  "style": "pbr",
+  "toon_bands": 4,
+  "normal_strength": 4.0,
+  "normal_convention": "opengl",
+  "tile_meters": 2.0
+ },
+ "created": "2026-11-03T22:31:14+00:00",
+ "seconds": 1.75,
+ "outputs": [
+  {
+   "path": "lava_basecolor.png",
+   "role": "basecolor",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "9d427b27dfc4d40f9b2a66b7e50a505c03ff8daa637c888a850960c47fac7879",
+   "bytes": 122911
+  },
+  {
+   "path": "lava_normal.png",
+   "role": "normal (opengl)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "10f02996d63209e2d18f16044b142b5a736d541562c8a624eb2d3b75cf2f853f",
+   "bytes": 161882
+  },
+  {
+   "path": "lava_roughness.png",
+   "role": "roughness",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "7080480579d5b1c9d78f83ae7d699f9d1d67e32a7595cb1169b6f5dc0ca63805",
+   "bytes": 38041
+  },
+  {
+   "path": "lava_metallic.png",
+   "role": "metallic",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "39962cd5bc9f4f0446341d3e6e0c6c37336ddeb2e026a17a3d06bb6cb3266daf",
+   "bytes": 141
+  },
+  {
+   "path": "lava_ao.png",
+   "role": "ao",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "ef9e6a5e3309cb5762aca7478611bca50df2f392da88c96ffa355657feefe026",
+   "bytes": 24299
+  },
+  {
+   "path": "lava_height16.png",
+   "role": "height",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "I;16",
+   "sha256": "3cc0e41690972a02e545c61592f950cc0c509b1b7c14a58ce5beecc3df359c1e",
+   "bytes": 125130
+  },
+  {
+   "path": "lava_orm.png",
+   "role": "orm (R=AO G=roughness B=metallic, glTF)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "d64b61f0b32a620ed6f0740a4928b75ff0c074f06b26b4f08262d0c67ccfaaf1",
+   "bytes": 69741
+  },
+  {
+   "path": "lava_emission.png",
+   "role": "emission",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "d43254415b6224354ea1977de1aae78c438a85e499a5a79f6c0764a9c675e773",
+   "bytes": 81181
+  },
+  {
+   "path": "lava_tiled2x2.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "59023e0b0fba182e0ed6b189ff2bed2c7a1b0e11d9869937ce75f5275afb0bf9",
+   "bytes": 253903
+  },
+  {
+   "path": "lava.material.json",
+   "role": "material",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "averages",
+    "emissiveTexture",
+    "name",
+    "normalTexture",
+    "occlusionTexture",
+    "pbrMetallicRoughness",
+    "three",
+    "tiling_m"
+   ],
+   "sha256": "e47a76a12219bc4c421522cf22656728ae63b4b3e84e90d90b7d67e880168cb8",
+   "bytes": 770
+  },
+  {
+   "path": "lava_sphere.glb",
+   "role": "sample",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 4096,
+   "animations": [],
+   "materials": 1,
+   "sha256": "81b70cb55913696d6e736fe6f588e41a076535fa96d09eda6dc3b44789eac84d",
+   "bytes": 530748
+  },
+  {
+   "path": "lava_render.png",
+   "role": "render",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "0bdda9ed88875de6482980d83c55a9d53d75b925004eda0840fca39717a9a5b5",
+   "bytes": 262084
+  }
+ ],
+ "checks": [
+  {
+   "name": "material sphere: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 1,
+    "first": [
+     "WARNING MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations. @ /meshes/0/primitives/0/material"
+    ]
+   }
+  },
+  {
+   "name": "material sphere: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 4096,
+    "errors": null
+   }
+  },
+  {
+   "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+   "ok": true,
+   "detail": {
+    "basecolor": 0.913,
+    "height": 0.925,
+    "normal": 0.935,
+    "roughness": 0.916
+   }
+  },
+  {
+   "name": "normal map vectors are unit length",
+   "ok": true,
+   "detail": 0.0
+  },
+  {
+   "name": "maps are in range and not flat",
+   "ok": true,
+   "detail": 0.161
+  }
+ ],
+ "tools": {
+  "studio_materials": {
+   "name": "GITCRAFT MaterialCraft generators",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (render check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "generated",
+   "seconds": 0.12,
+   "material": "lava"
+  }
+ ],
+ "notes": [],
+ "material": {
+  "name": "lava",
+  "pbrMetallicRoughness": {
+   "baseColorTexture": "lava_basecolor.png",
+   "metallicRoughnessTexture": "lava_orm.png",
+   "metallicFactor": 1.0,
+   "roughnessFactor": 1.0
+  },
+  "normalTexture": "lava_normal.png",
+  "occlusionTexture": "lava_orm.png",
+  "emissiveTexture": "lava_emission.png",
+  "tiling_m": 2.0,
+  "three": {
+   "type": "MeshStandardMaterial",
+   "map": "lava_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+   "normalMap": "lava_normal.png",
+   "roughnessMap": "lava_orm.png",
+   "metalnessMap": "lava_orm.png",
+   "aoMap": "lava_orm.png",
+   "displacementMap": "lava_height16.png (optional)",
+   "emissiveMap": "lava_emission.png"
+  },
+  "averages": {
+   "basecolor_srgb": [
+    0.32,
+    0.203,
+    0.124
+   ],
+   "roughness": 0.817,
+   "metallic": 0.0
+  }
+ }
+}

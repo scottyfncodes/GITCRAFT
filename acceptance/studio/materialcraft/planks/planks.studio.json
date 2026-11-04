@@ -1,0 +1,267 @@
+{
+ "department": "materialcraft",
+ "action": "generate",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "materialcraft/planks",
+ "request": {
+  "material": "planks",
+  "resolution": 256,
+  "name": "planks",
+  "dirt": 0.2,
+  "out_dir": "(acceptance)",
+  "scale": 1.0,
+  "moss": 0,
+  "wear": 0,
+  "wet": 0,
+  "style": "pbr",
+  "toon_bands": 4,
+  "normal_strength": 4.0,
+  "normal_convention": "opengl",
+  "tile_meters": 2.0
+ },
+ "created": "2026-11-03T22:31:12+00:00",
+ "seconds": 1.82,
+ "outputs": [
+  {
+   "path": "planks_basecolor.png",
+   "role": "basecolor",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "846cec7ad3e4339464b96b70e4770e864b0d1af73b874d76f50021de1b7ba5c7",
+   "bytes": 114445
+  },
+  {
+   "path": "planks_normal.png",
+   "role": "normal (opengl)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "b37b86ab5af6334096d055eaaee56d23b269cdb76a3330ddb32a0948fd048db3",
+   "bytes": 152765
+  },
+  {
+   "path": "planks_roughness.png",
+   "role": "roughness",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "f167ede2b4a688b0e36746698639469330ca0b2f472300dea372a62b680c0ddf",
+   "bytes": 36103
+  },
+  {
+   "path": "planks_metallic.png",
+   "role": "metallic",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "39962cd5bc9f4f0446341d3e6e0c6c37336ddeb2e026a17a3d06bb6cb3266daf",
+   "bytes": 141
+  },
+  {
+   "path": "planks_ao.png",
+   "role": "ao",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "81c01d1d06ee1201dce69821fef7af3e88bc8bd53d60430d36965dcb7f7cc05d",
+   "bytes": 43971
+  },
+  {
+   "path": "planks_height16.png",
+   "role": "height",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "I;16",
+   "sha256": "1a305ad72447b1b4e3adc9f9960758ca461141de0503bfac25e62cdb3a2f8a2d",
+   "bytes": 123120
+  },
+  {
+   "path": "planks_orm.png",
+   "role": "orm (R=AO G=roughness B=metallic, glTF)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "17d09c8a2b9973d3f8e79e0ec907ec74ea31e5924eedd763ce81564e7803227d",
+   "bytes": 101825
+  },
+  {
+   "path": "planks_tiled2x2.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "780d2b904b7c0dff94452c95342b31f2a9d439432597abd43ec214ded4db29c6",
+   "bytes": 239209
+  },
+  {
+   "path": "planks.material.json",
+   "role": "material",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "averages",
+    "emissiveTexture",
+    "name",
+    "normalTexture",
+    "occlusionTexture",
+    "pbrMetallicRoughness",
+    "three",
+    "tiling_m"
+   ],
+   "sha256": "e5c04a874dd169a6269f62951ba455fe153f7a2bae35cf033253d9a873c02589",
+   "bytes": 763
+  },
+  {
+   "path": "planks_sphere.glb",
+   "role": "sample",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 4096,
+   "animations": [],
+   "materials": 1,
+   "sha256": "07d1a0bde8449ae14841f80e502e1bc2e9b4485ef3b9a8f94ea5298f2c2d4803",
+   "bytes": 463900
+  },
+  {
+   "path": "planks_render.png",
+   "role": "render",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "ea0e4cdd2279d3ca44542846fa716dab59954ec5b44c16e02320d79d5fa1aca9",
+   "bytes": 197706
+  }
+ ],
+ "checks": [
+  {
+   "name": "material sphere: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 1,
+    "first": [
+     "WARNING MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations. @ /meshes/0/primitives/0/material"
+    ]
+   }
+  },
+  {
+   "name": "material sphere: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 4096,
+    "errors": null
+   }
+  },
+  {
+   "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+   "ok": true,
+   "detail": {
+    "basecolor": 0.967,
+    "height": 0.997,
+    "normal": 0.952,
+    "roughness": 0.983
+   }
+  },
+  {
+   "name": "normal map vectors are unit length",
+   "ok": true,
+   "detail": 0.0
+  },
+  {
+   "name": "maps are in range and not flat",
+   "ok": true,
+   "detail": 0.1326
+  }
+ ],
+ "tools": {
+  "studio_materials": {
+   "name": "GITCRAFT MaterialCraft generators",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (render check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "generated",
+   "seconds": 0.19,
+   "material": "planks"
+  },
+  {
+   "stage": "weathered",
+   "seconds": 0.05
+  }
+ ],
+ "notes": [],
+ "material": {
+  "name": "planks",
+  "pbrMetallicRoughness": {
+   "baseColorTexture": "planks_basecolor.png",
+   "metallicRoughnessTexture": "planks_orm.png",
+   "metallicFactor": 1.0,
+   "roughnessFactor": 1.0
+  },
+  "normalTexture": "planks_normal.png",
+  "occlusionTexture": "planks_orm.png",
+  "emissiveTexture": null,
+  "tiling_m": 2.0,
+  "three": {
+   "type": "MeshStandardMaterial",
+   "map": "planks_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+   "normalMap": "planks_normal.png",
+   "roughnessMap": "planks_orm.png",
+   "metalnessMap": "planks_orm.png",
+   "aoMap": "planks_orm.png",
+   "displacementMap": "planks_height16.png (optional)",
+   "emissiveMap": null
+  },
+  "averages": {
+   "basecolor_srgb": [
+    0.475,
+    0.324,
+    0.191
+   ],
+   "roughness": 0.706,
+   "metallic": 0.0
+  }
+ }
+}

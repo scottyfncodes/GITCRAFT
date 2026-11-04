@@ -1,0 +1,422 @@
+{
+ "department": "worldcraft",
+ "action": "terrain",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "worldcraft/island",
+ "request": {
+  "preset": "island",
+  "climate": "tropical",
+  "seed": 7,
+  "name": "island",
+  "out_dir": "(acceptance)",
+  "resolution": 257,
+  "mesh_resolution": 129,
+  "roughness": 0.5,
+  "erosion": 12,
+  "erosion_strength": 0.5,
+  "thermal": 20,
+  "vegetation": 1.0,
+  "tree_spacing": 6,
+  "rocks": 0.6,
+  "rock_spacing": 10
+ },
+ "created": "2026-11-03T22:30:32+00:00",
+ "seconds": 3.34,
+ "outputs": [
+  {
+   "path": "island_height16.png",
+   "role": "heightmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "I;16",
+   "sha256": "b5817e50bf22c2767607c7a02b1eb09a4ae4fca35d92c0f9e899ab3a946230d1",
+   "bytes": 97839
+  },
+  {
+   "path": "island_normal.png",
+   "role": "normal_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "989707b30e817cc658c798b67ad5a76ef99412317006f1393b2923ae5d02a546",
+   "bytes": 65443
+  },
+  {
+   "path": "island_splat.png",
+   "role": "splatmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGBA",
+   "sha256": "4812a83bb0e8b419e1c796345d1639a1f594b1ff1b2facb48514d99c08c6e3d3",
+   "bytes": 10379
+  },
+  {
+   "path": "island_biomes.png",
+   "role": "biome_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "3ccfe843ec17b0c9937fcb0e0995a18a7702a07588ab2c698384aab98a319623",
+   "bytes": 30934
+  },
+  {
+   "path": "island_preview.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "545108f43d2767b9418d449191c3810c51bed75ecac8d0dc68be2d6873fca348",
+   "bytes": 56301
+  },
+  {
+   "path": "masks/island_water.png",
+   "role": "mask:water",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "cb460d65282e2363d8d65e1b2229f7ed1201cc58816d1a9d1366d32804569a5e",
+   "bytes": 1294
+  },
+  {
+   "path": "masks/island_cliff.png",
+   "role": "mask:cliff",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "18e6a77263bf6c2830ae3b7adf7803d15cc36b02746f207d82b4f4e341ea2a56",
+   "bytes": 143
+  },
+  {
+   "path": "masks/island_beach.png",
+   "role": "mask:beach",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "5b45e3c921b980c64d9e510044a287f5dc95b75686d15abeff5ad15557f8506f",
+   "bytes": 1578
+  },
+  {
+   "path": "masks/island_forest.png",
+   "role": "mask:forest",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "ee281695c3ede0c77fcf00f3fe9812e8913d649e9d853dd43ad72eddd740b685",
+   "bytes": 1207
+  },
+  {
+   "path": "masks/island_moisture.png",
+   "role": "mask:moisture",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "fad4d8783cc5baecfd169de8da0940c3da6074302960177fbc312c2fa413488d",
+   "bytes": 11249
+  },
+  {
+   "path": "masks/island_slope.png",
+   "role": "mask:slope",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "10e9e3d7cd8027b98d5073e0803b3b5beec538a7d05a83d79e28fc9be2d79dea",
+   "bytes": 39500
+  },
+  {
+   "path": "island_scatter.json",
+   "role": "scatter",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "rocks",
+    "units",
+    "vegetation"
+   ],
+   "sha256": "49cb55a3bcb93265740184d095013d6b756e73c486e16e92537c126b39db0662",
+   "bytes": 83905
+  },
+  {
+   "path": "island_coastline.json",
+   "role": "coastline",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "polylines",
+    "units"
+   ],
+   "sha256": "3ef0a41751b4171b447120ddd3f48936da1b40f900dc3863d08c54e569426c4c",
+   "bytes": 16429
+  },
+  {
+   "path": "island.glb",
+   "role": "mesh",
+   "format": "glb",
+   "ok": true,
+   "meshes": 2,
+   "nodes": 2,
+   "triangles": 32770,
+   "animations": [],
+   "materials": 2,
+   "sha256": "7f085086abdfcb7fb2cc2d7fd99e022ad52e0d1c90a2efc9d05c035065dcd36d",
+   "bytes": 930904
+  },
+  {
+   "path": "island.terrain.json",
+   "role": "manifest",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "biome_cells",
+    "biomes",
+    "height_scale_m",
+    "heightmap",
+    "land_fraction",
+    "preset",
+    "resolution",
+    "rocks",
+    "sea_level",
+    "sea_level_height_m",
+    "seed",
+    "splat_channels",
+    "vegetation",
+    "world_size_m"
+   ],
+   "sha256": "f77e934e06a6d853c213f0b94c3c60e9adb88954eadc7c0d0fd4e70a196de129",
+   "bytes": 1070
+  },
+  {
+   "path": "island_engine.png",
+   "role": "engine_screenshot",
+   "format": "png",
+   "ok": true,
+   "width": 800,
+   "height": 600,
+   "mode": "RGB",
+   "sha256": "647c0fb848374dfbaec1d142a24cc222b40e98484cc14142e1694c794422d456",
+   "bytes": 116202
+  }
+ ],
+ "checks": [
+  {
+   "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 0,
+    "first": [
+     "INFO UNUSED_OBJECT: This object may be unused. @ /meshes/0/primitives/0/attributes/TEXCOORD_0"
+    ]
+   }
+  },
+  {
+   "name": "terrain GLB: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 2,
+    "triangles": 32770,
+    "errors": null
+   }
+  },
+  {
+   "name": "heightfield has relief",
+   "ok": true,
+   "detail": 0.179
+  },
+  {
+   "name": "island/coast has land and water",
+   "ok": true,
+   "detail": 0.241
+  },
+  {
+   "name": "splat weights sum to 1",
+   "ok": true
+  },
+  {
+   "name": "coastline extracted",
+   "ok": true,
+   "detail": 6
+  }
+ ],
+ "tools": {
+  "studio_world": {
+   "name": "GITCRAFT WorldCraft generators (noise, erosion, biomes, scatter, surface nets, FFT ocean)",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (engine check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "base shape",
+   "seconds": 0.26,
+   "preset": "island"
+  },
+  {
+   "stage": "eroded",
+   "seconds": 0.36,
+   "iterations": 12
+  },
+  {
+   "stage": "biomes",
+   "seconds": 0.06
+  },
+  {
+   "stage": "scatter",
+   "seconds": 1.16,
+   "vegetation": 701,
+   "rocks": 28,
+   "coast_lines": 6
+  }
+ ],
+ "notes": [],
+ "terrain": {
+  "preset": "island",
+  "seed": 7,
+  "resolution": 257,
+  "world_size_m": 512,
+  "height_scale_m": 45,
+  "sea_level": 0.32,
+  "sea_level_height_m": 14.4,
+  "heightmap": "island_height16.png (16-bit, 0 = lowest, 65535 = height_scale_m)",
+  "splat_channels": {
+   "R": "sand",
+   "G": "grass",
+   "B": "rock",
+   "A": "snow"
+  },
+  "biomes": {
+   "deep_water": [
+    24,
+    70,
+    120
+   ],
+   "shallow_water": [
+    52,
+    136,
+    168
+   ],
+   "beach": [
+    226,
+    205,
+    150
+   ],
+   "grassland": [
+    124,
+    170,
+    78
+   ],
+   "forest": [
+    62,
+    122,
+    58
+   ],
+   "jungle": [
+    38,
+    110,
+    52
+   ],
+   "desert": [
+    214,
+    186,
+    120
+   ],
+   "savanna": [
+    176,
+    172,
+    90
+   ],
+   "swamp": [
+    82,
+    104,
+    66
+   ],
+   "tundra": [
+    150,
+    160,
+    130
+   ],
+   "rock": [
+    120,
+    112,
+    104
+   ],
+   "snow": [
+    240,
+    244,
+    248
+   ]
+  },
+  "biome_cells": {
+   "deep_water": 43062,
+   "shallow_water": 7078,
+   "beach": 2194,
+   "grassland": 1290,
+   "forest": 7835,
+   "jungle": 3262,
+   "savanna": 534,
+   "swamp": 794
+  },
+  "land_fraction": 0.241,
+  "vegetation": 701,
+  "rocks": 28
+ },
+ "engine": {
+  "ok": true,
+  "meshes": 2,
+  "triangles": 32770,
+  "vertex_colored_meshes": 1,
+  "clips": [],
+  "bounds": {
+   "min": [
+    -294.4,
+    -14.388,
+    -294.4
+   ],
+   "max": [
+    294.4,
+    30.528,
+    294.4
+   ]
+  },
+  "centre_colours": 432
+ }
+}

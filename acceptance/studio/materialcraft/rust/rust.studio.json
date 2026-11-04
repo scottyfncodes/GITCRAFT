@@ -1,0 +1,267 @@
+{
+ "department": "materialcraft",
+ "action": "generate",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "materialcraft/rust",
+ "request": {
+  "material": "rust",
+  "resolution": 256,
+  "name": "rust",
+  "wear": 0.4,
+  "out_dir": "(acceptance)",
+  "scale": 1.0,
+  "dirt": 0,
+  "moss": 0,
+  "wet": 0,
+  "style": "pbr",
+  "toon_bands": 4,
+  "normal_strength": 4.0,
+  "normal_convention": "opengl",
+  "tile_meters": 2.0
+ },
+ "created": "2026-11-03T22:31:10+00:00",
+ "seconds": 1.86,
+ "outputs": [
+  {
+   "path": "rust_basecolor.png",
+   "role": "basecolor",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "47d43fe5a18c4e9a38ff578131dc2dccee252597501f9c08f59cb0a66eb99556",
+   "bytes": 115520
+  },
+  {
+   "path": "rust_normal.png",
+   "role": "normal (opengl)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "928c040b98af6579575f5281bd8cdbef97f085dbf29eb791d2a6eb1dac875f5e",
+   "bytes": 131627
+  },
+  {
+   "path": "rust_roughness.png",
+   "role": "roughness",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "5e5e988a74207aa6c47eb9f1f7e5eebb857a028f5e439d2ed74e10bf82a07205",
+   "bytes": 43198
+  },
+  {
+   "path": "rust_metallic.png",
+   "role": "metallic",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "ddbe6885329c2d614f92888bfc1920dacfb27d056d59efff7768f1365fae1634",
+   "bytes": 36871
+  },
+  {
+   "path": "rust_ao.png",
+   "role": "ao",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "1f2cf96636b5f4201d97683358616500915abd1a1c35cbf38f0eb6fe24a47662",
+   "bytes": 44552
+  },
+  {
+   "path": "rust_height16.png",
+   "role": "height",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "I;16",
+   "sha256": "607c6cbf3902cfb86c067fa1a5aa19f0be050188b63e67c4f654ab30738d2ec6",
+   "bytes": 120411
+  },
+  {
+   "path": "rust_orm.png",
+   "role": "orm (R=AO G=roughness B=metallic, glTF)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "b5642a60d96ef272d791607887d4f92355ccd1cce374fb82c4a3e9ba86eec1df",
+   "bytes": 132294
+  },
+  {
+   "path": "rust_tiled2x2.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "6e0d13672920c363976b3dc6a500a64106f9a3ce46511d07021e06cc43d9611e",
+   "bytes": 238036
+  },
+  {
+   "path": "rust.material.json",
+   "role": "material",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "averages",
+    "emissiveTexture",
+    "name",
+    "normalTexture",
+    "occlusionTexture",
+    "pbrMetallicRoughness",
+    "three",
+    "tiling_m"
+   ],
+   "sha256": "c1a4013ff339384491da4609fb8f8fd3bfb0ccad2b38a4d1920f73d64af2d8a1",
+   "bytes": 743
+  },
+  {
+   "path": "rust_sphere.glb",
+   "role": "sample",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 4096,
+   "animations": [],
+   "materials": 1,
+   "sha256": "935c123f36c51e6fe8b2b37688f662d6ce2dc55f7a76b75716ad2a75793824d5",
+   "bytes": 474292
+  },
+  {
+   "path": "rust_render.png",
+   "role": "render",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "bd1e26cfa61b4b3985805b3920000149ca4338ee35d2d6f8e9fb5ca5c977a724",
+   "bytes": 213130
+  }
+ ],
+ "checks": [
+  {
+   "name": "material sphere: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 1,
+    "first": [
+     "WARNING MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations. @ /meshes/0/primitives/0/material"
+    ]
+   }
+  },
+  {
+   "name": "material sphere: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 4096,
+    "errors": null
+   }
+  },
+  {
+   "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+   "ok": true,
+   "detail": {
+    "basecolor": 0.809,
+    "height": 0.708,
+    "normal": 0.686,
+    "roughness": 0.868
+   }
+  },
+  {
+   "name": "normal map vectors are unit length",
+   "ok": true,
+   "detail": 0.0
+  },
+  {
+   "name": "maps are in range and not flat",
+   "ok": true,
+   "detail": 0.1487
+  }
+ ],
+ "tools": {
+  "studio_materials": {
+   "name": "GITCRAFT MaterialCraft generators",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (render check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "generated",
+   "seconds": 0.24,
+   "material": "rust"
+  },
+  {
+   "stage": "weathered",
+   "seconds": 0.01
+  }
+ ],
+ "notes": [],
+ "material": {
+  "name": "rust",
+  "pbrMetallicRoughness": {
+   "baseColorTexture": "rust_basecolor.png",
+   "metallicRoughnessTexture": "rust_orm.png",
+   "metallicFactor": 1.0,
+   "roughnessFactor": 1.0
+  },
+  "normalTexture": "rust_normal.png",
+  "occlusionTexture": "rust_orm.png",
+  "emissiveTexture": null,
+  "tiling_m": 2.0,
+  "three": {
+   "type": "MeshStandardMaterial",
+   "map": "rust_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+   "normalMap": "rust_normal.png",
+   "roughnessMap": "rust_orm.png",
+   "metalnessMap": "rust_orm.png",
+   "aoMap": "rust_orm.png",
+   "displacementMap": "rust_height16.png (optional)",
+   "emissiveMap": null
+  },
+  "averages": {
+   "basecolor_srgb": [
+    0.621,
+    0.526,
+    0.485
+   ],
+   "roughness": 0.603,
+   "metallic": 0.681
+  }
+ }
+}

@@ -43,6 +43,18 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
         problems+=("$name: the Blender install didn't finish (often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
       fi
     else inst=NO; fi
+  elif [[ "$name" == studiocraft ]]; then
+    if gitcraft_studio_ready; then inst=yes
+    elif [[ "$(last_state studiocraft)" == off || "$GITCRAFT_STUDIO" != 1 ]]; then
+      say "$(printf '  %-13s %-10s %-11s %s' "$name" off off "skipped (GITCRAFT_STUDIO=0)")"; continue
+    elif [[ "$(last_state studiocraft)" == pending || "$(last_state studiocraft)" == failed ]]; then
+      inst=PARTIAL   # registered only once its venv is complete, so "not registered" is expected here
+      if [[ "$(last_state studiocraft)" == failed ]]; then
+        problems+=("studiocraft: the Studio install failed (see $GITCRAFT_LOG/studio.log). Fix that and run scripts/install.sh studiocraft, or set GITCRAFT_STUDIO=0")
+      else
+        problems+=("studiocraft: the Studio install didn't finish (often a setup script that ran out of time); the 2D tools are unaffected. The SessionStart hook finishes it in the background, or run scripts/install.sh studiocraft")
+      fi
+    else inst=NO; fi
   else
     inst=$([[ -x "$GITCRAFT_BIN/$pkg" ]] && echo yes || echo NO)
   fi
@@ -111,6 +123,30 @@ PY
 )
 fi
 
+if gitcraft_studio_ready; then
+  say ""
+  say "  Studio departments (studiocraft; also ForgeCraft departments / department_run):"
+  case "$(last_state studiocraft-voice)" in
+    ok) say "    voice model:    installed (Kokoro-82M)" ;;
+    later) say "    voice model:    deferred (GITCRAFT_STUDIO_VOICE=later): the SessionStart hook installs it in the background" ;;
+    pending) say "    voice model:    install didn't finish: the SessionStart hook retries it, or run scripts/install-studio.sh voice" ;;
+    failed) say "    voice model:    install failed (see $GITCRAFT_LOG/studio.log): scripts/install-studio.sh voice"; problems+=("studio voice model: install failed (see $GITCRAFT_LOG/studio.log)") ;;
+    off) say "    voice model:    off (GITCRAFT_STUDIO_VOICE=0)" ;;
+  esac
+  studio_json=$(GITCRAFT_STUDIO_HOME="$GITCRAFT_STUDIO_HOME" "$GITCRAFT_STUDIO_HOME/venv/bin/python" "$here/../studio/cli.py" --call studio_status '{}' 2>/dev/null)
+  while IFS= read -r line; do say "    $line"; done < <(python3 - "$studio_json" <<'PY'
+import json, sys
+try: d = json.loads(sys.argv[1])
+except Exception: print("could not read the studio status (run studio/cli.py list)"); sys.exit()
+for x in d["departments"]:
+    acts = x["actions"]; ready = [a for a, v in acts.items() if v == "ready"]; blocked = {a: v for a, v in acts.items() if v != "ready"}
+    line = f"{x['department']:15s} {len(ready)}/{len(acts)} actions ready"
+    if blocked: line += "; blocked: " + "; ".join(f"{a} ({v[9:][:70]})" for a, v in list(blocked.items())[:3])
+    print(line)
+PY
+)
+fi
+
 audit="$GITCRAFT_LOG/audit.jsonl"
 if [[ -f "$audit" ]]; then
   read -r calls fails refused < <(python3 - "$audit" <<'PY'
@@ -127,7 +163,9 @@ PY
   say "  audit:    $calls tool calls logged, $fails failed, $refused refused by policy ($audit)"
 fi
 if [[ -f "$GITCRAFT_HOME/status.json" ]]; then
-  bad=$(python3 -c 'import json,os;s=json.load(open(os.path.expanduser("~/.gitcraft/status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state") not in ("ok","off")))' 2>/dev/null)
+  # "later" is a deliberate deferral (the SessionStart hook installs it), not a failure
+  bad=$(python3 -c 'import json,os,sys;s=json.load(open(os.path.join(sys.argv[1],"status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state") not in ("ok","off","later") and not k.startswith("studiocraft")))' "$GITCRAFT_HOME" 2>/dev/null)
+  # (studiocraft and its voice model have their own messages above)
   [[ -n "$bad" ]] && problems+=("last install reported failures for: $bad (see $GITCRAFT_LOG/install.log)")
 fi
 

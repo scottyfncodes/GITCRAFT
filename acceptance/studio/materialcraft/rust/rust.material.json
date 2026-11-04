@@ -1,0 +1,32 @@
+{
+ "name": "rust",
+ "pbrMetallicRoughness": {
+  "baseColorTexture": "rust_basecolor.png",
+  "metallicRoughnessTexture": "rust_orm.png",
+  "metallicFactor": 1.0,
+  "roughnessFactor": 1.0
+ },
+ "normalTexture": "rust_normal.png",
+ "occlusionTexture": "rust_orm.png",
+ "emissiveTexture": null,
+ "tiling_m": 2.0,
+ "three": {
+  "type": "MeshStandardMaterial",
+  "map": "rust_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+  "normalMap": "rust_normal.png",
+  "roughnessMap": "rust_orm.png",
+  "metalnessMap": "rust_orm.png",
+  "aoMap": "rust_orm.png",
+  "displacementMap": "rust_height16.png (optional)",
+  "emissiveMap": null
+ },
+ "averages": {
+  "basecolor_srgb": [
+   0.621,
+   0.526,
+   0.485
+  ],
+  "roughness": 0.603,
+  "metallic": 0.681
+ }
+}

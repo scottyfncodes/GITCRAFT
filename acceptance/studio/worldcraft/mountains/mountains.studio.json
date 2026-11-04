@@ -1,0 +1,415 @@
+{
+ "department": "worldcraft",
+ "action": "terrain",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "worldcraft/mountains",
+ "request": {
+  "preset": "mountains",
+  "climate": "cold",
+  "seed": 7,
+  "name": "mountains",
+  "out_dir": "(acceptance)",
+  "resolution": 257,
+  "mesh_resolution": 129,
+  "roughness": 0.5,
+  "erosion": 12,
+  "erosion_strength": 0.5,
+  "thermal": 20,
+  "vegetation": 1.0,
+  "tree_spacing": 6,
+  "rocks": 0.6,
+  "rock_spacing": 10
+ },
+ "created": "2026-11-03T22:30:47+00:00",
+ "seconds": 8.86,
+ "outputs": [
+  {
+   "path": "mountains_height16.png",
+   "role": "heightmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "I;16",
+   "sha256": "34003b9e6aa759f1ed3844cdd5d6373570590def3d3ff6f51d5dc67b6fcefee6",
+   "bytes": 107312
+  },
+  {
+   "path": "mountains_normal.png",
+   "role": "normal_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "5a2d20577b88068e3ab23ad10b546fa62aa576dd9d7c8786a7c3ea6dd17f104e",
+   "bytes": 107247
+  },
+  {
+   "path": "mountains_splat.png",
+   "role": "splatmap",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGBA",
+   "sha256": "ab7b63967e05fc73b3941a1aa209aa6abae9c10a037266cd480743e42013c28b",
+   "bytes": 89169
+  },
+  {
+   "path": "mountains_biomes.png",
+   "role": "biome_map",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "bcc558a9b114bfaa0d124965cb1f9fe08e8797b5525de963854ca30a856751b6",
+   "bytes": 10826
+  },
+  {
+   "path": "mountains_preview.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "RGB",
+   "sha256": "e6730a77da0822194b0243d6eecbb6a345e3e441cfa15ae62ae22ae34b1fe87d",
+   "bytes": 113912
+  },
+  {
+   "path": "masks/mountains_water.png",
+   "role": "mask:water",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "b5cca3162feb246d1323728f49f5fdcc1448f6d4c93e7fe283615ca128360a1b",
+   "bytes": 150
+  },
+  {
+   "path": "masks/mountains_cliff.png",
+   "role": "mask:cliff",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "0e65ab187c4fa3cd3e4c07d349c8a930d940c3c0eaae3846d03fa7f3a7b09d9a",
+   "bytes": 6572
+  },
+  {
+   "path": "masks/mountains_beach.png",
+   "role": "mask:beach",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "96d19d6ecc7195c833234552710f15faf2a4d642f3e9cddf92afb620f3b95d83",
+   "bytes": 228
+  },
+  {
+   "path": "masks/mountains_forest.png",
+   "role": "mask:forest",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "18e6a77263bf6c2830ae3b7adf7803d15cc36b02746f207d82b4f4e341ea2a56",
+   "bytes": 143
+  },
+  {
+   "path": "masks/mountains_moisture.png",
+   "role": "mask:moisture",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "2ed74b499aef648e33374603c4fc6937397b94713d73e9db7fa7d2b8afebdbfd",
+   "bytes": 19488
+  },
+  {
+   "path": "masks/mountains_slope.png",
+   "role": "mask:slope",
+   "format": "png",
+   "ok": true,
+   "width": 257,
+   "height": 257,
+   "mode": "L",
+   "sha256": "77073cb2957f02f9a0094b60fc1d1e6f629f8bbba377efd2fd337b1868eb5509",
+   "bytes": 53043
+  },
+  {
+   "path": "mountains_scatter.json",
+   "role": "scatter",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "rocks",
+    "units",
+    "vegetation"
+   ],
+   "sha256": "3d1a53f2cce88238c3ccfd740f3523dcf78b1b423100c1797c130ad47031362f",
+   "bytes": 995025
+  },
+  {
+   "path": "mountains_coastline.json",
+   "role": "coastline",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "polylines",
+    "units"
+   ],
+   "sha256": "a8afbbd477be38ea1cf39e2b0eec89708c60f5f2c0dcc4ec3262287aa8885f58",
+   "bytes": 43
+  },
+  {
+   "path": "mountains.glb",
+   "role": "mesh",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 32768,
+   "animations": [],
+   "materials": 1,
+   "sha256": "66e6acba46acfa0cd71805e579da3b3d446c85580574154e3ba8eca9813b8dd0",
+   "bytes": 930056
+  },
+  {
+   "path": "mountains.terrain.json",
+   "role": "manifest",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "biome_cells",
+    "biomes",
+    "height_scale_m",
+    "heightmap",
+    "land_fraction",
+    "preset",
+    "resolution",
+    "rocks",
+    "sea_level",
+    "sea_level_height_m",
+    "seed",
+    "splat_channels",
+    "vegetation",
+    "world_size_m"
+   ],
+   "sha256": "ee4e38809e91cb124c5255b381fd774b7a8f821055f66a56f4943215efb23dcb",
+   "bytes": 1031
+  },
+  {
+   "path": "mountains_engine.png",
+   "role": "engine_screenshot",
+   "format": "png",
+   "ok": true,
+   "width": 800,
+   "height": 600,
+   "mode": "RGB",
+   "sha256": "aac33b34ec40fef8707c009a264f58c8195d342d996af3401b3d1fac180d4caa",
+   "bytes": 298188
+  }
+ ],
+ "checks": [
+  {
+   "name": "terrain GLB: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 0,
+    "first": [
+     "INFO UNUSED_OBJECT: This object may be unused. @ /meshes/0/primitives/0/attributes/TEXCOORD_0"
+    ]
+   }
+  },
+  {
+   "name": "terrain GLB: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 32768,
+    "errors": null
+   }
+  },
+  {
+   "name": "heightfield has relief",
+   "ok": true,
+   "detail": 0.182
+  },
+  {
+   "name": "terrain is all land",
+   "ok": true,
+   "detail": 1.0
+  },
+  {
+   "name": "splat weights sum to 1",
+   "ok": true
+  }
+ ],
+ "tools": {
+  "studio_world": {
+   "name": "GITCRAFT WorldCraft generators (noise, erosion, biomes, scatter, surface nets, FFT ocean)",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (engine check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "base shape",
+   "seconds": 0.21,
+   "preset": "mountains"
+  },
+  {
+   "stage": "eroded",
+   "seconds": 0.34,
+   "iterations": 12
+  },
+  {
+   "stage": "biomes",
+   "seconds": 0.05
+  },
+  {
+   "stage": "scatter",
+   "seconds": 6.72,
+   "vegetation": 1627,
+   "rocks": 8124,
+   "coast_lines": 0
+  }
+ ],
+ "notes": [],
+ "terrain": {
+  "preset": "mountains",
+  "seed": 7,
+  "resolution": 257,
+  "world_size_m": 3000,
+  "height_scale_m": 450,
+  "sea_level": 0.0,
+  "sea_level_height_m": 0.0,
+  "heightmap": "mountains_height16.png (16-bit, 0 = lowest, 65535 = height_scale_m)",
+  "splat_channels": {
+   "R": "sand",
+   "G": "grass",
+   "B": "rock",
+   "A": "snow"
+  },
+  "biomes": {
+   "deep_water": [
+    24,
+    70,
+    120
+   ],
+   "shallow_water": [
+    52,
+    136,
+    168
+   ],
+   "beach": [
+    226,
+    205,
+    150
+   ],
+   "grassland": [
+    124,
+    170,
+    78
+   ],
+   "forest": [
+    62,
+    122,
+    58
+   ],
+   "jungle": [
+    38,
+    110,
+    52
+   ],
+   "desert": [
+    214,
+    186,
+    120
+   ],
+   "savanna": [
+    176,
+    172,
+    90
+   ],
+   "swamp": [
+    82,
+    104,
+    66
+   ],
+   "tundra": [
+    150,
+    160,
+    130
+   ],
+   "rock": [
+    120,
+    112,
+    104
+   ],
+   "snow": [
+    240,
+    244,
+    248
+   ]
+  },
+  "biome_cells": {
+   "shallow_water": 1,
+   "beach": 75,
+   "grassland": 524,
+   "tundra": 19660,
+   "rock": 22222,
+   "snow": 23567
+  },
+  "land_fraction": 1.0,
+  "vegetation": 1627,
+  "rocks": 8124
+ },
+ "engine": {
+  "ok": true,
+  "meshes": 1,
+  "triangles": 32768,
+  "vertex_colored_meshes": 1,
+  "clips": [],
+  "bounds": {
+   "min": [
+    -1500,
+    0,
+    -1500
+   ],
+   "max": [
+    1500,
+    448.979,
+    1500
+   ]
+  },
+  "centre_colours": 330
+ }
+}

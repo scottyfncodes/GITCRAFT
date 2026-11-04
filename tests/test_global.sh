@@ -59,8 +59,8 @@ check "gitcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/gitc
 # --- 3. from the other project
 if command -v claude >/dev/null; then
   (cd "$proj" && timeout 300 claude mcp list) > "$work/mcp-list.out" 2>&1
-  n=$(grep -cE '^(photocraft|vectorcraft|designcraft|pdfcraft|lightcraft|filmcraft|effectcraft|meshcraft|forgecraft):.*/\.gitcraft/runtime/scripts/mcp\.sh .*Connected' "$work/mcp-list.out")
-  check "claude mcp list in the other project: 9/9 GITCRAFT servers Connected from the runtime ($n)" '[[ $n -eq 9 ]]'
+  n=$(grep -cE '^(photocraft|vectorcraft|designcraft|pdfcraft|lightcraft|filmcraft|effectcraft|meshcraft|forgecraft|studiocraft):.*/\.gitcraft/runtime/scripts/mcp\.sh .*Connected' "$work/mcp-list.out")
+  check "claude mcp list in the other project: 10/10 GITCRAFT servers Connected from the runtime ($n)" '[[ $n -eq 10 ]]'
   check "the project's own .mcp.json server is still listed next to them" 'grep -q "^orbit-docs:" "$work/mcp-list.out"'
 else
   echo "SKIP claude CLI not on PATH: the MCP-level checks below still run"
@@ -74,8 +74,8 @@ if [[ "${GITCRAFT_TEST_ASK_CLAUDE:-1}" == 1 ]] && command -v claude >/dev/null; 
   if grep -qiE 'not logged in|invalid api key|authentication|please run /login' "$work/claude-ask.out"; then
     echo "SKIP headless Claude Code check: the CLI is not signed in in the fresh HOME ($(head -c 120 "$work/claude-ask.out"))"
   else
-    check "headless Claude Code in the other project sees all nine servers" \
-      '( for s in photocraft vectorcraft designcraft pdfcraft lightcraft filmcraft effectcraft meshcraft forgecraft; do grep -q "$s" "$work/claude-ask.out" || exit 1; done )'
+    check "headless Claude Code in the other project sees all ten servers" \
+      '( for s in photocraft vectorcraft designcraft pdfcraft lightcraft filmcraft effectcraft meshcraft forgecraft studiocraft; do grep -q "$s" "$work/claude-ask.out" || exit 1; done )'
     check "headless Claude Code in the other project has the GITCRAFT instructions and skill" '[[ $(grep -c "YES" "$work/claude-ask.out") -ge 2 ]]'
   fi
 fi

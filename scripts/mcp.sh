@@ -14,7 +14,7 @@ name="${1:?usage: mcp.sh <tool>}"
 shift
 repo="$(dirname "$here")"
 pkg=""
-[[ "$name" == meshcraft || "$name" == forgecraft ]] && pkg="$name"
+[[ "$name" == meshcraft || "$name" == forgecraft || "$name" == studiocraft ]] && pkg="$name"
 for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r n _ p <<<"$entry"
   [[ "$n" == "$name" ]] && pkg="$p"
@@ -28,6 +28,7 @@ bin="$GITCRAFT_BIN/$pkg"
 if [[ "$name" == meshcraft ]]; then
   if gitcraft_mesh_ready; then bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"; else bin="$(command -v python3)"; fi
 elif [[ "$name" == forgecraft ]]; then bin="$(command -v python3)"; fi
+[[ "$name" == studiocraft ]] && bin="$GITCRAFT_STUDIO_HOME/venv/bin/python"
 if [[ ! -x "$bin" ]]; then
   echo "gitcraft: $pkg isn't built yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
   exit 1
@@ -70,10 +71,16 @@ case "$name" in
   meshcraft)   mkdir -p "$GITCRAFT_3D_LIBRARY"; export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_3D_LIBRARY FORGECRAFT_HOME
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
   # The 3D Department pipeline (stdlib Python); spawns Blender, Meshroom and the AI backends as children.
-  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache"
-               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME GITCRAFT_3D_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache"
+  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME GITCRAFT_3D_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache" \
+                      GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG
                # HOME inside the sandbox is the tool's state folder (Chromium and Blender write caches there)
                cmd=(env HOME="$state/data" python3 "$repo/forgecraft/server.py") ;;
+  # The Studio departments (studio/): Python in the studio venv; spawns Blender (MeshCraft's), Node/Chromium,
+  # FFmpeg and the voice venv as children, all inside this sandbox.
+  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY
+               cmd=(env HOME="$state/data" "$bin" "$repo/studio/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
 case "$name" in vectorcraft|designcraft|effectcraft)
@@ -84,7 +91,8 @@ cmd+=("$@")
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
-[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache")
+[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")")
+[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")")
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).
@@ -95,7 +103,10 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   # meshcraft: its code + Blender venv + the shared 3D code; ForgeCraft's runtimes only to probe them (hardware_probe)
   [[ "$name" == meshcraft ]] && policy+=(--rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft" --rx "$repo/gitcraft3d" --rx "$FORGECRAFT_HOME")
   # forgecraft: its code + generators, and MeshCraft (code + Blender), which it runs as a child for all Blender work
-  [[ "$name" == forgecraft ]] && policy+=(--rx "$repo/forgecraft" --rx "$repo/gitcraft3d" --rx "$FORGECRAFT_HOME" --rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft")
+  [[ "$name" == forgecraft ]] && policy+=(--rx "$repo/forgecraft" --rx "$repo/gitcraft3d" --rx "$FORGECRAFT_HOME" --rx "$GITCRAFT_HOME/meshcraft" --rx "$repo/meshcraft"
+                                          --rx "$repo/studio" --rx "$GITCRAFT_STUDIO_HOME")   # department_* tools run the Studio
+  # studiocraft: its code + runtimes (venvs, voice models, Node packages) + MeshCraft's Blender for its Blender actions
+  [[ "$name" == studiocraft ]] && policy+=(--rx "$repo/studio" --rx "$GITCRAFT_STUDIO_HOME" --rx "$GITCRAFT_HOME/meshcraft")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done

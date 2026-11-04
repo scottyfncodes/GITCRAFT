@@ -1,0 +1,52 @@
+{
+ "title": "adventure_theme",
+ "tempo": 112,
+ "bars": 8,
+ "key": "D",
+ "scale": "dorian",
+ "chords_degrees": [
+  0,
+  3,
+  6,
+  4,
+  0,
+  3,
+  6,
+  4
+ ],
+ "sample_rate": 44100,
+ "loop": {
+  "start": 0,
+  "end": 756000,
+  "seconds": 17.1429
+ },
+ "stems": {
+  "bass": "stems/adventure_theme_bass.wav",
+  "pad": "stems/adventure_theme_pad.wav",
+  "lead": "stems/adventure_theme_lead.wav",
+  "arp": "stems/adventure_theme_arp.wav",
+  "drums": "stems/adventure_theme_drums.wav"
+ },
+ "intensity_levels": {
+  "low": [
+   "pad",
+   "bass"
+  ],
+  "mid": [
+   "pad",
+   "bass",
+   "drums",
+   "arp"
+  ],
+  "high": [
+   "bass",
+   "pad",
+   "lead",
+   "arp",
+   "drums"
+  ]
+ },
+ "mix": "adventure_theme.wav",
+ "midi": "adventure_theme.mid",
+ "usage": "Start every stem together on one AudioContext clock (loop=true, loopEnd=loop.seconds); fade stem gains to the level's set."
+}

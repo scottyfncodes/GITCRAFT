@@ -1,0 +1,263 @@
+{
+ "department": "materialcraft",
+ "action": "generate",
+ "studio": "1.0.0",
+ "status": "ok",
+ "out_dir": "materialcraft/brick",
+ "request": {
+  "material": "brick",
+  "resolution": 256,
+  "name": "brick",
+  "style": "toon",
+  "out_dir": "(acceptance)",
+  "scale": 1.0,
+  "dirt": 0,
+  "moss": 0,
+  "wear": 0,
+  "wet": 0,
+  "toon_bands": 4,
+  "normal_strength": 4.0,
+  "normal_convention": "opengl",
+  "tile_meters": 2.0
+ },
+ "created": "2026-11-03T22:31:16+00:00",
+ "seconds": 1.79,
+ "outputs": [
+  {
+   "path": "brick_basecolor.png",
+   "role": "basecolor",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "bfde93b7d114d788d9efc3a53ca908b64e3fcf6808a1a6299c1cb2645aee681a",
+   "bytes": 8810
+  },
+  {
+   "path": "brick_normal.png",
+   "role": "normal (opengl)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "f0085168f643f5eea166d7b4ff754d7a59e2ee576ab3e7e965f7971c9ee33efb",
+   "bytes": 51892
+  },
+  {
+   "path": "brick_roughness.png",
+   "role": "roughness",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "feb93b92926ec75d6f2224eb9f0bf2f880a9c8a8891da4027445b895218e2b4c",
+   "bytes": 566
+  },
+  {
+   "path": "brick_metallic.png",
+   "role": "metallic",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "39962cd5bc9f4f0446341d3e6e0c6c37336ddeb2e026a17a3d06bb6cb3266daf",
+   "bytes": 141
+  },
+  {
+   "path": "brick_ao.png",
+   "role": "ao",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "L",
+   "sha256": "d717726f74ce8369997388299e06641374af7c26046977f14102d64382911ce4",
+   "bytes": 27826
+  },
+  {
+   "path": "brick_height16.png",
+   "role": "height",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "I;16",
+   "sha256": "8814b2c8dcf639f1a55c7ca7a8dcf03ea479a1ed8e6dcb05828489e38b0cb644",
+   "bytes": 106078
+  },
+  {
+   "path": "brick_orm.png",
+   "role": "orm (R=AO G=roughness B=metallic, glTF)",
+   "format": "png",
+   "ok": true,
+   "width": 256,
+   "height": 256,
+   "mode": "RGB",
+   "sha256": "2560cb9d3c29ed4152e3e02aed787b53cd27afedbd3e20ecaa3e8aa72d6d1a5f",
+   "bytes": 37584
+  },
+  {
+   "path": "brick_tiled2x2.png",
+   "role": "preview",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "0ff706992ebfd44968ce0e901856b120750c75f2f12099ef0a68696f39e389bd",
+   "bytes": 23239
+  },
+  {
+   "path": "brick.material.json",
+   "role": "material",
+   "format": "json",
+   "ok": true,
+   "keys": [
+    "averages",
+    "emissiveTexture",
+    "name",
+    "normalTexture",
+    "occlusionTexture",
+    "pbrMetallicRoughness",
+    "three",
+    "tiling_m"
+   ],
+   "sha256": "92a9d7728925a0f5174af91167ff67ecd9ca6d6a3544e6659412cd22681d34ec",
+   "bytes": 749
+  },
+  {
+   "path": "brick_sphere.glb",
+   "role": "sample",
+   "format": "glb",
+   "ok": true,
+   "meshes": 1,
+   "nodes": 1,
+   "triangles": 4096,
+   "animations": [],
+   "materials": 1,
+   "sha256": "0b6519de3b49d9716403ae6609d64617d9c1a643b893a5a83dd3ceb27f4f78b6",
+   "bytes": 193136
+  },
+  {
+   "path": "brick_render.png",
+   "role": "render",
+   "format": "png",
+   "ok": true,
+   "width": 512,
+   "height": 512,
+   "mode": "RGB",
+   "sha256": "9bdf8d9143597dd707cf5b7b69cb6202b18d2fcc417712a05411c02eaf665527",
+   "bytes": 184567
+  }
+ ],
+ "checks": [
+  {
+   "name": "material sphere: Khronos glTF-Validator, 0 errors",
+   "ok": true,
+   "detail": {
+    "errors": 0,
+    "warnings": 1,
+    "first": [
+     "WARNING MESH_PRIMITIVE_GENERATED_TANGENT_SPACE: Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations. @ /meshes/0/primitives/0/material"
+    ]
+   }
+  },
+  {
+   "name": "material sphere: loads and renders in three.js r170",
+   "ok": true,
+   "detail": {
+    "meshes": 1,
+    "triangles": 4096,
+    "errors": null
+   }
+  },
+  {
+   "name": "tiles seamlessly (wrap step \u2264 1.5\u00d7 the 99th-percentile ordinary step, every map)",
+   "ok": true,
+   "detail": {
+    "basecolor": 0.969,
+    "height": 0.683,
+    "normal": 0.994,
+    "roughness": 0.0
+   }
+  },
+  {
+   "name": "normal map vectors are unit length",
+   "ok": true,
+   "detail": 0.0
+  },
+  {
+   "name": "maps are in range and not flat",
+   "ok": true,
+   "detail": 0.2241
+  }
+ ],
+ "tools": {
+  "studio_materials": {
+   "name": "GITCRAFT MaterialCraft generators",
+   "license": "same as GITCRAFT",
+   "version": "1.0"
+  },
+  "numpy": {
+   "name": "NumPy",
+   "license": "BSD-3-Clause",
+   "version": "2.5.4"
+  },
+  "three": {
+   "name": "three.js r170 (render check)",
+   "license": "MIT",
+   "version": "0.170.0"
+  },
+  "gltf_validator": {
+   "name": "Khronos glTF-Validator",
+   "license": "Apache-2.0",
+   "version": "2.0.0-dev.3.10"
+  }
+ },
+ "output_license": "Generated by GITCRAFT; owned by the requesting project",
+ "attribution": null,
+ "stages": [
+  {
+   "stage": "generated",
+   "seconds": 0.16,
+   "material": "brick"
+  }
+ ],
+ "notes": [],
+ "material": {
+  "name": "brick",
+  "pbrMetallicRoughness": {
+   "baseColorTexture": "brick_basecolor.png",
+   "metallicRoughnessTexture": "brick_orm.png",
+   "metallicFactor": 1.0,
+   "roughnessFactor": 1.0
+  },
+  "normalTexture": "brick_normal.png",
+  "occlusionTexture": "brick_orm.png",
+  "emissiveTexture": null,
+  "tiling_m": 2.0,
+  "three": {
+   "type": "MeshStandardMaterial",
+   "map": "brick_basecolor.png (SRGBColorSpace, RepeatWrapping)",
+   "normalMap": "brick_normal.png",
+   "roughnessMap": "brick_orm.png",
+   "metalnessMap": "brick_orm.png",
+   "aoMap": "brick_orm.png",
+   "displacementMap": "brick_height16.png (optional)",
+   "emissiveMap": null
+  },
+  "averages": {
+   "basecolor_srgb": [
+    0.605,
+    0.37,
+    0.245
+   ],
+   "roughness": 0.8,
+   "metallic": 0.0
+  }
+ }
+}
