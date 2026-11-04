@@ -97,7 +97,8 @@ scripts/install-studio.sh            # core: studio venv + Node runtime
 scripts/install-studio.sh voice      # + Kokoro voice (pip + ~115 MB GitHub release download, SHA-256 checked)
 scripts/install-studio.sh mocap      # + MediaPipe Pose for animcraft_mocap (pip + ~40 MB pinned models, SHA-256 checked;
                                      #   as root it also apt-installs the EGL/GLES libraries MediaPipe loads)
-scripts/install-studio.sh music      # opt-in: ACE-Step 1.5 for audiocraft_music_model (~10 GB; weights from huggingface.co)
+scripts/install-studio.sh music      # opt-in: ACE-Step 1.5 for audiocraft_music_model (~8 GB with CPU PyTorch; huggingface.co,
+                                     #   download.pytorch.org and download-r2.pytorch.org must be allowed)
 scripts/install-studio.sh unirig     # GPU machines only: UniRig for animcraft_autorig_ml (CUDA, weights from huggingface.co)
 scripts/install.sh meshcraft         # Blender, for animcraft / cinematiccraft / worldcraft sky / fxcraft destruction
 GITCRAFT_STUDIO=0                    # no Studio
@@ -204,7 +205,7 @@ copyleft/share-alike ones.
 
 - Default music is procedural (solid, loopable, editable via MIDI). `audiocraft_music_model` (ACE-Step 1.5,
   MIT) is opt-in: it needs `install-studio.sh music` with Hugging Face access and is slow without a GPU. Its
-  adapter was written against ACE-Step v0.1.8's documented API and is untested end to end here (no HF access).
+  adapter is tested end to end on CPU (no GPU): 10 s of music in about 40–70 s, run in bfloat16 so it fits in 16 GB of RAM.
 - `animcraft_mocap` is monocular: one person, no root travel (hip-centred landmarks), no fingers or face.
 - `animcraft_autorig_ml` (UniRig) needs an NVIDIA GPU; its installer and adapter are untested on CPU-only machines.
 - AnimCraft rigs from landmarks: expects a T/A-pose humanoid facing forward, a level quadruped, or a straight

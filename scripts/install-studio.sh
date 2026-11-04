@@ -134,7 +134,10 @@ music() {
   (cd "$SH/ace-step" && HF_HOME="$SH/ace-step/hf-cache" timeout "$BIG_LIMIT" .venv/bin/python -c '
 from huggingface_hub import snapshot_download
 snapshot_download("ACE-Step/Ace-Step1.5", local_dir="checkpoints",
-                  allow_patterns=["acestep-v15-turbo/*", "vae/*", "Qwen3-Embedding-0.6B/*"])') >>"$log" 2>&1 ||
+                  allow_patterns=["acestep-v15-turbo/*", "vae/*", "Qwen3-Embedding-0.6B/*"])
+# ACE-Step keeps model code next to the weights; sync it now (the sandboxed runs cannot write here)
+from acestep.model_downloader import _sync_model_code_files
+_sync_model_code_files("acestep-v15-turbo", "checkpoints")') >>"$log" 2>&1 ||
     { echo "gitcraft-studio: ACE-Step checkpoint download failed (see $log)" >&2; return 1; }
   command -v nvidia-smi >/dev/null || echo "gitcraft-studio: no NVIDIA GPU: audiocraft_music_model runs on CPU (minutes per 30 s)" >&2
   echo "gitcraft-studio: music ready (ACE-Step 1.5 turbo; audiocraft_music_model)"

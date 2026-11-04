@@ -141,7 +141,7 @@ but not practical here/now; REJECT = paid, restricted, abandoned, unsuitable or 
 | TestCraft | Playwright, Chromium, Khronos validator, own diff | 8 actions | smoke on desktop/phone/tablet; play with coin + wall-collision assertions and MP4 capture; 60 fps profile; baseline + regression detection; 133-file asset audit |
 | AssetCraft | SQLite catalogue | 12 actions | scan; exact + near duplicates; unused; dependencies; NC licence flagged + ATTRIBUTION.md; versioning; refuses overwrite; 14 3D-library versions synced (197 files); HTML catalogue |
 | AnimCraft (Nov 2026) | MediaPipe Pose Landmarker 1.2.2 (Apache-2.0), own BVH solver | `mocap` | 12-frame video → 21-joint BVH: own FK and Blender's importer both match the landmarks (0.0° limb error), retargeted onto the auto-rigged hero and played in three.js; single photo → eased pose clip |
-| AudioCraft (Nov 2026) | ACE-Step 1.5 v0.1.8 (MIT), opt-in | `music_model` | reports `blocked` here (no HF access, no GPU); adapter follows the documented `generate_music` API, DiT only |
+| AudioCraft (Nov 2026) | ACE-Step 1.5 v0.1.8 (MIT), opt-in | `music_model` | **works on CPU**: 10 s clips in ~40–70 s (DiT turbo, LM off, bfloat16 to fit 16 GB RAM), measured length/level/clipping; tested through the sandboxed launcher |
 | AnimCraft (Nov 2026) | UniRig (MIT), GPU only | `autorig_ml` | reports `blocked` here (no NVIDIA GPU); runs UniRig's own skeleton/skin/merge scripts |
 | FXCraft (Nov 2026) | three.quarks 0.16.0 (MIT) | `quarks` | systems serialised, reloaded with QuarksLoader and simulated in Chromium; usage snippet |
 | LevelCraft (Nov 2026) | LDtk 1.5.3 JSON schema (MIT) | `formats: ["ldtk"]` | every level validates against the official schema and reads back to the same tiles, collision and entities |
@@ -188,7 +188,7 @@ Kdenlive (GUI-only/redundant), "LibreTerrain" (does not exist), Tiled CLI and DA
 | Kokoro model files (int8 ONNX + voices) | `~/.gitcraft/studio/models/kokoro` | 115 MB |
 | mocap venv (mediapipe, OpenCV) + pose models (full, heavy) | `~/.gitcraft/studio/mocap-venv`, `models/mediapipe` | ~400 MB + 40 MB |
 | three.quarks (Node) | `~/.gitcraft/studio/node` | ~1 MB |
-| ACE-Step (opt-in) | `~/.gitcraft/studio/ace-step` | ~10 GB with CUDA PyTorch and weights |
+| ACE-Step (opt-in) | `~/.gitcraft/studio/ace-step` | ~8 GB on CPU machines (CPU PyTorch + DiT turbo, VAE, text encoder); more with CUDA PyTorch |
 | UniRig (GPU only) | `~/.gitcraft/studio/unirig` | several GB |
 | catalogue + thumbnails | `~/.gitcraft/assetcraft` | grows with assets (KBs per asset) |
 | Repo additions | `studio/`, `tests/test_studio.py`, fixture game, docs, `acceptance/studio` (curated proofs) | code ~300 KB; acceptance package a few MB |
