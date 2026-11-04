@@ -55,6 +55,12 @@
    "version": "kokoro-v1.0.int8",
    "source": "https://github.com/thewh1teagle/kokoro-onnx",
    "note": "espeak-ng (GPL-3.0) is used for phonemisation as a runtime library in a separate venv; nothing GPL is committed or linked into GITCRAFT code; generated speech carries no licence obligation"
+  },
+  "ace_step": {
+   "name": "ACE-Step 1.5 (text → music DiT, acestep-v15-turbo, 8 steps; LM off)",
+   "license": "MIT (code and weights)",
+   "version": "v0.1.8 (ace-step 1.5.0)",
+   "source": "https://github.com/ace-step/ACE-Step-1.5"
   }
  },
  "dependencies": {
@@ -87,6 +93,21 @@
    "alternatives": [
     "Piper TTS (GPL-3.0 piper1-gpl; voices from Hugging Face, per-voice licences)",
     "espeak-ng alone (GPL-3.0, robotic formant voice)"
+   ]
+  },
+  "ace_step": {
+   "kind": "venv",
+   "python": "{STUDIO_HOME}/ace-step/.venv/bin/python",
+   "module": "ace_step",
+   "license": "MIT",
+   "weights_dirs": [
+    "{STUDIO_HOME}/ace-step/checkpoints/acestep-v15-turbo",
+    "{STUDIO_HOME}/ace-step/checkpoints/vae",
+    "{STUDIO_HOME}/ace-step/checkpoints/Qwen3-Embedding-0.6B"
+   ],
+   "install": "scripts/install-studio.sh music  (opt-in: ~10 GB with PyTorch; weights from huggingface.co, which the environment's network policy must allow)",
+   "alternatives": [
+    "audiocraft_music (GITCRAFT's own deterministic synth: loops and stems, no model)"
    ]
   }
  },
@@ -686,6 +707,87 @@
     "measure",
     "loudness check"
    ]
+  },
+  "music_model": {
+   "summary": "Opt-in neural music with ACE-Step 1.5: a prompt (and optional lyrics) → a full track, measured and encoded. Needs `install-studio.sh music`; a GPU makes it fast (CPU works, slowly).",
+   "requires": [
+    "numpy",
+    "ffmpeg",
+    "ace_step"
+   ],
+   "params": {
+    "type": "object",
+    "required": [
+     "prompt"
+    ],
+    "properties": {
+     "prompt": {
+      "type": "string",
+      "description": "style caption, e.g. 'upbeat chiptune boss battle, 160 bpm, square leads'"
+     },
+     "lyrics": {
+      "type": "string",
+      "description": "optional lyrics with [verse]/[chorus] tags; empty = instrumental"
+     },
+     "duration": {
+      "type": "number",
+      "default": 30,
+      "minimum": 5,
+      "maximum": 240
+     },
+     "bpm": {
+      "type": "integer",
+      "minimum": 40,
+      "maximum": 240
+     },
+     "key": {
+      "type": "string",
+      "description": "e.g. 'C minor'"
+     },
+     "model": {
+      "type": "string",
+      "enum": [
+       "acestep-v15-turbo"
+      ],
+      "default": "acestep-v15-turbo"
+     },
+     "steps": {
+      "type": "integer",
+      "default": 8,
+      "minimum": 4,
+      "maximum": 60
+     },
+     "formats": {
+      "type": "array",
+      "default": [
+       "wav",
+       "ogg"
+      ],
+      "items": {
+       "type": "string"
+      }
+     },
+     "timeout": {
+      "type": "integer",
+      "default": 3600,
+      "minimum": 60,
+      "maximum": 7200
+     }
+    }
+   },
+   "outputs": [
+    "<name>.wav/.ogg",
+    "<name>_waveform.png"
+   ],
+   "keywords": [
+    "ace-step",
+    "neural music",
+    "ai music",
+    "song",
+    "lyrics",
+    "vocals",
+    "soundtrack from prompt"
+   ]
   }
  },
  "examples": [
@@ -748,6 +850,7 @@
  "limits": [
   "Music is procedural (a solid loopable bed with MIDI to refine), not a human composition or a generative-model track.",
   "Kokoro reads English best; other languages need espeak-ng's voices and may mispronounce names.",
-  "ACE-Step and Stable Audio Open are deferred: they need a GPU and Hugging Face downloads (see docs/studio-acquisition.md)."
+  "ACE-Step and Stable Audio Open are deferred: they need a GPU and Hugging Face downloads (see docs/studio-acquisition.md).",
+  "music_model (ACE-Step) is opt-in and needs its weights from huggingface.co; without a GPU it runs on CPU, minutes per 30 s; outputs are MIT-licensed model output (check vocals/lyrics for likeness)"
  ]
 }

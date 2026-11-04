@@ -11,6 +11,15 @@ Actions whose runtime is not installed must report `blocked` (never a fake resul
 as SKIP with the reason, not counted as passes. Exit 1 on any failure."""
 import json, os, shutil, subprocess, sys, tempfile, time
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(HERE)
+# the harness itself makes and compares images (Pillow, numpy): use the Studio's venv when this Python lacks them
+try:
+    import numpy, PIL  # noqa: F401
+except ImportError:
+    _vpy = os.path.join(os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.expanduser("~/.gitcraft/studio"), "venv", "bin", "python")
+    # compare prefixes: a venv's python is a symlink to the same interpreter binary
+    if os.access(_vpy, os.X_OK) and os.path.realpath(sys.prefix) != os.path.realpath(os.path.dirname(os.path.dirname(_vpy))):
+        os.execv(_vpy, [_vpy] + sys.argv)
+    raise
 sys.path.insert(0, HERE)
 from mcp_client import Client
 
@@ -62,6 +71,23 @@ def run(tool, args, label, need=None, timeout=1800, expect_checks=True):
     return r if good else None
 
 
+def mocap_take(target):
+    """AnimCraft mocap on a real photo (MediaPipe's own test image, fetched at test time) turned into a short
+    swaying clip: landmarks → BVH → Blender import → retarget onto the auto-rigged hero."""
+    if not ready("animcraft", "mocap"): return skip("animcraft: mocap", depts["animcraft"]["actions"].get("mocap"))
+    import subprocess, urllib.request
+    d = f"{ws}/anim/mocap_src"; os.makedirs(d, exist_ok=True); jpg = f"{d}/pose.jpg"
+    try: urllib.request.urlretrieve("https://storage.googleapis.com/mediapipe-assets/pose.jpg", jpg)
+    except Exception as e: return skip("animcraft: mocap", f"test photo unreachable ({e})")
+    for i, a in enumerate([0, 4, 8, 12, 8, 4, 0, -4, -8, -12, -8, -4]):
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", jpg, "-vf", f"rotate={a}*PI/180:fillcolor=white,scale=640:-2", f"{d}/f_{i:02d}.png"], check=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-framerate", "12", "-i", f"{d}/f_%02d.png", "-pix_fmt", "yuv420p", f"{d}/take.mp4"], check=True)
+    r = run("animcraft_mocap", {"input": f"{d}/take.mp4", "fps": 12, "target": target, "out_dir": f"{ws}/anim/mocap", "name": "take"},
+            "animcraft: mocap video → BVH (FK + Blender checked) → retargeted onto the hero", need=True)
+    if r: check("animcraft: mocap BVH has every frame", r["mocap"]["bvh"]["frames"] == 12 and r["mocap"]["detected_frames"] >= 10, r["mocap"])
+    run("animcraft_mocap", {"input": jpg, "out_dir": f"{ws}/anim/mocap_still", "name": "still"}, "animcraft: mocap from a single photo (eased pose clip)", need=True)
+
+
 # ---- AudioCraft
 r = run("audiocraft_sfx", {"preset": "coin", "variations": 2, "out_dir": f"{ws}/audio/sfx"}, "audiocraft: sfx (2 variations, WAV + OGG, measured)", need=True)
 if r: check("audiocraft: sfx registered in the catalogue", r.get("catalog", {}).get("registered", 0) >= 4, r.get("catalog"))
@@ -97,11 +123,15 @@ if r: check("materialcraft: seam got smaller", r["seam"]["after"] < r["seam"]["b
 
 # ---- LevelCraft
 for kind, size in (("dungeon", (48, 36)), ("platformer", (96, 20)), ("overworld", (64, 48))):
-    run("levelcraft_generate", {"kind": kind, "width": size[0], "height": size[1], "seed": 3, "out_dir": f"{ws}/levels/{kind}"}, f"levelcraft: {kind} solved, Tiled TMJ loads in Phaser 3, blockout GLB", need=True)
+    r = run("levelcraft_generate", {"kind": kind, "width": size[0], "height": size[1], "seed": 3, "out_dir": f"{ws}/levels/{kind}"},
+            f"levelcraft: {kind} solved, Tiled TMJ loads in Phaser 3, LDtk validates + reads back, blockout GLB", need=True)
+    if r: check(f"levelcraft: {kind} LDtk project written", any(o["path"].endswith(".ldtk") for o in r["outputs"]), [o["path"] for o in r["outputs"]])
 
 # ---- FXCraft
 r = run("fxcraft_flipbook", {"effect": "fire", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/fire"}, "fxcraft: fire flipbook loops exactly", need=True)
 run("fxcraft_emitter", {"effect": "explosion", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/boom"}, "fxcraft: explosion emitter plays in three.js", need=True)
+r = run("fxcraft_quarks", {"effect": "magic", "frames": 16, "frame_size": 64, "out_dir": f"{ws}/fx/quarks"}, "fxcraft: three.quarks system reloads with QuarksLoader and simulates", need=True)
+if r: check("fxcraft: three.quarks JSON + usage written", {".quarks.json", ".quarks.usage.json"} <= {o["path"][o["path"].index(".quarks"):] for o in r["outputs"] if ".quarks" in o["path"]})
 
 # ---- TestCraft
 run("testcraft_smoke", {"target": GAME, "viewports": ["desktop", "phone"], "out_dir": f"{ws}/qa/smoke"}, "testcraft: smoke test on desktop + phone", need=True)
@@ -127,6 +157,7 @@ if not QUICK:
         run("animcraft_autorig", {"input": f"{ws}/anim/demo/demo_humanoid.glb", "naming": "mixamo", "out_dir": f"{ws}/anim/rig", "name": "hero_mixamo"}, "animcraft: Mixamo-named rig", need=True)
         run("animcraft_retarget", {"source": f"{ws}/anim/clips/hero_anim.glb", "clip": "walk", "target": f"{ws}/anim/rig/hero_mixamo.glb", "out_dir": f"{ws}/anim/retarget"},
             "animcraft: retarget walk across bone naming schemes", need=True)
+        mocap_take(f"{ws}/anim/rig/hero.glb")
         run("animcraft_spritesheet", {"input": f"{ws}/anim/clips/hero_anim.glb", "clips": ["walk"], "directions": 2, "frames": 4, "size": 64, "samples": 4, "out_dir": f"{ws}/anim/sprites"},
             "animcraft: sprite sheets from a 3D clip", need=True)
     run("animcraft_physics", {"count": 4, "frames": 48, "out_dir": f"{ws}/anim/physics"}, "animcraft: rigid-body drop settles on the ground", need=True)
@@ -167,7 +198,7 @@ c.close()
 # ---- routing (no runtime needed)
 c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=env)
 for brief, want in (("a seamless rain ambience", ("audiocraft", "ambience")), ("mossy cobblestone texture", ("materialcraft", "generate")), ("explosion sprite sheet for phaser", ("fxcraft", "flipbook")),
-                    ("rig my character", ("animcraft", "autorig")), ("check fps on mobile", ("testcraft", "perf")), ("golden hour orbit cutscene", ("cinematiccraft", "shot")),
+                    ("rig my character", ("animcraft", "autorig")), ("motion capture from a video of me dancing", ("animcraft", "mocap")), ("record gameplay video of my game", ("cinematiccraft", "capture")), ("check fps on mobile", ("testcraft", "perf")), ("golden hour orbit cutscene", ("cinematiccraft", "shot")),
                     ("a roguelike dungeon level", ("levelcraft", "generate")), ("find unused assets", ("assetcraft", "unused")), ("sunset skybox", ("worldcraft", "sky"))):
     ok, r = c.call("route", {"brief": brief}); ch = r.get("chosen") or {}
     check(f"route: {brief!r} → {want[0]}.{want[1]}", (ch.get("department"), ch.get("action")) == want, (ch.get("department"), ch.get("action")))
@@ -188,6 +219,27 @@ if os.access(os.path.expanduser("~/.gitcraft/meshcraft/venv/bin/python"), os.X_O
     f.close()
 else:
     skip("forgecraft department tools", "MeshCraft's Blender is not installed, so ForgeCraft is not registered")
+
+# ---- deferred start: studiocraft registered before its runtime exists (a cut-off or not-yet-run Studio install)
+early = os.path.join(ws, "studio-home-early"); shutil.rmtree(early, ignore_errors=True); os.makedirs(early)
+envd = dict(env, GITCRAFT_STUDIO_HOME=early)
+c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=envd, log=os.path.join(ws, "studiocraft-early.log"))
+names = [t["name"] for t in c.tools()]
+check("deferred: without its runtime studiocraft starts and lists only studio_status", names == ["studio_status"], names)
+ok, r = c.call("studio_status"); check("deferred: studio_status says how to install", ok and "install.sh studiocraft" in r.get("how_to_install", ""), r)
+real = os.path.join(os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.expanduser("~/.gitcraft/studio"), "venv")
+subprocess.run(["cp", "-a", real, os.path.join(early, "venv.part")], check=True); os.rename(os.path.join(early, "venv.part"), os.path.join(early, "venv"))
+note, end = None, time.time() + 30
+while time.time() < end and note is None:
+    try: m = c.q.get(timeout=2)
+    except Exception: continue
+    if m and m.get("method") == "notifications/tools/list_changed": note = m
+check("deferred: announces tools/list_changed when the runtime lands", note is not None)
+names = [t["name"] for t in c.tools()]
+check("deferred: the same server now lists every department tool", "audiocraft_sfx" in names and len(names) >= 50, len(names))
+ok, r = c.call("audiocraft_sfx", {"preset": "blip", "out_dir": f"{ws}/deferred/sfx"})
+check("deferred: the same server runs a department action through the new runtime", ok and r.get("status") == "ok", r if not ok else r.get("error"))
+c.close(); shutil.rmtree(early, ignore_errors=True)
 
 n_ok = sum(ok for _, ok in results)
 print(f"\n{n_ok}/{len(results)} checks passed (outputs in {ws})")

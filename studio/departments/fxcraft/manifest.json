@@ -2,7 +2,7 @@
  "name": "fxcraft",
  "version": "1.0.0",
  "title": "FXCraft — visual effects",
- "summary": "Game-ready effects: flipbook atlases from particle simulations (fire, smoke, magic, energy/portal, rain, snow loops that repeat exactly; explosion, sparks, dust, splash, lightning, debris one-shots) with Phaser/PixiJS atlas JSON, GIF and MP4 previews; portable emitter presets (.fx.json) with a dependency-free three.js runtime, played in three.js r170; Blender Voronoi destruction with baked rigid-body physics as an animated GLB.",
+ "summary": "Game-ready effects: flipbook atlases from particle simulations (fire, smoke, magic, energy/portal, rain, snow loops that repeat exactly; explosion, sparks, dust, splash, lightning, debris one-shots) with Phaser/PixiJS atlas JSON, GIF and MP4 previews; portable emitter presets (.fx.json) with a dependency-free three.js runtime, played in three.js r170; three.quarks particle systems (QuarksLoader JSON); Blender Voronoi destruction with baked rigid-body physics as an animated GLB.",
  "keywords": [
   "effect",
   "effects",
@@ -69,6 +69,12 @@
    "name": "Blender 5.2 (bpy) — bmesh bisect fracture, Bullet rigid bodies",
    "license": "GPL-2.0-or-later (outputs are not covered)",
    "version": "5.2.3"
+  },
+  "three_quarks": {
+   "name": "three.quarks 0.16.0 (particle system library for three.js)",
+   "license": "MIT",
+   "version": "0.16.0",
+   "source": "https://github.com/Alchemist0823/three.quarks"
   }
  },
  "dependencies": {
@@ -111,6 +117,12 @@
    "kind": "blender",
    "license": "GPL-2.0-or-later",
    "install": "scripts/install.sh meshcraft"
+  },
+  "three_quarks": {
+   "kind": "node_module",
+   "path": "{STUDIO_HOME}/node/node_modules/three.quarks",
+   "license": "MIT",
+   "install": "scripts/install-studio.sh"
   }
  },
  "actions": {
@@ -349,6 +361,87 @@
     "smash",
     "crumble"
    ]
+  },
+  "quarks": {
+   "summary": "The effect as a three.quarks particle system: flipbook + QuarksLoader JSON (made by three.quarks' own toJSON), reloaded and played in three.js r170.",
+   "requires": [
+    "numpy",
+    "pillow",
+    "ffmpeg",
+    "three",
+    "three_quarks",
+    "browser"
+   ],
+   "keywords": [
+    "three.quarks",
+    "quarks",
+    "quarks json",
+    "particle system json"
+   ],
+   "params": {
+    "type": "object",
+    "required": [
+     "effect"
+    ],
+    "properties": {
+     "effect": {
+      "type": "string",
+      "enum": [
+       "fire",
+       "smoke",
+       "magic",
+       "energy",
+       "rain",
+       "snow",
+       "explosion",
+       "sparks",
+       "dust",
+       "splash",
+       "lightning",
+       "debris"
+      ]
+     },
+     "frames": {
+      "type": "integer",
+      "default": 32
+     },
+     "frame_size": {
+      "type": "integer",
+      "default": 128
+     },
+     "fps": {
+      "type": "integer",
+      "default": 24
+     },
+     "columns": {
+      "type": "integer"
+     },
+     "color": {
+      "type": "array",
+      "items": {
+       "type": "integer"
+      }
+     },
+     "intensity": {
+      "type": "number",
+      "default": 1.0
+     },
+     "max_particles": {
+      "type": "integer",
+      "default": 256,
+      "minimum": 1,
+      "maximum": 20000
+     },
+     "overrides": {
+      "type": "object",
+      "description": "emitter fields: rate, burst, lifetime, speed, direction, spread_deg, gravity, size, alpha, area, drag"
+     },
+     "check_seconds": {
+      "type": "number",
+      "default": 2.0
+     }
+    }
+   }
   }
  },
  "examples": [

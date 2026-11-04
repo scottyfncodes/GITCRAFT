@@ -48,11 +48,11 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
     elif [[ "$(last_state studiocraft)" == off || "$GITCRAFT_STUDIO" != 1 ]]; then
       say "$(printf '  %-13s %-10s %-11s %s' "$name" off off "skipped (GITCRAFT_STUDIO=0)")"; continue
     elif [[ "$(last_state studiocraft)" == pending || "$(last_state studiocraft)" == failed ]]; then
-      inst=PARTIAL   # registered only once its venv is complete, so "not registered" is expected here
+      inst=PARTIAL   # registered anyway: it lists a status tool until the runtime lands, then announces its tools
       if [[ "$(last_state studiocraft)" == failed ]]; then
         problems+=("studiocraft: the Studio install failed (see $GITCRAFT_LOG/studio.log). Fix that and run scripts/install.sh studiocraft, or set GITCRAFT_STUDIO=0")
       else
-        problems+=("studiocraft: the Studio install didn't finish (often a setup script that ran out of time); the 2D tools are unaffected. The SessionStart hook finishes it in the background, or run scripts/install.sh studiocraft")
+        problems+=("studiocraft: the Studio install didn't finish (often a setup script that ran out of time); the 2D tools are unaffected. studiocraft is registered and announces its tools once the SessionStart hook finishes it in the background, or run scripts/install.sh studiocraft")
       fi
     else inst=NO; fi
   else

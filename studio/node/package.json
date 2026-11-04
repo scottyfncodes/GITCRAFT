@@ -1,10 +1,11 @@
 {
   "name": "gitcraft-studio-node",
   "private": true,
-  "description": "Browser-side runtimes for GITCRAFT Studio checks: three.js (engine previews of materials, terrain, FX, blockouts) Phaser 3 (Tiled map loading) and the Khronos glTF-Validator. Installed into ~/.gitcraft/studio/node by scripts/install-studio.sh; nothing here is copied into projects.",
+  "description": "Browser-side runtimes for GITCRAFT Studio checks: three.js (engine previews of materials, terrain, FX, blockouts) Phaser 3 (Tiled map loading) the Khronos glTF-Validator and three.quarks (FXCraft emitter export). Installed into ~/.gitcraft/studio/node by scripts/install-studio.sh; nothing here is copied into projects.",
   "dependencies": {
     "phaser": "3.90.0",
     "three": "0.170.0",
-    "gltf-validator": "2.0.0-dev.3.10"
+    "gltf-validator": "2.0.0-dev.3.10",
+    "three.quarks": "0.16.0"
   }
 }

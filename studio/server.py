@@ -10,10 +10,36 @@ Tools are generated from the department manifests: one `<department>_<action>` t
   route                which department/action fits a brief (3D modelling goes to ForgeCraft)
   run                  run any department action by name (what ForgeCraft's department_run calls)
 
-ForgeCraft exposes the same through `departments`, `department_route` and `department_run`."""
-import json, os, platform, sys, threading, traceback
+ForgeCraft exposes the same through `departments`, `department_route` and `department_run`.
+
+Deferred start (like MeshCraft's, gitcraft3d/deferred.py): studiocraft is registered before its runtime is
+installed, because Claude Code reads MCP servers only when a session starts. Without the studio venv the
+launcher starts this server on the system Python; it answers at once with a single `studio_status` tool that
+says how to install, watches for the install to finish, then sends `notifications/tools/list_changed` and runs
+every department action through the venv (`cli.py --call`). The next session starts on the venv directly."""
+import glob, json, os, platform, subprocess, sys, threading, time, traceback
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from core import VERSION, contract, routing, roots
+from core import STUDIO_HOME, VERSION, contract, routing, roots
+
+VENV_PY = os.path.join(STUDIO_HOME, "venv", "bin", "python")
+# this process is the Studio venv's Python (the system Python may have numpy too, but not the pinned runtime)
+IN_VENV = os.path.realpath(sys.prefix) == os.path.realpath(os.path.dirname(os.path.dirname(VENV_PY)))
+
+
+def runtime_ready():
+    root = os.path.dirname(os.path.dirname(VENV_PY))
+    return os.access(VENV_PY, os.X_OK) and bool(glob.glob(os.path.join(root, "lib", "python*", "site-packages", "numpy-*.dist-info")))
+
+
+def deferred():
+    """True while the Studio runtime is missing (this process lists only studio_status)."""
+    return not IN_VENV and not runtime_ready()
+
+
+INSTALL_HINT = ("The Studio runtime (~/.gitcraft/studio: numpy, Pillow, Node packages) isn't installed yet, so only this status "
+                "tool is listed. Install it with `~/.gitcraft/runtime/scripts/install.sh studiocraft` (about a minute; the SessionStart "
+                "hook also does it in the background). When it finishes, this server announces its full tool list "
+                "(tools/list_changed) and this session sees the department tools without /mcp.")
 
 COMMON = {"out_dir": {"type": "string", "description": "output folder inside a GITCRAFT root (default <root>/gitcraft-out/<department>/<name>)"},
           "name": {"type": "string", "description": "file stem for the outputs"}, "seed": {"type": "integer", "description": "deterministic seed"},
@@ -31,6 +57,8 @@ def _hardware():
 
 
 def tools():
+    if deferred():
+        return [("studio_status", "GITCRAFT Studio status. " + INSTALL_HINT, {"type": "object", "properties": {}})]
     out = [
         ("studio_status", "Every GITCRAFT Studio department (audiocraft, animcraft, worldcraft, fxcraft, materialcraft, levelcraft, cinematiccraft, testcraft, assetcraft), its actions and whether each can run on this machine, with the reason when not.", {"type": "object", "properties": {}}),
         ("department_describe", "One department's machine-readable manifest: actions with request schemas and outputs, dependencies with live status, acquired tools and licences, examples, limits.",
@@ -51,8 +79,20 @@ def tools():
 
 def call(name, args):
     args = dict(args or {})
+    if deferred():
+        if name == "studio_status": return {"studio": VERSION, "state": "waiting for the Studio runtime", "how_to_install": INSTALL_HINT}
+        raise RuntimeError(INSTALL_HINT)
+    if not IN_VENV:   # started before the runtime existed: run through the venv (same code, one process per call)
+        r = subprocess.run([VENV_PY, os.path.join(HERE, "cli.py"), "--call", name, json.dumps(args)], capture_output=True, text=True,
+                           timeout=7200, env=dict(os.environ))
+        lines = r.stdout.strip().splitlines()
+        if r.returncode != 0 or not lines: raise RuntimeError(f"studio {name} failed: {(r.stderr or '')[-1500:]}")
+        return json.loads(lines[-1])
     if name == "studio_status":
-        return {"studio": VERSION, "roots": roots(), "hardware": _hardware(), "departments": contract.overview()}
+        return {"studio": VERSION, "roots": roots(), "hardware": _hardware(), "sandbox": os.environ.get("GITCRAFT_SANDBOX"),
+                "network": {"allowed_hosts": [h for h in (os.environ.get("GITCRAFT_NETGATE") or "").split(",") if h] or None,
+                            "note": "HTTPS to these hosts only, through netgate" if os.environ.get("GITCRAFT_NETGATE") else "no network"},
+                "departments": contract.overview()}
     if name == "department_describe": return contract.describe(args["department"])
     if name == "route": return routing.route(args.get("brief", ""))
     if name == "run": return contract.run(args["department"], args["action"], args.get("params") or {})
@@ -68,13 +108,19 @@ def main():
 
     def send(m):
         with lock: real_stdout.write(json.dumps(m, default=str) + "\n"); real_stdout.flush()
+
+    if deferred():   # announce the department tools once the runtime lands
+        def watch():
+            while not runtime_ready(): time.sleep(3)
+            send({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
+        threading.Thread(target=watch, daemon=True).start()
     for line in sys.stdin:
         try: msg = json.loads(line)
         except ValueError: continue
         mid, method, p = msg.get("id"), msg.get("method"), msg.get("params") or {}
         if mid is None: continue
         if method == "initialize":
-            send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": p.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {}},
+            send({"jsonrpc": "2.0", "id": mid, "result": {"protocolVersion": p.get("protocolVersion", "2025-06-18"), "capabilities": {"tools": {"listChanged": True}},
                   "serverInfo": {"name": "studiocraft", "version": VERSION},
                   "instructions": "GITCRAFT Studio departments (audio, animation, worlds, FX, materials, levels, cinematics, QA, assets). Start with studio_status or route; each <department>_<action> tool validates its request, reports `blocked` with the reason when a dependency is missing, validates and hashes every output, writes a .studio.json provenance record and registers outputs in the AssetCraft catalogue."}})
         elif method == "tools/list":

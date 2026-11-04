@@ -140,6 +140,11 @@ but not practical here/now; REJECT = paid, restricted, abandoned, unsuitable or 
 | CinematicCraft | Blender Cycles, FFmpeg, Playwright | 5 actions | island orbit + hero dolly shots with camera paths; storyboard PNG/PDF; title card; 7 s teaser with crossfades + music; gameplay capture |
 | TestCraft | Playwright, Chromium, Khronos validator, own diff | 8 actions | smoke on desktop/phone/tablet; play with coin + wall-collision assertions and MP4 capture; 60 fps profile; baseline + regression detection; 133-file asset audit |
 | AssetCraft | SQLite catalogue | 12 actions | scan; exact + near duplicates; unused; dependencies; NC licence flagged + ATTRIBUTION.md; versioning; refuses overwrite; 14 3D-library versions synced (197 files); HTML catalogue |
+| AnimCraft (Nov 2026) | MediaPipe Pose Landmarker 1.2.2 (Apache-2.0), own BVH solver | `mocap` | 12-frame video → 21-joint BVH: own FK and Blender's importer both match the landmarks (0.0° limb error), retargeted onto the auto-rigged hero and played in three.js; single photo → eased pose clip |
+| AudioCraft (Nov 2026) | ACE-Step 1.5 v0.1.8 (MIT), opt-in | `music_model` | reports `blocked` here (no HF access, no GPU); adapter follows the documented `generate_music` API, DiT only |
+| AnimCraft (Nov 2026) | UniRig (MIT), GPU only | `autorig_ml` | reports `blocked` here (no NVIDIA GPU); runs UniRig's own skeleton/skin/merge scripts |
+| FXCraft (Nov 2026) | three.quarks 0.16.0 (MIT) | `quarks` | systems serialised, reloaded with QuarksLoader and simulated in Chromium; usage snippet |
+| LevelCraft (Nov 2026) | LDtk 1.5.3 JSON schema (MIT) | `formats: ["ldtk"]` | every level validates against the official schema and reads back to the same tiles, collision and entities |
 | ForgeCraft | — | `departments`, `department_route`, `department_run` | discovers 9 departments, routes studio vs 3D, runs a department inside its own sandbox |
 
 Existing capabilities after the change: `test_policy.py`, `test_meshcraft.py`, `test_forgecraft.py` re-run
@@ -149,13 +154,12 @@ Existing capabilities after the change: `test_policy.py`, `test_meshcraft.py`, `
 
 | Deferred | Why | In place now |
 |---|---|---|
-| ACE-Step 1.5 music model | Hugging Face unreachable here; GPU recommended | procedural music with MIDI + stems |
-| UniRig | CUDA ≥ 8 GB, HF weights, skinning checkpoints pending | landmark rig + heat weights |
-| MediaPipe/FreeMoCap video mocap | model downloads / AGPL | retarget any BVH/FBX/Mixamo motion |
+| ACE-Step 1.5 (now an opt-in action) | needs `install-studio.sh music` + huggingface.co; GPU recommended | procedural music with MIDI + stems |
+| UniRig (now a GPU-only action) | CUDA ≥ 8 GB, HF weights | landmark rig + heat weights |
+| FreeMoCap multi-camera mocap | AGPL | MediaPipe single-camera mocap (`animcraft_mocap`) |
 | Infinigen | hours per scene, heavy install | numpy terrain + Blender sky |
 | Mantaflow fluid sims | minutes per effect on CPU | particle flipbooks |
-| Material Maker 1.5 CLI | needs a GPU rendering context | procedural PBR generators |
-| LDtk writer | format work, not a dependency | Tiled TMJ (+ LDtk's importers) |
+| Material Maker 1.5 CLI | its Linux build segfaulted exporting under Xvfb + Mesa (software GL) here; needs a desktop GPU context | procedural PBR generators |
 | EEVEE renders | GPU context | Cycles CPU |
 
 ## 4. Rejected
@@ -182,6 +186,10 @@ Kdenlive (GUI-only/redundant), "LibreTerrain" (does not exist), Tiled CLI and DA
 | Node runtime (three 0.170.0, phaser 3.90.0, gltf-validator) | `~/.gitcraft/studio/node` | ~180 MB |
 | voice venv (kokoro-onnx, onnxruntime, phonemizer, espeak-ng) | `~/.gitcraft/studio/voice-venv` | ~150 MB |
 | Kokoro model files (int8 ONNX + voices) | `~/.gitcraft/studio/models/kokoro` | 115 MB |
+| mocap venv (mediapipe, OpenCV) + pose models (full, heavy) | `~/.gitcraft/studio/mocap-venv`, `models/mediapipe` | ~400 MB + 40 MB |
+| three.quarks (Node) | `~/.gitcraft/studio/node` | ~1 MB |
+| ACE-Step (opt-in) | `~/.gitcraft/studio/ace-step` | ~10 GB with CUDA PyTorch and weights |
+| UniRig (GPU only) | `~/.gitcraft/studio/unirig` | several GB |
 | catalogue + thumbnails | `~/.gitcraft/assetcraft` | grows with assets (KBs per asset) |
 | Repo additions | `studio/`, `tests/test_studio.py`, fixture game, docs, `acceptance/studio` (curated proofs) | code ~300 KB; acceptance package a few MB |
 
@@ -189,15 +197,13 @@ Blender (MeshCraft) and Playwright/Chromium/FFmpeg were already present; nothing
 
 ## 7. Recommended next acquisitions
 
-1. **ACE-Step 1.5** (MIT) as an opt-in AudioCraft `music_model` action on machines with Hugging Face access
-   (and ideally a GPU); keep the procedural composer as the default and fallback.
-2. **MediaPipe Pose → BVH** for single-camera mocap into AnimCraft `retarget`.
-3. **LDtk project writer** in LevelCraft.
-4. **three.quarks** export target for FXCraft emitters.
-5. **Material Maker 1.5** CLI on desktop machines with a GPU (node-graph materials).
-6. **UniRig** for non-humanoid auto-rigging when a CUDA GPU is available.
-7. Per-host network allowances in the sandbox (instead of all-or-nothing) so model downloads can be
-   approved per domain.
+Done in November 2026: MediaPipe mocap, the LDtk writer, three.quarks export, ACE-Step and UniRig as
+opt-in/GPU actions, and per-host network allowances (netgate). Next:
+
+1. **Material Maker 1.5** CLI on a desktop machine with a GPU (its export crashed under software GL here).
+2. Run `audiocraft_music_model` and `animcraft_autorig_ml` end to end on a GPU machine with Hugging Face
+   access, and add them to `tests/test_studio.py` there.
+3. Multi-person and root-motion mocap (MediaPipe image-space hip track → root translation).
 
 ## Sources (licence/status checks, November 2026)
 
@@ -210,6 +216,9 @@ UniRig: [arXiv 2504.12451](https://arxiv.org/html/2504.12451) ·
 Cascadeur: [plans](https://cascadeur.com/plans), [education](https://cascadeur.com/education) ·
 Material Maker CLI: [docs](https://rodzill4.github.io/material-maker/doc/command_line.html), [1.5 release](https://digitalproduction.com/2026/01/26/material-maker-1-5-adds-dds-fbx-cli-10-new-nodes/) ·
 Infinigen: [docs](https://infinigen.cs.princeton.edu/docs/latest/), [arXiv 2306.09310](https://arxiv.org/abs/2306.09310) ·
-LDtk: [Chocolatey listing](https://chocolatey.org/packages/ldtk) ·
+LDtk: [Chocolatey listing](https://chocolatey.org/packages/ldtk), [1.5.3 JSON schema](https://ldtk.io/files/JSON_SCHEMA.json) ·
+MediaPipe Pose Landmarker: [guide](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker) ·
+ACE-Step 1.5: [repo, v0.1.8](https://github.com/ace-step/ACE-Step-1.5) ·
+UniRig: [repo](https://github.com/VAST-AI-Research/UniRig) ·
 FreeMoCap: [PyPI](https://pypi.org/project/freemocap/1.2.1/) ·
 terrain search ("LibreTerrain"): [Terra](https://github.com/open-terra/terra), [TerrainLib](https://terrainlib.readthedocs.io/en/develop/).

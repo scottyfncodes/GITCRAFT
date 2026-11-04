@@ -1,7 +1,7 @@
 """AudioCraft: game audio production. Synthesis is GITCRAFT's own deterministic engine
 (synth.py); speech is Kokoro-82M (Apache-2.0) in its own venv; editing, loudness and
 conversion are FFmpeg. Every output has a waveform preview and is measured after writing."""
-import json, os, sys
+import json, os, shutil, sys
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import synth, midi
@@ -262,7 +262,29 @@ def analyze(ctx, p):
     return {"outputs": [{"path": media.waveform_png(x, ctx.path(stem + "_waveform.png")), "role": "preview", "format": "png"},
                         {"path": rp, "role": "report", "format": "json"}], "analysis": res}
 
+def music_model(ctx, p):
+    """Opt-in neural music: ACE-Step 1.5 (MIT, DiT only, offline once installed). Slow without a GPU."""
+    d = deps.check_one("ace_step", MANIFEST["dependencies"]["ace_step"]); ctx.used("ace_step", "ffmpeg")
+    gpu = deps.check_one("gpu", {"kind": "gpu"})["available"]
+    if not gpu: ctx.note("no NVIDIA GPU: ACE-Step runs on CPU, expect minutes per 30 s of music")
+    root = os.path.join(STUDIO_HOME, "ace-step"); stem = p.get("name") or "song"; raw = ctx.path("_ace")
+    os.makedirs(raw, exist_ok=True)
+    r = runners.venv(d["python"], os.path.join(HERE, "acestep_gen.py"),
+                     {"root": root, "model": p["model"], "caption": p["prompt"], "lyrics": p.get("lyrics"), "duration": p["duration"], "bpm": p.get("bpm"),
+                      "keyscale": p.get("key"), "seed": ctx.seed, "steps": p["steps"], "device": "auto", "offload": not gpu, "out_dir": raw},
+                     timeout=p["timeout"], install="scripts/install-studio.sh music")
+    got = next((a["path"] for a in r["audios"] if a.get("path") and os.path.exists(a["path"])), None)
+    if not got: raise StudioError("ACE-Step reported success but wrote no audio file")
+    x = media.read_audio(got, sr=SR); x = synth.normalize(x, -1.0)
+    outs = _write(ctx, stem, x, p["formats"], "music"); m = _measure(x)
+    shutil.rmtree(raw, ignore_errors=True)
+    checks = [{"name": "length matches the request (±10 %)", "ok": abs(m["seconds"] - p["duration"]) <= 0.1 * p["duration"] + 0.5, "detail": m["seconds"]},
+              {"name": "not silent (RMS above -40 dBFS)", "ok": m["rms_dbfs"] > -40, "detail": m["rms_dbfs"]},
+              {"name": "no clipped samples", "ok": m["clipped_samples"] == 0, "detail": m["clipped_samples"]}]
+    return {"outputs": outs, "checks": checks, "measure": m, "engine": {"model": p["model"], "device": r.get("device"), "steps": p["steps"], "lm": "off (DiT only)"}}
+
+
 
 MANIFEST = json.load(open(os.path.join(HERE, "manifest.json")))
-ACTIONS = {"sfx": sfx, "ambience": ambience, "music": music, "voice": voice, "process": process, "convert": convert,
+ACTIONS = {"sfx": sfx, "ambience": ambience, "music": music, "music_model": music_model, "voice": voice, "process": process, "convert": convert,
            "loop": loop, "layer": layer, "analyze": analyze}

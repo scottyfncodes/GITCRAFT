@@ -1,0 +1,3 @@
+# AnimCraft mocap runtime (separate venv: ~/.gitcraft/studio/mocap-venv)
+# mediapipe Apache-2.0 (pulls numpy BSD-3, opencv-contrib-python Apache-2.0, matplotlib PSF-style, flatbuffers Apache-2.0, absl-py Apache-2.0)
+mediapipe==1.2.2

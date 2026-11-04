@@ -11,19 +11,31 @@ THREE_D = ["3d model", "3d", "mesh", "glb", "low-poly model", "model of", "sculp
 STOP = {"a", "an", "the", "for", "of", "to", "and", "with", "my", "me", "make", "create", "generate", "some", "that", "in", "on", "it", "is", "from", "this", "game"}
 
 
-def _hits(text, words):
-    return [w for w in words if re.search(r"(?<![a-z0-9])" + re.escape(w.lower()) + r"(?![a-z0-9])", text)]
+def _spans(text, w):
+    return [m.span() for m in re.finditer(r"(?<![a-z0-9])" + re.escape(w.lower()) + r"(?![a-z0-9])", text)]
+
+
+def _hits(text, words, phrases=()):
+    """Words found in the text, ignoring a hit that only occurs inside a longer phrase some manifest names
+    ("capture" inside "motion capture" is not a vote for gameplay capture)."""
+    out = []
+    for w in words:
+        sp = _spans(text, w)
+        if sp and any(not any(a <= s and e <= b and (b - a) > (e - s) for a, b in phrases) for s, e in sp): out.append(w)
+    return out
 
 
 def route(brief, limit=5):
     t = (brief or "").lower()
     cands = []
+    phrases = sorted({sp for d in contract.departments() for kw in contract.manifest(d).get("keywords", []) +
+                      [k for spec in contract.manifest(d)["actions"].values() for k in spec.get("keywords", [])] if " " in kw for sp in _spans(t, kw)})
     for d in contract.departments():
         m = contract.manifest(d)
-        dk = _hits(t, m.get("keywords", []))
+        dk = _hits(t, m.get("keywords", []), phrases)
         for a, spec in m["actions"].items():
             words = [a.replace("_", " ")] + spec.get("keywords", [])
-            ak = _hits(t, words)
+            ak = _hits(t, words, phrases)
             params, enum_hits = {}, []
             for pn, ps in spec.get("params", {}).get("properties", {}).items():
                 found = []

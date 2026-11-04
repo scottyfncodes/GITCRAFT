@@ -70,7 +70,7 @@ check("setup installs the user-level SessionStart hook", any("session-start.sh" 
 class Session:
     def __init__(self):
         cmd = ["claude", "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-               "--allowedTools", "mcp__meshcraft", "mcp__forgecraft", "--max-turns", "8"]
+               "--allowedTools", "mcp__meshcraft", "mcp__forgecraft", "mcp__studiocraft", "--max-turns", "8"]
         self.p = subprocess.Popen(cmd, cwd=proj, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
         self.q = queue.Queue()
         threading.Thread(target=self._read, daemon=True).start()
@@ -127,6 +127,15 @@ if a.mode == "session":
     started = open(log).read().splitlines()[0] if os.path.exists(log) else ""
     check("the global SessionStart hook started the Blender build in the background", "background build started" in started and "global" in started
           and "meshcraft" in started, started)
+    # StudioCraft: connected at session start, or (a slower first start) connects during the session and runs
+    studio_init = servers.get("studiocraft")
+    if studio_init == "connected":
+        check("session start: studiocraft connected", True)
+    else:
+        evs = s.ask("Call mcp__studiocraft__studio_status and say how many departments it lists.")
+        ran = [r for r in calls(evs) if r[0] == "mcp__studiocraft__studio_status" and not r[2]]
+        check(f"studiocraft connects in the same session and runs studio_status (status at session start: {studio_init})",
+              bool(ran) and '"departments"' in ran[0][1], [r[:1] + (r[1][:120],) for r in calls(evs)])
 
 else:
     # 2) MCP clients stand in for Claude Code: they connect to the registered servers before Blender exists
@@ -144,6 +153,11 @@ else:
     started = open(log).read().splitlines()[0] if os.path.exists(log) else ""
     check("the global SessionStart hook returns at once and starts the Blender build in the background",
           hr.returncode == 0 and "background build started" in started and "global" in started and "meshcraft" in started, (hr.stdout + hr.stderr)[-500:] or started)
+    r = reg.get("studiocraft", {})
+    sc = Client([r.get("command", "")] + r.get("args", []), env=dict(env, **r.get("env", {})), cwd=proj)
+    ok, sst = sc.call("studio_status"); sc.close()
+    check("studiocraft is registered and its studio_status runs from the other project", ok and len((sst or {}).get("departments", [])) == 9,
+          str(sst)[:200])
 
 # 3) wait for the build; time it
 t_hook = time.time()

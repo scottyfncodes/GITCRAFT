@@ -49,6 +49,6 @@ def node(script, args, timeout=300):
     return _run(["node", os.path.join(WEB_DIR, script)], args, timeout, f"browser ({script})", env)
 
 
-def venv(python, script, args, timeout=600):
-    if not os.access(python, os.X_OK): raise Blocked(f"runtime {python} is not installed", install="scripts/install-studio.sh voice")
+def venv(python, script, args, timeout=600, install="scripts/install-studio.sh voice"):
+    if not os.access(python, os.X_OK): raise Blocked(f"runtime {python} is not installed", install=install)
     return _run([python, "-I", script], args, timeout, os.path.basename(script))

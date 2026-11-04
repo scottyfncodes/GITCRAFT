@@ -4,6 +4,7 @@
 // The page is served at http://gc.local/ with:
 //   /three/...   three@0.170.0 (studio node runtime)     /phaser/...  phaser@3.90.0
 //   /files/<absolute path>  any file (the sandbox decides what is readable)
+//   /nm/<package>/...  any package in the studio node runtime (e.g. three.quarks, quarks.core)
 // The page sets window.__report = {...} and window.__done = true when finished.
 // Nothing is fetched from the network: unmatched requests are aborted and listed in the report.
 import { createRequire } from 'node:module';
@@ -35,6 +36,7 @@ try {
     if (u.pathname.startsWith('/three/')) file = path.join(nm, 'three', decodeURIComponent(u.pathname.slice(7)));
     else if (u.pathname.startsWith('/phaser/')) file = path.join(nm, 'phaser', decodeURIComponent(u.pathname.slice(8)));
     else if (u.pathname.startsWith('/files/')) file = decodeURIComponent(u.pathname.slice(6));
+    else if (u.pathname.startsWith('/nm/')) file = path.join(nm, decodeURIComponent(u.pathname.slice(4)));   // any studio node module
     if (!file || !existsSync(file)) return route.fulfill({ status: 404, body: 'not found' });
     return route.fulfill({ status: 200, contentType: MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', body: readFileSync(file) });
   });
