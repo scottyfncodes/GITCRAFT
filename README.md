@@ -37,7 +37,7 @@ Ten departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, three
 | **CinematicCraft** | camera moves rendered in Cycles + engine camera paths, storyboards, title cards, teasers, gameplay capture |
 | **TestCraft** | smoke, gameplay, FPS, visual regression, asset integrity and animation tests in Chromium |
 | **AssetCraft** | catalogue, versions, duplicates, unused assets, licences + ATTRIBUTION.md, safe integration |
-| **PLAYCRAFT** | game design and gameplay quality: plays the built game on desktop + phone, scores 10 categories with evidence levels, ranks improvements by genre (15 profiles), verifies changes with guardrails. "Run PLAYCRAFT on this game" — [docs/playcraft.md](docs/playcraft.md) |
+| **PLAYCRAFT** | game design and gameplay quality: plays the built game on desktop + phone, scores 10 categories with evidence levels, ranks improvements by genre (15 profiles), verifies changes with guardrails. "Run PLAYCRAFT on this game" — [docs/playcraft.md](docs/playcraft.md). Every run is kept in the **Game Quality History** (portfolio, baselines, measured progress, deployments): [docs/playcraft-history.md](docs/playcraft-history.md), page at `/games/` |
 
 ForgeCraft discovers and routes to them (`departments`, `department_route`, `department_run`). Docs: [docs/studio.md](docs/studio.md); how each tool was chosen, licensed and verified: [docs/studio-acquisition.md](docs/studio-acquisition.md). Proofs: `acceptance/studio/`. Test: `tests/test_studio.py`.
 

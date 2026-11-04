@@ -121,6 +121,8 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
   `scripts/mcp.sh` need updating to match if you add one.
 - `tests/test_studio.py` must pass after any change under `studio/` (`--quick` skips the Blender actions).
+- `tests/test_playcraft_history.py` must pass after any change to `studio/departments/playcraft/history.py`, its `ui/` or the
+  history actions; never rewrite or delete runs in `history/playcraft/` (the committed Game Quality History).
 - `tests/test_playcraft.py` must pass after any change under `studio/departments/playcraft/` or `studio/core/web/gamepage.mjs`;
   PLAYCRAFT never edits a game and never reports a score, test or regression it did not measure (`docs/playcraft.md`).
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`

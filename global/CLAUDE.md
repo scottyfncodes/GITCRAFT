@@ -34,7 +34,10 @@ difficulty, replayability) use PLAYCRAFT: "Run PLAYCRAFT on this game" and
 "Run the full GITCRAFT + PLAYCRAFT pass" follow the `playcraft` skill
 (studiocraft `playcraft_pass` / `playcraft_full_pass`, then `playcraft_verify`).
 It plays the built game, scores 10 categories with evidence levels and ranks
-improvements; never report a score or test that was not actually run.
+improvements; never report a score or test that was not actually run. Every
+run is kept in the Game Quality History (`playcraft_history`: one game's
+progress or the whole portfolio); only measured changes between commits count
+as improvement, and a deployment is recorded only with evidence.
 
 Project isolation:
 - The active project is whatever repo you are working in. Never assume it is

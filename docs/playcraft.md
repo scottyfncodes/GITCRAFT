@@ -160,6 +160,13 @@ and when the replay shows a regression that reproduces (a noise-prone regression
 | `tests/test_playcraft.py` | rules, three fixture games (physics, survival/exploration, arcade), verify cycle with guardrails, full pass, routing |
 | `tests/acceptance_playcraft.py` | the pass on real game repositories through the user-scope registration, from the game's folder |
 
+## Game Quality History
+
+Every run is recorded in a persistent, cross-repository history that compares it with the game's pinned baseline,
+tracks findings and regressions across runs, separates genuine improvement from measurement noise, and records
+deployments only with evidence. Portfolio questions, the Games page and the storage rules are documented in
+[playcraft-history.md](playcraft-history.md).
+
 ## Limitations
 
 - Builds are not run inside the sandbox (no package registry): build with the game's own toolchain and pass `target`.
