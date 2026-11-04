@@ -164,7 +164,8 @@ PY
 fi
 if [[ -f "$GITCRAFT_HOME/status.json" ]]; then
   # "later" is a deliberate deferral (the SessionStart hook installs it), not a failure
-  bad=$(python3 -c 'import json,os,sys;s=json.load(open(os.path.join(sys.argv[1],"status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state") not in ("ok","off","later")))' "$GITCRAFT_HOME" 2>/dev/null)
+  bad=$(python3 -c 'import json,os,sys;s=json.load(open(os.path.join(sys.argv[1],"status.json")));print(" ".join(k for k,v in s.get("tools",{}).items() if v.get("state") not in ("ok","off","later") and not k.startswith("studiocraft")))' "$GITCRAFT_HOME" 2>/dev/null)
+  # (studiocraft and its voice model have their own messages above)
   [[ -n "$bad" ]] && problems+=("last install reported failures for: $bad (see $GITCRAFT_LOG/install.log)")
 fi
 
