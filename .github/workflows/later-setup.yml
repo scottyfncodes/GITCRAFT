@@ -1,0 +1,53 @@
+name: GITCRAFT_MESHCRAFT=later end to end
+
+# Weekly proof that a cloud environment set up with GITCRAFT_MESHCRAFT=later still works: a fresh HOME runs
+# scripts/setup-env.sh (no Blender), MeshCraft and ForgeCraft connect before Blender exists, the user-level
+# SessionStart hook builds Blender in the background, and the already-running servers then list and run their full
+# tools. Catches breakage from new bpy wheels, Node/three updates, setup changes and, with an API key, Claude Code.
+#
+# Without the ANTHROPIC_API_KEY secret the test uses MCP clients in place of Claude Code (--mode mcp). With it, it also
+# drives a real `claude -p` session (--mode session).
+on:
+  schedule:
+    - cron: "41 6 * * 3" # Wednesdays
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/workflows/later-setup.yml", "tests/test_later_setup_session.py", "scripts/session-start.sh", "scripts/setup-env.sh"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: later-setup
+  cancel-in-progress: true
+
+jobs:
+  later:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13" # bpy publishes wheels for 3.11 and 3.13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Claude Code (only with an API key)
+        if: ${{ env.ANTHROPIC_API_KEY != '' }}
+        run: npm i -g @anthropic-ai/claude-code
+      - name: Setup with GITCRAFT_MESHCRAFT=later, then the background Blender build
+        shell: bash # -eo pipefail: the test's exit code survives the tee
+        run: |
+          git checkout -B "ci-later-${GITHUB_RUN_ID}"   # setup clones the committed branch of this checkout
+          python3 tests/test_later_setup_session.py --work "$RUNNER_TEMP/later" | tee "$RUNNER_TEMP/later.out"
+      - name: Logs
+        if: always()
+        run: |
+          tail -n 60 "$RUNNER_TEMP/later/home/.gitcraft/logs/install.log" || true
+          tail -n 40 "$RUNNER_TEMP/later/home/.gitcraft/logs/meshcraft.log" || true
