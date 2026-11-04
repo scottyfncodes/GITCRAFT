@@ -227,7 +227,7 @@ if os.access(os.path.expanduser("~/.gitcraft/meshcraft/venv/bin/python"), os.X_O
     f = Client([os.path.join(REPO, "scripts", "mcp.sh"), "forgecraft"], env=env, log=os.path.join(ws, "forgecraft.log"))
     names = {t["name"] for t in f.tools()}
     check("forgecraft exposes departments / department_route / department_run", {"departments", "department_route", "department_run"} <= names)
-    ok, r = f.call("departments"); check("forgecraft: departments lists all nine", ok and len(r["departments"]) == 9)
+    ok, r = f.call("departments"); check("forgecraft: departments lists all ten (incl. playcraft)", ok and len(r["departments"]) == 10 and any(d["department"] == "playcraft" for d in r["departments"]))
     ok, r = f.call("department_route", {"brief": "footstep sound effects"}); check("forgecraft: department_route picks audiocraft.sfx", ok and r["use"] == "studio" and r["studio"]["chosen"]["action"] == "sfx", r.get("next"))
     ok, r = f.call("department_route", {"brief": "a 3d model of a lighthouse"}); check("forgecraft: department_route keeps 3D models in the 3D pipeline", ok and r["use"] == "3d", r.get("next"))
     ok, r = f.call("department_run", {"department": "audiocraft", "action": "sfx", "params": {"preset": "footstep", "out_dir": f"{ws}/forge/sfx"}})
