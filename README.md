@@ -78,6 +78,13 @@ Before this, the two 3D servers were only registered once Blender was installed,
 | `GITCRAFT_STUDIO_VOICE=later` | voice model (~115 MB + onnxruntime) installed in the background at the first session; `audiocraft_voice` sees it on its next call |
 | `GITCRAFT_STUDIO_VOICE=0` | no voice model (`audiocraft_voice` reports blocked) |
 
+Motion capture (`animcraft_mocap`, ~440 MB) is not part of the default setup. To have it in every session, add a
+second line to the setup script; `|| true` keeps a failed download from stopping the session:
+
+```
+~/.gitcraft/runtime/scripts/install-studio.sh mocap || true
+```
+
 ### Workstation
 
 Run the same line once in a terminal. `~/.claude.json` and `~/.claude/` persist, so every later session in every project inherits it; run it again to update. Requirements: Linux x86_64 (prebuilt binaries), Python 3 (3.11/3.13 for MeshCraft), Node/npm (optional, for the 3D engine check), Linux 5.13+ for the kernel sandbox.

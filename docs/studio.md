@@ -96,7 +96,7 @@ in the background by the user-level SessionStart hook:
 scripts/install-studio.sh            # core: studio venv + Node runtime
 scripts/install-studio.sh voice      # + Kokoro voice (pip + ~115 MB GitHub release download, SHA-256 checked)
 scripts/install-studio.sh mocap      # + MediaPipe Pose for animcraft_mocap (pip + ~40 MB pinned models, SHA-256 checked;
-                                     #   needs the system EGL/GLES libraries: apt-get install libegl1 libgles2)
+                                     #   as root it also apt-installs the EGL/GLES libraries MediaPipe loads)
 scripts/install-studio.sh music      # opt-in: ACE-Step 1.5 for audiocraft_music_model (~10 GB; weights from huggingface.co)
 scripts/install-studio.sh unirig     # GPU machines only: UniRig for animcraft_autorig_ml (CUDA, weights from huggingface.co)
 scripts/install.sh meshcraft         # Blender, for animcraft / cinematiccraft / worldcraft sky / fxcraft destruction
