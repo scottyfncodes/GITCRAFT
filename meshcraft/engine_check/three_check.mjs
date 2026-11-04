@@ -13,7 +13,10 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) => (v.startsWith('--') ? a.concat([[v.slice(2), arr[i + 1]]]) : a), []));
 const require = createRequire(import.meta.url);
-const pwPath = [process.env.PLAYWRIGHT_MODULE, '/opt/node-tools/node_modules/playwright', 'playwright'].find((p) => { try { require.resolve(p); return true; } catch { return false; } });
+// `npm i -g playwright` lands next to this node binary (<prefix>/lib/node_modules), which require() does not search
+const globalPw = path.join(path.dirname(process.execPath), '..', 'lib', 'node_modules', 'playwright');
+const pwPath = [process.env.PLAYWRIGHT_MODULE, '/opt/node-tools/node_modules/playwright', 'playwright', globalPw].find((p) => { try { require.resolve(p); return true; } catch { return false; } });
+if (!pwPath) { console.error('Playwright not found: set PLAYWRIGHT_MODULE or npm i -g playwright'); process.exit(2); }
 const { chromium } = require(pwPath);
 const execPath = ['/opt/pw-browsers/chromium', process.env.CHROMIUM_PATH].find((p) => p && existsSync(p));
 
