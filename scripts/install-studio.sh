@@ -115,12 +115,28 @@ need_hf() {
 music() {
   command -v uv >/dev/null || { echo "gitcraft-studio: music needs uv (pip install uv)" >&2; return 1; }
   need_hf ACE-Step/Ace-Step1.5 || return 1
-  echo "gitcraft-studio: ACE-Step 1.5 $ACE_TAG → $SH/ace-step (PyTorch + weights: this takes a while)"
+  echo "gitcraft-studio: ACE-Step 1.5 $ACE_TAG → $SH/ace-step (PyTorch + ~6 GB of weights: this takes a while)"
   fetch_repo "$ACE_REPO" "$ACE_TAG" "$SH/ace-step" >>"$log" 2>&1 || { echo "gitcraft-studio: could not fetch $ACE_REPO@$ACE_TAG (see $log)" >&2; return 1; }
-  (cd "$SH/ace-step" && timeout "$BIG_LIMIT" uv sync -q) >>"$log" 2>&1 || { echo "gitcraft-studio: ACE-Step uv sync failed (see $log)" >&2; return 1; }
-  (cd "$SH/ace-step" && HF_HOME="$SH/ace-step/hf-cache" timeout "$BIG_LIMIT" .venv/bin/python -m acestep.model_downloader) >>"$log" 2>&1 ||
+  if command -v nvidia-smi >/dev/null && nvidia-smi -L >/dev/null 2>&1; then
+    (cd "$SH/ace-step" && timeout "$BIG_LIMIT" uv sync -q) >>"$log" 2>&1 || { echo "gitcraft-studio: ACE-Step uv sync failed (see $log)" >&2; return 1; }
+  else
+    # No NVIDIA GPU: the project pins CUDA builds of PyTorch (~4 GB of unusable GPU libraries). Install it on Python 3.12
+    # (flash-attn/triton only apply to 3.11) with the CPU builds instead (needs download.pytorch.org + download-r2.pytorch.org).
+    echo "gitcraft-studio: no NVIDIA GPU: installing ACE-Step with the CPU build of PyTorch"
+    local ov="$SH/ace-step/.gitcraft-cpu-overrides.txt"
+    printf 'torch==2.10.0+cpu\ntorchvision==0.25.0+cpu\ntorchaudio==2.10.0+cpu\n' > "$ov"
+    (cd "$SH/ace-step" && uv venv -q --allow-existing -p 3.12 .venv &&
+      timeout "$BIG_LIMIT" uv pip install -q --python .venv/bin/python --no-sources --override "$ov" \
+        --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple --index-strategy unsafe-best-match \
+        -e . -e acestep/third_parts/nano-vllm) >>"$log" 2>&1 || { echo "gitcraft-studio: ACE-Step CPU install failed (see $log)" >&2; return 1; }
+  fi
+  # Only what audiocraft_music_model loads (DiT turbo, VAE, text encoder; the 5 Hz LM stays off): ~6 GB, not ~10 GB
+  (cd "$SH/ace-step" && HF_HOME="$SH/ace-step/hf-cache" timeout "$BIG_LIMIT" .venv/bin/python -c '
+from huggingface_hub import snapshot_download
+snapshot_download("ACE-Step/Ace-Step1.5", local_dir="checkpoints",
+                  allow_patterns=["acestep-v15-turbo/*", "vae/*", "Qwen3-Embedding-0.6B/*"])') >>"$log" 2>&1 ||
     { echo "gitcraft-studio: ACE-Step checkpoint download failed (see $log)" >&2; return 1; }
-  command -v nvidia-smi >/dev/null || echo "gitcraft-studio: no NVIDIA GPU: audiocraft_music_model will run on CPU (minutes per 30 s)" >&2
+  command -v nvidia-smi >/dev/null || echo "gitcraft-studio: no NVIDIA GPU: audiocraft_music_model runs on CPU (minutes per 30 s)" >&2
   echo "gitcraft-studio: music ready (ACE-Step 1.5 turbo; audiocraft_music_model)"
 }
 UNIRIG_REPO="https://github.com/VAST-AI-Research/UniRig"; UNIRIG_REF="6793c6640ff01c8fb389f3993434124bb43d2933"
