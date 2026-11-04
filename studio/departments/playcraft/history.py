@@ -105,7 +105,8 @@ def normalize_remote(url):
     parts = [p for p in path.split("/") if p]
     if len(parts) < 2: return None
     if "github" not in host and "gitlab" not in host and "bitbucket" not in host:
-        host = "github.com" if "github" in u else host   # a local git proxy in front of GitHub
+        # a session's local git proxy (loopback) in front of GitHub: http://127.0.0.1:<port>/git/<owner>/<repo>
+        host = "github.com" if ("github" in u or host.split(":")[0] in ("127.0.0.1", "localhost", "::1")) else host
     return f"{host.lower()}/{parts[-2].lower()}/{parts[-1].lower()}"
 
 
@@ -383,11 +384,12 @@ def noise_band(assess_runs):
     """Largest overall move between consecutive runs of the same commit and the same method: this game's measured noise."""
     deltas, pairs = [], []
     for a, b in zip(assess_runs, assess_runs[1:]):
-        if same_commit(a, b) and (a.get("method") == b.get("method") or not a.get("method") or not b.get("method")):
+        # noise = the same commit measured twice by the same PLAYCRAFT (an unrecorded or different method is a method change)
+        if same_commit(a, b) and a.get("method") and a.get("method") == b.get("method"):
             if a["overall"].get("score") is not None and b["overall"].get("score") is not None:
                 deltas.append(abs(b["overall"]["score"] - a["overall"]["score"])); pairs.append([a["run_id"], b["run_id"]])
     return {"band": max(deltas + [3]), "measured": bool(deltas), "samples": len(deltas), "pairs": pairs,
-            "note": None if deltas else "no repeat runs of one commit yet: default ±3"}
+            "note": None if deltas else "no repeat runs of one commit with the same PLAYCRAFT method yet: default ±3"}
 
 
 def track_findings(runs):
@@ -580,3 +582,41 @@ def verify_live(live_html_path, build_dir):
     if not hashed and not detail["identical_html"]:
         return False, dict(detail, why="same file names but no content fingerprints: cannot tell which commit is live")
     return True, detail
+
+
+# ---------------------------------------------------------------- the static site view (forgecraft/ui_server.py --publish)
+def site_view(store):
+    """Everything the Games page renders, from recorded runs only (no new measurement, no network)."""
+    P, games = portfolio(store)
+    out = {"generated": P["generated"], "rules": P["rules"], "portfolio": P["games"], "answers": P["answers"], "games": {}}
+    for G in games:
+        gid = G["game"]["id"]
+        vb = G["vs_baseline"]
+        out["games"][gid] = {
+            "id": gid, "title": G["game"].get("title"), "repo": G["game"].get("repo"), "url": G["game"].get("url"), "pitch": G["game"].get("pitch"),
+            "engine": G["game"].get("engine"), "genres": G["genres"], "baseline": G["baseline"], "latest": G["latest"], "runs": G["runs"], "noise": G["noise"],
+            "timeline": G["timeline"], "age_days": G["age_days"], "deployment": G["deployment"],
+            "vs_baseline": None if not vb else {k: vb[k] for k in ("verdict", "same_commit", "commits", "overall", "verified_overall", "categories", "counts")}
+                           | {"changes": [{k: c.get(k) for k in ("id", "title", "category", "class", "from", "to", "why")} for c in vb["changes"]]},
+            "steps": [{k: s[k] for k in ("from", "to", "verdict", "same_commit", "commits", "overall", "counts")} for s in G["steps"]],
+            "findings": [{k: f.get(k) for k in ("id", "title", "category", "type", "state", "level", "first_seen", "last_seen", "resolved_in", "resolved_level", "resolved_by",
+                                                 "reopened", "occurrences", "impact", "evidence")} for f in G["findings"]],
+            "regressions": G["regressions"], "recurring": G["recurring_regressions"], "passes": G["improvement_passes"],
+            "events": [{k: e.get(k) for k in ("type", "url", "commit", "level", "observed_at", "recorded_at", "evidence", "note", "state", "title", "live_check")} for e in store.events(gid)],
+            "provenance": [{"run": r["run_id"], "kind": r["kind"], "assessed_at": r["assessed_at"], "recorded_at": r["recorded_at"], "recorded_by": r.get("recorded_by"),
+                            "commit": (r.get("commit") or {}).get("head"), "commit_source": (r.get("commit") or {}).get("source"), "method": r.get("method"),
+                            "card_sha256": r["card_sha256"], "pr": r.get("pr")} for r in store.runs(gid)]}
+    return out
+
+
+def publish_site(archive, dist_games, ui_dir=None):
+    """Write the Games page (UI + data.json) for a store/archive folder into dist_games. Returns the number of games."""
+    import shutil
+    ui_dir = ui_dir or os.path.join(HERE, "ui")
+    if os.path.isdir(dist_games): shutil.rmtree(dist_games)
+    shutil.copytree(ui_dir, dist_games)
+    st = Store(archive, archive="", sync=False) if os.path.isdir(os.path.join(archive, "games")) else None
+    view = site_view(st) if st else {"generated": now(), "rules": [], "portfolio": [], "answers": {}, "games": {}}
+    view["source"] = {"archive": os.path.relpath(archive, REPO) if archive.startswith(REPO) else archive, "note": "a snapshot of the committed Game Quality History"}
+    _atomic(os.path.join(dist_games, "data.json"), json.dumps(view, default=str))
+    return len(view["games"])
