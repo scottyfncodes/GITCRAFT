@@ -235,7 +235,7 @@ def analyse(results):
                  load_ms=desk.get("load_ms"), start_ms=(desk.get("start") or {}).get("ms"), pause=desk.get("pause"), hooks_found=desk.get("hooks_found"), state_changed=desk.get("state_changed"))
         if desk.get("load_ms") is not None: m["time_to_play_ms"] = desk["load_ms"] + ((desk.get("start") or {}).get("ms") or 0)
     if phone:
-        m["phone"] = phone; m["phone_fps"] = phone.get("fps")
+        m["phone"] = phone; m["phone_fps"] = phone.get("fps"); m["phone_frame_p50"] = phone.get("frame_p50")
         if not desk: m.update(dead_time=phone.get("dead_time"), monkey_s=phone.get("monkey_s"), idle_motion=phone.get("idle_motion"), fps=phone.get("fps"), frame_p95=phone.get("frame_p95"))
     fv = phone if phone and phone.get("min_font_px") is not None else desk
     if fv: m.update(min_font_px=fv.get("min_font_px"), min_font_text=fv.get("min_font_text"), min_font_viewport="phone" if fv is phone else "desktop")
@@ -458,8 +458,11 @@ def compare_cards(before, after, changes):
         if bm.get(k) is not None and am.get(k) is not None and worse_if(bm[k], am[k], tol): regress.append(f"{name}: {bm[k]} → {am[k]}")
     num("FPS (desktop, software rendering)", "fps", lambda b, a, t: a < b * (1 - t), 0.25)
     num("FPS (phone)", "phone_fps", lambda b, a, t: a < b * (1 - t), 0.25)
-    num("fastest visible response (ms)", "best_response_ms", lambda b, a, t: a > b + t and a > b * 1.5, 50)
-    num("touch response (ms)", "touch_best_response_ms", lambda b, a, t: a > b + t and a > b * 1.5, 50)
+    # latency is read from the screen, one frame at a time: a change smaller than two frames is below what the probe resolves
+    # (measured: at ~8 fps the best touch response of identical builds ranged 79-356 ms between runs)
+    frame = lambda k: max(bm.get(k) or 16.7, am.get(k) or 16.7)
+    num("fastest visible response (ms)", "best_response_ms", lambda b, a, t: a > b + t and a > b * 1.5, max(50, 2 * frame("frame_p50")))
+    num("touch response (ms)", "touch_best_response_ms", lambda b, a, t: a > b + t and a > b * 1.5, max(50, 2 * frame("phone_frame_p50")))
     num("dead time during play", "dead_time", lambda b, a, t: a > b + t, 0.15)
     num("time to play (ms)", "time_to_play_ms", lambda b, a, t: a > b * 1.5 + t, 500)
     for name, k in (("page errors", "page_errors"), ("missing files", "missing"), ("input errors", "input_errors")):

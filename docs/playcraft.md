@@ -145,8 +145,8 @@ PLAYCRAFT pass in one out_dir and merges them into one plan:
 - touches production data (`*.sqlite`, `prod*/`, …)
 - is on `main`/`master`
 
-and when the replay shows a regression: new page/missing/input errors, a control that no longer responds,
-FPS down >25 %, response time up by >50 ms and 1.5×, dead time up by >15 points, time-to-play up by 1.5×.
+and when the replay shows a regression that reproduces (a noise-prone regression — FPS, latency, a control that missed both trials, dead time — triggers a second replay, and only what reproduces counts; errors and missing files are never retried away): new page/missing/input errors, a control that no longer responds,
+FPS down >25 %, response time up by 1.5× and by more than 50 ms or two frames (whichever is larger: the probe reads the screen a frame at a time), dead time up by >15 points, time-to-play up by 1.5×.
 
 ## Integration
 
