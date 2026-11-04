@@ -134,6 +134,11 @@ try {
           }
           if (!el) return null; const r = el.getBoundingClientRect(); return { text: el.innerText.trim().slice(0, 40), x: r.x + r.width / 2, y: r.y + r.height / 2 };
         }, step === 0);
+        if (!hit && step === 0 && !chain.waited) {   // a slow game shows its title screen late: look again before giving up
+          let found = null;
+          for (let k = 0; k < 3 && !found; k++) { await page.waitForTimeout(2000); found = await page.evaluate(() => !![...document.querySelectorAll('button, [role=button]')].find((el) => el.getBoundingClientRect().width > 10 && /^\s*(play|start|new game|continue|set sail|begin|let['’`]?s go)/i.test(el.innerText || ''))); }
+          chain.waited = true; if (found) { step--; continue; }
+        }
         if (!hit) break;
         if (touch) await page.touchscreen.tap(hit.x, hit.y); else await page.mouse.click(hit.x, hit.y);
         chain.push(hit.text); await page.waitForTimeout(900);
