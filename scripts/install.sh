@@ -145,13 +145,18 @@ elif ((want_mesh)); then mesh_state=pending forge_state=pending; fi
 "$here/install-global.sh"   # runtime copy in ~/.gitcraft/runtime, user-scope registration, global instructions
 write_status
 
-# 2b) GITCRAFT Studio (the departments): no Blender needed. Registered by a second install-global pass as soon
-#     as its core venv is complete; the voice model (the slowest part) comes after that, or later.
+# 2b) GITCRAFT Studio (the departments): no Blender needed. studiocraft is already registered by the pass above:
+#     until its venv lands it lists a status tool, then announces its department tools (studio/server.py). The second
+#     install-global pass refreshes the runtime copy; the voice model (the slowest part) comes after that, or later.
 if [[ $studio_state == pending ]]; then
   if gitcraft_studio_ready && [[ $update -eq 0 ]]; then echo "gitcraft: studiocraft already installed"; studio_state=ok
   # not fatal: the seven 2D tools are registered already, status.json records it and the SessionStart hook retries it
   else "$here/install-studio.sh" core && studio_state=ok || { studio_state=failed; echo "gitcraft: studiocraft not installed this time (recorded; the SessionStart hook retries it, or run scripts/install.sh studiocraft)" >&2; }; fi
-  if [[ $studio_state == ok ]]; then "$here/install-global.sh" >/dev/null && echo "gitcraft: studiocraft registered"; fi
+  if [[ $studio_state == ok ]]; then
+    # version on every install (installs from before the file existed get one too): commit of the code it runs
+    echo "studio $(git -C "$repo_dir" rev-parse --short HEAD 2>/dev/null || echo unknown) $(date -u +%F)" > "$GITCRAFT_BIN/studiocraft.version"
+    "$here/install-global.sh" >/dev/null && echo "gitcraft: studiocraft registered"
+  fi
   write_status
   if [[ $studio_state == ok && $voice_state == pending ]]; then
     if "$here/install-studio.sh" voice; then voice_state=ok

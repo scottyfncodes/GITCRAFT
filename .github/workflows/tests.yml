@@ -1,0 +1,76 @@
+name: Tests
+
+# Every pull request (and main): install GITCRAFT the way a user's machine does, then run the guard/sandbox
+# policy test, the Studio departments (quick: no Blender actions) and the 3D Department. The tools run behind
+# scripts/mcp.sh exactly as in a session (guard + Landlock), so a launcher or sandbox regression fails here.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers   # under /opt: the sandbox lets tools execute from there
+      GITCRAFT_GLOBAL_INSTRUCTIONS: "0"            # CI has no ~/.claude to manage
+      GITCRAFT_GLOBAL_HOOK: "0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"                   # MeshCraft's bpy 5.2 wheel is published for 3.11 and 3.13
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: System packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -q uv
+
+      - name: Playwright + Chromium
+        run: |
+          sudo mkdir -p /opt/pw-browsers && sudo chown "$USER" /opt/pw-browsers
+          npm install -g playwright@1.56.1
+          npx -y playwright@1.56.1 install --with-deps chromium
+          ln -sfn "$(node -e "console.log(require('$(npm root -g)/playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
+          /opt/pw-browsers/chromium --version
+
+      - name: Landlock
+        run: |
+          python3 -c 'import ctypes;l=ctypes.CDLL(None);l.syscall.restype=ctypes.c_long;print("Landlock ABI", l.syscall(444,None,0,1))'
+
+      - name: Install GITCRAFT (2D tools, Studio core, MeshCraft + ForgeCraft)
+        env:
+          GITCRAFT_STUDIO_VOICE: "0"               # the voice model is exercised by tests/test_studio.py locally
+        run: scripts/install.sh
+
+      - name: Doctor
+        run: scripts/doctor.sh || true
+
+      - name: Policy (guard + sandbox)
+        run: python3 tests/test_policy.py
+
+      - name: Studio departments (quick)
+        run: python3 tests/test_studio.py --quick
+
+      - name: ForgeCraft (3D Department)
+        run: python3 tests/test_forgecraft.py
+
+      - name: Logs on failure
+        if: failure()
+        run: |
+          tail -n 80 ~/.gitcraft/logs/*.log || true

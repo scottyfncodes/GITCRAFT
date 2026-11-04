@@ -28,7 +28,8 @@ studio_last=$(python3 -c 'import json,os,sys;t=json.load(open(os.path.join(sys.a
 read -r studio_last voice_last <<<"$studio_last"
 studio_voice=0
 if [[ "$GITCRAFT_STUDIO" == 1 ]]; then
-  if [[ "$studio_last" == pending || "$studio_last" == failed ]] && ! gitcraft_studio_ready; then missing+=(studiocraft); fi
+  # any state but a deliberate off: cut off ("pending"), failed, never attempted, or a runtime removed since
+  if [[ "$studio_last" != off ]] && ! gitcraft_studio_ready; then missing+=(studiocraft); fi
   if [[ "$voice_last" == later || "$voice_last" == pending ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
     [[ " ${missing[*]} " == *" studiocraft "* ]] || missing+=(studiocraft); studio_voice=1
   fi
@@ -60,4 +61,4 @@ else
   fi
   echo "GITCRAFT: building ${missing[*]} in the background (log: $GITCRAFT_LOG/install.log)."
 fi
-echo "GITCRAFT: MeshCraft and ForgeCraft announce their tools when their build finishes; a deferred voice model is picked up by studiocraft on its next call; other tools need /mcp."
+echo "GITCRAFT: MeshCraft and ForgeCraft announce their tools when their build finishes; StudioCraft announces its department tools when its runtime lands, and picks up a deferred voice model on its next call; other tools need /mcp."

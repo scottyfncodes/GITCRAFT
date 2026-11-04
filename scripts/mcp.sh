@@ -28,7 +28,11 @@ bin="$GITCRAFT_BIN/$pkg"
 if [[ "$name" == meshcraft ]]; then
   if gitcraft_mesh_ready; then bin="$GITCRAFT_HOME/meshcraft/venv/bin/python"; else bin="$(command -v python3)"; fi
 elif [[ "$name" == forgecraft ]]; then bin="$(command -v python3)"; fi
-[[ "$name" == studiocraft ]] && bin="$GITCRAFT_STUDIO_HOME/venv/bin/python"
+# StudioCraft runs on its venv; before that exists it starts on the system Python, lists a status tool and announces
+# its department tools when the install lands (studio/server.py), so a session that began first still gets them.
+if [[ "$name" == studiocraft ]]; then
+  if gitcraft_studio_ready; then bin="$GITCRAFT_STUDIO_HOME/venv/bin/python"; else bin="$(command -v python3)"; fi
+fi
 if [[ ! -x "$bin" ]]; then
   echo "gitcraft: $pkg isn't built yet. Run scripts/install.sh $name (or check ~/.gitcraft/logs)." >&2
   exit 1
@@ -97,6 +101,7 @@ writable=("${roots[@]}" "$state")
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).
 [[ "$name" == meshcraft || "$name" == forgecraft ]] && mkdir -p "$GITCRAFT_HOME/meshcraft" "$FORGECRAFT_HOME"
+[[ "$name" == studiocraft ]] && mkdir -p "$GITCRAFT_STUDIO_HOME" "$GITCRAFT_HOME/meshcraft"   # same: fenced before the install fills them
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done

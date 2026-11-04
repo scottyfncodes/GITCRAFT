@@ -189,6 +189,27 @@ if os.access(os.path.expanduser("~/.gitcraft/meshcraft/venv/bin/python"), os.X_O
 else:
     skip("forgecraft department tools", "MeshCraft's Blender is not installed, so ForgeCraft is not registered")
 
+# ---- deferred start: studiocraft registered before its runtime exists (a cut-off or not-yet-run Studio install)
+early = os.path.join(ws, "studio-home-early"); shutil.rmtree(early, ignore_errors=True); os.makedirs(early)
+envd = dict(env, GITCRAFT_STUDIO_HOME=early)
+c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=envd, log=os.path.join(ws, "studiocraft-early.log"))
+names = [t["name"] for t in c.tools()]
+check("deferred: without its runtime studiocraft starts and lists only studio_status", names == ["studio_status"], names)
+ok, r = c.call("studio_status"); check("deferred: studio_status says how to install", ok and "install.sh studiocraft" in r.get("how_to_install", ""), r)
+real = os.path.join(os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.expanduser("~/.gitcraft/studio"), "venv")
+subprocess.run(["cp", "-a", real, os.path.join(early, "venv.part")], check=True); os.rename(os.path.join(early, "venv.part"), os.path.join(early, "venv"))
+note, end = None, time.time() + 30
+while time.time() < end and note is None:
+    try: m = c.q.get(timeout=2)
+    except Exception: continue
+    if m and m.get("method") == "notifications/tools/list_changed": note = m
+check("deferred: announces tools/list_changed when the runtime lands", note is not None)
+names = [t["name"] for t in c.tools()]
+check("deferred: the same server now lists every department tool", "audiocraft_sfx" in names and len(names) >= 50, len(names))
+ok, r = c.call("audiocraft_sfx", {"preset": "blip", "out_dir": f"{ws}/deferred/sfx"})
+check("deferred: the same server runs a department action through the new runtime", ok and r.get("status") == "ok", r if not ok else r.get("error"))
+c.close(); shutil.rmtree(early, ignore_errors=True)
+
 n_ok = sum(ok for _, ok in results)
 print(f"\n{n_ok}/{len(results)} checks passed (outputs in {ws})")
 sys.exit(0 if n_ok == len(results) else 1)
