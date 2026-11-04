@@ -154,6 +154,12 @@ def generate(ctx, p):
                "collision_rects": collision, "nav_rects": nav, "meta": meta}
     gp = ctx.path(f"{stem}.level.json"); json.dump(generic, open(gp, "w"), default=str); outs.append({"path": gp, "role": "level_data", "format": "json"})
     outs.append({"path": preview(grid, ents, ctx.path(f"{stem}_preview.png"), 8 if max(w, h) <= 128 else 4, edges), "role": "preview", "format": "png"})
+    ldtk_doc = None
+    if "ldtk" in p["formats"]:
+        import ldtk as LD
+        ldtk_doc = LD.build(grid, ents, tsname, tsi, ts, name=stem.title().replace("_", ""))
+        lp = ctx.path(f"{stem}.ldtk"); json.dump(ldtk_doc, open(lp, "w"), indent=1)
+        outs.append({"path": lp, "role": "ldtk_project", "format": "json"}); ctx.used("ldtk_format")
     glb = blockout(grid, ctx.path(f"{stem}_blockout.glb"), 1.0, side); outs.append({"path": glb, "role": "blockout", "format": "glb"})
     ctx.stage("exported", collision_rects=len(collision), nav_rects=len(nav))
     # ---- verification
@@ -181,6 +187,13 @@ def generate(ctx, p):
     v = G.solid(grid); cov = np.zeros_like(v)
     for x, y, wd, ht in collision: cov[y:y + ht, x:x + wd] = True
     checks.append({"name": "collision rectangles cover exactly the solid tiles", "ok": bool((cov == v).all()), "detail": len(collision)})
+    if ldtk_doc is not None:
+        import ldtk as LD
+        errs = LD.validate(ldtk_doc)
+        checks.append({"name": "LDtk project validates against the official LDtk 1.5.3 JSON schema", "ok": not errs, "detail": errs[:3]})
+        rg, rs, re_ = LD.read_back(json.load(open(ctx.path(f"{stem}.ldtk"))))
+        checks.append({"name": "LDtk read-back: tiles, collision and entities match the level", "ok": bool((rg == grid).all()) and bool((rs == v).all()) and len(re_) == len(ents),
+                       "detail": {"tiles_equal": bool((rg == grid).all()), "collision_equal": bool((rs == v).all()), "entities": [len(re_), len(ents)]}})
     shot = ctx.path(f"{stem}_phaser.png"); r = phaser_check(tmj, ctx.path(tsname), shot, ts); rep = r.get("report") or {}
     ctx.used("phaser"); outs.append({"path": shot, "role": "engine_screenshot", "format": "png"})
     checks.append({"name": "loads in Phaser 3 (tilemap, tileset, object layers, solid-tile collision)",

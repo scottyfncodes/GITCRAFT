@@ -99,6 +99,88 @@ window.__report = R; window.__done = true;
     return {"outputs": outs, "checks": checks, "preset": preset, "engine": rep}
 
 
+QUARKS_IMPORTMAP = ('<script type="importmap">{"imports":{"three":"http://gc.local/three/build/three.module.js",'
+                    '"three.quarks":"http://gc.local/nm/three.quarks/dist/three.quarks.esm.js","quarks.core":"http://gc.local/nm/quarks.core/dist/quarks.core.esm.js"}}</script>')
+
+
+def quarks(ctx, p):
+    """The effect as a three.quarks (MIT) particle system: built with three.quarks' own API from the emitter
+    preset in headless Chromium, serialised by `emitter.toJSON()` (the format QuarksLoader and the three.quarks
+    editor read), then reloaded with QuarksLoader and simulated to prove the file plays."""
+    fb = flipbook(ctx, p); eff = p["effect"]; stem = p.get("name") or eff
+    pr = dict(PRESETS[eff]); pr.update(p.get("overrides") or {})
+    meta = fb["flipbook"]; atlas = ctx.path(meta["image"])
+    cfg = {"preset": pr, "cols": meta["cols"], "rows": meta["rows"], "frames": meta["frames"], "loop": meta["loop"], "texture": webpages.file_url(atlas),
+           "max": p["max_particles"], "seconds": p["check_seconds"]}
+    html = f"""<!doctype html><html><head>{QUARKS_IMPORTMAP}</head><body style="margin:0;background:#1b1e24"><canvas id="c" width="640" height="480"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {{ BatchedRenderer, ParticleSystem, QuarksLoader, QuarksUtil, RenderMode, ConstantValue, IntervalValue, ConeEmitter, PointEmitter, ConstantColor,
+         ColorOverLife, Gradient, SizeOverLife, PiecewiseBezier, Bezier, FrameOverLife, ApplyForce, Vector3 as QV3, Vector4 }} from 'three.quarks';
+const C = {json.dumps(cfg)}; const P = C.preset; const R = {{ ok: false }};
+try {{
+  const renderer = new THREE.WebGLRenderer({{ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true }}); renderer.setSize(640, 480, false); renderer.setClearColor(0x1b1e24);
+  const scene = new THREE.Scene(); const cam = new THREE.PerspectiveCamera(45, 640 / 480, 0.05, 100); cam.position.set(0, 0.9, 3.6); cam.lookAt(0, 0.7, 0);
+  const tex = await new THREE.TextureLoader().loadAsync(C.texture); tex.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.MeshBasicMaterial({{ map: tex, transparent: true, depthWrite: false, blending: P.blending === 'additive' ? THREE.AdditiveBlending : THREE.NormalBlending }});
+  const lerp = (a) => Array.isArray(a) ? (a[0] === a[1] ? new ConstantValue(a[0]) : new IntervalValue(a[0], a[1])) : new ConstantValue(a);
+  const al = P.alpha || [1, 1, 0], sz = P.size || [1, 1];
+  const behaviors = [
+    new ColorOverLife(new Gradient([[new QV3(1, 1, 1), 0], [new QV3(1, 1, 1), 1]], [[al[0], 0], [al[1], 0.5], [al[2], 1]])),
+    new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1 + (sz[1] / sz[0] - 1) / 3, 1 + 2 * (sz[1] / sz[0] - 1) / 3, sz[1] / sz[0]), 0]])),
+    new FrameOverLife(new PiecewiseBezier([[new Bezier(0, (C.frames - 1) / 3, 2 * (C.frames - 1) / 3, C.frames - 1), 0]])),
+  ];
+  const g = P.gravity || [0, 0, 0], gm = Math.hypot(...g);
+  if (gm > 0) behaviors.push(new ApplyForce(new QV3(g[0] / gm, g[1] / gm, g[2] / gm), new ConstantValue(gm)));
+  const area = P.area || [0, 0, 0], spread = (P.spread_deg || 0) * Math.PI / 180;
+  const system = new ParticleSystem({{
+    duration: Math.max(1, (P.lifetime || [1, 1])[1]), looping: !!(P.rate), prewarm: false, worldSpace: true,
+    shape: (area[0] > 0 || spread > 0) ? new ConeEmitter({{ radius: Math.max(0.001, area[0] / 2), angle: Math.max(0.001, spread), thickness: 1 }}) : new PointEmitter(),
+    startLife: lerp(P.lifetime || 1), startSpeed: lerp(P.speed || 0), startSize: new ConstantValue(sz[0]), startColor: new ConstantColor(new Vector4(1, 1, 1, 1)),
+    emissionOverTime: new ConstantValue(P.rate || 0),
+    emissionBursts: P.burst ? [{{ time: 0, count: new ConstantValue(Math.max(1, P.burst)), cycle: 1, interval: 0.01, probability: 1 }}] : [],
+    material, renderMode: RenderMode.BillBoard, uTileCount: C.cols, vTileCount: C.rows, startTileIndex: new ConstantValue(0), behaviors,
+  }});
+  // three.quarks' cone emits along local +Z: turn it to the preset's direction
+  const d = new THREE.Vector3(...(P.direction || [0, 1, 0])).normalize();
+  system.emitter.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), d); system.emitter.position.y = 0.3;
+  system.emitter.name = 'gitcraft-' + {json.dumps(eff)};
+  // serialise from a parent Group: as the root object, three.js would extract materials/textures before the
+  // emitter adds its own (they would be lost); this is also how the three.quarks editor exports
+  const root = new THREE.Group(); root.name = 'gitcraft-fx'; root.add(system.emitter);
+  const json = root.toJSON();
+  // reload exactly what a game would load, and play it
+  const batch = new BatchedRenderer(); scene.add(batch);
+  const loaded = await new Promise((res, rej) => new QuarksLoader().parse(json, res, rej));
+  QuarksUtil.addToBatchRenderer(loaded, batch); scene.add(loaded);
+  let systems = 0; loaded.traverse((o) => {{ if (o.system) systems++; }});
+  let peak = 0; const steps = Math.round(C.seconds * 60 * 0.35); let found = null;
+  loaded.traverse((o) => {{ if (o.system) found = o.system; }});
+  for (let i = 0; i < steps; i++) {{ batch.update(1 / 60); peak = Math.max(peak, found ? found.particleNum : 0); }}
+  renderer.render(scene, cam);
+  const gl = renderer.getContext(); const px = new Uint8Array(4 * 200 * 200); gl.readPixels(220, 140, 200, 200, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  let lit = 0; for (let i = 0; i < px.length; i += 4) if (Math.abs(px[i] - 0x1b) + Math.abs(px[i+1] - 0x1e) + Math.abs(px[i+2] - 0x24) > 30) lit++;
+  const ps = json.object.children && json.object.children[0] && json.object.children[0].ps;
+  Object.assign(R, {{ ok: true, json, systems, peak_particles: peak, lit_pixels: lit, version: ps && ps.version, materials: (json.materials || []).length, textures: (json.textures || []).length }});
+}} catch (e) {{ R.error = String(e && e.stack || e); }}
+window.__report = R; window.__done = true;
+</script></body></html>"""
+    shot = ctx.path(f"{stem}_quarks.png"); r = webpages.run(html, shot, (640, 480)); rep = r.get("report") or {}
+    ctx.used("three", "three_quarks")
+    outs = fb["outputs"] + [{"path": shot, "role": "engine_screenshot", "format": "png"}]
+    checks = list(fb["checks"])
+    if rep.get("json"):
+        qp = ctx.path(f"{stem}.quarks.json"); json.dump(rep["json"], open(qp, "w"))
+        outs.append({"path": qp, "role": "three.quarks emitter (QuarksLoader JSON, texture embedded)", "format": "json"})
+    checks.append({"name": "three.quarks: emitter.toJSON() reloads with QuarksLoader and emits particles that render",
+                   "ok": bool(rep.get("ok")) and rep.get("systems", 0) >= 1 and rep.get("peak_particles", 0) > 0 and rep.get("lit_pixels", 0) > 50 and not r.get("errors"),
+                   "detail": {k: rep.get(k) for k in ("systems", "peak_particles", "lit_pixels", "version", "materials", "textures", "error")} | {"errors": (r.get("errors") or [])[:2]}})
+    usage = {"load": "new QuarksLoader().parse(json, (obj) => { QuarksUtil.addToBatchRenderer(obj, batchRenderer); scene.add(obj); })",
+             "update": "batchRenderer.update(delta) every frame", "library": "three.quarks 0.16 (MIT), three >= 0.165"}
+    up = ctx.path(f"{stem}.quarks.usage.json"); json.dump(usage, open(up, "w"), indent=1); outs.append({"path": up, "role": "usage", "format": "json"})
+    return {"outputs": outs, "checks": checks, "quarks": {k: rep.get(k) for k in ("systems", "peak_particles", "version")}}
+
+
 def destruction(ctx, p):
     ctx.used("blender")
     src = ctx.need(p["input"]) if p.get("input") else None
@@ -119,4 +201,4 @@ def destruction(ctx, p):
     return {"outputs": outs, "checks": checks, "simulation": r}
 
 
-ACTIONS = {"flipbook": flipbook, "emitter": emitter, "destruction": destruction}
+ACTIONS = {"flipbook": flipbook, "emitter": emitter, "quarks": quarks, "destruction": destruction}

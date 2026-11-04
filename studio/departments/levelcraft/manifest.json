@@ -2,7 +2,7 @@
  "name": "levelcraft",
  "version": "1.0.0",
  "title": "LevelCraft — levels and maps",
- "summary": "Procedural dungeons (BSP rooms + corridors + doors), caves (cellular automata), completable platformer levels (jump-physics reachability solver), overworlds (biomes, A* roads with bridges between settlements, camps, resources) and towns (road grid, building plots with doors, plaza) — as Tiled TMJ maps with a generated tileset, entity/collision/navigation object layers, generic JSON, preview and a 3D blockout GLB, each solved and loaded in Phaser 3.",
+ "summary": "Procedural dungeons (BSP rooms + corridors + doors), caves (cellular automata), completable platformer levels (jump-physics reachability solver), overworlds (biomes, A* roads with bridges between settlements, camps, resources) and towns (road grid, building plots with doors, plaza) — as Tiled TMJ maps and LDtk 1.5.3 projects with a generated tileset, entity/collision/navigation object layers, generic JSON, preview and a 3D blockout GLB, each solved and loaded in Phaser 3.",
  "keywords": [
   "level",
   "levels",
@@ -62,6 +62,12 @@
    "name": "Khronos glTF-Validator",
    "license": "Apache-2.0",
    "version": "2.0.0-dev.3.10"
+  },
+  "ldtk_format": {
+   "name": "LDtk 1.5.3 project format (writer is GITCRAFT's; schema from the LDtk repository)",
+   "license": "MIT (LDtk and its JSON schema)",
+   "version": "1.5.3",
+   "source": "https://ldtk.io"
   }
  },
  "dependencies": {
@@ -99,6 +105,12 @@
    "kind": "playwright",
    "license": "Apache-2.0 (Playwright), BSD (Chromium)",
    "install": "npm i -g playwright && npx playwright install chromium"
+  },
+  "jsonschema": {
+   "kind": "python",
+   "module": "jsonschema",
+   "license": "MIT",
+   "install": "scripts/install-studio.sh"
   }
  },
  "actions": {
@@ -110,7 +122,8 @@
     "phaser",
     "three",
     "gltf_validator",
-    "browser"
+    "browser",
+    "jsonschema"
    ],
    "params": {
     "type": "object",
@@ -195,6 +208,21 @@
       "default": 10,
       "minimum": 7,
       "maximum": 24
+     },
+     "formats": {
+      "type": "array",
+      "default": [
+       "tiled",
+       "ldtk"
+      ],
+      "items": {
+       "type": "string",
+       "enum": [
+        "tiled",
+        "ldtk"
+       ]
+      },
+      "description": "tiled: .tmj (always written; Phaser check); ldtk: LDtk 1.5.3 project"
      }
     }
    },
@@ -247,8 +275,8 @@
   }
  ],
  "limits": [
-  "Exports Tiled TMJ (LDtk projects can import Tiled maps through its own importer); a native LDtk writer is deferred.",
   "Platformer physics is a tile-level model (jump height/distance, head room); verify feel in the game itself (TestCraft play).",
-  "Tiles are a generated placeholder tileset; swap in the game's art by keeping the tile ids (tileset tile property `name`)."
+  "Tiles are a generated placeholder tileset; swap in the game's art by keeping the tile ids (tileset tile property `name`).",
+  "LDtk export is one level per project with Entities, IntGrid (solid) and Tiles layers; entity properties beyond type and position (tier, patrol…) are in the Tiled map and the level JSON, not LDtk fields."
  ]
 }
