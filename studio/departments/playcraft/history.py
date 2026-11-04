@@ -322,6 +322,9 @@ def compare_runs(a, b, noise=None):
         else:
             up = RANK.get(y["s"], 0) > RANK.get(x["s"], 0)
             if sc: rec["class"] = "measurement"; rec["why"] = "same commit: the game did not change"
+            elif x["l"] in STRONG and y["l"] in STRONG and method_same is not True:
+                rec["class"] = ("improved" if up else "regressed") + " (unconfirmed: method changed)"
+                rec["why"] = "measured by different PLAYCRAFT versions: re-measure the earlier commit with the current method to confirm"
             elif x["l"] in STRONG and y["l"] in STRONG: rec["class"] = ("improved" if up else "regressed") + f" ({y['l']})"
             else: rec["class"] = "code change (unverified)"; rec["why"] = f"inferred from source: {'appeared' if up else 'disappeared'}"
             rec["direction"] = "up" if up else "down"
@@ -329,14 +332,15 @@ def compare_runs(a, b, noise=None):
     d_all = (b["overall"].get("score") or 0) - (a["overall"].get("score") or 0) if b.get("overall") and a.get("overall") else None
     va, vb = (a.get("verified") or {}).get("overall"), (b.get("verified") or {}).get("overall")
     d_ver = (vb - va) if va is not None and vb is not None else None
-    real_up = [c for c in changes if c.get("class", "").startswith("improved")]
-    real_down = [c for c in changes if c.get("class", "").startswith("regressed")]
-    unver = [c for c in changes if c.get("class") == "code change (unverified)"]
+    real_up = [c for c in changes if c.get("class", "").startswith("improved") and "unconfirmed" not in c["class"]]
+    real_down = [c for c in changes if c.get("class", "").startswith("regressed") and "unconfirmed" not in c["class"]]
+    unver = [c for c in changes if c.get("class") == "code change (unverified)" or "unconfirmed" in c.get("class", "")]
     band = noise if noise is not None else 3
     if sc: verdict = "measurement only (same commit)"
     elif real_up and not real_down: verdict = "genuine improvement"
     elif real_down and not real_up: verdict = "genuine regression"
     elif real_up and real_down: verdict = "mixed"
+    elif any("unconfirmed" in c.get("class", "") for c in changes): verdict = "unconfirmed (PLAYCRAFT method changed): re-measure the baseline commit"
     elif unver: verdict = "code changed; not verified by measurement"
     elif d_all is not None and abs(d_all) <= band: verdict = "no measured change (within noise)"
     else: verdict = "score moved without a measured criterion change (method or coverage)"
@@ -351,8 +355,37 @@ def compare_runs(a, b, noise=None):
             "overall": {"from": a["overall"].get("score"), "to": b["overall"].get("score"), "delta": d_all, "noise_band": band},
             "verified_overall": {"from": va, "to": vb, "delta": d_ver}, "categories": cats, "verdict": verdict,
             "counts": {"improved": len(real_up), "regressed": len(real_down), "unverified_code": len(unver),
-                       "measurement": sum(1 for c in changes if c.get("class") == "measurement"), "coverage": sum(1 for c in changes if c.get("class") == "coverage")},
+                       "measurement": sum(1 for c in changes if c.get("class") == "measurement"), "coverage": sum(1 for c in changes if c.get("class") == "coverage"),
+                       "unconfirmed": sum(1 for c in changes if "unconfirmed" in c.get("class", ""))},
             "changes": changes}
+
+
+def controlled(base, latest, runs):
+    """A run of the baseline's commit measured with the latest run's method (a re-measurement), if there is one."""
+    bc = (base.get("commit") or {}).get("head")
+    if not bc or not latest.get("method"): return None
+    cands = [r for r in runs if (r.get("commit") or {}).get("head") == bc and r.get("method") == latest["method"] and r["run_id"] != latest["run_id"]
+             and same_commit(r, base)]
+    return cands[-1] if cands else None
+
+
+def confirm_with(vs, ctrl_cmp):
+    """Settle 'unconfirmed (method changed)' criteria with a controlled comparison (same method, baseline commit → latest)."""
+    if not vs or not ctrl_cmp: return vs
+    cc = {c["id"]: c for c in ctrl_cmp["changes"]}
+    for c in vs["changes"]:
+        if "unconfirmed" not in c.get("class", ""): continue
+        k = cc.get(c["id"])
+        if k and k.get("class", "").startswith(("improved", "regressed")) and "unconfirmed" not in k["class"] and k.get("direction") == c.get("direction"):
+            c["class"] = k["class"]; c["why"] = f"confirmed by re-measuring the baseline commit with the same method ({ctrl_cmp['from']} → {ctrl_cmp['to']})"
+        else:
+            c["class"] = "method"; c["why"] = (f"not reproduced when the baseline commit was re-measured with the same method ({ctrl_cmp['from']}): "
+                                               "the earlier result came from an older PLAYCRAFT")
+    for k in ctrl_cmp["changes"]:   # measured changes the old method could not see
+        if k.get("class", "").startswith(("improved", "regressed")) and "unconfirmed" not in k["class"] and not any(c["id"] == k["id"] for c in vs["changes"]):
+            vs["changes"].append(dict(k, why=f"found by the controlled comparison ({ctrl_cmp['from']} → {ctrl_cmp['to']})"))
+    vs["controlled"] = {"from": ctrl_cmp["from"], "to": ctrl_cmp["to"], "verdict": ctrl_cmp["verdict"]}
+    return vs
 
 
 def attribute_steps(vs, steps):
@@ -367,13 +400,21 @@ def attribute_steps(vs, steps):
         f = flips.get(c["id"])
         if f and all(x is True for x in f) and c.get("class") not in ("coverage", "evidence"):
             c["class"] = "measurement"; c["why"] = "changed between two runs of the same commit (measurement or PLAYCRAFT method), not by the game"
-    real_up = [c for c in vs["changes"] if c.get("class", "").startswith("improved")]; real_down = [c for c in vs["changes"] if c.get("class", "").startswith("regressed")]
-    vs["counts"] = {"improved": len(real_up), "regressed": len(real_down), "unverified_code": sum(1 for c in vs["changes"] if c.get("class") == "code change (unverified)"),
+    return recount(vs)
+
+
+def recount(vs):
+    real = lambda c, w: c.get("class", "").startswith(w) and "unconfirmed" not in c["class"]
+    real_up = [c for c in vs["changes"] if real(c, "improved")]; real_down = [c for c in vs["changes"] if real(c, "regressed")]
+    vs["counts"] = {"improved": len(real_up), "regressed": len(real_down),
+                    "unconfirmed": sum(1 for c in vs["changes"] if "unconfirmed" in c.get("class", "")), "method": sum(1 for c in vs["changes"] if c.get("class") == "method"),
+                    "unverified_code": sum(1 for c in vs["changes"] if c.get("class") == "code change (unverified)"),
                     "measurement": sum(1 for c in vs["changes"] if c.get("class") == "measurement"), "coverage": sum(1 for c in vs["changes"] if c.get("class") == "coverage")}
     if not vs["same_commit"]:
         if real_up and not real_down: vs["verdict"] = "genuine improvement"
         elif real_down and not real_up: vs["verdict"] = "genuine regression"
         elif real_up and real_down: vs["verdict"] = "mixed"
+        elif vs["counts"]["unconfirmed"]: vs["verdict"] = "unconfirmed (PLAYCRAFT method changed): re-measure the baseline commit"
         elif vs["counts"]["unverified_code"]: vs["verdict"] = "code changed; not verified by measurement"
         elif vs["overall"]["delta"] is not None and abs(vs["overall"]["delta"]) <= vs["overall"]["noise_band"]: vs["verdict"] = "no measured change (within noise)"
         else: vs["verdict"] = "score moved without a measured criterion change (method or coverage)"
@@ -435,7 +476,7 @@ def regressions(runs):
     assess = [r for r in runs if r["kind"] in ASSESS_KINDS]
     for a, b in zip(assess, assess[1:]):
         for c in compare_runs(a, b)["changes"]:
-            if c.get("class", "").startswith("regressed"):
+            if c.get("class", "").startswith("regressed") and "unconfirmed" not in c["class"]:
                 out.append({"run": b["run_id"], "kind": "assessment", "what": f"{c['title']}: {c['from']['status']} → {c['to']['status']} ({c['to']['level']})", "criterion": c["id"],
                             "commit": _short_sha(b.get("commit")), "confirmed": True})
     counts = {}
@@ -492,6 +533,8 @@ def game_report(store, gid, stale_days=14):
     nb = noise_band([r for r in runs if r["kind"] in ASSESS_KINDS])
     steps = [compare_runs(a, b, nb["band"]) for a, b in zip(assess, assess[1:])]
     vs_base = attribute_steps(compare_runs(base, latest, nb["band"]), steps) if latest["run_id"] != base["run_id"] else None
+    ctrl = controlled(base, latest, runs) if vs_base and not vs_base["same_commit"] else None
+    if ctrl: vs_base = recount(confirm_with(vs_base, compare_runs(ctrl, latest, nb["band"])))
     findings = track_findings(assess)
     regs, recurring = regressions(runs)
     timeline = [{"run": r["run_id"], "kind": r["kind"], "at": r["assessed_at"], "commit": _short_sha(r.get("commit")), "method": r.get("method") or "unrecorded",

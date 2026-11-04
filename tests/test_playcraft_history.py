@@ -116,6 +116,24 @@ check("portfolio: recurring regressions and the attention ranking are grounded i
       P["answers"]["recurring_regressions"] and P["answers"]["recurring_regressions"][0]["game"] == "Blip" and P["answers"]["needs_attention_next"][0]["game"] == "Blip",
       P["answers"]["needs_attention_next"][:2])
 check("portfolio never ranks raw scores across genres (improved_most only lists genuine verdicts)", all(x["verdict"] == "genuine improvement" for x in P["answers"]["improved_most"]))
+# a PLAYCRAFT method change between commits: unconfirmed until the baseline commit is re-measured with the new method
+d3, g3 = repo("drift"); m1 = commit(d3, g3, "one")
+X = {"x.time": ("player_experience", "pass", "observed"), "x.touch": ("mobile", "fail", "verified")}
+q1 = S.record(card(d3, m1, "2026-02-01T10:00:00+00:00", X, method="old"), "pass", root=d3)
+m2 = commit(d3, g3, "two")
+Y = {"x.time": ("player_experience", "partial", "observed"), "x.touch": ("mobile", "pass", "verified")}
+S.record(card(d3, m2, "2026-02-02T10:00:00+00:00", Y, method="new"), "pass", root=d3)
+vb = H.game_report(S, q1["game_id"])["vs_baseline"]
+check("method changed between commits: measured flips are 'unconfirmed', never genuine", vb["verdict"].startswith("unconfirmed") and vb["counts"]["improved"] == 0 and vb["counts"]["unconfirmed"] == 2, vb["counts"])
+# re-measure the baseline commit with the new method: the touch fix reproduces, the time 'regression' does not
+g3("checkout", "-q", m1)
+S.record(card(d3, m1, "2026-02-03T10:00:00+00:00", {"x.time": ("player_experience", "partial", "observed"), "x.touch": ("mobile", "fail", "verified")}, method="new"), "pass", root=d3)
+g3("checkout", "-q", "main")
+S.record(card(d3, m2, "2026-02-04T10:00:00+00:00", Y, method="new"), "pass", root=d3)
+G3 = H.game_report(S, q1["game_id"]); cls = {c["id"]: c["class"] for c in G3["vs_baseline"]["changes"]}
+check("controlled comparison (baseline commit re-measured, same method) confirms the real fix and exposes the method artefact",
+      G3["vs_baseline"]["verdict"] == "genuine improvement" and cls["x.touch"].startswith("improved") and cls["x.time"] == "method" and G3["vs_baseline"].get("controlled"), (G3["vs_baseline"]["verdict"], cls))
+check("the baseline stays the original run after a re-measurement", G3["baseline"] == q1["run_id"])
 # live check
 b = os.path.join(ws, "build"); os.makedirs(b, exist_ok=True)
 open(os.path.join(b, "index.html"), "w").write('<script type="module" src="/assets/index-Ab12Cd34.js"></script><link rel="stylesheet" href="/assets/index-Zz99Yy88.css">')
