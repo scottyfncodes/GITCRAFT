@@ -10,6 +10,9 @@
      isn't the project);
    - the build's duration is measured (cold download);
    - when it lands, the SAME session uses MeshCraft's and ForgeCraft's full tools (tools/list_changed, no /mcp).
+--mode mcp (the default when `claude` isn't installed or there's no API key, as in CI): the same checks without
+Claude Code. MCP clients connect to the registered MeshCraft and ForgeCraft servers before Blender exists, the global
+hook runs the way Claude Code runs it, and the same server processes must list and run their full tools afterwards.
 Exit 1 on any failure. Downloads the prebuilt tools (~400 MB) and Blender (~400 MB).
 """
 import argparse, json, os, queue, shutil, subprocess, sys, tempfile, threading, time
@@ -17,7 +20,13 @@ import argparse, json, os, queue, shutil, subprocess, sys, tempfile, threading, 
 ap = argparse.ArgumentParser()
 ap.add_argument("--work", default=None)
 ap.add_argument("--build-timeout", type=int, default=1800)
+ap.add_argument("--mode", choices=["auto", "session", "mcp"], default="auto")
 a = ap.parse_args()
+if a.mode == "auto":
+    a.mode = "session" if shutil.which("claude") and (os.environ.get("ANTHROPIC_API_KEY") or os.path.exists(os.path.expanduser("~/.claude/.credentials.json"))
+                                                       or os.environ.get("CLAUDE_CODE_OAUTH_TOKEN") or os.environ.get("CLAUDECODE")) else "mcp"
+print(f"mode: {a.mode}", flush=True)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 branch = subprocess.check_output(["git", "-C", repo, "rev-parse", "--abbrev-ref", "HEAD"], text=True).strip()
 fails, report = [], {}
@@ -101,21 +110,25 @@ def calls(evs):
     return out
 
 
-# 2) a session in another project, started before Blender exists
-s = Session()
-ev1 = s.ask("Call mcp__meshcraft__meshcraft_status and quote its state field.")
-init = next((e for e in ev1 if e.get("type") == "system" and e.get("subtype") == "init"), {})
-servers = {m["name"]: m.get("status") for m in init.get("mcp_servers", [])}
-tools = init.get("tools", [])
-check("session start: MeshCraft and ForgeCraft connected (project is not GITCRAFT)",
-      servers.get("meshcraft") == "connected" and servers.get("forgecraft") == "connected", servers)
-check("session start: each lists only its status tool while Blender is missing",
-      [t for t in tools if t.startswith("mcp__meshcraft__")] == ["mcp__meshcraft__meshcraft_status"]
-      and [t for t in tools if t.startswith("mcp__forgecraft__")] == ["mcp__forgecraft__forgecraft_status"],
-      [t for t in tools if "craft__" in t and ("meshcraft" in t or "forgecraft" in t)])
-# StudioCraft: connected at session start, or (a slower first start) connects during the session and runs
-studio_init = servers.get("studiocraft")
-if st.get("studiocraft", {}).get("state") == "ok":
+if a.mode == "session":
+    # 2) a session in another project, started before Blender exists
+    s = Session()
+    ev1 = s.ask("Call mcp__meshcraft__meshcraft_status and quote its state field.")
+    init = next((e for e in ev1 if e.get("type") == "system" and e.get("subtype") == "init"), {})
+    servers = {m["name"]: m.get("status") for m in init.get("mcp_servers", [])}
+    tools = init.get("tools", [])
+    check("session start: MeshCraft and ForgeCraft connected (project is not GITCRAFT)",
+          servers.get("meshcraft") == "connected" and servers.get("forgecraft") == "connected", servers)
+    check("session start: each lists only its status tool while Blender is missing",
+          [t for t in tools if t.startswith("mcp__meshcraft__")] == ["mcp__meshcraft__meshcraft_status"]
+          and [t for t in tools if t.startswith("mcp__forgecraft__")] == ["mcp__forgecraft__forgecraft_status"],
+          [t for t in tools if "craft__" in t and ("meshcraft" in t or "forgecraft" in t)])
+    log = os.path.join(gc, "logs", "install.log")
+    started = open(log).read().splitlines()[0] if os.path.exists(log) else ""
+    check("the global SessionStart hook started the Blender build in the background", "background build started" in started and "global" in started
+          and "meshcraft" in started, started)
+    # StudioCraft: connected at session start, or (a slower first start) connects during the session and runs
+    studio_init = servers.get("studiocraft")
     if studio_init == "connected":
         check("session start: studiocraft connected", True)
     else:
@@ -123,10 +136,28 @@ if st.get("studiocraft", {}).get("state") == "ok":
         ran = [r for r in calls(evs) if r[0] == "mcp__studiocraft__studio_status" and not r[2]]
         check(f"studiocraft connects in the same session and runs studio_status (status at session start: {studio_init})",
               bool(ran) and '"departments"' in ran[0][1], [r[:1] + (r[1][:120],) for r in calls(evs)])
-log = os.path.join(gc, "logs", "install.log")
-started = open(log).read().splitlines()[0] if os.path.exists(log) else ""
-check("the global SessionStart hook started the Blender build in the background", "background build started" in started and "global" in started
-      and "meshcraft" in started, started)
+
+else:
+    # 2) MCP clients stand in for Claude Code: they connect to the registered servers before Blender exists
+    from mcp_client import Client
+    log = os.path.join(gc, "logs", "install.log")
+    clients = {}
+    for name in ("meshcraft", "forgecraft"):
+        r = reg.get(name, {})
+        clients[name] = Client([r.get("command", "")] + r.get("args", []), env=dict(env, **r.get("env", {})), cwd=proj)
+    names = {n: sorted(t["name"] for t in c.tools()) for n, c in clients.items()}
+    check("start: MeshCraft and ForgeCraft connect, each with only its status tool while Blender is missing",
+          names == {"meshcraft": ["meshcraft_status"], "forgecraft": ["forgecraft_status"]}, names)
+    hook = next((h["command"] for g in hooks for h in g.get("hooks", []) if "--global" in h.get("command", "")), "")
+    hr = subprocess.run(hook, shell=True, cwd=proj, env=env, capture_output=True, text=True, timeout=60)  # as Claude Code runs it
+    started = open(log).read().splitlines()[0] if os.path.exists(log) else ""
+    check("the global SessionStart hook returns at once and starts the Blender build in the background",
+          hr.returncode == 0 and "background build started" in started and "global" in started and "meshcraft" in started, (hr.stdout + hr.stderr)[-500:] or started)
+    r = reg.get("studiocraft", {})
+    sc = Client([r.get("command", "")] + r.get("args", []), env=dict(env, **r.get("env", {})), cwd=proj)
+    ok, sst = sc.call("studio_status"); sc.close()
+    check("studiocraft is registered and its studio_status runs from the other project", ok and len((sst or {}).get("departments", [])) == 9,
+          str(sst)[:200])
 
 # 3) wait for the build; time it
 t_hook = time.time()
@@ -136,22 +167,38 @@ done = lambda: (json.load(open(os.path.join(gc, "status.json")))["tools"].get("f
 while time.time() - t_hook < a.build_timeout and not (ready() and done()):
     time.sleep(5)
 first = os.path.getmtime(log) if os.path.exists(log) else time.time()
-report["blender_build_seconds_after_session_start"] = round(time.time() - t_hook, 1)
+report["blender_build_seconds_after_hook"] = round(time.time() - t_hook, 1)
 tail = open(log).read()[-1500:] if os.path.exists(log) else ""
-check(f"background build finished: Blender + engine check + ForgeCraft ({report['blender_build_seconds_after_session_start']} s, cold caches)",
+check(f"background build finished: Blender + engine check + ForgeCraft ({report['blender_build_seconds_after_hook']} s, cold caches)",
       ready() and done(), tail)
 report["install_log"] = [l for l in open(log).read().splitlines() if l.startswith("gitcraft: ")][-8:] if os.path.exists(log) else []
 time.sleep(8)  # the servers poll every 3 s, then announce tools/list_changed
 
-# 4) the same session now has the full tools
-ev2 = s.ask("MeshCraft and ForgeCraft may have new tools now. Call mcp__meshcraft__list_templates and say how many templates "
-            "it returns; then call mcp__forgecraft__hardware_probe and quote its blender capability.")
-c2 = calls(ev2)
-lt = next((t for n, t, err in c2 if n.endswith("list_templates") and not err), "")
-hp = next((t for n, t, err in c2 if n.endswith("hardware_probe") and not err), "")
-check("same session, no /mcp: MeshCraft's full tools (list_templates ran)", "boat" in lt and "chest" in lt, [n for n, _, _ in c2])
-check("same session, no /mcp: ForgeCraft's full tools (hardware_probe ran)", "blender" in hp.lower(), [n for n, _, _ in c2])
-s.close()
+if a.mode == "session":
+    # 4) the same session now has the full tools
+    ev2 = s.ask("MeshCraft and ForgeCraft may have new tools now. Call mcp__meshcraft__list_templates and say how many templates "
+                "it returns; then call mcp__forgecraft__hardware_probe and quote its blender capability.")
+    c2 = calls(ev2)
+    lt = next((t for n, t, err in c2 if n.endswith("list_templates") and not err), "")
+    hp = next((t for n, t, err in c2 if n.endswith("hardware_probe") and not err), "")
+    check("same session, no /mcp: MeshCraft's full tools (list_templates ran)", "boat" in lt and "chest" in lt, [n for n, _, _ in c2])
+    check("same session, no /mcp: ForgeCraft's full tools (hardware_probe ran)", "blender" in hp.lower(), [n for n, _, _ in c2])
+    s.close()
+
+else:
+    # 4) the same server processes now list and run their full tools (tools/list_changed; no reconnect)
+    full = {}
+    for _ in range(20):
+        full = {n: [t["name"] for t in c.tools()] for n, c in clients.items()}
+        if "list_templates" in full["meshcraft"] and "hardware_probe" in full["forgecraft"]: break
+        time.sleep(1)
+    ok_lt, lt = clients["meshcraft"].call("list_templates")
+    ok_hp, hp = clients["forgecraft"].call("hardware_probe")
+    check(f"same MeshCraft server, no reconnect: full tools ({len(full['meshcraft'])}) and list_templates ran",
+          ok_lt and "boat" in json.dumps(lt) and "chest" in json.dumps(lt), full["meshcraft"][:8])
+    check(f"same ForgeCraft server, no reconnect: full tools ({len(full['forgecraft'])}) and hardware_probe ran",
+          ok_hp and "blender" in json.dumps(hp).lower(), full["forgecraft"][:8])
+    for c in clients.values(): c.p.kill()
 
 print(json.dumps({"work": work, "report": report, "failed": fails}, indent=1))
 sys.exit(1 if fails else 0)
