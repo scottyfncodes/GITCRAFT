@@ -1,0 +1,34 @@
+{
+ "schema": 1,
+ "id": "scottyfncodes--demo-day",
+ "created": "2026-11-04T23:20:13+00:00",
+ "paths_seen": [
+  "/home/user/scottyfncodes/demo-day"
+ ],
+ "baseline_run": "20261104204214-pass-7e5bfe96",
+ "repo": "scottyfncodes/demo-day",
+ "host": "github.com",
+ "url": "https://github.com/scottyfncodes/demo-day",
+ "remote_key": "github.com/scottyfncodes/demo-day",
+ "name": "demo-day",
+ "title": "DEMO DAY",
+ "pitch": "A casual demolition puzzle for the phone browser. A street of little brick houses, a tee, and a bag of golf balls. Every brick, pane, floor, beam and roof tile is its own piece: find the weak spot, take it out, and watch the rest come down. Damage stays put, so you can take a few shots, close the app, and pick up the same half-wrecked house later.",
+ "engine": [
+  "three.js"
+ ],
+ "updated": "2026-11-04T23:42:59+00:00",
+ "baseline_pinned_at": "2026-11-04T23:20:13+00:00",
+ "genres": [
+  {
+   "genre": "physics_puzzle",
+   "title": "Physics puzzle / destruction",
+   "share": 1.0
+  },
+  {
+   "genre": "sports",
+   "title": "Sports",
+   "share": 0.62
+  }
+ ],
+ "latest_run": "20261104234258-pass-4d14191a"
+}

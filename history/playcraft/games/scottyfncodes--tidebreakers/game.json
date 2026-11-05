@@ -1,0 +1,35 @@
+{
+ "schema": 1,
+ "id": "scottyfncodes--tidebreakers",
+ "created": "2026-11-04T23:20:13+00:00",
+ "paths_seen": [
+  "/home/user/scottyfncodes/tidebreakers",
+  "/home/user/pc-work/remeasure/tb"
+ ],
+ "baseline_run": "20261104204512-pass-bef0ec20",
+ "repo": "scottyfncodes/tidebreakers",
+ "host": "github.com",
+ "url": "https://github.com/scottyfncodes/tidebreakers",
+ "remote_key": "github.com/scottyfncodes/tidebreakers",
+ "name": "tidebreakers",
+ "title": "TIDEBREAKERS",
+ "pitch": "A mobile-first, stylized 3D survival adventure on a flooded Earth, built for iPhone Safari and Home Screen install.\nThe look is Waterworld-inspired ocean survival: everything salvaged, patched and fought over, scrap atolls and outposts\nin an immense dark sea, and **green means alive**: living plants are the rarest, most valuable thing in the world\n(see `docs/waterworld-pass/`, and `docs/grimy-pass/` for the weathering foundation).\nCivilization is under the sea. You start in a patchwork skiff at ",
+ "engine": [
+  "three.js"
+ ],
+ "updated": "2026-11-05T00:16:17+00:00",
+ "baseline_pinned_at": "2026-11-04T23:20:13+00:00",
+ "genres": [
+  {
+   "genre": "survival",
+   "title": "Survival",
+   "share": 1.0
+  },
+  {
+   "genre": "exploration",
+   "title": "Exploration / adventure",
+   "share": 0.83
+  }
+ ],
+ "latest_run": "20261105001617-pass-7fe56aea"
+}

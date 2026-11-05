@@ -59,6 +59,22 @@ Two requests, two entry points:
   headless Chromium renders WebGL in software).
 - Open a PR in the game repo if that is the project's workflow; do not merge or deploy without permission.
 
+## The history (every run is kept)
+
+Every assess/pass/verify/full_pass is recorded automatically in the Game Quality History (`history` block in the
+result, `history.md` next to the report). Use it:
+- Before a pass: `playcraft_history {game: <repo>}`, to see what was already found, fixed, or regressed before.
+- When asked about progress or "which games need attention": `playcraft_history` (portfolio). Answer from its
+  grounded answers; never compare raw scores across games of different genres.
+- After merging: `playcraft_history_record {event: "main", commit, evidence: "git ls-remote ..."}`.
+- After deploying: `playcraft_history_record {event: "deployment", url, commit, ...}`. Fetch the live page
+  yourself and pass `live_html` + `build_dir` (the build of that commit) so PLAYCRAFT can live-verify it, or give
+  the CI/hosting `evidence` (deploy-reported). Never call a deployment live without one of these.
+- Pass `pr` to verify when the work has a PR, and export the history to `<GITCRAFT>/history/playcraft`
+  (`playcraft_history_export`) in a GITCRAFT PR so it survives the session.
+On an unchanged commit every score change is measurement; only verified/observed criterion changes between
+commits count as improvement. Details: `docs/playcraft-history.md`.
+
 ## Reading the scores
 
 0-100 per category: core gameplay, game feel, controls, progression, difficulty/balance, player experience,

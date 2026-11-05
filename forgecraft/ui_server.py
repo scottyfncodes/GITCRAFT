@@ -119,8 +119,20 @@ def publish(lib_root, dist, source=""):
     probe = json.load(open(probe_file)) if os.path.exists(probe_file) else hardware.probe()
     st = state(lib_root, "data/", probe, mode="snapshot", source=source)
     json.dump(st, open(os.path.join(data, "state.json"), "w"), default=str)
+    games = _publish_games(dist)
     total = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dist) for f in fs)
-    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs to {dist} ({total / 2**20:.1f} MB)")
+    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + f" to {dist} ({total / 2**20:.1f} MB)")
+
+
+def _publish_games(dist):
+    """The PLAYCRAFT Game Quality History page (dist/games/), from the committed archive history/playcraft (stdlib only)."""
+    import importlib.util
+    repo = os.path.dirname(HERE)
+    archive = os.path.join(repo, "history", "playcraft")
+    mod = os.path.join(repo, "studio", "departments", "playcraft", "history.py")
+    if not os.path.isdir(os.path.join(archive, "games")) or not os.path.exists(mod): return 0
+    spec = importlib.util.spec_from_file_location("playcraft_history_site", mod); h = importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
+    return h.publish_site(archive, os.path.join(dist, "games"))
 
 
 NO_LIVE = """ForgeCraft's live web server was removed (it ran jobs outside GITCRAFT's sandbox and accepted

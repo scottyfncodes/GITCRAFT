@@ -30,7 +30,8 @@ FIX = os.path.join(HERE, "fixtures", "playcraft")
 GAMES = {}
 for g in ("physics_tower", "survival_raft", "arcade_dodge"):
     d = os.path.join(ws, g); shutil.rmtree(d, ignore_errors=True); shutil.copytree(os.path.join(FIX, g), d); GAMES[g] = d
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_ASSET_CATALOG=os.path.join(ws, "catalog", "catalog.sqlite"))
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_ASSET_CATALOG=os.path.join(ws, "catalog", "catalog.sqlite"),
+           GITCRAFT_PLAYCRAFT_HISTORY=os.path.join(ws, "history"), GITCRAFT_PLAYCRAFT_ARCHIVE=os.path.join(ws, "no-archive"))   # never the real history
 results = []
 
 

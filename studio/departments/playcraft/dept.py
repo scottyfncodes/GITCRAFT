@@ -24,7 +24,7 @@ def _load(name):
     spec = _ilu.spec_from_file_location(f"playcraft_{name}", os.path.join(HERE, f"{name}.py")); m = _ilu.module_from_spec(spec); spec.loader.exec_module(m); return m
 
 
-scan = _load("scan"); rubric = _load("rubric"); report = _load("report")
+scan = _load("scan"); rubric = _load("rubric"); report = _load("report"); history = _load("history")
 PROFILES = json.load(open(os.path.join(HERE, "genres.json")))["genres"]
 VIEWPORTS = {"desktop": {"name": "desktop", "width": 1280, "height": 720}, "laptop": {"name": "laptop", "width": 1440, "height": 900},
              "phone": {"name": "phone", "device": "iPhone 13"}, "phone_landscape": {"name": "phone_landscape", "device": "iPhone 13 landscape"},
@@ -326,6 +326,7 @@ def build_card(ctx, p, info, metrics, played_vps):
     focus = [{"genre": g["genre"], "title": PROFILES[g["genre"]]["title"], "priorities": PROFILES[g["genre"]]["priorities"], "testing": PROFILES[g["genre"]].get("testing", []),
               "avoid": PROFILES[g["genre"]].get("avoid", [])} for g in genres]
     return {"version": VERSION, "created": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+            "git": history.git_state(info["root"]), "method": history.method_fingerprint(),
             "game": {k: info.get(k) for k in ("name", "title", "pitch", "root", "engine", "build", "mobile", "counts")},
             "genre": {"genres": genres, "primary": genres[0]["genre"], "hybrid": info["genre"]["hybrid"]}, "weights": prof["weights"], "genre_focus": focus,
             "played": {"played": bool(metrics), "viewports": played_vps}, "overall": overall, "categories": cats, "results": results, "findings": finds,
@@ -364,7 +365,8 @@ def assess(ctx, p):
     else:
         ctx.note("not played: " + (info["build"]["note"] or "play disabled") + " — scores rest on source and docs and are capped")
     card = build_card(ctx, p, info, metrics, vps)
-    return {"outputs": _card_outputs(ctx, card, shots), "checks": _card_checks(card), "summary": _summary(card)}
+    outs = _card_outputs(ctx, card, shots)
+    return {"outputs": outs + _history_outputs(ctx, p, "assess", outs), "checks": _card_checks(card), "summary": _summary(card), "history": ctx.history}
 
 
 # ---------------------------------------------------------------- phases 1-4: the pass
@@ -410,7 +412,8 @@ def pass_(ctx, p):
     card["baseline"] = {"git": _git_state(info["root"]), "target": p.get("target") or info["build"]["playable_dir"], "request": {k: v for k, v in p.items() if k in ("viewports", "keys", "start_steps", "play_seconds", "pointer", "pause_keys", "genres", "mobile", "hooks", "trials")}}
     outs = _card_outputs(ctx, card, shots, plan) + [_write_json(ctx, "plan.json", plan)]
     ctx.stage("plan", items=sum(len(s["items"]) for s in plan["stages"]))
-    return {"outputs": outs, "checks": _card_checks(card), "summary": _summary(card), "plan": [f"{s['name']}: " + "; ".join(i["title"] for i in s["items"]) for s in plan["stages"]],
+    outs += _history_outputs(ctx, p, "pass", outs)
+    return {"outputs": outs, "checks": _card_checks(card), "summary": _summary(card), "history": ctx.history, "plan": [f"{s['name']}: " + "; ".join(i["title"] for i in s["items"]) for s in plan["stages"]],
             "baseline": os.path.join(ctx.out_dir, "playcraft.json"), "next": "implement the plan in the game repo (branch, small commits), run its tests and build, then playcraft_verify with baseline=<this playcraft.json>"}
 
 
@@ -548,10 +551,11 @@ def verify(ctx, p):
     lines = ["# PLAYCRAFT pass report", "", f"Game: **{card['game']['title'] or card['game']['name']}** · baseline {base['created']} · now {card['created']}", "",
              f"Changed: {diff.get('stat') or 'n/a'}", ""] + report.before_after_md(cmp)
     outs.append(_write_text(ctx, "pass_report.md", "\n".join(lines) + "\n"))
+    outs += _history_outputs(ctx, p, "verify", outs)
     checks = [{"name": "game played again with the baseline's probe", "ok": bool(metrics) or not (base.get("metrics")), "detail": vps},
               {"name": "no gameplay regressions", "ok": not cmp["regressions"], "detail": cmp["regressions"][:6]}] + guard
     return {"outputs": outs, "checks": checks, "compare": {k: cmp.get(k) for k in ("overall", "regressions", "warnings", "resolved", "new_findings", "metrics", "confirmation_run")}, "guardrails": guard,
-            "summary": _summary(card)}
+            "summary": _summary(card), "history": ctx.history}
 
 
 # ---------------------------------------------------------------- GITCRAFT + PLAYCRAFT
@@ -599,9 +603,202 @@ def full_pass(ctx, p):
     card["engineering"] = eng
     card["baseline"] = {"git": _git_state(info["root"]), "target": target, "request": {k: v for k, v in p.items() if k in ("viewports", "keys", "start_steps", "play_seconds", "pointer", "pause_keys", "genres", "mobile", "hooks", "trials")}}
     outs = _card_outputs(ctx, card, shots, plan, stem="playcraft") + [_write_json(ctx, "plan.json", plan), _write_json(ctx, "engineering.json", eng)]
+    outs += _history_outputs(ctx, p, "full_pass", outs)
     checks = _card_checks(card) + [{"name": "engineering checks ran (or were reported blocked)", "ok": bool(eng), "detail": {k: (v.get("status") if isinstance(v, dict) else v) for k, v in eng.items()}}]
-    return {"outputs": outs, "checks": checks, "summary": _summary(card), "engineering": {k: (v.get("status") if isinstance(v, dict) else v) for k, v in eng.items()},
+    return {"outputs": outs, "checks": checks, "summary": _summary(card), "history": ctx.history, "engineering": {k: (v.get("status") if isinstance(v, dict) else v) for k, v in eng.items()},
             "plan": [f"{s['name']}: " + "; ".join(i["title"] for i in s["items"]) for s in plan["stages"]], "baseline": os.path.join(ctx.out_dir, "playcraft.json")}
+
+
+# ---------------------------------------------------------------- Game Quality History
+def _history_outputs(ctx, p, kind, outs):
+    """Record this run in the Game Quality History and write its comparison with the game's baseline. Never fails the
+    run: a history problem is reported in the result (`history.error`) and the notes."""
+    ctx.history = None
+    if p.get("record_history") is False: ctx.history = {"skipped": "record_history: false"}; return []
+    try:
+        card_path = next(o["path"] for o in outs if o.get("format") == "json" and os.path.basename(o["path"]) in ("playcraft.json", "verify.json"))
+        data = open(card_path, "rb").read(); card = json.loads(data)
+        st = history.Store()
+        rec = st.record(data, kind, root=card["game"]["root"], out_dir=ctx.out_dir, source_file=card_path, pr=p.get("pr"),
+                        record_path=os.path.join(ctx.out_dir, f"{re.sub(r'[^a-z0-9]+', '_', str(p.get('name') or kind).lower()).strip('_')[:48] or kind}.studio.json"))
+        G = history.game_report(st, rec["game_id"])
+        md = _history_md(G, focus_run=rec["run_id"])
+        ctx.history = {"store": st.root, "game_id": rec["game_id"], "run_id": rec["run_id"], "new": rec["new"], "baseline_run": rec["baseline_run"], "runs": G["runs"],
+                       "vs_baseline": {k: (G["vs_baseline"] or {}).get(k) for k in ("verdict", "overall", "verified_overall", "counts", "same_commit")} if G["vs_baseline"] else "this run is the baseline",
+                       "new_findings": [f["title"] for f in G["findings"] if f.get("first_seen") == rec["run_id"] and rec["run_id"] != rec["baseline_run"]]}
+        ctx.stage("history", game=rec["game_id"], run=rec["run_id"])
+        return [_write_text(ctx, "history.md", md)]
+    except Exception as e:   # the history is a record, never a reason to fail an assessment
+        ctx.history = {"error": f"{type(e).__name__}: {e}"}; ctx.note(f"Game Quality History not updated: {type(e).__name__}: {e}")
+        return []
+
+
+def _arrow(d):
+    return "—" if d is None else ("▲ +" + str(d) if d > 0 else "▼ " + str(d) if d < 0 else "= 0")
+
+
+def _history_md(G, focus_run=None):
+    g = G["game"]; vb = G["vs_baseline"]
+    L = [f"# Game Quality History: {g.get('title') or g['id']}", "", f"`{g['id']}` · {g.get('repo') or 'no git remote'} · {G['runs']} runs · baseline `{G['baseline']}` (pinned)", "",
+         "Genres: " + ", ".join(f"{x['title']}" + (f" ({int(x['share'] * 100)}%)" if x.get("share") else "") for x in G["genres"] or []), "",
+         f"Measured noise on this game: ±{G['noise']['band']} overall" + (f" ({G['noise']['samples']} repeat run(s) of one commit)" if G['noise']['measured'] else " (default: no repeat runs of one commit yet)"), ""]
+    if vb:
+        L += ["## Baseline vs latest", "", f"**{vb['verdict']}** · commits {vb['commits'][0] or '?'} → {vb['commits'][1] or '?'}" + (" (same commit)" if vb["same_commit"] else ""),
+              f"Overall {vb['overall']['from']} → {vb['overall']['to']} ({_arrow(vb['overall']['delta'])}); verified-only {vb['verified_overall']['from']} → {vb['verified_overall']['to']} ({_arrow(vb['verified_overall']['delta'])})", "",
+              "| Category | Baseline | Latest | Change | Verified-only |", "|---|---|---|---|---|"]
+        for k, c in vb["categories"].items():
+            if c["from"] is None and c["to"] is None: continue
+            L.append(f"| {c['title'] or k} | {c['from'] if c['from'] is not None else '—'} | {c['to'] if c['to'] is not None else '—'} | {_arrow(c['delta'])} | {c['verified_from'] if c['verified_from'] is not None else '—'} → {c['verified_to'] if c['verified_to'] is not None else '—'} |")
+        L += ["", "Criterion changes: " + ", ".join(f"{v} {k.replace('_', ' ')}" for k, v in vb["counts"].items() if v), ""]
+        L += [f"- {c['class']}: {c['title']} ({c['from']['status']}/{c['from']['level']} → {c['to']['status']}/{c['to']['level']})" + (f" — {c['why']}" if c.get("why") else "") for c in vb["changes"][:20]]
+        L.append("")
+    else:
+        L += ["This is the first recorded run: it is the baseline.", ""]
+    L += ["## Score progression", "", "| Run | Kind | Commit | Overall | Verified-only | Evidence v/o/i/n |", "|---|---|---|---|---|---|"]
+    for t in G["timeline"]:
+        e = t.get("evidence") or {}
+        L.append(f"| {t['at'][:16]}{' **baseline**' if t['is_baseline'] else ''}{' ← this run' if t['run'] == focus_run else ''} | {t['kind']} | {t['commit'] or '?'} | {t['overall']} | {t['verified'] if t['verified'] is not None else '—'} | {e.get('verified', 0)}/{e.get('observed', 0)}/{e.get('inferred', 0)}/{e.get('not_tested', 0)} |")
+    opened = [f for f in G["findings"] if f["state"] == "open"]; res = [f for f in G["findings"] if f["state"] == "resolved"]
+    L += ["", f"## Findings: {len(opened)} open, {len(res)} resolved", ""]
+    L += [f"- open{' (defect)' if f['type'] == 'defect' else ''}: {f['title']} — {f.get('level')}, since {f['first_seen'][:12]}" + (f", reopened {f['reopened']}×" if f["reopened"] else "") for f in opened[:15]]
+    L += [f"- resolved: {f['title']} in {f['resolved_in'][:12]} ({f.get('resolved_level')}" + (", by measurement on an unchanged commit: not credited" if f.get("resolved_by") != "change" else "") + ")" for f in res[:15]]
+    if G["regressions"]:
+        L += ["", "## Regression history", ""] + [f"- {r['kind']}: {r['what']} (commit {r['commit'] or '?'})" for r in G["regressions"][:15]]
+    if G["improvement_passes"]:
+        L += ["", "## Improvement passes", ""]
+        for x in G["improvement_passes"]:
+            L += [f"- {x['at'][:16]} commit {x['commit'] or '?'}{(' · ' + x['pr']) if x.get('pr') else ''}: " + "; ".join(c.get("title", "") for c in x["changes"]),
+                  f"  - measurably resolved: {', '.join(x['measurable']) or 'none'}; resolved from source only: {', '.join(x['unmeasured']) or 'none'}; regressions: {', '.join(x['regressions']) or 'none'}"]
+    d = G["deployment"]
+    L += ["", "## Deployment", "", (f"{d['level']}: {d.get('url')} at {d.get('commit')} ({d.get('observed_at')})" + ("" if d.get("assessed_is_deployed") is None else f"; latest assessment {'is' if d['assessed_is_deployed'] else 'is NOT'} the deployed commit")) if d.get("level") else d.get("note")]
+    return "\n".join(L) + "\n"
+
+
+def _find_game(st, key):
+    if not key: return None
+    games = st.games()
+    if key in games: return key
+    k = key.lower().strip().rstrip("/")
+    for gid in games:
+        g = st.game(gid)
+        if k in ((g.get("repo") or "").lower(), (g.get("title") or "").lower(), (g.get("name") or "").lower()) or k.endswith("/" + (g.get("repo") or "#").split("/")[-1]): return gid
+    if os.path.isdir(key):
+        gid = history.identity(key)["id"]
+        if gid in games: return gid
+    return None
+
+
+def history_view(ctx, p):
+    ctx.used("studio_playcraft"); st = history.Store()
+    if p.get("game"):
+        gid = _find_game(st, p["game"])
+        if not gid: raise StudioError(f"no history for {p['game']!r}", hint="games: " + ", ".join(st.games()) if st.games() else "record a PLAYCRAFT run first")
+        G = history.game_report(st, gid, p["stale_days"])
+        outs = [_write_json(ctx, f"history_{gid}.json", G), _write_text(ctx, f"history_{gid}.md", _history_md(G))]
+        return {"outputs": outs, "checks": [{"name": "history loaded", "ok": True, "detail": {"runs": G["runs"]}}], "store": st.root,
+                "game": gid, "baseline": G["baseline"], "latest": G["latest"], "vs_baseline": {k: (G["vs_baseline"] or {}).get(k) for k in ("verdict", "overall", "verified_overall", "counts")},
+                "open_findings": [f["title"] for f in G["findings"] if f["state"] == "open"][:12], "regressions": G["regressions"][:10], "deployment": G["deployment"]}
+    P, games = history.portfolio(st, p["stale_days"])
+    L = ["# Game portfolio", "", f"{len(P['games'])} games · store `{st.root}` · generated {P['generated']}", "", *[f"> {r}" for r in P["rules"]], "",
+         "| Game | Genres | Latest | Since baseline | Verdict | Open defects | Attention |", "|---|---|---|---|---|---|---|"]
+    for r in P["games"]:
+        L.append(f"| {r['title']} | {', '.join(g['title'] for g in r['genres'] or [])} | {r['overall']} ({r['confidence']}) | {_arrow(r['delta'])} (verified {_arrow(r['verified_delta'])}) | {r['verdict']} | {r['open_defects']} | {r['attention']} |")
+    A = P["answers"]
+    L += ["", "## Questions", "", "**Improved most (genuine, measured):** " + ("; ".join(f"{x['game']} ({x['improved_criteria']} criteria improved at verified/observed level)" for x in A["improved_most"]) or "none yet"),
+          "", "**Declined:** " + ("; ".join(f"{x['game']} ({x['verdict']})" for x in A["declined"]) or "none measured"),
+          "", "**Not assessed recently:** " + ("; ".join(f"{x['game']} ({x['age_days']} days)" for x in A["not_assessed_recently"]) or "none"),
+          "", "**Unresolved defects:** " + ("; ".join(f"{x['game']}: " + ", ".join(d['title'] for d in x['defects']) for x in A["unresolved_defects"]) or "none"),
+          "", "**Recurring regressions:** " + ("; ".join(f"{x['game']}: " + ", ".join(f"{r['what']} ×{r['times']}" for r in x['recurring']) for x in A["recurring_regressions"]) or "none"),
+          "", "**Improvements with measurable results:** " + ("; ".join(f"{x['game']}: {', '.join(x['measurable'])}" for x in A["measurable_improvements"]) or "none"),
+          "", "**Needs attention next:**", ""] + [f"{i + 1}. {x['game']} ({x['attention']}): " + "; ".join(x["reasons"]) for i, x in enumerate(A["needs_attention_next"])]
+    outs = [_write_json(ctx, "portfolio.json", P), _write_text(ctx, "portfolio.md", "\n".join(L) + "\n")]
+    return {"outputs": outs, "checks": [{"name": "portfolio built from recorded runs", "ok": True, "detail": len(P["games"])}], "store": st.root, "answers": P["answers"],
+            "games": [{k: r[k] for k in ("title", "overall", "delta", "verified_delta", "verdict", "open_defects", "attention")} for r in P["games"]]}
+
+
+def _kind_of(path, card):
+    rec = next((os.path.join(os.path.dirname(path), f) for f in os.listdir(os.path.dirname(path)) if f.endswith(".studio.json")), None)
+    a = (history._json(rec) or {}).get("action") if rec else None
+    if a in ("assess", "pass", "verify", "full_pass"): return a, rec
+    if card.get("compare"): return "verify", rec
+    if card.get("engineering"): return "full_pass", rec
+    return ("pass" if card.get("plan") else "assess"), rec
+
+
+def history_import(ctx, p):
+    """Import existing PLAYCRAFT outputs (playcraft.json / verify.json) with their own timestamps and records."""
+    ctx.used("studio_playcraft"); st = history.Store(); files = []
+    for x in p["paths"]:
+        x = ctx.need(x, "path")
+        if os.path.isfile(x): files.append(x)
+        else:
+            for d, dirs, fs in os.walk(x):
+                dirs[:] = [y for y in dirs if y not in ("node_modules", ".git", "play", "play_confirm", "engineering")]
+                files += [os.path.join(d, f) for f in fs if f in ("playcraft.json", "verify.json")]
+    ann = p.get("annotations") or {}
+    cards = []
+    for f in files:
+        try: c = json.load(open(f))
+        except ValueError: continue
+        if not isinstance(c, dict) or "results" not in c or "game" not in c: continue
+        cards.append((c.get("created") or "", f, c))
+    out, skipped = [], []
+    for _, f, c in sorted(cards):   # oldest first, so the earliest run becomes the baseline
+        root = (c.get("game") or {}).get("root")
+        if p.get("only_games") and history.identity(root)["id"] not in p["only_games"]: skipped.append(f); continue
+        kind, rec = _kind_of(f, c)
+        a = ann.get(f) or ann.get(os.path.relpath(f, os.path.dirname(f))) or {}
+        r = st.record(open(f, "rb").read(), kind, root=root, out_dir=os.path.dirname(f), record_path=rec, source_file=f, commit=a.get("commit"), pr=a.get("pr"),
+                      annotations={k: v for k, v in a.items() if k not in ("commit", "pr")} or None, recorded_by="playcraft_history_import")
+        out.append(dict(r, file=f, kind=kind))
+    rows = [{"file": o["file"], "game": o["game_id"], "run": o["run_id"], "kind": o["kind"], "new": o["new"]} for o in out]
+    return {"outputs": [_write_json(ctx, "import.json", {"store": st.root, "imported": rows, "skipped": skipped})],
+            "checks": [{"name": "found PLAYCRAFT cards to import", "ok": bool(out), "detail": len(out)}], "store": st.root,
+            "imported": sum(1 for o in out if o["new"]), "already_present": sum(1 for o in out if not o["new"]),
+            "games": {g: sum(1 for o in out if o["game_id"] == g) for g in sorted({o["game_id"] for o in out})}}
+
+
+def history_record(ctx, p):
+    """Deployments, PR links and notes. A deployment is live-verified only when PLAYCRAFT matches the fetched live page
+    (live_html) against the local build of that commit (build_dir); deploy-reported when the caller gives the
+    hosting/CI evidence; a bare claim is refused."""
+    ctx.used("studio_playcraft"); st = history.Store()
+    gid = _find_game(st, p["game"])
+    if not gid: raise StudioError(f"no history for {p['game']!r}", hint="record a PLAYCRAFT run for the game first")
+    ev = {"type": p["event"]}
+    if p["event"] == "deployment":
+        if not p.get("url") or not p.get("commit"): raise StudioError("a deployment needs url and commit")
+        ev.update(url=p["url"], commit=p["commit"], environment=p.get("environment") or "production", observed_at=p.get("observed_at") or history.now())
+        if p.get("live_html") and p.get("build_dir"):
+            ok, detail = history.verify_live(ctx.need(p["live_html"], "live_html"), ctx.need(p["build_dir"], "build_dir"))
+            from core.contract import sha256
+            ev["live_check"] = {"ok": ok, "detail": detail, "live_html_sha256": sha256(ctx.need(p["live_html"])), "build_dir": p["build_dir"]}
+            ev["level"] = "live-verified" if ok else ("deploy-reported" if p.get("evidence") else "unverified")
+        elif p.get("evidence"): ev["level"] = "deploy-reported"
+        else: raise StudioError("no evidence for this deployment", hint="give `evidence` (the hosting/CI result for that commit) or `live_html` + `build_dir` so PLAYCRAFT can check the live page; nothing is recorded as live without evidence")
+        if ev["level"] == "unverified": raise StudioError("the live page does not match the build of that commit and no hosting evidence was given", hint=json.dumps(ev["live_check"]["detail"], default=str)[:400])
+        ev["evidence"] = p.get("evidence")
+    elif p["event"] == "main":   # the default branch head, as observed by the caller (e.g. git ls-remote): merged is not deployed
+        if not p.get("commit") or not p.get("evidence"): raise StudioError("a main event needs commit and evidence (how it was observed)")
+        ev.update(commit=p["commit"], branch=p.get("environment") or "main", observed_at=p.get("observed_at") or history.now(), evidence=p["evidence"])
+    elif p["event"] == "pr":
+        if not p.get("url"): raise StudioError("a PR link needs url")
+        ev.update(url=p["url"], commit=p.get("commit"), run=p.get("run"), state=p.get("state"), title=p.get("title"))
+    else:
+        if not p.get("note"): raise StudioError("a note needs `note`")
+        ev.update(note=p["note"], run=p.get("run"))
+    saved = st.add_event(gid, ev)
+    return {"outputs": [_write_json(ctx, "event.json", saved)], "checks": [{"name": "event recorded", "ok": True, "detail": saved.get("level") or saved["type"]}],
+            "game": gid, "event": saved}
+
+
+def history_export(ctx, p):
+    ctx.used("studio_playcraft"); st = history.Store()
+    dest = os.path.abspath(p["dest"])
+    from core import inside_roots
+    if not inside_roots(dest): raise StudioError(f"GITCRAFT policy: dest {dest} is outside the workspace roots")
+    r = st.export(dest)
+    return {"outputs": [_write_json(ctx, "export.json", r)], "checks": [{"name": "exported", "ok": True, "detail": r["runs_added"]}], **r}
 
 
 def genres(ctx, p):
@@ -619,4 +816,5 @@ def genres(ctx, p):
             "genres": {i: PROFILES[i]["title"] for i in ids}}
 
 
-ACTIONS = {"discover": discover, "play": play, "assess": assess, "pass": pass_, "verify": verify, "full_pass": full_pass, "genres": genres}
+ACTIONS = {"discover": discover, "play": play, "assess": assess, "pass": pass_, "verify": verify, "full_pass": full_pass, "genres": genres,
+           "history": history_view, "history_import": history_import, "history_record": history_record, "history_export": history_export}
