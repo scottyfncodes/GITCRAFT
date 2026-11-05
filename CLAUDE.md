@@ -128,6 +128,8 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   coverage; never rewrite or delete runs in `history/pixelcraft/` (`docs/pixelcraft.md`).
 - `tests/test_playcraft.py` must pass after any change under `studio/departments/playcraft/` or `studio/core/web/gamepage.mjs`;
   PLAYCRAFT never edits a game and never reports a score, test or regression it did not measure (`docs/playcraft.md`).
+- `tests/test_designcraft.py` must pass after any change under `gamedesign/` (`--quick` skips the browser); DESIGNCRAFT never
+  writes to or runs an assessed game, never labels an inferred judgement as observed play; never rewrite runs in `history/designcraft/` (`docs/designcraft.md`).
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`
   (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
 - Never commit model weights or Meshroom: they install into
