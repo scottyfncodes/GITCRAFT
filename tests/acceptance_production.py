@@ -329,6 +329,14 @@ def main():
     try:
         if "A" in PART: part_a(c)
         if "B" in PART: part_b(c)
+    except Exception:
+        # an unexpected exception (e.g. "server exited") is a failure, never a pass: show why the server stopped
+        rc = c.p.poll()
+        print(f"\nERROR: the run stopped on an unexpected exception; studiocraft server exit status: {rc}"
+              + (f" (killed by signal {-rc})" if rc is not None and rc < 0 else ""), flush=True)
+        try: print("---- studiocraft.log (server + guard stderr), last 6000 chars ----\n" + open(os.path.join(ws, "studiocraft.log"), errors="replace").read()[-6000:], flush=True)
+        except OSError as e: print(f"(no server log: {e})", flush=True)
+        raise
     finally:
         c.p.kill()
     bad = [l for l, ok in results if not ok]
