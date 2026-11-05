@@ -197,8 +197,11 @@ class Store:
     def __init__(self, root=None, archive=None, sync=True):
         self.root = root or store_root(); self.archive = archive if archive is not None else archive_root()
         os.makedirs(os.path.join(self.root, "games"), exist_ok=True)
+        self.sync_note = None
         if sync and self.archive and os.path.isdir(os.path.join(self.archive, "games")) and os.path.realpath(self.archive) != os.path.realpath(self.root):
-            self.sync_from(self.archive)
+            try: self.sync_from(self.archive)
+            except OSError as e:   # an unreadable archive never blocks recording; the next readable session imports it
+                self.sync_note = f"committed archive not imported ({type(e).__name__}: {e})"
 
     def gdir(self, gid): return os.path.join(self.root, "games", gid)
     def games(self): return sorted(d for d in os.listdir(os.path.join(self.root, "games")) if os.path.isfile(os.path.join(self.root, "games", d, "game.json")))

@@ -112,6 +112,8 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
                                           --rx "$repo/studio" --rx "$GITCRAFT_STUDIO_HOME")   # department_* tools run the Studio
   # studiocraft: its code + runtimes (venvs, voice models, Node packages) + MeshCraft's Blender for its Blender actions
   [[ "$name" == studiocraft ]] && policy+=(--rx "$repo/studio" --rx "$GITCRAFT_STUDIO_HOME" --rx "$GITCRAFT_HOME/meshcraft")
+  # the committed Game Quality History (PLAYCRAFT imports it into its store): read-only, runs never write it
+  [[ ( "$name" == studiocraft || "$name" == forgecraft ) && -d "$repo/history" ]] && policy+=(--ro "$repo/history")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done

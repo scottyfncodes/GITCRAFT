@@ -174,8 +174,8 @@ if "--rules" in sys.argv:
 # ---------------------------------------------------------------- part 2: end to end through the sandboxed launcher
 from mcp_client import Client
 hist = os.path.join(ws, "store"); arch2 = os.path.join(ws, "archive2")
-env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_ASSET_CATALOG=os.path.join(ws, "catalog", "c.sqlite"), GITCRAFT_PLAYCRAFT_HISTORY=hist,
-           GITCRAFT_PLAYCRAFT_ARCHIVE=os.path.join(ws, "no-archive"))
+env = dict(os.environ, GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_ASSET_CATALOG=os.path.join(ws, "catalog", "c.sqlite"), GITCRAFT_PLAYCRAFT_HISTORY=hist)
+env.pop("GITCRAFT_PLAYCRAFT_ARCHIVE", None)   # the real committed archive (history/playcraft): it must be readable inside the sandbox
 GAME = os.path.join(ws, "arcade"); TOWER = os.path.join(ws, "physics")
 for src, dst, name in ((os.path.join(HERE, "fixtures", "playcraft", "arcade_dodge"), GAME, "blip"), (os.path.join(HERE, "fixtures", "playcraft", "physics_tower"), TOWER, "topple")):
     shutil.rmtree(dst, ignore_errors=True); shutil.copytree(src, dst)
@@ -196,6 +196,8 @@ def run(tool, args, label, timeout=900):
 
 P0 = dict(project=GAME, target=GAME, viewports=["desktop", "phone"], play_seconds=3, trials=1)
 a = run("playcraft_pass", dict(P0, out_dir=f"{ws}/out/p1"), "pass 1 on the arcade fixture is recorded automatically")
+check("recording works inside the sandbox with the committed archive present (no history error)", a.get("history") and not a["history"].get("error"), a.get("history"))
+check("the committed archive was imported into the store from inside the sandbox", os.path.isdir(os.path.join(hist, "games", "scottyfncodes--fart-flight")), sorted(os.listdir(os.path.join(hist, "games"))) if os.path.isdir(os.path.join(hist, "games")) else None)
 check("pass 1 is the baseline of acme--blip, written to the private store", (a.get("history") or {}).get("game_id") == "acme--blip" and a["history"]["vs_baseline"] == "this run is the baseline"
       and os.path.isdir(os.path.join(hist, "games", "acme--blip")), a.get("history"))
 b2 = run("playcraft_pass", dict(P0, out_dir=f"{ws}/out/p2"), "pass 2 on the same commit")
@@ -238,13 +240,13 @@ dep = json.load(open(f"{ws}/out/h2/history_acme--blip.json"))["deployment"] if o
 check("deployment: live-verified (the live page is identical to the build), and the assessed commit is both deployed and main",
       dep.get("level") in ("live-verified",) and dep.get("assessed_is_deployed") is True and dep.get("assessed_is_main") is True, dep)
 ok, P = c.call("playcraft_history", {"out_dir": f"{ws}/out/port"})
-check("portfolio answers: improved_most names the arcade game with measured criteria", ok and P["answers"]["improved_most"] and P["answers"]["improved_most"][0]["game"] == "BLIP", (P.get("answers") or {}).get("improved_most"))
+check("portfolio answers: improved_most names the arcade game with measured criteria", ok and any(x["game"] == "BLIP" for x in P["answers"]["improved_most"]), (P.get("answers") or {}).get("improved_most"))
 check("portfolio answers: measurable improvements list the verify pass", ok and any(x["game"] == "BLIP" for x in P["answers"]["measurable_improvements"]))
 run("playcraft_history_export", {"dest": arch2, "out_dir": f"{ws}/out/x"}, "export the store to an archive folder")
 c.close()
 fresh = H.Store(os.path.join(ws, "fresh2"), archive=arch2)
 check("a fresh store (new session, upgraded GITCRAFT) imports the archive with every run and the same baseline",
-      set(fresh.games()) == {"acme--blip", "acme--topple"} and len(fresh.runs("acme--blip")) == 4 and fresh.game("acme--blip")["baseline_run"] == a["history"]["run_id"]
+      {"acme--blip", "acme--topple", "scottyfncodes--fart-flight"} <= set(fresh.games()) and len(fresh.runs("acme--blip")) == 4 and fresh.game("acme--blip")["baseline_run"] == a["history"]["run_id"]
       and len(fresh.events("acme--blip")) == 2, (fresh.games(), len(fresh.runs("acme--blip"))))
 print(f"\n{sum(results)}/{len(results)} passed; outputs in {ws}")
 sys.exit(0 if all(results) else 1)
