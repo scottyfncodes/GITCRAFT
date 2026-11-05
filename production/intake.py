@@ -146,7 +146,14 @@ def parse(prompt, project=None, overrides=None):
     spec = {"title": title, "prompt": prompt, "deliverable": deliverable, "dimension": dimension, "platform": platform,
             "genres": genres, "features": feats, "assets": assets, "quality": q, "project": proj, "authorisations": auth,
             "because": because, "assumptions": assumptions, "questions": questions}
-    if overrides: spec = merge(spec, overrides)
+    if overrides:
+        spec = merge(spec, overrides)
+        # what follows from the deliverable is re-derived when an override changed it (unless also overridden), so
+        # the quality bar matches what is actually being made, e.g. a "level pack" re-classified as an asset pack
+        d, qo = spec["deliverable"], (overrides.get("quality") or {})
+        for k, v in (("playcraft", d == "game"), ("pixelcraft", d in ("game", "app", "site")), ("designcraft", d == "game")):
+            if k not in qo: spec["quality"][k] = v
+        if "genres" not in overrides and d != "game": spec["genres"] = []
     spec["acceptance"] = acceptance(spec)
     return spec
 

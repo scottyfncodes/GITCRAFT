@@ -37,6 +37,12 @@ three = intake.parse("Make a low-poly 3D exploration game on a volcano island wi
 check("intake: 3D → materials and world, sky preset from the prompt", three["dimension"] == "3d" and {"wood", "stone"} <= set(three["assets"]["materials"])
       and three["assets"]["world"]["terrain"] == "volcano" and three["assets"]["world"]["sky"] == "sunset", three["assets"])
 check("intake: too short a prompt is refused", raises(lambda: intake.parse("game"), ValueError))
+lp = intake.parse("Make a platformer level pack with five levels and music", overrides={"deliverable": "asset_pack"})
+check("intake: a deliverable override re-derives its quality bar (no PLAYCRAFT/PIXELCRAFT criteria for an asset pack)",
+      not lp["quality"]["playcraft"] and not lp["quality"]["pixelcraft"] and not {"gameplay_quality", "interface_quality", "design_review"} & {c["id"] for c in lp["acceptance"]},
+      [c["id"] for c in lp["acceptance"]])
+lq = intake.parse("Make a platformer level pack with five levels and music", overrides={"deliverable": "asset_pack", "quality": {"pixelcraft": True}})
+check("intake: ...unless the override sets that bar explicitly (then it stays, and is measured or NOT PLANNED)", lq["quality"]["pixelcraft"] and "interface_quality" in {c["id"] for c in lq["acceptance"]})
 o = intake.parse("Build a small arcade game", overrides={"quality": {"playcraft_min": 70}})
 check("intake: overrides deep-merge into the spec", o["quality"]["playcraft_min"] == 70 and "max_rounds" in o["quality"])
 
