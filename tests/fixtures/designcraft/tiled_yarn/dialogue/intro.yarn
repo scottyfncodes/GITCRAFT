@@ -1,0 +1,19 @@
+title: Start
+---
+Warden: The keep has been dark for a hundred years.
+Warden: Light the lantern and the keep will remember you.
+-> I will light it.
+    <<jump Accept>>
+-> Not today.
+    <<jump Refuse>>
+===
+title: Accept
+---
+Warden: Then go. The stairs are in the north hall.
+Ivy: I'll come with you. I know the way.
+===
+title: Refuse
+---
+Warden: The dark can wait. It always has.
+<<jump Missing>>
+===

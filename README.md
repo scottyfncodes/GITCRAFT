@@ -42,6 +42,10 @@ Ten departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, three
 
 ForgeCraft discovers and routes to them (`departments`, `department_route`, `department_run`). Docs: [docs/studio.md](docs/studio.md); how each tool was chosen, licensed and verified: [docs/studio-acquisition.md](docs/studio-acquisition.md). Proofs: `acceptance/studio/`. Test: `tests/test_studio.py`.
 
+## Game design intelligence: DESIGNCRAFT
+
+DESIGNCRAFT (`gamedesign/`, a standalone product) reads a game repository read-only and assesses its *design*: levels, missions, story, progression and the combined player experience. Five departments do the analysis: LEVELCRAFT, MISSIONCRAFT, STORYCRAFT, PROGRESSIONCRAFT and EXPERIENCECRAFT. For every significant weakness DESIGNCRAFT writes three alternatives (conservative, ambitious, wild card), each grounded in the game's own content. It scores the design out of 100 with evidence levels, coverage and confidence, reuses PLAYCRAFT's play evidence, and keeps an append-only history. The web app, including a Design Lab, is at `/designcraft/`. `python3 -m gamedesign assess <repo> --record`. Docs: [docs/designcraft.md](docs/designcraft.md). Test: `tests/test_designcraft.py`.
+
 ## Control room
 
 `scripts/ui.sh` opens a local, phone-friendly web UI for every tool: health, discovery, MeshCraft pipelines, jobs with their retries, the versioned 3D library with fingerprints and verified exports, and routing advice. It listens on 127.0.0.1 only, needs its one-time link, and acts only through `scripts/mcp.sh`, so the sandbox and guard apply. See [docs/ui.md](docs/ui.md).

@@ -1,11 +1,36 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python3 forgecraft/ui_server.py --publish acceptance/tidebreakers-3d/library forgecraft/ui/dist --source 'TIDEBREAKERS acceptance run'",
+  "buildCommand": "python3 forgecraft/ui_server.py --publish acceptance/tidebreakers-3d/library forgecraft/ui/dist --source 'TIDEBREAKERS acceptance run' && python3 -m gamedesign publish history/designcraft forgecraft/ui/dist/designcraft",
   "outputDirectory": "forgecraft/ui/dist",
   "installCommand": "true",
   "framework": null,
   "headers": [
-    { "source": "/(.*)\\.glb", "headers": [{ "key": "Content-Type", "value": "model/gltf-binary" }] },
-    { "source": "/data/state.json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    {
+      "source": "/(.*)\\.glb",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "model/gltf-binary"
+        }
+      ]
+    },
+    {
+      "source": "/data/state.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/designcraft/data/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
   ]
 }

@@ -1,0 +1,5 @@
+{"width":4,"height":3,"tilewidth":16,"tileheight":16,"orientation":"orthogonal",
+ "layers":[{"type":"tilelayer","name":"walls","width":4,"height":3,"data":[1,1,1,1,1,0,0,1,1,1,1,1]},
+  {"type":"objectgroup","name":"things","objects":[
+   {"name":"Entrance","type":"spawn_point","x":20,"y":20},{"name":"Old Chest","type":"chest","x":40,"y":20},
+   {"name":"Skeleton","type":"enemy","x":30,"y":20,"properties":[{"name":"hp","value":12}]},{"name":"Shrine","type":"checkpoint","x":50,"y":20}]}]}
