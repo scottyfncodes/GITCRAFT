@@ -133,11 +133,6 @@ def build(spec, disc):
               resources=x.get("resources", ()), retries=x.get("retries", 1), timeout=x.get("timeout", 1800), work_order=x.get("work_order"),
               criterion=x.get("criterion")))
         if x.get("stage", "production") == "production": prod.append(x["id"])
-    skip = set(spec.get("skip_tasks") or [])
-    if skip:
-        tasks[:] = [t for t in tasks if t["id"] not in skip]
-        for t in tasks: t["depends_on"] = [d for d in t["depends_on"] if d not in skip]
-        decisions.append(f"skipped at the agent's request: {', '.join(sorted(skip))}")
 
     # ---------------------------------------------------------------- integration
     shipping = [t["id"] for t in tasks if t.get("ship")]
@@ -206,6 +201,12 @@ def build(spec, disc):
                           "instructions": ["Deploy only to the target the person approved.", "Open the live URL and confirm it serves this build (same commit/content).",
                                            "Submit the URL and the evidence (a check that ran against the live URL)."],
                           "expected": [], "requires": ["url", "evidence"]}))
+    skip = set(spec.get("skip_tasks") or [])   # applied last, so any task (QA and release included) can be skipped
+    if skip:
+        unknown = sorted(skip - {t["id"] for t in tasks})
+        tasks[:] = [t for t in tasks if t["id"] not in skip]
+        for t in tasks: t["depends_on"] = [d for d in t["depends_on"] if d not in skip]
+        decisions.append(f"skipped at the agent's request: {', '.join(sorted(skip - set(unknown)))}" + (f" (not in the plan: {', '.join(unknown)})" if unknown else ""))
     plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions}
     plan["parallel_groups"] = parallel_groups(plan)
     return plan

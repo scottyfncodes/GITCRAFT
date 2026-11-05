@@ -43,7 +43,7 @@ def main(argv=None):
 def plan_summary(pr):
     return {"production": pr["id"], "status": pr["status"], "store": pr["store"], "spec": {k: pr["spec"][k] for k in
             ("title", "deliverable", "dimension", "platform", "genres", "assets", "quality", "project", "authorisations", "assumptions", "questions", "because")},
-            "acceptance": pr["spec"]["acceptance"], "problems": pr["problems"], "blocked_up_front": pr["readiness"], "decisions": pr["decisions"],
+            "acceptance": pr["spec"]["acceptance"], "problems": pr["problems"], "unmeasured_criteria": pr.get("unmeasured_criteria"), "warnings": pr.get("warnings"), "blocked_up_front": pr["readiness"], "decisions": pr["decisions"],
             "parallel_groups": pr["parallel_groups"],
             "tasks": [{"id": t, "title": pr["tasks"][t]["title"], "owner": pr["tasks"][t]["owner"], "depends_on": pr["tasks"][t]["depends_on"]} for t in pr["order"]]}
 

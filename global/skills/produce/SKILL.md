@@ -19,7 +19,8 @@ when it hands you a work order, and you never claim anything it did not measure.
    - If the interpretation is wrong (wrong genre, a feature missed), plan again with `overrides`
      (deep-merged into the spec), e.g. `{"assets": {"levels": {"kind": "dungeon", "count": 4, "by_levelcraft": true}}}`,
      `{"quality": {"playcraft_min": 60}}`, `{"extra_tasks": [{id, department, action, params, depends_on, ship}]}`,
-     `{"skip_tasks": ["qa.perf"]}`. A plan with `problems` does not run.
+     `{"skip_tasks": ["qa.perf"]}`. A plan with `problems` does not run. A criterion listed in `unmeasured_criteria` will report
+     NOT PLANNED and the production cannot be READY: plan a task for it, or tell the person the requirement is being dropped.
    - Tell the person in a few lines what will be made, by which departments, and what is blocked here.
 2. **Run** — `production_run {production}`. It runs every ready task on parallel workers and stops when
    the deliverable is ready, or when it waits on you (`awaiting_agent`) or on a person (`needs_approval`).

@@ -119,6 +119,7 @@ def part_a(c):
           T["qa.designcraft"]["kind"] == "designcraft" and T["foundation.identity"]["kind"] == "agent" and T["build"]["kind"] == "agent")
     check("4 nothing irrelevant planned (no 3D, no voice, no terrain for a 2D platformer)", not any(k in T for k in ("audio.voice", "world.terrain", "models.1")))
     check("3 plan validated before running (every request is one its department accepts)", plan["problems"] == [], plan["problems"])
+    check("3 every acceptance criterion is measured by a planned task", plan["unmeasured_criteria"] == [], plan["unmeasured_criteria"])
     # ---- 5. dependency order
     pos = {t: i for i, g in enumerate(plan["parallel_groups"]) for t in g}
     check("5 order: assets → integrate → build → QA → regression → release report → deploy",

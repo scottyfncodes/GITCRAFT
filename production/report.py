@@ -21,10 +21,12 @@ def acceptance(prod, exclude=()):
         ts = [_eff(prod, i) for i in roots_ if prod["tasks"][i].get("criterion") == c["id"]]
         if c["id"] == "release_ready":
             others = acceptance(prod, exclude={"release_ready", "deployment"})
-            st = "passed" if others and all(o["status"] == "passed" for o in others) else "pending" if any(o["status"] == "pending" for o in others) else "failed"
+            st = "passed" if others and all(o["status"] == "passed" for o in others) else \
+                 "not_planned" if any(o["status"] == "not_planned" for o in others) and not any(o["status"] in ("failed", "blocked") for o in others) else \
+                 "pending" if any(o["status"] == "pending" for o in others) else "failed"
             out.append(dict(c, status=st, why=None if st == "passed" else [o["id"] for o in others if o["status"] != "passed"], evidence=[])); continue
-        if not ts:
-            out.append(dict(c, status="not_planned", why="no task measures this criterion", evidence=[])); continue
+        if not ts:   # never dropped, never assumed: an unmeasured requirement blocks READY
+            out.append(dict(c, status="not_planned", why=["NOT PLANNED: no task in this production measures this criterion"], evidence=[])); continue
         states = [t["state"] for t in ts]
         if c["id"] == "deployment":
             t = ts[0]; dep = t.get("deployment") or {}
@@ -49,6 +51,7 @@ def acceptance(prod, exclude=()):
 def verdict(acc):
     s = {a["id"]: a["status"] for a in acc}
     core = {k: v for k, v in s.items() if k != "deployment"}
+    if not acc or any(v == "not_planned" for v in s.values()): return "NOT READY"
     if all(v == "passed" for v in core.values()):
         if s.get("deployment") in (None, "passed"): return "READY"
         return "READY — deployment " + s["deployment"].replace("_", " ")

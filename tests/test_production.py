@@ -81,6 +81,26 @@ check("store: a production id cannot address anything outside the store", store.
       and raises(lambda: store.path("ok", "..", "..", "x"), ValueError))
 check("report: verdicts", report.verdict([{"id": "a", "status": "passed"}]) == "READY" and report.verdict([{"id": "a", "status": "failed"}]) == "NOT READY"
       and report.verdict([{"id": "a", "status": "passed"}, {"id": "deployment", "status": "needs_approval"}]).startswith("READY — deployment"))
+check("report: a NOT PLANNED criterion makes the verdict NOT READY even when everything else passed",
+      report.verdict([{"id": "a", "status": "passed"}, {"id": "b", "status": "not_planned"}, {"id": "release_ready", "status": "passed"}]) == "NOT READY")
+
+# ---- acceptance criteria are never dropped (regression: PR #42 review)
+gp = engine.plan("Build a polished mobile platformer game called Keeper with sound, music and three levels", os.path.join(ws, "keeper"),
+                 {"skip_tasks": ["qa.licences"]})
+ids = [c["id"] for c in gp["spec"]["acceptance"]]
+check("criteria: skipping the only task that measures a criterion keeps the criterion in the spec", "licensing" in ids, ids)
+check("criteria: the plan names it as unmeasured with a warning", gp["unmeasured_criteria"] == ["licensing"] and any("licensing" in w for w in gp["warnings"]),
+      (gp["unmeasured_criteria"], gp["warnings"]))
+for t in gp["tasks"].values():   # force every planned task to have passed: READY must still be impossible
+    t["state"] = "passed"; t["gate_results"] = [{"condition": "forced for the test", "ok": True}]
+acc = {a["id"]: a for a in report.acceptance(gp)}
+check("criteria: the unmeasured criterion reports NOT PLANNED in the acceptance report", acc["licensing"]["status"] == "not_planned"
+      and "NOT PLANNED" in str(acc["licensing"]["why"]), acc["licensing"])
+check("criteria: with every task passed, the production is still NOT READY", report.verdict(list(acc.values())) == "NOT READY"
+      and acc["release_ready"]["status"] != "passed" and "NOT PLANNED" in report.markdown(gp), report.verdict(list(acc.values())))
+ok_plan = engine.plan("Build a polished mobile platformer game called Keeper Two with sound, music and three levels", os.path.join(ws, "keeper2"))
+check("criteria: a normal plan measures every criterion", ok_plan["unmeasured_criteria"] == [] and
+      {"loads_everywhere", "gameplay_quality", "interface_quality", "asset_integrity", "licensing", "release_ready"} <= {c["id"] for c in ok_plan["spec"]["acceptance"]})
 con = contracts.all_contracts()
 check("contracts: all eleven Studio departments + 3D, DESIGNCRAFT, agent, built-ins", len(con["studio"]) == 11 and {"forgecraft", "designcraft", "agent", "builtin"} <= set(con))
 
@@ -104,6 +124,20 @@ if executors.studio_python():
     pr2 = store.load(p["production"])
     check("server: a deleted department output is detected on resume and that task (only) is redone",
           len(pr2["tasks"]["audio.sfx.jump"]["attempts"]) == 2 and len(pr2["tasks"]["audio.sfx.coin"]["attempts"]) == 1 and r["status"] == "passed", r.get("counts"))
+    # regression (PR #42 review): a requirement whose task was removed can never end READY, in a real run
+    ok, p = c.call("production_plan", {"prompt": "Make a sound pack with jump and coin sound effects and calm music", "project": os.path.join(ws, "pack2"),
+                                       "overrides": {"deliverable": "asset_pack", "skip_tasks": ["audio.music"]}}, timeout=300)
+    check("server: the music criterion stays in the plan as unmeasured", ok and p["unmeasured_criteria"] == ["asset_music"]
+          and "asset_music" in {x["id"] for x in p["acceptance"]}, p.get("unmeasured_criteria"))
+    ok, r = c.call("production_run", {"production": p["production"]}, timeout=600)
+    pr = store.load(p["production"])
+    ok2, rep = c.call("production_report", {"production": p["production"]}, timeout=120)
+    st = {x["id"]: x["status"] for x in rep["acceptance"]}
+    check("server: every remaining task passed, but the release gate failed on the NOT PLANNED criterion",
+          all(pr["tasks"][t]["state"] == "passed" for t in pr["tasks"] if t != "release.report") and pr["tasks"]["release.report"]["state"] == "failed"
+          and any("asset_music" in c["name"] and not c["ok"] and "NOT PLANNED" in str(c.get("detail")) for c in pr["tasks"]["release.report"]["result"]["checks"]), pr["tasks"]["release.report"].get("error"))
+    check("server: status failed, report NOT READY with the criterion NOT PLANNED", r["status"] == "failed" and st["asset_music"] == "not_planned"
+          and "NOT READY" in rep["markdown"] and "NOT PLANNED" in rep["markdown"], (r["status"], st))
     c.p.kill()
 else:
     print("SKIP server checks: the Studio runtime is not installed (scripts/install-studio.sh)")

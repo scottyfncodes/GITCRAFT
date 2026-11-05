@@ -135,15 +135,22 @@ def plan(prompt, project=None, overrides=None, store_dir=None):
     essential = [q for q in spec["questions"] if q.get("essential")]
     disc = discovery.run(spec)
     pl = planner.build(spec, disc)
+    # Every acceptance criterion from the intake stays in the spec. One that no planned task measures is reported
+    # `not_planned`: it is visible in the plan and the report, and it prevents READY (the release gate fails on it).
     measured = {t.get("criterion") for t in pl["tasks"].values()}
-    dropped = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
-    if dropped:   # a criterion no task can measure is not silently "passed": it is removed with the reason recorded
-        spec["acceptance"] = [c for c in spec["acceptance"] if c["id"] not in dropped]
-        pl["decisions"].append(f"criteria not applicable to this plan (nothing measures them): {', '.join(dropped)}")
+    have = {c["id"] for c in spec["acceptance"]}
+    for cid, text in (("asset_integrity", "Every integrated asset opens as its format and is referenced by the build"),
+                      ("licensing", "Every shipped asset has a recorded licence; nothing non-commercial or no-derivatives")):
+        if cid in measured and cid not in have:   # planning may add criteria (the project's existing assets), never remove one
+            spec["acceptance"].insert(-1, {"id": cid, "text": text, "measured_by": "planning: the project has assets"})
+    unmeasured = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
     problems = planner.validate(pl, disc)
     prod = {"id": store.new_id(spec["title"]), "spec": spec, "discovery": disc, "tasks": pl["tasks"], "order": pl["order"],
             "decisions": pl["decisions"], "parallel_groups": pl["parallel_groups"], "problems": problems,
-            "readiness": planner.readiness(pl, disc), "status": "planned" if not problems and not essential else "needs_input"}
+            "readiness": planner.readiness(pl, disc), "unmeasured_criteria": unmeasured,
+            "warnings": [f"acceptance criterion {c} is not measured by any planned task: it will report NOT PLANNED and the "
+                         "production cannot be READY (plan the task, or drop the requirement from the spec with overrides)" for c in unmeasured],
+            "status": "planned" if not problems and not essential else "needs_input"}
     store.create(prod, store_dir)
     store.event(prod, "planned", tasks=len(pl["tasks"]), problems=problems or None, blocked_up_front=list(prod["readiness"]) or None)
     return prod

@@ -31,7 +31,7 @@ how files move between them, or which checks decide "done".
 | 1 Intake | The prompt becomes a spec: deliverable, 2D/3D, platform and viewports, engine, genres, features, the assets each department makes, a quality bar, authorisations (deploy, replacing assets, merging and spending are never pre-authorised), measurable acceptance criteria, assumptions, and questions (`essential` only when there's no safe default). `overrides` correct any field. | `intake.py`, `rules.json` |
 | 2 Discovery | The project is read without running it: engine, entry, build folder, existing assets (an existing `jump.wav` means no new jump sound), tests, docs, git. The departments report what is ready on this machine (Studio `studio_status`, and ForgeCraft's probe for 3D). | `discovery.py` |
 | 3 Analysis | Tasks that can't run here are known before anything starts (`blocked_up_front`, with the reason and the install command). | `planner.readiness` |
-| 4 Planning | A task graph: stage, owner, department action and request, dependencies, hand-off references, what ships into the project, the gate, resources and retries. Parallel waves are computed from it. It is validated before running: unknown dependencies, cycles, unknown actions, and requests a department would refuse are all reported as `problems`. | `planner.py` |
+| 4 Planning | Every intake criterion stays in the plan; one no task measures is listed in `unmeasured_criteria`/`warnings`, reports NOT PLANNED and blocks READY. A task graph: stage, owner, department action and request, dependencies, hand-off references, what ships into the project, the gate, resources and retries. Parallel waves are computed from it. It is validated before running: unknown dependencies, cycles, unknown actions, and requests a department would refuse are all reported as `problems`. | `planner.py` |
 | 5 Foundation | Project folders (never overwriting anything); the visual identity (agent + VectorCraft), whose palette the effects are tinted with. | `builtins.scaffold` |
 | 6 Production | Department tasks run concurrently (4 workers; at most 2 browsers and 1 Blender at a time), each in its own process. | `engine.run`, `executors.py` |
 | 7 Integration | Every passed output that ships is copied into the project, hash-verified, with a `.license.json` sidecar. Two different files for one path is a conflict (failed, nothing copied). Replacing a different existing file needs approval. Then the build work order lists every integrated asset. | `builtins.integrate` |
@@ -91,7 +91,9 @@ ForgeCraft keeps the 3D Department. The Director gives it a brief and records th
 - `{"quality": {"playcraft_min": 60, "max_rounds": 2}}` raises the gameplay bar and limits remediation to two rounds.
 - `{"assets": {"levels": {"kind": "dungeon", "count": 4, "by_levelcraft": true}}}` asks for four LevelCraft dungeons.
 - `{"extra_tasks": [{"id": "audio.boss", "department": "audiocraft", "action": "music", "params": {"mood": "tense"}, "ship": {"dest": "$project/assets/audio", "roles": ["music"], "formats": ["ogg"]}}]}` adds a task. Extra tasks are validated, gated and integrated like the rest.
-- `{"skip_tasks": ["qa.perf"]}` drops a task (the skip is recorded as a decision).
+- `{"skip_tasks": ["qa.licences"]}` drops a task (the skip is recorded as a decision). Acceptance criteria are never
+  dropped: one that no remaining task measures reports **NOT PLANNED** and the production cannot be READY. To remove
+  a requirement, change the spec that creates it instead (e.g. `{"quality": {"perf": false}}`), so the change is explicit.
 
 Request parameters can reference upstream results:
 

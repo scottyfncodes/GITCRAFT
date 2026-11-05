@@ -170,10 +170,13 @@ def acceptance(spec):
     if q.get("playcraft"): add("gameplay_quality", f"PLAYCRAFT overall ≥ {q['playcraft_min']} with the game actually played", "qa.playcraft")
     if q.get("pixelcraft"): add("interface_quality", f"PIXELCRAFT overall ≥ {q['pixelcraft_min']} at iPhone 17, iPhone 13 and desktop", "qa.pixelcraft")
     if q.get("designcraft"): add("design_review", "DESIGNCRAFT assessment recorded (structural design findings reviewed)", "qa.designcraft")
+    web = d in ("game", "app", "site")
     for kind in ("sfx", "music", "ambience", "voice", "levels", "vfx", "materials", "world", "models", "identity"):
-        if a.get(kind): add(f"asset_{kind}", f"{kind} produced by its department, validated, and integrated into the project", "integrate")
-    add("asset_integrity", "Every integrated asset opens as its format and is referenced by the build", "qa.assets")
-    add("licensing", "Every shipped asset has a recorded licence; nothing non-commercial or no-derivatives", "qa.licences")
+        if a.get(kind): add(f"asset_{kind}", f"{kind} produced by its department, validated" + (", and integrated into the project" if web else ""), "integrate" if web else "production")
+    if web and any(a.get(k) for k in ("sfx", "music", "ambience", "voice", "levels", "vfx", "materials", "world", "models", "identity")):
+        # only when the deliverable ships assets into a build; a project's own existing assets add these at planning
+        add("asset_integrity", "Every integrated asset opens as its format and is referenced by the build", "qa.assets")
+        add("licensing", "Every shipped asset has a recorded licence; nothing non-commercial or no-derivatives", "qa.licences")
     if spec["features"].get("deploy"): add("deployment", "Deployed and the live URL verified (needs approval)", "release.deploy")
     add("release_ready", "Release report written with every criterion's evidence measured on the final build", "release.report")
     return out
