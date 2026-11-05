@@ -80,6 +80,7 @@ jobs:
 
       - name: "#45 diagnosis: master-prompt acceptance, repeated with crash capture"
         run: |
+          set +e   # keep going after a failing run: the point is to capture it
           fails=0
           for i in 1 2 3; do
             echo "::group::acceptance run $i"
