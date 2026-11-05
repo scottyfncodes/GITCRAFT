@@ -236,6 +236,78 @@ def shade(o, smooth_angle=None):
             pass
 
 
+
+# ---------------------------------------------------------------- structural pieces (timber, steel, snow)
+def beam(name, a, b, t, mat=None, parent=None, depth=None):
+    """A square (t x t, or t x depth) bar from point a to point b: braces, rafters, guy wires, struts."""
+    a, b = Vector(a), Vector(b)
+    d = b - a
+    o = box(name, (t, depth or t, d.length), (0, 0, 0), mat, parent=parent)
+    o.rotation_mode = "QUATERNION"
+    o.rotation_quaternion = Vector((0, 0, 1)).rotation_difference(d.normalized())
+    o.location = (a + b) / 2
+    return o
+
+
+def mound(name, w, h, d, loc=(0, 0, 0), mat=None, segs=10, rings=4, parent=None):
+    """The top half of a squashed sphere, w (x) by d (y) at its base and h high, base at loc: a snow
+    drift, a spoil or tailings heap, a hay pile, a sand bank. Closed underneath."""
+    bm = bmesh.new()
+    top = bm.verts.new((0, 0, h))
+    rows = []
+    for j in range(rings, 0, -1):
+        a = (math.pi / 2) * j / (rings + 1)
+        rows.append([bm.verts.new((math.cos(t) * math.cos(a) * w / 2, math.sin(t) * math.cos(a) * d / 2, math.sin(a) * h))
+                     for t in (2 * math.pi * i / segs for i in range(segs))])
+    rows.append([bm.verts.new((math.cos(t) * w / 2, math.sin(t) * d / 2, 0)) for t in (2 * math.pi * i / segs for i in range(segs))])
+    for i in range(segs):
+        bm.faces.new((top, rows[0][i], rows[0][(i + 1) % segs]))
+    for r0, r1 in zip(rows, rows[1:]):
+        for i in range(segs):
+            bm.faces.new((r0[i], r1[i], r1[(i + 1) % segs], r0[(i + 1) % segs]))
+    bm.faces.new(rows[-1][::-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bmesh.ops.translate(bm, vec=Vector(loc), verts=bm.verts)
+    return _mesh_obj(name, bm, mat, parent)
+
+
+def log_wall(name, length, height, loc=(0, 0, 0), axis="X", r=0.17, mats=(None, None), grain=None, openings=(), half=False, verts=7, parent=None):
+    """A log wall: round logs of radius r stacked to `height` along `axis` ("X" or "Y"), centred on loc
+    with its foot at loc's z. mats alternates two log materials course by course; grain, if given, caps
+    each log with an end-grain disc. openings are (u0, u1, z0, z1) holes in wall coordinates (u along the
+    wall from its centre, z up from its foot) for doors and windows: logs are cut short either side.
+    half raises every course by r (the cross wall of a notched corner). Returns the list of objects."""
+    n = max(2, round(height / (r * 2)))
+    out = []
+    lx, ly, lz = loc
+    for i in range(n):
+        z = lz + r + i * r * 2 + (r if half else 0)
+        zz = z - lz
+        spans = [(-length / 2, length / 2)]
+        for u0, u1, z0, z1 in openings:
+            if z0 - r < zz < z1 + r:
+                nxt = []
+                for a, b in spans:
+                    if u1 <= a or u0 >= b:
+                        nxt.append((a, b))
+                    else:
+                        if u0 > a: nxt.append((a, u0))
+                        if u1 < b: nxt.append((u1, b))
+                spans = nxt
+        m = mats[i % 2] if mats[i % 2] is not None else mats[0]
+        for a, b in spans:
+            if b - a < 0.05:
+                continue
+            c = (a + b) / 2
+            p = (lx + c, ly, z) if axis == "X" else (lx, ly + c, z)
+            out.append(cylinder(f"{name}_{i}", r, b - a, p, axis=axis, verts=verts, mat=m, parent=parent))
+        if grain is not None:
+            for e in (-1, 1):
+                u = e * (length / 2 + 0.02)
+                p = (lx + u, ly, z) if axis == "X" else (lx, ly + u, z)
+                out.append(cylinder(f"{name}_end", r * 0.9, 0.04, p, axis=axis, verts=verts, mat=grain, parent=parent))
+    return out
+
 # ---------------------------------------------------------------- colour bake + atlas
 def bake_vertex_colors(o, mats: Materials, jitter=0.04, seed=1, per_role_jitter=None):
     """Write each face's material colour into the 'Color' corner attribute (linear float).
