@@ -184,11 +184,11 @@ def part_a(c):
             if "smoke" in f: ch = agent.fix(o)
             elif "playcraft" in f and "coyote" not in open(os.path.join(proj, "js", "game.js")).read(): ch = agent.improve(o)
             else: ch = []
+            if not ch:   # no honest remedy available to the stand-in: the work order stays open (the production cannot be READY)
+                print(f"   agent has no fix for {f}; leaving it open", flush=True); continue
             git_commit(proj, f"fix: {f}")
-            if not ch:
-                r = call(c, "production_submit", {"production": pid, "task": f, "files": [os.path.join(proj, "index.html")], "notes": "no further change available", "continue": False})
-                check(f"a fix that changes nothing is refused ({f})", not r["submission"]["accepted"]); break
             call(c, "production_submit", {"production": pid, "task": f, "files": [os.path.join(proj, x) for x in ch], "notes": "fixed per findings"}, timeout=2400)
+        if all(not (("smoke" in f) or ("playcraft" in f)) for f in fixes): break
     prod = load(pid)
     rv = prod["tasks"].get("qa.smoke.r1", {})
     check("10 re-verification measured the modified project and passed", rv.get("state") == "passed" and rv.get("measured_fingerprint") != sm.get("measured_fingerprint"))
@@ -198,6 +198,10 @@ def part_a(c):
         check(f"10 PLAYCRAFT re-measured after its fix ({before} → {after})", prod["tasks"]["qa.playcraft.r1"]["state"] == "passed", after)
     st = call(c, "production_status", {"production": pid})
     prod = load(pid)
+    perf_iv = [(a["t0"], a["t1"]) for t, x in prod["tasks"].items() if t.startswith("qa.perf") for a in x["attempts"] if a.get("t0") and a.get("t1")]
+    other_iv = [(a["t0"], a["t1"]) for t, x in prod["tasks"].items() if not t.startswith("qa.perf") for a in x["attempts"] if a.get("t0") and a.get("t1")]
+    check("frame-rate measurements ran with the machine to themselves (no other task overlapped qa.perf)", perf_iv and
+          not any(s0 < e1 and s1 < e0 for s0, e0 in perf_iv for s1, e1 in other_iv), perf_iv)
     fp_rel = prod["tasks"]["release.report"].get("result", {}).get("fingerprint")
     final_qa = [e for e in (prod["tasks"][i] for i in prod["order"]) if e["kind"] != "agent" and e["stage"] in ("qa", "release") and e["state"] == "passed" and e.get("measured_fingerprint")]
     check("11 release: every QA result was measured on the exact build released", fp_rel and all(q["measured_fingerprint"] == fp_rel for q in final_qa if not q.get("superseded_by")),
@@ -308,6 +312,9 @@ def part_b(c):
     call(c, "production_run", {"production": pid})
     st = call(c, "production_submit", {"production": pid, "task": "build", "files": [os.path.join(game, "index.html")], "notes": "existing game"}, timeout=1500)
     check("B5 PLAYCRAFT gate failed against a 99 bar → fix work order", "fix.qa.playcraft.r1" in tasks_in(st, "awaiting_agent"), st["counts"])
+    r = call(c, "production_submit", {"production": pid, "task": "fix.qa.playcraft.r1", "files": [os.path.join(game, "index.html")], "notes": "nothing changed", "continue": False})
+    check("B5 a fix submitted without changing the project is refused; the work order stays open", not r["submission"]["accepted"]
+          and "fix.qa.playcraft.r1" in tasks_in(r, "awaiting_agent"), r["submission"])
     with open(os.path.join(game, "index.html"), "a") as f: f.write("\n<!-- tuned -->\n")
     git_commit(game, "tune")
     st = call(c, "production_submit", {"production": pid, "task": "fix.qa.playcraft.r1", "files": [os.path.join(game, "index.html")], "notes": "a change that cannot reach 99"}, timeout=1500)

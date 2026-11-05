@@ -17,7 +17,9 @@ from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BL
 from . import inside_roots, roots, store_root
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
 
-RESOURCES = {"browser": 2, "blender": 1}
+RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1}
+# "exclusive": a timing measurement (frame rate) is only valid with the machine to itself, so such a task starts
+# only when nothing else runs, and nothing else starts while it runs
 FINGERPRINT_SKIP = {".git", "node_modules", "__pycache__", ".cache"}
 
 
@@ -231,6 +233,7 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
                         if _stale_qa(prod, t): store.save(prod); break
                         if t["kind"] == "agent": _issue(prod, t); continue
                         if any(in_use[r] >= RESOURCES[r] for r in t["resources"]): continue
+                        if in_use["exclusive"] or ("exclusive" in t["resources"] and running): continue
                         if len(running) >= max_workers: break
                         work, early = _prepare(prod, t)
                         if early is not None: _finish(prod, t, early); continue

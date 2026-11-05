@@ -157,7 +157,7 @@ def build(spec, disc):
         if q.get("perf"):
             qa.append("qa.perf")
             add(T("qa.perf", "TestCraft performance profile", "qa", "studio", department="testcraft", action="perf",
-                  params={"target": tgt, "seconds": 4, "min_fps": q["min_fps"], "max_p95_ms": q["max_p95_ms"], "name": "perf"}, deps=["build"], resources=["browser"],
+                  params={"target": tgt, "seconds": 4, "min_fps": q["min_fps"], "max_p95_ms": q["max_p95_ms"], "name": "perf"}, deps=["build"], resources=["browser", "exclusive"],
                   criterion="performance"))
         if q.get("playcraft"):
             qa.append("qa.playcraft")
