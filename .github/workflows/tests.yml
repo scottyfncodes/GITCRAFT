@@ -70,6 +70,12 @@ jobs:
       - name: ForgeCraft (3D Department)
         run: python3 tests/test_forgecraft.py
 
+      - name: Production Director (unit + a real production through the sandboxed server)
+        run: python3 tests/test_production.py
+
+      - name: Production Director master-prompt acceptance (every department for real)
+        run: python3 tests/acceptance_production.py
+
       - name: Logs on failure
         if: failure()
         run: |

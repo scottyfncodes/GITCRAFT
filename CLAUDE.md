@@ -91,6 +91,14 @@ project without this repo attached. Sources: `global/`.
 - Runtimes live in `~/.gitcraft/studio` (`scripts/install-studio.sh [voice|mocap|music|unirig|all]`); nothing
   large is committed. Choices, scores, licences and deferrals: `docs/studio-acquisition.md`.
 
+## Production Director (production/)
+
+- One master prompt → a production: `production_plan` → `production_run` (studiocraft tools; CLI `python3 -m production`).
+  intake → discovery → planner → engine (parallel, gated, resumable) → acceptance report. Guide: `docs/production.md`.
+- It coordinates departments and never re-implements one: Studio actions through `studio/cli.py --call`, 3D through
+  `forgecraft/cli.py call`, DESIGNCRAFT through `gamedesign`, the agent through work orders. Standard library only.
+- A tool returning `ok` makes a task `complete`; only its gate makes it `passed`. Never mark a gate passed without a measurement.
+
 ## Control room (local web UI)
 
 `scripts/ui.sh` serves a phone-friendly UI for every GITCRAFT tool on 127.0.0.1
@@ -130,6 +138,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   PLAYCRAFT never edits a game and never reports a score, test or regression it did not measure (`docs/playcraft.md`).
 - `tests/test_designcraft.py` must pass after any change under `gamedesign/` (`--quick` skips the browser); DESIGNCRAFT never
   writes to or runs an assessed game, never labels an inferred judgement as observed play; never rewrite runs in `history/designcraft/` (`docs/designcraft.md`).
+- `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
+  master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
+  gate or substitute a mocked department result to make it pass.
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`
   (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
 - Never commit model weights or Meshroom: they install into

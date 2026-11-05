@@ -1,0 +1,45 @@
+"""GITCRAFT Production: one master prompt → a coordinated, verified production.
+
+The Production Director sits above the departments. It never re-implements one:
+
+  intake      the master prompt → a production spec (deliverable, platform, features, quality bar,
+              authorisations, acceptance criteria, assumptions, the few questions that matter)
+  discovery   the project (existing code, engine, assets, tests, git), and what can really run here
+              (every Studio action ready/blocked, the 3D Department's probe)
+  planner     spec + discovery → a task graph: stages, dependencies, handoffs, gates, parallel groups
+  engine      dependency-aware scheduling with parallel workers, retries, failure propagation,
+              quality gates, remediation loops, persistent state and resume
+  executors   who does each task: Studio departments (studio/core/contract.py), the 3D Department
+              (ForgeCraft), DESIGNCRAFT (gamedesign/), built-ins (scaffold, integrate, release), and the
+              agent (Claude: code, integration, the 2D ArtCraft tools) through work orders it submits back
+  report      the acceptance report: every criterion with its evidence, what is still blocked, and
+              whether the deliverable is genuinely ready
+
+Standard library only: it runs inside the studiocraft sandbox (studio venv) and on a plain python3."""
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(HERE)
+VERSION = "1.0.0"
+
+# Task states. A tool returning successfully makes a task `complete`; only its gate makes it `passed`.
+PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED = (
+    "pending", "in_progress", "awaiting_agent", "complete", "passed", "failed", "blocked", "needs_approval", "skipped")
+TERMINAL = {PASSED, FAILED, BLOCKED, SKIPPED}
+STATES = [PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED]
+STAGES = ["intake", "discovery", "foundation", "production", "integration", "qa", "release"]
+
+
+def roots():
+    rs = os.environ.get("GITCRAFT_ROOTS") or os.environ.get("GITCRAFT_ROOT") or os.getcwd()
+    return [os.path.realpath(r) for r in rs.split(":") if r]
+
+
+def inside_roots(path):
+    rp = os.path.realpath(path)
+    return any(rp == r or rp.startswith(r.rstrip(os.sep) + os.sep) for r in roots())
+
+
+def store_root():
+    """Where productions live: $GITCRAFT_PRODUCTION_HOME, else <first root>/gitcraft-out/production."""
+    return os.path.realpath(os.environ.get("GITCRAFT_PRODUCTION_HOME") or os.path.join(roots()[0], "gitcraft-out", "production"))
