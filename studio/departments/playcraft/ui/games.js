@@ -25,7 +25,7 @@
 
   // ---------------------------------------------------------------- charts
   function trail(timeline, w = 320, h = 76) {
-    const pts = timeline.filter((t) => t.overall != null);
+    const pts = timeline.filter((t) => t.overall != null && !t.is_remeasure);   // progression of the code; controls are on the game page
     if (!pts.length) return "";
     const vals = pts.flatMap((t) => [t.overall, t.verified]).filter((v) => v != null);
     const lo = Math.max(0, Math.min(...vals) - 6), hi = Math.min(100, Math.max(...vals) + 6);
@@ -47,18 +47,22 @@
     const base = tl.find((t) => t.is_baseline) || tl[0], band = G.noise?.band ?? 3;
     let g = `<rect x="${L}" y="${y(Math.min(hi, base.overall + band))}" width="${w - L - R}" height="${Math.max(1, y(Math.max(lo, base.overall - band)) - y(Math.min(hi, base.overall + band)))}" fill="rgba(138,155,179,.16)"/>`;
     for (let v = lo; v <= hi; v += 10) g += `<line x1="${L}" x2="${w - R}" y1="${y(v)}" y2="${y(v)}" stroke="#24497a" stroke-width="1"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" fill="#6f88a8" font-size="11">${v}</text>`;
-    const path = (k) => tl.map((t, i) => (t[k] == null ? null : `${x(i)},${y(t[k])}`)).filter(Boolean).join(" ");
+    const path = (k) => tl.map((t, i) => (t[k] == null || t.is_remeasure ? null : `${x(i)},${y(t[k])}`)).filter(Boolean).join(" ");   // controls are dots, not progress
     g += `<polyline points="${path("verified")}" fill="none" stroke="#f4c542" stroke-width="2.5" stroke-dasharray="6 5"/>`;
     g += `<polyline points="${path("overall")}" fill="none" stroke="#fbefd5" stroke-width="3.5" stroke-linejoin="round"/>`;
+    let lastLabel = -1e9;
     tl.forEach((t, i) => {
       const same = i > 0 && tl[i - 1].commit && t.commit === tl[i - 1].commit;
-      g += `<circle cx="${x(i)}" cy="${y(t.overall)}" r="${t.is_baseline ? 7 : 5.5}" fill="${t.is_baseline ? "#081a30" : t.kind === "verify" ? "#2ad0b8" : "#fbefd5"}" stroke="#fbefd5" stroke-width="2.5"><title>${esc(t.kind)} · ${esc(day(t.at))} · ${esc(t.commit || "?")} · ${t.overall}</title></circle>`;
+      g += `<circle cx="${x(i)}" cy="${y(t.overall)}" r="${t.is_baseline ? 7 : 5.5}" fill="${t.is_baseline ? "#081a30" : t.is_remeasure ? "#6f88a8" : t.kind === "verify" ? "#2ad0b8" : "#fbefd5"}" stroke="#fbefd5" stroke-width="2.5"><title>${esc(t.kind)} · ${esc(day(t.at))} · ${esc(t.commit || "?")} · ${t.overall}</title></circle>`;
+      const gap = (w - L - R) / Math.max(1, tl.length - 1), special = t.is_baseline || t.is_remeasure || t.kind === "verify";
+      if (!(!same || special || gap > 70) || x(i) - lastLabel < 62) return;   // the dot is drawn; skip a label that would collide
+      lastLabel = x(i);
       g += `<text x="${x(i)}" y="${h - 16}" text-anchor="middle" fill="${same ? "#6f88a8" : "#a8bcd4"}" font-size="11" font-family="ui-monospace, Menlo, monospace">${sha(t.commit)}</text>`;
-      g += `<text x="${x(i)}" y="${h - 3}" text-anchor="middle" fill="#6f88a8" font-size="10">${esc(t.kind)}</text>`;
+      if (special || gap > 70) g += `<text x="${x(i)}" y="${h - 3}" text-anchor="middle" fill="#6f88a8" font-size="10">${t.is_baseline ? "baseline" : t.is_remeasure ? "control" : esc(t.kind)}</text>`;
     });
     return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Score progression for ${esc(G.title)}">${g}</svg>
       <div class="legend"><span><i style="border-color:#fbefd5"></i>Overall</span><span><i style="border-color:#f4c542;border-top-style:dashed"></i>Verified-only</span>
-      <span><i style="border-color:rgba(138,155,179,.5);border-top-width:8px"></i>Baseline ± measured noise (${band})</span><span>Grey commit = same as previous run</span></div>`;
+      <span><i style="border-color:rgba(138,155,179,.5);border-top-width:8px"></i>Baseline ± measured noise (${band})</span><span>Grey commit = same as previous run · grey dot = re-measure of an older commit (control)</span></div>`;
   }
 
   // ---------------------------------------------------------------- portfolio
@@ -110,7 +114,7 @@
     if (!G) { app.innerHTML = `<a class="back" href="#/">← All games</a><p class="lede">No history for that game.</p>`; return; }
     const r = DATA.portfolio.find((x) => x.id === id) || {}, vb = G.vs_baseline, dep = G.deployment || {};
     const [vc, vt] = verdict(r.verdict);
-    const base = G.timeline.find((t) => t.is_baseline) || G.timeline[0], last = G.timeline[G.timeline.length - 1];
+    const base = G.timeline.find((t) => t.is_baseline) || G.timeline[0], last = G.timeline.find((t) => t.run === G.latest) || G.timeline[G.timeline.length - 1];
     const when = (rid) => { const t = G.timeline.find((x) => x.run === rid); return t ? day(t.at) : esc((rid || "").slice(0, 12)); };
     const lvl = (l) => `<span class="lv ${esc(l || "unknown")}">${esc((l || "?").replace("_", " "))}</span>`;
     const clsOf = (c) => (c.includes("unconfirmed") || c.startsWith("code") ? "code" : c.startsWith("improved") ? "improved" : c.startsWith("regressed") ? "regressed" : c === "measurement" || c === "method" ? "measurement" : "");
@@ -168,7 +172,7 @@
       </div>
 
       <section class="panel"><h3>Runs and provenance</h3><div class="scroll"><table class="prov"><thead><tr><th>Assessed</th><th>Kind</th><th>Commit</th><th>Overall</th><th>Verified</th><th>Evidence v/o/i/n</th><th>Method</th></tr></thead><tbody>
-        ${G.timeline.map((t, i) => { const pv = G.provenance[i] || {}; const e = t.evidence || {}; return `<tr><td>${esc(day(t.at))}${t.is_baseline ? ` <span class="chip gold">baseline</span>` : !t.is_baseline && t.commit && t.commit === base.commit && i > 0 && G.timeline[i - 1].commit !== t.commit ? ` <span class="chip">re-measure</span>` : ""}</td><td>${esc(t.kind)}</td><td class="mono" title="${esc(pv.commit_source || "")}">${sha(t.commit)}</td><td class="n">${t.overall}</td><td class="n">${t.verified ?? "—"}</td><td class="n">${e.verified || 0}/${e.observed || 0}/${e.inferred || 0}/${e.not_tested || 0}</td><td class="mono">${esc(t.method)}</td></tr>`; }).join("")}
+        ${G.timeline.map((t, i) => { const pv = G.provenance[i] || {}; const e = t.evidence || {}; return `<tr><td>${esc(day(t.at))}${t.is_baseline ? ` <span class="chip gold">baseline</span>` : t.is_remeasure ? ` <span class="chip">re-measure (control)</span>` : ""}</td><td>${esc(t.kind)}</td><td class="mono" title="${esc(pv.commit_source || "")}">${sha(t.commit)}</td><td class="n">${t.overall}</td><td class="n">${t.verified ?? "—"}</td><td class="n">${e.verified || 0}/${e.observed || 0}/${e.inferred || 0}/${e.not_tested || 0}</td><td class="mono">${esc(t.method)}</td></tr>`; }).join("")}
       </tbody></table></div><p class="lede" style="font-size:13px;margin-top:8px">Every run keeps its full PLAYCRAFT card (SHA-256 recorded). The baseline is pinned and never overwritten.</p></section>`;
     const show = (k) => {
       const xs = k === "open" ? open : k === "fixed" ? fixed : unm;

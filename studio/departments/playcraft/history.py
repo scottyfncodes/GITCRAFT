@@ -426,14 +426,26 @@ def recount(vs):
     return vs
 
 
+def remeasures(runs):
+    """Run ids measured on a commit after a newer commit had already been assessed (controls, not progress)."""
+    first, out = {}, set()
+    for i, r in enumerate(runs):
+        h = (r.get("commit") or {}).get("head")
+        if not h: continue
+        first.setdefault(h, i)
+        if any(j > first[h] for j in first.values() if j < i): out.add(r["run_id"])
+    return out
+
+
 def noise_band(assess_runs):
-    """Largest overall move between consecutive runs of the same commit and the same method: this game's measured noise."""
+    """Largest overall move between two runs of the same commit and the same PLAYCRAFT method: this game's measured noise."""
     deltas, pairs = [], []
-    for a, b in zip(assess_runs, assess_runs[1:]):
-        # noise = the same commit measured twice by the same PLAYCRAFT (an unrecorded or different method is a method change)
-        if same_commit(a, b) and a.get("method") and a.get("method") == b.get("method"):
-            if a["overall"].get("score") is not None and b["overall"].get("score") is not None:
-                deltas.append(abs(b["overall"]["score"] - a["overall"]["score"])); pairs.append([a["run_id"], b["run_id"]])
+    for i, a in enumerate(assess_runs):
+        for b in assess_runs[i + 1:]:
+            # the same commit measured twice by the same PLAYCRAFT (an unrecorded or different method is a method change)
+            if same_commit(a, b) and a.get("method") and a.get("method") == b.get("method"):
+                if a["overall"].get("score") is not None and b["overall"].get("score") is not None:
+                    deltas.append(abs(b["overall"]["score"] - a["overall"]["score"])); pairs.append([a["run_id"], b["run_id"]])
     return {"band": max(deltas + [3]), "measured": bool(deltas), "samples": len(deltas), "pairs": pairs,
             "note": None if deltas else "no repeat runs of one commit with the same PLAYCRAFT method yet: default ±3"}
 
@@ -507,13 +519,14 @@ def improvement_passes(runs):
     return out
 
 
-def deployment_status(game, runs, events):
+def deployment_status(game, runs, events, latest_assessed=None):
     deps = [e for e in events if e.get("type") == "deployment"]
     prs = [e for e in events if e.get("type") == "pr"]
     best = None
     for d in sorted(deps, key=lambda e: e.get("observed_at") or e["recorded_at"]):
         best = d
-    latest_assessed = next((r for r in reversed(runs) if r["kind"] in ASSESS_KINDS), None)
+    controls = remeasures(runs)
+    latest_assessed = latest_assessed or next((r for r in reversed(runs) if r["kind"] in ASSESS_KINDS and r["run_id"] not in controls), None)
     a_sha = ((latest_assessed or {}).get("commit") or {}).get("head")
     out = {"deployments": deps, "prs": prs, "latest_assessed_commit": a_sha[:7] if a_sha else None}
     if best:
@@ -533,8 +546,9 @@ def game_report(store, gid, stale_days=14):
     g = store.game(gid); runs = store.runs(gid); events = store.events(gid)
     if not g or not runs: return None
     base = next((r for r in runs if r["run_id"] == g.get("baseline_run")), runs[0])
-    assess = [r for r in runs if r["kind"] in ASSESS_KINDS or r["kind"] == "verify"]
-    latest = assess[-1] if assess else runs[-1]
+    controls = remeasures(runs)
+    assess = [r for r in runs if (r["kind"] in ASSESS_KINDS or r["kind"] == "verify") and r["run_id"] not in controls]
+    latest = assess[-1] if assess else runs[-1]   # the newest run of the newest code (re-measures of older commits are controls)
     nb = noise_band([r for r in runs if r["kind"] in ASSESS_KINDS])
     steps = [compare_runs(a, b, nb["band"]) for a, b in zip(assess, assess[1:])]
     vs_base = attribute_steps(compare_runs(base, latest, nb["band"]), steps) if latest["run_id"] != base["run_id"] else None
@@ -546,13 +560,13 @@ def game_report(store, gid, stale_days=14):
                  "overall": r["overall"].get("score"), "confidence": r["overall"].get("confidence"), "verified": (r.get("verified") or {}).get("overall"),
                  "measured": (r.get("measured") or {}).get("overall"), "categories": {k: v.get("score") for k, v in r["categories"].items()},
                  "evidence": r.get("evidence"), "played": r.get("played"), "start_chain": (r.get("metrics") or {}).get("start_chain"),
-                 "is_baseline": r["run_id"] == base["run_id"]} for r in runs]
+                 "is_baseline": r["run_id"] == base["run_id"], "is_remeasure": r["run_id"] in controls} for r in runs]
     age_days = None
     try: age_days = round((datetime.datetime.now(datetime.timezone.utc) - datetime.datetime.fromisoformat(latest["assessed_at"])).total_seconds() / 86400, 1)
     except Exception: pass
     return {"game": g, "baseline": base["run_id"], "latest": latest["run_id"], "runs": len(runs), "timeline": timeline, "vs_baseline": vs_base, "steps": steps,
             "noise": nb, "findings": findings, "regressions": regs, "recurring_regressions": recurring, "improvement_passes": improvement_passes(runs),
-            "deployment": deployment_status(g, runs, events), "age_days": age_days, "stale": age_days is not None and age_days > stale_days,
+            "deployment": deployment_status(g, runs, events, latest), "age_days": age_days, "stale": age_days is not None and age_days > stale_days,
             "genres": latest.get("genres"), "latest_summary": {"overall": latest["overall"], "verified": latest.get("verified"), "evidence": latest.get("evidence"),
                                                                 "played": latest.get("played"), "metrics": latest.get("metrics")}}
 

@@ -1,0 +1,31 @@
+{
+ "schema": 1,
+ "id": "scottyfncodes--fart-flight",
+ "created": "2026-11-04T23:20:13+00:00",
+ "paths_seen": [
+  "/home/user/scottyfncodes/fart-flight",
+  "/home/user/fart-flight",
+  "/home/user/pc-work/remeasure/ff"
+ ],
+ "baseline_run": "20261104204841-pass-5840cbc6",
+ "repo": "scottyfncodes/fart-flight",
+ "host": "github.com",
+ "url": "https://github.com/scottyfncodes/fart-flight",
+ "remote_key": "github.com/scottyfncodes/fart-flight",
+ "name": "ff",
+ "title": "Fart Flight",
+ "pitch": "He has gas. He has a dream.",
+ "engine": [
+  "Canvas 2D (no engine)"
+ ],
+ "updated": "2026-11-05T00:07:56+00:00",
+ "baseline_pinned_at": "2026-11-04T23:20:13+00:00",
+ "genres": [
+  {
+   "genre": "arcade",
+   "title": "Arcade",
+   "share": 1.0
+  }
+ ],
+ "latest_run": "20261105000756-pass-96c295d5"
+}

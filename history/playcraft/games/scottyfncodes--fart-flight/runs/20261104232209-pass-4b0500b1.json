@@ -1,0 +1,858 @@
+{
+ "schema": 1,
+ "run_id": "20261104232209-pass-4b0500b1",
+ "game_id": "scottyfncodes--fart-flight",
+ "kind": "pass",
+ "assessed_at": "2026-11-04T23:22:09+00:00",
+ "recorded_at": "2026-11-04T23:22:09+00:00",
+ "recorded_by": "playcraft",
+ "commit": {
+  "head": "273799fc53caccfe1382271cff446aa06c2e419c",
+  "branch": "main",
+  "dirty": [],
+  "source": "recorded"
+ },
+ "method": "de0f88a09642",
+ "playcraft_version": "1.0.0",
+ "card_sha256": "4b0500b126c426f728fb932aadcbe3e2c59921daaf7d094e03be3f6cc8639778",
+ "provenance": {
+  "out_dir": "/home/user/fart-flight/gitcraft-out/playcraft/history-run",
+  "record": "/home/user/fart-flight/gitcraft-out/playcraft/history-run/pass.studio.json",
+  "source_file": "/home/user/fart-flight/gitcraft-out/playcraft/history-run/playcraft.json",
+  "project_root": "/home/user/fart-flight",
+  "annotations": null
+ },
+ "pr": null,
+ "title": "Fart Flight",
+ "pitch": "He has gas. He has a dream.",
+ "engine": [
+  "Canvas 2D (no engine)"
+ ],
+ "genres": [
+  {
+   "genre": "arcade",
+   "title": "Arcade",
+   "share": 1.0
+  }
+ ],
+ "hybrid": false,
+ "weights": {
+  "core_gameplay": 1.1,
+  "game_feel": 1.4,
+  "controls": 1.3,
+  "progression": 0.7,
+  "difficulty": 1.2,
+  "player_experience": 1.1,
+  "replayability": 1.3,
+  "technical": 1.1,
+  "presentation": 1.0,
+  "mobile": 1.0
+ },
+ "mobile": true,
+ "played": true,
+ "viewports": [
+  "desktop",
+  "phone"
+ ],
+ "overall": {
+  "score": 78,
+  "confidence": "medium",
+  "coverage": 1.0,
+  "strong_evidence_share": 0.32,
+  "note": null
+ },
+ "categories": {
+  "core_gameplay": {
+   "title": "Core gameplay",
+   "score": 83,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.33
+  },
+  "game_feel": {
+   "title": "Game feel",
+   "score": 79,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.15
+  },
+  "controls": {
+   "title": "Controls and responsiveness",
+   "score": 75,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.53
+  },
+  "progression": {
+   "title": "Progression and rewards",
+   "score": 70,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.0
+  },
+  "difficulty": {
+   "title": "Difficulty and balance",
+   "score": 67,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.0
+  },
+  "player_experience": {
+   "title": "Player experience",
+   "score": 85,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.41
+  },
+  "replayability": {
+   "title": "Replayability",
+   "score": 70,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.0
+  },
+  "technical": {
+   "title": "Technical gameplay quality",
+   "score": 85,
+   "confidence": "high",
+   "applicable": true,
+   "strong": 0.67
+  },
+  "presentation": {
+   "title": "Presentation and immersion",
+   "score": 77,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.31
+  },
+  "mobile": {
+   "title": "Mobile experience",
+   "score": 95,
+   "confidence": "high",
+   "applicable": true,
+   "strong": 0.79
+  }
+ },
+ "verified": {
+  "overall": 100,
+  "categories": {
+   "core_gameplay": 100,
+   "game_feel": null,
+   "controls": 100,
+   "progression": null,
+   "difficulty": null,
+   "player_experience": 100,
+   "replayability": null,
+   "technical": 100,
+   "presentation": 100,
+   "mobile": 100
+  },
+  "criteria": 15
+ },
+ "measured": {
+  "overall": 100,
+  "categories": {
+   "core_gameplay": 100,
+   "game_feel": 100,
+   "controls": 100,
+   "progression": null,
+   "difficulty": null,
+   "player_experience": 100,
+   "replayability": null,
+   "technical": 100,
+   "presentation": 100,
+   "mobile": 100
+  },
+  "criteria": 19
+ },
+ "evidence": {
+  "verified": 15,
+  "observed": 4,
+  "inferred": 45,
+  "not_tested": 3
+ },
+ "criteria": {
+  "cg.pitch": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "core_gameplay",
+   "t": "The intended experience is stated (pitch / how it plays)",
+   "i": 2,
+   "g": null,
+   "d": "He has gas. He has a dream."
+  },
+  "cg.goals": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "core_gameplay",
+   "t": "Clear player objectives",
+   "i": 4,
+   "g": null,
+   "d": "found levels, game_over, highscore, stars"
+  },
+  "cg.decisions": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "core_gameplay",
+   "t": "Meaningful decisions (choices with trade-offs)",
+   "i": 4,
+   "g": null,
+   "d": "found input_drag, unlocks"
+  },
+  "cg.responds": {
+   "s": "pass",
+   "l": "verified",
+   "c": "core_gameplay",
+   "t": "Playing changes the game (inputs move the game state)",
+   "i": 5,
+   "g": null,
+   "d": "11/11 probed inputs changed the screen"
+  },
+  "cg.state": {
+   "s": "unknown",
+   "l": "not_tested",
+   "c": "core_gameplay",
+   "t": "Game state advances during play (exposed numbers change)",
+   "i": 2,
+   "g": null,
+   "d": "the probe could not measure this"
+  },
+  "gf.response": {
+   "s": "pass",
+   "l": "observed",
+   "c": "game_feel",
+   "t": "Actions are acknowledged on screen within ~100 ms",
+   "i": 5,
+   "g": null,
+   "d": "fastest visible response 20 ms after the input (median 68.5 ms; one frame here is 66.7 ms, so \u2264 133 ms passes)"
+  },
+  "gf.shake": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Camera/screen shake for big impacts",
+   "i": 3,
+   "g": null,
+   "d": "found screen_shake"
+  },
+  "gf.hitstop": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Hit-stop / slow motion on key moments",
+   "i": 3,
+   "g": null,
+   "d": "found hitstop"
+  },
+  "gf.particles": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Particles on interactions",
+   "i": 3,
+   "g": null,
+   "d": "found particles"
+  },
+  "gf.easing": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Motion is eased (tweens, lerps, springs), not linear",
+   "i": 3,
+   "g": null,
+   "d": "found easing"
+  },
+  "gf.anticipation": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Anticipation, recoil, squash and stretch",
+   "i": 2,
+   "g": null,
+   "d": "found squash"
+  },
+  "gf.audio": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Sound effects on actions",
+   "i": 4,
+   "g": null,
+   "d": "found audio"
+  },
+  "gf.popups": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Rewards are announced where they happen",
+   "i": 2,
+   "g": null,
+   "d": "found popups"
+  },
+  "gf.restraint": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Effects can be calmed (reduced motion / shake setting)",
+   "i": 2,
+   "g": null,
+   "d": "found reduced_motion"
+  },
+  "ctl.responds": {
+   "s": "pass",
+   "l": "verified",
+   "c": "controls",
+   "t": "Each probed control produces a visible response",
+   "i": 4,
+   "g": null,
+   "d": "6/6 desktop inputs responded"
+  },
+  "ctl.methods": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "controls",
+   "t": "More than one input method (keyboard + pointer/touch, gamepad)",
+   "i": 3,
+   "g": null,
+   "d": "found input_keyboard, input_pointer, input_touch"
+  },
+  "ctl.forgiveness": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "controls",
+   "t": "Input forgiveness (buffering, deadzones, grace windows)",
+   "i": 3,
+   "g": null,
+   "d": "not found in source: input_buffer, deadzone"
+  },
+  "ctl.settings": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "controls",
+   "t": "Control settings (sensitivity, remap, invert)",
+   "i": 2,
+   "g": null,
+   "d": "not found in source: sensitivity, input_remap"
+  },
+  "ctl.errors": {
+   "s": "pass",
+   "l": "verified",
+   "c": "controls",
+   "t": "Inputs never throw errors",
+   "i": 5,
+   "g": null,
+   "d": "no errors while inputs were played"
+  },
+  "pr.save": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Progress is saved",
+   "i": 4,
+   "g": null,
+   "d": "found save"
+  },
+  "pr.unlocks": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Unlocks or upgrades that change play",
+   "i": 3,
+   "g": null,
+   "d": "found unlocks"
+  },
+  "pr.goals": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Long-term goals (achievements, collections, ranks)",
+   "i": 3,
+   "g": null,
+   "d": "found achievements, collectibles, stars"
+  },
+  "pr.no_bolt_on": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "No generic retention systems bolted on",
+   "i": 3,
+   "g": null,
+   "d": "none of: daily_reward, battle_pass, energy_gate, lootbox"
+  },
+  "db.ramp": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Difficulty progresses (levels, waves, ramp)",
+   "i": 4,
+   "g": null,
+   "d": "found ramp, levels, difficulty"
+  },
+  "db.tuning": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Tuning values are centralised",
+   "i": 2,
+   "g": null,
+   "d": "found tuning_config"
+  },
+  "db.evidence": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Balance is measured (simulations, solvers, playtest bots)",
+   "i": 3,
+   "g": null,
+   "d": "not found in source: tune_tests"
+  },
+  "db.recovery": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Failure has a recovery path (retry, checkpoint, respawn)",
+   "i": 4,
+   "g": null,
+   "d": "found restart"
+  },
+  "db.assist": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Assist / difficulty options",
+   "i": 2,
+   "g": null,
+   "d": "found assist, difficulty"
+  },
+  "px.loads": {
+   "s": "pass",
+   "l": "observed",
+   "c": "player_experience",
+   "t": "Playable quickly (load + start \u2264 3 s)",
+   "i": 4,
+   "g": null,
+   "d": "2102 ms from navigation to playing (load 133 ms + start 1969 ms; served locally)"
+  },
+  "px.onboarding": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Onboarding teaches by doing (hints, first-run guidance)",
+   "i": 4,
+   "g": null,
+   "d": "found tutorial"
+  },
+  "px.pause": {
+   "s": "pass",
+   "l": "verified",
+   "c": "player_experience",
+   "t": "Pause works, and the game pauses when hidden",
+   "i": 3,
+   "g": null,
+   "d": "Escape: motion 0.0126 \u2192 0.0000 while paused"
+  },
+  "px.auto_pause": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Auto-pause when the page is hidden",
+   "i": 3,
+   "g": null,
+   "d": "found visibility_pause"
+  },
+  "px.restart": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Restart friction is low",
+   "i": 4,
+   "g": null,
+   "d": "found restart"
+  },
+  "px.text": {
+   "s": "pass",
+   "l": "verified",
+   "c": "player_experience",
+   "t": "Text is legible on the target device (\u2265 12 px)",
+   "i": 3,
+   "g": null,
+   "d": "smallest visible text 12 px ('DIGNITY') on phone"
+  },
+  "px.accessibility": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Accessibility (reduced motion, ARIA, contrast, subtitles, mute)",
+   "i": 3,
+   "g": null,
+   "d": "found reduced_motion, aria, subtitles, mute"
+  },
+  "px.dead_time": {
+   "s": "pass",
+   "l": "observed",
+   "c": "player_experience",
+   "t": "Little dead time during play",
+   "i": 3,
+   "g": null,
+   "d": "0% of frames unchanged during 8.0 s of mixed inputs"
+  },
+  "rp.variety": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Variation between sessions (randomness, procedural content)",
+   "i": 3,
+   "g": null,
+   "d": "found randomness"
+  },
+  "rp.mastery": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Mastery goals (best scores, ratings, records)",
+   "i": 4,
+   "g": null,
+   "d": "found highscore, stars"
+  },
+  "rp.expression": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Player expression (customisation, sandbox, styles)",
+   "i": 2,
+   "g": null,
+   "d": "found customization"
+  },
+  "rp.share": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Shareable moments (share, replay, daily seed)",
+   "i": 2,
+   "g": null,
+   "d": "found share"
+  },
+  "tech.loads": {
+   "s": "pass",
+   "l": "verified",
+   "c": "technical",
+   "t": "Game loads on every tested viewport",
+   "i": 5,
+   "g": null,
+   "d": "loaded on desktop, phone"
+  },
+  "tech.errors": {
+   "s": "pass",
+   "l": "verified",
+   "c": "technical",
+   "t": "No runtime errors during play",
+   "i": 5,
+   "g": null,
+   "d": "0 page errors (console errors: 1)"
+  },
+  "tech.missing": {
+   "s": "pass",
+   "l": "verified",
+   "c": "technical",
+   "t": "No missing files",
+   "i": 4,
+   "g": null,
+   "d": "no missing files"
+  },
+  "tech.fps": {
+   "s": "unknown",
+   "l": "not_tested",
+   "c": "technical",
+   "t": "Frame rate holds during play",
+   "i": 4,
+   "g": null,
+   "d": "not representative: the browser rendered on ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver) (so\u2026"
+  },
+  "tech.timestep": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "technical",
+   "t": "Frame-rate-independent update (dt clamp / fixed step)",
+   "i": 4,
+   "g": null,
+   "d": "found fixed_step, dt_clamp"
+  },
+  "tech.tests": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "technical",
+   "t": "Automated tests exist",
+   "i": 3,
+   "g": null,
+   "d": "not found in source: tests"
+  },
+  "pres.audio": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Sound design and music",
+   "i": 4,
+   "g": null,
+   "d": "found audio, music"
+  },
+  "pres.animation": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Animation",
+   "i": 3,
+   "g": null,
+   "d": "found animation"
+  },
+  "pres.atmosphere": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Atmosphere (lighting, fog, weather, post)",
+   "i": 2,
+   "g": null,
+   "d": "not found in source: atmosphere"
+  },
+  "pres.transitions": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Transitions between screens and states",
+   "i": 2,
+   "g": null,
+   "d": "found transitions"
+  },
+  "pres.alive": {
+   "s": "pass",
+   "l": "observed",
+   "c": "presentation",
+   "t": "The world moves when the player is idle",
+   "i": 2,
+   "g": null,
+   "d": "share of the screen changing per frame with no input: 0.00738"
+  },
+  "pres.visual": {
+   "s": "pass",
+   "l": "verified",
+   "c": "presentation",
+   "t": "Screens have visual range (not blank or flat)",
+   "i": 3,
+   "g": null,
+   "d": "{\"desktop\": 723, \"phone\": 1211}"
+  },
+  "mob.renders": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Renders on a phone viewport",
+   "i": 5,
+   "g": null,
+   "d": "1211"
+  },
+  "mob.touch": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Touch input responds",
+   "i": 5,
+   "g": null,
+   "d": "5/5 touch gestures changed the screen; fastest 57 ms"
+  },
+  "mob.meta": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Viewport meta set for phones",
+   "i": 3,
+   "g": null,
+   "d": "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
+  },
+  "mob.targets": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Touch targets \u2265 44 px",
+   "i": 3,
+   "g": null,
+   "d": "all 1 visible controls \u2265 44 px"
+  },
+  "mob.overflow": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "No horizontal overflow on phones",
+   "i": 3,
+   "g": null,
+   "d": "no horizontal overflow"
+  },
+  "mob.gestures": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Browser gestures do not fight the game (touch-action, no zoom)",
+   "i": 3,
+   "g": null,
+   "d": "play surface touch-action: none; viewport: width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=\u2026"
+  },
+  "mob.safe_area": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "mobile",
+   "t": "Safe areas respected (notch, home bar)",
+   "i": 3,
+   "g": null,
+   "d": "found safe_area"
+  },
+  "mob.orientation": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "mobile",
+   "t": "Orientation handled",
+   "i": 2,
+   "g": null,
+   "d": "found orientation"
+  },
+  "mob.fps": {
+   "s": "unknown",
+   "l": "not_tested",
+   "c": "mobile",
+   "t": "Frame rate on the phone viewport",
+   "i": 3,
+   "g": null,
+   "d": "not representative: the browser rendered on ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver) (so\u2026"
+  },
+  "mob.haptics": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "mobile",
+   "t": "Haptics on key moments (where supported)",
+   "i": 1,
+   "g": null,
+   "d": "found haptics"
+  },
+  "ar.instant_restart": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Instant restart after failure",
+   "i": 5,
+   "g": "arcade",
+   "d": "found restart"
+  },
+  "ar.near_miss": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Near-miss / close-call feedback",
+   "i": 4,
+   "g": "arcade",
+   "d": "found pattern"
+  },
+  "ar.high_score": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Persistent best score",
+   "i": 4,
+   "g": "arcade",
+   "d": "found highscore, save"
+  },
+  "ar.ramp": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Difficulty ramps within a run",
+   "i": 4,
+   "g": "arcade",
+   "d": "found ramp"
+  },
+  "ar.score_feedback": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Score changes are celebrated where the player looks",
+   "i": 3,
+   "g": "arcade",
+   "d": "found pattern"
+  }
+ },
+ "findings": [
+  {
+   "id": "ctl.forgiveness",
+   "title": "Input forgiveness (buffering, deadzones, grace windows)",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "controls",
+   "impact": 3,
+   "priority": 5.3,
+   "evidence": "not found in source: input_buffer, deadzone"
+  },
+  {
+   "id": "tech.tests",
+   "title": "Automated tests exist",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "technical",
+   "impact": 3,
+   "priority": 4.1,
+   "evidence": "not found in source: tests"
+  },
+  {
+   "id": "db.evidence",
+   "title": "Balance is measured (simulations, solvers, playtest bots)",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "difficulty",
+   "impact": 3,
+   "priority": 3.7,
+   "evidence": "not found in source: tune_tests"
+  },
+  {
+   "id": "ctl.settings",
+   "title": "Control settings (sensitivity, remap, invert)",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "controls",
+   "impact": 2,
+   "priority": 2.7,
+   "evidence": "not found in source: sensitivity, input_remap"
+  },
+  {
+   "id": "pres.atmosphere",
+   "title": "Atmosphere (lighting, fog, weather, post)",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "presentation",
+   "impact": 2,
+   "priority": 0.5,
+   "evidence": "not found in source: atmosphere"
+  }
+ ],
+ "metrics": {
+  "responded": "11/11",
+  "best_response_ms": 20,
+  "touch_best_response_ms": 57,
+  "fps": 13.8,
+  "phone_fps": 8.1,
+  "software_gl": true,
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "time_to_play_ms": 2102,
+  "dead_time": 0.0,
+  "page_errors": 0,
+  "missing": 0,
+  "min_font_px": 12,
+  "small_targets": 0,
+  "pause_works": true,
+  "start_chain": null
+ },
+ "compare": null,
+ "plan": [
+  "2. High-impact, low-effort feel and flow",
+  "3. Deeper design work"
+ ]
+}

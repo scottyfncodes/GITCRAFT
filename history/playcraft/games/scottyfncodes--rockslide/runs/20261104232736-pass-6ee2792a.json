@@ -1,0 +1,883 @@
+{
+ "schema": 1,
+ "run_id": "20261104232736-pass-6ee2792a",
+ "game_id": "scottyfncodes--rockslide",
+ "kind": "pass",
+ "assessed_at": "2026-11-04T23:27:36+00:00",
+ "recorded_at": "2026-11-04T23:27:37+00:00",
+ "recorded_by": "playcraft",
+ "commit": {
+  "head": "2f70374e300eabe812885ede2a6739fa519b4a54",
+  "branch": "main",
+  "dirty": [],
+  "source": "recorded"
+ },
+ "method": "de0f88a09642",
+ "playcraft_version": "1.0.0",
+ "card_sha256": "6ee2792a798e2acde6c2eece63dc97fa88d3d7448dcf17ee87ca69ff0dfe2021",
+ "provenance": {
+  "out_dir": "/home/user/rockslide/gitcraft-out/playcraft/history-run",
+  "record": "/home/user/rockslide/gitcraft-out/playcraft/history-run/pass.studio.json",
+  "source_file": "/home/user/rockslide/gitcraft-out/playcraft/history-run/playcraft.json",
+  "project_root": "/home/user/rockslide",
+  "annotations": null
+ },
+ "pr": null,
+ "title": "ROCKSLIDE: Mountain Patrol",
+ "pitch": "You are Vince, twenty, long blonde hair with a bit of a curl, the newest hand on the Kessel Patrol. You run the mountain patrol for the Kessel valley: its slopes, its roads, its village and the people who get lost on it. You have a log station, a snowmobile, a helicopter, a pair of old skis, and Koda, a grey-and-white husky with one ear that never stands up.",
+ "engine": [
+  "three.js"
+ ],
+ "genres": [
+  {
+   "genre": "simulation",
+   "title": "Simulation",
+   "share": 1.0
+  },
+  {
+   "genre": "exploration",
+   "title": "Exploration / adventure",
+   "share": 0.78
+  }
+ ],
+ "hybrid": false,
+ "weights": {
+  "core_gameplay": 1.1,
+  "game_feel": 1.16,
+  "controls": 1.16,
+  "progression": 1.1,
+  "difficulty": 0.86,
+  "player_experience": 1.2,
+  "replayability": 1.0,
+  "technical": 1.06,
+  "presentation": 1.29,
+  "mobile": 1.0
+ },
+ "mobile": true,
+ "played": true,
+ "viewports": [
+  "desktop",
+  "phone"
+ ],
+ "overall": {
+  "score": 78,
+  "confidence": "medium",
+  "coverage": 1.0,
+  "strong_evidence_share": 0.31,
+  "note": null
+ },
+ "categories": {
+  "core_gameplay": {
+   "title": "Core gameplay",
+   "score": 83,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.33
+  },
+  "game_feel": {
+   "title": "Game feel",
+   "score": 74,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.19
+  },
+  "controls": {
+   "title": "Controls and responsiveness",
+   "score": 77,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.53
+  },
+  "progression": {
+   "title": "Progression and rewards",
+   "score": 70,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.0
+  },
+  "difficulty": {
+   "title": "Difficulty and balance",
+   "score": 68,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.0
+  },
+  "player_experience": {
+   "title": "Player experience",
+   "score": 70,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.36
+  },
+  "replayability": {
+   "title": "Replayability",
+   "score": 70,
+   "confidence": "low",
+   "applicable": true,
+   "strong": 0.0
+  },
+  "technical": {
+   "title": "Technical gameplay quality",
+   "score": 90,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.58
+  },
+  "presentation": {
+   "title": "Presentation and immersion",
+   "score": 83,
+   "confidence": "medium",
+   "applicable": true,
+   "strong": 0.31
+  },
+  "mobile": {
+   "title": "Mobile experience",
+   "score": 93,
+   "confidence": "high",
+   "applicable": true,
+   "strong": 0.79
+  }
+ },
+ "verified": {
+  "overall": 91,
+  "categories": {
+   "core_gameplay": 100,
+   "game_feel": null,
+   "controls": 100,
+   "progression": null,
+   "difficulty": null,
+   "player_experience": 50,
+   "replayability": null,
+   "technical": 100,
+   "presentation": 100,
+   "mobile": 100
+  },
+  "criteria": 14
+ },
+ "measured": {
+  "overall": 91,
+  "categories": {
+   "core_gameplay": 100,
+   "game_feel": 100,
+   "controls": 80,
+   "progression": null,
+   "difficulty": null,
+   "player_experience": 61,
+   "replayability": null,
+   "technical": 100,
+   "presentation": 100,
+   "mobile": 100
+  },
+  "criteria": 19
+ },
+ "evidence": {
+  "verified": 14,
+  "observed": 5,
+  "inferred": 46,
+  "not_tested": 3
+ },
+ "criteria": {
+  "cg.pitch": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "core_gameplay",
+   "t": "The intended experience is stated (pitch / how it plays)",
+   "i": 2,
+   "g": null,
+   "d": "You are Vince, twenty, long blonde hair with a bit of a curl, the newest hand on the Kessel Patrol. You run the mountain patrol for the Kess\u2026"
+  },
+  "cg.goals": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "core_gameplay",
+   "t": "Clear player objectives",
+   "i": 4,
+   "g": null,
+   "d": "found levels, game_over, highscore, stars"
+  },
+  "cg.decisions": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "core_gameplay",
+   "t": "Meaningful decisions (choices with trade-offs)",
+   "i": 4,
+   "g": null,
+   "d": "found upgrades, input_drag, currency, unlocks"
+  },
+  "cg.responds": {
+   "s": "pass",
+   "l": "verified",
+   "c": "core_gameplay",
+   "t": "Playing changes the game (inputs move the game state)",
+   "i": 5,
+   "g": null,
+   "d": "7/13 probed inputs changed the screen"
+  },
+  "cg.state": {
+   "s": "unknown",
+   "l": "not_tested",
+   "c": "core_gameplay",
+   "t": "Game state advances during play (exposed numbers change)",
+   "i": 2,
+   "g": null,
+   "d": "the probe could not measure this"
+  },
+  "gf.response": {
+   "s": "pass",
+   "l": "observed",
+   "c": "game_feel",
+   "t": "Actions are acknowledged on screen within ~100 ms",
+   "i": 5,
+   "g": null,
+   "d": "fastest visible response 394 ms after the input (median 658 ms; one frame here is 216.6 ms, so \u2264 433 ms passes)"
+  },
+  "gf.shake": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Camera/screen shake for big impacts",
+   "i": 3,
+   "g": null,
+   "d": "found screen_shake"
+  },
+  "gf.hitstop": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Hit-stop / slow motion on key moments",
+   "i": 3,
+   "g": null,
+   "d": "not found in source: hitstop"
+  },
+  "gf.particles": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Particles on interactions",
+   "i": 3,
+   "g": null,
+   "d": "found particles"
+  },
+  "gf.easing": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Motion is eased (tweens, lerps, springs), not linear",
+   "i": 3,
+   "g": null,
+   "d": "found easing"
+  },
+  "gf.anticipation": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Anticipation, recoil, squash and stretch",
+   "i": 2,
+   "g": null,
+   "d": "found squash"
+  },
+  "gf.audio": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Sound effects on actions",
+   "i": 4,
+   "g": null,
+   "d": "found audio"
+  },
+  "gf.popups": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Rewards are announced where they happen",
+   "i": 2,
+   "g": null,
+   "d": "found popups"
+  },
+  "gf.restraint": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "game_feel",
+   "t": "Effects can be calmed (reduced motion / shake setting)",
+   "i": 2,
+   "g": null,
+   "d": "found reduced_motion"
+  },
+  "ctl.responds": {
+   "s": "partial",
+   "l": "observed",
+   "c": "controls",
+   "t": "Each probed control produces a visible response",
+   "i": 4,
+   "g": null,
+   "d": "5/8 desktop inputs responded; no visible response: key ArrowUp, click centre, drag / pull back (rendering under 10 fps here: re-check misses\u2026"
+  },
+  "ctl.methods": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "controls",
+   "t": "More than one input method (keyboard + pointer/touch, gamepad)",
+   "i": 3,
+   "g": null,
+   "d": "found input_keyboard, input_pointer, input_touch"
+  },
+  "ctl.forgiveness": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "controls",
+   "t": "Input forgiveness (buffering, deadzones, grace windows)",
+   "i": 3,
+   "g": null,
+   "d": "found deadzone"
+  },
+  "ctl.settings": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "controls",
+   "t": "Control settings (sensitivity, remap, invert)",
+   "i": 2,
+   "g": null,
+   "d": "found sensitivity, input_remap"
+  },
+  "ctl.errors": {
+   "s": "pass",
+   "l": "verified",
+   "c": "controls",
+   "t": "Inputs never throw errors",
+   "i": 5,
+   "g": null,
+   "d": "no errors while inputs were played"
+  },
+  "pr.save": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Progress is saved",
+   "i": 4,
+   "g": null,
+   "d": "found save"
+  },
+  "pr.unlocks": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Unlocks or upgrades that change play",
+   "i": 3,
+   "g": null,
+   "d": "found unlocks, upgrades"
+  },
+  "pr.goals": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Long-term goals (achievements, collections, ranks)",
+   "i": 3,
+   "g": null,
+   "d": "found achievements, collectibles, xp, stars"
+  },
+  "pr.no_bolt_on": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "No generic retention systems bolted on",
+   "i": 3,
+   "g": null,
+   "d": "none of: daily_reward, battle_pass, energy_gate, lootbox"
+  },
+  "db.ramp": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Difficulty progresses (levels, waves, ramp)",
+   "i": 4,
+   "g": null,
+   "d": "found ramp, levels"
+  },
+  "db.tuning": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Tuning values are centralised",
+   "i": 2,
+   "g": null,
+   "d": "found tuning_config"
+  },
+  "db.evidence": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Balance is measured (simulations, solvers, playtest bots)",
+   "i": 3,
+   "g": null,
+   "d": "found tune_tests"
+  },
+  "db.recovery": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Failure has a recovery path (retry, checkpoint, respawn)",
+   "i": 4,
+   "g": null,
+   "d": "found restart"
+  },
+  "db.assist": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "difficulty",
+   "t": "Assist / difficulty options",
+   "i": 2,
+   "g": null,
+   "d": "not found in source: assist, difficulty"
+  },
+  "px.loads": {
+   "s": "partial",
+   "l": "observed",
+   "c": "player_experience",
+   "t": "Playable quickly (load + start \u2264 3 s)",
+   "i": 4,
+   "g": null,
+   "d": "4408 ms from navigation to playing (load 727 ms + start 3681 ms; served locally)"
+  },
+  "px.onboarding": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Onboarding teaches by doing (hints, first-run guidance)",
+   "i": 4,
+   "g": null,
+   "d": "found tutorial"
+  },
+  "px.pause": {
+   "s": "pass",
+   "l": "verified",
+   "c": "player_experience",
+   "t": "Pause works, and the game pauses when hidden",
+   "i": 3,
+   "g": null,
+   "d": "Escape: motion 0.0104 \u2192 0.0000 while paused"
+  },
+  "px.auto_pause": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Auto-pause when the page is hidden",
+   "i": 3,
+   "g": null,
+   "d": "found visibility_pause"
+  },
+  "px.restart": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Restart friction is low",
+   "i": 4,
+   "g": null,
+   "d": "found restart"
+  },
+  "px.text": {
+   "s": "fail",
+   "l": "verified",
+   "c": "player_experience",
+   "t": "Text is legible on the target device (\u2265 12 px)",
+   "i": 3,
+   "g": null,
+   "d": "smallest visible text 8.5 px ('Map') on phone"
+  },
+  "px.accessibility": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Accessibility (reduced motion, ARIA, contrast, subtitles, mute)",
+   "i": 3,
+   "g": null,
+   "d": "found reduced_motion, aria, subtitles, mute"
+  },
+  "px.dead_time": {
+   "s": "pass",
+   "l": "observed",
+   "c": "player_experience",
+   "t": "Little dead time during play",
+   "i": 3,
+   "g": null,
+   "d": "0% of frames unchanged during 9.0 s of mixed inputs"
+  },
+  "rp.variety": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Variation between sessions (randomness, procedural content)",
+   "i": 3,
+   "g": null,
+   "d": "found randomness, procedural"
+  },
+  "rp.mastery": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Mastery goals (best scores, ratings, records)",
+   "i": 4,
+   "g": null,
+   "d": "found highscore, stars"
+  },
+  "rp.expression": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Player expression (customisation, sandbox, styles)",
+   "i": 2,
+   "g": null,
+   "d": "found customization, sandbox_mode"
+  },
+  "rp.share": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Shareable moments (share, replay, daily seed)",
+   "i": 2,
+   "g": null,
+   "d": "found share"
+  },
+  "tech.loads": {
+   "s": "pass",
+   "l": "verified",
+   "c": "technical",
+   "t": "Game loads on every tested viewport",
+   "i": 5,
+   "g": null,
+   "d": "loaded on desktop, phone"
+  },
+  "tech.errors": {
+   "s": "pass",
+   "l": "verified",
+   "c": "technical",
+   "t": "No runtime errors during play",
+   "i": 5,
+   "g": null,
+   "d": "0 page errors (console errors: 1)"
+  },
+  "tech.missing": {
+   "s": "pass",
+   "l": "verified",
+   "c": "technical",
+   "t": "No missing files",
+   "i": 4,
+   "g": null,
+   "d": "no missing files"
+  },
+  "tech.fps": {
+   "s": "unknown",
+   "l": "not_tested",
+   "c": "technical",
+   "t": "Frame rate holds during play",
+   "i": 4,
+   "g": null,
+   "d": "not representative: the browser rendered on ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver) (so\u2026"
+  },
+  "tech.timestep": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "technical",
+   "t": "Frame-rate-independent update (dt clamp / fixed step)",
+   "i": 4,
+   "g": null,
+   "d": "found fixed_step, dt_clamp"
+  },
+  "tech.tests": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "technical",
+   "t": "Automated tests exist",
+   "i": 3,
+   "g": null,
+   "d": "found tests"
+  },
+  "pres.audio": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Sound design and music",
+   "i": 4,
+   "g": null,
+   "d": "found audio, music"
+  },
+  "pres.animation": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Animation",
+   "i": 3,
+   "g": null,
+   "d": "found animation"
+  },
+  "pres.atmosphere": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Atmosphere (lighting, fog, weather, post)",
+   "i": 2,
+   "g": null,
+   "d": "found atmosphere"
+  },
+  "pres.transitions": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "presentation",
+   "t": "Transitions between screens and states",
+   "i": 2,
+   "g": null,
+   "d": "found transitions"
+  },
+  "pres.alive": {
+   "s": "pass",
+   "l": "observed",
+   "c": "presentation",
+   "t": "The world moves when the player is idle",
+   "i": 2,
+   "g": null,
+   "d": "share of the screen changing per frame with no input: 0.04741"
+  },
+  "pres.visual": {
+   "s": "pass",
+   "l": "verified",
+   "c": "presentation",
+   "t": "Screens have visual range (not blank or flat)",
+   "i": 3,
+   "g": null,
+   "d": "{\"desktop\": 1187, \"phone\": 1121}"
+  },
+  "mob.renders": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Renders on a phone viewport",
+   "i": 5,
+   "g": null,
+   "d": "1121"
+  },
+  "mob.touch": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Touch input responds",
+   "i": 5,
+   "g": null,
+   "d": "2/5 touch gestures changed the screen; fastest 201 ms"
+  },
+  "mob.meta": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Viewport meta set for phones",
+   "i": 3,
+   "g": null,
+   "d": "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  },
+  "mob.targets": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Touch targets \u2265 44 px",
+   "i": 3,
+   "g": null,
+   "d": "all 4 visible controls \u2265 44 px"
+  },
+  "mob.overflow": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "No horizontal overflow on phones",
+   "i": 3,
+   "g": null,
+   "d": "no horizontal overflow"
+  },
+  "mob.gestures": {
+   "s": "pass",
+   "l": "verified",
+   "c": "mobile",
+   "t": "Browser gestures do not fight the game (touch-action, no zoom)",
+   "i": 3,
+   "g": null,
+   "d": "play surface touch-action: none; viewport: width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+  },
+  "mob.safe_area": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "mobile",
+   "t": "Safe areas respected (notch, home bar)",
+   "i": 3,
+   "g": null,
+   "d": "found safe_area"
+  },
+  "mob.orientation": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "mobile",
+   "t": "Orientation handled",
+   "i": 2,
+   "g": null,
+   "d": "found orientation"
+  },
+  "mob.fps": {
+   "s": "unknown",
+   "l": "not_tested",
+   "c": "mobile",
+   "t": "Frame rate on the phone viewport",
+   "i": 3,
+   "g": null,
+   "d": "not representative: the browser rendered on ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver) (so\u2026"
+  },
+  "mob.haptics": {
+   "s": "fail",
+   "l": "inferred",
+   "c": "mobile",
+   "t": "Haptics on key moments (where supported)",
+   "i": 1,
+   "g": null,
+   "d": "not found in source: haptics"
+  },
+  "sim.readout": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Systems are readable (gauges, indicators)",
+   "i": 4,
+   "g": "simulation",
+   "d": "found pattern"
+  },
+  "sim.time": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Time controls (skip, sleep, speed)",
+   "i": 3,
+   "g": "simulation",
+   "d": "found pattern"
+  },
+  "sim.rules_tested": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "technical",
+   "t": "Simulation rules covered by tests",
+   "i": 3,
+   "g": "simulation",
+   "d": "found tests"
+  },
+  "ex.discoveries": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "progression",
+   "t": "Discoveries are logged (catalogue, journal, map)",
+   "i": 3,
+   "g": "exploration",
+   "d": "found pattern"
+  },
+  "ex.secrets": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "replayability",
+   "t": "Secrets and hidden things",
+   "i": 2,
+   "g": "exploration",
+   "d": "found collectibles"
+  },
+  "ex.map": {
+   "s": "pass",
+   "l": "inferred",
+   "c": "player_experience",
+   "t": "Map / orientation",
+   "i": 2,
+   "g": "exploration",
+   "d": "found pattern"
+  }
+ },
+ "findings": [
+  {
+   "id": "px.text",
+   "title": "Text is legible on the target device (\u2265 12 px)",
+   "type": "design",
+   "level": "verified",
+   "status": "fail",
+   "category": "player_experience",
+   "impact": 3,
+   "priority": 6.2,
+   "evidence": "smallest visible text 8.5 px ('Map') on phone"
+  },
+  {
+   "id": "gf.hitstop",
+   "title": "Hit-stop / slow motion on key moments",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "game_feel",
+   "impact": 3,
+   "priority": 4.46,
+   "evidence": "not found in source: hitstop"
+  },
+  {
+   "id": "ctl.responds",
+   "title": "Each probed control produces a visible response",
+   "type": "design",
+   "level": "observed",
+   "status": "partial",
+   "category": "controls",
+   "impact": 4,
+   "priority": 3.57,
+   "evidence": "5/8 desktop inputs responded; no visible response: key ArrowUp, click centre, drag / pull back (rendering under 10 fps here: re-check misses on real hardware)"
+  },
+  {
+   "id": "px.loads",
+   "title": "Playable quickly (load + start \u2264 3 s)",
+   "type": "design",
+   "level": "observed",
+   "status": "partial",
+   "category": "player_experience",
+   "impact": 4,
+   "priority": 2.76,
+   "evidence": "4408 ms from navigation to playing (load 727 ms + start 3681 ms; served locally)"
+  },
+  {
+   "id": "db.assist",
+   "title": "Assist / difficulty options",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "difficulty",
+   "impact": 2,
+   "priority": 0.94,
+   "evidence": "not found in source: assist, difficulty"
+  },
+  {
+   "id": "mob.haptics",
+   "title": "Haptics on key moments (where supported)",
+   "type": "design",
+   "level": "inferred",
+   "status": "fail",
+   "category": "mobile",
+   "impact": 1,
+   "priority": 0.5,
+   "evidence": "not found in source: haptics"
+  }
+ ],
+ "metrics": {
+  "responded": "7/13",
+  "best_response_ms": 394,
+  "touch_best_response_ms": 201,
+  "fps": 4.6,
+  "phone_fps": 9.7,
+  "software_gl": true,
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "time_to_play_ms": 4408,
+  "dead_time": 0.0,
+  "page_errors": 0,
+  "missing": 0,
+  "min_font_px": 8.5,
+  "small_targets": 0,
+  "pause_works": true,
+  "start_chain": null
+ },
+ "compare": null,
+ "plan": [
+  "2. High-impact, low-effort feel and flow",
+  "3. Deeper design work"
+ ]
+}

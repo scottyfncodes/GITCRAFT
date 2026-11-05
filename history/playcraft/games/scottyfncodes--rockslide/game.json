@@ -1,0 +1,45 @@
+{
+ "schema": 1,
+ "id": "scottyfncodes--rockslide",
+ "created": "2026-11-04T23:20:13+00:00",
+ "paths_seen": [
+  "/home/user/rockslide",
+  "/home/user/pc-work/remeasure/rs"
+ ],
+ "baseline_run": "20261104204722-pass-1301b8f9",
+ "repo": "scottyfncodes/rockslide",
+ "host": "github.com",
+ "url": "https://github.com/scottyfncodes/rockslide",
+ "remote_key": "github.com/scottyfncodes/rockslide",
+ "name": "rockslide",
+ "title": "ROCKSLIDE: Mountain Patrol",
+ "pitch": "You are Vince, twenty, long blonde hair with a bit of a curl, the newest hand on the Kessel Patrol. You run the mountain patrol for the Kessel valley: its slopes, its roads, its village and the people who get lost on it. You have a log station, a snowmobile, a helicopter, a pair of old skis, and Koda, a grey-and-white husky with one ear that never stands up.",
+ "engine": [
+  "three.js"
+ ],
+ "updated": "2026-11-05T00:11:10+00:00",
+ "baseline_pinned_at": "2026-11-04T23:20:13+00:00",
+ "genres": [
+  {
+   "genre": "simulation",
+   "title": "Simulation",
+   "share": 1.0
+  },
+  {
+   "genre": "exploration",
+   "title": "Exploration / adventure",
+   "share": 0.84
+  },
+  {
+   "genre": "physics_puzzle",
+   "title": "Physics puzzle / destruction",
+   "share": 0.46
+  },
+  {
+   "genre": "sports",
+   "title": "Sports",
+   "share": 0.46
+  }
+ ],
+ "latest_run": "20261105001110-pass-06bc6f6e"
+}
