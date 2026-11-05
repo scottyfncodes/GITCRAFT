@@ -58,6 +58,7 @@ if not os.path.exists(os.path.join(os.path.expanduser(os.environ.get("GITCRAFT_H
     TESTS.pop("meshcraft"); TESTS.pop("forgecraft")   # optional tools (GITCRAFT_MESHCRAFT=0); forgecraft drives MeshCraft's Blender
 want = sys.argv[1:] or list(TESTS)
 for name in want:
+    if name not in TESTS: continue   # e.g. "network": a section below, not a per-tool round trip
     good, bad = TESTS[name]
     try:
         c = Client([MCP, name], env=env)
@@ -156,6 +157,72 @@ for name, cmd, bad in (("forgecraft", ["python3", os.path.join(FC_DIR, "server.p
         c.close()
     except Exception as e:
         check(f"{name}: sandbox-only run", False, str(e)[:300])
+
+# Network isolation of the two orchestrating servers (studiocraft, which hosts the Production Director, and forgecraft).
+# The launcher enables networking only for GITCRAFT_ALLOW_NET exactly "1" (the documented opt-in, same for every tool);
+# any other inherited value must leave the kernel's TCP fence on. Proof is real connections to a local HTTP server:
+# its request count is ground truth, independent of what any tool reports about itself.
+studio_py = os.path.join(os.path.expanduser(os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.join(os.environ.get("GITCRAFT_HOME") or "~/.gitcraft", "studio")), "venv", "bin", "python")
+if ("network" in want or not sys.argv[1:]) and os.access(studio_py, os.X_OK):
+    import http.server, threading
+    hits = []
+    class H(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            hits.append(self.path); body = b"<!doctype html><html><body><h1>netcheck</h1><button>ok</button></body></html>"
+            self.send_response(200); self.send_header("Content-Type", "text/html"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+        def log_message(self, *a): pass
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H); port = srv.server_address[1]
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{port}/"
+
+    def net_env(value):
+        e = {k: v for k, v in env.items() if k not in ("GITCRAFT_ALLOW_NET", "GITCRAFT_ALLOW_LOCAL_PORTS")}
+        e.update(GITCRAFT_ASSET_CATALOG=os.path.join(ws, "net-catalog.sqlite"), GITCRAFT_PIXELCRAFT_HISTORY=os.path.join(ws, "net-pxh"),
+                 GITCRAFT_PLAYCRAFT_HISTORY=os.path.join(ws, "net-ph"))
+        if value is not None: e["GITCRAFT_ALLOW_NET"] = value
+        return e
+
+    def reach(server, value, via):
+        """(sandbox string the kernel layer applied, requests the local server received) for one launch."""
+        n0 = len(hits); c = Client([MCP, server], env=net_env(value))
+        try:
+            req = {"target": url, "out_dir": os.path.join(ws, f"net-{server}-{via}-{value}"), "viewports": ["iphone17", "iphone13", "desktop"]}
+            if server == "studiocraft":
+                sb = c.call("studio_status")[1].get("sandbox")
+                if via == "production":
+                    ok, p = c.call("production_plan", {"prompt": "Audit the interface of the running app for release", "project": os.path.join(ws, f"netapp-{value}"),
+                                                       "overrides": {"deliverable": "asset_pack", "assets": {}, "extra_tasks": [
+                                                           {"id": "net.audit", "department": "pixelcraft", "action": "audit", "params": {"target": url, "viewports": req["viewports"]}}]}}, timeout=300)
+                    c.call("production_run", {"production": p["production"]}, timeout=600)
+                    t = json.load(open(os.path.join(ws, "gitcraft-out", "production", p["production"], "production.json")))["tasks"]["net.audit"]
+                    sb = (sb or "") + f" [net.audit ran {len(t['attempts'])}x: {t['state']}]"
+                    if not t["attempts"]: sb += " NOT RUN"
+                else:
+                    c.call("pixelcraft_audit", req, timeout=600)
+            else:
+                sb = c.call("hardware_probe")[1].get("network")
+                c.call("department_run", {"department": "pixelcraft", "action": "audit", "params": req}, timeout=600)
+        finally:
+            c.close()
+        return sb, len(hits) - n0
+
+    for v in (None, "0", "true", "yes", "TRUE", "01", "1 ", " 1"):
+        c = Client([MCP, "studiocraft"], env=net_env(v)); sb = c.call("studio_status")[1].get("sandbox") or ""; c.close()
+        check(f"network: studiocraft stays fenced with GITCRAFT_ALLOW_NET={v!r} inherited", "+nonet" in sb, sb)
+    sb, n = reach("studiocraft", None, "tool")
+    check("network: studiocraft by default cannot connect (a real browser load reached the server 0 times)", n == 0 and "+nonet" in sb, (sb, n))
+    sb, n = reach("studiocraft", "true", "tool")
+    check("network: an accidental GITCRAFT_ALLOW_NET=true does not open the network (0 requests)", n == 0, (sb, n))
+    sb, n = reach("studiocraft", None, "production")
+    check("network: work the Production Director runs (department children inside studiocraft) is fenced too (0 requests)", n == 0 and "NOT RUN" not in sb and "ran" in sb, (sb, n))
+    print("   production audit:", sb)
+    sb, n = reach("forgecraft", None, "tool")
+    check("network: forgecraft by default cannot connect either (0 requests) and its probe says denied", n == 0 and "denied" in str(sb), (sb, n))
+    sb, n = reach("studiocraft", "1", "tool")
+    check("network: the documented opt-in GITCRAFT_ALLOW_NET=1 opens studiocraft (requests arrive)", n > 0 and "+nonet" not in (sb or ""), (sb, n))
+    sb, n = reach("forgecraft", "1", "tool")
+    check("network: ...exactly as it opens forgecraft (same policy for both orchestrators)", n > 0 and "allowed" in str(sb), (sb, n))
+    srv.shutdown()
 
 os.remove(SECRET)
 failed = [r for r in results if not r[1]]

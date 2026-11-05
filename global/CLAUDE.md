@@ -10,6 +10,16 @@ rigging, terrain/skies/oceans, VFX, PBR materials, levels/tilemaps,
 cinematics, browser QA, asset catalogue, PLAYCRAFT: game design and
 gameplay quality, and PIXELCRAFT: visual quality and UI/UX). The `gitcraft` skill has the full tool-selection guide.
 
+For a WHOLE deliverable from one master prompt (a game, app, site or asset
+pack: "build a polished mobile-first game with sound, levels and deployment"),
+follow the `produce` skill: pass the prompt verbatim to studiocraft
+`production_plan`, then `production_run`. The Production Director picks the
+departments, orders and parallelises them, gates every result, turns failed
+gates into fix work orders and re-verifies, and writes the acceptance report.
+You do its work orders (code, wiring assets, the 2D tools) and submit them
+with `production_submit`; report READY only when its report says READY, and
+leave approvals (deployment, replacing assets) to the person.
+
 Before implementing creative, visual, design, game-development, 2D, 3D,
 modelling, animation, illustration, texture, rendering or asset-generation work
 in ANY project:

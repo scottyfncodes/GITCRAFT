@@ -8,6 +8,7 @@
   forgecraft/cli.py process path/to/mesh.glb [name]
   forgecraft/cli.py jobs | job <id> | retry <id>
   forgecraft/cli.py search [query] | get <asset> | export <asset> <dest_dir>
+  forgecraft/cli.py call <tool> '<json>'                                    # any MCP tool by name, JSON result on stdout (the Production Director)
   forgecraft/cli.py snapshot <dir>                                            # copy the library (no scratch) for publishing
   forgecraft/cli.py serve                                                    # removed: use scripts/ui.sh (see below)
 """
@@ -20,6 +21,10 @@ def main(a):
     cmd, rest = a[0], a[1:]
     import server
     spec = lambda s: json.loads(s) if s.strip().startswith("{") else {"brief": s}
+    if cmd == "call":   # one MCP tool; the JSON result is the last stdout line (production/executors.py reads it)
+        import contextlib
+        with contextlib.redirect_stdout(sys.stderr): r = server.call(rest[0], json.loads(rest[1]) if len(rest) > 1 else {})
+        print(json.dumps(r, default=str)); return 0
     if cmd == "probe": r = server.call("hardware_probe", {})
     elif cmd == "route": r = server.call("route", {"brief": rest[0], "images": rest[1:]})
     elif cmd == "generate": r = server.call("generate", spec(" ".join(rest)))

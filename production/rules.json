@@ -1,0 +1,81 @@
+{
+ "deliverables": {
+  "game": ["game", "platformer", "roguelike", "shooter", "puzzler", "arcade game", "endless runner", "gameplay"],
+  "site": ["website", "landing page", "marketing site", "portfolio site", "web site", "homepage"],
+  "app": ["app", "application", "dashboard", "tool", "web app", "pwa"],
+  "asset_pack": ["asset pack", "sound pack", "texture pack", "sprite pack", "asset kit"],
+  "media": ["trailer", "video", "teaser", "cinematic", "animation reel"]
+ },
+ "three_d_words": ["3d", "three.js", "threejs", "low-poly", "low poly", "voxel", "first-person", "third-person", "isometric 3d", "babylon"],
+ "mobile_words": ["mobile", "mobile-first", "phone", "touch", "iphone", "android", "tablet", "portrait"],
+ "engines": {
+  "phaser": ["phaser"], "three": ["three.js", "threejs"], "pixi": ["pixi", "pixijs"], "react": ["react", "next.js", "nextjs"],
+  "vite": ["vite"], "canvas": ["canvas", "vanilla js", "no framework", "plain javascript"], "babylon": ["babylon"]
+ },
+ "genres": {
+  "platformer": ["platformer", "platforming", "jump and run", "side-scroller", "side scroller"],
+  "arcade": ["arcade", "endless", "high score", "score attack", "runner"],
+  "roguelike": ["roguelike", "roguelite", "dungeon crawler", "procedural dungeon", "permadeath"],
+  "physics_puzzle": ["physics puzzle", "puzzle", "puzzler"],
+  "racing": ["racing", "racer", "kart"],
+  "survival": ["survival", "survive"],
+  "strategy": ["strategy", "tower defense", "tower defence", "rts", "tactics"],
+  "exploration": ["exploration", "explore", "open world", "adventure"],
+  "action": ["action", "combat", "fighting", "hack and slash", "shooter", "shoot"],
+  "incremental": ["idle", "incremental", "clicker"],
+  "simulation": ["simulation", "sim", "tycoon"],
+  "management_builder": ["builder", "city builder", "management", "base building"],
+  "sports": ["sports", "football", "soccer", "basketball", "golf"],
+  "sandbox": ["sandbox", "creative mode"]
+ },
+ "features": {
+  "sound": ["sound", "audio", "sfx", "sound effects", "soundtrack"],
+  "music": ["music", "soundtrack", "theme", "score music"],
+  "voice": ["voice", "voiced", "voice acting", "dialogue", "narration", "narrator"],
+  "levels": ["levels", "stages", "worlds", "level design", "maps"],
+  "progression": ["progression", "unlock", "upgrades", "xp", "level up", "meta progression", "save progress"],
+  "identity": ["visual identity", "brand", "branding", "logo", "icon", "art direction", "original art", "original visual"],
+  "effects": ["particles", "vfx", "visual effects", "juice", "screen shake", "explosions"],
+  "materials": ["textures", "materials", "pbr"],
+  "world": ["terrain", "island", "world map", "landscape", "skybox", "ocean"],
+  "trailer": ["trailer", "teaser", "store video"],
+  "performance": ["60 fps", "60fps", "performance", "performant", "fast loading", "smooth"],
+  "accessibility": ["accessible", "accessibility", "a11y", "colour blind", "color blind"]
+ },
+ "polish_words": ["polished", "production-ready", "production ready", "professional", "high quality", "high-quality", "premium", "ship", "release-ready", "release ready"],
+ "deploy_words": ["deploy", "deployment", "deployed", "live link", "publish", "hosted", "vercel", "netlify", "github pages"],
+ "sfx_presets": {
+  "jump": ["jump", "hop", "leap"], "coin": ["coin", "collect", "pickup", "pick-up", "gem", "treasure"],
+  "laser": ["laser", "shoot", "blaster"], "explosion": ["explode", "explosion", "bomb", "blast"],
+  "hit": ["hit", "damage", "combat", "attack", "hurt"], "powerup": ["power-up", "powerup", "upgrade", "boost"],
+  "click": ["menu", "button", "ui sound"], "magic": ["magic", "spell", "enchant"], "splash": ["water", "swim", "splash"],
+  "whoosh": ["dash", "whoosh", "swoosh"], "footstep": ["footstep", "walk"], "alarm": ["alarm", "warning", "siren"], "thud": ["land", "thud", "crash"]
+ },
+ "default_sfx": {
+  "platformer": ["jump", "coin", "hit", "powerup", "click"], "arcade": ["coin", "hit", "powerup", "click", "explosion"],
+  "roguelike": ["hit", "coin", "magic", "footstep", "click"], "physics_puzzle": ["thud", "blip", "powerup", "click"],
+  "racing": ["whoosh", "thud", "powerup", "click"], "action": ["hit", "laser", "explosion", "click"], "app": ["click", "blip"]
+ },
+ "music_moods": {
+  "heroic": ["heroic", "epic"], "calm": ["calm", "relaxing", "cozy", "cosy", "chill", "peaceful"], "tense": ["tense", "horror", "scary", "dark"],
+  "playful": ["playful", "cute", "whimsical", "cheerful", "happy", "fun"], "mysterious": ["mysterious", "mystery", "eerie"],
+  "sad": ["sad", "melancholy"], "adventure": ["adventure", "adventurous", "quest"]
+ },
+ "default_mood": {"platformer": "playful", "arcade": "playful", "roguelike": "mysterious", "physics_puzzle": "calm", "exploration": "adventure", "action": "heroic", "survival": "tense", "racing": "heroic"},
+ "ambience": {"ocean": ["ocean", "sea", "beach", "coast"], "wind": ["wind", "mountain"], "rain": ["rain", "storm"], "forest": ["forest", "jungle", "woods"],
+              "cave": ["cave", "cavern", "underground"], "fire": ["campfire", "fireplace"], "night": ["night"], "space": ["space", "galaxy"], "city": ["city", "urban"]},
+ "level_kinds": {"platformer": ["platformer", "platforming", "side-scroller"], "dungeon": ["dungeon", "roguelike"], "cave": ["cave", "cavern"],
+                 "overworld": ["overworld", "world map", "open world"], "settlement": ["town", "village", "settlement"]},
+ "genre_level_kind": {"platformer": "platformer", "roguelike": "dungeon", "exploration": "overworld"},
+ "vfx": {"fire": ["fire", "flame", "torch"], "smoke": ["smoke"], "magic": ["magic", "spell"], "explosion": ["explosion", "explode", "bomb"],
+         "sparks": ["sparks", "spark"], "dust": ["dust"], "splash": ["splash"], "lightning": ["lightning"], "snow": ["snow"], "rain": ["rain"], "energy": ["energy", "glow", "lantern"]},
+ "default_vfx": ["sparks", "dust"],
+ "materials": {"stone": ["stone"], "wood": ["wood", "wooden"], "metal": ["metal"], "rust": ["rust", "rusty"], "sand": ["sand", "desert"], "grass": ["grass"],
+               "ice": ["ice", "frozen"], "lava": ["lava"], "brick": ["brick"], "cobblestone": ["cobblestone"], "snow": ["snowy"]},
+ "terrain": {"island": ["island"], "archipelago": ["archipelago"], "mountains": ["mountain"], "canyon": ["canyon"], "volcano": ["volcano"], "coast": ["coast"], "plains": ["plains", "meadow"]},
+ "sky": {"sunset": ["sunset"], "dusk": ["dusk"], "night": ["night"], "noon": ["noon", "sunny"], "overcast": ["overcast", "cloudy"], "morning": ["morning", "dawn"]},
+ "quality": {
+  "standard": {"playcraft_min": 40, "pixelcraft_min": 70, "min_fps": 20, "max_p95_ms": 100, "max_rounds": 2, "require_known_licences": true},
+  "polished": {"playcraft_min": 55, "pixelcraft_min": 80, "min_fps": 30, "max_p95_ms": 60, "max_rounds": 3, "require_known_licences": true}
+ }
+}

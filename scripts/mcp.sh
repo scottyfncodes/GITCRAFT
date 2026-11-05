@@ -82,8 +82,9 @@ case "$name" in
                cmd=(env HOME="$state/data" python3 "$repo/forgecraft/server.py") ;;
   # The Studio departments (studio/): Python in the studio venv; spawns Blender (MeshCraft's), Node/Chromium,
   # FFmpeg and the voice venv as children, all inside this sandbox.
-  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY"
-               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY GITCRAFT_PLAYCRAFT_HISTORY GITCRAFT_PIXELCRAFT_HISTORY
+  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY" "$FORGECRAFT_HOME/hf-cache"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY GITCRAFT_PLAYCRAFT_HISTORY GITCRAFT_PIXELCRAFT_HISTORY \
+                      FORGECRAFT_HOME HF_HOME="$FORGECRAFT_HOME/hf-cache" GITCRAFT_ALLOW_NET
                cmd=(env HOME="$state/data" "$bin" "$repo/studio/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
@@ -96,12 +97,12 @@ writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
 [[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
-[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
+[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).
 [[ "$name" == meshcraft || "$name" == forgecraft ]] && mkdir -p "$GITCRAFT_HOME/meshcraft" "$FORGECRAFT_HOME"
-[[ "$name" == studiocraft ]] && mkdir -p "$GITCRAFT_STUDIO_HOME" "$GITCRAFT_HOME/meshcraft"   # same: fenced before the install fills them
+[[ "$name" == studiocraft ]] && mkdir -p "$GITCRAFT_STUDIO_HOME" "$GITCRAFT_HOME/meshcraft" "$FORGECRAFT_HOME"   # same: fenced before the install fills them
 if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy=()
   for d in /usr /lib /lib64 /lib32 /bin /sbin /opt "$GITCRAFT_BIN"; do policy+=(--rx "$d"); done
@@ -112,6 +113,10 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
                                           --rx "$repo/studio" --rx "$GITCRAFT_STUDIO_HOME")   # department_* tools run the Studio
   # studiocraft: its code + runtimes (venvs, voice models, Node packages) + MeshCraft's Blender for its Blender actions
   [[ "$name" == studiocraft ]] && policy+=(--rx "$repo/studio" --rx "$GITCRAFT_STUDIO_HOME" --rx "$GITCRAFT_HOME/meshcraft")
+  # ...and the Production Director (production/), which delegates to the departments it coordinates: the 3D Department
+  # (ForgeCraft → MeshCraft, as ForgeCraft's own sandbox allows) and DESIGNCRAFT (gamedesign/, read-only analysis)
+  [[ "$name" == studiocraft ]] && policy+=(--rx "$repo/production" --rx "$repo/forgecraft" --rx "$repo/gitcraft3d" --rx "$repo/meshcraft"
+                                           --rx "$repo/gamedesign" --rx "$FORGECRAFT_HOME")
   # the committed Game Quality History (PLAYCRAFT imports it into its store): read-only, runs never write it
   [[ ( "$name" == studiocraft || "$name" == forgecraft ) && -d "$repo/history" ]] && policy+=(--ro "$repo/history")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done

@@ -4,6 +4,25 @@ Seven open-source creative apps from [ArtCraft](https://github.com/storytold), w
 
 PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department orchestrator) · **StudioCraft** (nine production departments: AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft, TestCraft, AssetCraft)
 
+## One master prompt → a finished production
+
+Give Claude Code the whole request, and GITCRAFT does the rest:
+
+> "Build a polished, mobile-first, original platformer game called Lantern Drift with a complete gameplay loop, progression, an original visual identity, sound, music, three levels, sparks and dust effects, responsive touch controls and production-ready deployment."
+
+The **Production Director** (`production/`, served as studiocraft's `production_*` tools; the `produce` skill) works through the request in order:
+
+1. It interprets the prompt: the deliverable, platform, features, a quality bar, measurable acceptance criteria, its assumptions, and only the essential questions.
+2. It inspects the project and checks what can really run on this machine.
+3. It plans every department's work as a dependency graph with parallel waves, structured hand-offs and quality gates.
+4. It runs the graph:
+   - Department tasks execute concurrently, with retries and honest `blocked` states.
+   - Work only Claude can do (code, wiring the assets in, VectorCraft art) goes out as validated work orders.
+   - A failed QA gate (TestCraft, PLAYCRAFT, PIXELCRAFT, asset integrity, licences) becomes a fix work order, followed by a re-verification of the modified build.
+5. It releases only when every criterion is measured on the exact build being released, and never treats a deployment as live without a check against it.
+
+Productions persist and resume. The usage guide is [docs/production.md](docs/production.md) and the audit behind the design is [docs/orchestration-audit.md](docs/orchestration-audit.md). The acceptance run is `tests/acceptance_production.py`.
+
 ## How it works
 
 1. A GitHub Action builds each app's CLI (which includes its MCP server) and publishes them to the `bin` branch. It reruns weekly to pick up upstream changes, or on demand from the Actions tab.
