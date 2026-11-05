@@ -60,7 +60,7 @@ def tools():
     if deferred():
         return [("studio_status", "GITCRAFT Studio status. " + INSTALL_HINT, {"type": "object", "properties": {}})]
     out = [
-        ("studio_status", "Every GITCRAFT Studio department (audiocraft, animcraft, worldcraft, fxcraft, materialcraft, levelcraft, cinematiccraft, testcraft, assetcraft, playcraft), its actions and whether each can run on this machine, with the reason when not.", {"type": "object", "properties": {}}),
+        ("studio_status", "Every GITCRAFT Studio department (audiocraft, animcraft, worldcraft, fxcraft, materialcraft, levelcraft, cinematiccraft, testcraft, assetcraft, playcraft, pixelcraft), its actions and whether each can run on this machine, with the reason when not.", {"type": "object", "properties": {}}),
         ("department_describe", "One department's machine-readable manifest: actions with request schemas and outputs, dependencies with live status, acquired tools and licences, examples, limits.",
          {"type": "object", "required": ["department"], "properties": {"department": {"type": "string", "enum": contract.departments()}}}),
         ("route", "Which department and action fit a free-text brief, with proposed parameters. 3D modelling is pointed at ForgeCraft. Advice only.",

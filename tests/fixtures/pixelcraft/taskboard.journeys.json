@@ -1,0 +1,5 @@
+[
+ {"name": "complete a task", "expected_taps": 2, "steps": [{"click": "Review pull request #42"}, {"click": "Mark done"}, {"expect": "tasks today"}]},
+ {"name": "quick-add a task", "expected_taps": 1, "steps": [{"fill": {"selector": "#q", "value": "Buy milk"}}, {"click": "Add"}, {"expect": "Buy milk"}]},
+ {"name": "rename myself", "expected_taps": 2, "steps": [{"click": "Settings"}, {"fill": {"label": "Display name", "selector": ".field input", "value": "Sam L."}}, {"click": "Save"}]}
+]

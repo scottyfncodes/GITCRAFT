@@ -26,7 +26,7 @@ project without this repo attached. Sources: `global/`.
 | `effectcraft` | Motion graphics and compositing (After Effects-style) | Animated titles, keyframes, effects, render queue |
 | `meshcraft`   | 3D production: Blender 5.2 headless (`meshcraft/`) | Game-ready 3D assets from a brief: model, palette materials, previews, validation, GLB/FBX/OBJ/STL export (toon or baked PBR), Three.js engine check, Blockbench and Mixamo hand-offs, the shared versioned asset library (`$GITCRAFT_3D_LIBRARY`, default `~/.gitcraft/3d-library`) and job records. The 3D Department's specialist: does every Blender step |
 | `forgecraft`  | 3D Department orchestrator (`forgecraft/`)  | Any 3D request: routes to MeshCraft templates, Blockbench, Mixamo, Meshroom, TripoSR or Hunyuan3D, has MeshCraft do the Blender work, engine-checks, records licence/provenance, hands off; same library and jobs as MeshCraft. Also discovers/routes/runs the Studio departments (`departments`, `department_route`, `department_run`) |
-| `studiocraft` | The Studio departments (`studio/`)          | AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft, TestCraft, AssetCraft, PLAYCRAFT (game design + gameplay quality, `docs/playcraft.md`): one `<department>_<action>` tool per action, plus `studio_status`, `department_describe`, `route`, `run`. See `docs/studio.md` |
+| `studiocraft` | The Studio departments (`studio/`)          | AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft, TestCraft, AssetCraft, PLAYCRAFT (game design + gameplay quality, `docs/playcraft.md`), PIXELCRAFT (visual quality + UI/UX of rendered apps, `docs/pixelcraft.md`): one `<department>_<action>` tool per action, plus `studio_status`, `department_describe`, `route`, `run`. See `docs/studio.md` |
 
 ## How to use them
 
@@ -123,6 +123,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - `tests/test_studio.py` must pass after any change under `studio/` (`--quick` skips the Blender actions).
 - `tests/test_playcraft_history.py` must pass after any change to `studio/departments/playcraft/history.py`, its `ui/` or the
   history actions; never rewrite or delete runs in `history/playcraft/` (the committed Game Quality History).
+- `tests/test_pixelcraft.py` must pass after any change under `studio/departments/pixelcraft/` (`--quick` for the short cycle);
+  PIXELCRAFT never edits an audited app, never reports a check it did not run, and never lets a score rise through lost
+  coverage; never rewrite or delete runs in `history/pixelcraft/` (`docs/pixelcraft.md`).
 - `tests/test_playcraft.py` must pass after any change under `studio/departments/playcraft/` or `studio/core/web/gamepage.mjs`;
   PLAYCRAFT never edits a game and never reports a score, test or regression it did not measure (`docs/playcraft.md`).
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`

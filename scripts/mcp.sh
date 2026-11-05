@@ -75,15 +75,15 @@ case "$name" in
   meshcraft)   mkdir -p "$GITCRAFT_3D_LIBRARY"; export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_3D_LIBRARY FORGECRAFT_HOME
                cmd=("$bin" "$repo/meshcraft/server.py") ;;
   # The 3D Department pipeline (stdlib Python); spawns Blender, Meshroom and the AI backends as children.
-  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY"
+  forgecraft)  mkdir -p "$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY"
                export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_ALLOW_NET FORGECRAFT_HOME GITCRAFT_3D_LIBRARY HF_HOME="$FORGECRAFT_HOME/hf-cache" \
-                      GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_PLAYCRAFT_HISTORY
+                      GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_PLAYCRAFT_HISTORY GITCRAFT_PIXELCRAFT_HISTORY
                # HOME inside the sandbox is the tool's state folder (Chromium and Blender write caches there)
                cmd=(env HOME="$state/data" python3 "$repo/forgecraft/server.py") ;;
   # The Studio departments (studio/): Python in the studio venv; spawns Blender (MeshCraft's), Node/Chromium,
   # FFmpeg and the voice venv as children, all inside this sandbox.
-  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY"
-               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY GITCRAFT_PLAYCRAFT_HISTORY
+  studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY"
+               export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY GITCRAFT_PLAYCRAFT_HISTORY GITCRAFT_PIXELCRAFT_HISTORY
                cmd=(env HOME="$state/data" "$bin" "$repo/studio/server.py") ;;
 esac
 # the tools with repeatable native roots also get the extra roots
@@ -95,8 +95,8 @@ cmd+=("$@")
 writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
-[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY")
-[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY")
+[[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
+[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).
@@ -118,6 +118,13 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   policy+=(--rw /dev)
   for d in "${writable[@]}"; do policy+=(--rw "$d"); done
   [[ "$GITCRAFT_ALLOW_NET" == 1 ]] || policy+=(--no-net)
+  # Local app ports (PIXELCRAFT auditing a running dev server, e.g. GITCRAFT_ALLOW_LOCAL_PORTS=5173,3000): Landlock
+  # filters TCP by port only, so these ports are allowed on any address; the browser probe itself refuses every
+  # origin but the app's own. Opt-in, studiocraft/forgecraft only.
+  if [[ -n "${GITCRAFT_ALLOW_LOCAL_PORTS:-}" && "$GITCRAFT_ALLOW_NET" != 1 && ( "$name" == studiocraft || "$name" == forgecraft ) ]]; then
+    for p in ${GITCRAFT_ALLOW_LOCAL_PORTS//,/ }; do [[ "$p" =~ ^[0-9]+$ ]] && policy+=(--allow-connect "$p"); done
+    export GITCRAFT_ALLOW_LOCAL_PORTS
+  fi
   # Per-host allowances (scripts/netgate.py): GITCRAFT_ALLOW_HOSTS_<TOOL>, else GITCRAFT_ALLOW_HOSTS, else the
   # ~/.gitcraft/allow-hosts file (one pattern per line, `tool: pattern` for one tool). Landlock then allows TCP to
   # the local netgate port only, and netgate lets through only those hosts (HTTPS, port 443), logged in net.jsonl.
