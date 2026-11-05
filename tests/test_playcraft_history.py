@@ -194,7 +194,8 @@ git("checkout", "-qb", "feel")
 js = open(os.path.join(GAME, "game.js")).read().replace("addEventListener('keyup',", "addEventListener('keydown', (e) => { if (e.code === 'KeyP' || e.code === 'Escape') paused = !paused; });\n"
                                                          "document.addEventListener('visibilitychange', () => { if (document.hidden) paused = true; });\naddEventListener('keyup',", 1)
 open(os.path.join(GAME, "game.js"), "w").write(js)
-open(os.path.join(GAME, "style.css"), "w").write(open(os.path.join(GAME, "style.css")).read().replace("width: 28px; height: 28px;", "width: 44px; height: 44px;"))
+css = open(os.path.join(GAME, "style.css")).read().replace("width: 28px; height: 28px;", "width: 44px; height: 44px;")   # read before opening for write
+open(os.path.join(GAME, "style.css"), "w").write(css)
 git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qam", "pause + 44 px button")
 v = run("playcraft_verify", dict(baseline=f"{ws}/out/p1/playcraft.json", play_seconds=3, trials=1, out_dir=f"{ws}/out/v1", pr="https://github.com/acme/blip/pull/7",
                                  changes=[{"title": "Pause", "why": "no pause"}, {"title": "44 px mute", "why": "touch target"}]), "verify of the improvement is recorded")
