@@ -7,8 +7,8 @@ pdfcraft (PDF ops), lightcraft (photo grading), filmcraft (video), effectcraft
 (motion graphics), meshcraft (3D, Blender), forgecraft (3D Department
 orchestrator) and studiocraft (the Studio departments: audio, animation and
 rigging, terrain/skies/oceans, VFX, PBR materials, levels/tilemaps,
-cinematics, browser QA, asset catalogue, and PLAYCRAFT: game design and
-gameplay quality). The `gitcraft` skill has the full tool-selection guide.
+cinematics, browser QA, asset catalogue, PLAYCRAFT: game design and
+gameplay quality, and PIXELCRAFT: visual quality and UI/UX). The `gitcraft` skill has the full tool-selection guide.
 
 Before implementing creative, visual, design, game-development, 2D, 3D,
 modelling, animation, illustration, texture, rendering or asset-generation work
@@ -38,6 +38,15 @@ improvements; never report a score or test that was not actually run. Every
 run is kept in the Game Quality History (`playcraft_history`: one game's
 progress or the whole portfolio); only measured changes between commits count
 as improvement, and a deployment is recorded only with evidence.
+
+For how an app or site LOOKS and how efficiently it is used (spacing, layout,
+typography, buttons and touch targets, mobile ergonomics, safe areas, states,
+accessibility, user journeys) use PIXELCRAFT: "Run PIXELCRAFT on this app"
+follows the `pixelcraft` skill (studiocraft `pixelcraft_audit`, then
+`pixelcraft_verify` after fixes). It audits the rendered app at iPhone 17,
+iPhone 13 and desktop (plus narrow, tablet, landscape), scores Visual Quality,
+Usability and Consistency with evidence and coverage, and never edits the app.
+For games, run it beside PLAYCRAFT (it measures the HTML UI, not the canvas).
 
 Project isolation:
 - The active project is whatever repo you are working in. Never assume it is

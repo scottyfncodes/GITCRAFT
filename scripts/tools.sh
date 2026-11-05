@@ -44,6 +44,8 @@ GITCRAFT_ASSET_CATALOG="${GITCRAFT_ASSET_CATALOG:-$GITCRAFT_HOME/assetcraft/cata
 # PLAYCRAFT's Game Quality History (all games): outside the runtime, so upgrades never touch it; the committed
 # archive <GITCRAFT>/history/playcraft is imported into it automatically
 GITCRAFT_PLAYCRAFT_HISTORY="${GITCRAFT_PLAYCRAFT_HISTORY:-$GITCRAFT_HOME/playcraft/history}"
+# PIXELCRAFT's audit history (every app's visual-quality runs; never rewritten)
+GITCRAFT_PIXELCRAFT_HISTORY="${GITCRAFT_PIXELCRAFT_HISTORY:-$GITCRAFT_HOME/pixelcraft/history}"
 FORGECRAFT_HOME="${FORGECRAFT_HOME:-$GITCRAFT_HOME/forgecraft}"               # Meshroom, AI venv, model cache
 # The 3D asset library + job records shared by meshcraft and forgecraft. Older variables still work;
 # a pre-consolidation ~/.gitcraft/meshcraft-library is used in place (same format).

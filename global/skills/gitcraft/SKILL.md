@@ -1,6 +1,6 @@
 ---
 name: gitcraft
-description: Choose and chain GITCRAFT's creative MCP tools (photocraft, vectorcraft, designcraft, pdfcraft, lightcraft, filmcraft, effectcraft, meshcraft, forgecraft, studiocraft) for visual, design, game-asset, 2D, 3D, audio, animation, rigging, terrain, VFX, material, level, cinematic, QA, asset-management, video or rendering work in the current project. Use before making or improving images, icons, logos, illustrations, textures, layouts, PDFs, sounds, music, voice lines, animations, levels, effects, videos, motion graphics or 3D models, or testing a web game, in any repository.
+description: Choose and chain GITCRAFT's creative MCP tools (photocraft, vectorcraft, designcraft, pdfcraft, lightcraft, filmcraft, effectcraft, meshcraft, forgecraft, studiocraft) for visual, design, game-asset, 2D, 3D, audio, animation, rigging, terrain, VFX, material, level, cinematic, QA, UI/UX and visual-quality audit, asset-management, video or rendering work in the current project. Use before making or improving images, icons, logos, illustrations, textures, layouts, PDFs, sounds, music, voice lines, animations, levels, effects, videos, motion graphics or 3D models, or testing a web game, in any repository.
 ---
 
 # Using GITCRAFT in any project
@@ -43,6 +43,7 @@ library. They have no network.
 | Camera moves, storyboards, title cards, teaser assembly, gameplay capture | studiocraft `cinematiccraft_*` | filmcraft (hand edit), effectcraft (titles) |
 | Smoke/gameplay/FPS/visual-regression/asset tests of a web game | studiocraft `testcraft_*` | — |
 | Catalogue, duplicates, unused assets, licences/ATTRIBUTION.md, safe import | studiocraft `assetcraft_*` | every department registers its outputs |
+| Visual quality / UI-UX audit of an app or site: spacing, layout, typography, buttons and touch targets, safe areas, states, accessibility, journeys, before/after verify (`pixelcraft` skill) | studiocraft `pixelcraft_*` | playcraft (how a game plays), testcraft (engineering smoke) |
 | Not sure which department | studiocraft `route` / forgecraft `department_route` | — |
 
 Typical projects:

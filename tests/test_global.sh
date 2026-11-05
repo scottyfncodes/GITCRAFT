@@ -56,6 +56,7 @@ check "global instructions added and the user's own CLAUDE.md text kept" \
   'grep -q "GITCRAFT:BEGIN" "$HOME/.claude/CLAUDE.md" && grep -q "Always use tabs in Makefiles" "$HOME/.claude/CLAUDE.md"'
 check "gitcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/gitcraft/SKILL.md" ]]'
 check "playcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/playcraft/SKILL.md" ]]'
+check "pixelcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/pixelcraft/SKILL.md" ]]'
 
 # --- 3. from the other project
 if command -v claude >/dev/null; then
