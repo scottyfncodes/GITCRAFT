@@ -134,6 +134,11 @@ G3 = H.game_report(S, q1["game_id"]); cls = {c["id"]: c["class"] for c in G3["vs
 check("controlled comparison (baseline commit re-measured, same method) confirms the real fix and exposes the method artefact",
       G3["vs_baseline"]["verdict"] == "genuine improvement" and cls["x.touch"].startswith("improved") and cls["x.time"] == "method" and G3["vs_baseline"].get("controlled"), (G3["vs_baseline"]["verdict"], cls))
 check("the baseline stays the original run after a re-measurement", G3["baseline"] == q1["run_id"])
+# a worktree whose repository git cannot read is refused, never filed under an invented identity
+wtd = os.path.join(ws, "worktree-like"); os.makedirs(wtd, exist_ok=True); open(os.path.join(wtd, ".git"), "w").write("gitdir: /nowhere/.git/worktrees/x\n")
+try: H.identity(wtd); refused = False
+except ValueError as e: refused = "worktree" in str(e)
+check("a git worktree with an unreadable repository is refused (no invented 'local' game)", refused)
 # live check
 b = os.path.join(ws, "build"); os.makedirs(b, exist_ok=True)
 open(os.path.join(b, "index.html"), "w").write('<script type="module" src="/assets/index-Ab12Cd34.js"></script><link rel="stylesheet" href="/assets/index-Zz99Yy88.css">')

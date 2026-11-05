@@ -14,6 +14,7 @@
     "measurement only (same commit)": ["measure", "Measurement only"], "code changed; not verified by measurement": ["code", "Code changed · unverified"],
     "no measured change (within noise)": ["measure", "Within noise"], "score moved without a measured criterion change (method or coverage)": ["measure", "Method / coverage"],
     "baseline only": ["base", "Baseline only"],
+    "unconfirmed (PLAYCRAFT method changed): re-measure the baseline commit": ["code", "Unconfirmed · method changed"],
   };
   const verdict = (v) => VERDICT[v] || ["measure", v || "—"];
   // a score move is coloured only when the history says it is real; otherwise it is grey and labelled as measurement
@@ -112,7 +113,7 @@
     const base = G.timeline.find((t) => t.is_baseline) || G.timeline[0], last = G.timeline[G.timeline.length - 1];
     const when = (rid) => { const t = G.timeline.find((x) => x.run === rid); return t ? day(t.at) : esc((rid || "").slice(0, 12)); };
     const lvl = (l) => `<span class="lv ${esc(l || "unknown")}">${esc((l || "?").replace("_", " "))}</span>`;
-    const clsOf = (c) => (c.startsWith("improved") ? "improved" : c.startsWith("regressed") ? "regressed" : c.startsWith("code") ? "code" : c === "measurement" ? "measurement" : "");
+    const clsOf = (c) => (c.includes("unconfirmed") || c.startsWith("code") ? "code" : c.startsWith("improved") ? "improved" : c.startsWith("regressed") ? "regressed" : c === "measurement" || c === "method" ? "measurement" : "");
     const [dc, dt] = DEP[dep.level] || ["ghost", "No deployment evidence"];
     const realIn = (k) => { const cs = (vb?.changes || []).filter((c) => c.category === k); return cs.some((c) => (c.class || "").startsWith("improved")) ? "up" : cs.some((c) => (c.class || "").startsWith("regressed")) ? "down" : null; };
     const cats = vb ? Object.entries(vb.categories).filter(([, c]) => c.from != null || c.to != null) : Object.entries(last.categories || {}).map(([k, v]) => [k, { title: k, from: v, to: v, delta: 0 }]);
@@ -139,7 +140,8 @@
         <h3>Baseline vs latest</h3>
         <div class="verdict"><div class="big num">${base.overall} → ${last.overall}</div><span class="stamp ${vc}" style="margin:0">${esc(vt)}</span></div>
         <p class="lede" style="margin-top:8px">Verified-only ${base.verified ?? "—"} → ${last.verified ?? "—"}. Measured noise on this game: ±${G.noise.band}${G.noise.measured ? ` (${G.noise.samples} repeat run${G.noise.samples > 1 ? "s" : ""} of one commit)` : " (default; no repeat runs yet)"}.</p>
-        ${vb ? `<div class="counts" style="margin-top:10px">${vb.counts.improved ? `<span class="chip teal">${vb.counts.improved} improved (measured)</span>` : ""}${vb.counts.regressed ? `<span class="chip coral">${vb.counts.regressed} regressed (measured)</span>` : ""}${vb.counts.unverified_code ? `<span class="chip ghost">${vb.counts.unverified_code} code change, unverified</span>` : ""}${vb.counts.measurement ? `<span class="chip slate">${vb.counts.measurement} measurement only</span>` : ""}${vb.counts.coverage ? `<span class="chip ghost">${vb.counts.coverage} coverage</span>` : ""}</div>` : ""}
+        ${vb?.controlled ? `<p class="lede" style="margin-top:8px">Confirmed by a controlled comparison: the baseline commit was re-measured with the current PLAYCRAFT (${esc(day((G.timeline.find((t) => t.run === vb.controlled.from) || {}).at))}), so method changes are not counted.</p>` : ""}
+        ${vb ? `<div class="counts" style="margin-top:10px">${vb.counts.improved ? `<span class="chip teal">${vb.counts.improved} improved (measured)</span>` : ""}${vb.counts.regressed ? `<span class="chip coral">${vb.counts.regressed} regressed (measured)</span>` : ""}${vb.counts.unconfirmed ? `<span class="chip ghost">${vb.counts.unconfirmed} unconfirmed (method changed)</span>` : ""}${vb.counts.method ? `<span class="chip slate">${vb.counts.method} PLAYCRAFT method, not the game</span>` : ""}${vb.counts.unverified_code ? `<span class="chip ghost">${vb.counts.unverified_code} code change, unverified</span>` : ""}${vb.counts.measurement ? `<span class="chip slate">${vb.counts.measurement} measurement only</span>` : ""}${vb.counts.coverage ? `<span class="chip ghost">${vb.counts.coverage} coverage</span>` : ""}</div>` : ""}
       </section>
 
       <section class="panel"><h3>Score progression</h3>${chart(G)}</section>
@@ -166,7 +168,7 @@
       </div>
 
       <section class="panel"><h3>Runs and provenance</h3><div class="scroll"><table class="prov"><thead><tr><th>Assessed</th><th>Kind</th><th>Commit</th><th>Overall</th><th>Verified</th><th>Evidence v/o/i/n</th><th>Method</th></tr></thead><tbody>
-        ${G.timeline.map((t, i) => { const pv = G.provenance[i] || {}; const e = t.evidence || {}; return `<tr><td>${esc(day(t.at))}${t.is_baseline ? ` <span class="chip gold">baseline</span>` : ""}</td><td>${esc(t.kind)}</td><td class="mono" title="${esc(pv.commit_source || "")}">${sha(t.commit)}</td><td class="n">${t.overall}</td><td class="n">${t.verified ?? "—"}</td><td class="n">${e.verified || 0}/${e.observed || 0}/${e.inferred || 0}/${e.not_tested || 0}</td><td class="mono">${esc(t.method)}</td></tr>`; }).join("")}
+        ${G.timeline.map((t, i) => { const pv = G.provenance[i] || {}; const e = t.evidence || {}; return `<tr><td>${esc(day(t.at))}${t.is_baseline ? ` <span class="chip gold">baseline</span>` : !t.is_baseline && t.commit && t.commit === base.commit && i > 0 && G.timeline[i - 1].commit !== t.commit ? ` <span class="chip">re-measure</span>` : ""}</td><td>${esc(t.kind)}</td><td class="mono" title="${esc(pv.commit_source || "")}">${sha(t.commit)}</td><td class="n">${t.overall}</td><td class="n">${t.verified ?? "—"}</td><td class="n">${e.verified || 0}/${e.observed || 0}/${e.inferred || 0}/${e.not_tested || 0}</td><td class="mono">${esc(t.method)}</td></tr>`; }).join("")}
       </tbody></table></div><p class="lede" style="font-size:13px;margin-top:8px">Every run keeps its full PLAYCRAFT card (SHA-256 recorded). The baseline is pinned and never overwritten.</p></section>`;
     const show = (k) => {
       const xs = k === "open" ? open : k === "fixed" ? fixed : unm;

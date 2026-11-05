@@ -118,6 +118,11 @@ def identity(root, name=None):
         gid = f"{owner}--{repo}" if host == "github.com" else f"{host.replace('.', '-')}--{owner}--{repo}"
         url = f"https://{key}"
         return {"id": gid, "repo": f"{owner}/{repo}", "host": host, "url": url, "remote_key": key}
+    if root and os.path.isfile(os.path.join(root, ".git")):
+        # a git worktree/submodule: its .git file points at a repository that may be outside the sandbox roots, so git
+        # cannot read it here. Never invent an identity for it (that would split one game into two histories).
+        raise ValueError(f"{root} is a git worktree or submodule whose repository is not readable here: run PLAYCRAFT from a full clone "
+                         "(or put the main repository inside the GITCRAFT roots) so the game and commit can be identified")
     base = re.sub(r"[^a-z0-9]+", "-", (name or os.path.basename(root or "game")).lower()).strip("-") or "game"
     return {"id": f"local--{base}-{hashlib.sha1(os.path.realpath(root or base).encode()).hexdigest()[:8]}", "repo": None, "host": None, "url": None, "remote_key": None}
 
