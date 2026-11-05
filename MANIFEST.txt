@@ -1,0 +1,7 @@
+designcraft designcraft-cli 0e85e9e 2026-11-05
+effectcraft effectcraft-cli a439b1b 2026-11-05
+filmcraft filmcraft-cli 46763a8 2026-11-05
+lightcraft lightcraft-cli eab130e 2026-11-05
+pdfcraft pdfcraft-cli c3c36f7 2026-11-05
+photocraft photocraft-cli 3e27572 2026-11-05
+vectorcraft vectorcraft-cli b319341 2026-11-05
