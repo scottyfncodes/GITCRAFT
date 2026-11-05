@@ -106,6 +106,7 @@ The seven templates from `boat` to `deckhand` came from ForgeCraft in the 3D Dep
 
 Templates are Python modules in `engine/templates/` with `META` (params, roles, triangle budget), `default_roles(params)` and `build(ctx)`, using the modelling kit in `engine/kit.py`:
 - primitives with bevels;
+- structural pieces: `log_wall` (stacked round logs with door and window openings, notched-corner offset and end grain), `mound` (drifts, heaps and banks), `beam` (a bar from one point to another: braces, struts, guy wires). From ROCKSLIDE's lodge and working mountain; `tests/test_meshcraft_structural.py`;
 - palette-role materials;
 - the vertex-colour bake;
 - the palette atlas;
