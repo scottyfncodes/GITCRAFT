@@ -139,6 +139,20 @@ wtd = os.path.join(ws, "worktree-like"); os.makedirs(wtd, exist_ok=True); open(o
 try: H.identity(wtd); refused = False
 except ValueError as e: refused = "worktree" in str(e)
 check("a git worktree with an unreadable repository is refused (no invented 'local' game)", refused)
+# a timing-dependent criterion: one run per side is not enough
+d4, g4 = repo("noisy"); n1 = commit(d4, g4, "one")
+Z = {"ctl.responds": ("controls", "pass", "verified"), "mob.targets": ("mobile", "partial", "verified")}
+z1 = S.record(card(d4, n1, "2026-03-01T10:00:00+00:00", Z), "pass", root=d4)
+n2 = commit(d4, g4, "two")
+Z2 = {"ctl.responds": ("controls", "partial", "verified"), "mob.targets": ("mobile", "pass", "verified")}
+S.record(card(d4, n2, "2026-03-02T10:00:00+00:00", Z2), "pass", root=d4)
+cls = {c["id"]: c["class"] for c in H.game_report(S, z1["game_id"])["vs_baseline"]["changes"]}
+check("noisy criteria need repetition: a single-run control-response flip is unconfirmed; a deterministic one counts",
+      "noisy" in cls["ctl.responds"] and cls["mob.targets"] == "improved (verified)", cls)
+S.record(card(d4, n2, "2026-03-03T10:00:00+00:00", Z2), "pass", root=d4)
+S.record(card(d4, n1, "2026-03-04T10:00:00+00:00", Z), "pass", root=d4)   # baseline commit re-measured, agrees
+cls = {c["id"]: c["class"] for c in H.game_report(S, z1["game_id"])["vs_baseline"]["changes"]}
+check("...and becomes a measured change once each side repeats and agrees", cls["ctl.responds"] == "regressed (verified)", cls)
 # live check
 b = os.path.join(ws, "build"); os.makedirs(b, exist_ok=True)
 open(os.path.join(b, "index.html"), "w").write('<script type="module" src="/assets/index-Ab12Cd34.js"></script><link rel="stylesheet" href="/assets/index-Zz99Yy88.css">')

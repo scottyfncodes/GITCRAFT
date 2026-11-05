@@ -15,6 +15,7 @@
     "no measured change (within noise)": ["measure", "Within noise"], "score moved without a measured criterion change (method or coverage)": ["measure", "Method / coverage"],
     "baseline only": ["base", "Baseline only"],
     "unconfirmed (PLAYCRAFT method changed): re-measure the baseline commit": ["code", "Unconfirmed · method changed"],
+    "unconfirmed (noisy measurement): repeat the run": ["code", "Unconfirmed · noisy"],
   };
   const verdict = (v) => VERDICT[v] || ["measure", v || "—"];
   // a score move is coloured only when the history says it is real; otherwise it is grey and labelled as measurement
@@ -145,7 +146,7 @@
         <div class="verdict"><div class="big num">${base.overall} → ${last.overall}</div><span class="stamp ${vc}" style="margin:0">${esc(vt)}</span></div>
         <p class="lede" style="margin-top:8px">Verified-only ${base.verified ?? "—"} → ${last.verified ?? "—"}. Measured noise on this game: ±${G.noise.band}${G.noise.measured ? ` (${G.noise.samples} repeat run${G.noise.samples > 1 ? "s" : ""} of one commit)` : " (default; no repeat runs yet)"}.</p>
         ${vb?.controlled ? `<p class="lede" style="margin-top:8px">Confirmed by a controlled comparison: the baseline commit was re-measured with the current PLAYCRAFT (${esc(day((G.timeline.find((t) => t.run === vb.controlled.from) || {}).at))}), so method changes are not counted.</p>` : ""}
-        ${vb ? `<div class="counts" style="margin-top:10px">${vb.counts.improved ? `<span class="chip teal">${vb.counts.improved} improved (measured)</span>` : ""}${vb.counts.regressed ? `<span class="chip coral">${vb.counts.regressed} regressed (measured)</span>` : ""}${vb.counts.unconfirmed ? `<span class="chip ghost">${vb.counts.unconfirmed} unconfirmed (method changed)</span>` : ""}${vb.counts.method ? `<span class="chip slate">${vb.counts.method} PLAYCRAFT method, not the game</span>` : ""}${vb.counts.unverified_code ? `<span class="chip ghost">${vb.counts.unverified_code} code change, unverified</span>` : ""}${vb.counts.measurement ? `<span class="chip slate">${vb.counts.measurement} measurement only</span>` : ""}${vb.counts.coverage ? `<span class="chip ghost">${vb.counts.coverage} coverage</span>` : ""}</div>` : ""}
+        ${vb ? `<div class="counts" style="margin-top:10px">${vb.counts.improved ? `<span class="chip teal">${vb.counts.improved} improved (measured)</span>` : ""}${vb.counts.regressed ? `<span class="chip coral">${vb.counts.regressed} regressed (measured)</span>` : ""}${vb.counts.unconfirmed ? `<span class="chip ghost">${vb.counts.unconfirmed} unconfirmed (method or noise)</span>` : ""}${vb.counts.method ? `<span class="chip slate">${vb.counts.method} PLAYCRAFT method, not the game</span>` : ""}${vb.counts.unverified_code ? `<span class="chip ghost">${vb.counts.unverified_code} code change, unverified</span>` : ""}${vb.counts.measurement ? `<span class="chip slate">${vb.counts.measurement} measurement only</span>` : ""}${vb.counts.coverage ? `<span class="chip ghost">${vb.counts.coverage} coverage</span>` : ""}</div>` : ""}
       </section>
 
       <section class="panel"><h3>Score progression</h3>${chart(G)}</section>

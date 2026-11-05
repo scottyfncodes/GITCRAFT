@@ -296,6 +296,10 @@ class Store:
 
 # ---------------------------------------------------------------- analysis
 RANK = {"pass": 2, "partial": 1, "fail": 0}
+# probe criteria that depend on timing and game state (a control pressed while the player is mid-crash, a frame that took
+# longer): one run is not enough to call a change real. Deterministic checks (sizes, text, viewport, errors) are not here.
+NOISY = {"cg.responds", "ctl.responds", "gf.response", "mob.touch", "px.loads", "px.dead_time", "pres.alive", "tech.fps", "mob.fps",
+         "px.pause", "cg.state"}
 STRONG = ("verified", "observed")
 
 
@@ -393,6 +397,26 @@ def confirm_with(vs, ctrl_cmp):
     return vs
 
 
+def repeatable(vs, runs, base, latest):
+    """For noisy criteria, a measured change is real only if every same-method run of each commit agrees with it and
+    one side has been measured at least twice; otherwise it is 'unconfirmed (noisy measurement)'."""
+    if not vs: return vs
+    def side(commit, method, cid):
+        rs = [r for r in runs if (r.get("commit") or {}).get("head") == commit and (not method or r.get("method") == method) and cid in r.get("criteria", {})]
+        return [r["criteria"][cid]["s"] for r in rs]
+    bc, lc = (base.get("commit") or {}).get("head"), (latest.get("commit") or {}).get("head")
+    for c in vs["changes"]:
+        if c["id"] not in NOISY or not c.get("class", "").startswith(("improved", "regressed")) or "unconfirmed" in c["class"]: continue
+        old = side(bc, (vs.get("controlled") and latest.get("method")) or base.get("method"), c["id"])
+        new = side(lc, latest.get("method"), c["id"])
+        agree = old and new and all(x == c["from"]["status"] for x in old) and all(x == c["to"]["status"] for x in new)
+        if not agree or max(len(old), len(new)) < 2:
+            c["class"] = c["class"].split(" (")[0] + " (unconfirmed: noisy measurement)"
+            c["why"] = (f"timing/state-dependent check: baseline commit {old or '—'} vs latest commit {new or '—'} across runs; "
+                        "repeat the run (or raise trials) until each side agrees")
+    return recount(vs)
+
+
 def attribute_steps(vs, steps):
     """Re-classify a baseline→latest comparison by where each criterion actually changed: a flip that happened between
     two runs of the same commit is measurement (or a PLAYCRAFT method change), even if the endpoints' commits differ."""
@@ -419,7 +443,8 @@ def recount(vs):
         if real_up and not real_down: vs["verdict"] = "genuine improvement"
         elif real_down and not real_up: vs["verdict"] = "genuine regression"
         elif real_up and real_down: vs["verdict"] = "mixed"
-        elif vs["counts"]["unconfirmed"]: vs["verdict"] = "unconfirmed (PLAYCRAFT method changed): re-measure the baseline commit"
+        elif vs["counts"]["unconfirmed"]: vs["verdict"] = ("unconfirmed (PLAYCRAFT method changed): re-measure the baseline commit" if any("method changed" in c.get("class", "") for c in vs["changes"])
+                                                           else "unconfirmed (noisy measurement): repeat the run")
         elif vs["counts"]["unverified_code"]: vs["verdict"] = "code changed; not verified by measurement"
         elif vs["overall"]["delta"] is not None and abs(vs["overall"]["delta"]) <= vs["overall"]["noise_band"]: vs["verdict"] = "no measured change (within noise)"
         else: vs["verdict"] = "score moved without a measured criterion change (method or coverage)"
@@ -554,6 +579,7 @@ def game_report(store, gid, stale_days=14):
     vs_base = attribute_steps(compare_runs(base, latest, nb["band"]), steps) if latest["run_id"] != base["run_id"] else None
     ctrl = controlled(base, latest, runs) if vs_base and not vs_base["same_commit"] else None
     if ctrl: vs_base = recount(confirm_with(vs_base, compare_runs(ctrl, latest, nb["band"])))
+    if vs_base and not vs_base["same_commit"]: vs_base = repeatable(vs_base, runs, base, latest)
     findings = track_findings(assess)
     regs, recurring = regressions(runs)
     timeline = [{"run": r["run_id"], "kind": r["kind"], "at": r["assessed_at"], "commit": _short_sha(r.get("commit")), "method": r.get("method") or "unrecorded",

@@ -54,9 +54,14 @@ history, but it never replaces the baseline.
 | A criterion only measured in one run (`not tested`, added or removed) | **coverage** (e.g. FPS stopped being scored on software rendering) |
 | Status changed between different commits, verified/observed on both sides | **improved** / **regressed** (verified or observed): the only class that counts as genuine |
 | Status changed between different commits, from source only | **code change (unverified)**: reported, never credited as an improvement |
+| Status changed between commits but the two runs used **different PLAYCRAFT methods** (or one is unrecorded) | **unconfirmed (method changed)** until the baseline commit is re-measured with the current method; that controlled comparison then confirms it or relabels it **method** |
+| A timing/state-dependent check changed (control responses, latency, time to play, dead time, idle motion, FPS, pause, game state) without every same-method run of each commit agreeing, and at least two runs on one side | **unconfirmed (noisy measurement)**: repeat the run. Deterministic checks (touch-target sizes, text size, viewport, errors) need no repetition |
+
+A re-measurement of an older commit after newer code was assessed is a **control**: it never becomes the "latest"
+assessment and is not a progression step (it is drawn as a grey dot).
 
 Each game gets a verdict: genuine improvement, genuine regression, mixed, measurement only (same commit),
-code changed but not verified, no measured change (within noise), or score moved without a measured criterion
+code changed but not verified, unconfirmed (method changed / noisy measurement), no measured change (within noise), or score moved without a measured criterion
 change (method or coverage).
 
 The **noise band** is measured per game: the largest overall move between two runs of the same commit made with the
