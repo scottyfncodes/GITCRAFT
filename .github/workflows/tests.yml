@@ -18,6 +18,10 @@ concurrency:
 
 jobs:
   tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     runs-on: ubuntu-24.04
     timeout-minutes: 75
     env:
@@ -76,8 +80,27 @@ jobs:
       - name: Production Director (unit + a real production through the sandboxed server)
         run: python3 tests/test_production.py
 
-      - name: Production Director master-prompt acceptance (every department for real)
-        run: python3 tests/acceptance_production.py
+      - name: "#45 stability on the fix: master-prompt acceptance x3 with capture"
+        run: |
+          set +e   # keep going after a failing run: the point is to capture it
+          fails=0
+          for i in 1 2 3; do
+            echo "::group::acceptance run $i"
+            GITCRAFT_PRODUCTION_PROOF="$RUNNER_TEMP/acc$i" python3 tests/acceptance_production.py > "$RUNNER_TEMP/acc$i.log" 2>&1; rc=$?
+            tail -n 40 "$RUNNER_TEMP/acc$i.log"
+            echo "::endgroup::"
+            echo "RUN $i exit $rc"
+            if [ $rc -ne 0 ]; then
+              fails=$((fails+1))
+              echo "---- FULL failing log (run $i) ----"; cat "$RUNNER_TEMP/acc$i.log"
+              echo "---- studiocraft.log ----"; cat "$RUNNER_TEMP/acc$i/studiocraft.log" 2>/dev/null | tail -n 400
+              echo "---- processes ----"; ps -eo pid,ppid,pgid,etimes,rss,comm,args --sort=pid | grep -v ' \[' | tail -n 80
+              echo "---- kernel ----"; sudo dmesg -T 2>/dev/null | tail -n 60
+              echo "---- audit tail ----"; tail -n 20 ~/.gitcraft/logs/audit.jsonl
+            fi
+          done
+          echo "SHARD SUMMARY: $fails of 3 acceptance runs failed"
+          exit $fails
 
       - name: Logs on failure
         if: failure()
