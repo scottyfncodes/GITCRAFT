@@ -3,7 +3,8 @@
 //            steps?: [...], perf_ms?, record_video?, _result }
 // The game folder `root` is served at http://game.local/ through request interception (no sockets,
 // works inside the GITCRAFT sandbox); any other host is blocked and reported.
-// Steps: {press: key} {hold: key, ms} {down: key} {up: key} {click: [x, y]} {tap: [x, y]} {wait: ms}
+// Steps: {press: key} {hold: key, ms} {down: key} {up: key} {click: [x, y] | "css selector"} {tap: [x, y]} {wait: ms}
+//        {fill: "css selector", value} {expect: "css selector", text?, name?}   (apps: selectors; games: coordinates)
 //        {screenshot: name} {eval: "js expr", as: name} {assert: "js expr", name} {type: text}
 import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, readdirSync } from 'node:fs';
 import path from 'node:path';
@@ -44,7 +45,14 @@ try {
         else if (s.hold) { await page.keyboard.down(s.hold); await page.waitForTimeout(s.ms || 500); await page.keyboard.up(s.hold); }
         else if (s.down) await page.keyboard.down(s.down);
         else if (s.up) await page.keyboard.up(s.up);
+        else if (typeof s.click === 'string') await page.click(s.click, { timeout: s.timeout || 5000 });   // a CSS selector (apps)
         else if (s.click) await page.mouse.click(s.click[0], s.click[1]);
+        else if (s.fill) await page.fill(s.fill, String(s.value ?? ''), { timeout: s.timeout || 5000 });
+        else if (s.expect) {   // an element (optionally containing text) is visible: a feature's outcome, as a person sees it
+          const loc = page.locator(s.expect).filter(s.text ? { hasText: s.text } : {}).first();
+          let ok = true; try { await loc.waitFor({ state: 'visible', timeout: s.timeout || 5000 }); } catch { ok = false; }
+          R.asserts.push({ name: s.name || `${s.expect}${s.text ? ' shows ' + JSON.stringify(s.text) : ''}`, expr: s.expect, ok }); rec.ok = ok;
+        }
         else if (s.tap) { if (ctxOpts.hasTouch) await page.touchscreen.tap(s.tap[0], s.tap[1]); else await page.mouse.click(s.tap[0], s.tap[1]); }
         else if (s.type) await page.keyboard.type(s.type);
         else if (s.wait) await page.waitForTimeout(s.wait);

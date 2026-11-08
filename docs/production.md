@@ -81,6 +81,10 @@ the save keys and the preservation rules.
 
 An approved exception is added with `production_revise {overrides: {"mode": {"allow": ["assets/hero.png"]}}, reason}`. As a material change, it needs a new approval.
 
+**GitHub issues.** When Claude can fetch the repository's open issues (the GitHub connection), it passes them to
+`production_start {issues}`. Bugs join the inventory's defects and the rest become requests, done only if the blueprint
+includes them. Without them, the Discovery Report says the issues were not read.
+
 **Delivery** follows the project's own conventions: its branch and PR flow, its CI, its deployment. A deployment counts as live only with a check against the live URL.
 
 **How "Run GITCRAFT" reaches a session, and its limits:**
@@ -90,6 +94,31 @@ An approved exception is added with `production_revise {overrides: {"mode": {"al
 - `~/.gitcraft/runtime/.gitcraft-source` names the commit being served.
 - A session where GITCRAFT was never installed (no setup script, no global install) cannot discover it. Run the setup script once (README → "Use GITCRAFT in every project").
 - Open GitHub issues and the live site aren't read during Discovery (no network in the sandbox). Claude adds them when it has access, and the report says when they weren't checked.
+
+## Going live
+
+Every web project's Decision Room asks **where it goes live**:
+- the project's own pipeline when it has one (recommended);
+- Vercel (the connected account);
+- GitHub Pages;
+- or not at all.
+
+You approve the deploy itself at release (`release.deploy` needs `deploy`). Claude deploys to that target, then proves it from its own shell (the tool sandbox has no network):
+
+```bash
+python3 -m production verify-live <production> https://your-app.vercel.app --submit
+```
+
+`verify-live` (`production/live.py`):
+1. Fetches the live page and requires it to equal the released entry page. A login wall (Vercel deployment protection) or an older deployment fails here, and it says which.
+2. Requires every local file the page references to be served with the same bytes.
+3. Checks the deployed manifest and its icons at their sizes.
+4. Checks the HaveAnApp Pulse script answers, when it was chosen.
+5. Opens the site in Chromium on a phone and a desktop: it must load with no page errors or failed requests, with the byline visible.
+
+It writes `tasks/release.deploy/live-check.json` and, with `--submit`, hands it to the deployment gate. A deployment is recorded live only when this passes. The report then says **Delivered**, with the live URL.
+
+TLS is always verified, and the check goes through the session's HTTPS proxy when there is one. Plain `http://` is refused, except a local test server with `GITCRAFT_LIVE_ALLOW_LOCAL=1` (tests only).
 
 ## Idea to delivery
 
@@ -229,6 +258,7 @@ Request parameters can reference upstream results:
 
 ```bash
 python3 -m production start "Run GITCRAFT: <anything>" [--project DIR]
+python3 -m production verify-live <id> <url> [--submit]          # after deploying, from your own shell
 python3 -m production idea "<idea>" [--project DIR]
 python3 -m production recon <id> [--depth quick|deep] [--findings FILE]
 python3 -m production promote <id>

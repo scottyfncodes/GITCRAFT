@@ -93,17 +93,27 @@ class Pool:
     """One MCP client per tool (plus a second MeshCraft client for tools that never load Blender,
     so browsing and advice stay responsive while a pipeline runs). Idle clients are closed."""
     def __init__(self, log, idle=900):
-        self.log, self.idle, self.clients, self.lock = log, idle, {}, threading.Lock()
+        self.log, self.idle, self.clients, self.lock, self.starting = log, idle, {}, threading.Lock(), {}
         self.tools_cache = {}
         threading.Thread(target=self._reaper, daemon=True).start()
 
     def get(self, key):
+        """The pool lock guards only the dictionary: starting a tool server (up to a minute) holds a per-key lock, so
+        other tools and the overview keep answering meanwhile."""
         tool = key.split("#")[0]
         with self.lock:
             c = self.clients.get(key)
-            if c is None or not c.alive():
-                c = self.clients[key] = Client(tool, self.log)
+            if c is not None and c.alive():
+                c.used = time.time(); return c
+            start_lock = self.starting.setdefault(key, threading.Lock())
+        with start_lock:
+            with self.lock:
+                c = self.clients.get(key)
+                if c is not None and c.alive():
+                    c.used = time.time(); return c
+            c = Client(tool, self.log)   # slow: outside the pool lock
             c.used = time.time()
+            with self.lock: self.clients[key] = c
             return c
 
     def _reaper(self):

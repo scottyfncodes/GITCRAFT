@@ -65,22 +65,21 @@ The reference is HangarBook (read-only), which credits its maker as "HangarBook 
 The GITCRAFT standard (`production/kit/haveanapp/`):
 
 - **`attribution.json`**: the company name, the byline text, the placements, the rules and the URL setting.
-- **`byline.html` / `byline-linked.html`**: the plain markup. It works in any framework.
+- **`byline.html`**: the plain markup, linked to https://haveanapp.com. It works in any framework.
 - **`byline.css`**: small, medium weight and muted. It inherits the app's own text colour, so it follows light and dark themes without a palette of its own. It respects safe areas and keeps a 24 px touch target when linked.
 - **`Byline.tsx`**: the React version.
 
 **Placement:** in a footer, an About or Settings screen, under the app's name on a launch or title screen, or on a game's title or pause screen.
 The app's name stays the hero; HaveAnApp is a quiet maker's signature, never an advertisement, and never inside the app icon.
 
-**Link:** no official HaveAnApp website could be verified (HangarBook doesn't link one, and no address could be confirmed),
-so `url` is `null` and generated apps show the credit as text. When the official address is confirmed, set `url` and
-`url_verified: true` in `attribution.json`. Every later production then links it, and `qa.attribution` checks the link.
-Until then, `qa.attribution` fails any byline that links to an unverified "haveanapp" address.
+**Link:** the byline links to the official site, **https://haveanapp.com** (confirmed by its owner; `attribution.json`).
+HaveAnAppHQ is used only for Instagram posting and is never the byline's link. Every starter and every generated project
+links it, and `qa.attribution` checks the link (a missing link, or any other address, fails).
 
 **`qa.attribution`** checks that:
 - the app's visible markup (HTML, JSX/TSX, Vue, Svelte, Astro; not `<meta>`, `<title>` or comments) has an element marked `data-haveanapp` that reads "by HaveAnApp";
 - that element is not hidden;
-- it links only to the verified URL.
+- it links to https://haveanapp.com.
 
 ## Engineering standards (proportionate)
 
@@ -115,9 +114,70 @@ Only checks the profile requires can fail the gate.
 Mobile usability and accessibility are measured in the rendered app by PIXELCRAFT (axe-core, touch targets, safe areas).
 Load and frame rate are measured by TestCraft. `qa.standards` doesn't repeat them.
 
+## Starters
+
+A new, empty web project starts from a starter (`production/kit/starters`) instead of an empty folder:
+`static-app` (apps and sites, no framework), `canvas-game` (2D games) or `vite-react` (apps that asked for React; the
+build installs and commits the lockfile). Each one already meets these standards: `lang`, viewport and title, a visible
+error path, the HaveAnApp byline, the manifest and the icon links the App Icon Studio fills, 44 px targets, light and dark
+tokens, reduced motion and a feature-check file. `foundation.scaffold` copies a starter only into an empty folder and
+never over a file; an existing project never gets one.
+
+## Feature checks
+
+A new app or site proves each planned feature in a browser. The build writes `tests/gitcraft.features.json`, one entry
+per feature: the steps a person takes, ending in what they see.
+
+```json
+{"features": [{"name": "add an item", "requirement": "a shopping list",
+  "steps": [{"fill": "#item", "value": "Milk"}, {"click": "#add"}, {"expect": "#list li", "text": "Milk"}]}]}
+```
+
+Steps: `click` (a CSS selector, or `[x, y]` for games), `fill`, `press`, `type`, `wait`, `expect` (an element is visible,
+optionally containing text) and `assert` (a JavaScript expression). `qa.features` runs every feature in Chromium through
+TestCraft's scripted play, each on a fresh page. A feature with no observable outcome is refused, and a failing feature
+becomes a fix work order like any other gate. Games are played by PLAYCRAFT instead; a game's feature file is optional.
+An existing project's feature file, when it has one, runs as an advisory check.
+
+## Backend and data
+
+When the idea needs shared data (accounts, sync, a shared list, a leaderboard), the Decision Room asks where it lives.
+The recommendation is **hosted Postgres + a small API**; the alternative is **on the device only** (no server, no sync).
+
+- `backend.provision` is a work order that needs the person's approval (`infrastructure`, never pre-authorised). It
+  uses the connected Neon account: one project, a `development` branch and production. Each connection string goes only
+  into the hosting provider's environment variables and a git-ignored `.env`.
+- Its record (`backend.json`) holds names only. A record containing a connection string, key or password is refused.
+- The build reads `DATABASE_URL` from the environment and keeps the schema in the repository as migrations, with an index
+  for every column a query filters or joins on. `qa.standards` checks the migrations, parameterised SQL, validation and
+  auth, at the depth the engineering profile asks for.
+
+## HaveAnApp Pulse (analytics)
+
+Optional, chosen in the Decision Room: the anonymous, cookieless page counter HangarBook ships
+(`<script defer src="https://haveanapp-pulse-collect.vercel.app/p.js" data-app="<app>">`). It is recommended for
+public apps and sites and not for private ones. `qa.standards` checks it is on the entry page when chosen, and that no
+analytics is on the page when it was not. `verify-live` checks the script answers on the deployed site.
+
+## Native app icons
+
+When the idea is a native iOS or Android app, the App Icon Studio also derives native sets from the same approved
+master, into `native-icons/`:
+
+- **iOS:** `ios/AppIcon.appiconset` with the single-size 1024 × 1024 icon (opaque: the App Store rejects transparency) and its `Contents.json`.
+- **Android:** `android/res/mipmap-{mdpi…xxxhdpi}/ic_launcher.png` (48–192 px), an adaptive icon (foreground with the art in the
+  66 dp safe zone, `mipmap-anydpi-v26/ic_launcher.xml`) and its background colour.
+
+The folders are integrated as they are (Android rejects stray files in `res/`, so the licence record is one
+`LICENSE.assets.json` at the set's root). GITCRAFT builds web apps; these sets are ready for a native wrapper or app project.
+
 ## Tests
 
 - `tests/test_lifecycle.py` covers the codec, inspection, concept and master validation, derivatives, verification, attribution and the three profiles,
   plus a real app production: concepts → declined with feedback → new concepts → a person's choice → master → icon set → build → `qa.icons`,
   `qa.attribution` (a missing byline fails and is fixed) and `qa.standards` → delivered.
+- `tests/test_gaps.py` covers starters, the deployment/backend/analytics/native decisions (and that approving applies them),
+  the backend approval and secret check, feature checks in Chromium (pass, fail, no outcome, missing), native icon sets,
+  GitHub issues in Discovery, and `verify-live` (this build passes; changed bytes, a login wall and plain http fail; a real
+  Vercel URL behind deployment protection is reported as a login wall).
 - `tests/acceptance_production.py` runs the same path inside the master-prompt game, with VectorCraft drawing the concepts and the master.

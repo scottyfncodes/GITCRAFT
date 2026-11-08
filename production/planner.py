@@ -41,7 +41,8 @@ def build(spec, disc):
     tasks, decisions = [], []
     add = tasks.append
     stems = set(proj.get("asset_stems") or [])
-    asset_dir = spec["project"].get("asset_dir") or proj.get("asset_dir") or "assets"
+    starter = _starter(spec, proj)
+    asset_dir = spec["project"].get("asset_dir") or proj.get("asset_dir") or ("public/assets" if starter == "vite-react" else "assets")
     spec["project"]["asset_dir"] = asset_dir
     adir = lambda sub: f"$project/{asset_dir}/{sub}"
     web = d in ("game", "app", "site")
@@ -57,7 +58,17 @@ def build(spec, disc):
     # a new project gets its folders; an existing one gets nothing it did not ask for (integration makes a folder
     # only when something ships into it)
     add(T("foundation.scaffold", "Prepare the project folder" + ("" if existing else " and asset folders") + " (never overwrites)", "foundation", "builtin",
-          action="scaffold", params={"dirs": [] if existing else [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models", "icons")]}))
+          action="scaffold", params={"dirs": [] if existing else [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models", "icons")],
+                                     "starter": starter, "title": spec["title"]}))
+    if starter: decisions.append(f"starter: {starter} (production/kit/starters) copied into the new, empty project: the standards are wired in from the first file")
+    if spec.get("backend", {}).get("provider") == "postgres":
+        add(T("backend.provision", "Hosted Postgres for development and production (needs your approval)", "foundation", "agent", deps=["foundation.scaffold"],
+              criterion="backend", work_order={"approval": "infrastructure", "tools": ["Neon (connected): create_project / create_branch / get_connection_string", "Vercel (connected): create_project_env"],
+                "brief": f"The data behind {spec['title']}: one Postgres database with separate development and production branches.",
+                "instructions": ["Create (or reuse, if the blueprint names one) a Neon project for this app; a 'development' branch for building and testing and the default branch for production.",
+                                 "Put each connection string only where it is used: the hosting provider's environment variables (DATABASE_URL per environment) and a local .env that .gitignore excludes. Never in the repository, a work order or a submission.",
+                                 "Write backend.json: {\"provider\": \"neon\", \"project\": \"<name>\", \"environments\": {\"development\": \"<branch>\", \"production\": \"<branch>\"}, \"env_vars\": [\"DATABASE_URL\"]} (names only, no secrets)."],
+                "expected": [{"path": "backend.json", "format": "json", "keys": ["provider", "environments", "env_vars"], "validate": "no_secrets"}]}))
     identity = None
     if a.get("identity"):
         identity = "foundation.identity"
@@ -154,12 +165,13 @@ def build(spec, disc):
     if web:
         add(T("integrate.assets", "Integrate every passed asset into the project (hash-verified, no silent overwrite)", "integration", "builtin",
               action="integrate", deps=shipping or ["foundation.scaffold"], criterion="asset_integrity"))
-        build_deps = ["integrate.assets"] + ([identity] if identity else []) + (["icon.derivatives"] if "icon.derivatives" in {t["id"] for t in tasks} else [])
+        build_deps = ["integrate.assets"] + ([identity] if identity else []) + [x for x in ("icon.derivatives", "backend.provision") if x in {t["id"] for t in tasks}]
         kind = {"game": "game", "app": "app", "site": "site"}[d]
         add(T("build", f"Build the {kind}: {spec['title']}", "integration", "agent", deps=build_deps,
               work_order={"brief": spec["prompt"],
                           "instructions": _build_instructions(spec),
-                          "expected": [{"path": "$project/" + (proj.get("entry") or "index.html"), "format": "html"}],
+                          "expected": [{"path": "$project/" + (proj.get("entry") or "index.html"), "format": "html"}]
+                                      + ([{"path": "$project/tests/gitcraft.features.json", "format": "json", "keys": ["features"], "validate": "features"}] if _features_required(spec) else []),
                           "inputs": "the integrated-assets manifest (handoff) lists every asset path with its role",
                           "license": "owned by the project"}))
     # ---------------------------------------------------------------- quality assurance (parallel; each failure spawns a fix + re-verification)
@@ -190,6 +202,12 @@ def build(spec, disc):
             qa.append("qa.designcraft")
             add(T("qa.designcraft", "DESIGNCRAFT: structural game-design review (advisory)", "qa", "designcraft", action="assess", params={"project": "$project"},
                   deps=["build"], advisory=True, criterion="design_review"))
+        if _features_required(spec) or existing:
+            qa.append("qa.features")
+            add(T("qa.features", "Feature checks: every planned feature works in a browser (tests/gitcraft.features.json)", "qa", "builtin", action="check_features",
+                  params={"file": "$project/tests/gitcraft.features.json", "required": _features_required(spec), "viewports": ["phone"] if spec["platform"]["mobile_first"] else ["desktop"]},
+                  deps=["build"], resources=["browser"], criterion="features_work" if _features_required(spec) else None, gate=[{"type": "status_ok"}],
+                  advisory=not _features_required(spec)))
         if spec.get("icon", {}).get("required"):
             qa.append("qa.icons")
             add(T("qa.icons", "App icon: approved, wired in, right sizes and formats, readable small", "qa", "builtin", action="check_icons",
@@ -202,7 +220,8 @@ def build(spec, disc):
         qa.append("qa.standards")
         add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks"
               + (" (advisory: findings in existing code are reported, not imposed)" if existing else ""), "qa", "builtin", action="check_standards",
-              params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d}, deps=["build"], criterion="engineering_standards",
+              params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d, "analytics": (spec.get("analytics") or {}).get("provider"),
+                      "backend": (spec.get("backend") or {}).get("provider")}, deps=["build"], criterion="engineering_standards",
               gate=[{"type": "status_ok"}], advisory=existing))
         if existing:
             qa.append("qa.preserve")
@@ -230,10 +249,8 @@ def build(spec, disc):
           criterion="release_ready", gate=[{"type": "status_ok"}]))
     if spec["features"].get("deploy"):
         add(T("release.deploy", "Deploy and verify the live URL", "release", "agent", deps=["release.report"], criterion="deployment",
-              work_order={"approval": "deploy", "brief": "Deploy the verified release and check the live URL.",
-                          "instructions": ["Deploy only to the target the person approved.", "Open the live URL and confirm it serves this build (same commit/content).",
-                                           "Submit the URL and the evidence (a check that ran against the live URL)."],
-                          "expected": [], "requires": ["url", "evidence"]}))
+              work_order={"approval": "deploy", "brief": "Deploy the verified release and prove the live URL serves it.",
+                          "instructions": _deploy_instructions(spec), "expected": [], "requires": ["url", "evidence"]}))
     skip = set(spec.get("skip_tasks") or [])   # applied last, so any task (QA and release included) can be skipped
     if skip:
         unknown = sorted(skip - {t["id"] for t in tasks})
@@ -306,6 +323,35 @@ def _review_plan(spec, proj, decisions):
     return plan
 
 
+def _starter(spec, proj):
+    """A starter for a new, empty web project (production/kit/starters), or None."""
+    if (spec.get("mode") or {}).get("existing") or proj.get("exists") and proj.get("files") or spec["deliverable"] not in ("game", "app", "site"): return None
+    eng = (spec["platform"].get("engine") or "").lower()
+    if spec["deliverable"] == "game": return "canvas-game" if eng in ("", "canvas", "vanilla") and spec["dimension"] == "2d" else None
+    return "vite-react" if eng == "react" else ("static-app" if eng in ("", "vanilla", "canvas") else None)
+
+
+def _features_required(spec):
+    """New apps and sites prove each planned feature in a browser; games are played by PLAYCRAFT instead."""
+    m = spec.get("mode") or {}
+    return spec["deliverable"] in ("app", "site") and not m.get("existing")
+
+
+def _deploy_instructions(spec):
+    t = (spec.get("deploy") or {}).get("target") or "vercel"
+    how = {"vercel": ["Deploy with Vercel (the connected account): link or create the project for this repository; production deploys from the merged main branch.",
+                      "Make sure visitors can open it: no deployment protection on the production URL unless the blueprint says the app is private."],
+           "github_pages": ["Deploy with GitHub Pages from the repository (Settings → Pages, or a pages workflow the person approved). The URL has a /<repo>/ subpath: "
+                            "the starters and the icon set use relative URLs, so nothing else changes."],
+           "existing": [f"Use the project's own pipeline ({', '.join((spec.get('deploy') or {}).get('found') or []) or 'as configured'}): merge through its PR convention "
+                        "and wait for its deploy; change nothing in its CI or hosting."]}.get(t, [])
+    return ["Deploy only to the target the person approved (blueprint: " + t + ")."] + how + [
+        "Prove it from your own shell (it has network; the tool sandbox does not): python3 -m production verify-live <production> <url> --submit. "
+        "It compares the live page and every file it references with this release, checks the manifest and icons, opens it on a phone and a desktop, "
+        "and submits the evidence. A login wall, an older deployment or a page error fails it.",
+        "If it fails, fix the deployment (not the check) and run it again."]
+
+
 def _build_instructions(spec):
     q, a = spec["quality"], spec["assets"]
     if (spec.get("mode") or {}).get("existing"):
@@ -339,6 +385,22 @@ def _build_instructions(spec):
         ins.append("App icon: " + ("wire in the icon set from icon.derivatives exactly as its icons.snippet.json says (the head tags, and the manifest's icons; "
                                    "merge into an existing manifest). Remove every older or framework-default icon reference." if mode != "keep" else
                                    "keep the project's existing icon; make sure index.html links a favicon, a 180 px opaque apple-touch-icon and a manifest with 192 and 512 px icons."))
+    if _features_required(spec):
+        ins.append("Feature checks: write tests/gitcraft.features.json with one entry per feature in the brief (name, requirement, steps a person takes "
+                   "ending in what they see: click/fill/press/expect). qa.features runs each in Chromium; a feature without a check is not done.")
+    if (spec.get("analytics") or {}).get("provider") == "pulse":
+        from . import standards as _s2
+        ins.append("Analytics (approved): add HaveAnApp Pulse to the entry page: " + _s2.pulse_snippet(spec["title"]) + " (anonymous, cookieless).")
+    be = (spec.get("backend") or {}).get("provider")
+    if be == "postgres":
+        ins.append("Backend (approved): a small API (serverless functions on the deploy target) over the Postgres from backend.provision, reading DATABASE_URL "
+                   "from the environment; migrations in the repository with an index for every column a query filters or joins on; validate every input; "
+                   "authenticate every route that reads or writes someone's data; parameterised SQL only.")
+    elif be == "local":
+        ins.append("Data stays on the device (approved): localStorage/IndexedDB with a versioned key, and an export so a person can keep their data.")
+    if spec["platform"].get("native"):
+        ins.append("Native icon sets for " + " and ".join(spec["platform"]["native"]) + " are in native-icons/ (ios/AppIcon.appiconset, android/res): "
+                   "leave them for the native wrapper; the web build does not reference them.")
     ins.append("Run no build step that needs the network. Submit the files you changed.")
     return ins
 
@@ -372,11 +434,12 @@ def _icon_tasks(spec, proj, identity, adir):
                                             "Check it at 32 px: the silhouette must still read."],
                            "expected": [{"path": "icon-1024.png", "format": "png", "validate": "icon_master", "role": "icon_master"}],
                            "license": "owned by the project (made with GITCRAFT VectorCraft)"})
-    params = {"master": {"$from": "icon.master", "role": "icon_master"}, "name": spec["title"]}
+    params = {"master": {"$from": "icon.master", "role": "icon_master"}, "name": spec["title"], "platforms": list(spec["platform"].get("native") or [])}
     if identity: params["background"] = {"$from": identity, "role": "*", "format": "json", "json": "background"}
     deriv = T("icon.derivatives", "App icon set: PWA 192/512, maskable, Apple touch 180, favicons (from the approved master)", "foundation", "builtin",
               action="icon_derivatives", params=params, deps=["icon.master"] + ([identity] if identity else []),
-              ship={"dest": adir("icons"), "roles": ["icon", "favicon", "icon_master"]}, gate=[{"type": "status_ok"}], criterion="app_icon")
+              ship={"dest": adir("icons"), "roles": ["icon", "favicon", "icon_master", "icon_native"], "role_dest": {"icon_native": "$project/native-icons"},
+                    "folder_licence_roles": ["icon_native"]}, gate=[{"type": "status_ok"}], criterion="app_icon")
     return [concepts, select, master, deriv]
 
 

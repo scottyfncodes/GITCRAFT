@@ -82,6 +82,9 @@ jobs:
       - name: Run GITCRAFT (universal entry, maturity-aware workflows, preservation)
         run: python3 tests/test_entry.py
 
+      - name: Starters, feature checks, backend, native icons, Pulse, verify-live
+        run: python3 tests/test_gaps.py
+
       - name: Hardening (guard + control room regressions from docs/tech-debt.md)
         run: python3 tests/test_hardening.py
 

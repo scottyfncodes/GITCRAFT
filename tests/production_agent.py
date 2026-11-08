@@ -224,7 +224,7 @@ button{{min-width:48px;min-height:48px;padding:0 14px;border-radius:12px;border:
 #lp{{left:16px}} #rp{{right:16px}}
 </style></head><body>
 <canvas id="game" aria-label="Lantern Drift game"></canvas>
-<header><div><img src="{logo}" alt="Lantern Drift"><p class="haveanapp-byline" data-haveanapp>by HaveAnApp</p></div><div class="tb"><button id="pause">Pause</button><button id="mute">Sound on</button></div></header>
+<header><div><img src="{logo}" alt="Lantern Drift"><p class="haveanapp-byline" data-haveanapp><a href="https://haveanapp.com" rel="noopener" target="_blank" style="color:inherit;text-decoration:none">by HaveAnApp</a></p></div><div class="tb"><button id="pause">Pause</button><button id="mute">Sound on</button></div></header>
 <div class="pad" id="lp"><button id="bl" aria-label="Move left">◀</button><button id="br" aria-label="Move right">▶</button></div>
 <div class="pad" id="rp"><button id="bj" aria-label="Jump">Jump</button></div>
 <script>window.ASSETS = {json.dumps(assets)};</script>

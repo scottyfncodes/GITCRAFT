@@ -73,12 +73,29 @@ def _vague(request):
     return len(r.split()) < 2
 
 
-def start(text, project=None, store_dir=None, overrides=None):
+def _issues(issues):
+    """Open GitHub issues the agent fetched (number, title, labels, body?) → defects (bugs) and requests (the rest)."""
+    out = {"defects": [], "requests": []}
+    for i in issues or []:
+        if not isinstance(i, dict) or not i.get("title"): continue
+        labels = [str(l.get("name") if isinstance(l, dict) else l).lower() for l in i.get("labels") or []]
+        item = {"what": f"#{i.get('number', '?')} {i['title'][:100]}", "where": "GitHub issue", "evidence": ", ".join(labels) or "open issue"}
+        (out["defects"] if any(re.search(r"bug|defect|crash|regression|broken", l) for l in labels) or re.search(r"\b(bug|crash|broken|error|fails?)\b", i["title"], re.I)
+         else out["requests"]).append(item)
+    return out
+
+
+def start(text, project=None, store_dir=None, overrides=None, issues=None):
     r = route(text, project)
     if r.get("problem"):
         return {"status": r["problem"], "routing": r, "next": r["next"]}
     proj = r["project"]
     a = maturity.assess(proj) if proj else {"existing": False, "maturity": "new", "confidence": "high", "evidence": ["no project: a new idea"]}
+    if issues is not None and a.get("existing"):
+        iss = _issues(issues)
+        a["inventory"]["defects"] += iss["defects"]; a["inventory"]["requests"] = iss["requests"]
+        a["evidence"].append(f"GitHub: {len(issues)} open issues read ({len(iss['defects'])} bugs, {len(iss['requests'])} requests)")
+        a["issues_read"] = True
     if not a["existing"]:
         if len((r["request"] or "").strip()) < 12:
             return {"status": "needs_input", "routing": r, "question": "What would you like to make? A sentence is enough: who it is for and what it should do.",

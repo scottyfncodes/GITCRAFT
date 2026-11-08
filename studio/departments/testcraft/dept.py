@@ -78,7 +78,7 @@ def play(ctx, p):
         vp = r["viewport"]
         checks.append({"name": f"{vp}: no page errors during play", "ok": not r["page_errors"], "detail": r["page_errors"][:3]})
         checks += [{"name": f"{vp}: {a['name']}", "ok": a["ok"], "detail": a.get("value", a.get("error"))} for a in r["asserts"]]
-        if len(r["screenshots"]) >= 2:
+        if len(r["screenshots"]) >= 2 and p["min_change"] > 0:   # 0 = an app's feature check: its own expect/assert steps are the evidence
             from PIL import Image
             a = np.asarray(Image.open(r["screenshots"][0]).convert("L"), float); b = np.asarray(Image.open(r["screenshots"][-1]).convert("L"), float)
             changed = float((np.abs(a - b) > 8).mean()) if a.shape == b.shape else 1.0

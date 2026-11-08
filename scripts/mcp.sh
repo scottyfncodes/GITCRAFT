@@ -130,11 +130,13 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
     for p in ${GITCRAFT_ALLOW_LOCAL_PORTS//,/ }; do [[ "$p" =~ ^[0-9]+$ ]] && policy+=(--allow-connect "$p"); done
     export GITCRAFT_ALLOW_LOCAL_PORTS
   fi
-  # Per-host allowances (scripts/netgate.py): GITCRAFT_ALLOW_HOSTS_<TOOL>, else GITCRAFT_ALLOW_HOSTS, else the
+  # Per-host allowances (scripts/netgate.py): GITCRAFT_ALLOW_HOSTS_<TOOL>, else GITCRAFT_ALLOW_HOSTS (either may be `none`), else the
   # ~/.gitcraft/allow-hosts file (one pattern per line, `tool: pattern` for one tool). Landlock then allows TCP to
   # the local netgate port only, and netgate lets through only those hosts (HTTPS, port 443), logged in net.jsonl.
   allow_var="GITCRAFT_ALLOW_HOSTS_${name^^}"; allow_hosts="${!allow_var:-${GITCRAFT_ALLOW_HOSTS:-}}"
-  if [[ -z "$allow_hosts" && -f "$GITCRAFT_HOME/allow-hosts" ]]; then
+  # `none` is an explicit "no network at all" for this run (the allow-hosts file is not read)
+  if [[ "$allow_hosts" == none ]]; then allow_hosts=""
+  elif [[ -z "$allow_hosts" && -f "$GITCRAFT_HOME/allow-hosts" ]]; then
     allow_hosts=$(sed -e 's/#.*//' "$GITCRAFT_HOME/allow-hosts" | awk -v t="$name" 'NF==0{next} /:/{split($0,a,":"); gsub(/ /,"",a[1]); if (a[1]==t) {gsub(/ /,"",a[2]); print a[2]}; next} {gsub(/ /,""); print}' | paste -sd, -)
   fi
   if [[ -n "$allow_hosts" && "$GITCRAFT_ALLOW_NET" != 1 ]]; then

@@ -1,7 +1,7 @@
 {
  "name": "testcraft",
  "version": "1.0.0",
- "title": "TestCraft — automated QA",
+ "title": "TestCraft \u2014 automated QA",
  "summary": "Browser QA for web games with Playwright + Chromium: smoke tests on desktop, phone and tablet emulation (errors, missing files, blank screens, overflow, canvas), scripted gameplay with assertions on game state and video capture, FPS / frame-time / heap profiling, visual regression (YIQ pixel diff, baselines), asset integrity (every file opened by format; GLBs through the Khronos validator; texture budgets), animation playback (GLB clips really move; sprite frames differ), the project's own Vitest/Jest suite, and HTML/JSON reports.",
  "keywords": [
   "test",
@@ -203,7 +203,7 @@
       "items": {
        "type": "object"
       },
-      "description": "[{hold:'ArrowRight', ms:800}, {press:'Space'}, {click:[x,y]}, {wait:500}, {screenshot:'after'}, {eval:'window.game.score', as:'score'}, {assert:'window.game.score > 0', name:'collects a coin'}]"
+      "description": "[{hold:'ArrowRight', ms:800}, {press:'Space'}, {click:[x,y]}, {wait:500}, {screenshot:'after'}, {eval:'window.game.score', as:'score'}, {assert:'window.game.score > 0', name:'collects a coin'}, {click:'#add'}, {fill:'#amount', value:'12'}, {expect:'.row', text:'12'}]"
      },
      "viewports": {
       "type": "array",
@@ -224,7 +224,8 @@
      },
      "min_change": {
       "type": "number",
-      "default": 0.0005
+      "default": 0.0005,
+      "description": "0 turns the 'screen changed' check off (app feature checks judged by their own expect/assert steps)."
      }
     }
    },
@@ -373,7 +374,7 @@
    ]
   },
   "assets": {
-   "summary": "Open and validate every asset in a folder (images, audio, video, GLB via Khronos, Tiled maps, JSON…), with a texture size budget.",
+   "summary": "Open and validate every asset in a folder (images, audio, video, GLB via Khronos, Tiled maps, JSON\u2026), with a texture size budget.",
    "requires": [
     "numpy",
     "pillow",

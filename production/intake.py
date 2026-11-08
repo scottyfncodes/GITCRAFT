@@ -67,7 +67,10 @@ def parse(prompt, project=None, overrides=None):
     if engine: because["engine"] = ew
     elif deliverable == "game": engine = "three" if dimension == "3d" else "canvas"; assumptions.append(f"engine not named: {engine} (no framework dependency added)")
     viewports = ["phone", "desktop", "tablet"] if mobile else (["desktop"] if desktop_only else ["desktop", "phone"])
-    platform = {"mobile_first": mobile, "viewports": viewports, "engine": engine, "web": True}
+    native = sorted({p for p, words in RULES["native_words"].items() if _w(t, words)})
+    native = ["android", "ios"] if "both" in native else native
+    platform = {"mobile_first": mobile or bool(native), "viewports": viewports, "engine": engine, "web": True, "native": native}
+    if native: because["native"] = native
 
     # ---- genres (PLAYCRAFT profiles) for games
     genres = [g for g, words in RULES["genres"].items() if _w(t, words)] if deliverable == "game" else []
@@ -153,7 +156,9 @@ def parse(prompt, project=None, overrides=None):
     spec = {"title": title, "prompt": prompt, "deliverable": deliverable, "dimension": dimension, "platform": platform,
             "genres": genres, "features": feats, "assets": assets, "quality": q, "project": proj, "authorisations": auth,
             "engineering": {"profile": prof, "because": pw}, "icon": {"mode": None, "required": web and not existing},
-            "attribution": {"required": web and not existing}, "mode": _mode(prompt, project, existing, overrides), "because": because, "assumptions": assumptions, "questions": questions}
+            "attribution": {"required": web and not existing}, "mode": _mode(prompt, project, existing, overrides),
+            "deploy": {"target": None}, "analytics": {"provider": None},
+            "backend": {"provider": None, "needed": bool(feats.get("backend")), "because": _w(t, RULES["features"]["backend"])}, "because": because, "assumptions": assumptions, "questions": questions}
     if overrides:
         spec = merge(spec, overrides)
         # what follows from the deliverable is re-derived when an override changed it (unless also overridden), so
@@ -217,6 +222,10 @@ def acceptance(spec):
         add("engineering_standards", f"The {spec.get('engineering', {}).get('profile', 'personal')} engineering standard's measured checks pass (mobile basics, secrets, "
             "HTTPS, reproducible dependencies; auth, validation and rate limits for public/sensitive apps); review items listed", "qa.standards")
     mode = spec.get("mode") or {}
+    if d in ("app", "site") and not mode.get("existing"):
+        add("features_work", "Every planned feature works in a browser (tests/gitcraft.features.json, run on a phone)", "qa.features")
+    if (spec.get("backend") or {}).get("provider") == "postgres":
+        add("backend", "Hosted Postgres set up for development and production (approved), with no secret in the repository", "backend.provision")
     if web and mode.get("existing") and mode.get("workflow") != "review":
         add("preservation", "Existing work preserved: no file deleted, secrets, CI and deployment untouched"
             + (", game art/audio/levels and saved progress intact" if d == "game" else "") + " (unless approved)", "qa.preserve")

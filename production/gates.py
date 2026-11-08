@@ -16,7 +16,7 @@ import json, os, re
 from . import executors
 
 
-SOURCE_ROLES = {"icon_master"}
+SOURCE_ROLES = {"icon_master", "icon_native"}   # kept in the project, not referenced by the web build
 
 
 def get(d, path):

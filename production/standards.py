@@ -33,6 +33,14 @@ PROFILE_WORDS = {
 }
 
 
+PULSE_SRC = "https://haveanapp-pulse-collect.vercel.app/p.js"   # HaveAnApp Pulse, as HangarBook ships it (index.html)
+
+
+def pulse_snippet(title):
+    slug = re.sub(r"[^a-z0-9]+", "-", str(title).lower()).strip("-") or "app"
+    return f'<script defer src="{PULSE_SRC}" data-app="{slug}"></script>'
+
+
 def attribution_config():
     with open(os.path.join(KIT, "attribution.json")) as f: return json.load(f)
 
@@ -109,7 +117,8 @@ def attribution(project, cfg=None):
         checks.append({"name": "the byline is not hidden", "ok": not hidden, "detail": hidden.group(0) if hidden else None})
         hrefs = re.findall(r"href\s*=\s*[\"'{]+([^\"'}]+)", f["raw"])
         if cfg.get("url") and cfg.get("url_verified"):
-            checks.append({"name": f"the byline links to the verified HaveAnApp site ({cfg['url']})", "ok": cfg["url"] in hrefs or any("COMPANY_URL" in h for h in hrefs), "detail": hrefs or "no link"})
+            okl = any(h.strip().rstrip("/") == cfg["url"].rstrip("/") or "COMPANY_URL" in h for h in hrefs)
+            checks.append({"name": f"the byline links to the official HaveAnApp site ({cfg['url']})", "ok": okl, "detail": hrefs or "no link"})
         else:
             checks.append({"name": "the byline links nowhere unverified (no official HaveAnApp URL is verified yet)", "ok": not [h for h in hrefs if "haveanapp" in h.lower()],
                            "detail": hrefs or None})
@@ -126,7 +135,7 @@ def _check(cid, title, status, detail=None, profiles=PROFILES):
     return {"id": cid, "name": title, "status": status, "ok": status != "failed", "detail": detail, "required_for": profiles}
 
 
-def check(project, profile="personal", deliverable="app"):
+def check(project, profile="personal", deliverable="app", analytics=None, backend=None):
     """→ {status, checks, review, profile}. A failed check required by the profile fails the gate; `review` items never pass silently."""
     out = []; codefiles = list(_files(project)); src = {p: _read(p) for p in codefiles}
     entry = _entry(project); etext = _read(entry) if entry else ""
@@ -195,6 +204,16 @@ def check(project, profile="personal", deliverable="app"):
                                               None if idx else "tables defined without any index: add indexes for the columns queries filter or join on", ["public", "sensitive"]))
     else:
         out.append(_check("server", "server-side checks (auth, validation, rate limits, CORS, SQL)", "n/a", "no server code: a static client app"))
+    if analytics == "pulse":   # chosen in the Decision Room: the counter is on the entry page, deferred, with this app's name
+        m = re.search(r"""<script\b[^>]*src=["']""" + re.escape(PULSE_SRC) + r"""["'][^>]*>""", etext)
+        out.append(_check("analytics", "HaveAnApp Pulse is on the entry page (deferred, with data-app)", "ok" if m and "defer" in m.group(0) and "data-app=" in m.group(0) else "failed",
+                          None if m else "add " + pulse_snippet(os.path.basename(project.rstrip("/")))))
+    elif analytics is None and PULSE_SRC in etext:
+        out.append(_check("analytics", "no analytics the blueprint did not approve", "failed", "HaveAnApp Pulse is on the page but the Decision Room chose no analytics"))
+    if backend == "postgres":
+        has_mig = any(re.search(r"(^|/)(migrations?|db|schema|drizzle|prisma)(/|\.)", os.path.relpath(p, project)) for p in _files(project, (".sql", ".prisma", ".ts", ".js")))
+        out.append(_check("migrations", "the database schema lives in the repository as migrations", "ok" if has_mig else "failed",
+                          None if has_mig else "add the schema as migrations (e.g. migrations/001_init.sql) with its indexes"))
     req = [c for c in out if profile in c["required_for"]]
     failed = [c for c in req if c["status"] == "failed"]
     review = [c for c in req if c["status"] == "review"]

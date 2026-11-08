@@ -1,0 +1,6 @@
+{
+ "_how": "Optional for games (PLAYCRAFT plays the game). Steps: {press: 'Space'}, {hold: 'ArrowRight', ms: 500}, {tap: [x, y]}, {wait: 300}, {assert: 'window.game.state === \"play\"', name: '...'}.",
+ "features": [
+  {"name": "starts from the title screen", "requirement": "start screen", "steps": [{"press": "Space"}, {"wait": 200}, {"assert": "window.game.state === 'play'", "name": "Space starts the game"}]}
+ ]
+}

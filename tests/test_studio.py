@@ -154,7 +154,9 @@ run("testcraft_smoke", {"target": GAME, "viewports": ["desktop", "phone"], "out_
 run("testcraft_play", {"target": GAME, "steps": [{"hold": "ArrowRight", "ms": 3000}, {"assert": "window.game.score >= 2", "name": "collects both coins"},
                                                   {"hold": "ArrowRight", "ms": 2000}, {"assert": "window.game.x < 420", "name": "the wall blocks the player"}], "out_dir": f"{ws}/qa/play"},
     "testcraft: scripted gameplay with state assertions", need=True)
-run("testcraft_perf", {"target": GAME, "seconds": 2, "min_fps": 20, "out_dir": f"{ws}/qa/perf"}, "testcraft: FPS profile", need=True)
+# this checks the profiler measures and gates, not the runner's speed: the budget is the production "standard" bar (p95 ≤ 100 ms);
+# the 50 ms default failed at 50.1 ms on a CI runner's SwiftShader (PR #49)
+run("testcraft_perf", {"target": GAME, "seconds": 2, "min_fps": 20, "max_p95_ms": 100, "out_dir": f"{ws}/qa/perf"}, "testcraft: FPS profile", need=True)
 r = run("testcraft_visual_diff", {"target": GAME, "baseline_dir": f"{ws}/qa/baseline", "out_dir": f"{ws}/qa/vd1"}, "testcraft: visual baseline created", need=True)
 run("testcraft_visual_diff", {"target": GAME, "baseline_dir": f"{ws}/qa/baseline", "out_dir": f"{ws}/qa/vd2"}, "testcraft: unchanged game matches its baseline", need=True)
 if os.path.exists(f"{ws}/qa/play/desktop_loaded.png") and os.path.exists(f"{ws}/qa/play/desktop_final.png"):
