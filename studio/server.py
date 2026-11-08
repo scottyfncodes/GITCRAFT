@@ -82,12 +82,29 @@ def tools():
 _P = lambda **p: {"type": "object", "properties": p}
 _PID = {"type": "string", "description": "production id (from production_plan or production_list)"}
 PRODUCTION_TOOLS = [
-    ("production_plan", "START HERE for any substantial deliverable (a game, app, site, asset pack): give the whole master prompt. GITCRAFT interprets it "
-     "(deliverable, platform, features, quality bar, acceptance criteria, assumptions, essential questions), inspects the project and what can run here, "
-     "and plans every department's work as a dependency graph with parallel waves, hand-offs and quality gates. Returns the plan; then production_run.",
+    ("production_plan", "START HERE for any substantial deliverable (a game, app, site, asset pack): give the whole master prompt (New Build). GITCRAFT interprets it "
+     "(deliverable, platform, features, quality bar, acceptance criteria, assumptions, essential questions), runs a read-only Discovery of the project and what can run here, "
+     "plans every department's work as a dependency graph with parallel waves, hand-offs and quality gates, and opens the Decision Room. Nothing is built until a person "
+     "approves the blueprint (production_decide). Optional recon: quick|deep runs Recon first.",
      {"type": "object", "required": ["prompt"], "properties": {"prompt": {"type": "string", "description": "the complete master prompt"},
       "project": {"type": "string", "description": "the project folder (default: a new folder in the workspace)"},
-      "overrides": {"type": "object", "description": "corrections to the interpreted spec (deep-merged), e.g. {\"quality\": {\"playcraft_min\": 60}}"}}}),
+      "overrides": {"type": "object", "description": "corrections to the interpreted spec (deep-merged), e.g. {\"quality\": {\"playcraft_min\": 60}}"},
+      "recon": {"type": "string", "enum": ["quick", "deep"], "description": "run Recon on the idea before Discovery"}}}),
+    ("production_idea", "Save an idea without building it (a sentence, a rough idea, a spec, a pasted master prompt, a GitHub URL). Returns its brief: objective, "
+     "requirements, constraints. Then optionally production_recon, and production_promote to build it, or production_discard to park/discard it.",
+     {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}, "project": {"type": "string"}, "overrides": {"type": "object"}}}),
+    ("production_recon", "Recon on an idea: with depth (quick|deep) it issues the research work order (bounded budget: Reality Check, Competition Radar, Identity Check, "
+     "The Zag, Recommendation build/pivot/park); with findings it validates and saves them (every claim cites a source or says it is an assumption; nothing invented).",
+     _P(production=_PID, depth={"type": "string", "enum": ["quick", "deep"]}, findings={"type": "object"})),
+    ("production_promote", "Turn a saved, researched or parked idea into a build: read-only Discovery, the Discovery Report and the Decision Room.",
+     _P(production=_PID, overrides={"type": "object"})),
+    ("production_discard", "Park an idea (park: true, revisit later) or discard it (kept for the record).", _P(production=_PID, park={"type": "boolean"}, reason={"type": "string"})),
+    ("production_decide", "The Decision Room: answer material decisions (answers {decision_id: value}; a changed answer re-plans, read-only) and approve the blueprint "
+     "(approve: true) — only when the person has said so. With a pending revision, approve applies it and approve: false declines it.",
+     _P(production=_PID, answers={"type": "object"}, approve={"type": "boolean"}, note={"type": "string"})),
+    ("production_revise", "Change the plan (overrides, reason). Before approval it re-plans; after approval a material change pauses the build until a person approves it "
+     "(production_decide); finished work whose definition did not change is kept.", {"type": "object", "required": ["production", "overrides", "reason"],
+     "properties": {"production": _PID, "overrides": {"type": "object"}, "reason": {"type": "string"}}}),
     ("production_run", "Run (or resume) a production: every ready task on parallel workers, retries for execution failures, honest blocked states, "
      "quality gates with fix work orders and re-verification. Stops when the deliverable is ready or it waits on the agent (work orders) or a person (approvals).",
      _P(production=_PID, workers={"type": "integer", "description": "parallel workers (default 4)"}, wait={"type": "boolean", "description": "false: run in the background and poll production_status"})),
@@ -96,8 +113,10 @@ PRODUCTION_TOOLS = [
      {"type": "object", "required": ["production", "task"], "properties": {"production": _PID, "task": {"type": "string"}, "files": {"type": "array", "items": {"type": "string"}, "description": "absolute paths of the files made or changed (inside the workspace)"},
       "notes": {"type": "string"}, "url": {"type": "string"}, "evidence": {"type": "string", "description": "deployment: a check record (.studio.json) that ran against the URL"},
       "license": {"type": "string"}, "continue": {"type": "boolean", "description": "run the production on after an accepted submission (default true)"}}}),
-    ("production_approve", "A person's decision on a task that needs approval (deployment, replacing existing assets). Only call this when the person has said so.",
-     {"type": "object", "required": ["production", "task", "approved"], "properties": {"production": _PID, "task": {"type": "string"}, "approved": {"type": "boolean"}, "note": {"type": "string"}}}),
+    ("production_approve", "A person's decision on a task that needs approval (the app icon choice, deployment, replacing existing assets). Only call this when the person has said so. "
+     "For icon.select pass choice (the concept id); declining it with a note asks for new concepts.",
+     {"type": "object", "required": ["production", "task", "approved"], "properties": {"production": _PID, "task": {"type": "string"}, "approved": {"type": "boolean"},
+      "note": {"type": "string"}, "choice": {"type": "string", "description": "icon.select: the approved concept id"}}}),
     ("production_report", "The acceptance report: every criterion with its measured evidence, remediation history, blockers, and the verdict (READY / NOT READY).", _P(production=_PID)),
     ("production_list", "Every production in the store, newest first.", _P()),
     ("production_contracts", "Every department's contract: what it accepts and produces, what it requires, how success and failure are reported, where outputs go, how provenance and licences are recorded.", _P()),
@@ -119,7 +138,17 @@ def _production(name, a):
     _load_production()
     from production import engine, store, report, contracts
     from production.cli import plan_summary
-    if name == "production_plan": return plan_summary(engine.plan(a["prompt"], a.get("project"), a.get("overrides")))
+    if name == "production_plan":
+        pr = engine.plan(a["prompt"], a.get("project"), a.get("overrides"), recon=a.get("recon"))
+        return pr if "recon_order" in pr else plan_summary(pr)
+    if name == "production_idea":
+        pr = engine.idea(a["text"], a.get("project"), a.get("overrides")); return dict(engine.lifecycle_view(pr), brief=pr["brief"])
+    if name == "production_recon":
+        return engine.submit_recon(a["production"], a["findings"]) if a.get("findings") is not None else engine.start_recon(a["production"], a.get("depth") or "quick")
+    if name == "production_promote": return plan_summary(engine.promote(a["production"], a.get("overrides")))
+    if name == "production_discard": return engine.discard(a["production"], park=bool(a.get("park")), reason=a.get("reason"))
+    if name == "production_decide": return engine.decide(a["production"], a.get("answers"), approve=bool(a.get("approve")), note=a.get("note"))
+    if name == "production_revise": return engine.revise(a["production"], a["overrides"], a["reason"])
     if name == "production_run":
         if a.get("wait") is False:
             pid = a["production"]
@@ -131,7 +160,7 @@ def _production(name, a):
     if name == "production_submit":
         return engine.submit(a["production"], a["task"], a.get("files"), a.get("notes"), a.get("url"), a.get("evidence"), a.get("license"),
                              run_after=a.get("continue", True))
-    if name == "production_approve": return engine.approve(a["production"], a["task"], approved=a["approved"], note=a.get("note"))
+    if name == "production_approve": return engine.approve(a["production"], a["task"], approved=a["approved"], note=a.get("note"), choice=a.get("choice"))
     if name == "production_report":
         pr = store.load(a["production"]); return {"production": pr["id"], "markdown": report.markdown(pr), "acceptance": report.acceptance(pr)}
     if name == "production_list": return {"productions": store.list_all()}

@@ -15,11 +15,10 @@ PALETTE = {"background": "#14122B", "primary": "#F2A541", "accent": "#3FC1C9", "
 
 
 def identity(order, env):
-    """VectorCraft: a wordmark logo (SVG) and a 512 px app icon (PNG) in an original palette."""
+    """VectorCraft: a wordmark logo (SVG) in an original palette (the app icon is the App Icon Studio's work)."""
     from mcp_client import Client
     out = order["out_dir"]
     json.dump(PALETTE, open(os.path.join(out, "palette.json"), "w"), indent=1)
-    c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "vectorcraft"], env=env, log=os.path.join(out, "vectorcraft.log"))
     steps = [
         ("run_command", {"command": "artboard.setProps", "params": {"index": 0, "width": 640, "height": 200, "name": "logo"}}),
         ("draw_shape", {"shape": "rectangle", "x": 0, "y": 0, "width": 640, "height": 200, "fill": PALETTE["background"], "stroke": "none", "radius": 24}),
@@ -27,21 +26,71 @@ def identity(order, env):
         ("draw_shape", {"shape": "rectangle", "x": 72, "y": 62, "width": 52, "height": 78, "fill": PALETTE["primary"], "stroke": PALETTE["text"], "strokeWidth": 4, "radius": 12}),
         ("draw_shape", {"shape": "rectangle", "x": 84, "y": 48, "width": 28, "height": 14, "fill": PALETTE["accent"], "stroke": "none", "radius": 4}),
         ("add_text", {"text": "LANTERN DRIFT", "x": 186, "y": 118, "size": 46, "color": PALETTE["text"]}),
-        ("run_command", {"command": "artboard.new", "params": {"x": 0, "y": 260, "width": 512, "height": 512, "name": "icon"}}),
-        ("draw_shape", {"shape": "rectangle", "x": 0, "y": 260, "width": 512, "height": 512, "fill": PALETTE["background"], "stroke": "none", "radius": 96}),
-        ("draw_shape", {"shape": "ellipse", "x": 106, "y": 366, "width": 300, "height": 300, "fill": PALETTE["primary"], "stroke": "none", "opacity": 30}),
-        ("draw_shape", {"shape": "rectangle", "x": 196, "y": 412, "width": 120, "height": 190, "fill": PALETTE["primary"], "stroke": PALETTE["text"], "strokeWidth": 10, "radius": 28}),
-        ("draw_shape", {"shape": "rectangle", "x": 222, "y": 380, "width": 68, "height": 34, "fill": PALETTE["accent"], "stroke": "none", "radius": 10}),
         ("export", {"path": os.path.join(out, "logo.svg"), "format": "svg", "artboard": 0, "outlineText": True}),
-        ("export", {"path": os.path.join(out, "icon-512.png"), "format": "png", "artboard": 1, "scale": 1}),
     ]
-    log = []
-    for tool, args in steps:
-        ok, r = c.call(tool, args, timeout=120)
-        log.append({"tool": tool, "ok": ok, "result": str(r)[:200]})
-        if not ok: raise RuntimeError(f"vectorcraft {tool} failed: {r}")
-    json.dump(log, open(os.path.join(out, "vectorcraft_steps.json"), "w"), indent=1)
-    return [os.path.join(out, f) for f in ("palette.json", "logo.svg", "icon-512.png")]
+    _vectorcraft(steps, out, env)
+    return [os.path.join(out, f) for f in ("palette.json", "logo.svg")]
+
+
+def _vectorcraft(steps, out, env, log="vectorcraft_steps.json"):
+    from mcp_client import Client
+    c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "vectorcraft"], env=env, log=os.path.join(out, "vectorcraft.log"))
+    rec = []
+    try:
+        for tool, args in steps:
+            ok, r = c.call(tool, args, timeout=120)
+            rec.append({"tool": tool, "ok": ok, "result": str(r)[:200]})
+            if not ok: raise RuntimeError(f"vectorcraft {tool} failed: {r}")
+    finally:
+        c.p.kill()
+    json.dump(rec, open(os.path.join(out, log), "w"), indent=1)
+
+
+def _concept(cid, ox, oy):
+    """One icon concept on a 1024 artboard at (ox, oy): three different ideas, not colour swaps."""
+    P, S = PALETTE, 1024
+    tile = ("draw_shape", {"shape": "rectangle", "x": ox, "y": oy, "width": S, "height": S, "fill": P["background"], "stroke": "none"})
+    if cid == "lantern":   # the lantern itself: a bold body, a cap and a glow
+        return [tile, ("draw_shape", {"shape": "ellipse", "x": ox + 192, "y": oy + 192, "width": 640, "height": 640, "fill": P["primary"], "stroke": "none", "opacity": 28}),
+                ("draw_shape", {"shape": "rectangle", "x": ox + 372, "y": oy + 300, "width": 280, "height": 440, "fill": P["primary"], "stroke": P["text"], "strokeWidth": 22, "radius": 64}),
+                ("draw_shape", {"shape": "rectangle", "x": ox + 424, "y": oy + 222, "width": 176, "height": 82, "fill": P["accent"], "stroke": "none", "radius": 22})]
+    if cid == "drift":     # a drifting flame over a wave: motion
+        return [tile, ("draw_shape", {"shape": "ellipse", "x": ox + 352, "y": oy + 196, "width": 320, "height": 460, "fill": P["primary"], "stroke": "none"}),
+                ("draw_shape", {"shape": "ellipse", "x": ox + 432, "y": oy + 330, "width": 160, "height": 240, "fill": P["text"], "stroke": "none"}),
+                ("draw_shape", {"shape": "rectangle", "x": ox + 152, "y": oy + 720, "width": 720, "height": 96, "fill": P["accent"], "stroke": "none", "radius": 48})]
+    return [tile, ("draw_shape", {"shape": "ellipse", "x": ox + 212, "y": oy + 212, "width": 600, "height": 600, "fill": P["accent"], "stroke": "none"}),   # "ember": a ring and a spark
+            ("draw_shape", {"shape": "ellipse", "x": ox + 332, "y": oy + 332, "width": 360, "height": 360, "fill": P["background"], "stroke": "none"}),
+            ("draw_shape", {"shape": "ellipse", "x": ox + 437, "y": oy + 437, "width": 150, "height": 150, "fill": P["primary"], "stroke": "none"})]
+
+
+IDEAS = {"lantern": "the lantern itself: a bold glowing body under an accent cap", "drift": "a flame drifting over a wave of light",
+         "ember": "an ember inside a ring: the collectible"}
+
+
+def icon_concepts(order, env):
+    """VectorCraft: three different 1024 px concepts, exported as PNG + SVG, and concepts.json with a recommendation."""
+    out, steps = order["out_dir"], [("run_command", {"command": "artboard.setProps", "params": {"index": 0, "width": 1024, "height": 1024, "name": "lantern"}})]
+    for i, cid in enumerate(IDEAS):
+        if i: steps.append(("run_command", {"command": "artboard.new", "params": {"x": i * 1124, "y": 0, "width": 1024, "height": 1024, "name": cid}}))
+        steps += _concept(cid, i * 1124, 0)
+    for i, cid in enumerate(IDEAS):
+        steps += [("export", {"path": os.path.join(out, f"{cid}.png"), "format": "png", "artboard": i, "scale": 1}),
+                  ("export", {"path": os.path.join(out, f"{cid}.svg"), "format": "svg", "artboard": i})]
+    _vectorcraft(steps, out, env, "vectorcraft_concepts.json")
+    json.dump({"concepts": [{"id": c, "file": f"{c}.png", "source": f"{c}.svg", "idea": IDEAS[c], "rationale": "one silhouette that reads at 32 px"} for c in IDEAS],
+               "recommended": "lantern"}, open(os.path.join(out, "concepts.json"), "w"), indent=1)
+    return [os.path.join(out, "concepts.json")]
+
+
+def icon_master(order, env):
+    """VectorCraft: the approved concept (selection.json in the hand-off) redrawn as the 1024 master."""
+    out = order["out_dir"]
+    sel = next(json.load(open(o["path"])) for u in order["handoff"]["upstream"] for o in u["outputs"] if o["path"].endswith("selection.json"))
+    steps = [("run_command", {"command": "artboard.setProps", "params": {"index": 0, "width": 1024, "height": 1024, "name": "icon"}})] + _concept(sel["choice"], 0, 0) + [
+        ("export", {"path": os.path.join(out, "icon-1024.png"), "format": "png", "artboard": 0, "scale": 1}),
+        ("export", {"path": os.path.join(out, "icon.svg"), "format": "svg", "artboard": 0})]
+    _vectorcraft(steps, out, env, "vectorcraft_master.json")
+    return [os.path.join(out, "icon-1024.png"), os.path.join(out, "icon.svg")]
 
 
 GAME_JS = r"""// Lantern Drift — an original mobile-first platformer (GITCRAFT production acceptance game)
@@ -154,17 +203,20 @@ def build(order, defect=True):
     brand = [a["dest_rel"] for a in ia if "/brand/" in a["dest_rel"]]
     assets = {"palette": palette, "sfx": sfx, "music": by("music")[0], "levels": levels, "fx": fxs,
               "editor_sources": other, "atlases": atlases, "brand": brand}
-    icon = next((b for b in brand if b.endswith(".png")), "")
     logo = next((b for b in brand if b.endswith(".svg")), "")
+    snip = next(json.load(open(o["path"])) for u in order["handoff"]["upstream"] for o in u["outputs"] if o["path"].endswith("icons.snippet.json"))
+    json.dump(dict(snip["manifest"], description="Lantern Drift by HaveAnApp"), open(os.path.join(proj, "manifest.webmanifest"), "w"), indent=1)
     html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Lantern Drift</title><link rel="icon" href="{icon}"><link rel="apple-touch-icon" href="{icon}">
+<title>Lantern Drift</title><meta name="author" content="HaveAnApp">
+{snip["head"]}
 <style>
 :root{{--bg:{palette['background']};--fg:{palette['text']};--accent:{palette['accent']};--primary:{palette['primary']}}}
 html,body{{margin:0;height:100%;background:var(--bg);color:var(--fg);font:16px system-ui;overflow:hidden;touch-action:none}}
 canvas{{position:fixed;inset:0;width:100%;height:100%}}
 header{{position:fixed;top:env(safe-area-inset-top,0);left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px}}
-header img{{height:40px}}
+header img{{height:40px;display:block}}
+.haveanapp-byline{{margin:2px 0 0;font-size:12px;font-weight:500;letter-spacing:.04em;line-height:1.2;color:inherit;opacity:.72}}
 .tb{{display:flex;gap:8px}}
 button{{min-width:48px;min-height:48px;padding:0 14px;border-radius:12px;border:2px solid var(--fg);background:rgba(20,18,43,.6);color:var(--fg);font:600 16px system-ui}}
 .pad{{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;gap:16px}}
@@ -172,7 +224,7 @@ button{{min-width:48px;min-height:48px;padding:0 14px;border-radius:12px;border:
 #lp{{left:16px}} #rp{{right:16px}}
 </style></head><body>
 <canvas id="game" aria-label="Lantern Drift game"></canvas>
-<header><img src="{logo}" alt="Lantern Drift"><div class="tb"><button id="pause">Pause</button><button id="mute">Sound on</button></div></header>
+<header><div><img src="{logo}" alt="Lantern Drift"><p class="haveanapp-byline" data-haveanapp>by HaveAnApp</p></div><div class="tb"><button id="pause">Pause</button><button id="mute">Sound on</button></div></header>
 <div class="pad" id="lp"><button id="bl" aria-label="Move left">◀</button><button id="br" aria-label="Move right">▶</button></div>
 <div class="pad" id="rp"><button id="bj" aria-label="Jump">Jump</button></div>
 <script>window.ASSETS = {json.dumps(assets)};</script>
@@ -187,7 +239,7 @@ button{{min-width:48px;min-height:48px;padding:0 14px;border-radius:12px;border:
                "scripts": {}}, open(os.path.join(proj, "package.json"), "w"), indent=1)
     open(os.path.join(proj, "README.md"), "w").write("# Lantern Drift\n\nAn original mobile-first platformer: reach the light, collect embers, three levels, saved progress.\n\n"
                                                      "Controls: arrows/A-D + Space, or the on-screen pad. P pauses, M mutes.\n")
-    return ["index.html", "js/game.js", "package.json", "README.md"]
+    return ["index.html", "js/game.js", "package.json", "README.md", "manifest.webmanifest"]
 
 
 FEEL = [   # what PLAYCRAFT's plan asked for, as changes to js/game.js

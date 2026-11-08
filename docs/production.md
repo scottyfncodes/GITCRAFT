@@ -9,20 +9,71 @@ Tell Claude Code what you want, in one message, as completely as you like:
 
 That's all you have to do. Claude follows the `produce` skill:
 
-1. `production_plan` with your prompt.
-2. `production_run`.
-3. Each work order handed to it (the code, wiring the assets in, the logo in VectorCraft), followed by `production_submit`.
-4. Repeat until the acceptance report says READY, or a genuine blocker remains.
+1. `production_plan` with your prompt. GITCRAFT runs a read-only Discovery and opens the **Decision Room**.
+2. You read the few material decisions (each with a recommendation) and approve the blueprint: `production_decide`.
+3. `production_run`.
+4. Each work order handed to it (the code, wiring the assets in, the logo and icon concepts in VectorCraft), followed by `production_submit`.
+5. Repeat until the acceptance report says READY, or a genuine blocker remains.
 
 You'll be asked only what matters:
 
+- **The Decision Room:** once, before anything is built. It covers scope, architecture, design and icon direction, the engineering standard, cost and deployment, each with a recommended default.
 - **Essential questions:** rare, because most choices have a safe default, which the report lists as an assumption.
-- **Approvals:** deploying, or replacing a file your project already has.
+- **Approvals:** choosing the app icon from its concepts, deploying, or replacing a file your project already has.
 
 At the end you get the project, and a report listing every acceptance criterion with its measured evidence.
 
 What you never need to know: which departments exist, which order they run in, which can run at the same time,
 how files move between them, or which checks decide "done".
+
+## Idea to delivery
+
+One record per project (`production.json` in the store) carries it through every stage. `production_status` and
+`production_list` show the stage and a one-line summary in plain words.
+
+```
+Idea ──► Recon (optional) ──► Discovery ──► Decisions ──► Approved ──► Building ──► Verified ──► Delivered
+  │            │                 (read-only)    │ ▲                       │
+  └─ parked / discarded          revision ◄─────┘ └── material change ◄───┘ (paused until approved)
+```
+
+| Stage | Tool | What happens | Code |
+|---|---|---|---|
+| Idea | `production_idea` | Saves any input: a sentence, a rough idea, a spec, a pasted master prompt, a GitHub URL or a project folder. Records a **brief** (objective, outcome, requirements, constraints), using only sentences the person wrote. Nothing is read or built. | `lifecycle.brief` |
+| Recon | `production_recon {depth}` → `{findings}` | Optional. **Quick** (≤ 6 searches) or **Deep** (≤ 20). It's the agent's research work order, because the sandbox has no network. Sections: Reality Check, Competition Radar, Identity Check, The Zag, and a Recommendation (build, pivot or park, with uncertainties). The findings are validated before they're kept (see below). Writes `recon/RECON.md`. | `recon.py` |
+| Discovery | `production_promote` (or `production_plan` for a New Build) | Read-only: it never writes to the project and never creates the project folder. It reads the project, the engines, the existing assets and icons, the tests and git, plus what can run on this machine. Writes `DISCOVERY.md`: understanding, existing resources, recommended approach, alternatives, risks, decisions needing input, the plan in waves, and the acceptance criteria. | `discovery.py`, `lifecycle.discovery_report` |
+| Decisions | `production_decide {answers}` | **The Decision Room.** Material decisions only: scope, architecture (existing code is reused), design direction, app icon (new, refine or keep), engineering standard (personal, public or sensitive), cost, deployment, and HaveAnApp credit for existing apps. Each has a plain question, a recommended default, the options and their trade-offs. An answer that changes the spec re-plans (still read-only). An answer that isn't one of the options is refused. | `lifecycle.decisions` |
+| Approved | `production_decide {approve: true}` | Freezes the **blueprint**: every decision's answer (unanswered ones take the recommendation), the tasks, the criteria and the authorisations, with a hash. It is the source of truth. Settled decisions can't be reopened from the Decision Room, and every work order carries them. A plan with problems or an unanswered essential question can't be approved. | `lifecycle.blueprint` |
+| Building | `production_run` | Only an approved blueprint can be built: Discovery approval is not build approval. This is the engine described below. | `engine.run` |
+| Verified / Delivered | | Verified: the release passed but the deployment isn't verified live. Delivered: every criterion passed, including a deployment checked against its live URL when one was asked for. | `lifecycle.stage` |
+
+**Recon evidence rules.** Recon may not invent evidence:
+- every finding has a basis (`source`, `verified`, `assumption` or `inference`);
+- a `source` or `verified` finding must cite the URL it came from;
+- a domain or name is only "available" with a `verified` lookup;
+- competitors are named;
+- the verdict is build, pivot or park, with its reasoning and uncertainties;
+- going over the budget is refused.
+
+Recon is never a barrier: promoting without it (or before it finishes) is allowed, and is recorded.
+
+**Deviations.** `production_revise {overrides, reason}`:
+- **Before approval**, it simply re-plans.
+- **After approval**, a change to the scope, platform, features, assets, authorisations, engineering profile, icon or attribution is
+  **material**. The build pauses (`revision`, and `run` is refused), and `production_decide {approve: true}` applies it.
+  Every task whose definition didn't change keeps its finished work, anything downstream of a changed task is redone, and the
+  blueprint version goes up. `approve: false` discards the change.
+- A change to the quality bar only is applied without a new approval.
+
+**Compatibility.** Productions made before the lifecycle existed have no `lifecycle` record and run as before.
+
+**The app standards.** Every web deliverable plans the App Icon Studio chain (`icon.concepts` → `icon.select` (a person
+chooses) → `icon.master` → `icon.derivatives`) and three measured checks:
+- `qa.icons`
+- `qa.attribution` (the quiet "by HaveAnApp" credit)
+- `qa.standards` (proportionate engineering checks)
+
+See [app-standards.md](app-standards.md).
 
 ## The lifecycle
 
@@ -112,20 +163,31 @@ Request parameters can reference upstream results:
 ## CLI
 
 ```bash
-python3 -m production plan "<master prompt>" [--project DIR] [--overrides JSON]
+python3 -m production idea "<idea>" [--project DIR]
+python3 -m production recon <id> [--depth quick|deep] [--findings FILE]
+python3 -m production promote <id>
+python3 -m production plan "<master prompt>" [--project DIR] [--overrides JSON] [--recon quick|deep]
+python3 -m production decide <id> [--answers JSON] [--approve | --decline] [--note TEXT]
+python3 -m production revise <id> --overrides JSON --reason TEXT
+python3 -m production discard <id> [--park]
 python3 -m production run <id>            # run or resume
 python3 -m production status <id>
 python3 -m production submit <id> <task> --files /abs/a /abs/b --notes "…" [--run]
-python3 -m production approve <id> <task> [--decline]
+python3 -m production approve <id> <task> [--decline] [--choice ID]
 python3 -m production report <id>
 python3 -m production list | contracts
 ```
 
 ## Verification
 
+- `tests/test_lifecycle.py` (~1 min) covers briefs, standalone Recon (evidence rules, budget, park and discard), Recon in a New Build, read-only Discovery
+  (byte-identical project, no folder created), the Decision Room (answers re-plan, invalid answers refused, existing-app attribution choice),
+  the approval boundary, the frozen blueprint, material and non-material revisions (pause, approve with preserved work, decline), legacy productions,
+  the icon codec and checks, attribution, the standards profiles, and a real app production from icon concepts to delivered.
+
 - `tests/test_production.py` (~1 min) covers intake, planning, validation, gates, store, lock and fingerprints, plus a real production through the sandboxed server: plan, run, idempotent resume, and redoing a task whose output was deleted.
 - `tests/acceptance_production.py` (~6 min) is the master-prompt run:
-  - **Part A:** the Lantern Drift prompt, end to end. Interpretation, discovery, department selection, ordering, measured parallelism, the palette → effects hand-off, integration of 27 assets, a real defect caught by TestCraft and a real PLAYCRAFT shortfall (54 against a bar of 55, then 63 after the fix work order), re-verification, stale evidence re-measured, release on the exact build, deployment refused without evidence, and resume.
+  - **Part A:** the Lantern Drift prompt, end to end. Interpretation, discovery, the Decision Room (refused before approval, then approved), the App Icon Studio (three VectorCraft concepts, a person's choice, the master, the icon set), the HaveAnApp credit and the engineering standard measured, department selection, ordering, measured parallelism, the palette → effects hand-off, integration of 27 assets, a real defect caught by TestCraft and a real PLAYCRAFT shortfall (54 against a bar of 55, then 63 after the fix work order), re-verification, stale evidence re-measured, release on the exact build, deployment refused without evidence, and resume.
   - **Part B:** a refused plan, a missing runtime (blocked and propagated), a failed department (retried, then failed), an invalid agent output, an integration conflict, overwrite protection, a run killed mid-production and resumed, and a quality gate exhausted (NOT READY).
 
 ## Limits

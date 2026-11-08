@@ -12,6 +12,7 @@ Spec fields:
   quality {level, gates...}, project {path, exists}, authorisations, acceptance [...],
   assumptions [...], questions [...]"""
 import copy, json, os, re
+from . import standards
 
 RULES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules.json")))
 
@@ -143,9 +144,14 @@ def parse(prompt, project=None, overrides=None):
         questions.append({"id": "genre", "essential": False, "question": "What kind of game is it?", "default": "arcade"})
 
     title = _title(prompt, t) or (deliverable.title() + " production")
+    # ---- engineering standard (proportionate: personal / public / sensitive), icon and attribution standards
+    prof, pw = standards.profile_for(t, deliverable)
+    if not pw: assumptions.append(f"nobody named who uses it or what it holds: the {prof} engineering standard")
+    web = deliverable in ("game", "app", "site")
     spec = {"title": title, "prompt": prompt, "deliverable": deliverable, "dimension": dimension, "platform": platform,
             "genres": genres, "features": feats, "assets": assets, "quality": q, "project": proj, "authorisations": auth,
-            "because": because, "assumptions": assumptions, "questions": questions}
+            "engineering": {"profile": prof, "because": pw}, "icon": {"mode": None, "required": web},
+            "attribution": {"required": web}, "because": because, "assumptions": assumptions, "questions": questions}
     if overrides:
         spec = merge(spec, overrides)
         # what follows from the deliverable is re-derived when an override changed it (unless also overridden), so
@@ -154,6 +160,9 @@ def parse(prompt, project=None, overrides=None):
         for k, v in (("playcraft", d == "game"), ("pixelcraft", d in ("game", "app", "site")), ("designcraft", d == "game")):
             if k not in qo: spec["quality"][k] = v
         if "genres" not in overrides and d != "game": spec["genres"] = []
+        w = d in ("game", "app", "site")
+        if "icon" not in overrides: spec["icon"]["required"] = w
+        if "attribution" not in overrides: spec["attribution"]["required"] = w
     spec["acceptance"] = acceptance(spec)
     return spec
 
@@ -184,6 +193,14 @@ def acceptance(spec):
         # only when the deliverable ships assets into a build; a project's own existing assets add these at planning
         add("asset_integrity", "Every integrated asset opens as its format and is referenced by the build", "qa.assets")
         add("licensing", "Every shipped asset has a recorded licence; nothing non-commercial or no-derivatives", "qa.licences")
+    if web and spec.get("icon", {}).get("required"):
+        add("app_icon", "An approved app icon (or an inspected, kept existing one) is wired in: favicon, Apple touch 180 (opaque), manifest 192/512 and "
+            "maskable, correct sizes and formats, readable at 32 px, no generic framework or broken icon", "qa.icons")
+    if web and spec.get("attribution", {}).get("required"):
+        add("attribution", "The quiet 'by HaveAnApp' maker's credit is visible in the app (marked data-haveanapp), linked only to the verified HaveAnApp site", "qa.attribution")
+    if web:
+        add("engineering_standards", f"The {spec.get('engineering', {}).get('profile', 'personal')} engineering standard's measured checks pass (mobile basics, secrets, "
+            "HTTPS, reproducible dependencies; auth, validation and rate limits for public/sensitive apps); review items listed", "qa.standards")
     if spec["features"].get("deploy"): add("deployment", "Deployed and the live URL verified (needs approval)", "release.deploy")
     add("release_ready", "Release report written with every criterion's evidence measured on the final build", "release.report")
     return out

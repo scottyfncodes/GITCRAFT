@@ -93,7 +93,8 @@ project without this repo attached. Sources: `global/`.
 
 ## Production Director (production/)
 
-- One master prompt → a production: `production_plan` → `production_run` (studiocraft tools; CLI `python3 -m production`).
+- One master prompt → a production: `production_plan` → `production_decide` (a person approves the blueprint) → `production_run`
+  (studiocraft tools; CLI `python3 -m production`). Ideas: `production_idea` → optional `production_recon` → `production_promote`.
   intake → discovery → planner → engine (parallel, gated, resumable) → acceptance report. Guide: `docs/production.md`.
 - It coordinates departments and never re-implements one: Studio actions through `studio/cli.py --call`, 3D through
   `forgecraft/cli.py call`, DESIGNCRAFT through `gamedesign`, the agent through work orders. Standard library only.
@@ -141,6 +142,11 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   PLAYCRAFT never edits a game and never reports a score, test or regression it did not measure (`docs/playcraft.md`).
 - `tests/test_designcraft.py` must pass after any change under `gamedesign/` (`--quick` skips the browser); DESIGNCRAFT never
   writes to or runs an assessed game, never labels an inferred judgement as observed play; never rewrite runs in `history/designcraft/` (`docs/designcraft.md`).
+- `tests/test_lifecycle.py` must pass after any change under `production/` (the lifecycle, Recon, the Decision Room and blueprint,
+  revisions, the App Icon Studio, HaveAnApp attribution, engineering standards); never let `run` build without an approved blueprint,
+  never select an icon without a person's choice, and never set the HaveAnApp URL to an address that has not been verified
+  (`production/kit/haveanapp/attribution.json`). Standards: docs/app-standards.md.
+- `tests/test_hardening.py` must pass after any change to `scripts/guard.py` or `ui/server.py` (docs/tech-debt.md).
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
   gate or substitute a mocked department result to make it pass.

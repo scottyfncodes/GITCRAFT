@@ -11,17 +11,27 @@ when it hands you a work order, and you never claim anything it did not measure.
 
 ## The loop
 
+0. **Idea / Recon (optional)** — when the person only wants to explore an idea, or asks "is this worth building?":
+   `production_idea {text}` saves it (nothing is built). `production_recon {production, depth: quick|deep}` gives a bounded
+   research work order: do it with your own web tools within the budget, then `production_recon {production, findings}`. Every
+   claim cites the URL you opened or says `assumption`; never call a domain available without a lookup you ran; never invent a
+   competitor, price or statistic. Then `production_promote` (build it) or `production_discard {park: true}`. A New Build can
+   ask for Recon first with `production_plan {recon: "quick"}`. Recon is optional and never a reason to delay a build that was asked for.
 1. **Plan** — `production_plan {prompt: <the whole master prompt, verbatim>, project: <the repo folder, if one exists>}`.
-   Read the returned spec: deliverable, platform, genres, assets, quality bar, acceptance criteria,
-   `assumptions`, `questions`, `blocked_up_front`, `problems`.
-   - Ask the person **only** the questions marked `essential` (usually none). Non-essential ones have a
-     safe default; mention it in your summary instead of asking.
-   - If the interpretation is wrong (wrong genre, a feature missed), plan again with `overrides`
-     (deep-merged into the spec), e.g. `{"assets": {"levels": {"kind": "dungeon", "count": 4, "by_levelcraft": true}}}`,
-     `{"quality": {"playcraft_min": 60}}`, `{"extra_tasks": [{id, department, action, params, depends_on, ship}]}`,
-     `{"skip_tasks": ["qa.perf"]}`. A plan with `problems` does not run. A criterion listed in `unmeasured_criteria` will report
-     NOT PLANNED and the production cannot be READY: plan a task for it, or tell the person the requirement is being dropped.
-   - Tell the person in a few lines what will be made, by which departments, and what is blocked here.
+   This runs a read-only Discovery (it never writes to the project) and opens the **Decision Room**.
+   Read the returned spec and `decision_room`, plus `DISCOVERY.md` (the 8-section Discovery Report).
+   - If the interpretation is wrong, use `production_revise {overrides, reason}` (before approval it simply re-plans), e.g.
+     `{"assets": {"levels": {"kind": "dungeon", "count": 4, "by_levelcraft": true}}}`, `{"quality": {"playcraft_min": 60}}`,
+     `{"extra_tasks": [{id, department, action, params, depends_on, ship}]}`, `{"skip_tasks": ["qa.perf"]}`. A plan with `problems`
+     cannot be approved. A criterion in `unmeasured_criteria` reports NOT PLANNED and the production cannot be READY.
+   - **Decision Room:** show the person the decisions in plain words: the question, your recommendation and the trade-off.
+     These are the scope, the architecture, the design direction, the app icon (new, refine or keep), the engineering standard
+     (personal, public or sensitive), the cost, the deployment, and the HaveAnApp credit for an existing app. Record their answers with
+     `production_decide {answers}`, and approve with `production_decide {approve: true}` **only when the person has approved**.
+     If they gave a complete master prompt and said to proceed, that is approval of the recommended defaults: say which defaults
+     you approved. Discovery approval is not build approval. `production_run` refuses until the blueprint is approved.
+   - The approved blueprint is the source of truth: don't reopen settled decisions. A material change later (scope, platform,
+     features, authorisations, standard, icon) goes through `production_revise`. The build then pauses until the person approves it.
 2. **Run** — `production_run {production}`. It runs every ready task on parallel workers and stops when
    the deliverable is ready, or when it waits on you (`awaiting_agent`) or on a person (`needs_approval`).
 3. **Work orders** — for each task in `awaiting_agent`, open its `WORK_ORDER.md` (path in `production_status`).
@@ -37,7 +47,10 @@ when it hands you a work order, and you never claim anything it did not measure.
    modified project. Fix the cause the findings name; never weaken a gate, edit a measurement, or
    skip a check to get green. After `quality.max_rounds` the gate stays failed and the report says NOT READY:
    tell the person what remains and why.
-5. **Approvals** — `needs_approval` (deployment, replacing an existing asset) is the person's decision.
+5. **Approvals** — `needs_approval` (the app icon choice, deployment, replacing an existing asset) is the person's decision.
+   For `icon.select`, show the person the comparison sheet (`concepts.html`: every concept at full size and at 180, 64 and 32 px,
+   light and dark) and your recommendation. Approve with `choice` only when they've chosen; if they want changes, decline with their note
+   and new concepts are requested. Never pick an icon silently.
    Ask them; call `production_approve` only with their answer. A deployment counts as live only with
    `evidence`: a passing check record that ran against the live URL. Without it, say "deployed, not verified".
 6. **Report** — `production_report {production}`: every criterion with its measured evidence and the verdict.
@@ -49,6 +62,16 @@ when it hands you a work order, and you never claim anything it did not measure.
 Productions persist (`production_list`). After an interruption, `production_run` again: passed work is kept
 (while its outputs still match their hashes), interrupted tasks run again, and QA evidence measured before the
 project changed is re-measured before release. Never start a new production for work that already has one.
+
+## The app standards (every web app, site and game)
+
+- **App icon:** draw the concepts and the master with VectorCraft/PhotoCraft (`icon.concepts`, `icon.master`). They are distinctive, read at 32 px,
+  have no tiny text, screenshots or framework art, and are the app's own (no shared GITCRAFT look). Wire in `icons.snippet.json` exactly, and remove old icon references.
+- **HaveAnApp credit:** a quiet "by HaveAnApp" byline marked `data-haveanapp` (`production/kit/haveanapp`: HTML, CSS and React) in a footer,
+  an About or Settings screen, or a title or pause screen. It is never in the icon, and linked only to the verified URL in `attribution.json`.
+- **Engineering:** build to the approved profile. A personal app stays simple; public and sensitive apps get validation, error handling,
+  pinned dependencies, auth and rate limits. `qa.standards` lists what it could not decide as review items: address them or say so.
+- Docs: docs/app-standards.md.
 
 ## Rules
 

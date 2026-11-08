@@ -16,6 +16,7 @@ import concurrent.futures as cf, copy, hashlib, json, os, threading, time, trace
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
 from . import inside_roots, roots, store_root
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
+from . import lifecycle, recon, icons
 
 RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1}
 # "exclusive": a timing measurement (frame rate) is only valid with the machine to itself, so such a task starts
@@ -125,17 +126,43 @@ def _slim(res):
     return {k: v for k, v in res.items() if k not in drop}
 
 
-# ---------------------------------------------------------------- plan
-def plan(prompt, project=None, overrides=None, store_dir=None):
-    spec = intake.parse(prompt, project, overrides)
+# ---------------------------------------------------------------- the lifecycle: idea → recon → discovery → decisions → approved
+def idea(text, project=None, overrides=None, store_dir=None, source=None):
+    """Save an idea (any size: a sentence to a master prompt, a GitHub URL, a project folder). Nothing is read or built."""
+    spec = intake.parse(text, project, overrides)
     if not spec["project"]["path"] and spec["deliverable"] in ("game", "app", "site"):
         spec["project"]["path"] = os.path.join(roots()[0], store.slugify(spec["title"]))
     p = spec["project"]["path"]
     if p and not inside_roots(p):
         raise PermissionError(f"GITCRAFT policy: project {p} is outside the workspace roots ({':'.join(roots())})")
+    prod = {"id": store.new_id(spec["title"]), "spec": spec, "brief": lifecycle.brief(text, p, source), "overrides": overrides or {},
+            "tasks": {}, "order": [], "decisions": [], "parallel_groups": [], "problems": [], "status": "idea"}
+    lifecycle.move(prod, "idea")
+    store.create(prod, store_dir)
+    return prod
+
+
+def plan(prompt, project=None, overrides=None, store_dir=None, recon=None):
+    """New Build: idea → (optional Recon) → read-only Discovery → the Decision Room. Building waits for decide(approve)."""
+    prod = idea(prompt, project, overrides, store_dir)
+    if recon: return start_recon(prod["id"], recon, store_dir=store_dir)
+    return promote(prod["id"], store_dir=store_dir)
+
+
+def _discover_and_plan(prod):
+    """Read-only Discovery and planning into an existing record. Never writes to the project."""
+    spec = intake.parse(prod["spec"]["prompt"], prod["spec"]["project"]["path"] if prod["spec"]["project"].get("path") else None, prod.get("overrides") or None)
+    if not spec["project"]["path"]: spec["project"]["path"] = prod["spec"]["project"]["path"]
+    p = spec["project"]["path"]
     spec["project"]["exists"] = bool(p and os.path.isdir(p))
-    essential = [q for q in spec["questions"] if q.get("essential")]
+    if prod.get("recon"): spec["recon"] = {k: prod["recon"].get(k) for k in ("depth", "at")} | {"verdict": (prod["recon"].get("recommendation") or {}).get("verdict")}
+    lifecycle.move(prod, "discovery")
     disc = discovery.run(spec)
+    icon_state = icons.inspect(p) if spec.get("icon", {}).get("required") else {"status": "n/a"}
+    if spec.get("icon", {}).get("required") and not spec["icon"].get("mode"):
+        spec["icon"]["mode"] = "keep" if icon_state["status"] == "candidate" else "new"
+        spec["icon"]["existing"] = icon_state.get("best")
+    essential = [q for q in spec["questions"] if q.get("essential")]
     pl = planner.build(spec, disc)
     # Every acceptance criterion from the intake stays in the spec. One that no planned task measures is reported
     # `not_planned`: it is visible in the plan and the report, and it prevents READY (the release gate fails on it).
@@ -147,15 +174,199 @@ def plan(prompt, project=None, overrides=None, store_dir=None):
             spec["acceptance"].insert(-1, {"id": cid, "text": text, "measured_by": "planning: the project has assets"})
     unmeasured = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
     problems = planner.validate(pl, disc)
-    prod = {"id": store.new_id(spec["title"]), "spec": spec, "discovery": disc, "tasks": pl["tasks"], "order": pl["order"],
-            "decisions": pl["decisions"], "parallel_groups": pl["parallel_groups"], "problems": problems,
-            "readiness": planner.readiness(pl, disc), "unmeasured_criteria": unmeasured,
-            "warnings": [f"acceptance criterion {c} is not measured by any planned task: it will report NOT PLANNED and the "
-                         "production cannot be READY (plan the task, or drop the requirement from the spec with overrides)" for c in unmeasured],
-            "status": "planned" if not problems and not essential else "needs_input"}
-    store.create(prod, store_dir)
-    store.event(prod, "planned", tasks=len(pl["tasks"]), problems=problems or None, blocked_up_front=list(prod["readiness"]) or None)
+    prod.update({"spec": spec, "discovery": disc, "icon_state": icon_state, "tasks": pl["tasks"], "order": pl["order"],
+                 "decisions": pl["decisions"], "parallel_groups": pl["parallel_groups"], "problems": problems,
+                 "readiness": planner.readiness(pl, disc), "unmeasured_criteria": unmeasured,
+                 "warnings": [f"acceptance criterion {c} is not measured by any planned task: it will report NOT PLANNED and the "
+                              "production cannot be READY (plan the task, or drop the requirement from the spec with overrides)" for c in unmeasured],
+                 "status": "planned" if not problems and not essential else "needs_input"})
+    answered = {d["id"]: d for d in prod.get("decision_room") or [] if d.get("answer") is not None}
+    room = lifecycle.decisions(spec, disc, icon_state)
+    for d in room:
+        if d["id"] in answered: d.update(answer=answered[d["id"]]["answer"], status=answered[d["id"]]["status"])
+    prod["decision_room"] = room
+    lifecycle.move(prod, "decisions")
+    prod["discovery_report"] = lifecycle.discovery_report(prod)
     return prod
+
+
+def promote(pid, overrides=None, store_dir=None):
+    """An idea (saved, recon'd or parked) becomes a build: read-only Discovery, then the Decision Room."""
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        st = lifecycle.stage(prod)
+        if st not in ("idea", "recon", "parked", "decisions"):
+            raise ValueError(f"{pid} is at {st}: only an idea (or one still in the Decision Room) can be promoted; use production_revise to change an approved blueprint")
+        if overrides: prod["overrides"] = intake.merge(prod.get("overrides") or {}, overrides)
+        if st == "recon": prod.setdefault("lifecycle", {})["recon_skipped"] = True
+        _discover_and_plan(prod)
+        store.save(prod)
+        store.event(prod, "planned", tasks=len(prod["tasks"]), problems=prod["problems"] or None, blocked_up_front=list(prod["readiness"]) or None,
+                    decisions=len(prod["decision_room"]))
+    return prod
+
+
+def start_recon(pid, depth="quick", store_dir=None):
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        if lifecycle.stage(prod) not in ("idea", "parked", "recon"): raise ValueError(f"recon runs on an idea, and {pid} is at {lifecycle.stage(prod)}")
+        order = recon.order(prod, depth)
+        d = os.path.join(prod["store"], "recon"); os.makedirs(d, exist_ok=True)
+        store.write_json(os.path.join(d, "work_order.json"), order)
+        prod["recon_order"] = order; lifecycle.move(prod, "recon", note=depth)
+        store.save(prod); store.event(prod, "recon_started", depth=depth)
+    return dict(lifecycle_view(prod), recon_order=order)
+
+
+def submit_recon(pid, findings, store_dir=None):
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        if lifecycle.stage(prod) != "recon": raise ValueError(f"{pid} has no Recon waiting (stage {lifecycle.stage(prod)}): start one with production_recon {{depth}}")
+        depth = prod["recon_order"]["depth"]
+        checks = recon.validate(findings, depth)
+        ok = all(c["ok"] for c in checks)
+        if ok:
+            rec = {"depth": depth, "at": store.now(), "findings": findings, "recommendation": findings["recommendation"]}
+            p = os.path.join(prod["store"], "recon", "RECON.md")
+            with open(p, "w") as f: f.write(recon.markdown(prod["spec"]["title"], rec))
+            store.write_json(os.path.join(prod["store"], "recon", "findings.json"), findings)
+            rec["report"] = p; prod["recon"] = rec
+            lifecycle.move(prod, "idea", note=f"recon {depth}: {findings['recommendation']['verdict']}")
+        store.save(prod); store.event(prod, "recon_submitted", accepted=ok)
+    return dict(lifecycle_view(prod), recon_accepted=ok, checks=[c for c in checks if not c["ok"]] or "all passed",
+                next="production_promote to build it, production_discard {park: true} to park it" if ok else "fix the findings and submit again")
+
+
+def discard(pid, park=False, reason=None, store_dir=None):
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        if lifecycle.stage(prod) not in ("idea", "recon", "decisions", "parked"):
+            raise ValueError(f"{pid} is at {lifecycle.stage(prod)}: an approved build is not discarded from here")
+        lifecycle.move(prod, "parked" if park else "discarded", note=reason); prod["status"] = "parked" if park else "discarded"
+        store.save(prod); store.event(prod, "parked" if park else "discarded", reason=reason)
+    return lifecycle_view(prod)
+
+
+def decide(pid, answers=None, approve=False, note=None, store_dir=None):
+    """The Decision Room: answer decisions (a changed answer re-plans, read-only), and approve the blueprint.
+    With a material revision pending, approve applies it (preserving finished work) and declines discard it."""
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        lc = prod.setdefault("lifecycle", {"history": []})
+        if lc.get("revision"):
+            rv = lc["revision"]
+            if approve:
+                _apply_revision(prod, rv["overrides"])
+                prod["blueprint"] = dict(lifecycle.blueprint(prod), version=(prod.get("blueprint") or {}).get("version", 1) + 1, revision=rv)
+                prod.setdefault("decisions", []).append(f"approved revision: {rv['reason']} ({', '.join(rv['changed'])})")
+                store.event(prod, "revision_approved", changed=rv["changed"])
+            else:
+                prod.setdefault("decisions", []).append(f"declined revision: {rv['reason']}" + (f" — {note}" if note else ""))
+                store.event(prod, "revision_declined")
+            prod["lifecycle"].pop("revision", None); prod["status"] = overall(prod) if any(t.get("attempts") for t in prod["tasks"].values()) else "planned"
+            store.save(prod); return lifecycle_view(prod)
+        st = lifecycle.stage(prod)
+        if st not in ("decisions",):
+            raise ValueError(f"{pid} is at {st}: the Decision Room is open only before approval (use production_revise for a change after it)")
+        if answers:
+            room = {d["id"]: d for d in prod["decision_room"]}
+            unknown = [k for k in answers if k not in room]
+            if unknown: raise ValueError(f"no decision {unknown} (decisions: {sorted(room)})")
+            ov = lifecycle.overrides_for(prod["decision_room"], answers)
+            for k, v in answers.items(): room[k].update(answer=v, status="answered")
+            if ov:
+                prod["overrides"] = intake.merge(prod.get("overrides") or {}, ov)
+                _discover_and_plan(prod)
+            store.event(prod, "decisions_answered", answers=answers)
+        if approve:
+            if prod.get("problems"): raise ValueError("the plan has problems; correct them (answers or production_revise) before approving: " + "; ".join(prod["problems"][:4]))
+            open_q = [d["id"] for d in prod["decision_room"] if d["kind"] == "question" and "essential" in (d.get("why") or "") and d.get("answer") is None]
+            if open_q: raise ValueError(f"essential questions need an answer first: {open_q}")
+            if any(d["id"] == "scope" and d.get("answer") == "revise" for d in prod["decision_room"]):
+                raise ValueError("the scope is marked for revision: send production_revise with the change, then approve")
+            for d in prod["decision_room"]:
+                if d.get("answer") is None: d.update(answer=d["recommended"], status="approved (recommended)")
+                else: d["status"] = "approved"
+            prod["blueprint"] = dict(lifecycle.blueprint(prod), version=1, note_from_person=note)
+            prod.setdefault("decisions", []).append("blueprint approved" + (f" — {note}" if note else ""))
+            lifecycle.move(prod, "approved"); prod["status"] = "planned"; lc["stage"] = None
+            store.event(prod, "blueprint_approved", hash=prod["blueprint"]["hash"])
+        store.save(prod)
+    return lifecycle_view(prod)
+
+
+TASK_DEF = ("kind", "department", "action", "params", "depends_on", "ship", "work_order", "gate", "criterion")
+
+
+def _apply_revision(prod, overrides):
+    """Re-plan with the revision, keeping every task whose definition did not change (passed work is not redone)."""
+    old = prod["tasks"]
+    prod["overrides"] = intake.merge(prod.get("overrides") or {}, overrides)
+    keep_lc = copy.deepcopy(prod.get("lifecycle")); room = copy.deepcopy(prod.get("decision_room"))
+    _discover_and_plan(prod)
+    prod["lifecycle"] = keep_lc; prod["decision_room"] = room
+    new, order, dropped = prod["tasks"], [], []
+    for tid in list(prod["order"]):
+        n = new[tid]; o = old.get(tid)
+        if o and all(json.dumps(o.get(k), sort_keys=True) == json.dumps(n.get(k), sort_keys=True) for k in TASK_DEF):
+            new[tid] = o
+        order.append(tid)
+        chain = [x for x in old.values() if x.get("chain") == tid]   # its remediation history stays with it
+        if new[tid] is o:
+            for x in sorted(chain, key=lambda x: (x.get("round") or 0, 0 if x["id"].startswith("fix.") else 1)):
+                new[x["id"]] = x; order.append(x["id"])
+    for tid, o in old.items():
+        if tid not in new and not o.get("chain"): dropped.append(tid)
+    prod["order"] = order
+    changed = {t for t in order if t in old and new[t] is not old[t]}
+    for t in [new[x] for x in order]:   # anything downstream of a changed task is redone
+        if t["state"] != PENDING and any(d in changed or (new.get(d) and new[d]["state"] == PENDING and d in old and new[d] is not old[d]) for d in t["depends_on"]):
+            _invalidate(prod, t, "the approved revision changed something it depends on")
+    if dropped: prod.setdefault("decisions", []).append(f"revision removed: {', '.join(dropped)}")
+
+
+def revise(pid, overrides, reason, store_dir=None):
+    """Change the plan. Before approval it re-plans; after, a material deviation pauses the build until it is approved."""
+    if not reason: raise ValueError("say why the plan changes (reason)")
+    prod = store.load(pid, store_dir)
+    st = lifecycle.stage(prod)
+    if st in ("idea", "recon", "parked", "decisions"):
+        return lifecycle_view(promote(pid, overrides=overrides, store_dir=store_dir))
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        new = intake.parse(prod["spec"]["prompt"], prod["spec"]["project"]["path"], intake.merge(prod.get("overrides") or {}, overrides))
+        for k in ("icon", "project"):   # resolved at discovery
+            if k not in overrides: new[k] = copy.deepcopy(prod["spec"].get(k))
+        changed = lifecycle.material(prod["spec"], new)
+        if not changed:
+            _apply_revision(prod, overrides)
+            prod.setdefault("decisions", []).append(f"non-material revision applied: {reason}")
+            store.event(prod, "revision_applied", material=False)
+        else:
+            prod["lifecycle"]["revision"] = {"overrides": overrides, "reason": reason, "changed": changed, "at": store.now()}
+            prod["status"] = "paused"
+            store.event(prod, "revision_requested", changed=changed, reason=reason)
+        store.save(prod)
+    return dict(lifecycle_view(prod), material=changed or None,
+                next="a person approves or declines the change (production_decide approve=true|false)" if changed else "production_run")
+
+
+def lifecycle_view(prod):
+    v = lifecycle.summary(prod)
+    out = {"production": prod["id"], "title": prod["spec"]["title"], "stage": v["stage"], "summary": v["summary"], "status": prod.get("status"),
+           "store": prod["store"]}
+    if v["stage"] == "decisions" or (prod.get("lifecycle") or {}).get("revision"):
+        out["decision_room"] = [{k: d.get(k) for k in ("id", "title", "question", "recommended", "options", "why", "answer", "status")} for d in prod.get("decision_room") or []]
+        out["discovery_report"] = prod.get("discovery_report")
+        if (prod.get("lifecycle") or {}).get("revision"): out["revision"] = prod["lifecycle"]["revision"]
+    if prod.get("blueprint"): out["blueprint"] = {k: prod["blueprint"].get(k) for k in ("status", "version", "hash", "approved_at")}
+    if prod.get("recon"): out["recon"] = {"depth": prod["recon"]["depth"], "verdict": prod["recon"]["recommendation"].get("verdict"), "report": prod["recon"].get("report")}
+    return out
 
 
 # ---------------------------------------------------------------- run
@@ -219,6 +430,8 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
     prod = store.load(pid, store_dir)
     if prod.get("problems"):
         return dict(status(prod), refused="the plan has problems; correct the spec (production_plan with overrides) before running")
+    gate = _build_authorised(prod)
+    if gate: return dict(status(prod), refused=gate)
     with store.lock(prod):
         prod = store.load(pid, store_dir)
         _recover(prod); prod["status"] = "running"; store.save(prod)
@@ -262,6 +475,16 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
         return status(prod)
 
 
+def _build_authorised(prod):
+    """None, or why building may not start: Discovery approval is not build approval; only an approved blueprint is."""
+    if "lifecycle" not in prod: return None   # made before the lifecycle existed: its plan was its authorisation
+    st = lifecycle.stage(prod)
+    if st == "revision": return "a material change to the approved blueprint is waiting for a person (production_decide)"
+    if (prod.get("blueprint") or {}).get("status") != "approved":
+        return f"the blueprint is not approved (stage: {st}): review the Decision Room and approve it (production_decide approve=true) before building"
+    return None
+
+
 def _issue(prod, t):
     wo = t["work_order"] or {}
     if wo.get("approval") and not prod["spec"]["authorisations"].get(wo["approval"]) and not t.get("approved"):
@@ -273,6 +496,8 @@ def _issue(prod, t):
         h["integrated_assets"] = [{k: m[k] for k in ("dest_rel", "role", "format", "task")} for m in ((integ or {}).get("result") or {}).get("integrated", [])]
     order = {"production": prod["id"], "task": t["id"], "title": t["title"], "owner": t["owner"], "out_dir": d, "project": _project(prod),
              **{k: v for k, v in wo.items() if k != "approval"}, "handoff": h,
+             "blueprint": {"decisions": (prod.get("blueprint") or {}).get("decisions"), "engineering": prod["spec"].get("engineering", {}).get("profile"),
+                           "rule": "settled: build to these decisions; a material change needs production_revise and a person's approval"},
              "submit": f"production_submit {{\"production\": \"{prod['id']}\", \"task\": \"{t['id']}\", \"files\": [absolute paths], \"notes\": \"...\"}}"}
     if wo.get("expected"):
         order["expected"] = [dict(e, path=e["path"].replace("$project", _project(prod)) if e["path"].startswith("$project") else os.path.join(d, e["path"])) for e in wo["expected"]]
@@ -312,6 +537,8 @@ def _prepare(prod, t):
         if action == "release": return None, _release(prod, t, out_dir)   # reads the whole production: main thread
         ctx = {"prod": {"id": prod["id"]}, "task": copy.deepcopy(t), "project": _project(prod), "params": params, "out_dir": out_dir,
                "upstream": copy.deepcopy(_upstream(prod, t)), "auth": dict(prod["spec"]["authorisations"]), "approved": t.get("approved"),
+               "spec": copy.deepcopy(prod["spec"]), "choice": t.get("choice"), "approval_note": t.get("approval_note"),
+               "tasks": {k: {"state": eff(prod, k)["state"], "approved": eff(prod, k).get("approved")} for k in prod["tasks"]},
                "inside_roots": inside_roots, "previous_manifest": copy.deepcopy((t.get("last_result") or {}).get("integrated"))}
         return (lambda: getattr(builtins, action)(ctx)), None
     return None, {"status": "failed", "failure": "request", "error": f"unknown executor {kind}"}
@@ -442,16 +669,25 @@ def _verify_deploy(url, evidence):
     return {"ok": True, "detail": f"{rec.get('department')}.{rec.get('action')} passed against {url}"}
 
 
-def approve(pid, task, approved=True, note=None, store_dir=None):
+def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
     prod = store.load(pid, store_dir)
     with store.lock(prod):
         prod = store.load(pid, store_dir)
         t = prod["tasks"].get(task)
         if not t or t["state"] != NEEDS_APPROVAL: raise ValueError(f"{task} is not waiting for approval")
-        store.event(prod, "approval", task=task, approved=approved, note=note)
-        prod.setdefault("decisions", []).append(f"{'approved' if approved else 'declined'}: {task}" + (f" — {note}" if note else ""))
+        options = [c.get("id") for c in (t.get("result") or {}).get("concepts") or []]
+        if approved and choice is not None and options and choice not in options:
+            raise ValueError(f"{choice!r} is not one of the concepts {options}")
+        store.event(prod, "approval", task=task, approved=approved, note=note, choice=choice)
+        prod.setdefault("decisions", []).append(f"{'approved' if approved else 'declined'}: {task}" + (f" ({choice})" if choice else "") + (f" — {note}" if note else ""))
         if approved:
-            t["approved"] = True; t["last_result"] = t.get("result"); _set(prod, t, PENDING, reason="approved")
+            t["approved"] = True; t["last_result"] = t.get("result"); t["choice"] = choice; t["approval_note"] = note
+            _set(prod, t, PENDING, reason="approved" + (f": {choice}" if choice else ""))
+        elif task == "icon.select":   # not these: new concepts with the person's feedback, then the choice again
+            c = prod["tasks"]["icon.concepts"]
+            c["work_order"] = dict(c["work_order"] or {}, feedback=(c["work_order"] or {}).get("feedback", []) + [note or "make different concepts"])
+            _set(prod, c, PENDING, reason="the person asked for new concepts" + (f": {note}" if note else ""), outputs=[], result=None)
+            _set(prod, t, PENDING, reason="waiting for the new concepts", outputs=[], result=None)
         else:
             _set(prod, t, SKIPPED, reason=f"declined by a person{': ' + note if note else ''}")
         store.save(prod)
@@ -511,6 +747,9 @@ def status(prod_or_id, store_dir=None):
         t = prod["tasks"][tid]
         if t["state"] == AWAITING_AGENT: nxt.append(f"agent: do {tid} ({t.get('work_order_path')}) then production_submit")
         if t["state"] == NEEDS_APPROVAL: nxt.append(f"person: approve or decline {tid} — {t.get('reason')}")
-    return {"production": prod["id"], "title": prod["spec"]["title"], "status": prod.get("status"), "store": prod["store"], "project": _project(prod),
-            "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
+    lv = lifecycle.summary(prod)
+    for d in ((prod.get("lifecycle") or {}).get("revision") and ["revision"]) or []: nxt.insert(0, "person: approve or decline the pending revision (production_decide)")
+    if lv["stage"] == "decisions": nxt.insert(0, "person: review the Decision Room and approve the blueprint (production_decide)")
+    return {"production": prod["id"], "title": prod["spec"]["title"], "status": prod.get("status"), "stage": lv["stage"], "summary": lv["summary"],
+            "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
             "report": os.path.join(prod["store"], "REPORT.md")}

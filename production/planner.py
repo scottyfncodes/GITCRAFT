@@ -48,18 +48,18 @@ def build(spec, disc):
 
     # ---------------------------------------------------------------- foundation
     add(T("foundation.scaffold", "Prepare the project folder and asset folders (never overwrites)", "foundation", "builtin", action="scaffold",
-          params={"dirs": [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models")]}))
+          params={"dirs": [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models", "icons")]}))
     identity = None
     if a.get("identity"):
         identity = "foundation.identity"
-        add(T(identity, "Original visual identity: logo, app icon, palette", "foundation", "agent", deps=["foundation.scaffold"],
-              work_order={"tools": ["vectorcraft (draw_shape, draw_path, add_text, export SVG/PNG)", "photocraft (raster icon sizes)"],
+        add(T(identity, "Original visual identity: palette and logo", "foundation", "agent", deps=["foundation.scaffold"],
+              work_order={"tools": ["vectorcraft (draw_shape, draw_path, add_text, export SVG/PNG)"],
                           "brief": f"An original visual identity for {spec['title']}: {spec['prompt'][:300]}",
                           "instructions": ["Derive the palette from the prompt's mood and setting; keep it original (no existing brand).",
                                            "Write palette.json as {\"background\": \"#rrggbb\", \"primary\": \"#rrggbb\", \"accent\": \"#rrggbb\", \"text\": \"#rrggbb\"}.",
-                                           "Make logo.svg (wordmark + mark) and icon-512.png (square app icon) with VectorCraft; export, then look at the PNG."],
+                                           "Make logo.svg (wordmark + mark) with VectorCraft; export, then look at it. The app icon is the App Icon Studio's job (icon.concepts)."],
                           "expected": [{"path": "palette.json", "format": "json", "keys": ["background", "primary", "accent", "text"]},
-                                       {"path": "logo.svg", "format": "svg"}, {"path": "icon-512.png", "format": "png"}],
+                                       {"path": "logo.svg", "format": "svg"}],
                           "license": "owned by the project (made with GITCRAFT VectorCraft)"},
               ship={"dest": adir("brand"), "roles": ["*"]}, criterion="asset_identity"))
     script = None
@@ -69,6 +69,12 @@ def build(spec, disc):
               work_order={"brief": "Write the lines the game speaks (tutorial, story beats, barks).",
                           "instructions": ["Write script.json as {\"lines\": [{\"text\": \"…\", \"voice\": \"af_heart\"}, …]} (≤ 12 lines)."],
                           "expected": [{"path": "script.json", "format": "json", "keys": ["lines"]}]}))
+
+    # ---------------------------------------------------------------- App Icon Studio (concepts → a person picks → master → platform set)
+    icon_tasks = _icon_tasks(spec, proj, identity, adir) if web and spec.get("icon", {}).get("required") else []
+    for x in icon_tasks: add(x)
+    mode = (spec.get("icon") or {}).get("mode")
+    if web and mode == "keep": decisions.append("app icon: the existing icon is kept (inspected; qa.icons verifies it is wired in correctly)")
 
     # ---------------------------------------------------------------- production (independent tasks run in parallel)
     prod = []
@@ -139,7 +145,7 @@ def build(spec, disc):
     if web:
         add(T("integrate.assets", "Integrate every passed asset into the project (hash-verified, no silent overwrite)", "integration", "builtin",
               action="integrate", deps=shipping or ["foundation.scaffold"], criterion="asset_integrity"))
-        build_deps = ["integrate.assets"] + ([identity] if identity else [])
+        build_deps = ["integrate.assets"] + ([identity] if identity else []) + (["icon.derivatives"] if "icon.derivatives" in {t["id"] for t in tasks} else [])
         kind = {"game": "game", "app": "app", "site": "site"}[d]
         add(T("build", f"Build the {kind}: {spec['title']}", "integration", "agent", deps=build_deps,
               work_order={"brief": spec["prompt"],
@@ -175,6 +181,19 @@ def build(spec, disc):
             qa.append("qa.designcraft")
             add(T("qa.designcraft", "DESIGNCRAFT: structural game-design review (advisory)", "qa", "designcraft", action="assess", params={"project": "$project"},
                   deps=["build"], advisory=True, criterion="design_review"))
+        if spec.get("icon", {}).get("required"):
+            qa.append("qa.icons")
+            add(T("qa.icons", "App icon: approved, wired in, right sizes and formats, readable small", "qa", "builtin", action="check_icons",
+                  params={"mode": mode}, deps=["build"] + (["icon.derivatives"] if "icon.derivatives" in {t["id"] for t in tasks} else []),
+                  criterion="app_icon", gate=[{"type": "status_ok"}]))
+        if spec.get("attribution", {}).get("required"):
+            qa.append("qa.attribution")
+            add(T("qa.attribution", "HaveAnApp attribution: the maker's credit is in the app", "qa", "builtin", action="check_attribution",
+                  deps=["build"], criterion="attribution", gate=[{"type": "status_ok"}]))
+        qa.append("qa.standards")
+        add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks", "qa", "builtin", action="check_standards",
+              params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d}, deps=["build"], criterion="engineering_standards",
+              gate=[{"type": "status_ok"}]))
         ships = bool(shipping) or bool(proj.get("assets"))
         if not ships: decisions.append("no asset integrity / licence QA: nothing ships and the project has no assets")
         if ships: qa.append("qa.assets")
@@ -223,8 +242,60 @@ def _build_instructions(spec):
                 "Progression that is saved (localStorage), a best score or unlocks; pause; mute."]
     if a.get("levels"): ins.append(f"Load the {a['levels']['count']} level files (level_data JSON) in order; reaching the exit advances.")
     if a.get("sfx") or a.get("music"): ins.append("Play the sound effects on their events and loop the music after the first input (autoplay policy).")
+    from . import standards as _std
+    prof = spec.get("engineering", {}).get("profile", "personal")
+    ins += _std.instructions(prof, spec["deliverable"])
+    if spec.get("attribution", {}).get("required"):
+        cfg = _std.attribution_config()
+        ins.append("HaveAnApp attribution (production/kit/haveanapp): add the quiet byline \"by HaveAnApp\" beneath or beside the app's name in a footer, "
+                   "About/Settings screen or a game's title/pause screen, marked data-haveanapp, styled small and muted in the app's own theme "
+                   "(byline.css; Byline.tsx for React). Also <meta name=\"author\" content=\"HaveAnApp\"> and '<App> by HaveAnApp' in the manifest description. "
+                   + (f"Link it to {cfg['url']}." if cfg.get("url") and cfg.get("url_verified") else "Do not link it: no official HaveAnApp URL is verified yet.")
+                   + " Never put it in the app icon.")
+    if spec.get("icon", {}).get("required"):
+        mode = (spec.get("icon") or {}).get("mode")
+        ins.append("App icon: " + ("wire in the icon set from icon.derivatives exactly as its icons.snippet.json says (the head tags, and the manifest's icons; "
+                                   "merge into an existing manifest). Remove every older or framework-default icon reference." if mode != "keep" else
+                                   "keep the project's existing icon; make sure index.html links a favicon, a 180 px opaque apple-touch-icon and a manifest with 192 and 512 px icons."))
     ins.append("Run no build step that needs the network. Submit the files you changed.")
     return ins
+
+
+def _icon_tasks(spec, proj, identity, adir):
+    """App Icon Studio: concepts → a person chooses (icon.select) → the 1024 master → the platform set (shipped)."""
+    mode = (spec.get("icon") or {}).get("mode") or "new"
+    if mode == "keep": return []
+    pal = "palette.json from the identity (hand-off)" if identity else "the project's own colours"
+    refine = mode == "refine"
+    base = (spec.get("icon") or {}).get("existing")
+    concepts = T("icon.concepts", "App icon concepts" + (" (refining the existing icon)" if refine else ""), "foundation", "agent",
+                 deps=[identity or "foundation.scaffold"],
+                 work_order={"tools": ["vectorcraft (draw_shape, draw_path, pathfinder, export PNG at 1024 px + SVG)", "photocraft (raster finishing)"],
+                             "brief": (f"Refine the existing icon ({base}) for {spec['title']}" if refine else f"App icon concepts for {spec['title']}") + f": {spec['prompt'][:240]}",
+                             "instructions": [
+                                 "Make 3 meaningfully different concepts (2 minimum, 5 maximum): different ideas, not colour swaps." if not refine else
+                                 "Make 2-3 refinements that keep the existing icon's idea and make it cleaner, bolder and readable at small size.",
+                                 f"Use {pal}. One strong silhouette per concept; it must read at 32 px. No tiny text, no screenshot, no generic framework or "
+                                 "stock imagery, no HaveAnApp branding. Each app's icon is its own: no shared GITCRAFT style.",
+                                 "Export each concept as a square PNG of at least 512 px (1024 preferred) and its SVG source; look at each export.",
+                                 'Write concepts.json: {"concepts": [{"id": "a", "file": "a.png", "source": "a.svg", "idea": "…", "rationale": "…"}], "recommended": "a"}.'],
+                             "expected": [{"path": "concepts.json", "format": "json", "keys": ["concepts", "recommended"], "validate": "icon_concepts", "role": "concepts"}],
+                             "license": "owned by the project (made with GITCRAFT VectorCraft)"})
+    select = T("icon.select", "A person chooses the app icon (comparison sheet)", "foundation", "builtin", action="icon_select", deps=["icon.concepts"],
+               gate=[{"type": "status_ok"}])
+    master = T("icon.master", "Final app icon: the approved concept refined into a 1024 px master", "foundation", "agent", deps=["icon.select"],
+               work_order={"tools": ["vectorcraft", "photocraft"], "brief": "Refine the approved concept (selection.json in the hand-off) into the final master icon.",
+                           "instructions": ["Keep the approved idea; do not switch to another concept (that needs a new approval).",
+                                            "Export icon-1024.png at exactly 1024 x 1024 (full-bleed square: platforms apply their own corner mask) and icon.svg.",
+                                            "Check it at 32 px: the silhouette must still read."],
+                           "expected": [{"path": "icon-1024.png", "format": "png", "validate": "icon_master", "role": "icon_master"}],
+                           "license": "owned by the project (made with GITCRAFT VectorCraft)"})
+    params = {"master": {"$from": "icon.master", "role": "icon_master"}, "name": spec["title"]}
+    if identity: params["background"] = {"$from": identity, "role": "*", "format": "json", "json": "background"}
+    deriv = T("icon.derivatives", "App icon set: PWA 192/512, maskable, Apple touch 180, favicons (from the approved master)", "foundation", "builtin",
+              action="icon_derivatives", params=params, deps=["icon.master"] + ([identity] if identity else []),
+              ship={"dest": adir("icons"), "roles": ["icon", "favicon", "icon_master"]}, gate=[{"type": "status_ok"}], criterion="app_icon")
+    return [concepts, select, master, deriv]
 
 
 def parallel_groups(plan):

@@ -16,6 +16,9 @@ import json, os, re
 from . import executors
 
 
+SOURCE_ROLES = {"icon_master"}
+
+
 def get(d, path):
     for k in path.split("."):
         if not isinstance(d, dict) or k not in d: return None
@@ -50,7 +53,8 @@ def evaluate(task, res, ctx):
         elif ty == "referenced":
             man = ctx.get("integrated") or []
             src = _source_text(ctx["project"])
-            missing = [m["dest_rel"] for m in man if os.path.basename(m["dest_rel"]) not in src]
+            # an icon master is preserved source artwork (the derivatives are what the build references)
+            missing = [m["dest_rel"] for m in man if m.get("role") not in SOURCE_ROLES and os.path.basename(m["dest_rel"]) not in src]
             out.append({"condition": "every integrated asset is referenced by the build", "ok": not missing, "detail": missing[:20] or None,
                         "measured": f"{len(man) - len(missing)}/{len(man)} referenced"})
         elif ty == "advisory":
@@ -63,7 +67,7 @@ def _source_text(project):
     for d, dirs, files in os.walk(project):
         dirs[:] = [x for x in dirs if x not in (".git", "node_modules")]
         for f in files:
-            if f.endswith((".js", ".mjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".json")) and "assets" not in os.path.relpath(d, project).split(os.sep)[:2]:
+            if f.endswith((".js", ".mjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".webmanifest", ".vue", ".svelte")) and "assets" not in os.path.relpath(d, project).split(os.sep)[:2]:
                 try: buf.append(open(os.path.join(d, f), errors="ignore").read(2_000_000))
                 except OSError: pass
     return "\n".join(buf)
@@ -85,6 +89,10 @@ def check_expected(expected, base, project, roots_ok):
                 if miss: ok, v = False, {"ok": False, "error": f"missing keys {miss}"}
             except ValueError as ex: ok, v = False, {"ok": False, "error": str(ex)}
         res.append({"name": f"{e['path']} exists and opens as {e.get('format') or v.get('format')}", "ok": ok, "detail": v.get("error") or v.get("note")})
+        if ok and e.get("validate"):   # a content check beyond the format (e.g. the icon concepts, the 1024 master)
+            from . import icons
+            extra = icons.VALIDATORS[e["validate"]](p, base)
+            res += extra; ok = all(c["ok"] for c in extra)
         if ok: outs.append({"path": p, "role": e.get("role") or os.path.splitext(os.path.basename(p))[0], "format": v.get("format"), "ok": True})
     return res, outs
 
