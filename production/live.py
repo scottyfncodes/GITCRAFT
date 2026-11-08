@@ -56,13 +56,24 @@ def _local(project, entry, ref):
     return next((c for c in cands if os.path.isfile(c)), None)
 
 
+def _playwright():
+    """(module, chromium) the way the Studio finds them (studio/core/deps.py: env, studio runtime, /opt, the global npm root)."""
+    import importlib, sys
+    sd = os.path.join(os.path.dirname(HERE), "studio")
+    if sd not in sys.path: sys.path.insert(0, sd)
+    try: return importlib.import_module("core.deps").resolve_playwright()
+    except Exception: return None, None
+
+
 def browser_check(url, out_dir):
     """Chromium on phone + desktop (production/web/verify_live.mjs)."""
     if not shutil.which("node"): return {"error": "node is not installed here"}
+    pw, chrome = _playwright()
     d = tempfile.mkdtemp(prefix="gitcraft-live-"); reqp, resp = os.path.join(d, "req.json"), os.path.join(d, "res.json")
     json.dump({"url": url, "out_dir": out_dir, "_result": resp}, open(reqp, "w"))
     try:
-        subprocess.run(["node", os.path.join(HERE, "web", "verify_live.mjs"), reqp], capture_output=True, text=True, timeout=240)
+        env = dict(os.environ, **{k: v for k, v in (("PLAYWRIGHT_MODULE", pw), ("CHROMIUM_PATH", chrome)) if v})
+        subprocess.run(["node", os.path.join(HERE, "web", "verify_live.mjs"), reqp], capture_output=True, text=True, timeout=240, env=env)
         return json.load(open(resp))
     except (subprocess.TimeoutExpired, OSError, ValueError) as e:
         return {"error": f"the browser check did not finish: {e}"}
