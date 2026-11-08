@@ -271,7 +271,26 @@ def validate_master(path, base=None):
             {"name": "the master is decodable (8/16-bit, not interlaced)", "ok": il == 0 and bd in (8, 16) or ct == 3, "detail": f"bit depth {bd}, interlace {il}"}]
 
 
-VALIDATORS = {"icon_concepts": validate_concepts, "icon_master": validate_master}
+def validate_features(path, base=None):
+    """tests/gitcraft.features.json: named features, each ending in something a person can see (expect/assert)."""
+    try: data = json.load(open(path))
+    except (OSError, ValueError) as e: return [{"name": "the feature file reads as JSON", "ok": False, "detail": str(e)}]
+    fs = data.get("features") or []
+    bad = [f.get("name") or f"#{i}" for i, f in enumerate(fs, 1) if not f.get("name") or not any(("expect" in st or "assert" in st) for st in f.get("steps") or [])]
+    return [{"name": "at least one feature is listed", "ok": bool(fs), "detail": f"{len(fs)} features"},
+            {"name": "every feature ends in an observable outcome (expect or assert)", "ok": not bad, "detail": bad[:8] or None}]
+
+
+SECRETISH = re.compile(r"(postgres(?:ql)?://[^\s\"']*:[^\s\"'@]+@|npg_[A-Za-z0-9]{8,}|sk_(?:live|test)_[A-Za-z0-9]{8,}|eyJhbGciOi|password\"\s*:\s*\"[^\"]{4,})", re.I)
+
+
+def validate_no_secrets(path, base=None):
+    t = open(path, errors="ignore").read()
+    m = SECRETISH.search(t)
+    return [{"name": f"{os.path.basename(path)} holds names only, no secret values", "ok": not m, "detail": "a connection string, key or password is in the file: remove it" if m else None}]
+
+
+VALIDATORS = {"icon_concepts": validate_concepts, "icon_master": validate_master, "features": validate_features, "no_secrets": validate_no_secrets}
 
 
 # ---------------------------------------------------------------- the comparison sheet a person chooses from
@@ -311,7 +330,44 @@ def href_prefix(asset_dir):
     return (a + "/icons/") if a else "icons/"
 
 
-def derivatives(master, out_dir, background=None, name="App", theme=None, prefix="icons/", source_svg=None):
+ANDROID = [("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)]
+
+
+def native_sets(w, h, px, bg, out_dir, platforms):
+    """iOS: a single-size 1024 asset catalog (opaque: the App Store rejects alpha). Android: legacy mipmaps plus an
+    adaptive icon (108 dp foreground with the art in the 66 dp safe zone, over a solid background colour)."""
+    outs, checks = [], []
+    if "ios" in platforms:
+        d = os.path.join(out_dir, "ios", "AppIcon.appiconset"); os.makedirs(d, exist_ok=True)
+        p = encode(os.path.join(d, "AppIcon-1024.png"), w, h, flatten(w, h, px, bg))
+        json.dump({"images": [{"filename": "AppIcon-1024.png", "idiom": "universal", "platform": "ios", "size": "1024x1024"}], "info": {"author": "gitcraft", "version": 1}},
+                  open(os.path.join(d, "Contents.json"), "w"), indent=1)
+        outs += [{"path": p, "rel": "ios/AppIcon.appiconset/AppIcon-1024.png", "role": "icon_native", "format": "png"},
+                 {"path": os.path.join(d, "Contents.json"), "rel": "ios/AppIcon.appiconset/Contents.json", "role": "icon_native", "format": "json"}]
+        checks.append({"name": "iOS: 1024 x 1024 opaque App Store icon + Contents.json", "ok": opaque(decode(p)[2])})
+    if "android" in platforms:
+        hexbg = "#%02x%02x%02x" % tuple(bg)
+        flat, safe = flatten(w, h, px, bg), pad(w, h, px, 66 / 108, bg)   # once, then resized per density
+        for dens, size in ANDROID:
+            d = os.path.join(out_dir, "android", "res", f"mipmap-{dens}")
+            p = encode(os.path.join(d, "ic_launcher.png"), size, size, resize(w, h, flat, size, size))
+            outs.append({"path": p, "rel": f"android/res/mipmap-{dens}/ic_launcher.png", "role": "icon_native", "format": "png"})
+            fg = os.path.join(d, "ic_launcher_foreground.png")
+            encode(fg, size * 9 // 4, size * 9 // 4, resize(w, h, safe, size * 9 // 4, size * 9 // 4))
+            outs.append({"path": fg, "rel": f"android/res/mipmap-{dens}/ic_launcher_foreground.png", "role": "icon_native", "format": "png"})
+        ad = os.path.join(out_dir, "android", "res", "mipmap-anydpi-v26"); os.makedirs(ad, exist_ok=True)
+        open(os.path.join(ad, "ic_launcher.xml"), "w").write('<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
+                                                             '  <background android:drawable="@color/ic_launcher_background"/>\n  <foreground android:drawable="@mipmap/ic_launcher_foreground"/>\n</adaptive-icon>\n')
+        vd = os.path.join(out_dir, "android", "res", "values"); os.makedirs(vd, exist_ok=True)
+        open(os.path.join(vd, "ic_launcher_background.xml"), "w").write(f'<?xml version="1.0" encoding="utf-8"?>\n<resources>\n  <color name="ic_launcher_background">{hexbg}</color>\n</resources>\n')
+        outs += [{"path": os.path.join(ad, "ic_launcher.xml"), "rel": "android/res/mipmap-anydpi-v26/ic_launcher.xml", "role": "icon_native", "format": "text"},
+                 {"path": os.path.join(vd, "ic_launcher_background.xml"), "rel": "android/res/values/ic_launcher_background.xml", "role": "icon_native", "format": "text"}]
+        checks.append({"name": "Android: mipmaps 48-192 px + adaptive icon (foreground in the safe zone, background colour)",
+                       "ok": all(header(o["path"])[:2] == (s2, s2) for o, (_, s2) in zip([o for o in outs if o["rel"].endswith("/ic_launcher.png")], ANDROID))})
+    return outs, checks
+
+
+def derivatives(master, out_dir, background=None, name="App", theme=None, prefix="icons/", source_svg=None, platforms=()):
     """→ {status, outputs, checks, snippet}. Writes the PWA, Apple, maskable and favicon set beside a copy of the master."""
     os.makedirs(out_dir, exist_ok=True)
     w, h, px = decode(master)
@@ -336,6 +392,8 @@ def derivatives(master, out_dir, background=None, name="App", theme=None, prefix
     for s in (16, 32, 48):
         tmp = encode(os.path.join(out_dir, f".ico-{s}.png"), s, s, resize(w, h, px, s, s)); ico.append((s, open(tmp, "rb").read())); os.remove(tmp)
     outs.append({"path": write_ico(os.path.join(out_dir, "favicon.ico"), ico), "role": "favicon", "format": "ico"})
+    if platforms:
+        n_outs, n_checks = native_sets(w, h, px, bg, out_dir, platforms); outs += n_outs; checks += n_checks
     small = resize(w, h, px, 32, 32); c32 = round(contrast(32, 32, small), 1)
     checks.append({"name": "small-size clarity: the 32 px icon has a visible shape (luminance spread ≥ 12)", "ok": c32 >= 12, "measured": c32,
                    "detail": None if c32 >= 12 else "at 32 px the icon is nearly one flat tone: simplify the mark or raise its contrast"})

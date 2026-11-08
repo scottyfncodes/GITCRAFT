@@ -115,7 +115,7 @@ def _norm_outputs(res):
     outs = []
     for o in res.get("outputs") or []:
         p = o["path"] if os.path.isabs(o["path"]) else os.path.join(base, o["path"])
-        outs.append({"path": p, "role": o.get("role"), "format": o.get("format"), "ok": o.get("ok", True),
+        outs.append({"path": p, "role": o.get("role"), "format": o.get("format"), "ok": o.get("ok", True), **({"rel": o["rel"]} if o.get("rel") else {}),
                      "sha256": o.get("sha256") or (builtins.sha256(p) if os.path.isfile(p) else None)})
     return outs
 
@@ -299,9 +299,20 @@ def decide(pid, answers=None, approve=False, note=None, store_dir=None):
             if open_q: raise ValueError(f"essential questions need an answer first: {open_q}")
             if any(d["id"] == "scope" and d.get("answer") == "revise" for d in prod["decision_room"]):
                 raise ValueError("the scope is marked for revision: send production_revise with the change, then approve")
+            # approving the recommendations means applying them: a default that differs from the plan re-plans first
+            pending = {d["id"]: d["recommended"] for d in prod["decision_room"] if d.get("answer") is None and d["kind"] == "choice"
+                       and d["recommended"] in [o["value"] for o in d["options"]]}
+            ov = lifecycle.overrides_for(prod["decision_room"], pending)
             for d in prod["decision_room"]:
                 if d.get("answer") is None: d.update(answer=d["recommended"], status="approved (recommended)")
-                else: d["status"] = "approved"
+            if ov and lifecycle.material(prod["spec"], intake.merge(prod["spec"], ov)):
+                prod["overrides"] = intake.merge(prod.get("overrides") or {}, ov)
+                _discover_and_plan(prod)
+                if prod.get("problems"): raise ValueError("the recommended defaults produce a plan with problems: " + "; ".join(prod["problems"][:4]))
+                for d in prod["decision_room"]:
+                    if d.get("answer") is None: d.update(answer=d["recommended"], status="approved (recommended)")
+            for d in prod["decision_room"]:
+                if d["status"] != "approved (recommended)": d["status"] = "approved"
             prod["blueprint"] = dict(lifecycle.blueprint(prod), version=1, note_from_person=note)
             prod.setdefault("decisions", []).append("blueprint approved" + (f" — {note}" if note else ""))
             lifecycle.move(prod, "approved"); prod["status"] = "planned"; lc["stage"] = None

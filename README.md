@@ -26,6 +26,7 @@ The **Production Director** (`production/`, served as studiocraft's `production_
    - Department tasks execute concurrently, with retries and honest `blocked` states.
    - Work only Claude can do (code, wiring the assets in, VectorCraft art) goes out as validated work orders.
    - A failed QA gate (TestCraft, PLAYCRAFT, PIXELCRAFT, asset integrity, licences) becomes a fix work order, followed by a re-verification of the modified build.
+   - New apps start from a **starter** with the standards already wired in; each planned feature gets a **browser check**; shared data gets an approved **hosted Postgres** with separate development and production; going live is **verified**: the live URL must serve this exact build (`verify-live`).
    - Every web app gets the **App Icon Studio**: concepts → a person's choice → a 1024 master → the PWA, Apple and favicon set, wired in and verified. It also gets the quiet **"by HaveAnApp"** maker's credit and **proportionate engineering checks** ([docs/app-standards.md](docs/app-standards.md)).
 6. It releases only when every criterion is measured on the exact build being released, and never treats a deployment as live without a check against it.
 

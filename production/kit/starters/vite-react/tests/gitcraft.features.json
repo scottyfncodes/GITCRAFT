@@ -1,0 +1,6 @@
+{
+ "_how": "One entry per feature in the plan: steps a person would take, ending in what they should see. Steps: {click: '#id'}, {fill: '#field', value: 'text'}, {press: 'Enter'}, {wait: 300}, {expect: '.selector', text: 'shown text'}, {assert: 'js expression'}. qa.features runs every feature in Chromium on a phone.",
+ "features": [
+  {"name": "the app opens ready to use", "requirement": "the first screen", "steps": [{"expect": "#content", "text": "Ready"}]}
+ ]
+}

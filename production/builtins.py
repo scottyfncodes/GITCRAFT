@@ -34,10 +34,32 @@ def select(outputs, roles=("*",), formats=None):
                                                                                        or os.path.splitext(o["path"])[1].lstrip(".") in formats)]
 
 
+STARTERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kit", "starters")
+
+
+def _copy_starter(name, proj, title):
+    """Copy a starter into an empty project, filling {{TITLE}}/{{SHORT}}/{{SLUG}}; never overwrites a file."""
+    src = os.path.join(STARTERS, name); made = []
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-") or "app"
+    for d, _, files in os.walk(src):
+        for f in files:
+            sp = os.path.join(d, f); rel = os.path.relpath(sp, src); dp = os.path.join(proj, rel)
+            if os.path.exists(dp): continue
+            os.makedirs(os.path.dirname(dp), exist_ok=True)
+            with open(sp, encoding="utf-8") as fh: t = fh.read()
+            t = t.replace("{{TITLE}}", title).replace("{{SHORT}}", title[:12]).replace("{{SLUG}}", slug)
+            with open(dp, "w", encoding="utf-8") as fh: fh.write(t)
+            made.append(rel)
+    return made
+
+
 def scaffold(ctx):
     proj = ctx["project"]; made = []
     if not ctx["inside_roots"](proj): return {"status": "failed", "failure": "request", "error": f"GITCRAFT policy: project {proj} is outside the workspace roots"}
+    empty = not os.path.isdir(proj) or not any(not n.startswith(".") for n in os.listdir(proj))
     if not os.path.isdir(proj): os.makedirs(proj); made.append(proj)
+    starter = ctx["params"].get("starter")
+    if starter and empty: made += [f"starter {starter}: {r}" for r in _copy_starter(starter, proj, ctx["params"].get("title") or "App")]
     for d in ctx["params"].get("dirs", []):
         p = os.path.join(proj, d)
         if not os.path.isdir(p): os.makedirs(p); made.append(p)
@@ -57,8 +79,9 @@ def integrate(ctx):
             if aid: plan[f"library:{aid}"] = {"task": up["id"], "library_asset": aid, "dest_dir": dest_dir}
             continue
         for o in select(up.get("outputs", []), ship.get("roles", ["*"]), ship.get("formats")):
-            dest = os.path.join(dest_dir, os.path.basename(o["path"]))
-            item = {"task": up["id"], "src": o["path"], "dest": dest, "sha256": o.get("sha256") or sha256(o["path"]), "role": o.get("role"), "format": o.get("format"),
+            dd = (ship.get("role_dest") or {}).get(o.get("role"), ship["dest"]).replace("$project", proj)
+            dest = os.path.join(dd, o.get("rel") or os.path.basename(o["path"]))   # rel keeps a set's own folders (native icon sets)
+            item = {"task": up["id"], "src": o["path"], "dest": dest, "folder_licence": o.get("role") in (ship.get("folder_licence_roles") or []), "set_root": dd, "sha256": o.get("sha256") or sha256(o["path"]), "role": o.get("role"), "format": o.get("format"),
                     "license": up.get("license"), "attribution": up.get("attribution"), "record": (up.get("result") or {}).get("record")}
             if dest in plan and plan[dest]["sha256"] != item["sha256"]:
                 conflicts.append({"dest": os.path.relpath(dest, proj), "tasks": [plan[dest]["task"], up["id"]]})
@@ -90,7 +113,10 @@ def integrate(ctx):
         ok = sha256(dest) == it["sha256"]
         side = {"license": it.get("license") or "LicenseRef-Project-Owned", "attribution": it.get("attribution"),
                 "source": {"production": prod["id"], "task": it["task"], "record": it.get("record")}}
-        with open(dest + ".license.json", "w") as f: json.dump(side, f, indent=1)
+        if it.get("folder_licence"):   # platform folders (Android res/) reject stray files: one record at the set's root instead
+            with open(os.path.join(it["set_root"], "LICENSE.assets.json"), "w") as f: json.dump(side, f, indent=1)
+        else:
+            with open(dest + ".license.json", "w") as f: json.dump(side, f, indent=1)
         rel = os.path.relpath(dest, proj)
         manifest.append({"dest": dest, "dest_rel": rel, "sha256": it["sha256"], "role": it["role"], "format": it["format"], "task": it["task"], "replaced": replaced})
         outs.append({"path": dest, "role": it["role"], "format": it["format"], "sha256": it["sha256"], "ok": ok})
@@ -155,7 +181,8 @@ def icon_derivatives(ctx):
     svg = next((o["path"] for up in ctx["upstream"] for o in up.get("outputs", []) if o["path"].endswith(".svg") and "icon" in os.path.basename(o["path"])), None)
     try:
         return icons.derivatives(master, ctx["out_dir"], background=p.get("background"), name=p.get("name") or "App",
-                                 prefix=icons.href_prefix(ctx["spec"]["project"].get("asset_dir")), source_svg=svg)
+                                 prefix=icons.href_prefix(ctx["spec"]["project"].get("asset_dir")), source_svg=svg,
+                                 platforms=p.get("platforms") or ())
     except icons.PNGError as e:
         return {"status": "failed", "failure": "request", "error": f"the master cannot be decoded: {e}", "outputs": []}
 
@@ -201,7 +228,8 @@ def check_attribution(ctx):
 def check_standards(ctx):
     from . import standards
     p = ctx["params"]
-    return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app"), "standards.json")
+    return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app",
+                                             analytics=p.get("analytics"), backend=p.get("backend")), "standards.json")
 
 
 def check_preserve(ctx):
@@ -212,3 +240,27 @@ def check_preserve(ctx):
         return {"status": "failed", "failure": "handoff", "error": "no preservation baseline was recorded at Discovery", "outputs": []}
     with open(p["baseline"]) as f: base = json.load(f)
     return _with_report(ctx, maturity.preserve_check(ctx["project"], base, p.get("allow") or (), p.get("kind") or "app"), "preserve.json")
+
+
+def check_features(ctx):
+    """Every feature in tests/gitcraft.features.json, run in Chromium through TestCraft's scripted play (a fresh page each)."""
+    from . import icons
+    p = ctx["params"]; f = p.get("file")
+    if not f or not os.path.isfile(f):
+        if not p.get("required"):
+            return _with_report(ctx, {"status": "ok", "checks": [{"name": "no feature checks in this project (optional here)", "ok": True}], "outputs": []}, "features.json")
+        return _with_report(ctx, {"status": "failed", "checks": [{"name": "tests/gitcraft.features.json exists", "ok": False, "detail": "write one check per planned feature"}],
+                                  "outputs": []}, "features.json")
+    shape = icons.validate_features(f)
+    if not all(c["ok"] for c in shape): return _with_report(ctx, {"status": "failed", "checks": shape, "outputs": []}, "features.json")
+    feats = json.load(open(f))["features"]; checks, runs = list(shape), []
+    for i, ft in enumerate(feats, 1):
+        r = executors.studio_run("testcraft", "play", {"target": ctx["project"], "steps": ft["steps"], "viewports": p.get("viewports") or ["phone"],
+                                                       "out_dir": os.path.join(ctx["out_dir"], f"feature-{i}"), "name": f"feature_{i}", "register": False,
+                                                       "min_change": 0})
+        if r.get("status") == "blocked": return r
+        failed = [f"{c['name']}" + (f" ({c.get('detail')})" if c.get("detail") not in (None, "", True) else "") for c in r.get("checks", []) if not c.get("ok")]
+        ok = r.get("status") == "ok" and not failed
+        checks.append({"name": f"feature: {ft['name']}", "ok": ok, "detail": None if ok else (failed[:4] or r.get("error"))})
+        runs.append({"feature": ft["name"], "record": r.get("record"), "status": r.get("status")})
+    return _with_report(ctx, {"status": "ok" if all(c["ok"] for c in checks) else "failed", "checks": checks, "runs": runs, "outputs": []}, "features.json")

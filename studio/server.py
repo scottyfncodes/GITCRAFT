@@ -89,7 +89,8 @@ PRODUCTION_TOOLS = [
      "rebranding, new icon or redesign unless approved. Then production_decide (the person approves) and production_run.",
      {"type": "object", "properties": {"text": {"type": "string", "description": "what the person said, verbatim (may be just 'Run GITCRAFT')"},
       "project": {"type": "string", "description": "the project folder, when known (e.g. the session's repository)"},
-      "overrides": {"type": "object", "description": "corrections to the interpreted spec"}}}),
+      "overrides": {"type": "object", "description": "corrections to the interpreted spec"},
+      "issues": {"type": "array", "items": {"type": "object"}, "description": "the repository's open GitHub issues, when you can fetch them: [{number, title, labels}]"}}}),
     ("production_plan", "START HERE for any substantial deliverable (a game, app, site, asset pack): give the whole master prompt (New Build). GITCRAFT interprets it "
      "(deliverable, platform, features, quality bar, acceptance criteria, assumptions, essential questions), runs a read-only Discovery of the project and what can run here, "
      "plans every department's work as a dependency graph with parallel waves, hand-offs and quality gates, and opens the Decision Room. Nothing is built until a person "
@@ -148,7 +149,7 @@ def _production(name, a):
     from production.cli import plan_summary
     if name == "production_start":
         from production import entry
-        return entry.start(a.get("text") or "", a.get("project"), overrides=a.get("overrides"))
+        return entry.start(a.get("text") or "", a.get("project"), overrides=a.get("overrides"), issues=a.get("issues"))
     if name == "production_plan":
         pr = engine.plan(a["prompt"], a.get("project"), a.get("overrides"), recon=a.get("recon"))
         return pr if "recon_order" in pr else plan_summary(pr)

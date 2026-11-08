@@ -87,6 +87,10 @@ def main(argv):
         log("Landlock unavailable: running WITHOUT the filesystem sandbox.")
         os.execvp(cmd[0], cmd)
 
+    if no_net and abi < 4:   # TCP rules need Landlock ABI 4 (Linux 6.7+)
+        if require:
+            log(f"--no-net needs Landlock ABI 4 (Linux 6.7+); this kernel has ABI {abi}: refusing to run with network access (--require)."); return 126
+        log(f"warning: Landlock ABI {abi} cannot block TCP (needs ABI 4, Linux 6.7+): running with the filesystem sandbox but WITH network access.")
     handled = fs_rights(abi)
     attr = RulesetAttr(handled, (NET_BIND_TCP | NET_CONNECT_TCP) if (no_net and abi >= 4) else 0, 0)
     size = ctypes.sizeof(RulesetAttr) if abi >= 6 else (16 if abi >= 4 else 8)

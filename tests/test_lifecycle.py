@@ -283,7 +283,11 @@ if executors.studio_python():
 <main><h1>Tidepool</h1><p>High tide 06:12</p></main>{byline}<script>addEventListener('error', () => document.body.classList.add('err'))</script>
 <!-- {' '.join(os.path.basename(i) for i in integrated)} --></body></html>"""
     open(os.path.join(proj, "index.html"), "w").write(page(""))
-    st = engine.submit(pr["id"], "build", [os.path.join(proj, "index.html"), os.path.join(proj, "manifest.webmanifest")], "build without the byline", run_after=True)
+    check("starter: the new app started from the static-app starter (standards wired in)", os.path.isfile(os.path.join(proj, "app.js")) and os.path.isfile(os.path.join(proj, "tests", "gitcraft.features.json")))
+    json.dump({"features": [{"name": "shows the next high tide", "requirement": "a tide timetable", "steps": [{"expect": "main p", "text": "High tide"}]}]},
+              open(os.path.join(proj, "tests", "gitcraft.features.json"), "w"))
+    st = engine.submit(pr["id"], "build", [os.path.join(proj, "index.html"), os.path.join(proj, "manifest.webmanifest"), os.path.join(proj, "tests", "gitcraft.features.json")],
+                       "build without the byline", run_after=True)
     prx = store.load(pr["id"])
     check("qa.attribution: a build without the byline fails and becomes a fix work order", prx["tasks"]["qa.attribution"]["state"] == "failed"
           and "fix.qa.attribution.r1" in prx["tasks"], {k: (v["state"], v.get("error") or v.get("reason")) for k, v in prx["tasks"].items() if v["state"] != "passed"})
@@ -294,8 +298,10 @@ if executors.studio_python():
     prx = store.load(pr["id"])
     acc = {a["id"]: a["status"] for a in report.acceptance(prx)}
     check("app: after the fix, the attribution re-verification passes", engine.eff(prx, "qa.attribution")["state"] == "passed", engine.eff(prx, "qa.attribution").get("error"))
-    check("app: app_icon, attribution and engineering_standards criteria passed with evidence", all(acc.get(k) == "passed" for k in ("app_icon", "attribution", "engineering_standards")), acc)
-    check("app: the lifecycle reads delivered once the release passed", st["status"] == "passed" and st["stage"] == "delivered", (st["status"], st.get("stage"), acc))
+    check("app: app_icon, attribution, engineering_standards and features_work criteria passed with evidence",
+          all(acc.get(k) == "passed" for k in ("app_icon", "attribution", "engineering_standards", "features_work")), acc)
+    check("app: the lifecycle reads delivered once the release passed", st["status"] == "passed" and st["stage"] == "delivered",
+          (st["status"], st.get("stage"), {t["id"]: (t["state"], (t.get("reason") or t.get("error") or "")[:300]) for t in st["tasks"] if t["state"] not in ("passed", "skipped")}))
 else:
     print("SKIP the app production: the Studio runtime is not installed (scripts/install-studio.sh)")
 

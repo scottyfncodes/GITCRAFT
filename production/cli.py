@@ -1,6 +1,7 @@
 """GITCRAFT Production command line (the same calls as studiocraft's production_* tools).
 
   python3 -m production start ["Run GITCRAFT: <anything>"] [--project DIR]   the one entry point (idea, spec, repo URL, project)
+  python3 -m production verify-live <id> <url> [--submit]   after deploying: prove the live URL serves this release
   python3 -m production idea "<idea>" [--project DIR]               save an idea (nothing read or built)
   python3 -m production recon <id> [--depth quick|deep] [--findings FILE]   Recon work order / submit findings
   python3 -m production promote <id>                               idea → read-only Discovery → Decision Room
@@ -26,6 +27,8 @@ def main(argv=None):
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("plan"); p.add_argument("prompt"); p.add_argument("--project"); p.add_argument("--overrides"); p.add_argument("--recon", choices=["quick", "deep"])
     st = sp.add_parser("start", help="Run GITCRAFT: any idea, spec, repo URL or project folder"); st.add_argument("text", nargs="?", default=""); st.add_argument("--project")
+    vl = sp.add_parser("verify-live", help="after deploying: prove the live URL serves this release (run from your own shell)")
+    vl.add_argument("id"); vl.add_argument("url"); vl.add_argument("--submit", action="store_true"); vl.add_argument("--no-browser", action="store_true")
     i = sp.add_parser("idea"); i.add_argument("text"); i.add_argument("--project")
     rc = sp.add_parser("recon"); rc.add_argument("id"); rc.add_argument("--depth", default="quick", choices=["quick", "deep"]); rc.add_argument("--findings", help="JSON file of findings to submit")
     pm = sp.add_parser("promote"); pm.add_argument("id"); pm.add_argument("--overrides")
@@ -47,6 +50,15 @@ def main(argv=None):
     elif o.cmd == "start":
         from . import entry
         out = entry.start(o.text, o.project)
+    elif o.cmd == "verify-live":
+        from . import live
+        rec = live.verify(store.load(o.id), o.url, browser=not o.no_browser)
+        out = {"status": rec["status"], "record": rec["record"], "failed": [c for c in rec["checks"] if not c["ok"]] or None}
+        if o.submit:
+            pr = store.load(o.id); t = pr["tasks"].get("release.deploy")
+            if not t: out["submit"] = "this production has no deployment task"
+            elif t["state"] != "awaiting_agent": out["submit"] = f"release.deploy is {t['state']}, not waiting for the deployment (approve it first)"
+            else: out["submit"] = engine.submit(o.id, "release.deploy", url=o.url, evidence=rec["record"], notes="verify-live")["submission"]
     elif o.cmd == "idea": pr = engine.idea(o.text, o.project); out = dict(engine.lifecycle_view(pr), brief=pr["brief"])
     elif o.cmd == "recon": out = engine.submit_recon(o.id, json.load(open(o.findings))) if o.findings else engine.start_recon(o.id, o.depth)
     elif o.cmd == "promote": out = plan_summary(engine.promote(o.id, json.loads(o.overrides) if o.overrides else None))

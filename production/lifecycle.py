@@ -91,11 +91,13 @@ def decisions(spec, disc, icon_state=None):
                       {o["value"]: {"platform": {"engine": o["value"]}} for o in opts[:4]},
                       "Existing code is reused, never rewritten." if found else "The lightest stack that does the job is the default."))
         keep_design = existing or bool(proj.get("assets", {}).get("vector"))
+        ident = bool(spec["assets"].get("identity"))
         out.append(_d("design", "Design direction", "Give it an original visual identity (palette, logo) derived from the idea?" if not keep_design
                       else "Keep the project's existing look and brand (no redesign)?",
-                      "original" if not keep_design else "keep",
+                      ("original" if ident else "keep") if not keep_design else "keep",
                       [{"value": "original", "label": "Original identity", "tradeoff": "a palette and logo made for this app with VectorCraft"},
-                       {"value": "keep", "label": "Keep what the project has", "tradeoff": "no new brand work; the build follows existing assets"}],
+                       {"value": "keep", "label": "Keep it simple" if not keep_design else "Keep what the project has",
+                        "tradeoff": "no separate brand work; the build picks a clean palette" if not keep_design else "no new brand work; the build follows existing assets"}],
                       {"original": {"assets": {"identity": True}}, "keep": {"assets": {"identity": False}}},
                       "Every app keeps its own identity; there is no shared GITCRAFT style."))
         st = (icon_state or {}).get("status", "none")
@@ -129,12 +131,42 @@ def decisions(spec, disc, icon_state=None):
                   [{"value": "free", "label": "No new costs (recommended)", "tradeoff": "everything runs on what is already here"},
                    {"value": "allow_paid", "label": "Paid services allowed", "tradeoff": "each one still needs your approval when it comes up"}],
                   {"free": {"authorisations": {"spend": False}}, "allow_paid": {}}, "Spending is never pre-authorised."))
-    if spec["features"].get("deploy"):
-        out.append(_d("deployment", "Where it goes live", "Deploy after it passes every check, to the target you approve when it is ready?", "approve_at_release",
-                      [{"value": "approve_at_release", "label": "Ask me at release", "tradeoff": "the release is verified first; you approve the deploy then"},
-                       {"value": "no_deploy", "label": "Don't deploy", "tradeoff": "you get the verified project and report only"}],
-                      {"approve_at_release": {}, "no_deploy": {"features": {"deploy": False}}},
-                      "A deployment is only recorded as live with a check against the live URL."))
+    if web:
+        pth = (spec.get("project") or {}).get("path") or ""
+        found = [f for f in ("vercel.json", ".vercel/project.json", "netlify.toml", "CNAME", "firebase.json", "fly.toml", "render.yaml") if pth and os.path.exists(os.path.join(pth, f))]
+        wf = os.path.join(pth, ".github", "workflows") if pth else ""
+        if wf and os.path.isdir(wf): found += [f".github/workflows/{f}" for f in os.listdir(wf) if re.search(r"deploy|pages|release|publish", f, re.I)]
+        asked = bool(spec["features"].get("deploy"))
+        opts = ([{"value": "existing", "label": "The project's own pipeline", "tradeoff": f"uses what is already set up ({', '.join(found[:3])})"}] if found else []) + [
+            {"value": "vercel", "label": "Vercel", "tradeoff": "the connected Vercel account; a preview per PR and production from main"},
+            {"value": "github_pages", "label": "GitHub Pages", "tradeoff": "free static hosting from the repository; static sites and games only"},
+            {"value": "no_deploy", "label": "Don't deploy", "tradeoff": "you get the verified project and report only"}]
+        rec = "existing" if found else ("vercel" if asked else "no_deploy")   # an existing pipeline is how this project delivers
+        out.append(_d("deployment", "Where it goes live", "Deploy it once every check passes? You approve the deploy itself at release; it counts as live only after "
+                      "GITCRAFT opens the live URL and finds this exact build there.", rec, opts,
+                      {o["value"]: ({"features": {"deploy": False}, "deploy": {"target": None}} if o["value"] == "no_deploy" else
+                                    {"features": {"deploy": True}, "deploy": {"target": o["value"], "found": found}}) for o in opts},
+                      ("you asked for it to go live" if asked else "you didn't ask for deployment") + (f"; found {', '.join(found[:3])}" if found else "")))
+        if spec.get("backend", {}).get("needed"):
+            out.append(_d("backend", "Where its data lives", "It needs shared data (" + ", ".join((spec["backend"].get("because") or [])[:3]) + "). Use a hosted Postgres database "
+                          "with a small API, set up separately for development and production?", "postgres",
+                          [{"value": "postgres", "label": "Hosted Postgres + API", "tradeoff": "real accounts and sync; uses the connected Neon account; you approve the setup"},
+                           {"value": "local", "label": "On the device only", "tradeoff": "no server or cost; data stays in one browser and does not sync"}],
+                          {"postgres": {"backend": {"provider": "postgres"}}, "local": {"backend": {"provider": "local"}}},
+                          "Infrastructure is never created without your approval; secrets never go in the repository."))
+        if not existing:
+            prof = spec.get("engineering", {}).get("profile", "personal")
+            rec_a = "pulse" if prof == "public" or d == "site" else "none"
+            out.append(_d("analytics", "Usage counts", "Count visits with HaveAnApp Pulse (anonymous and cookieless, as in HangarBook)?", rec_a,
+                          [{"value": "pulse", "label": "HaveAnApp Pulse", "tradeoff": "anonymous page counts; no cookies, no personal data; one script tag"},
+                           {"value": "none", "label": "No analytics", "tradeoff": "nothing is counted"}],
+                          {"pulse": {"analytics": {"provider": "pulse"}}, "none": {"analytics": {"provider": None}}},
+                          "recommended for public apps and sites; a private app does not need it"))
+        if spec["platform"].get("native"):
+            out.append(_d("native", "Native app icons", f"Also produce the {' and '.join(spec['platform']['native'])} icon sets from the approved master?", "yes",
+                          [{"value": "yes", "label": "Yes", "tradeoff": "iOS asset catalog (1024, opaque) and Android mipmaps + adaptive icon"},
+                           {"value": "no", "label": "Web icons only", "tradeoff": "PWA, Apple touch and favicons"}],
+                          {"yes": {}, "no": {"platform": {"native": []}}}, "GITCRAFT builds web apps; the native icon sets are ready for a native wrapper or app project."))
     if web and proj.get("exists"):
         out.append(_d("attribution", "HaveAnApp credit", "Add the quiet 'by HaveAnApp' credit to this existing app?", "leave",
                       [{"value": "add", "label": "Add it", "tradeoff": "a small byline in the footer or About screen"},
@@ -166,6 +198,7 @@ def overrides_for(decs, answers):
 
 # ---------------------------------------------------------------- the blueprint and deviations
 MATERIAL_KEYS = ("deliverable", "dimension", "platform", "genres", "features", "assets", "authorisations", "engineering", "icon", "attribution",
+                 "deploy", "analytics", "backend",
                  "extra_tasks", "skip_tasks", "project")
 
 
@@ -276,6 +309,7 @@ def discovery_report(prod):
         L += [f"  - evidence: {e}" for e in m.get("evidence", [])]
         inv = m.get("inventory") or {}
         for key, head, why in (("working", "Working (keep as it is)", "evidence"), ("unfinished", "Unfinished", None), ("defects", "Defects", None),
+                               ("requests", "Requests from open issues (done only if the blueprint includes them)", None),
                                ("improvements", "Optional improvements (not done unless approved)", None)):
             items = inv.get(key) or []
             if not items: continue
@@ -283,7 +317,8 @@ def discovery_report(prod):
             L += [f"  - {x['what']}" + (f" — `{x['where']}`" if x.get("where") else "") + (f" ({x['evidence']})" if why and x.get("evidence") else "") for x in items[:12]]
             if len(items) > 12: L.append(f"  - … and {len(items) - 12} more")
         if m.get("save_keys"): L.append(f"- **Saved data** (preserved): storage keys {', '.join(m['save_keys'][:10])}")
-        L.append("- Not inspected here: open GitHub issues and the live deployment (no network inside the sandbox; the agent adds them when it can).")
+        L.append("- Open GitHub issues: " + ("read (in the inventory above)." if m.get("issues_read") else "not read (pass them to production_start as issues; the sandbox has no network).")
+                 + " The live deployment is checked at release (verify-live).")
     L.append(f"- GITCRAFT departments ready on this machine: {ready}/{total} actions" + (f" (Studio: {st.get('reason')})" if st.get("status") == "blocked" else ""))
     L += ["", "## 3. Recommended approach", ""]
     for o, ids in owners.items(): L.append(f"- **{o}:** {len(ids)} task(s) — {', '.join(ids[:6])}{'…' if len(ids) > 6 else ''}")

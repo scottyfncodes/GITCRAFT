@@ -149,6 +149,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - `tests/test_entry.py` must pass after any change to `production/entry.py`, `maturity.py`, the existing-project paths of the
   planner/intake/lifecycle, or the "Run GITCRAFT" wording in `global/`; Discovery stays read-only, and an existing project never gets
   scaffolding, rebranding, a new icon or a redesign without the Decision Room's approval.
+- `tests/test_gaps.py` must pass after any change to `production/live.py`, `production/web/`, the starters (`production/kit/starters`),
+  feature checks, backend/analytics/native decisions or the native icon sets; `verify-live` never records a deployment live
+  without measuring this exact build at the URL, and never disables TLS verification.
 - `tests/test_hardening.py` must pass after any change to `scripts/guard.py` or `ui/server.py` (docs/tech-debt.md).
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a

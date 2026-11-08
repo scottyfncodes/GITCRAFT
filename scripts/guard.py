@@ -58,13 +58,20 @@ def inside(path, roots):
     return any(p == r or p.startswith(r + os.sep) for r in roots), p
 
 
+_DIGESTS = {}   # (path, size, mtime_ns) → sha256: an unchanged input is not re-hashed on every call
+
+
 def digest(p):
     try:
         if os.path.isfile(p) and os.path.getsize(p) <= 512 * 2**20:
-            h = hashlib.sha256()
-            with open(p, "rb") as f:
-                for b in iter(lambda: f.read(1 << 20), b""): h.update(b)
-            return {"path": p, "bytes": os.path.getsize(p), "sha256": h.hexdigest()}
+            st = os.stat(p); key = (p, st.st_size, st.st_mtime_ns)
+            if key not in _DIGESTS:
+                h = hashlib.sha256()
+                with open(p, "rb") as f:
+                    for b in iter(lambda: f.read(1 << 20), b""): h.update(b)
+                if len(_DIGESTS) > 5000: _DIGESTS.clear()
+                _DIGESTS[key] = h.hexdigest()
+            return {"path": p, "bytes": st.st_size, "sha256": _DIGESTS[key]}
         if os.path.isdir(p): return {"path": p, "dir": True}
     except OSError:
         pass
@@ -134,6 +141,7 @@ def main():
 
     def from_server():
         for line in proc.stdout:
+            emit(line)   # the client gets its answer first; the audit record (which hashes files) follows
             try:
                 msg = json.loads(line)
                 if isinstance(msg, dict) and msg.get("id") in pending:
@@ -151,7 +159,6 @@ def main():
                     audit.write(json.dumps(rec) + "\n")
             except Exception:
                 pass
-            emit(line)
         os._exit(proc.wait() or 0)
 
     reader = threading.Thread(target=from_server, daemon=True); reader.start()

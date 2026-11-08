@@ -22,14 +22,21 @@ Regression tests for the fixed items: `tests/test_hardening.py`. Each test was c
 | L1 | P1 | `production/engine.py` | Approving Discovery was the same as authorising the build: `production_plan` → `production_run` built with no human approval of the plan's material choices, and a later change of scope was applied silently. | By design (no approval step existed) | The Decision Room and blueprint (`production_decide`): `run` refuses until a blueprint is approved, and a material revision pauses the build until it is approved again (docs/production.md) |
 | L2 | P2 | `production/builtins.py` | A measured QA built-in that returned no output file was classed as an execution failure. It was retried and never remediated. | Demonstrated while adding `qa.attribution` | Built-in checks write their evidence (`_with_report`), so a failure is a quality finding with a fix work order |
 
+## Fixed in the follow-up (gap closure)
+
+| ID | Was | Fix |
+|---|---|---|
+| F5 | `test_netgate.py` failed on every standard install (the CC0 allow-list) | `GITCRAFT_ALLOW_HOSTS[_TOOL]=none` is an explicit no-network run (the allow-hosts file is not read); the test uses it. 8/8 |
+| F6 | `--no-net` dropped silently on Landlock ABI < 4 | a warning, and `--require` refuses to run with network access |
+| F7 | audit hashing delayed every response | the response goes out first; hashes are cached by path, size and mtime |
+| F8 | the UI's pool lock was held while a tool server started | a per-tool start lock; the pool lock guards only the dictionary |
+| CI | `testcraft: FPS profile` failed at 50.1 ms on a runner (PR #49) | the test checks that the profiler measures and gates, at the production "standard" budget (100 ms) |
+| L3 | the live browser check routed `127.0.0.1` through the HTTPS proxy (405) | localhost and `NO_PROXY` hosts bypass the proxy |
+
 ## Remaining, prioritised (not changed: low risk or out of this upgrade's scope)
 
 | ID | P | Where | Problem | Evidence | Suggested fix |
 |---|---|---|---|---|---|
-| F5 | P2 | `tests/test_netgate.py` vs `scripts/install-global.sh` | The installer allows four CC0 hosts by default, but the test expects no network. It fails on every standard install. The UI shows "network denied" while netgate allows hosts. | Demonstrated (7/8) | Run the test with a temp `GITCRAFT_HOME` or `GITCRAFT_CC0_SOURCES=0`; have the UI show the netgate allowances |
-| F6 | P2 | `scripts/sandbox.py` | On kernels with Landlock ABI < 4 (before Linux 6.7), `--no-net` is dropped without a warning, even with `GITCRAFT_SANDBOX=require`. | Hypothetical (this kernel is ABI 7) | Warn, and refuse under `--require` |
-| F7 | P2 | `scripts/guard.py` | The audit hashes every output file (up to 512 MB × 200) before the response goes out, so large outputs can push a call past the client's timeout. | Hypothetical | Respond first and hash in a worker, or cache hashes by mtime and size |
-| F8 | P2 | `ui/server.py` `Pool.get` | The pool lock is held while a tool server starts (up to 60 s), which blocks every other call. | Hypothetical | Start the client outside the lock |
 | P1 | P2 | `production/discovery.py` | Up to 200 code files × 200 KB are read into one string to detect engines (up to 40 MB of memory). | Hypothetical | Stop reading at the first match per engine |
 | F9 | P3 | `tests/test_policy.py` | Crashes when ForgeCraft is in its deferred (Blender not yet installed) state, so the later network checks never run. | Demonstrated | Skip with a reason when the tool lists only its status tool |
 | F10–F12 | P3 | `ui/server.py`, `guard.py` | A file descriptor leaks per restarted UI client; duplicate `Cache-Control` headers on vendor files; the last guard response could be lost when stdin closes (F12 fixed with the reader join). | Partly demonstrated | Close the client's log handle; let callers override headers |
@@ -41,6 +48,11 @@ The production store's atomic `production.json` and per-production `flock`, the 
 Host/Origin checks, the static-file and library path validation, the department contract's validation and
 `blocked` semantics, and every existing suite that doesn't need Blender (`test_production.py` 43/43,
 `test_stdio_isolation.py` apart from the Blender server).
+
+## Known environment-dependent failures
+
+`tests/test_ui.py` fails 10 of 54 checks on a machine where MeshCraft's local three.js and Blender library are not fully
+installed. The same 10 fail on `main` before these changes. The suite is not part of CI.
 
 ## Test status at the time of the assessment
 

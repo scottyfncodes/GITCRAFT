@@ -73,10 +73,10 @@ c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=lenv)
 ok, st = c.call("studio_status"); c.close()
 check("mcp.sh: GITCRAFT_ALLOW_HOSTS_STUDIOCRAFT gives studiocraft netgate (sandbox +netgate, allowance reported)",
       ok and (st.get("network") or {}).get("allowed_hosts") == ["pypi.org"] and "+netgate" in (st.get("sandbox") or ""), {k: st.get(k) for k in ("sandbox", "network")})
-lenv.pop("GITCRAFT_ALLOW_HOSTS_STUDIOCRAFT")
+lenv["GITCRAFT_ALLOW_HOSTS_STUDIOCRAFT"] = "none"   # a standard install allows the CC0 hosts in ~/.gitcraft/allow-hosts; `none` is the explicit no-network run
 c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=lenv)
 ok, st = c.call("studio_status"); c.close()
-check("mcp.sh: without an allowance studiocraft has no network", ok and not (st.get("network") or {}).get("allowed_hosts") and "+nonet" in (st.get("sandbox") or "") and "+netgate" not in st.get("sandbox", ""),
+check("mcp.sh: with GITCRAFT_ALLOW_HOSTS_STUDIOCRAFT=none studiocraft has no network (the allow-hosts file is not read)", ok and not (st.get("network") or {}).get("allowed_hosts") and "+nonet" in (st.get("sandbox") or "") and "+netgate" not in st.get("sandbox", ""),
       {k: st.get(k) for k in ("sandbox", "network")})
 print(f"\n{sum(results)}/{len(results)} checks passed")
 sys.exit(0 if all(results) else 1)

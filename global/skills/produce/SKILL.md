@@ -31,8 +31,16 @@ It works out the rest; the person never needs to know these tools.
   untouched, game assets unchanged and every save key still used. Approved exceptions go in with `production_revise {overrides: {mode: {allow: [paths]}}}`.
 - Show the person the Discovery Report's state, evidence and inventory in a few lines, and the Decision Room's recommendations.
   Approval (`production_decide {approve: true}`) is theirs. Then the loop below from **Run**.
+- When you can read the repository's open issues (GitHub connection), pass them: `production_start {text, project, issues: [{number, title, labels}]}`.
 - Deliver in the project's own way: its branch and PR conventions, its CI, its deployment. Give the PR link and, when it deploys,
-  the live URL verified by a check against it. Never say done without the report's evidence.
+  the live URL. After deploying, prove it from your shell: `python3 -m production verify-live <production> <url> --submit`
+  (same build as released, files byte-identical, icons, Pulse, phone + desktop in Chromium). A login wall or an older
+  deployment fails: fix the deployment, never the check. Never say done or live without the report's evidence.
+- New apps start from a starter (standards already wired in). Write `tests/gitcraft.features.json`: one check per planned
+  feature, ending in what a person sees. `qa.features` runs them in Chromium.
+- A backend (hosted Postgres) is set up only after the person approves `backend.provision`. Use the connected Neon account
+  with separate development and production environments, put secrets only in the hosting env vars and a git-ignored `.env`,
+  and write a `backend.json` with names only.
 
 ## The loop
 
