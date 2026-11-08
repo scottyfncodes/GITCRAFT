@@ -57,39 +57,66 @@ def decisions(spec, disc, icon_state=None):
     out = []
     feats = [k for k, v in spec["features"].items() if v and k not in ("deploy",)]
     assets = [k for k, v in spec["assets"].items() if v]
-    out.append(_d("scope", "What gets built", f"Build {spec['title']} as a {spec['dimension'].upper()} {d}"
-                  + (f" ({', '.join(spec['genres'])})" if spec.get("genres") else "") + f" with {', '.join(feats + assets) or 'the core features'}?",
-                  "as_interpreted", [{"value": "as_interpreted", "label": "Yes, as described", "tradeoff": "what the plan below makes"},
-                                     {"value": "revise", "label": "Change the scope", "tradeoff": "answer with overrides (production_revise) before approving"}],
-                  {}, "The scope decides every department's work; the assumptions list what was filled in.", kind="confirm"))
+    mode = spec.get("mode") or {}
+    existing = bool(mode.get("existing"))
+    if existing:
+        from .maturity import WORKFLOW
+        mat = (mode.get("maturity") or "").replace("_", " ")
+        wf = mode.get("workflow") or "update"
+        opts = [{"value": w, "label": WORKFLOW[w].split(":")[0], "tradeoff": WORKFLOW[w].split(":", 1)[1].strip()} for w in ("continue", "complete", "update", "fix", "review")]
+        opts.sort(key=lambda o: o["value"] != wf)
+        if mode.get("question") and not mode.get("request"):
+            out.append(_d("request", "What should change", mode["question"], None, [], {"$answer": {"mode": {"request": "$answer"}}},
+                          "essential: the project looks finished, so GITCRAFT changes only what you name", kind="question"))
+        out.append(_d("scope", "What GITCRAFT will do", f"This looks like a {mat} {mode.get('kind') or spec['deliverable']} ({mode.get('confidence')} confidence). "
+                      f"{WORKFLOW[wf].split(':', 1)[1].strip().capitalize()}" + (f": {mode['request']}" if mode.get("request") else "") + "?",
+                      wf, opts, {o["value"]: {"mode": {"workflow": o["value"]}} for o in opts},
+                      f"read as '{wf}' because of {mode.get('because')}; the Discovery Report shows the evidence. Existing work is preserved (qa.preserve)."))
+    else:
+        out.append(_d("scope", "What gets built", f"Build {spec['title']} as a {spec['dimension'].upper()} {d}"
+                      + (f" ({', '.join(spec['genres'])})" if spec.get("genres") else "") + f" with {', '.join(feats + assets) or 'the core features'}?",
+                      "as_interpreted", [{"value": "as_interpreted", "label": "Yes, as described", "tradeoff": "what the plan below makes"},
+                                         {"value": "revise", "label": "Change the scope", "tradeoff": "answer with overrides (production_revise) before approving"}],
+                      {}, "The scope decides every department's work; the assumptions list what was filled in.", kind="confirm"))
     if web:
         eng = spec["platform"].get("engine")
-        existing = proj.get("engines") or []
-        rec = existing[0] if existing else (eng or ("three" if spec["dimension"] == "3d" else "canvas" if d == "game" else "vanilla"))
-        opts = [{"value": rec, "label": f"{rec} (recommended)", "tradeoff": "keeps the existing code" if existing else "no framework dependency; smallest, fastest load" if rec in ("canvas", "vanilla") else "suits what was asked"}]
+        found = proj.get("engines") or []
+        rec = found[0] if found else (eng or ("three" if spec["dimension"] == "3d" else "canvas" if d == "game" else "vanilla"))
+        opts = [{"value": rec, "label": f"{rec} (recommended)", "tradeoff": "keeps the existing code" if found else "no framework dependency; smallest, fastest load" if rec in ("canvas", "vanilla") else "suits what was asked"}]
         for alt, tr in (("vanilla", "plain HTML/JS: nothing to install, simplest to host"), ("react", "component model for larger UIs; adds a build step"),
                         ("phaser", "game framework: physics, scenes, input; ~1 MB"), ("three", "3D rendering")):
             if alt != rec and not (d != "game" and alt == "phaser") and not (spec["dimension"] != "3d" and alt == "three"): opts.append({"value": alt, "label": alt, "tradeoff": tr})
-        out.append(_d("architecture", "How it is built", f"Build it with {rec}?", rec, opts[:4],
+        if existing: opts = opts[:1] + [dict(o, tradeoff=o["tradeoff"] + " — a migration of working code: needs a strong reason") for o in opts[1:]]
+        out.append(_d("architecture", "How it is built", f"{'Keep building' if existing else 'Build it'} with {rec}?", rec, opts[:4],
                       {o["value"]: {"platform": {"engine": o["value"]}} for o in opts[:4]},
-                      "Existing code is reused, never rewritten." if existing else "The lightest stack that does the job is the default."))
-        out.append(_d("design", "Design direction", "Give it an original visual identity (palette, logo) derived from the idea?" if not proj.get("assets", {}).get("vector")
-                      else "Keep the project's existing brand assets as the design direction?",
-                      "original" if not proj.get("assets", {}).get("vector") else "keep",
+                      "Existing code is reused, never rewritten." if found else "The lightest stack that does the job is the default."))
+        keep_design = existing or bool(proj.get("assets", {}).get("vector"))
+        out.append(_d("design", "Design direction", "Give it an original visual identity (palette, logo) derived from the idea?" if not keep_design
+                      else "Keep the project's existing look and brand (no redesign)?",
+                      "original" if not keep_design else "keep",
                       [{"value": "original", "label": "Original identity", "tradeoff": "a palette and logo made for this app with VectorCraft"},
                        {"value": "keep", "label": "Keep what the project has", "tradeoff": "no new brand work; the build follows existing assets"}],
                       {"original": {"assets": {"identity": True}}, "keep": {"assets": {"identity": False}}},
                       "Every app keeps its own identity; there is no shared GITCRAFT style."))
         st = (icon_state or {}).get("status", "none")
-        rec_icon = "keep" if st == "candidate" else "new"
-        out.append(_d("app_icon", "App icon", {"candidate": f"The project has an icon that could be kept ({(icon_state or {}).get('best')}). Keep it, refine it, or design a new one?",
-                                               "weak": "The project's icon files are too small or not square. Design a new icon?",
-                                               "generic": "The project only has a framework's default icon. Design a new one?"}.get(st, "Design a new app icon: a few concepts to choose from, then the full set?"),
-                      rec_icon, [{"value": "new", "label": "New icon", "tradeoff": "2-4 concepts shown side by side; you pick one before it is finalised"},
-                                 {"value": "refine", "label": "Refine the existing icon", "tradeoff": "keeps its idea; redrawn as a 1024 px master"},
-                                 {"value": "keep", "label": "Keep the existing icon", "tradeoff": "only verified and wired in; nothing redrawn"}][: 3 if st == "candidate" else 1],
-                      {"new": {"icon": {"mode": "new"}}, "refine": {"icon": {"mode": "refine"}}, "keep": {"icon": {"mode": "keep"}}},
-                      (icon_state or {}).get("reason") or "No icon yet."))
+        if existing:   # an existing project's icon is never replaced unless the person asks
+            out.append(_d("app_icon", "App icon", f"Leave the project's icon as it is? ({(icon_state or {}).get('reason') or 'no change'})", "leave",
+                          [{"value": "leave", "label": "Leave it", "tradeoff": "no icon work"},
+                           {"value": "new", "label": "Design a new icon", "tradeoff": "concepts to choose from, then the full PWA/Apple/favicon set"}]
+                          + ([{"value": "refine", "label": "Refine the existing icon", "tradeoff": "keeps its idea; a clean 1024 master and the full set"}] if st == "candidate" else []),
+                          {"leave": {"icon": {"required": False}}, "new": {"icon": {"required": True, "mode": "new"}},
+                           "refine": {"icon": {"required": True, "mode": "refine", "existing": (icon_state or {}).get("best")}}},
+                          "Existing projects keep their icon unless you ask."))
+        else:
+            rec_icon = "keep" if st == "candidate" else "new"
+            out.append(_d("app_icon", "App icon", {"candidate": f"The project has an icon that could be kept ({(icon_state or {}).get('best')}). Keep it, refine it, or design a new one?",
+                                                   "weak": "The project's icon files are too small or not square. Design a new icon?",
+                                                   "generic": "The project only has a framework's default icon. Design a new one?"}.get(st, "Design a new app icon: a few concepts to choose from, then the full set?"),
+                          rec_icon, [{"value": "new", "label": "New icon", "tradeoff": "2-4 concepts shown side by side; you pick one before it is finalised"},
+                                     {"value": "refine", "label": "Refine the existing icon", "tradeoff": "keeps its idea; redrawn as a 1024 px master"},
+                                     {"value": "keep", "label": "Keep the existing icon", "tradeoff": "only verified and wired in; nothing redrawn"}][: 3 if st == "candidate" else 1],
+                          {"new": {"icon": {"mode": "new"}}, "refine": {"icon": {"mode": "refine"}}, "keep": {"icon": {"mode": "keep"}}},
+                          (icon_state or {}).get("reason") or "No icon yet."))
         prof = spec.get("engineering", {}).get("profile", "personal")
         out.append(_d("engineering", "Who uses it and what it holds", "Engineering standard: " + {"personal": "a private app for a few people, no accounts or sensitive data?",
                       "public": "a public app (anyone can open it, or it has accounts)?", "sensitive": "an app handling payments, health, financial or personal data?"}[prof],
@@ -109,7 +136,7 @@ def decisions(spec, disc, icon_state=None):
                       {"approve_at_release": {}, "no_deploy": {"features": {"deploy": False}}},
                       "A deployment is only recorded as live with a check against the live URL."))
     if web and proj.get("exists"):
-        out.append(_d("attribution", "HaveAnApp credit", "Add the quiet 'by HaveAnApp' credit to this existing app?", "add",
+        out.append(_d("attribution", "HaveAnApp credit", "Add the quiet 'by HaveAnApp' credit to this existing app?", "leave",
                       [{"value": "add", "label": "Add it", "tradeoff": "a small byline in the footer or About screen"},
                        {"value": "leave", "label": "Leave it out", "tradeoff": "the app is not GITCRAFT-generated; its branding stays as it is"}],
                       {"add": {"attribution": {"required": True}}, "leave": {"attribution": {"required": False}}},
@@ -131,7 +158,9 @@ def overrides_for(decs, answers):
         vals = [o["value"] for o in d["options"]]
         if d["kind"] in ("choice", "confirm") and a not in vals:
             raise ValueError(f"decision {d['id']}: {a!r} is not one of {vals}")
-        ov = merge(ov, d["sets"].get(a, {}))
+        if "$answer" in d["sets"]:
+            ov = merge(ov, json.loads(json.dumps(d["sets"]["$answer"]).replace('"$answer"', json.dumps(str(a)))))
+        else: ov = merge(ov, d["sets"].get(a, {}))
     return ov
 
 
@@ -239,6 +268,22 @@ def discovery_report(prod):
     else: L.append(f"- New project (will be created at `{spec['project']['path']}` when the build starts)")
     ic = prod.get("icon_state") or {}
     L.append(f"- App icon: {ic.get('status', 'none')} — {ic.get('reason', '')}")
+    m = prod.get("maturity")
+    if m and m.get("existing"):
+        mode = spec.get("mode") or {}
+        L += ["", f"**Project state: {m['maturity'].replace('_', ' ')} {m.get('kind') or ''}** (confidence {m['confidence']}; a reading of the files, not of a run)."
+              f" Workflow: **{mode.get('workflow')}** ({mode.get('because')}).", ""]
+        L += [f"  - evidence: {e}" for e in m.get("evidence", [])]
+        inv = m.get("inventory") or {}
+        for key, head, why in (("working", "Working (keep as it is)", "evidence"), ("unfinished", "Unfinished", None), ("defects", "Defects", None),
+                               ("improvements", "Optional improvements (not done unless approved)", None)):
+            items = inv.get(key) or []
+            if not items: continue
+            L.append(f"- **{head}** ({len(items)}):")
+            L += [f"  - {x['what']}" + (f" — `{x['where']}`" if x.get("where") else "") + (f" ({x['evidence']})" if why and x.get("evidence") else "") for x in items[:12]]
+            if len(items) > 12: L.append(f"  - … and {len(items) - 12} more")
+        if m.get("save_keys"): L.append(f"- **Saved data** (preserved): storage keys {', '.join(m['save_keys'][:10])}")
+        L.append("- Not inspected here: open GitHub issues and the live deployment (no network inside the sandbox; the agent adds them when it can).")
     L.append(f"- GITCRAFT departments ready on this machine: {ready}/{total} actions" + (f" (Studio: {st.get('reason')})" if st.get("status") == "blocked" else ""))
     L += ["", "## 3. Recommended approach", ""]
     for o, ids in owners.items(): L.append(f"- **{o}:** {len(ids)} task(s) — {', '.join(ids[:6])}{'…' if len(ids) > 6 else ''}")

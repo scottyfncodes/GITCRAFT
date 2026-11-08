@@ -82,6 +82,14 @@ def tools():
 _P = lambda **p: {"type": "object", "properties": p}
 _PID = {"type": "string", "description": "production id (from production_plan or production_list)"}
 PRODUCTION_TOOLS = [
+    ("production_start", "RUN GITCRAFT: the one entry point. Give it whatever the person brought: an idea, a spec, a pasted master prompt, a GitHub URL, "
+     "a local path, or just 'Run GITCRAFT' with the project folder. It finds the project (a URL needs a clone in the workspace: it says how), reads its "
+     "state without changing it (new / partial / nearly complete / finished; game / app / site, with evidence and confidence), works out what was asked "
+     "(build / continue / complete / update / fix / review), and plans that workflow into the Decision Room. Existing work is preserved: no scaffolding, "
+     "rebranding, new icon or redesign unless approved. Then production_decide (the person approves) and production_run.",
+     {"type": "object", "properties": {"text": {"type": "string", "description": "what the person said, verbatim (may be just 'Run GITCRAFT')"},
+      "project": {"type": "string", "description": "the project folder, when known (e.g. the session's repository)"},
+      "overrides": {"type": "object", "description": "corrections to the interpreted spec"}}}),
     ("production_plan", "START HERE for any substantial deliverable (a game, app, site, asset pack): give the whole master prompt (New Build). GITCRAFT interprets it "
      "(deliverable, platform, features, quality bar, acceptance criteria, assumptions, essential questions), runs a read-only Discovery of the project and what can run here, "
      "plans every department's work as a dependency graph with parallel waves, hand-offs and quality gates, and opens the Decision Room. Nothing is built until a person "
@@ -138,6 +146,9 @@ def _production(name, a):
     _load_production()
     from production import engine, store, report, contracts
     from production.cli import plan_summary
+    if name == "production_start":
+        from production import entry
+        return entry.start(a.get("text") or "", a.get("project"), overrides=a.get("overrides"))
     if name == "production_plan":
         pr = engine.plan(a["prompt"], a.get("project"), a.get("overrides"), recon=a.get("recon"))
         return pr if "recon_order" in pr else plan_summary(pr)

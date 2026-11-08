@@ -45,10 +45,19 @@ def build(spec, disc):
     spec["project"]["asset_dir"] = asset_dir
     adir = lambda sub: f"$project/{asset_dir}/{sub}"
     web = d in ("game", "app", "site")
+    pmode = spec.get("mode") or {}
+    existing, workflow = bool(pmode.get("existing")), pmode.get("workflow") or "build"
+    if existing and workflow == "review": return _review_plan(spec, proj, decisions)
+    # an update or a fix to an existing project is not a quality overhaul: the evaluators' scores are measured and
+    # reported, and the gates that hold are the ones about the change (loads, regression, preservation)
+    small_change = existing and workflow in ("update", "fix")
+    if small_change: decisions.append(f"{workflow} of an existing project: PLAYCRAFT/PIXELCRAFT scores are reported (advisory), not imposed")
 
     # ---------------------------------------------------------------- foundation
-    add(T("foundation.scaffold", "Prepare the project folder and asset folders (never overwrites)", "foundation", "builtin", action="scaffold",
-          params={"dirs": [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models", "icons")]}))
+    # a new project gets its folders; an existing one gets nothing it did not ask for (integration makes a folder
+    # only when something ships into it)
+    add(T("foundation.scaffold", "Prepare the project folder" + ("" if existing else " and asset folders") + " (never overwrites)", "foundation", "builtin",
+          action="scaffold", params={"dirs": [] if existing else [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models", "icons")]}))
     identity = None
     if a.get("identity"):
         identity = "foundation.identity"
@@ -169,13 +178,13 @@ def build(spec, disc):
             qa.append("qa.playcraft")
             add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
                   params={"project": "$project", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
-                  deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality",
+                  deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
         if q.get("pixelcraft"):
             qa.append("qa.pixelcraft")
             add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability at iPhone 17, iPhone 13, desktop", "qa", "studio", department="pixelcraft", action="audit",
                   params={"project": "$project", "target": "$project", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
-                  deps=["build"], resources=["browser"], timeout=1200, criterion="interface_quality",
+                  deps=["build"], resources=["browser"], timeout=1200, criterion="interface_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["pixelcraft_min"], "label": "PIXELCRAFT overall"}]))
         if q.get("designcraft"):
             qa.append("qa.designcraft")
@@ -191,9 +200,14 @@ def build(spec, disc):
             add(T("qa.attribution", "HaveAnApp attribution: the maker's credit is in the app", "qa", "builtin", action="check_attribution",
                   deps=["build"], criterion="attribution", gate=[{"type": "status_ok"}]))
         qa.append("qa.standards")
-        add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks", "qa", "builtin", action="check_standards",
+        add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks"
+              + (" (advisory: findings in existing code are reported, not imposed)" if existing else ""), "qa", "builtin", action="check_standards",
               params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d}, deps=["build"], criterion="engineering_standards",
-              gate=[{"type": "status_ok"}]))
+              gate=[{"type": "status_ok"}], advisory=existing))
+        if existing:
+            qa.append("qa.preserve")
+            add(T("qa.preserve", "Preservation: existing files, secrets, CI/deploy" + (", game assets and saves" if d == "game" else "") + " intact", "qa", "builtin",
+                  action="check_preserve", params={"kind": d, "allow": pmode.get("allow") or []}, deps=["build"], criterion="preservation", gate=[{"type": "status_ok"}]))
         ships = bool(shipping) or bool(proj.get("assets"))
         if not ships: decisions.append("no asset integrity / licence QA: nothing ships and the project has no assets")
         if ships: qa.append("qa.assets")
@@ -231,8 +245,76 @@ def build(spec, disc):
     return plan
 
 
+WORKFLOW_BRIEF = {
+    "continue": "This is a partially built {kind}. Finish its unfinished features (the Discovery inventory lists them, with where each was found), "
+                "most important first. Keep everything that already works; do not rebuild, rename or restructure it.",
+    "complete": "This {kind} is nearly complete. Fix the genuine blockers (defects first, then the open items needed to call it done) and stop there; "
+                "no new features, redesigns or refactors.",
+    "update": "Implement only the requested change{req} in this existing {kind}, and the supporting fixes it needs. Everything else stays as it is.",
+    "fix": "Fix the reported problem{req} in this {kind} and add a regression check for it. Change nothing else.",
+}
+
+
+def _existing_instructions(spec):
+    mode, d = spec.get("mode") or {}, spec["deliverable"]
+    req = f" ({mode['request']})" if mode.get("request") else ""
+    ins = [WORKFLOW_BRIEF.get(mode.get("workflow"), WORKFLOW_BRIEF["update"]).format(kind=d, req=req),
+           f"Work in the existing architecture and conventions ({spec['platform'].get('engine') or 'as found'}): same framework, file layout, style and naming; "
+           "no migrations, new frameworks, scaffolding, rebranding, new icon or redesign unless the blueprint approved them.",
+           "Never touch secrets or .env files, production data or user-created content. Keep the CI, deployment and environment configuration as they are "
+           "unless the change cannot work without editing them (then say so in the submission notes).",
+           "Commit on a feature branch in the project, following its own PR conventions."]
+    if d == "game":
+        ins.append("This is an existing game: preserve its gameplay, mechanics, controls, levels, art direction, audio and assets, and its saved data and "
+                   "progression (the same storage keys and formats; a player's existing save must still load). Change them only where the blueprint says.")
+    ins.append("qa.preserve checks this: no deleted files, untouched secrets/CI/deploy" + (", unchanged game assets and every save key still used" if d == "game" else "")
+               + ". An approved exception goes in through production_revise (mode.allow).")
+    return ins
+
+
+def _review_plan(spec, proj, decisions):
+    """Review only: measure the project as it is (read-only evaluators), change nothing, report."""
+    q, d = spec["quality"], spec["deliverable"]
+    tasks = []
+    add = tasks.append
+    if proj.get("entry") or proj.get("build_dir"):
+        add(T("qa.smoke", "TestCraft smoke: loads on every viewport, no errors, no missing files", "qa", "studio", department="testcraft", action="smoke",
+              params={"target": "$project", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, resources=["browser"], criterion="loads_everywhere"))
+        if q.get("playcraft"):
+            add(T("qa.playcraft", "PLAYCRAFT: play the game and score it", "qa", "studio", department="playcraft", action="pass",
+                  params={"project": "$project", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
+                  resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=True))
+        if q.get("pixelcraft"):
+            add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability", "qa", "studio", department="pixelcraft", action="audit",
+                  params={"project": "$project", "target": "$project", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
+                  resources=["browser"], timeout=1200, criterion="interface_quality", advisory=True))
+        if q.get("designcraft"):
+            add(T("qa.designcraft", "DESIGNCRAFT: structural game-design review (advisory)", "qa", "designcraft", action="assess", params={"project": "$project"},
+                  advisory=True, criterion="design_review"))
+        if q.get("perf"):
+            add(T("qa.perf", "TestCraft performance profile", "qa", "studio", department="testcraft", action="perf",
+                  params={"target": "$project", "seconds": 4, "min_fps": q["min_fps"], "max_p95_ms": q["max_p95_ms"], "name": "perf"},
+                  resources=["browser", "exclusive"], criterion="performance", advisory=True))
+    add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks (advisory)", "qa", "builtin",
+          action="check_standards", params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d}, criterion="engineering_standards",
+          gate=[{"type": "status_ok"}], advisory=True))
+    add(T("release.report", "Review report: the project as it is, measured; nothing changed", "release", "builtin", action="release", deps=[t["id"] for t in tasks],
+          criterion="release_ready", gate=[{"type": "status_ok"}]))
+    decisions.append("review only: the evaluators measure the project as it is; nothing is built, scaffolded or changed")
+    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions}
+    plan["parallel_groups"] = parallel_groups(plan)
+    return plan
+
+
 def _build_instructions(spec):
     q, a = spec["quality"], spec["assets"]
+    if (spec.get("mode") or {}).get("existing"):
+        ins = _existing_instructions(spec)
+        from . import standards as _std
+        ins += _std.instructions(spec.get("engineering", {}).get("profile", "personal"), spec["deliverable"])[1:2]
+        if a.get("sfx") or a.get("music"): ins.append("Wire the new sounds in where the request says; existing sounds stay.")
+        ins.append("Submit the files you changed.")
+        return ins
     ins = [f"Implement a complete {spec['deliverable']} in the project folder (entry index.html), original in name, art and mechanics.",
            f"Platform: {'mobile-first, touch controls with ≥ 44 px targets, portrait and landscape' if spec['platform']['mobile_first'] else 'desktop and phone'}; "
            f"engine: {spec['platform']['engine'] or 'plain web'}; no new paid services.",

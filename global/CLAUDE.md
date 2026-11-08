@@ -10,6 +10,13 @@ rigging, terrain/skies/oceans, VFX, PBR materials, levels/tilemaps,
 cinematics, browser QA, asset catalogue, PLAYCRAFT: game design and
 gameplay quality, and PIXELCRAFT: visual quality and UI/UX). The `gitcraft` skill has the full tool-selection guide.
 
+"Run GITCRAFT" (with an idea, a pasted prompt, a GitHub URL, or in an existing
+project): follow the `produce` skill and call studiocraft `production_start` with
+the person's words verbatim and the project folder. It detects new vs existing
+and the project's maturity (partial, nearly complete, finished; game/app/site),
+picks the workflow, preserves existing work, and opens the Decision Room. A
+repository URL that isn't cloned yet returns the clone command to run first.
+
 For a WHOLE deliverable from one master prompt (a game, app, site or asset
 pack: "build a polished mobile-first game with sound, levels and deployment"),
 follow the `produce` skill: pass the prompt verbatim to studiocraft

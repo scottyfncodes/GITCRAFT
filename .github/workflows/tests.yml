@@ -79,6 +79,9 @@ jobs:
       - name: Lifecycle, App Icon Studio, HaveAnApp attribution, engineering standards
         run: python3 tests/test_lifecycle.py
 
+      - name: Run GITCRAFT (universal entry, maturity-aware workflows, preservation)
+        run: python3 tests/test_entry.py
+
       - name: Hardening (guard + control room regressions from docs/tech-debt.md)
         run: python3 tests/test_hardening.py
 
