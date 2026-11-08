@@ -431,6 +431,21 @@ def tool_list():
     return [{"name": n, "description": d, "inputSchema": s} for n, (d, s, _) in TOOLS.items()]
 
 
+def private_stdio():
+    """The JSON-RPC pipes belong to this server alone (#45). Every child (Node/Chromium, FFmpeg, Blender, a
+    department CLI) used to inherit fd 0 and fd 1, i.e. the protocol pipes. FFmpeg reads keystrokes from its stdin,
+    and a child that sets O_NONBLOCK on the shared pipe makes the server's next read return EAGAIN, which ends
+    `for line in sys.stdin` as if the client had gone: the server exited 0 mid-request. Here the protocol moves to
+    private close-on-exec descriptors, fd 0 becomes /dev/null and fd 1 becomes stderr, so no child can read, write
+    or re-flag the protocol. Returns (reader, writer) for the protocol."""
+    import fcntl
+    pin, pout = os.dup(0), os.dup(1)                       # os.dup is non-inheritable (O_CLOEXEC)
+    fcntl.fcntl(pin, fcntl.F_SETFL, fcntl.fcntl(pin, fcntl.F_GETFL) & ~os.O_NONBLOCK)
+    null = os.open(os.devnull, os.O_RDWR); os.dup2(null, 0); os.close(null)
+    os.dup2(2, 1)                                          # a child's stray output goes to the log, never into the protocol
+    return open(pin, "r", encoding="utf-8"), open(pout, "w", encoding="utf-8")
+
+
 def main():
     if len(sys.argv) > 2 and sys.argv[1] == "--call":
         raw = sys.argv[3] if len(sys.argv) > 3 else "{}"
@@ -441,9 +456,11 @@ def main():
             out = {"ok": False, "error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc(limit=4)[-1500:]}
         sys.__stdout__.write("\n" + json.dumps(out, default=str) + "\n"); sys.__stdout__.flush()
         return
+    proto_in, proto_out = private_stdio()
+    sys.__stdout__ = proto_out   # send() writes the protocol here
     inbox = queue.Queue()
     def reader():
-        for line in sys.stdin: inbox.put(line)
+        for line in proto_in: inbox.put(line)
         inbox.put(None)
     threading.Thread(target=reader, daemon=True).start()
     if MODE[0] == "waiting":

@@ -64,6 +64,9 @@ jobs:
       - name: Policy (guard + sandbox)
         run: python3 tests/test_policy.py
 
+      - name: Server stdio isolation (the MCP protocol pipes are private to each server, #45)
+        run: python3 tests/test_stdio_isolation.py
+
       - name: Studio departments (quick)
         run: python3 tests/test_studio.py --quick
 
