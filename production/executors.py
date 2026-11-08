@@ -73,6 +73,9 @@ def forgecraft_call(tool, args, timeout=7200):
 
 def designcraft_assess(project, out_json, timeout=900):
     if not os.path.isdir(os.path.join(REPO, "gamedesign")): return {"status": "blocked", "reason": "gamedesign/ (DESIGNCRAFT) is missing"}
+    rp, rj = os.path.realpath(project), os.path.realpath(out_json)
+    if rj == rp or rj.startswith(rp.rstrip(os.sep) + os.sep):   # the engine routes output outside the game; never hand DESIGNCRAFT a path in it
+        return {"status": "failed", "failure": "request", "error": f"DESIGNCRAFT output {out_json} is inside the game {project}: evaluation output must live outside it (store.output_root)"}
     # gamedesign is loaded by its path (inside the sandbox the repo root is not listable, so -m/PYTHONPATH cannot find it)
     boot = ("import importlib.util,sys;p=sys.argv[1];s=importlib.util.spec_from_file_location('gamedesign',p+'/__init__.py',submodule_search_locations=[p]);"
             "m=importlib.util.module_from_spec(s);sys.modules['gamedesign']=m;s.loader.exec_module(m);from gamedesign.cli import main;sys.exit(main(sys.argv[2:]))")

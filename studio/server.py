@@ -116,7 +116,9 @@ PRODUCTION_TOOLS = [
      "properties": {"production": _PID, "overrides": {"type": "object"}, "reason": {"type": "string"}}}),
     ("production_run", "Run (or resume) a production: every ready task on parallel workers, retries for execution failures, honest blocked states, "
      "quality gates with fix work orders and re-verification. Stops when the deliverable is ready or it waits on the agent (work orders) or a person (approvals).",
-     _P(production=_PID, workers={"type": "integer", "description": "parallel workers (default 4)"}, wait={"type": "boolean", "description": "false: run in the background and poll production_status"})),
+     _P(production=_PID, workers={"type": "integer", "description": "parallel workers (default 4)"}, wait={"type": "boolean", "description": "false: run in the background and poll production_status"},
+        retry={"type": "array", "items": {"type": "string"}, "description": "failed checks to run again first: only ones that failed without measuring the project (execution or request failures, e.g. after a GITCRAFT fix); a quality failure is refused"},
+        retry_reason={"type": "string", "description": "why they run again (required with retry; recorded)"})),
     ("production_status", "Where a production stands: every task's state (pending, in_progress, awaiting_agent, passed, failed, blocked, needs_approval), what is next and who must act.", _P(production=_PID)),
     ("production_submit", "Hand back an agent work order (WORK_ORDER.md in the task folder): the files made or changed. They are validated (exist, inside the roots, open as their format; a fix must change the project; a deployment needs evidence) before the task passes; then the run continues.",
      {"type": "object", "required": ["production", "task"], "properties": {"production": _PID, "task": {"type": "string"}, "files": {"type": "array", "items": {"type": "string"}, "description": "absolute paths of the files made or changed (inside the workspace)"},
@@ -170,6 +172,7 @@ def _production(name, a):
     if name == "production_decide": return engine.decide(a["production"], a.get("answers"), approve=bool(a.get("approve")), note=a.get("note"))
     if name == "production_revise": return engine.revise(a["production"], a["overrides"], a["reason"])
     if name == "production_run":
+        if a.get("retry"): engine.retry(a["production"], a["retry"], a.get("retry_reason"))
         if a.get("wait") is False:
             pid = a["production"]
             if _bg.get(pid) and _bg[pid].is_alive(): return {"production": pid, "status": "already running in the background"}

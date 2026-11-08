@@ -44,6 +44,16 @@ def write_json(p, data):
         raise
 
 
+def output_root(prod, create=True):
+    """The folder that receives this production's task output: never inside the evaluated project (artifacts.output_root)."""
+    proj = ((prod.get("spec") or {}).get("project") or {}).get("path")
+    return artifacts.output_root(prod["id"], prod["store"], proj, create=create)
+
+
+def task_dir(prod, tid):
+    d = os.path.join(output_root(prod), "tasks", os.path.basename(tid)); os.makedirs(d, exist_ok=True); return d
+
+
 def create(prod, root=None):
     base = os.path.realpath(root or store_root())
     if not inside_roots(base) and not artifacts.inside(base, artifacts.isolated_home()):

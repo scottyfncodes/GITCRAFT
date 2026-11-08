@@ -198,19 +198,24 @@ def _studio_records(P, ctx):
             for f in fs:
                 if f.endswith(".studio.json"): take(os.path.join(d, f))
     for pr in ctx["productions"]:
-        for p in glob.glob(os.path.join(pr["_dir"], "tasks", "*", "**", "*.studio.json"), recursive=True): take(p)
+        for base in dict.fromkeys([pr["_dir"], pr.get("_outputs") or pr["_dir"]]):
+            for p in glob.glob(os.path.join(base, "tasks", "*", "**", "*.studio.json"), recursive=True): take(p)
     return found
 
 
 def _productions(P):
-    from . import store_root
-    base = store_root(); out = []
-    if not P["path"] or not os.path.isdir(base): return out
-    for d in sorted(os.listdir(base)):
-        pr = _json(os.path.join(base, d, "production.json"))
-        if not pr: continue
-        pp = ((pr.get("spec") or {}).get("project") or {}).get("path")
-        if pp and os.path.realpath(pp) == P["path"]: out.append(dict(pr, _dir=os.path.join(base, d)))
+    from . import store_roots, artifacts
+    out, seen = [], set()
+    if not P["path"]: return out
+    for base in store_roots():
+        if not os.path.isdir(base): continue
+        for d in sorted(os.listdir(base)):
+            pr = _json(os.path.join(base, d, "production.json"))
+            if not pr or pr.get("id") in seen: continue
+            pp = ((pr.get("spec") or {}).get("project") or {}).get("path")
+            if pp and os.path.realpath(pp) == P["path"]:
+                seen.add(pr.get("id")); sd = os.path.join(base, d)
+                out.append(dict(pr, _dir=sd, _outputs=artifacts.output_root(pr.get("id") or d, sd, pp, create=False)))
     return sorted(out, key=lambda x: x.get("updated") or "")
 
 

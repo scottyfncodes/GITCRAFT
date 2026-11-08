@@ -227,8 +227,12 @@ The rules live in `production/artifacts.py` and hold for every game, app and sit
 - **Evaluation output lives outside the project.** The store is `$GITCRAFT_PRODUCTION_HOME`, else
   `<first root>/gitcraft-out/production`, unless that is inside the evaluated project (in a cloud session with one repo, the
   repo is the only root). Then it is another root's `gitcraft-out/production`, or the isolated home
-  `$GITCRAFT_HOME/productions` (writable in the studiocraft sandbox). DESIGNCRAFT, which refuses output inside a game, therefore always runs.
-  Productions are found by id in any of these stores.
+  `$GITCRAFT_HOME/productions` (writable in the studiocraft sandbox). Productions are found by id in any of these stores.
+  Task output (every department's `out_dir`, work orders, evidence, `designcraft.json`) goes to `store.output_root(prod)`:
+  the store itself, or, when a production's store is inside the evaluated project (one made before this rule, or opened
+  with an explicit store there), `$GITCRAFT_HOME/productions/<id>-outputs`. The record stays where it is; nothing a
+  department writes lands in the project, so DESIGNCRAFT, which refuses output inside a game, always runs, and its
+  executor refuses such a path itself. The release report, status and `Run GITCRAFT report` read the output from there.
 - **One target, by an explicit policy.** Smoke, feature checks, performance, PLAYCRAFT, PIXELCRAFT and the final regression
   all get `$target`. `evaluation.target` (an override) is `auto` (default: the built app when `package.json` has a build
   script and a bundler, else the project folder), `build` or `source`. The build folder is the bundler's `outDir`, else `dist/`.
@@ -266,6 +270,22 @@ ForgeCraft keeps the 3D Department. The Director gives it a brief and records th
 - `{"skip_tasks": ["qa.licences"]}` drops a task (the skip is recorded as a decision). Acceptance criteria are never
   dropped: one that no remaining task measures reports **NOT PLANNED** and the production cannot be READY. To remove
   a requirement, change the spec that creates it instead (e.g. `{"quality": {"perf": false}}`), so the change is explicit.
+- `{"extra_tasks": [{"id": "qa.smoke.dist", "department": "testcraft", "action": "smoke", "params": {...}, "replaces": "qa.smoke"}]}`
+  stands an equivalent check in for a planned one that cannot run as planned. It must be the same check (same kind,
+  department and action). It measures what the original measured (criterion, stage, advisory flag, gate and resources are
+  inherited; a different criterion is refused), the original is skipped, and whatever depended on the original depends on
+  the replacement. Nothing is inferred: an extra task without `replaces` measures only the criterion it names. Work and
+  build plans and review plans both honour `extra_tasks`, `skip_tasks` and `replaces`.
+- After approval, a revision that changes tasks is material and pauses the build. The pending revision shows its effect
+  on the acceptance criteria before anyone approves it: `would_lose` (criteria no task would measure: NOT PLANNED),
+  `would_measure`, `unmeasured_after` and `problems`. A revision with problems cannot be approved. Approving keeps the
+  earlier approvals: the previous blueprint goes to `blueprint_history`, and approved, declined and applied revisions stay in
+  `decisions` across re-planning.
+- `production_run {retry: ["qa.designcraft"], retry_reason: "…"}` (CLI: `run <id> --retry qa.designcraft --retry-reason "…"`)
+  runs a failed check again. Only a check that failed without measuring the project (an `execution` or `request` failure,
+  e.g. one GITCRAFT itself refused before a framework fix) can be retried; a gate (quality) failure is refused, because it is
+  fixed in the project by its fix work order. The earlier attempts stay in the task's history, the retry and its reason
+  are recorded, and what failed or was blocked because of it runs again.
 
 Request parameters can reference upstream results:
 

@@ -62,6 +62,12 @@ It works out the rest; the person never needs to know these tools.
      `{"assets": {"levels": {"kind": "dungeon", "count": 4, "by_levelcraft": true}}}`, `{"quality": {"playcraft_min": 60}}`,
      `{"extra_tasks": [{id, department, action, params, depends_on, ship}]}`, `{"skip_tasks": ["qa.perf"]}`. A plan with `problems`
      cannot be approved. A criterion in `unmeasured_criteria` reports NOT PLANNED and the production cannot be READY.
+   - A planned check that cannot run as planned is replaced, not skipped: an `extra_tasks` entry with
+     `"replaces": "<task id>"` that is the same check (same department and action) measures the original's criterion.
+     Skipping a criterion's only check leaves it NOT PLANNED. A pending revision shows `would_lose` / `would_measure`:
+     tell the person what it does to the acceptance criteria when you ask them to approve it.
+   - A check that failed without measuring anything (an execution or request failure, e.g. after a GITCRAFT fix)
+     runs again with `production_run {retry: [task], retry_reason}`; a quality failure is never retried, it is fixed.
    - **Decision Room:** show the person the decisions in plain words: the question, your recommendation and the trade-off.
      These are the scope, the architecture, the design direction, the app icon (new, refine or keep), the engineering standard
      (personal, public or sensitive), the cost, the deployment, and the HaveAnApp credit for an existing app. Record their answers with
