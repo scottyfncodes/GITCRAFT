@@ -213,6 +213,33 @@ When a QA gate fails, the engine:
 2. Creates `<check>.r1`, the same check depending on that fix. Dependents now wait on the re-verification.
 3. Stops after `quality.max_rounds` rounds (2 standard, 3 polished). The check stays failed, the release is blocked and the report says NOT READY.
 
+A review (`workflow: review`) measures and orders no fixes: a failed check stays failed and the run ends with its verdict.
+
+## Evaluation: artifacts, target and verdict
+
+The rules live in `production/artifacts.py` and hold for every game, app and site:
+
+- **Evaluation output is never source.** A folder named `gitcraft-out` or `.gitcraft-work`, or holding the marker file
+  `.gitcraft-artifacts` (written into every production store and task folder), is skipped by change detection. Writing a
+  report, a screenshot or `production.json` cannot make the project look changed, so it cannot start another round of
+  checks. If the source really keeps changing with no agent submission in between, QA is re-measured at most
+  `STALE_ROUNDS` (2) times; then re-measuring stops and the verdict is INCOMPLETE, naming the files that kept changing.
+- **Evaluation output lives outside the project.** The store is `$GITCRAFT_PRODUCTION_HOME`, else
+  `<first root>/gitcraft-out/production`, unless that is inside the evaluated project (in a cloud session with one repo, the
+  repo is the only root). Then it is another root's `gitcraft-out/production`, or the isolated home
+  `$GITCRAFT_HOME/productions` (writable in the studiocraft sandbox). DESIGNCRAFT, which refuses output inside a game, therefore always runs.
+  Productions are found by id in any of these stores.
+- **One target, by an explicit policy.** Smoke, feature checks, performance, PLAYCRAFT, PIXELCRAFT and the final regression
+  all get `$target`. `evaluation.target` (an override) is `auto` (default: the built app when `package.json` has a build
+  script and a bundler, else the project folder), `build` or `source`. The build folder is the bundler's `outDir`, else `dist/`.
+  A missing build blocks those checks with the build command; they never fall back to the unbuilt source. The policy is in the
+  plan's decisions and the report, and the release checks that every browser check measured the same folder. Structural
+  review (DESIGNCRAFT, standards, preservation, asset folders) reads the source.
+- **Every run ends with a verdict**, in `production_run`/`production_status` (`verdict`, `verdict_reasons`), `production.json` and
+  `REPORT.md` (a "Why …" section). **READY**: every criterion measured and passed. **NOT READY**: a criterion was measured and
+  failed, or is NOT PLANNED. **INCOMPLETE**: nothing failed, but a check could not run (blocked, for example not built), has not finished
+  (the time budget ran out, or it waits for the agent or a person), or measured a project that kept changing.
+
 ## Departments and their contracts
 
 `production_contracts` lists every department in one shape: what it accepts, produces and requires, how success
@@ -249,7 +276,7 @@ Request parameters can reference upstream results:
 ## Safety
 
 - Everything runs inside the studiocraft sandbox: workspace roots, its state, the shared libraries, and no network. The sandbox now also reads (never writes) the code of the departments the Director delegates to: `production/`, `forgecraft/`, `gitcraft3d/`, `meshcraft/` and `gamedesign/`, as ForgeCraft's sandbox already did. The 3D Department's model cache is writable for the same reason.
-- The production store and the project must be inside the roots. Submitted files outside the roots are refused, and the guard refuses relative paths, so submit absolute ones.
+- The production store and the project must be inside the roots (the store may also be the isolated home, and is never inside the project). Submitted files outside the roots are refused, and the guard refuses relative paths, so submit absolute ones.
 - Integration never silently overwrites a file, and two deliverables can never ship to one path.
 - Deploying, replacing existing assets, merging and spending are never authorised by the intake. A deployment without evidence is never recorded as live.
 - One runner per production (a file lock). A second one is refused with a clear message.
@@ -286,6 +313,7 @@ python3 -m production list | contracts
   the icon codec and checks, attribution, the standards profiles, and a real app production from icon concepts to delivered.
 
 - `tests/test_production.py` (~1 min) covers intake, planning, validation, gates, store, lock and fingerprints, plus a real production through the sandboxed server: plan, run, idempotent resume, and redoing a task whose output was deleted.
+- `tests/test_evaluation.py` (~20 s) covers the WAR-BALLOON evaluation failures: writing evaluation output never triggers another round (and real source churn is bounded), one target for every browser check under the source-vs-build policy, a store outside the game so DESIGNCRAFT runs and the game is untouched, and a READY / NOT READY / INCOMPLETE verdict with reasons for every run.
 - `tests/acceptance_production.py` (~6 min) is the master-prompt run:
   - **Part A:** the Lantern Drift prompt, end to end. Interpretation, discovery, the Decision Room (refused before approval, then approved), the App Icon Studio (three VectorCraft concepts, a person's choice, the master, the icon set), the HaveAnApp credit and the engineering standard measured, department selection, ordering, measured parallelism, the palette → effects hand-off, integration of 27 assets, a real defect caught by TestCraft and a real PLAYCRAFT shortfall (54 against a bar of 55, then 63 after the fix work order), re-verification, stale evidence re-measured, release on the exact build, deployment refused without evidence, and resume.
   - **Part B:** a refused plan, a missing runtime (blocked and propagated), a failed department (retried, then failed), an invalid agent output, an integration conflict, overwrite protection, a run killed mid-production and resumed, and a quality gate exhausted (NOT READY).

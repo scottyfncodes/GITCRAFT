@@ -255,7 +255,7 @@ def check_features(ctx):
     if not all(c["ok"] for c in shape): return _with_report(ctx, {"status": "failed", "checks": shape, "outputs": []}, "features.json")
     feats = json.load(open(f))["features"]; checks, runs = list(shape), []
     for i, ft in enumerate(feats, 1):
-        r = executors.studio_run("testcraft", "play", {"target": ctx["project"], "steps": ft["steps"], "viewports": p.get("viewports") or ["phone"],
+        r = executors.studio_run("testcraft", "play", {"target": p.get("target") or ctx["project"], "steps": ft["steps"], "viewports": p.get("viewports") or ["phone"],
                                                        "out_dir": os.path.join(ctx["out_dir"], f"feature-{i}"), "name": f"feature_{i}", "register": False,
                                                        "min_change": 0})
         if r.get("status") == "blocked": return r

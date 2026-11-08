@@ -142,7 +142,7 @@ def decisions(spec, disc, icon_state=None):
             {"value": "github_pages", "label": "GitHub Pages", "tradeoff": "free static hosting from the repository; static sites and games only"},
             {"value": "no_deploy", "label": "Don't deploy", "tradeoff": "you get the verified project and report only"}]
         rec = "existing" if found else ("vercel" if asked else "no_deploy")   # an existing pipeline is how this project delivers
-        out.append(_d("deployment", "Where it goes live", "Deploy it once every check passes? You approve the deploy itself at release; it counts as live only after "
+        if (spec.get("mode") or {}).get("workflow") != "review": out.append(_d("deployment", "Where it goes live", "Deploy it once every check passes? You approve the deploy itself at release; it counts as live only after "
                       "GITCRAFT opens the live URL and finds this exact build there.", rec, opts,
                       {o["value"]: ({"features": {"deploy": False}, "deploy": {"target": None}} if o["value"] == "no_deploy" else
                                     {"features": {"deploy": True}, "deploy": {"target": o["value"], "found": found}}) for o in opts},

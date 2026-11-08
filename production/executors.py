@@ -24,9 +24,21 @@ def studio_python():
     return py if os.access(py, os.X_OK) else None
 
 
+def _env(extra=None):
+    """The child's environment. The isolated evaluation home (production/artifacts.py: where a production's output goes
+    when every workspace root is inside the evaluated project) is appended to the child's roots so departments may write
+    their outputs there; the first root, and so every default, is unchanged."""
+    from .artifacts import isolated_home
+    e = dict(os.environ, **(extra or {}))
+    rs = [r for r in (e.get("GITCRAFT_ROOTS") or e.get("GITCRAFT_ROOT") or os.getcwd()).split(":") if r]
+    iso = isolated_home()
+    if os.path.isdir(iso) and iso not in rs: e["GITCRAFT_ROOTS"] = ":".join(rs + [iso])
+    return e
+
+
 def _child(cmd, timeout, env=None):
     try:
-        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=dict(os.environ, **(env or {})))
+        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=_env(env))
     except subprocess.TimeoutExpired:
         return {"status": "failed", "error": f"timed out after {timeout} s", "failure": "timeout"}
     except OSError as e:
@@ -76,7 +88,7 @@ def designcraft_assess(project, out_json, timeout=900):
 
 def _child_raw(cmd, timeout, env):
     try:
-        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=dict(os.environ, **env))
+        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=_env(env))
     except subprocess.TimeoutExpired:
         return {"status": "failed", "error": f"timed out after {timeout} s", "failure": "timeout"}
     if r.returncode != 0: return {"status": "failed", "error": (r.stderr or r.stdout)[-1500:], "failure": "crash"}

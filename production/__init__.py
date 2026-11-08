@@ -43,3 +43,18 @@ def inside_roots(path):
 def store_root():
     """Where productions live: $GITCRAFT_PRODUCTION_HOME, else <first root>/gitcraft-out/production."""
     return os.path.realpath(os.environ.get("GITCRAFT_PRODUCTION_HOME") or os.path.join(roots()[0], "gitcraft-out", "production"))
+
+
+def store_root_for(project):
+    """(store root, why or None): the store for a production of `project`, never inside that project (production/artifacts.py)."""
+    from . import artifacts
+    return artifacts.store_root_for(project, store_root(), roots())
+
+
+def store_roots():
+    """Every place a production can live: the configured store, each root's default store, the isolated home."""
+    from . import artifacts
+    out = []
+    for r in [store_root()] + [os.path.realpath(os.path.join(x, "gitcraft-out", "production")) for x in roots()] + [artifacts.isolated_home()]:
+        if r not in out: out.append(r)
+    return out

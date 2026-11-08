@@ -158,6 +158,7 @@ def parse(prompt, project=None, overrides=None):
             "engineering": {"profile": prof, "because": pw}, "icon": {"mode": None, "required": web and not existing},
             "attribution": {"required": web and not existing}, "mode": _mode(prompt, project, existing, overrides),
             "deploy": {"target": None}, "analytics": {"provider": None},
+            "evaluation": {"target": "auto"},   # source-vs-build policy for every browser check: auto | build | source
             "backend": {"provider": None, "needed": bool(feats.get("backend")), "because": _w(t, RULES["features"]["backend"])}, "because": because, "assumptions": assumptions, "questions": questions}
     if overrides:
         spec = merge(spec, overrides)

@@ -5,7 +5,9 @@ how its outputs are handed on (`ship`: which roles/formats go into the project, 
 whether it passed, the resources it holds (one Blender at a time, two browsers), and its retry budget.
 
 Request parameters may reference upstream results, resolved when the task starts (structured hand-offs):
-  "$project", "$project/sub/dir"                 the project folder
+  "$project", "$project/sub/dir"                 the project folder (source: structural review, asset folders)
+  "$target"                                      the evaluation target every browser check measures: the built app
+                                                 or the source, by the source-vs-build policy (production/artifacts.py)
   {"$from": "<task>", "role": r, "format": f}   the path of an upstream output (first match; "all": true for a list)
   {"$from": "<task>", "role": r, "json": "key", "as": "rgb"}   a value read from an upstream JSON output
 
@@ -177,10 +179,10 @@ def build(spec, disc):
     # ---------------------------------------------------------------- quality assurance (parallel; each failure spawns a fix + re-verification)
     qa = []
     if web:
-        tgt = "$project"
+        tgt = "$target"   # the evaluation target: one folder for every browser check (production/artifacts.py)
         qa.append("qa.smoke")
         add(T("qa.smoke", "TestCraft smoke: loads on every viewport, no errors, no missing files", "qa", "studio", department="testcraft", action="smoke",
-              params={"target": tgt, "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, deps=["build"], resources=["browser"], criterion="loads_everywhere"))
+              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, deps=["build"], resources=["browser"], criterion="loads_everywhere"))
         if q.get("perf"):
             qa.append("qa.perf")
             add(T("qa.perf", "TestCraft performance profile", "qa", "studio", department="testcraft", action="perf",
@@ -189,13 +191,13 @@ def build(spec, disc):
         if q.get("playcraft"):
             qa.append("qa.playcraft")
             add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
-                  params={"project": "$project", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
+                  params={"project": "$project", "target": "$target", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
                   deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
         if q.get("pixelcraft"):
             qa.append("qa.pixelcraft")
             add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability at iPhone 17, iPhone 13, desktop", "qa", "studio", department="pixelcraft", action="audit",
-                  params={"project": "$project", "target": "$project", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
+                  params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
                   deps=["build"], resources=["browser"], timeout=1200, criterion="interface_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["pixelcraft_min"], "label": "PIXELCRAFT overall"}]))
         if q.get("designcraft"):
@@ -205,7 +207,7 @@ def build(spec, disc):
         if _features_required(spec) or existing:
             qa.append("qa.features")
             add(T("qa.features", "Feature checks: every planned feature works in a browser (tests/gitcraft.features.json)", "qa", "builtin", action="check_features",
-                  params={"file": "$project/tests/gitcraft.features.json", "required": _features_required(spec), "viewports": ["phone"] if spec["platform"]["mobile_first"] else ["desktop"]},
+                  params={"file": "$project/tests/gitcraft.features.json", "target": "$target", "required": _features_required(spec), "viewports": ["phone"] if spec["platform"]["mobile_first"] else ["desktop"]},
                   deps=["build"], resources=["browser"], criterion="features_work" if _features_required(spec) else None, gate=[{"type": "status_ok"}],
                   advisory=not _features_required(spec)))
         if spec.get("icon", {}).get("required"):
@@ -240,7 +242,7 @@ def build(spec, disc):
     # ---------------------------------------------------------------- release
     if web:
         add(T("release.regression", "Final regression: smoke-test the exact build being released", "release", "studio", department="testcraft", action="smoke",
-              params={"target": "$project", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "regression"}, deps=qa, resources=["browser"],
+              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "regression"}, deps=qa, resources=["browser"],
               criterion="loads_everywhere"))
         rel_deps = qa + ["release.regression"]
     else:
@@ -296,21 +298,21 @@ def _review_plan(spec, proj, decisions):
     add = tasks.append
     if proj.get("entry") or proj.get("build_dir"):
         add(T("qa.smoke", "TestCraft smoke: loads on every viewport, no errors, no missing files", "qa", "studio", department="testcraft", action="smoke",
-              params={"target": "$project", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, resources=["browser"], criterion="loads_everywhere"))
+              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, resources=["browser"], criterion="loads_everywhere"))
         if q.get("playcraft"):
             add(T("qa.playcraft", "PLAYCRAFT: play the game and score it", "qa", "studio", department="playcraft", action="pass",
-                  params={"project": "$project", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
+                  params={"project": "$project", "target": "$target", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
                   resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=True))
         if q.get("pixelcraft"):
             add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability", "qa", "studio", department="pixelcraft", action="audit",
-                  params={"project": "$project", "target": "$project", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
+                  params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
                   resources=["browser"], timeout=1200, criterion="interface_quality", advisory=True))
         if q.get("designcraft"):
             add(T("qa.designcraft", "DESIGNCRAFT: structural game-design review (advisory)", "qa", "designcraft", action="assess", params={"project": "$project"},
                   advisory=True, criterion="design_review"))
         if q.get("perf"):
             add(T("qa.perf", "TestCraft performance profile", "qa", "studio", department="testcraft", action="perf",
-                  params={"target": "$project", "seconds": 4, "min_fps": q["min_fps"], "max_p95_ms": q["max_p95_ms"], "name": "perf"},
+                  params={"target": "$target", "seconds": 4, "min_fps": q["min_fps"], "max_p95_ms": q["max_p95_ms"], "name": "perf"},
                   resources=["browser", "exclusive"], criterion="performance", advisory=True))
     add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks (advisory)", "qa", "builtin",
           action="check_standards", params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d}, criterion="engineering_standards",
@@ -461,7 +463,7 @@ def parallel_groups(plan):
 
 def _strip_refs(v):
     if isinstance(v, dict) and "$from" in v: return None
-    if isinstance(v, str) and v.startswith("$project"): return "/placeholder"
+    if v == "$target" or isinstance(v, str) and v.startswith("$project"): return "/placeholder"
     if isinstance(v, dict): return {k: _strip_refs(x) for k, x in v.items()}
     if isinstance(v, list): return [_strip_refs(x) for x in v]
     return v

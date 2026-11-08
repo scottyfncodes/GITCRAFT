@@ -153,6 +153,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   feature checks, backend/analytics/native decisions or the native icon sets; `verify-live` never records a deployment live
   without measuring this exact build at the URL, and never disables TLS verification.
 - `tests/test_hardening.py` must pass after any change to `scripts/guard.py` or `ui/server.py` (docs/tech-debt.md).
+- `tests/test_evaluation.py` must pass after any change to change detection, the production store location, evaluation targets or
+  verdicts (`production/artifacts.py`, `engine.py`, `report.py`, `planner.py` targets): evaluation output is never source, never lives
+  in the evaluated project, every browser check measures one `$target`, and every run ends READY, NOT READY or INCOMPLETE (`docs/production.md`).
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
   gate or substitute a mocked department result to make it pass.
