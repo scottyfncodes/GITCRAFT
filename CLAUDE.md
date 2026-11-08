@@ -161,3 +161,6 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - Never commit model weights or Meshroom: they install into
   `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.
+- `tests/test_report.py` must pass after any change to `production/project_report.py`, the report path in `production/entry.py` or the
+  `production_project_report` tool; "Run GITCRAFT report" is read-only (never writes inside the project, builds, merges or deploys), never
+  reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).

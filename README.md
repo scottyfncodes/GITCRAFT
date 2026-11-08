@@ -70,6 +70,15 @@ Ten departments built from free, local tools (FFmpeg, Kokoro-82M, Blender, three
 
 ForgeCraft discovers and routes to them (`departments`, `department_route`, `department_run`). Docs: [docs/studio.md](docs/studio.md); how each tool was chosen, licensed and verified: [docs/studio-acquisition.md](docs/studio-acquisition.md). Proofs: `acceptance/studio/`. Test: `tests/test_studio.py`.
 
+## One report across every department: "Run GITCRAFT report"
+
+`Run GITCRAFT report` (or studiocraft `production_project_report`, or `python3 -m production project-report <project>`) builds one
+report for a project from the latest results of every department: executive summary and health, department scorecards, blockers,
+cross-department findings (corroborated, conflicts, dependencies, gaps), a P0–P3 action plan, changes since the previous report and
+next actions. It is read-only, it refreshes the read-only analyses, and it never presents a department with no data as measured.
+Reports are saved with a timestamp so later runs measure progress. Archived reports are published at `/reports/`. Docs:
+[docs/report.md](docs/report.md). Test: `tests/test_report.py`.
+
 ## Game design intelligence: DESIGNCRAFT
 
 DESIGNCRAFT (`gamedesign/`, a standalone product) reads a game repository read-only and assesses its *design*: levels, missions, story, progression and the combined player experience. Five departments do the analysis: LEVELCRAFT, MISSIONCRAFT, STORYCRAFT, PROGRESSIONCRAFT and EXPERIENCECRAFT. For every significant weakness DESIGNCRAFT writes three alternatives (conservative, ambitious, wild card), each grounded in the game's own content. It scores the design out of 100 with evidence levels, coverage and confidence, reuses PLAYCRAFT's play evidence, and keeps an append-only history. The web app, including a Design Lab, is at `/designcraft/`. `python3 -m gamedesign assess <repo> --record`. Docs: [docs/designcraft.md](docs/designcraft.md). Test: `tests/test_designcraft.py`.

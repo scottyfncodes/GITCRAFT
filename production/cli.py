@@ -43,6 +43,12 @@ def main(argv=None):
     a = sp.add_parser("approve"); a.add_argument("id"); a.add_argument("task"); a.add_argument("--decline", action="store_true"); a.add_argument("--note"); a.add_argument("--choice")
     rp = sp.add_parser("report"); rp.add_argument("id")
     sp.add_parser("list"); sp.add_parser("contracts")
+    gr = sp.add_parser("project-report", help="Run GITCRAFT report: one report across every department (read-only)")
+    gr.add_argument("project", help="project folder, GitHub owner/repo or URL, or history id (owner--repo)")
+    gr.add_argument("--refresh", default="quick", choices=["none", "quick", "full"])
+    gr.add_argument("--save", default="store", choices=["store", "archive", "none"], help="archive: history/reports (committed, published at /reports/)")
+    gr.add_argument("--out", help="write this report into this folder instead"); gr.add_argument("--json", action="store_true", help="print the JSON instead of Markdown")
+    pu = sp.add_parser("publish-reports", help="build the /reports/ site from an archive"); pu.add_argument("archive", nargs="?"); pu.add_argument("dist")
     o = ap.parse_args(argv)
     if o.cmd == "plan":
         pr = engine.plan(o.prompt, o.project, json.loads(o.overrides) if o.overrides else None, recon=o.recon)
@@ -72,6 +78,15 @@ def main(argv=None):
     elif o.cmd == "report": print(report.markdown(store.load(o.id))); return 0
     elif o.cmd == "list": out = store.list_all()
     elif o.cmd == "contracts": out = contracts.all_contracts()
+    elif o.cmd == "project-report":
+        from . import project_report
+        R = project_report.generate(o.project, refresh=o.refresh, save=o.save, out_dir=o.out)
+        if not o.json:
+            print(project_report.markdown(R)); print(f"\nSaved: {R['paths'].get('html') or 'not saved (--save none)'}", file=sys.stderr); return 0
+        out = R
+    elif o.cmd == "publish-reports":
+        from . import project_report
+        n = project_report.publish_site(o.archive or project_report.archive_root(), o.dist); print(f"published {n} report(s) to {o.dist}"); return 0
     print(json.dumps(out, indent=1, default=str))
     return 0
 
