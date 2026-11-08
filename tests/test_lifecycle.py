@@ -268,7 +268,9 @@ if executors.studio_python():
     st = engine.submit(pr["id"], "icon.master", [os.path.join(mo, "icon-1024.png")], "master", run_after=True)
     prx = store.load(pr["id"])
     check("icon: derivatives made from the approved master and integrated into the project", prx["tasks"]["icon.derivatives"]["state"] == "passed"
-          and os.path.isfile(os.path.join(proj, "assets", "icons", "apple-touch-icon.png")), prx["tasks"]["icon.derivatives"].get("error"))
+          and os.path.isfile(os.path.join(proj, "assets", "icons", "apple-touch-icon.png")),
+          {k: (prx["tasks"][k]["state"], prx["tasks"][k].get("reason") or prx["tasks"][k].get("error"), (prx["tasks"][k].get("result") or {}).get("checks"))
+           for k in ("icon.master", "icon.derivatives", "integrate.assets")})
     bo = json.load(open(os.path.join(pr["store"], "tasks", "build", "work_order.json")))
     check("build work order: asks for the attribution, the icon set and the proportionate standard",
           any("HaveAnApp" in i for i in bo["instructions"]) and any("icons.snippet.json" in i for i in bo["instructions"]) and any("personal" in i for i in bo["instructions"]))
