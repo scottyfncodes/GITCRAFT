@@ -127,7 +127,9 @@ def main():
             except Exception:
                 pass
             emit(line)
-        os._exit(proc.wait() or 0)
+        rc = proc.wait()
+        print(f"guard[diag45]: server stdout EOF; server exit status {rc}", file=sys.stderr, flush=True)
+        os._exit(rc or 0)
 
     threading.Thread(target=from_server, daemon=True).start()
     for line in sys.stdin.buffer:
@@ -159,6 +161,7 @@ def main():
                 continue
             if "id" in msg: pending[msg["id"]] = (inner or name, args, time.time(), paths)
         proc.stdin.write(line); proc.stdin.flush()
+    print("guard[diag45]: client stdin EOF; closing server stdin", file=sys.stderr, flush=True)
     proc.stdin.close()
     proc.wait()
 

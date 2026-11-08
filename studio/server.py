@@ -179,6 +179,12 @@ def main():
             while not runtime_ready(): time.sleep(3)
             send({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
         threading.Thread(target=watch, daemon=True).start()
+    def _fd0():
+        try: return f"{os.readlink('/proc/self/fd/0')} ino={os.fstat(0).st_ino}"
+        except OSError as e: return f"? ({e})"
+    print(f"studio[diag45]: start pid={os.getpid()} fd0={_fd0()}", file=sys.stderr, flush=True)
+    import atexit
+    atexit.register(lambda: print(f"studio[diag45]: exiting; fd0={_fd0()}", file=sys.stderr, flush=True))
     for line in sys.stdin:
         try: msg = json.loads(line)
         except ValueError: continue
@@ -205,6 +211,7 @@ def main():
             send({"jsonrpc": "2.0", "id": mid, "result": {}})
         else:
             send({"jsonrpc": "2.0", "id": mid, "error": {"code": -32601, "message": f"unknown method {method}"}})
+    print(f"studio[diag45]: stdin loop ended (EOF); fd0={_fd0()}; threads={[t.name for t in threading.enumerate()]}", file=sys.stderr, flush=True)
 
 
 if __name__ == "__main__":
