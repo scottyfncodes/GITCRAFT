@@ -21,7 +21,17 @@ import hashlib, json, os, re
 
 MARKER = ".gitcraft-artifacts"
 NAMES = {"gitcraft-out", ".gitcraft-work"}
-VCS_AND_CACHE = {".git", "node_modules", "__pycache__", ".cache"}
+# Folders that are never the project's source, wherever they sit: version control, installed dependencies and
+# virtualenvs, tool caches, and test-run reports (written by running a test suite, not by editing the project).
+# Build output (dist/, build/) is deliberately NOT here: it is what the browser checks measure, so a rebuild must
+# count as a change.
+VCS_AND_CACHE = {
+    ".git", ".hg", ".svn",                                                       # version control
+    "node_modules", "bower_components", ".venv", "venv", ".tox",                 # installed dependencies
+    "__pycache__", ".cache", ".pytest_cache", ".mypy_cache", ".ruff_cache",      # tool caches
+    ".parcel-cache", ".turbo", ".sass-cache",
+    "coverage", ".nyc_output", "test-results", "playwright-report",            # test-run reports
+}
 BUNDLERS = ("vite", "webpack", "parcel", "esbuild", "rollup", "next", "@sveltejs/kit", "astro", "react-scripts")
 POLICIES = ("auto", "build", "source")
 

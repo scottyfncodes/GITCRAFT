@@ -21,6 +21,15 @@ STUDIO_DIR = os.path.join(REPO, "studio")
 PREVIEW_ROLES = {"preview", "source", "manifest", "engine_screenshot", "blockout", "blockout_render", "ldtk_project", "render", "contact_sheet"}
 
 
+
+def _playcraft_hints(spec):
+    """What PLAYCRAFT is told about the game: only what the person stated. An intake default ("genre not named:
+    arcade", no mobile words) is an assumption, not a fact about the game; passing it would override PLAYCRAFT's
+    own detection from the game (an exploration game scored as arcade, its mobile category not scored at all)."""
+    pf = spec["platform"]
+    stated = pf.get("mobile_stated", pf["mobile_first"] or None)   # specs made before mobile_stated: only a 'yes' was ever stated
+    return {"genres": None if spec.get("genres_assumed") else (spec["genres"][:3] or None), "mobile": stated}
+
 def T(tid, title, stage, kind, *, department=None, action=None, params=None, deps=(), gate=None, ship=None, resources=(), retries=1,
       timeout=1800, owner=None, work_order=None, advisory=False, criterion=None):
     return {"id": tid, "title": title, "stage": stage, "kind": kind, "department": department, "action": action, "params": params or {},
@@ -186,7 +195,7 @@ def build(spec, disc):
         if q.get("playcraft"):
             qa.append("qa.playcraft")
             add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
-                  params={"project": "$project", "target": "$target", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
+                  params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
                   deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
         if q.get("pixelcraft"):
@@ -291,7 +300,7 @@ def _review_plan(spec, proj, decisions):
               params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, resources=["browser"], criterion="loads_everywhere"))
         if q.get("playcraft"):
             add(T("qa.playcraft", "PLAYCRAFT: play the game and score it", "qa", "studio", department="playcraft", action="pass",
-                  params={"project": "$project", "target": "$target", "genres": spec["genres"][:3] or None, "mobile": spec["platform"]["mobile_first"], "name": "playcraft"},
+                  params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
                   resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=True))
         if q.get("pixelcraft"):
             add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability", "qa", "studio", department="pixelcraft", action="audit",

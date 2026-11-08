@@ -7,7 +7,10 @@
 #             ⇄ the tool's own MCP server (with its native file roots where it has them)
 #
 #   scripts/mcp.sh photocraft
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# -P: the physical path. ~/.gitcraft/runtime is a symlink to the installed version (scripts/install-runtime.sh); a
+# server works from that version's own folder, so an update switching the symlink while it runs changes nothing for
+# it (its sandbox grants and its module paths all name the same, unchanged folder)
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 source "$here/tools.sh"
 
 name="${1:?usage: mcp.sh <tool>}"
