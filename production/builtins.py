@@ -202,3 +202,13 @@ def check_standards(ctx):
     from . import standards
     p = ctx["params"]
     return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app"), "standards.json")
+
+
+def check_preserve(ctx):
+    """An existing project's work survived the change (production/maturity.py baseline, taken at Discovery)."""
+    from . import maturity
+    p = ctx["params"]
+    if not p.get("baseline") or not os.path.isfile(p["baseline"]):
+        return {"status": "failed", "failure": "handoff", "error": "no preservation baseline was recorded at Discovery", "outputs": []}
+    with open(p["baseline"]) as f: base = json.load(f)
+    return _with_report(ctx, maturity.preserve_check(ctx["project"], base, p.get("allow") or (), p.get("kind") or "app"), "preserve.json")

@@ -6,7 +6,12 @@ PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft 
 
 ## One master prompt → a finished production
 
-Give Claude Code the whole request, and GITCRAFT does the rest:
+Say **"Run GITCRAFT"** with an idea, a pasted prompt, a GitHub repository URL, or inside an existing project. GITCRAFT reads
+what state the project is in (new, partially built, nearly complete, finished; game, app or site) and picks the workflow:
+build it, continue it, finish it, change only what you asked, fix it, or just review it. Existing work, games' saves and
+assets included, is preserved unless you approve a change. Examples are in [docs/production.md](docs/production.md#run-gitcraft).
+
+Or give Claude Code the whole request, and GITCRAFT does the rest:
 
 > "Build a polished, mobile-first, original platformer game called Lantern Drift with a complete gameplay loop, progression, an original visual identity, sound, music, three levels, sparks and dust effects, responsive touch controls and production-ready deployment."
 

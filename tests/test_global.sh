@@ -57,6 +57,9 @@ check "global instructions added and the user's own CLAUDE.md text kept" \
 check "gitcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/gitcraft/SKILL.md" ]]'
 check "playcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/playcraft/SKILL.md" ]]'
 check "pixelcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/pixelcraft/SKILL.md" ]]'
+check "'Run GITCRAFT' is routed in every project: instructions and the produce skill name production_start" \
+  'grep -q "Run GITCRAFT" "$HOME/.claude/CLAUDE.md" && grep -q "production_start" "$HOME/.claude/CLAUDE.md" && grep -q "^description:.*Run GITCRAFT" "$HOME/.claude/skills/produce/SKILL.md"'
+check "the runtime the servers start from has the universal entry point" '[[ -f "$HOME/.gitcraft/runtime/production/entry.py" ]]'
 
 # --- 3. from the other project
 if command -v claude >/dev/null; then
@@ -72,13 +75,14 @@ check "work in the other project (see the project checks above)" '[[ $rc -eq 0 ]
 check "the project's secret file is not in any tool's audit record" '! grep -qs "orbit-project-only" "$HOME/.gitcraft/logs/audit.jsonl"'
 
 if [[ "${GITCRAFT_TEST_ASK_CLAUDE:-1}" == 1 ]] && command -v claude >/dev/null; then
-  (cd "$proj" && timeout 300 claude -p "Answer in exactly three lines without using tools. Line 1: the comma-separated names of MCP servers you have whose names end in 'craft'. Line 2: YES or NO: do your user-level instructions tell you to consider GITCRAFT before creative or asset work? Line 3: YES or NO: is a skill named gitcraft available?" --max-turns 2) > "$work/claude-ask.out" 2>&1
+  (cd "$proj" && timeout 300 claude -p "Answer in exactly three lines without using tools. Line 1: the comma-separated names of MCP servers you have whose names end in 'craft'. Line 2: YES or NO: do your user-level instructions tell you to consider GITCRAFT before creative or asset work? Line 3: YES or NO: is a skill named gitcraft available? Line 4: if the person says Run GITCRAFT, which studiocraft tool do your instructions say to call first (just its name)?" --max-turns 2) > "$work/claude-ask.out" 2>&1
   if grep -qiE 'not logged in|invalid api key|authentication|please run /login' "$work/claude-ask.out"; then
     echo "SKIP headless Claude Code check: the CLI is not signed in in the fresh HOME ($(head -c 120 "$work/claude-ask.out"))"
   else
     check "headless Claude Code in the other project sees all ten servers" \
       '( for s in photocraft vectorcraft designcraft pdfcraft lightcraft filmcraft effectcraft meshcraft forgecraft studiocraft; do grep -q "$s" "$work/claude-ask.out" || exit 1; done )'
     check "headless Claude Code in the other project has the GITCRAFT instructions and skill" '[[ $(grep -c "YES" "$work/claude-ask.out") -ge 2 ]]'
+    check "headless Claude Code knows 'Run GITCRAFT' starts with production_start" 'grep -q "production_start" "$work/claude-ask.out"'
   fi
 fi
 

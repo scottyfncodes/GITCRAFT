@@ -110,7 +110,8 @@ room = {d["id"]: d for d in ex["decision_room"]}
 check("decision room: material decisions only, each with a recommendation, options and trade-offs",
       {"scope", "architecture", "design", "app_icon", "engineering", "cost", "attribution"} <= set(room) and all(d["recommended"] is not None and d["options"] for d in room.values()), sorted(room))
 check("decision room: existing code is reused (architecture recommends the detected engine)", room["architecture"]["recommended"] == "react")
-check("decision room: a framework's default icon is not kept (recommend a new icon)", ex["icon_state"]["status"] == "generic" and room["app_icon"]["recommended"] == "new")
+check("decision room: an existing app's icon is inspected (a framework default is reported) but never replaced unless asked",
+      ex["icon_state"]["status"] == "generic" and room["app_icon"]["recommended"] == "leave" and "new" in [o["value"] for o in room["app_icon"]["options"]])
 check("approval boundary: Discovery approval is not build approval (run refused before the blueprint is approved)", "not approved" in str(engine.run(ex["id"]).get("refused")))
 check("decision room: an answer that is not an option is refused", raises(lambda: engine.decide(ex["id"], {"engineering": "enterprise"}), ValueError))
 v = engine.decide(ex["id"], {"engineering": "sensitive"})

@@ -16,7 +16,7 @@ import concurrent.futures as cf, copy, hashlib, json, os, threading, time, trace
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
 from . import inside_roots, roots, store_root
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
-from . import lifecycle, recon, icons
+from . import lifecycle, recon, icons, maturity
 
 RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1}
 # "exclusive": a timing measurement (frame rate) is only valid with the machine to itself, so such a task starts
@@ -142,9 +142,12 @@ def idea(text, project=None, overrides=None, store_dir=None, source=None):
     return prod
 
 
-def plan(prompt, project=None, overrides=None, store_dir=None, recon=None):
-    """New Build: idea → (optional Recon) → read-only Discovery → the Decision Room. Building waits for decide(approve)."""
+def plan(prompt, project=None, overrides=None, store_dir=None, recon=None, assessment=None):
+    """New Build: idea → (optional Recon) → read-only Discovery → the Decision Room. Building waits for decide(approve).
+    An existing project (entry.start) arrives with its maturity assessment and is planned in its workflow's mode."""
     prod = idea(prompt, project, overrides, store_dir)
+    if assessment and assessment.get("existing"):
+        prod["maturity"] = assessment; store.save(prod)
     if recon: return start_recon(prod["id"], recon, store_dir=store_dir)
     return promote(prod["id"], store_dir=store_dir)
 
@@ -158,11 +161,14 @@ def _discover_and_plan(prod):
     if prod.get("recon"): spec["recon"] = {k: prod["recon"].get(k) for k in ("depth", "at")} | {"verdict": (prod["recon"].get("recommendation") or {}).get("verdict")}
     lifecycle.move(prod, "discovery")
     disc = discovery.run(spec)
-    icon_state = icons.inspect(p) if spec.get("icon", {}).get("required") else {"status": "n/a"}
+    existing = bool(spec.get("mode", {}).get("existing"))
+    if existing and not prod.get("maturity"): prod["maturity"] = maturity.assess(p)
+    icon_state = icons.inspect(p) if (spec.get("icon", {}).get("required") or existing) else {"status": "n/a"}
     if spec.get("icon", {}).get("required") and not spec["icon"].get("mode"):
         spec["icon"]["mode"] = "keep" if icon_state["status"] == "candidate" else "new"
         spec["icon"]["existing"] = icon_state.get("best")
     essential = [q for q in spec["questions"] if q.get("essential")]
+    if spec.get("mode", {}).get("question") and not spec["mode"].get("request"): essential.append({"id": "request"})
     pl = planner.build(spec, disc)
     # Every acceptance criterion from the intake stays in the spec. One that no planned task measures is reported
     # `not_planned`: it is visible in the plan and the report, and it prevents READY (the release gate fails on it).
@@ -174,6 +180,10 @@ def _discover_and_plan(prod):
             spec["acceptance"].insert(-1, {"id": cid, "text": text, "measured_by": "planning: the project has assets"})
     unmeasured = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
     problems = planner.validate(pl, disc)
+    if "qa.preserve" in pl["tasks"]:   # the baseline lives in the production store; the project is only read
+        bp = os.path.join(prod["store"], "baseline.json")
+        if not os.path.exists(bp): store.write_json(bp, maturity.baseline(p))
+        pl["tasks"]["qa.preserve"]["params"]["baseline"] = bp
     prod.update({"spec": spec, "discovery": disc, "icon_state": icon_state, "tasks": pl["tasks"], "order": pl["order"],
                  "decisions": pl["decisions"], "parallel_groups": pl["parallel_groups"], "problems": problems,
                  "readiness": planner.readiness(pl, disc), "unmeasured_criteria": unmeasured,
@@ -496,6 +506,9 @@ def _issue(prod, t):
         h["integrated_assets"] = [{k: m[k] for k in ("dest_rel", "role", "format", "task")} for m in ((integ or {}).get("result") or {}).get("integrated", [])]
     order = {"production": prod["id"], "task": t["id"], "title": t["title"], "owner": t["owner"], "out_dir": d, "project": _project(prod),
              **{k: v for k, v in wo.items() if k != "approval"}, "handoff": h,
+             **({"existing_project": {k: (prod.get("maturity") or {}).get(k) for k in ("maturity", "kind", "confidence", "inventory", "save_keys", "deploy", "tests")},
+                 "workflow": prod["spec"].get("mode", {}).get("workflow"), "request": prod["spec"].get("mode", {}).get("request")}
+                if prod["spec"].get("mode", {}).get("existing") and t["kind"] == "agent" else {}),
              "blueprint": {"decisions": (prod.get("blueprint") or {}).get("decisions"), "engineering": prod["spec"].get("engineering", {}).get("profile"),
                            "rule": "settled: build to these decisions; a material change needs production_revise and a person's approval"},
              "submit": f"production_submit {{\"production\": \"{prod['id']}\", \"task\": \"{t['id']}\", \"files\": [absolute paths], \"notes\": \"...\"}}"}

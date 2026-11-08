@@ -26,6 +26,71 @@ At the end you get the project, and a report listing every acceptance criterion 
 What you never need to know: which departments exist, which order they run in, which can run at the same time,
 how files move between them, or which checks decide "done".
 
+## "Run GITCRAFT"
+
+Say "Run GITCRAFT", with whatever you have:
+
+```text
+Run GITCRAFT: a calm breathing timer for my phone, just for me
+Run GITCRAFT on https://github.com/you/recipe-box — finish it
+Run GITCRAFT: add a dark mode toggle                (in a session on an existing project)
+Run GITCRAFT: the save button is broken             (a fix)
+Run GITCRAFT: review this game                      (measure and report; nothing changes)
+Run GITCRAFT                                         (in an existing project: it picks up where the project is)
+```
+
+Claude calls `production_start` with your words and the project folder. You never need the internal tools.
+
+1. **Where the project is.** It looks for a local path, then a GitHub URL (matched to a clone in the workspace by its git
+   remote), then the session's repository. An uncloned URL returns the exact clone command. The sandbox has no network,
+   so Claude clones it and calls again.
+2. **What state it is in** (`production/maturity.py`, read-only). It reads `new`, `partial`, `nearly_complete` or `finished`, and
+   `game`, `app` or `site`, each with **evidence** and a **confidence** level. The evidence comes from:
+   - entry point and code size;
+   - README feature lists and roadmap checkboxes;
+   - TODO/FIXME and stubs;
+   - references to missing files;
+   - tests, deployment configuration and git history.
+
+   The inventory separates **working** features (kept as they are), **unfinished** ones, **defects** and **optional improvements**,
+   each with the file it was found in. A stub is unfinished work, never a reason to rebuild.
+3. **What you asked for**: build, continue, complete, update, fix or review. With no request, the maturity decides:
+   partial → continue, nearly complete → complete, finished → one question ("what should change?").
+4. **The workflow:**
+
+| Project | Workflow | Gates |
+|---|---|---|
+| new idea | optional Recon → Discovery → Decision Room → build → verify → deliver | everything in this document |
+| partially built | continue: the unfinished features, most important first | QA bars + preservation |
+| nearly complete | complete: genuine blockers and completion criteria, then final verification | QA bars + preservation |
+| finished | update: only the requested change and the fixes it needs | loads, regression, preservation; PLAYCRAFT/PIXELCRAFT scores reported (advisory) |
+| any | fix: the defect and a regression check | as update |
+| any | review: TestCraft, PLAYCRAFT/PIXELCRAFT/DESIGNCRAFT and the standard measure it as it is | no build, nothing written to the project |
+| existing game | as above, preserving gameplay, mechanics, saves and progression, levels, assets, art direction and engine | + game assets unchanged, every save key still used |
+
+**Existing projects keep what they are.** By default there is no scaffolding, no redesign, no migration and no rebranding.
+They get no HaveAnApp credit and no new icon: the Decision Room recommends `keep`/`leave` for each, and you can ask for them.
+The engineering standard's findings in existing code are reported, not imposed. The build work order carries the inventory,
+the save keys and the preservation rules.
+
+**`qa.preserve`** compares the build against a baseline recorded in the production store at Discovery (the project itself is only read). It checks that:
+- no existing file was deleted;
+- `.env` and other secrets are untouched;
+- CI, deployment and lockfiles are unchanged;
+- for games, art, audio and levels are unchanged, and every save or progression key is still used.
+
+An approved exception is added with `production_revise {overrides: {"mode": {"allow": ["assets/hero.png"]}}, reason}`. As a material change, it needs a new approval.
+
+**Delivery** follows the project's own conventions: its branch and PR flow, its CI, its deployment. A deployment counts as live only with a check against the live URL.
+
+**How "Run GITCRAFT" reaches a session, and its limits:**
+- `scripts/setup-env.sh` (the cloud environment's setup script) installs from `main`.
+- `scripts/install-global.sh` writes the instruction block into `~/.claude/CLAUDE.md` and installs the `produce` skill, whose description names "Run GITCRAFT". `tests/test_global.sh` checks both in a fresh HOME, and asks a signed-in headless Claude Code which tool "Run GITCRAFT" calls.
+- The user-level SessionStart hook fast-forwards `~/.gitcraft/repo` from `main` **in the background**. A new GITCRAFT version is therefore served from the *next* session (or after `/mcp`), not the one that pulled it.
+- `~/.gitcraft/runtime/.gitcraft-source` names the commit being served.
+- A session where GITCRAFT was never installed (no setup script, no global install) cannot discover it. Run the setup script once (README → "Use GITCRAFT in every project").
+- Open GitHub issues and the live site aren't read during Discovery (no network in the sandbox). Claude adds them when it has access, and the report says when they weren't checked.
+
 ## Idea to delivery
 
 One record per project (`production.json` in the store) carries it through every stage. `production_status` and
@@ -163,6 +228,7 @@ Request parameters can reference upstream results:
 ## CLI
 
 ```bash
+python3 -m production start "Run GITCRAFT: <anything>" [--project DIR]
 python3 -m production idea "<idea>" [--project DIR]
 python3 -m production recon <id> [--depth quick|deep] [--findings FILE]
 python3 -m production promote <id>
@@ -180,6 +246,10 @@ python3 -m production list | contracts
 
 ## Verification
 
+- `tests/test_entry.py` (~1 min) covers "Run GITCRAFT": a new idea, a partial, nearly complete and finished app and an existing game
+  (maturity, kind, evidence, confidence, inventory), intent routing, repository URLs with and without a clone, read-only Discovery,
+  the existing-project defaults (no scaffolding, icon, branding or redesign), the essential question, the approval gate, preservation
+  (deleted files, secrets, CI, game assets, saves) and the invocation wiring (skill, global instructions, the MCP tool).
 - `tests/test_lifecycle.py` (~1 min) covers briefs, standalone Recon (evidence rules, budget, park and discard), Recon in a New Build, read-only Discovery
   (byte-identical project, no folder created), the Decision Room (answers re-plan, invalid answers refused, existing-app attribution choice),
   the approval boundary, the frozen blueprint, material and non-material revisions (pause, approve with preserved work, decline), legacy productions,

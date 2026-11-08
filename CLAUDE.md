@@ -146,6 +146,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   revisions, the App Icon Studio, HaveAnApp attribution, engineering standards); never let `run` build without an approved blueprint,
   never select an icon without a person's choice, and never set the HaveAnApp URL to an address that has not been verified
   (`production/kit/haveanapp/attribution.json`). Standards: docs/app-standards.md.
+- `tests/test_entry.py` must pass after any change to `production/entry.py`, `maturity.py`, the existing-project paths of the
+  planner/intake/lifecycle, or the "Run GITCRAFT" wording in `global/`; Discovery stays read-only, and an existing project never gets
+  scaffolding, rebranding, a new icon or a redesign without the Decision Room's approval.
 - `tests/test_hardening.py` must pass after any change to `scripts/guard.py` or `ui/server.py` (docs/tech-debt.md).
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a

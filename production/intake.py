@@ -12,7 +12,7 @@ Spec fields:
   quality {level, gates...}, project {path, exists}, authorisations, acceptance [...],
   assumptions [...], questions [...]"""
 import copy, json, os, re
-from . import standards
+from . import standards, maturity
 
 RULES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules.json")))
 
@@ -48,6 +48,8 @@ def parse(prompt, project=None, overrides=None):
         raise ValueError("the master prompt is empty or too short to plan from: describe the deliverable")
     t = " ".join(prompt.lower().split())
     because, assumptions, questions = {}, [], []
+    # an existing project gets only what was asked for: no implied sounds, identity, icon or branding
+    existing = bool((overrides or {}).get("mode", {}).get("existing")) or maturity.is_existing(project)
 
     # ---- deliverable
     deliverable, w = _first(t, RULES["deliverables"])
@@ -76,7 +78,7 @@ def parse(prompt, project=None, overrides=None):
     polished = bool(_w(t, RULES["polish_words"]))
     if deliverable == "game":
         feats["gameplay_loop"] = True; feats["controls"] = True
-        if polished and not feats["sound"]: feats["sound"] = True; assumptions.append("'polished' game: sound effects included")
+        if polished and not feats["sound"] and not existing: feats["sound"] = True; assumptions.append("'polished' game: sound effects included")
     feats["deploy"] = bool(_w(t, RULES["deploy_words"]))
 
     # ---- assets the departments make
@@ -119,7 +121,7 @@ def parse(prompt, project=None, overrides=None):
         if terr or feats["world"]: assets["world"] = {"terrain": terr or "island", "sky": _first(t, RULES["sky"])[0] or "morning", "ocean": bool(_w(t, ["ocean", "sea", "waves"]))}
         models = re.findall(r"(?:3d model|model) of (?:an? |the )?([a-z][a-z \-]{2,30}?)(?:[,.;]| and |$)", t)
         if models: assets["models"] = models[:4]
-    if feats["identity"] or (deliverable in ("game", "app", "site") and polished):
+    if feats["identity"] or (deliverable in ("game", "app", "site") and polished and not existing):
         assets["identity"] = True
         if not feats["identity"]: assumptions.append("'polished': an original visual identity (logo, icon, palette) is included")
     if feats["trailer"]: assets["trailer"] = True
@@ -150,8 +152,8 @@ def parse(prompt, project=None, overrides=None):
     web = deliverable in ("game", "app", "site")
     spec = {"title": title, "prompt": prompt, "deliverable": deliverable, "dimension": dimension, "platform": platform,
             "genres": genres, "features": feats, "assets": assets, "quality": q, "project": proj, "authorisations": auth,
-            "engineering": {"profile": prof, "because": pw}, "icon": {"mode": None, "required": web},
-            "attribution": {"required": web}, "because": because, "assumptions": assumptions, "questions": questions}
+            "engineering": {"profile": prof, "because": pw}, "icon": {"mode": None, "required": web and not existing},
+            "attribution": {"required": web and not existing}, "mode": _mode(prompt, project, existing, overrides), "because": because, "assumptions": assumptions, "questions": questions}
     if overrides:
         spec = merge(spec, overrides)
         # what follows from the deliverable is re-derived when an override changed it (unless also overridden), so
@@ -161,10 +163,23 @@ def parse(prompt, project=None, overrides=None):
             if k not in qo: spec["quality"][k] = v
         if "genres" not in overrides and d != "game": spec["genres"] = []
         w = d in ("game", "app", "site")
-        if "icon" not in overrides: spec["icon"]["required"] = w
-        if "attribution" not in overrides: spec["attribution"]["required"] = w
+        ex = spec.get("mode", {}).get("existing")
+        if "icon" not in overrides: spec["icon"]["required"] = w and not ex
+        if "attribution" not in overrides: spec["attribution"]["required"] = w and not ex
     spec["acceptance"] = acceptance(spec)
     return spec
+
+
+def _mode(prompt, project, existing, overrides):
+    """New projects build. An existing one is read (read-only) for its maturity, and the request picks the workflow, the
+    same way production_start does, unless the overrides already say (production_start passes its own reading)."""
+    if not existing: return {"existing": False, "workflow": "build"}
+    given = (overrides or {}).get("mode") or {}
+    if given.get("workflow") and given.get("maturity"): return {"existing": True}
+    a = maturity.assess(project) if project else {"maturity": "nearly_complete", "kind": None, "confidence": "low"}
+    wf, because = maturity.intent(prompt, a["maturity"])
+    return {"existing": True, "maturity": a["maturity"], "kind": a.get("kind"), "confidence": a.get("confidence"), "workflow": wf, "because": because,
+            "request": prompt if wf in ("update", "fix", "complete", "continue") else None}
 
 
 def merge(a, b):
@@ -201,6 +216,10 @@ def acceptance(spec):
     if web:
         add("engineering_standards", f"The {spec.get('engineering', {}).get('profile', 'personal')} engineering standard's measured checks pass (mobile basics, secrets, "
             "HTTPS, reproducible dependencies; auth, validation and rate limits for public/sensitive apps); review items listed", "qa.standards")
+    mode = spec.get("mode") or {}
+    if web and mode.get("existing") and mode.get("workflow") != "review":
+        add("preservation", "Existing work preserved: no file deleted, secrets, CI and deployment untouched"
+            + (", game art/audio/levels and saved progress intact" if d == "game" else "") + " (unless approved)", "qa.preserve")
     if spec["features"].get("deploy"): add("deployment", "Deployed and the live URL verified (needs approval)", "release.deploy")
     add("release_ready", "Release report written with every criterion's evidence measured on the final build", "release.report")
     return out
