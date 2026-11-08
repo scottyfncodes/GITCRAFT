@@ -83,7 +83,7 @@ def browser_check(url, out_dir):
 
 def verify(prod, url, browser=True):
     proj = prod["spec"]["project"]["path"]
-    out_dir = os.path.join(prod["store"], "tasks", "release.deploy"); os.makedirs(out_dir, exist_ok=True)
+    out_dir = store.task_dir(prod, "release.deploy")
     checks = []
     add = lambda name, ok, detail=None, **kw: checks.append(dict({"name": name, "ok": bool(ok), "detail": detail}, **kw))
     local_ok = os.environ.get("GITCRAFT_LIVE_ALLOW_LOCAL") == "1" and re.match(r"^http://(127\.0\.0\.1|localhost)(:\d+)?/", url or "")

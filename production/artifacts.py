@@ -104,6 +104,21 @@ def store_root_for(project, configured, roots):
     return iso, f"every workspace root is inside the project; evaluation output goes to the isolated home {iso}"
 
 
+OUTPUTS_SUFFIX = "-outputs"
+
+
+def output_root(prod_id, store, project, create=True):
+    """Where a production's task output (every department's out_dir, work orders, evidence) is written.
+
+    The store itself when it is outside the evaluated project. A store inside the project (a production made
+    before store_root_for existed, or one opened with an explicit store inside the project) keeps its record
+    where it is, but its task output goes to `<isolated home>/<id>-outputs`, so a read-only evaluator
+    (DESIGNCRAFT) is never handed a path inside the game. The folder is marked as evaluation output."""
+    if not project or not inside(store, project): return store
+    d = os.path.join(isolated_home(), os.path.basename(prod_id) + OUTPUTS_SUFFIX)
+    return mark(d) if create else d
+
+
 # ---------------------------------------------------------------- 3. what is evaluated
 def _read(p):
     try:

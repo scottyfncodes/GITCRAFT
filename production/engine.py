@@ -83,7 +83,7 @@ def _project(prod): return prod["spec"]["project"]["path"]
 
 
 def _task_dir(prod, tid):
-    d = os.path.join(prod["store"], "tasks", tid); os.makedirs(d, exist_ok=True); return d
+    return store.task_dir(prod, tid)   # outside the evaluated project, whatever store the production record sits in
 
 
 def _hex_rgb(h):
@@ -305,7 +305,10 @@ def decide(pid, answers=None, approve=False, note=None, store_dir=None):
         if lc.get("revision"):
             rv = lc["revision"]
             if approve:
+                if rv.get("problems"):   # same rule as the first approval: a plan with problems cannot be approved
+                    raise ValueError("the revision's plan has problems; send a corrected production_revise (or decline this one): " + "; ".join(rv["problems"][:4]))
                 _apply_revision(prod, rv["overrides"])
+                if prod.get("blueprint"): prod.setdefault("blueprint_history", []).append(prod["blueprint"])   # every approved version is kept
                 prod["blueprint"] = dict(lifecycle.blueprint(prod), version=(prod.get("blueprint") or {}).get("version", 1) + 1, revision=rv)
                 prod.setdefault("decisions", []).append(f"approved revision: {rv['reason']} ({', '.join(rv['changed'])})")
                 store.event(prod, "revision_approved", changed=rv["changed"])
@@ -355,6 +358,7 @@ def decide(pid, answers=None, approve=False, note=None, store_dir=None):
     return lifecycle_view(prod)
 
 
+DECISION_HISTORY = ("approved revision:", "declined revision:", "non-material revision applied:", "evaluation output isolated")
 TASK_DEF = ("kind", "department", "action", "params", "depends_on", "ship", "work_order", "gate", "criterion")
 
 
@@ -363,8 +367,12 @@ def _apply_revision(prod, overrides):
     old = prod["tasks"]
     prod["overrides"] = intake.merge(prod.get("overrides") or {}, overrides)
     keep_lc = copy.deepcopy(prod.get("lifecycle")); room = copy.deepcopy(prod.get("decision_room"))
+    # what people decided (approved, declined or applied revisions; isolation notes) is history: re-planning regenerates the
+    # planning notes but never drops these
+    history = [d for d in prod.get("decisions") or [] if d.startswith(DECISION_HISTORY)]
     _discover_and_plan(prod)
     prod["lifecycle"] = keep_lc; prod["decision_room"] = room
+    prod["decisions"] = history + [d for d in prod["decisions"] if d not in history]
     new, order, dropped = prod["tasks"], [], []
     for tid in list(prod["order"]):
         n = new[tid]; o = old.get(tid)
@@ -385,6 +393,26 @@ def _apply_revision(prod, overrides):
     if dropped: prod.setdefault("decisions", []).append(f"revision removed: {', '.join(dropped)}")
 
 
+def _revision_effect(prod, overrides):
+    """What a pending revision would do to the acceptance criteria, shown to the person before they approve it:
+    criteria no task would measure any more (NOT PLANNED: the production could not be READY), criteria it would start
+    measuring, and plan problems (e.g. a `replaces` that is not the same check). Planned on a copy in a scratch
+    folder: the production and its store are not touched."""
+    import tempfile, shutil
+    tmp = tempfile.mkdtemp(prefix="gitcraft-revision-")
+    try:
+        trial = copy.deepcopy(prod); trial["store"] = tmp
+        before = set(prod.get("unmeasured_criteria") or [])
+        _apply_revision(trial, overrides)
+        after = set(trial.get("unmeasured_criteria") or [])
+        return {"unmeasured_after": sorted(after), "would_lose": sorted(after - before), "would_measure": sorted(before - after),
+                "problems": trial.get("problems") or []}
+    except Exception as e:   # the preview never blocks a revision; the approved plan is validated when it is applied
+        return {"preview_error": f"{type(e).__name__}: {e}"}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def revise(pid, overrides, reason, store_dir=None):
     """Change the plan. Before approval it re-plans; after, a material deviation pauses the build until it is approved."""
     if not reason: raise ValueError("say why the plan changes (reason)")
@@ -403,7 +431,8 @@ def revise(pid, overrides, reason, store_dir=None):
             prod.setdefault("decisions", []).append(f"non-material revision applied: {reason}")
             store.event(prod, "revision_applied", material=False)
         else:
-            prod["lifecycle"]["revision"] = {"overrides": overrides, "reason": reason, "changed": changed, "at": store.now()}
+            prod["lifecycle"]["revision"] = {"overrides": overrides, "reason": reason, "changed": changed, "at": store.now(),
+                                             **_revision_effect(prod, overrides)}
             prod["status"] = "paused"
             store.event(prod, "revision_requested", changed=changed, reason=reason)
         store.save(prod)
@@ -435,12 +464,54 @@ def _recover(prod):
     # department artifacts live in the production store and must still be what passed; files in the project
     # (the build, integrated copies) legitimately change under remediation: their freshness is the release's
     # fingerprint check, not this one
-    st = os.path.realpath(prod["store"]) + os.sep
+    owned = tuple({os.path.realpath(prod["store"]) + os.sep, os.path.realpath(store.output_root(prod, create=False)) + os.sep})
     for t in list(prod["tasks"].values()):
         if t["state"] != PASSED: continue
-        bad = [o["path"] for o in t.get("outputs", []) if o.get("sha256") and os.path.realpath(o["path"]).startswith(st)
+        bad = [o["path"] for o in t.get("outputs", []) if o.get("sha256") and os.path.realpath(o["path"]).startswith(owned)
                and (not os.path.isfile(o["path"]) or builtins.sha256(o["path"]) != o["sha256"])]
         if bad: _invalidate(prod, t, f"outputs missing or changed since they passed: {', '.join(os.path.basename(b) for b in bad[:4])}")
+
+
+RETRYABLE = ("execution", "request")   # the check could not run: nothing about the project was measured
+
+
+def retry(pid, tasks, reason, store_dir=None):
+    """Re-run checks that failed without measuring the project (an executor that could not run, a request GITCRAFT
+    itself refused, e.g. DESIGNCRAFT's output path before task output was isolated). Explicit and recorded: the earlier
+    attempts stay in the task's history, an event names who asked and why, and dependants that were failed or blocked
+    on it run again. A check that ran and failed its gate (quality) cannot be retried: that is remediation's job,
+    so a retry can never turn a measured failure into a pass."""
+    if not reason: raise ValueError("say why the check should run again (reason)")
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        for tid in tasks:
+            t = prod["tasks"].get(tid)
+            if not t: raise ValueError(f"{tid}: no such task in {pid}")
+            if t["state"] != FAILED: raise ValueError(f"{tid} is {t['state']}: only a failed check can be retried")
+            last = (t["attempts"] or [{}])[-1]
+            if t.get("failure") == "quality" or last.get("outcome") not in RETRYABLE:
+                raise ValueError(f"{tid} ran and failed its gate ({t.get('failure') or last.get('outcome')}): a measured failure is fixed in the "
+                                 "project (its fix work order), never retried")
+        reopened = set()
+        for tid in tasks:
+            t = prod["tasks"][tid]
+            t["attempts"][-1]["retry_requested"] = {"at": store.now(), "reason": reason}
+            _invalidate(prod, t, f"retry requested: {reason} (previous: {t.get('error') or t.get('failure')})")
+            store.event(prod, "retry_requested", task=tid, reason=reason, previous=t.get("error"))
+            reopened.add(tid)
+        changed = True
+        while changed:   # whatever was failed or blocked because of a reopened check waits for it again
+            changed = False
+            for t in prod["tasks"].values():
+                if t["id"] in reopened or t["state"] not in (BLOCKED, FAILED): continue
+                if set(t.get("blocked_by") or []) & reopened or (t["state"] == FAILED and set(t["depends_on"]) & reopened):
+                    _set(prod, t, PENDING, reason="upstream is running again: " + ", ".join(sorted(set(t["depends_on"]) & reopened or set(t.get("blocked_by") or []) & reopened)),
+                         outputs=[], result=None, gate_results=None)
+                    reopened.add(t["id"]); changed = True
+        prod["status"] = "planned" if not any(t.get("attempts") for t in prod["tasks"].values()) else "running"
+        store.save(prod)
+    return status(prod)
 
 
 def _invalidate(prod, t, why):

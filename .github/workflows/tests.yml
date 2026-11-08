@@ -91,6 +91,12 @@ jobs:
       - name: Run GITCRAFT report (read-only cross-department project report)
         run: python3 tests/test_report.py
 
+      - name: Evaluation orchestration (no self-triggering loops, one target, isolated store, a final verdict)
+        run: python3 tests/test_evaluation.py
+
+      - name: Evaluation follow-ups (task output isolated for every production, replacement checks keep their criterion)
+        run: python3 tests/test_evaluation_followups.py
+
       - name: Production Director master-prompt acceptance (every department for real)
         run: python3 tests/acceptance_production.py
 

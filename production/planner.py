@@ -13,7 +13,7 @@ Request parameters may reference upstream results, resolved when the task starts
 
 validate(plan) refuses a plan with an unknown dependency, a cycle, an unknown department action or a
 request its department would reject, before anything runs."""
-import os, sys
+import copy, os, sys
 from . import REPO
 from . import discovery as _disc
 
@@ -154,13 +154,8 @@ def build(spec, disc):
               deps=["foundation.scaffold"], resources=["blender"], timeout=3600, ship={"dest": adir("models"), "library": True}, criterion="asset_models"))
 
     # ---------------------------------------------------------------- tasks the agent added to the spec (validated like the rest)
-    for x in spec.get("extra_tasks") or []:
-        kind = x.get("kind", "studio")
-        add(T(x["id"], x.get("title") or f"{x.get('department')}.{x.get('action')}", x.get("stage", "production"), kind, department=x.get("department"),
-              action=x.get("action"), params=x.get("params"), deps=x.get("depends_on") or ["foundation.scaffold"], ship=x.get("ship"),
-              resources=x.get("resources", ()), retries=x.get("retries", 1), timeout=x.get("timeout", 1800), work_order=x.get("work_order"),
-              criterion=x.get("criterion")))
-        if x.get("stage", "production") == "production": prod.append(x["id"])
+    for x in _extra_tasks(spec, add, tasks):
+        if x.get("stage", "production") == "production" and not x.get("replaces"): prod.append(x["id"])
 
     # ---------------------------------------------------------------- integration
     shipping = [t["id"] for t in tasks if t.get("ship")]
@@ -253,13 +248,8 @@ def build(spec, disc):
         add(T("release.deploy", "Deploy and verify the live URL", "release", "agent", deps=["release.report"], criterion="deployment",
               work_order={"approval": "deploy", "brief": "Deploy the verified release and prove the live URL serves it.",
                           "instructions": _deploy_instructions(spec), "expected": [], "requires": ["url", "evidence"]}))
-    skip = set(spec.get("skip_tasks") or [])   # applied last, so any task (QA and release included) can be skipped
-    if skip:
-        unknown = sorted(skip - {t["id"] for t in tasks})
-        tasks[:] = [t for t in tasks if t["id"] not in skip]
-        for t in tasks: t["depends_on"] = [d for d in t["depends_on"] if d not in skip]
-        decisions.append(f"skipped at the agent's request: {', '.join(sorted(skip - set(unknown)))}" + (f" (not in the plan: {', '.join(unknown)})" if unknown else ""))
-    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions}
+    rproblems = _skip_and_replace(spec, tasks, decisions)   # applied last, so any task (QA and release included) can be skipped or replaced
+    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions, "replacement_problems": rproblems}
     plan["parallel_groups"] = parallel_groups(plan)
     return plan
 
@@ -320,7 +310,11 @@ def _review_plan(spec, proj, decisions):
     add(T("release.report", "Review report: the project as it is, measured; nothing changed", "release", "builtin", action="release", deps=[t["id"] for t in tasks],
           criterion="release_ready", gate=[{"type": "status_ok"}]))
     decisions.append("review only: the evaluators measure the project as it is; nothing is built, scaffolded or changed")
-    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions}
+    _extra_tasks(spec, add, tasks, default_deps=())
+    rel = next(t for t in tasks if t["id"] == "release.report")   # the review report comes last and waits for every check, added ones included
+    tasks.remove(rel); rel["depends_on"] = [t["id"] for t in tasks]; tasks.append(rel)
+    rproblems = _skip_and_replace(spec, tasks, decisions)
+    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions, "replacement_problems": rproblems}
     plan["parallel_groups"] = parallel_groups(plan)
     return plan
 
@@ -469,13 +463,83 @@ def _strip_refs(v):
     return v
 
 
+def _extra_tasks(spec, add, tasks, default_deps=("foundation.scaffold",)):
+    """Add the tasks the agent asked for in the spec (validated like the rest); returns their specs."""
+    xs = spec.get("extra_tasks") or []
+    for x in xs:
+        add(T(x["id"], x.get("title") or f"{x.get('department')}.{x.get('action')}", x.get("stage", "production"), x.get("kind", "studio"),
+              department=x.get("department"), action=x.get("action"), params=x.get("params"), deps=x.get("depends_on") or list(default_deps),
+              ship=x.get("ship"), resources=x.get("resources", ()), retries=x.get("retries", 1), timeout=x.get("timeout", 1800),
+              work_order=x.get("work_order"), criterion=x.get("criterion")))
+        if x.get("replaces"): tasks[-1]["replaces"] = x["replaces"]
+    return xs
+
+
+def _skip_and_replace(spec, tasks, decisions):
+    """Apply skip_tasks and `replaces` (in place); returns the replacement problems for validate()."""
+    skip = set(spec.get("skip_tasks") or [])
+    replaced, rproblems = _replacements(tasks, spec.get("extra_tasks") or [], skip, decisions)
+    gone = skip | set(replaced)
+    if gone:
+        unknown = sorted(skip - {t["id"] for t in tasks})
+        tasks[:] = [t for t in tasks if t["id"] not in gone]
+        for t in tasks:   # a dependency on a replaced task becomes a dependency on its replacement; a skipped one is dropped
+            deps = []
+            for d in t["depends_on"]:
+                d = replaced.get(d, d)
+                if d not in gone and d != t["id"] and d not in deps: deps.append(d)
+            t["depends_on"] = deps
+        plain = sorted(skip - set(unknown) - set(replaced))
+        if plain or unknown:
+            decisions.append(f"skipped at the agent's request: {', '.join(plain) or 'nothing'}" + (f" (not in the plan: {', '.join(unknown)})" if unknown else ""))
+    return rproblems
+
+
+REPLACE_INHERIT = ("criterion", "stage", "advisory", "gate", "resources")
+
+
+def _replacements(tasks, extras, skip, decisions):
+    """({replaced id: replacement id}, problems) for extra tasks that declare `replaces`.
+
+    An extra task may stand in for a planned check that cannot run as planned (e.g. a smoke test pointed at the
+    built app instead of the source). It must be the same check: the same kind, department and action. It then
+    measures what the original measured: it inherits the original's criterion, stage, advisory flag, gate and
+    resources (an explicit, different criterion is refused), the original is skipped, and every task that
+    depended on the original depends on the replacement. Nothing is inferred: without `replaces`, an extra task
+    measures only the criterion it names. The revision that adds it is material and needs a person's approval."""
+    by = {t["id"]: t for t in tasks}
+    out, problems = {}, []
+    for x in extras:
+        rid, nid = x.get("replaces"), x.get("id")
+        if not rid: continue
+        new, old = by.get(nid), by.get(rid)
+        if old is None:
+            problems.append(f"{nid}: replaces {rid}, which is not in the plan"); continue
+        if rid in out:
+            problems.append(f"{nid}: {rid} is already replaced by {out[rid]}"); continue
+        same = (old["kind"], old.get("department"), old.get("action")) == (new["kind"], new.get("department"), new.get("action"))
+        if not same:
+            problems.append(f"{nid}: replaces {rid} but is not the same check ({new['kind']} {new.get('department')}.{new.get('action')} "
+                            f"vs {old['kind']} {old.get('department')}.{old.get('action')})"); continue
+        if x.get("criterion") and old.get("criterion") and x["criterion"] != old["criterion"]:
+            problems.append(f"{nid}: replaces {rid}, which measures {old['criterion']}, but names criterion {x['criterion']}"); continue
+        for k in REPLACE_INHERIT:
+            if k not in x or k == "criterion" and not x.get("criterion"): new[k] = copy.deepcopy(old.get(k))
+        if not x.get("depends_on"): new["depends_on"] = list(old["depends_on"])
+        out[rid] = nid
+        decisions.append(f"{nid} replaces {rid}: the same {old.get('department')}.{old.get('action')} check"
+                         + (f", measuring {old['criterion']}" if old.get("criterion") else "") + " (approved revision)")
+    return out, problems
+
+
 def validate(plan, disc=None):
     """Problems that would make the plan fail before it starts. Empty list = the plan is sound."""
     problems, tasks = [], plan["tasks"]
     for t in tasks.values():
         for dep in t["depends_on"]:
             if dep not in tasks: problems.append(f"{t['id']}: unknown dependency {dep}")
-    if problems: return problems   # the graph itself is broken: ordering it would be meaningless
+    problems = list(plan.get("replacement_problems") or []) + problems
+    if len(problems) > len(plan.get("replacement_problems") or []): return problems   # the graph itself is broken: ordering it would be meaningless
     try: parallel_groups(plan)
     except ValueError as e: problems.append(str(e))
     if STUDIO_DIR not in sys.path: sys.path.insert(0, STUDIO_DIR)
