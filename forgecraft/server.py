@@ -132,8 +132,23 @@ def call(name, a):
     raise KeyError(f"unknown tool {name}")
 
 
+def private_stdio():
+    """The JSON-RPC pipes belong to this server alone (#45). Every child (Node/Chromium, FFmpeg, Blender, a
+    department CLI) used to inherit fd 0 and fd 1, i.e. the protocol pipes. FFmpeg reads keystrokes from its stdin,
+    and a child that sets O_NONBLOCK on the shared pipe makes the server's next read return EAGAIN, which ends
+    `for line in sys.stdin` as if the client had gone: the server exited 0 mid-request. Here the protocol moves to
+    private close-on-exec descriptors, fd 0 becomes /dev/null and fd 1 becomes stderr, so no child can read, write
+    or re-flag the protocol. Returns (reader, writer) for the protocol."""
+    import fcntl
+    pin, pout = os.dup(0), os.dup(1)                       # os.dup is non-inheritable (O_CLOEXEC)
+    fcntl.fcntl(pin, fcntl.F_SETFL, fcntl.fcntl(pin, fcntl.F_GETFL) & ~os.O_NONBLOCK)
+    null = os.open(os.devnull, os.O_RDWR); os.dup2(null, 0); os.close(null)
+    os.dup2(2, 1)                                          # a child's stray output goes to the log, never into the protocol
+    return open(pin, "r", encoding="utf-8"), open(pout, "w", encoding="utf-8")
+
+
 def main():
-    out = sys.stdout
+    proto_in, out = private_stdio()
     lock = threading.Lock()
     # Before MeshCraft's Blender is installed, list only forgecraft_status and announce the full list once it is
     # (tools/list_changed): see gitcraft3d/deferred.py. Registered early, usable as soon as the install finishes.
@@ -146,7 +161,7 @@ def main():
             waiting[0] = False
             send({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
         deferred.Watcher(blender_arrived)
-    for line in sys.stdin:
+    for line in proto_in:
         try: msg = json.loads(line)
         except ValueError: continue
         mid, method, p = msg.get("id"), msg.get("method"), msg.get("params") or {}

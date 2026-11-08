@@ -26,7 +26,7 @@ def studio_python():
 
 def _child(cmd, timeout, env=None):
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=dict(os.environ, **(env or {})))
+        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=dict(os.environ, **(env or {})))
     except subprocess.TimeoutExpired:
         return {"status": "failed", "error": f"timed out after {timeout} s", "failure": "timeout"}
     except OSError as e:
@@ -76,7 +76,7 @@ def designcraft_assess(project, out_json, timeout=900):
 
 def _child_raw(cmd, timeout, env):
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=dict(os.environ, **env))
+        r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=dict(os.environ, **env))
     except subprocess.TimeoutExpired:
         return {"status": "failed", "error": f"timed out after {timeout} s", "failure": "timeout"}
     if r.returncode != 0: return {"status": "failed", "error": (r.stderr or r.stdout)[-1500:], "failure": "crash"}

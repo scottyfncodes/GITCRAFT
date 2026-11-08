@@ -123,6 +123,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 
 - `tests/test_policy.py` must pass after any change to the launcher, guard or
   sandbox.
+- `tests/test_stdio_isolation.py` must pass after any change to an MCP server's main loop (`studio/server.py`,
+  `forgecraft/server.py`, `meshcraft/server.py`): the JSON-RPC pipes stay private to the server (fd 0 = /dev/null,
+  fd 1 = stderr for every child), or a child process can end the server mid-request (#45).
 - `tests/test_global.sh` must pass after any change to install, registration,
   `global/` or the launcher (it installs into a fresh HOME and uses the tools
   from a separate project; it tests the committed branch).
