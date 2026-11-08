@@ -17,6 +17,12 @@ and the project's maturity (partial, nearly complete, finished; game/app/site),
 picks the workflow, preserves existing work, and opens the Decision Room. A
 repository URL that isn't cloned yet returns the clone command to run first.
 
+"Run GITCRAFT report": call `production_start` the same way (or studiocraft
+`production_project_report`). It reads the latest results of every department
+for the project, refreshes the read-only analyses, reconciles them, and saves a
+timestamped report (health, scorecards, blockers, P0–P3 plan, changes since the
+last report). It is read-only: never edit code, merge or deploy as part of it.
+
 For a WHOLE deliverable from one master prompt (a game, app, site or asset
 pack: "build a polished mobile-first game with sound, levels and deployment"),
 follow the `produce` skill: pass the prompt verbatim to studiocraft

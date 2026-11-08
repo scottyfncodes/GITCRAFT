@@ -128,6 +128,14 @@ PRODUCTION_TOOLS = [
       "note": {"type": "string"}, "choice": {"type": "string", "description": "icon.select: the approved concept id"}}}),
     ("production_report", "The acceptance report: every criterion with its measured evidence, remediation history, blockers, and the verdict (READY / NOT READY).", _P(production=_PID)),
     ("production_list", "Every production in the store, newest first.", _P()),
+    ("production_project_report", "RUN GITCRAFT REPORT: one project report from the latest analysis of every GITCRAFT department (the Studio departments, DESIGNCRAFT, "
+     "the 3D Department, the Production Director): executive summary and health, department scorecards, blockers, cross-department findings (corroborated, conflicts, "
+     "dependencies, gaps), a P0–P3 action plan, changes since the previous report and next actions. Read-only: it never edits code, builds, merges or deploys. "
+     "refresh: quick (default; re-runs the read-only analyses: Discovery, engineering standard, DESIGNCRAFT), full (also PLAYCRAFT/PIXELCRAFT on an existing build), none. "
+     "Saved timestamped (report.json/.md/.html) so the next report compares against it.",
+     {"type": "object", "required": ["project"], "properties": {"project": {"type": "string", "description": "the project folder, a GitHub owner/repo or URL, or a history id (owner--repo)"},
+                                                               "refresh": {"type": "string", "enum": ["none", "quick", "full"]},
+                                                               "save": {"type": "string", "enum": ["store", "none"], "description": "store (default): keep it for comparison; none: return only"}}}),
     ("production_contracts", "Every department's contract: what it accepts and produces, what it requires, how success and failure are reported, where outputs go, how provenance and licences are recorded.", _P()),
 ]
 _bg = {}
@@ -177,6 +185,10 @@ def _production(name, a):
         pr = store.load(a["production"]); return {"production": pr["id"], "markdown": report.markdown(pr), "acceptance": report.acceptance(pr)}
     if name == "production_list": return {"productions": store.list_all()}
     if name == "production_contracts": return contracts.all_contracts()
+    if name == "production_project_report":
+        from production import project_report, entry
+        R = project_report.generate(a["project"], refresh=a.get("refresh") or "quick", save=a.get("save") or "store")
+        return dict(entry.summary(R), markdown=project_report.markdown(R))
     raise KeyError(name)
 
 

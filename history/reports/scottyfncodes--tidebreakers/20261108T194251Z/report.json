@@ -1,0 +1,838 @@
+{
+ "gitcraft_report": "1.0.0",
+ "report_id": "scottyfncodes--tidebreakers/20261108T194251Z",
+ "generated": "2026-11-08T19:42:51+00:00",
+ "refresh": "quick",
+ "read_only": true,
+ "project": {
+  "id": "scottyfncodes--tidebreakers",
+  "repo": "scottyfncodes/tidebreakers",
+  "url": "https://github.com/scottyfncodes/tidebreakers",
+  "name": "tidebreakers",
+  "path": null,
+  "head": null,
+  "branch": null,
+  "dirty": null,
+  "kind": "game",
+  "maturity": null
+ },
+ "health": {
+  "score": 51.0,
+  "band": "at risk",
+  "confidence": "low",
+  "measured": 2,
+  "of": 5,
+  "stale": [],
+  "p0": 0,
+  "parts": {
+   "playcraft": 77,
+   "designcraft": 25
+  },
+  "basis": "mean of 2 measured department score(s) (playcraft, designcraft); 3 applicable department(s) have no score"
+ },
+ "departments": [
+  {
+   "id": "production",
+   "title": "Production Director",
+   "family": "Production",
+   "role": "director",
+   "summary": "Discovery, engineering standard, productions and their acceptance verdicts",
+   "applicable": true,
+   "applies_because": null,
+   "status": "unavailable",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "The project is not checked out here: Discovery and the engineering standard need its files (clone it and report again)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "playcraft",
+   "title": "PLAYCRAFT \u2014 game design and gameplay quality",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Assesses and improves how a game plays. Reads the repo (intent, engine, controls, systems with file:line evidence, genres across 15 genre profiles), plays the built game in Chromium on desktop and phone (response time of every control, dead time, idle motion, FPS, pause, touch targets, text size), scores 10 categories 0-100 with evidence levels (verified / observed / inferred / not tested) and confidence, ranks the highest-impact opportunities by impact, effort and risk, writes a staged plan, then verifies changes against the baseline (regressions + guardrails on the git diff) with a before/after report. full_pass adds GITCRAFT's engineering checks (TestCraft) under one plan.",
+   "applicable": true,
+   "applies_because": "PLAYCRAFT scores games",
+   "status": "current",
+   "score": {
+    "value": 77,
+    "label": "Gameplay quality",
+    "confidence": "low",
+    "coverage": 1.0,
+    "verified_only": 90,
+    "categories": {
+     "core_gameplay": 83,
+     "game_feel": 76,
+     "controls": 76,
+     "progression": 70,
+     "difficulty": 70,
+     "player_experience": 62,
+     "replayability": 70,
+     "technical": 92,
+     "presentation": 81,
+     "mobile": 89
+    }
+   },
+   "run": {
+    "id": "20261104235147-pass-0e51229d",
+    "at": "2026-11-04T23:51:47+00:00",
+    "commit": "36fa7b4deaa0",
+    "method": "de0f88a09642",
+    "runs": 5,
+    "source": "history/playcraft"
+   },
+   "age_days": 3.8,
+   "findings": [
+    {
+     "key": "playcraft:mob.gestures",
+     "department": "playcraft",
+     "id": "mob.gestures",
+     "title": "Browser gestures do not fight the game (touch-action, no zoom)",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "play surface touch-action: auto; viewport: width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers",
+     "kind": "design",
+     "theme": "touch"
+    },
+    {
+     "key": "playcraft:px.text",
+     "department": "playcraft",
+     "id": "px.text",
+     "title": "Text is legible on the target device (\u2265 12 px)",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "smallest visible text 9 px ('CATALOG') on phone",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers",
+     "kind": "design",
+     "theme": "text"
+    },
+    {
+     "key": "playcraft:px.loads",
+     "department": "playcraft",
+     "id": "px.loads",
+     "title": "Playable quickly (load + start \u2264 3 s)",
+     "severity": "major",
+     "level": "observed",
+     "evidence": "8036 ms from navigation to playing (load 502 ms + start 7534 ms; served locally)",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers",
+     "kind": "design",
+     "theme": "perf"
+    },
+    {
+     "key": "playcraft:gf.restraint",
+     "department": "playcraft",
+     "id": "gf.restraint",
+     "title": "Effects can be calmed (reduced motion / shake setting)",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "not found in source: reduced_motion",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers",
+     "kind": "design",
+     "theme": "feel"
+    },
+    {
+     "key": "playcraft:ctl.forgiveness",
+     "department": "playcraft",
+     "id": "ctl.forgiveness",
+     "title": "Input forgiveness (buffering, deadzones, grace windows)",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "not found in source: input_buffer, deadzone",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers",
+     "kind": "design",
+     "theme": "feel"
+    },
+    {
+     "key": "playcraft:ctl.methods",
+     "department": "playcraft",
+     "id": "ctl.methods",
+     "title": "More than one input method (keyboard + pointer/touch, gamepad)",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "found input_keyboard, input_pointer",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers",
+     "kind": "design",
+     "theme": "touch"
+    }
+   ],
+   "strengths": [
+    "Technical gameplay quality: 92",
+    "Mobile experience: 89"
+   ],
+   "notes": [
+    "Evidence: 16 verified, 3 observed, 49 inferred, 3 not tested; the game was played.",
+    "Against its baseline: code changed; not verified by measurement.",
+    "Deployment: live-verified at https://tidebreakers.vercel.app/",
+    "The project is not checked out here, so the analysed commit could not be compared with the current one."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": "not refreshed: the project is not checked out here"
+   },
+   "next": null
+  },
+  {
+   "id": "pixelcraft",
+   "title": "PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Audits the rendered application (not its source) in Chromium at iPhone 17, iPhone 13, desktop, narrow, tablet and landscape viewports: discovers its screens, captures screenshots, measures spacing, alignment, typography, touch targets, control consistency, safe areas, overflow, layout shift, hover/pressed/focus/disabled states, runs axe-core and user journeys (taps, depth, confirmations, feedback time). Scores Visual Quality, Usability and Consistency (100 each) from evidence, with coverage and confidence reported separately; every finding has screen, viewport, selector, measurements, severity, an annotated screenshot and a fix. verify replays the same routes, viewports and journeys, diffs screenshots, proves fixes and refuses score gains from lost coverage. Works on React, Vite, Next.js, static sites and browser games (HTML overlays). Never modifies the app.",
+   "applicable": true,
+   "applies_because": "PIXELCRAFT audits the rendered HTML UI of apps, sites and games",
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": "not refreshed: the project is not checked out here"
+   },
+   "next": "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability."
+  },
+  {
+   "id": "designcraft",
+   "title": "DESIGNCRAFT \u2014 game-design intelligence",
+   "family": "DESIGNCRAFT",
+   "role": "scored",
+   "summary": "levels, missions, story, progression and experience, from the game's own data",
+   "applicable": true,
+   "applies_because": "DESIGNCRAFT analyses game design",
+   "status": "current",
+   "score": {
+    "value": 25,
+    "label": "Game design",
+    "confidence": "low",
+    "coverage": 0.4,
+    "ceiling": 85,
+    "categories": {
+     "level": 54.7,
+     "mission": 0.0,
+     "narrative": 17.3,
+     "progression": 33.3,
+     "agency": 5.0,
+     "difficulty": 0.0,
+     "worldbuilding": 70.0,
+     "variety": 17.0
+    }
+   },
+   "run": {
+    "id": "20261105T151235Z-a8065959",
+    "at": "2026-11-05T15:12:35+00:00",
+    "commit": "bed002d27954",
+    "method": "d98e718b8f0c",
+    "runs": 1,
+    "source": "history/designcraft/scottyfncodes--tidebreakers"
+   },
+   "age_days": 3.2,
+   "findings": [
+    {
+     "key": "designcraft:storycraft.underdeveloped_character",
+     "department": "designcraft",
+     "id": "storycraft.underdeveloped_character",
+     "title": "14 named characters are barely present in the writing",
+     "severity": "major",
+     "level": "inferred",
+     "evidence": "Juno Vale, Tomas Reyes, Kai, Mara Okonkwo and 10 more are defined as characters but appear in at most one authored line and never speak. (facts verified in source: 6)",
+     "recommendation": "Give Juno Vale, Tomas Reyes and Kai a voice: one line each where the player meets them, one more later.",
+     "source": "src/data/crew.ts:26",
+     "kind": null,
+     "theme": "story"
+    },
+    {
+     "key": "designcraft:levelcraft.empty_zone",
+     "department": "designcraft",
+     "id": "levelcraft.empty_zone",
+     "title": "53% of the mapped area holds nothing to find or do",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "Dividing the playable extent (1125\u00d71800 units) into a 6\u00d76 grid, 19 cells contain no placed location and no mission target; the emptiest quarter is the north-west (6 of 9 cells empty). (facts verified in source: 1)",
+     "recommendation": "Add landmarks and small finds to the north-west of the map.",
+     "source": "src/data/world.ts:93",
+     "kind": null,
+     "theme": "level"
+    },
+    {
+     "key": "designcraft:experiencecraft.slow_start",
+     "department": "designcraft",
+     "id": "experiencecraft.slow_start",
+     "title": "PLAYCRAFT measured 8.6 s from load to first input",
+     "severity": "minor",
+     "level": "observed",
+     "evidence": "In PLAYCRAFT run 20261105001617-pass-7fe56aea the game took 8.6 s before it accepted play (software renderer; real devices are usually faster).",
+     "recommendation": "Let the player act during loading.",
+     "source": "history/playcraft/games/scottyfncodes--tidebreakers/runs/20261105001617-pass-7fe56aea.json",
+     "kind": null,
+     "theme": "perf"
+    },
+    {
+     "key": "designcraft:experiencecraft.long_tutorial",
+     "department": "designcraft",
+     "id": "experiencecraft.long_tutorial",
+     "title": "The guided chain First Voyage is 13 steps long",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "First Voyage walks the player through 13 sequential steps (Learn to steer, Sail out of Driftholm, Sail to the atoll to the west, Drop anchor near the beach\u2026). (facts verified in source: 1)",
+     "recommendation": "Cut First Voyage to its first five steps; teach the rest in context.",
+     "source": "src/data/progress.ts:54",
+     "kind": null,
+     "theme": "experience"
+    }
+   ],
+   "strengths": [],
+   "notes": [
+    "The project is not checked out here, so the analysed commit could not be compared with the current one."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "testcraft",
+   "title": "TestCraft \u2014 automated QA",
+   "family": "Studio",
+   "role": "qa",
+   "summary": "Browser QA for web games with Playwright + Chromium: smoke tests on desktop, phone and tablet emulation (errors, missing files, blank screens, overflow, canvas), scripted gameplay with assertions on game state and video capture, FPS / frame-time / heap profiling, visual regression (YIQ pixel diff, baselines), asset integrity (every file opened by format; GLBs through the Khronos validator; texture budgets), animation playback (GLB clips really move; sprite frames differ), the project's own Vitest/Jest suite, and HTML/JSON reports.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence."
+  },
+  {
+   "id": "assetcraft",
+   "title": "AssetCraft \u2014 asset management",
+   "family": "Studio",
+   "role": "catalogue",
+   "summary": "One asset catalogue for every project (SQLite in ~/.gitcraft/assetcraft): every department run registers its outputs with licence and provenance; scan existing projects; search across projects; versions on content change; exact and perceptual (dHash) duplicates; unused assets (not referenced by source); dependency tracing (glTF, Tiled, HTML/CSS); licence inventory with ATTRIBUTION.md and non-commercial flags; hash re-verification; hash-verified integration into a project (never overwriting silently); 3D-library sync; a browsable HTML catalogue.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "unavailable",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "The project is not checked out here, so its catalogue entries (keyed by folder) cannot be matched."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "3d",
+   "title": "3D Department \u2014 ForgeCraft + MeshCraft",
+   "family": "3D Department",
+   "role": "maker",
+   "summary": "3D assets: route, generate, engine-check, library",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No 3D Department jobs reference this project."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "animcraft",
+   "title": "AnimCraft \u2014 rigging and animation",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Automatic rigging (humanoid, quadruped, chain/tentacle/tail) from mesh landmarks with heat-map skin weights (Mixamo bone names optional); procedural clips (idle, walk, run, wave, jump; quadruped walk/run/idle; chain wave/slither/sway/curl; object bob/spin/hover/squash/shake); world-space retargeting between rigs with different names and proportions (BVH, FBX, GLB sources); rigid-body physics drops baked to keyframes; sprite sheets from 3D clips (N directions) or frame folders; playback verification in three.js.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "audiocraft",
+   "title": "AudioCraft \u2014 game audio",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Sound effects, seamless ambiences, adaptive multi-stem music with MIDI source, character dialogue (Kokoro-82M neural TTS, CPU), loop-point detection, trimming, EBU R128 loudness normalisation, layering and WAV/OGG/MP3/Opus/FLAC conversion.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "cinematiccraft",
+   "title": "CinematicCraft \u2014 cinematics and video",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Camera choreography (orbit, dolly in/out, crane up, flyby, push-in zoom, handheld, static) over any GLB/FBX/OBJ/.blend scene with lighting presets (studio three-point, golden hour, night, overcast, dramatic, daylight) and optional HDR/equirect sky, rendered with Cycles to MP4 + editable .blend + an engine camera path (JSON) for in-game cutscenes; storyboards (PNG + PDF); animated title cards; trailer assembly with crossfades and a loudness-normalised music bed; gameplay capture from a web game.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "fxcraft",
+   "title": "FXCraft \u2014 visual effects",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Game-ready effects: flipbook atlases from particle simulations (fire, smoke, magic, energy/portal, rain, snow loops that repeat exactly; explosion, sparks, dust, splash, lightning, debris one-shots) with Phaser/PixiJS atlas JSON, GIF and MP4 previews; portable emitter presets (.fx.json) with a dependency-free three.js runtime, played in three.js r170; three.quarks particle systems (QuarksLoader JSON); Blender Voronoi destruction with baked rigid-body physics as an animated GLB.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "levelcraft",
+   "title": "LevelCraft \u2014 levels and maps",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Procedural dungeons (BSP rooms + corridors + doors), caves (cellular automata), completable platformer levels (jump-physics reachability solver), overworlds (biomes, A* roads with bridges between settlements, camps, resources) and towns (road grid, building plots with doors, plaza) \u2014 as Tiled TMJ maps and LDtk 1.5.3 projects with a generated tileset, entity/collision/navigation object layers, generic JSON, preview and a 3D blockout GLB, each solved and loaded in Phaser 3.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "materialcraft",
+   "title": "MaterialCraft \u2014 PBR materials and shaders",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Seamless procedural PBR materials (21 kinds: stone, cobblestone, brick, tiles, wood, planks, bark, metal, brushed metal, rust, fabric, leather, sand, grass, dirt, ice, lava, water, marble, concrete, snow) with dirt/moss/wear/wet weathering and a toon style; glTF metallic-roughness map sets (basecolor, normal GL/DX, roughness, metallic, AO, 16-bit height, packed ORM, emission), a sample sphere GLB, a three.js render and seam checks; seamless-izing of any image; toon gradient ramps; swatch sheets.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "worldcraft",
+   "title": "WorldCraft \u2014 procedural environments",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Terrains (island, archipelago, atoll, coast, mountains, canyon, volcano, plains) with hydraulic + thermal erosion, biomes, 16-bit heightmaps, normal/splat/biome maps and masks, vegetation and rock scatter, coastlines and a vertex-coloured GLB; caves (surface-nets meshes); physical skies (Blender Nishita) as equirect + HDR + cubemap with sun lighting; seamless time-looping FFT oceans; rule-based scatter on any heightmap.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  }
+ ],
+ "reconciliation": {
+  "corroborated": [
+   {
+    "theme": "perf",
+    "title": "Performance and loading",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "count": 2,
+    "findings": [
+     {
+      "department": "playcraft",
+      "title": "Playable quickly (load + start \u2264 3 s)",
+      "level": "observed",
+      "severity": "major"
+     },
+     {
+      "department": "designcraft",
+      "title": "PLAYCRAFT measured 8.6 s from load to first input",
+      "level": "observed",
+      "severity": "minor"
+     }
+    ],
+    "note": "The same problem area is flagged by more than one department: one fix should address all of these, so they are one action."
+   }
+  ],
+  "conflicts": [
+   {
+    "title": "Progression: DESIGNCRAFT 33% vs PLAYCRAFT 70%",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "detail": "DESIGNCRAFT reads the design data (source); PLAYCRAFT measures the played build. A large gap means the design intent and the played experience disagree. Trust measured play for how it plays today, and the design analysis for what the data allows; confirm in a playtest before acting on either alone."
+   },
+   {
+    "title": "Difficulty: DESIGNCRAFT 0% vs PLAYCRAFT 70%",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "detail": "DESIGNCRAFT reads the design data (source); PLAYCRAFT measures the played build. A large gap means the design intent and the played experience disagree. Trust measured play for how it plays today, and the design analysis for what the data allows; confirm in a playtest before acting on either alone."
+   },
+   {
+    "title": "Variety: DESIGNCRAFT 17% vs PLAYCRAFT 70%",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "detail": "DESIGNCRAFT reads the design data (source); PLAYCRAFT measures the played build. A large gap means the design intent and the played experience disagree. Trust measured play for how it plays today, and the design analysis for what the data allows; confirm in a playtest before acting on either alone."
+   }
+  ],
+  "dependencies": [],
+  "gaps": [
+   {
+    "department": "pixelcraft",
+    "title": "PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+    "detail": "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability."
+   },
+   {
+    "department": "testcraft",
+    "title": "TestCraft \u2014 automated QA",
+    "detail": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence."
+   }
+  ]
+ },
+ "actions": [
+  {
+   "priority": "P1",
+   "theme": "text",
+   "title": "Text legibility and typography: Text is legible on the target device (\u2265 12 px)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:px.text"
+   ],
+   "level": "verified",
+   "why": "smallest visible text 9 px ('CATALOG') on phone",
+   "do": null,
+   "n": 1
+  },
+  {
+   "priority": "P1",
+   "theme": "touch",
+   "title": "Touch targets and mobile ergonomics: Browser gestures do not fight the game (touch-action, no zoom)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:mob.gestures"
+   ],
+   "level": "verified",
+   "why": "play surface touch-action: auto; viewport: width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover",
+   "do": null,
+   "n": 2
+  },
+  {
+   "priority": "P1",
+   "theme": "perf",
+   "title": "Performance and loading: Playable quickly (load + start \u2264 3 s)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:px.loads"
+   ],
+   "level": "observed",
+   "why": "8036 ms from navigation to playing (load 502 ms + start 7534 ms; served locally)",
+   "do": null,
+   "n": 3
+  },
+  {
+   "priority": "P2",
+   "theme": "perf",
+   "title": "Performance and loading: PLAYCRAFT measured 8.6 s from load to first input",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:experiencecraft.slow_start"
+   ],
+   "level": "observed",
+   "why": "In PLAYCRAFT run 20261105001617-pass-7fe56aea the game took 8.6 s before it accepted play (software renderer; real devices are usually faster).",
+   "do": "Let the player act during loading.",
+   "n": 4
+  },
+  {
+   "priority": "P2",
+   "theme": "story",
+   "title": "Story, characters and world: 14 named characters are barely present in the writing",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:storycraft.underdeveloped_character"
+   ],
+   "level": "inferred",
+   "why": "Juno Vale, Tomas Reyes, Kai, Mara Okonkwo and 10 more are defined as characters but appear in at most one authored line and never speak. (facts verified in source: 6)",
+   "do": "Give Juno Vale, Tomas Reyes and Kai a voice: one line each where the player meets them, one more later.",
+   "n": 5
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability.",
+   "n": 6
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: TestCraft \u2014 automated QA",
+   "departments": [
+    "testcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+   "n": 7
+  },
+  {
+   "priority": "P3",
+   "theme": "feel",
+   "title": "Feedback and game feel: Effects can be calmed (reduced motion / shake setting)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:gf.restraint",
+    "playcraft:ctl.forgiveness"
+   ],
+   "level": "inferred",
+   "why": "not found in source: reduced_motion",
+   "do": null,
+   "n": 8
+  },
+  {
+   "priority": "P3",
+   "theme": "level",
+   "title": "Level design: 53% of the mapped area holds nothing to find or do",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:levelcraft.empty_zone"
+   ],
+   "level": "inferred",
+   "why": "Dividing the playable extent (1125\u00d71800 units) into a 6\u00d76 grid, 19 cells contain no placed location and no mission target; the emptiest quarter is the north-west (6 of 9 cells empty). (facts verified in source: 1)",
+   "do": "Add landmarks and small finds to the north-west of the map.",
+   "n": 9
+  },
+  {
+   "priority": "P3",
+   "theme": "experience",
+   "title": "Player experience: The guided chain First Voyage is 13 steps long",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:experiencecraft.long_tutorial"
+   ],
+   "level": "inferred",
+   "why": "First Voyage walks the player through 13 sequential steps (Learn to steer, Sail out of Driftholm, Sail to the atoll to the west, Drop anchor near the beach\u2026). (facts verified in source: 1)",
+   "do": "Cut First Voyage to its first five steps; teach the rest in context.",
+   "n": 10
+  },
+  {
+   "priority": "P3",
+   "theme": "touch",
+   "title": "Touch targets and mobile ergonomics: More than one input method (keyboard + pointer/touch, gamepad)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:ctl.methods"
+   ],
+   "level": "inferred",
+   "why": "found input_keyboard, input_pointer",
+   "do": null,
+   "n": 11
+  }
+ ],
+ "levels": {
+  "verified": 2,
+  "observed": 2,
+  "inferred": 6
+ },
+ "unavailable": [
+  {
+   "department": "production",
+   "status": "unavailable",
+   "why": "The project is not checked out here: Discovery and the engineering standard need its files (clone it and report again)."
+  },
+  {
+   "department": "assetcraft",
+   "status": "unavailable",
+   "why": "The project is not checked out here, so its catalogue entries (keyed by folder) cannot be matched."
+  }
+ ],
+ "not_refreshed": [
+  {
+   "department": "playcraft",
+   "why": "not refreshed: the project is not checked out here"
+  },
+  {
+   "department": "pixelcraft",
+   "why": "not refreshed: the project is not checked out here"
+  }
+ ],
+ "title": "TIDEBREAKERS",
+ "summary": [
+  "TIDEBREAKERS scores **51.0/100** overall (at risk, low confidence): mean of 2 measured department score(s) (playcraft, designcraft); 3 applicable department(s) have no score.",
+  "2 of 14 departments have results for this project; 2 current, 10 no data, 2 unavailable.",
+  "Action plan: 0 P0, 3 P1, 4 P2, 4 P3. Findings by evidence: 2 verified, 2 observed, 6 inferred.",
+  "1 problem area(s) are flagged by several departments at once \u2014 the strongest signals in this report."
+ ],
+ "next_actions": [
+  "[P1] Text legibility and typography: Text is legible on the target device (\u2265 12 px)",
+  "[P1] Touch targets and mobile ergonomics: Browser gestures do not fight the game (touch-action, no zoom)",
+  "[P1] Performance and loading: Playable quickly (load + start \u2264 3 s)",
+  "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability.",
+  "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+  "Report again after the changes land (Run GITCRAFT report) to measure progress against this report."
+ ],
+ "changes": {
+  "first": true,
+  "note": "This is the first GITCRAFT report for this project: future reports will compare against it."
+ },
+ "paths": {
+  "dir": "/home/user/GITCRAFT/history/reports/scottyfncodes--tidebreakers/20261108T194251Z",
+  "json": "/home/user/GITCRAFT/history/reports/scottyfncodes--tidebreakers/20261108T194251Z/report.json",
+  "markdown": "/home/user/GITCRAFT/history/reports/scottyfncodes--tidebreakers/20261108T194251Z/report.md",
+  "html": "/home/user/GITCRAFT/history/reports/scottyfncodes--tidebreakers/20261108T194251Z/report.html"
+ }
+}

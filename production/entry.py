@@ -85,8 +85,34 @@ def _issues(issues):
     return out
 
 
+REPORT = re.compile(r"^(?:a\s+|the\s+|full\s+|project\s+)*report\b", re.I)
+
+
+def report(r, refresh="quick"):
+    """"Run GITCRAFT report": the read-only project report across every department (project_report.generate)."""
+    from . import project_report
+    target = r["project"] or r["repository"]
+    if not target:
+        return {"status": "needs_input", "routing": dict(r, workflow="report"), "question": "Which project should the report cover? Give its folder or GitHub repository.",
+                "why": "a report reads one project's results from every department"}
+    R = project_report.generate(target, refresh=refresh)
+    note = (f"Reported from the departments' recorded histories only; for Discovery and refreshed analysis, {r['next']}" if r.get("problem") == "needs_checkout" else None)
+    return {"status": "report", "note": note, "routing": dict(r, workflow="report", why="Run GITCRAFT report: read-only, every department, nothing built, changed, merged or deployed"),
+            "report": summary(R), "markdown": project_report.markdown(R)}
+
+
+def summary(R):
+    return {"report_id": R["report_id"], "title": R["title"], "health": R["health"], "summary": R["summary"],
+            "departments": [{"id": d["id"], "status": d["status"], "score": (d.get("score") or {}).get("value"), "findings": len(d["findings"])} for d in R["departments"]],
+            "actions": {p: [a["title"] for a in R["actions"] if a["priority"] == p][:8] for p in ("P0", "P1", "P2", "P3")},
+            "next_actions": R["next_actions"], "changes": R["changes"], "paths": R["paths"]}
+
+
 def start(text, project=None, store_dir=None, overrides=None, issues=None):
     r = route(text, project)
+    if REPORT.match(r["request"] or ""):   # a repository that is not cloned is reported from the departments' histories
+        if r.get("problem") == "outside_roots": return {"status": r["problem"], "routing": r, "next": r["next"]}
+        return report(r, (overrides or {}).get("refresh", "quick") if isinstance(overrides, dict) else "quick")
     if r.get("problem"):
         return {"status": r["problem"], "routing": r, "next": r["next"]}
     proj = r["project"]

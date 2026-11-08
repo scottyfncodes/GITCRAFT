@@ -1,0 +1,1566 @@
+{
+ "gitcraft_report": "1.0.0",
+ "report_id": "scottyfncodes--gitcraft/20261108T194251Z",
+ "generated": "2026-11-08T19:42:52+00:00",
+ "refresh": "quick",
+ "read_only": true,
+ "project": {
+  "id": "scottyfncodes--gitcraft",
+  "repo": "scottyfncodes/gitcraft",
+  "url": "https://github.com/scottyfncodes/gitcraft",
+  "name": "gitcraft",
+  "path": "/home/user/GITCRAFT",
+  "head": "198322aac10594826a686824f139227fab3a8629",
+  "branch": "claude/eager-euler-2t4esn",
+  "dirty": true,
+  "kind": "toolkit",
+  "maturity": "partial"
+ },
+ "health": {
+  "score": 87.7,
+  "band": "blocked",
+  "confidence": "medium",
+  "measured": 2,
+  "of": 3,
+  "stale": [
+   "pixelcraft"
+  ],
+  "p0": 2,
+  "parts": {
+   "pixelcraft": 75.3,
+   "testcraft": 100.0
+  },
+  "basis": "mean of 2 measured department score(s) (pixelcraft, testcraft); 1 applicable department(s) have no score; 1 stale"
+ },
+ "departments": [
+  {
+   "id": "production",
+   "title": "Production Director",
+   "family": "Production",
+   "role": "director",
+   "summary": "Discovery, engineering standard, productions and their acceptance verdicts",
+   "applicable": true,
+   "applies_because": null,
+   "status": "refreshed",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [
+    {
+     "key": "production:standard:entry",
+     "department": "production",
+     "id": "standard:entry",
+     "title": "Engineering standard: an entry page exists",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "no index.html or framework layout found",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering"
+    },
+    {
+     "key": "production:standard:https",
+     "department": "production",
+     "id": "standard:https",
+     "title": "Engineering standard: every script, style and image loads over HTTPS",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "['http://gc.local/phaser/dist/phaser.min.js']",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering"
+    },
+    {
+     "key": "production:standard:sql_injection",
+     "department": "production",
+     "id": "standard:sql_injection",
+     "title": "Engineering standard: no SQL built by string interpolation",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "['tests/test_lifecycle.py']",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering"
+    },
+    {
+     "key": "production:standard:secrets",
+     "department": "production",
+     "id": "standard:secrets",
+     "title": "Engineering standard: no secrets in the source or committed env files",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "[\"tests/test_playcraft.py: API_KEY='sk-\u2026\"]",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering"
+    },
+    {
+     "key": "production:standard:cors",
+     "department": "production",
+     "id": "standard:cors",
+     "title": "Engineering standard: the API does not allow every origin",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "cors')()",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+     "department": "production",
+     "id": "defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+     "title": "references a missing file: /assets/icons/apple-touch-icon.png",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/vite-react/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-assets-icons-favicon-ico",
+     "department": "production",
+     "id": "defect:references-a-missing-file-assets-icons-favicon-ico",
+     "title": "references a missing file: /assets/icons/favicon.ico",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/vite-react/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-manifest-webmanifest",
+     "department": "production",
+     "id": "defect:references-a-missing-file-manifest-webmanifest",
+     "title": "references a missing file: /manifest.webmanifest",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/vite-react/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-src-main-jsx",
+     "department": "production",
+     "id": "defect:references-a-missing-file-src-main-jsx",
+     "title": "references a missing file: /src/main.jsx",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/vite-react/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+     "department": "production",
+     "id": "defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+     "title": "references a missing file: assets/icons/apple-touch-icon.png",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/static-app/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+     "department": "production",
+     "id": "defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+     "title": "references a missing file: assets/icons/apple-touch-icon.png",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/canvas-game/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-assets-icons-favicon-ico",
+     "department": "production",
+     "id": "defect:references-a-missing-file-assets-icons-favicon-ico",
+     "title": "references a missing file: assets/icons/favicon.ico",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/static-app/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:defect:references-a-missing-file-assets-icons-favicon-ico",
+     "department": "production",
+     "id": "defect:references-a-missing-file-assets-icons-favicon-ico",
+     "title": "references a missing file: assets/icons/favicon.ico",
+     "severity": "major",
+     "level": "verified",
+     "evidence": null,
+     "recommendation": "Fix or remove the reference.",
+     "source": "production/kit/starters/canvas-game/index.html",
+     "kind": null,
+     "theme": "assets"
+    },
+    {
+     "key": "production:unfinished",
+     "department": "production",
+     "id": "unfinished",
+     "title": "9 unfinished item(s) (stubs, TODOs, open roadmap items)",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "stub: not implemented (production/maturity.py); stub: coming soon (production/maturity.py); stub: TODO: implement (production/maturity.py); stub: not implemented (production/maturity.py)",
+     "recommendation": "Finish or remove them before release.",
+     "source": null,
+     "kind": null,
+     "theme": "release"
+    },
+    {
+     "key": "production:standard:authorization",
+     "department": "production",
+     "id": "standard:authorization",
+     "title": "Engineering standard (review): server routes check who is calling",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "no authentication in server code",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering"
+    }
+   ],
+   "strengths": [],
+   "notes": [
+    "Discovery: partial game (high confidence) \u2014 1252 files, 246 code files, ~45517 lines of code; no entry point found; kind game: engine phaser, three, 32 game words; git: 149 commits, last 2026-11-08",
+    "Engineering standard: 4/10 applicable checks pass.",
+    "Discovery saw game engines but no playable entry point, so the game departments do not apply."
+   ],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "Discovery and the engineering standard re-run read-only for this report"
+   },
+   "next": null,
+   "standard": {
+    "passed": 4,
+    "of": 10,
+    "status": "failed"
+   }
+  },
+  {
+   "id": "playcraft",
+   "title": "PLAYCRAFT \u2014 game design and gameplay quality",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Assesses and improves how a game plays. Reads the repo (intent, engine, controls, systems with file:line evidence, genres across 15 genre profiles), plays the built game in Chromium on desktop and phone (response time of every control, dead time, idle motion, FPS, pause, touch targets, text size), scores 10 categories 0-100 with evidence levels (verified / observed / inferred / not tested) and confidence, ranks the highest-impact opportunities by impact, effort and risk, writes a staged plan, then verifies changes against the baseline (regressions + guardrails on the git diff) with a before/after report. full_pass adds GITCRAFT's engineering checks (TestCraft) under one plan.",
+   "applicable": false,
+   "applies_because": null,
+   "status": "not_applicable",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "pixelcraft",
+   "title": "PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Audits the rendered application (not its source) in Chromium at iPhone 17, iPhone 13, desktop, narrow, tablet and landscape viewports: discovers its screens, captures screenshots, measures spacing, alignment, typography, touch targets, control consistency, safe areas, overflow, layout shift, hover/pressed/focus/disabled states, runs axe-core and user journeys (taps, depth, confirmations, feedback time). Scores Visual Quality, Usability and Consistency (100 each) from evidence, with coverage and confidence reported separately; every finding has screen, viewport, selector, measurements, severity, an annotated screenshot and a fix. verify replays the same routes, viewports and journeys, diffs screenshots, proves fixes and refuses score gains from lost coverage. Works on React, Vite, Next.js, static sites and browser games (HTML overlays). Never modifies the app.",
+   "applicable": true,
+   "applies_because": "PIXELCRAFT audits the rendered HTML UI of apps, sites and games",
+   "status": "stale",
+   "score": {
+    "value": 75.3,
+    "label": "Visual quality and usability (mean of 2 UIs)",
+    "confidence": "medium",
+    "coverage": 1.0,
+    "categories": {
+     "visual": 70.2,
+     "usability": 81.9,
+     "consistency": 45.6
+    }
+   },
+   "run": {
+    "id": "20261105T134644Z-audit",
+    "at": "2026-11-05T13:46:44+00:00",
+    "commit": "1530d7e950b5",
+    "method": "pixelcraft",
+    "runs": 2,
+    "apps": 2
+   },
+   "age_days": 3.2,
+   "findings": [
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:axe.aria-required-children",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:axe.aria-required-children",
+     "title": "Accessibility: Certain ARIA roles must contain particular children",
+     "severity": "critical",
+     "level": "verified",
+     "evidence": "axe-core rule aria-required-children (wcag2a, wcag131): Certain ARIA roles must contain particular children.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/aria-required-children?application=axeAPI \u2014 Fix any of the following:   Element has children which are not allowed: button[tabindex]",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:layout.overflow",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:layout.overflow",
+     "title": "Page scrolls sideways (horizontal overflow)",
+     "severity": "critical",
+     "level": "verified",
+     "evidence": "The page is 331 px wide in a 320 px viewport: content is cut off and the whole page wobbles sideways when scrolled with a thumb.",
+     "recommendation": "Let the offending element shrink (max-width: 100%, min-width: 0 on flex children) or scroll it inside its own container (overflow-x: auto).",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "touch"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:axe.color-contrast",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:axe.color-contrast",
+     "title": "Accessibility: Elements must meet minimum color contrast ratio thresholds",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "axe-core rule color-contrast (wcag2aa, wcag143): Elements must meet minimum color contrast ratio thresholds.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI \u2014 Fix any of the following:   Element has insufficient color contrast of 3.99 (foreground color: #6f88a8, background color: #10294b, font size: 9.0pt (12px), f",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:axe.scrollable-region-focusable",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:axe.scrollable-region-focusable",
+     "title": "Accessibility: Scrollable region must have keyboard access",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "axe-core rule scrollable-region-focusable (wcag2a, wcag211, wcag213): Scrollable region must have keyboard access.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/scrollable-region-focusable?application=axeAPI \u2014 Fix any of the following:   Element should have focusable content   Element should be focusable",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:axe.scrollable-region-focusable",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:axe.scrollable-region-focusable",
+     "title": "Accessibility: Scrollable region must have keyboard access",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "axe-core rule scrollable-region-focusable (wcag2a, wcag211, wcag213): Scrollable region must have keyboard access.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/scrollable-region-focusable?application=axeAPI \u2014 Fix any of the following:   Element should have focusable content   Element should be focusable",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:controls.mixed_heights",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:controls.mixed_heights",
+     "title": "Buttons side by side have different heights",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "Buttons in one row are 64, 85 px tall; equivalent controls look like different components and the row looks unbalanced.",
+     "recommendation": "Use one button size per row (a size token: e.g. 44 px on mobile) and change emphasis with fill/outline, not padding.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:keyboard.div_button",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:keyboard.div_button",
+     "title": "Clickable element is not a real control",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "This element responds to clicks (pointer cursor) but is not a button or link, so keyboard and screen-reader users cannot use it.",
+     "recommendation": "Use <button> (or <a href>) instead of a clickable <div>/<span>.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:mobile.input_zoom",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:mobile.input_zoom",
+     "title": "Focusing a field zooms the page on iPhone",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "The field's font-size is 15 px; iOS Safari zooms in on any input under 16 px and leaves the page zoomed after typing.",
+     "recommendation": "Use font-size: 16px (1rem) for inputs, selects and textareas on mobile.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:states.no_pressed",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:states.no_pressed",
+     "title": "No pressed (active) state",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "Pressing this control changes nothing visually until the action completes; on touch screens there is no hover, so this is the only immediate confirmation of a tap.",
+     "recommendation": "Add an :active style (darker tone, scale 0.97, or ripple) to every button and link variant.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:states.no_pressed",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:states.no_pressed",
+     "title": "No pressed (active) state",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "Pressing this control changes nothing visually until the action completes; on touch screens there is no hover, so this is the only immediate confirmation of a tap.",
+     "recommendation": "Add an :active style (darker tone, scale 0.97, or ripple) to every button and link variant.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:type.too_small",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:type.too_small",
+     "title": "Text is too small to read comfortably",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "10.5-px text is below the 12-px minimum for phones; secondary information (dates, tags, captions) becomes hard to read.",
+     "recommendation": "Use at least 12 px (13-14 px preferred) for secondary text and keep hierarchy with weight and colour rather than very small sizes.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "text"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:controls.small_target",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:controls.small_target",
+     "title": "Touch target is too small",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "228\u00d727 px: under the 44\u00d744 pt Apple HIG minimum (24 px is the WCAG 2.2 floor); thumbs miss and hit neighbours.",
+     "recommendation": "Enlarge the hit area to 44\u00d744 (padding, min-height/min-width, or an ::after hit-area) while keeping the visible glyph size.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "touch"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:controls.small_target",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:controls.small_target",
+     "title": "Touch target is too small",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "202\u00d741 px: under the 44\u00d744 pt Apple HIG minimum (24 px is the WCAG 2.2 floor); thumbs miss and hit neighbours.",
+     "recommendation": "Enlarge the hit area to 44\u00d744 (padding, min-height/min-width, or an ::after hit-area) while keeping the visible glyph size.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "touch"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:spacing.uneven",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:spacing.uneven",
+     "title": "Uneven spacing between related elements",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "Items of the same kind in one list or stack are separated by different gaps, which reads as grouping that isn't there and makes the list look broken.",
+     "recommendation": "Give the container one gap (flex/grid `gap`, or one margin rule for all items) instead of per-item margins.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:spacing.uneven",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:spacing.uneven",
+     "title": "Uneven spacing between related elements",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "Items of the same kind in one list or stack are separated by different gaps, which reads as grouping that isn't there and makes the list look broken.",
+     "recommendation": "Give the container one gap (flex/grid `gap`, or one margin rule for all items) instead of per-item margins.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:axe.heading-order",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:axe.heading-order",
+     "title": "Accessibility: Heading levels should only increase by one",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "axe-core rule heading-order (best practice): Heading levels should only increase by one.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/heading-order?application=axeAPI \u2014 Fix any of the following:   Heading order invalid",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "a11y"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:controls.small_target_desktop",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:controls.small_target_desktop",
+     "title": "Click target is below 24 px",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "13\u00d713 px: under the WCAG 2.2 24\u00d724 px minimum target size.",
+     "recommendation": "Enlarge the hit area to 44\u00d744 (padding, min-height/min-width, or an ::after hit-area) while keeping the visible glyph size.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:controls.small_target_desktop",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:controls.small_target_desktop",
+     "title": "Click target is below 24 px",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "231\u00d714 px: under the WCAG 2.2 24\u00d724 px minimum target size.",
+     "recommendation": "Enlarge the hit area to 44\u00d744 (padding, min-height/min-width, or an ::after hit-area) while keeping the visible glyph size.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:resp.content_missing",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:resp.content_missing",
+     "title": "Content disappears at one screen size",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "At desktop, 'pipeline' shows only 48% of the words other sizes show; hidden content on phones is a common source of 'where did it go?'.",
+     "recommendation": "Reflow content instead of hiding it; move secondary content behind a disclosure rather than display: none.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "other"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:controls.too_close",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:controls.too_close",
+     "title": "Controls are too close together",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "'stylized low-poly boat with a red hull' and 'detailed ship from concept art' are 7 px apart and at least one is under 44 px: an easy mis-tap.",
+     "recommendation": "Keep at least 8 px between targets (more next to destructive actions), or merge rarely used actions into one overflow menu.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "touch"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:controls.too_close",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:controls.too_close",
+     "title": "Controls are too close together",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "'Open 6' and 'Fixed 5' are 6 px apart and at least one is under 44 px: an easy mis-tap.",
+     "recommendation": "Keep at least 8 px between targets (more next to destructive actions), or merge rarely used actions into one overflow menu.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "touch"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:layout.stretched_control",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:layout.stretched_control",
+     "title": "Controls stretch across the desktop window",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "A 1086-px-wide button on a 1440-px screen: the mobile full-width style was never adapted, so the control looks bloated and the eye travels far.",
+     "recommendation": "Cap form and button widths on desktop (max-width 480-560 px) or lay forms out in a constrained column.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:layout.stretched_control",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:layout.stretched_control",
+     "title": "Controls stretch across the desktop window",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "A 1086-px-wide button on a 1440-px screen: the mobile full-width style was never adapted, so the control looks bloated and the eye travels far.",
+     "recommendation": "Cap form and button widths on desktop (max-width 480-560 px) or lay forms out in a constrained column.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:type.line_length",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:type.line_length",
+     "title": "Lines of text are too long",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "About 100 characters per line; beyond ~80 the eye loses its place.",
+     "recommendation": "Cap text columns at 60-75ch (max-width: 70ch).",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "text"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:type.line_length",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:type.line_length",
+     "title": "Lines of text are too long",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "About 154 characters per line; beyond ~80 the eye loses its place.",
+     "recommendation": "Cap text columns at 60-75ch (max-width: 70ch).",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "text"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:mobile.reach",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:mobile.reach",
+     "title": "Main action is at the top of the phone screen",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "The primary action sits in the top fifth of a tall phone screen, the hardest zone to reach one-handed.",
+     "recommendation": "Repeat or move the main action to the lower half (a bottom action bar or floating button).",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "touch"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:nav.no_current",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:nav.no_current",
+     "title": "Navigation does not show where you are",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "On 'home' no navigation item is marked current (aria-current, selected or an active style).",
+     "recommendation": "Mark the current item with aria-current=\"page\" and a visible active style.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "other"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:states.no_hover",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:states.no_hover",
+     "title": "No hover state",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "The pointer over this control changes nothing (colour, shadow, underline), so it does not signal that it is clickable.",
+     "recommendation": "Add a hover style (tone shift, underline, elevation) for every interactive component variant.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:states.no_hover",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:states.no_hover",
+     "title": "No hover state",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "The pointer over this control changes nothing (colour, shadow, underline), so it does not signal that it is clickable.",
+     "recommendation": "Add a hover style (tone shift, underline, elevation) for every interactive component variant.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:spacing.off_scale",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:spacing.off_scale",
+     "title": "Spacing does not follow a consistent scale",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "Paddings, gaps and margins use many unrelated values, so the rhythm between elements looks accidental rather than designed.",
+     "recommendation": "Adopt a spacing scale (4/8-px steps: 4, 8, 12, 16, 24, 32) as tokens and replace one-off values with the nearest step.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:spacing.off_scale",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:spacing.off_scale",
+     "title": "Spacing does not follow a consistent scale",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "Paddings, gaps and margins use many unrelated values, so the rhythm between elements looks accidental rather than designed.",
+     "recommendation": "Adopt a spacing scale (4/8-px steps: 4, 8, 12, 16, 24, 32) as tokens and replace one-off values with the nearest step.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:spacing.cramped",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:spacing.cramped",
+     "title": "Text is cramped against the edge of its box",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "Text inside a filled or bordered box sits within a few pixels of the edge, which looks unfinished.",
+     "recommendation": "Give boxed text at least 8 px horizontal and 4 px vertical padding (12-16 px for cards).",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "text"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:type.too_small",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:type.too_small",
+     "title": "Text is too small to read comfortably",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "11-px text is below the 12-px minimum for phones; secondary information (dates, tags, captions) becomes hard to read.",
+     "recommendation": "Use at least 12 px (13-14 px preferred) for secondary text and keep hierarchy with weight and colour rather than very small sizes.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "text"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:layout.truncated",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:layout.truncated",
+     "title": "Text is truncated",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "Content is cut off with an ellipsis or clipped; on phones important words (task names, prices) disappear.",
+     "recommendation": "Allow two lines (line-clamp: 2) for primary labels, or give the label the space the trailing controls take.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "text"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:cross.heading_sizes",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:cross.heading_sizes",
+     "title": "The same heading level has different sizes on different screens",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "h1 is rendered at 21, 32 px depending on the screen.",
+     "recommendation": "Style headings once, globally, from the type scale.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:cross.heading_sizes",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:cross.heading_sizes",
+     "title": "The same heading level has different sizes on different screens",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "h2 is rendered at 22, 26 px depending on the screen.",
+     "recommendation": "Style headings once, globally, from the type scale.",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:component.button_variants",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:component.button_variants",
+     "title": "Too many button variants",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "6 distinct button size/shape combinations (heights 32, 40, 64, 84, 248, 268 px) at iphone17: buttons were styled one by one, not from a component.",
+     "recommendation": "Define 2-3 button sizes and 3 emphasis levels (primary, secondary, tertiary) as one component and use it everywhere.",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "layout"
+    },
+    {
+     "key": "pixelcraft:gitcraft-3d-department-ui:controls.competing_primary",
+     "department": "pixelcraft",
+     "id": "gitcraft-3d-department-ui:controls.competing_primary",
+     "title": "Two primary actions compete",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "'Interact' and 'Attack' are both strongly filled, similar in size and side by side, so neither reads as the main action.",
+     "recommendation": "Keep one filled primary button per group; make the other secondary (outline or tonal).",
+     "source": "history/pixelcraft/gitcraft-3d-department-ui/20261105T134644Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    },
+    {
+     "key": "pixelcraft:gitcraft-game-quality-history-games:controls.competing_primary",
+     "department": "pixelcraft",
+     "id": "gitcraft-game-quality-history-games:controls.competing_primary",
+     "title": "Two primary actions compete",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "'TIDEBREAKERS Survival Exploration / adventure 77 LOW CONF. C' and 'DEMO DAY Physics puzzle / destruction Sports 78 LOW CONF. ME' are both strongly filled, similar in size and side by side, so neither reads as the main action.",
+     "recommendation": "Keep one filled primary button per group; make the other secondary (outline or tonal).",
+     "source": "history/pixelcraft/gitcraft-game-quality-history-games/20261105T134257Z-audit/audit.json",
+     "kind": null,
+     "theme": "feel"
+    }
+   ],
+   "strengths": [],
+   "notes": [
+    "Stale: measured on 1530d7e, the project is now at 198322a"
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": "not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+   },
+   "next": "Re-run PIXELCRAFT (pixelcraft_audit) on the current build.",
+   "apps": [
+    {
+     "app": "gitcraft-3d-department-ui",
+     "name": "GITCRAFT 3D Department UI (/)",
+     "run": "20261105T134644Z-audit",
+     "at": "2026-11-05T13:46:44+00:00",
+     "overall": 65.9,
+     "categories": {
+      "visual": 70.2,
+      "usability": 81.9,
+      "consistency": 45.6
+     },
+     "coverage": 1.0,
+     "confidence": "medium",
+     "commit": "1530d7e950b5",
+     "runs": 1
+    },
+    {
+     "app": "gitcraft-game-quality-history-games",
+     "name": "GITCRAFT Game Quality History (/games/)",
+     "run": "20261105T134257Z-audit",
+     "at": "2026-11-05T13:42:57+00:00",
+     "overall": 84.8,
+     "categories": {
+      "visual": 84.2,
+      "usability": 86.7,
+      "consistency": 83.6
+     },
+     "coverage": 1.0,
+     "confidence": "high",
+     "commit": "1530d7e950b5",
+     "runs": 1
+    }
+   ]
+  },
+  {
+   "id": "designcraft",
+   "title": "DESIGNCRAFT \u2014 game-design intelligence",
+   "family": "DESIGNCRAFT",
+   "role": "scored",
+   "summary": "levels, missions, story, progression and experience, from the game's own data",
+   "applicable": false,
+   "applies_because": null,
+   "status": "not_applicable",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "testcraft",
+   "title": "TestCraft \u2014 automated QA",
+   "family": "Studio",
+   "role": "qa",
+   "summary": "Browser QA for web games with Playwright + Chromium: smoke tests on desktop, phone and tablet emulation (errors, missing files, blank screens, overflow, canvas), scripted gameplay with assertions on game state and video capture, FPS / frame-time / heap profiling, visual regression (YIQ pixel diff, baselines), asset integrity (every file opened by format; GLBs through the Khronos validator; texture budgets), animation playback (GLB clips really move; sprite frames differ), the project's own Vitest/Jest suite, and HTML/JSON reports.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": {
+    "value": 100.0,
+    "label": "QA checks passed",
+    "confidence": "high",
+    "coverage": null
+   },
+   "run": {
+    "id": "world_assets.studio.json",
+    "at": "2026-11-03T22:35:22+00:00",
+    "runs": 4,
+    "source": "/home/user/GITCRAFT/acceptance/studio/testcraft/world_assets/world_assets.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "4 run(s): assets, perf, play, smoke; 26/26 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "assetcraft",
+   "title": "AssetCraft \u2014 asset management",
+   "family": "Studio",
+   "role": "catalogue",
+   "summary": "One asset catalogue for every project (SQLite in ~/.gitcraft/assetcraft): every department run registers its outputs with licence and provenance; scan existing projects; search across projects; versions on content change; exact and perceptual (dHash) duplicates; unused assets (not referenced by source); dependency tracing (glTF, Tiled, HTML/CSS); licence inventory with ATTRIBUTION.md and non-commercial flags; hash re-verification; hash-verified integration into a project (never overwriting silently); 3D-library sync; a browsable HTML catalogue.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."
+  },
+  {
+   "id": "3d",
+   "title": "3D Department \u2014 ForgeCraft + MeshCraft",
+   "family": "3D Department",
+   "role": "maker",
+   "summary": "3D assets: route, generate, engine-check, library",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No 3D Department jobs reference this project."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "animcraft",
+   "title": "AnimCraft \u2014 rigging and animation",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Automatic rigging (humanoid, quadruped, chain/tentacle/tail) from mesh landmarks with heat-map skin weights (Mixamo bone names optional); procedural clips (idle, walk, run, wave, jump; quadruped walk/run/idle; chain wave/slither/sway/curl; object bob/spin/hover/squash/shake); world-space retargeting between rigs with different names and proportions (BVH, FBX, GLB sources); rigid-body physics drops baked to keyframes; sprite sheets from 3D clips (N directions) or frame folders; playback verification in three.js.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "drop.studio.json",
+    "at": "2026-11-03T22:33:05+00:00",
+    "runs": 11,
+    "source": "/home/user/GITCRAFT/acceptance/studio/animcraft/drop/drop.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "11 run(s): animate, autorig, demo_character, physics, retarget, spritesheet; 46/46 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "audiocraft",
+   "title": "AudioCraft \u2014 game audio",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Sound effects, seamless ambiences, adaptive multi-stem music with MIDI source, character dialogue (Kokoro-82M neural TTS, CPU), loop-point detection, trimming, EBU R128 loudness normalisation, layering and WAV/OGG/MP3/Opus/FLAC conversion.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "theme_16lufs.studio.json",
+    "at": "2026-11-03T22:30:28+00:00",
+    "runs": 13,
+    "source": "/home/user/GITCRAFT/acceptance/studio/audiocraft/theme_-16LUFS/theme_16lufs.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "13 run(s): ambience, loop, music, process, sfx, voice; 23/23 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "cinematiccraft",
+   "title": "CinematicCraft \u2014 cinematics and video",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Camera choreography (orbit, dolly in/out, crane up, flyby, push-in zoom, handheld, static) over any GLB/FBX/OBJ/.blend scene with lighting presets (studio three-point, golden hour, night, overcast, dramatic, daylight) and optional HDR/equirect sky, rendered with Cycles to MP4 + editable .blend + an engine camera path (JSON) for in-game cutscenes; storyboards (PNG + PDF); animated title cards; trailer assembly with crossfades and a loudness-normalised music bed; gameplay capture from a web game.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "gameplay.studio.json",
+    "at": "2026-11-03T22:34:56+00:00",
+    "runs": 5,
+    "source": "/home/user/GITCRAFT/acceptance/studio/cinematiccraft/gameplay/gameplay.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "5 run(s): assemble, capture, shot, storyboard, title_card; 13/13 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "fxcraft",
+   "title": "FXCraft \u2014 visual effects",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Game-ready effects: flipbook atlases from particle simulations (fire, smoke, magic, energy/portal, rain, snow loops that repeat exactly; explosion, sparks, dust, splash, lightning, debris one-shots) with Phaser/PixiJS atlas JSON, GIF and MP4 previews; portable emitter presets (.fx.json) with a dependency-free three.js runtime, played in three.js r170; three.quarks particle systems (QuarksLoader JSON); Blender Voronoi destruction with baked rigid-body physics as an animated GLB.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "crate_shatter.studio.json",
+    "at": "2026-11-03T22:31:54+00:00",
+    "runs": 12,
+    "source": "/home/user/GITCRAFT/acceptance/studio/fxcraft/crate_shatter/crate_shatter.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "12 run(s): destruction, emitter, flipbook; 39/39 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "levelcraft",
+   "title": "LevelCraft \u2014 levels and maps",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Procedural dungeons (BSP rooms + corridors + doors), caves (cellular automata), completable platformer levels (jump-physics reachability solver), overworlds (biomes, A* roads with bridges between settlements, camps, resources) and towns (road grid, building plots with doors, plaza) \u2014 as Tiled TMJ maps and LDtk 1.5.3 projects with a generated tileset, entity/collision/navigation object layers, generic JSON, preview and a 3D blockout GLB, each solved and loaded in Phaser 3.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "settlement.studio.json",
+    "at": "2026-11-03T22:31:36+00:00",
+    "runs": 5,
+    "source": "/home/user/GITCRAFT/acceptance/studio/levelcraft/settlement/settlement.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "5 run(s): generate; 31/31 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "materialcraft",
+   "title": "MaterialCraft \u2014 PBR materials and shaders",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Seamless procedural PBR materials (21 kinds: stone, cobblestone, brick, tiles, wood, planks, bark, metal, brushed metal, rust, fabric, leather, sand, grass, dirt, ice, lava, water, marble, concrete, snow) with dirt/moss/wear/wet weathering and a toon style; glTF metallic-roughness map sets (basecolor, normal GL/DX, roughness, metallic, AO, 16-bit height, packed ORM, emission), a sample sphere GLB, a three.js render and seam checks; seamless-izing of any image; toon gradient ramps; swatch sheets.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "swatches.studio.json",
+    "at": "2026-11-03T22:31:19+00:00",
+    "runs": 7,
+    "source": "/home/user/GITCRAFT/acceptance/studio/materialcraft/swatches/swatches.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "7 run(s): generate, library; 31/31 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "worldcraft",
+   "title": "WorldCraft \u2014 procedural environments",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Terrains (island, archipelago, atoll, coast, mountains, canyon, volcano, plains) with hydraulic + thermal erosion, biomes, 16-bit heightmaps, normal/splat/biome maps and masks, vegetation and rock scatter, coastlines and a vertex-coloured GLB; caves (surface-nets meshes); physical skies (Blender Nishita) as equirect + HDR + cubemap with sun lighting; seamless time-looping FFT oceans; rule-based scatter on any heightmap.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "current",
+   "score": null,
+   "run": {
+    "id": "ocean.studio.json",
+    "at": "2026-11-03T22:31:05+00:00",
+    "runs": 9,
+    "source": "/home/user/GITCRAFT/acceptance/studio/worldcraft/ocean/ocean.studio.json"
+   },
+   "age_days": 4.9,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "9 run(s): caves, ocean, sky, terrain; 39/39 output checks passed."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  }
+ ],
+ "reconciliation": {
+  "corroborated": [],
+  "conflicts": [],
+  "dependencies": [
+   {
+    "title": "PIXELCRAFT is stale",
+    "departments": [
+     "pixelcraft"
+    ],
+    "detail": "Its score describes an older build. Re-measuring needs a current build; GITCRAFT never builds while reporting, so build first, then run the department (or report with refresh=full)."
+   }
+  ],
+  "gaps": [
+   {
+    "department": "assetcraft",
+    "title": "AssetCraft \u2014 asset management",
+    "detail": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."
+   }
+  ]
+ },
+ "actions": [
+  {
+   "priority": "P0",
+   "theme": "a11y",
+   "title": "Accessibility and contrast: Accessibility: Certain ARIA roles must contain particular children",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-game-quality-history-games:axe.aria-required-children"
+   ],
+   "level": "verified",
+   "why": "axe-core rule aria-required-children (wcag2a, wcag131): Certain ARIA roles must contain particular children.",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/aria-required-children?application=axeAPI \u2014 Fix any of the following:   Element has children which are not allowed: button[tabindex]",
+   "n": 1
+  },
+  {
+   "priority": "P0",
+   "theme": "touch",
+   "title": "Touch targets and mobile ergonomics: Page scrolls sideways (horizontal overflow)",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:layout.overflow"
+   ],
+   "level": "verified",
+   "why": "The page is 331 px wide in a 320 px viewport: content is cut off and the whole page wobbles sideways when scrolled with a thumb.",
+   "do": "Let the offending element shrink (max-width: 100%, min-width: 0 on flex children) or scroll it inside its own container (overflow-x: auto).",
+   "n": 2
+  },
+  {
+   "priority": "P1",
+   "theme": "a11y",
+   "title": "Accessibility and contrast: Accessibility: Elements must meet minimum color contrast ratio thresholds",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-game-quality-history-games:axe.color-contrast",
+    "pixelcraft:gitcraft-3d-department-ui:axe.scrollable-region-focusable",
+    "pixelcraft:gitcraft-game-quality-history-games:axe.scrollable-region-focusable",
+    "pixelcraft:gitcraft-3d-department-ui:keyboard.div_button",
+    "pixelcraft:gitcraft-3d-department-ui:mobile.input_zoom"
+   ],
+   "level": "verified",
+   "why": "axe-core rule color-contrast (wcag2aa, wcag143): Elements must meet minimum color contrast ratio thresholds.",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI \u2014 Fix any of the following:   Element has insufficient color contrast of 3.99 (foreground color: #6f88a8, background color: #10294b, font size: 9.0pt (12px), f",
+   "n": 3
+  },
+  {
+   "priority": "P1",
+   "theme": "assets",
+   "title": "Assets and licences: references a missing file: /assets/icons/apple-touch-icon.png",
+   "departments": [
+    "production"
+   ],
+   "findings": [
+    "production:defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+    "production:defect:references-a-missing-file-assets-icons-favicon-ico",
+    "production:defect:references-a-missing-file-manifest-webmanifest",
+    "production:defect:references-a-missing-file-src-main-jsx",
+    "production:defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+    "production:defect:references-a-missing-file-assets-icons-apple-touch-icon-png",
+    "production:defect:references-a-missing-file-assets-icons-favicon-ico",
+    "production:defect:references-a-missing-file-assets-icons-favicon-ico"
+   ],
+   "level": "verified",
+   "why": null,
+   "do": "Fix or remove the reference.",
+   "n": 4
+  },
+  {
+   "priority": "P1",
+   "theme": "engineering",
+   "title": "Engineering standard: Engineering standard: an entry page exists",
+   "departments": [
+    "production"
+   ],
+   "findings": [
+    "production:standard:entry",
+    "production:standard:https",
+    "production:standard:sql_injection",
+    "production:standard:secrets",
+    "production:standard:cors"
+   ],
+   "level": "verified",
+   "why": "no index.html or framework layout found",
+   "do": null,
+   "n": 5
+  },
+  {
+   "priority": "P1",
+   "theme": "feel",
+   "title": "Feedback and game feel: No pressed (active) state",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:states.no_pressed",
+    "pixelcraft:gitcraft-game-quality-history-games:states.no_pressed"
+   ],
+   "level": "verified",
+   "why": "Pressing this control changes nothing visually until the action completes; on touch screens there is no hover, so this is the only immediate confirmation of a tap.",
+   "do": "Add an :active style (darker tone, scale 0.97, or ripple) to every button and link variant.",
+   "n": 6
+  },
+  {
+   "priority": "P1",
+   "theme": "layout",
+   "title": "Layout, spacing and consistency: Buttons side by side have different heights",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:controls.mixed_heights",
+    "pixelcraft:gitcraft-3d-department-ui:spacing.uneven",
+    "pixelcraft:gitcraft-game-quality-history-games:spacing.uneven"
+   ],
+   "level": "verified",
+   "why": "Buttons in one row are 64, 85 px tall; equivalent controls look like different components and the row looks unbalanced.",
+   "do": "Use one button size per row (a size token: e.g. 44 px on mobile) and change emphasis with fill/outline, not padding.",
+   "n": 7
+  },
+  {
+   "priority": "P1",
+   "theme": "coverage",
+   "title": "Refresh: PIXELCRAFT is stale",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [],
+   "level": "verified",
+   "why": "Its score describes an older build. Re-measuring needs a current build; GITCRAFT never builds while reporting, so build first, then run the department (or report with refresh=full).",
+   "do": "Re-run PIXELCRAFT (pixelcraft_audit) on the current build.",
+   "n": 8
+  },
+  {
+   "priority": "P1",
+   "theme": "text",
+   "title": "Text legibility and typography: Text is too small to read comfortably",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:type.too_small"
+   ],
+   "level": "verified",
+   "why": "10.5-px text is below the 12-px minimum for phones; secondary information (dates, tags, captions) becomes hard to read.",
+   "do": "Use at least 12 px (13-14 px preferred) for secondary text and keep hierarchy with weight and colour rather than very small sizes.",
+   "n": 9
+  },
+  {
+   "priority": "P1",
+   "theme": "touch",
+   "title": "Touch targets and mobile ergonomics: Touch target is too small",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:controls.small_target",
+    "pixelcraft:gitcraft-game-quality-history-games:controls.small_target"
+   ],
+   "level": "verified",
+   "why": "228\u00d727 px: under the 44\u00d744 pt Apple HIG minimum (24 px is the WCAG 2.2 floor); thumbs miss and hit neighbours.",
+   "do": "Enlarge the hit area to 44\u00d744 (padding, min-height/min-width, or an ::after hit-area) while keeping the visible glyph size.",
+   "n": 10
+  },
+  {
+   "priority": "P2",
+   "theme": "a11y",
+   "title": "Accessibility and contrast: Accessibility: Heading levels should only increase by one",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-game-quality-history-games:axe.heading-order"
+   ],
+   "level": "verified",
+   "why": "axe-core rule heading-order (best practice): Heading levels should only increase by one.",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/heading-order?application=axeAPI \u2014 Fix any of the following:   Heading order invalid",
+   "n": 11
+  },
+  {
+   "priority": "P2",
+   "theme": "other",
+   "title": "Content disappears at one screen size",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:resp.content_missing"
+   ],
+   "level": "verified",
+   "why": "At desktop, 'pipeline' shows only 48% of the words other sizes show; hidden content on phones is a common source of 'where did it go?'.",
+   "do": "Reflow content instead of hiding it; move secondary content behind a disclosure rather than display: none.",
+   "n": 12
+  },
+  {
+   "priority": "P2",
+   "theme": "feel",
+   "title": "Feedback and game feel: Click target is below 24 px",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:controls.small_target_desktop",
+    "pixelcraft:gitcraft-game-quality-history-games:controls.small_target_desktop",
+    "pixelcraft:gitcraft-3d-department-ui:states.no_hover",
+    "pixelcraft:gitcraft-game-quality-history-games:states.no_hover",
+    "pixelcraft:gitcraft-3d-department-ui:controls.competing_primary",
+    "pixelcraft:gitcraft-game-quality-history-games:controls.competing_primary"
+   ],
+   "level": "verified",
+   "why": "13\u00d713 px: under the WCAG 2.2 24\u00d724 px minimum target size.",
+   "do": "Enlarge the hit area to 44\u00d744 (padding, min-height/min-width, or an ::after hit-area) while keeping the visible glyph size.",
+   "n": 13
+  },
+  {
+   "priority": "P2",
+   "theme": "layout",
+   "title": "Layout, spacing and consistency: Controls stretch across the desktop window",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:layout.stretched_control",
+    "pixelcraft:gitcraft-game-quality-history-games:layout.stretched_control",
+    "pixelcraft:gitcraft-3d-department-ui:spacing.off_scale",
+    "pixelcraft:gitcraft-game-quality-history-games:spacing.off_scale",
+    "pixelcraft:gitcraft-3d-department-ui:cross.heading_sizes",
+    "pixelcraft:gitcraft-game-quality-history-games:cross.heading_sizes",
+    "pixelcraft:gitcraft-3d-department-ui:component.button_variants"
+   ],
+   "level": "verified",
+   "why": "A 1086-px-wide button on a 1440-px screen: the mobile full-width style was never adapted, so the control looks bloated and the eye travels far.",
+   "do": "Cap form and button widths on desktop (max-width 480-560 px) or lay forms out in a constrained column.",
+   "n": 14
+  },
+  {
+   "priority": "P2",
+   "theme": "other",
+   "title": "Navigation does not show where you are",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-game-quality-history-games:nav.no_current"
+   ],
+   "level": "verified",
+   "why": "On 'home' no navigation item is marked current (aria-current, selected or an active style).",
+   "do": "Mark the current item with aria-current=\"page\" and a visible active style.",
+   "n": 15
+  },
+  {
+   "priority": "P2",
+   "theme": "release",
+   "title": "Release and deployment: 9 unfinished item(s) (stubs, TODOs, open roadmap items)",
+   "departments": [
+    "production"
+   ],
+   "findings": [
+    "production:unfinished"
+   ],
+   "level": "verified",
+   "why": "stub: not implemented (production/maturity.py); stub: coming soon (production/maturity.py); stub: TODO: implement (production/maturity.py); stub: not implemented (production/maturity.py)",
+   "do": "Finish or remove them before release.",
+   "n": 16
+  },
+  {
+   "priority": "P2",
+   "theme": "text",
+   "title": "Text legibility and typography: Lines of text are too long",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:type.line_length",
+    "pixelcraft:gitcraft-game-quality-history-games:type.line_length",
+    "pixelcraft:gitcraft-3d-department-ui:spacing.cramped",
+    "pixelcraft:gitcraft-game-quality-history-games:type.too_small",
+    "pixelcraft:gitcraft-3d-department-ui:layout.truncated"
+   ],
+   "level": "verified",
+   "why": "About 100 characters per line; beyond ~80 the eye loses its place.",
+   "do": "Cap text columns at 60-75ch (max-width: 70ch).",
+   "n": 17
+  },
+  {
+   "priority": "P2",
+   "theme": "touch",
+   "title": "Touch targets and mobile ergonomics: Controls are too close together",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:gitcraft-3d-department-ui:controls.too_close",
+    "pixelcraft:gitcraft-game-quality-history-games:controls.too_close",
+    "pixelcraft:gitcraft-3d-department-ui:mobile.reach"
+   ],
+   "level": "verified",
+   "why": "'stylized low-poly boat with a red hull' and 'detailed ship from concept art' are 7 px apart and at least one is under 44 px: an easy mis-tap.",
+   "do": "Keep at least 8 px between targets (more next to destructive actions), or merge rarely used actions into one overflow menu.",
+   "n": 18
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: AssetCraft \u2014 asset management",
+   "departments": [
+    "assetcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+   "n": 19
+  },
+  {
+   "priority": "P3",
+   "theme": "engineering",
+   "title": "Engineering standard: Engineering standard (review): server routes check who is calling",
+   "departments": [
+    "production"
+   ],
+   "findings": [
+    "production:standard:authorization"
+   ],
+   "level": "inferred",
+   "why": "no authentication in server code",
+   "do": null,
+   "n": 20
+  }
+ ],
+ "levels": {
+  "verified": 53,
+  "observed": 0,
+  "inferred": 1
+ },
+ "unavailable": [],
+ "not_refreshed": [
+  {
+   "department": "pixelcraft",
+   "why": "not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+  }
+ ],
+ "title": "scottyfncodes/gitcraft",
+ "summary": [
+  "scottyfncodes/gitcraft scores **87.7/100** overall (blocked, medium confidence): mean of 2 measured department score(s) (pixelcraft, testcraft); 1 applicable department(s) have no score; 1 stale.",
+  "10 of 14 departments have results for this project; 8 current, 1 refreshed now, 1 stale, 2 no data, 2 not applicable.",
+  "Action plan: 2 P0, 8 P1, 9 P2, 1 P3. Findings by evidence: 53 verified, 0 observed, 1 inferred.",
+  "There are P0 blockers: resolve them before shipping anything else."
+ ],
+ "next_actions": [
+  "[P0] Accessibility and contrast: Accessibility: Certain ARIA roles must contain particular children \u2014 See https://dequeuniversity.com/rules/axe/4.10/aria-required-children?application=axeAPI \u2014 Fix any of the following:   Element has children which are not allowed: button[tabindex]",
+  "[P0] Touch targets and mobile ergonomics: Page scrolls sideways (horizontal overflow) \u2014 Let the offending element shrink (max-width: 100%, min-width: 0 on flex children) or scroll it inside its own container (overflow-x: auto).",
+  "[P1] Accessibility and contrast: Accessibility: Elements must meet minimum color contrast ratio thresholds \u2014 See https://dequeuniversity.com/rules/axe/4.10/color-contrast?application=axeAPI \u2014 Fix any of the following:   Element has insufficient color contrast of 3.99 (foreground color: #6f88a8, background color: #10294b, font size: 9.0pt (12px), f",
+  "[P1] Assets and licences: references a missing file: /assets/icons/apple-touch-icon.png \u2014 Fix or remove the reference.",
+  "Re-run PIXELCRAFT (pixelcraft_audit) on the current build.",
+  "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+  "Report again after the changes land (Run GITCRAFT report) to measure progress against this report."
+ ],
+ "changes": {
+  "first": true,
+  "note": "This is the first GITCRAFT report for this project: future reports will compare against it."
+ },
+ "paths": {
+  "dir": "/home/user/GITCRAFT/history/reports/scottyfncodes--gitcraft/20261108T194251Z",
+  "json": "/home/user/GITCRAFT/history/reports/scottyfncodes--gitcraft/20261108T194251Z/report.json",
+  "markdown": "/home/user/GITCRAFT/history/reports/scottyfncodes--gitcraft/20261108T194251Z/report.md",
+  "html": "/home/user/GITCRAFT/history/reports/scottyfncodes--gitcraft/20261108T194251Z/report.html"
+ }
+}

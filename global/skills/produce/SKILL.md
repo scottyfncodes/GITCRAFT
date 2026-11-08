@@ -1,6 +1,6 @@
 ---
 name: produce
-description: "Run GITCRAFT": the one entry point for any project. Use when the person says "Run GITCRAFT" (or "run gitcraft on …"), pastes a prompt or idea, describes an app/game/site to build, links a GitHub repository (github.com/owner/repo), or points at an existing project and wants it continued, finished, updated, fixed or reviewed. Also for a whole game, app, site or asset pack in one request ("build a polished mobile-first game with sound, levels and deployment", "make an original platformer", "create a landing page with a brand", "ship a sound pack") and "run the production", "produce this", "continue the production". GITCRAFT reads the project's state (new, partial, nearly complete, finished; game/app/site), picks the workflow, preserves existing work, asks only for the decisions that matter, plans every department in dependency order with parallel waves, gates every result, turns failures into fix work orders, re-verifies and writes the acceptance report. Not for a single asset (use the gitcraft skill and the department tool directly).
+description: "Run GITCRAFT": the one entry point for any project. Use when the person says "Run GITCRAFT" (or "run gitcraft on …"), pastes a prompt or idea, describes an app/game/site to build, links a GitHub repository (github.com/owner/repo), or points at an existing project and wants it continued, finished, updated, fixed or reviewed. Also for a whole game, app, site or asset pack in one request ("build a polished mobile-first game with sound, levels and deployment", "make an original platformer", "create a landing page with a brand", "ship a sound pack") and "run the production", "produce this", "continue the production", and "Run GITCRAFT report" (one project report across every department). GITCRAFT reads the project's state (new, partial, nearly complete, finished; game/app/site), picks the workflow, preserves existing work, asks only for the decisions that matter, plans every department in dependency order with parallel waves, gates every result, turns failures into fix work orders, re-verifies and writes the acceptance report. Not for a single asset (use the gitcraft skill and the department tool directly).
 ---
 
 # One master prompt → a verified production
@@ -15,6 +15,11 @@ when it hands you a work order, and you never claim anything it did not measure.
 It works out the rest; the person never needs to know these tools.
 
 - **A new idea** (a sentence, a spec, a pasted master prompt): the New Build below (optional Recon → Discovery → Decision Room).
+- **"Run GITCRAFT report"**: `production_start` returns `status: "report"`: one read-only report built from the latest
+  analysis of every department (health, scorecards, blockers, cross-department findings, P0–P3 plan, changes since the
+  last report, next actions), saved timestamped as report.json/.md/.html. Direct tool: `production_project_report
+  {project, refresh: quick|full|none}`. Show the person the summary and the report.html path. Reporting never edits code,
+  builds, merges or deploys; never present a department with no data as measured. See `docs/report.md`.
 - **A GitHub URL**: if it returns `needs_checkout`, attach the repository to the session if needed (`add_repo`), clone it where
   the result says, and call `production_start` again with `project`. Never ask the person to clone it.
 - **An existing project**: it is read without being changed: `maturity` (partial / nearly complete / finished),

@@ -121,8 +121,9 @@ def publish(lib_root, dist, source=""):
     json.dump(st, open(os.path.join(data, "state.json"), "w"), default=str)
     games = _publish_games(dist)
     audits = _publish_pixelcraft(dist)
+    reports = _publish_reports(dist)
     total = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dist) for f in fs)
-    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + (f", {audits} PIXELCRAFT audits" if audits else "") + f" to {dist} ({total / 2**20:.1f} MB)")
+    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + (f", {audits} PIXELCRAFT audits" if audits else "") + (f", {reports} GITCRAFT reports" if reports else "") + f" to {dist} ({total / 2**20:.1f} MB)")
 
 
 def _publish_games(dist):
@@ -145,6 +146,18 @@ def _publish_pixelcraft(dist):
     if not os.path.isdir(archive) or not os.path.exists(mod): return 0
     spec = importlib.util.spec_from_file_location("pixelcraft_site", mod); h = importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
     return h.publish_site(archive, os.path.join(dist, "pixelcraft"))
+
+
+def _publish_reports(dist):
+    """The GITCRAFT project reports page (dist/reports/), from the committed archive history/reports (stdlib only)."""
+    import importlib.util
+    repo = os.path.dirname(HERE)
+    archive = os.path.join(repo, "history", "reports")
+    mod = os.path.join(repo, "production", "project_report.py")
+    if not os.path.isdir(archive) or not os.path.exists(mod): return 0
+    sys.path.insert(0, repo)
+    from production import project_report
+    return project_report.publish_site(archive, os.path.join(dist, "reports"))
 
 
 NO_LIVE = """ForgeCraft's live web server was removed (it ran jobs outside GITCRAFT's sandbox and accepted

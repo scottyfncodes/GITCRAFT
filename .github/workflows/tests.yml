@@ -88,6 +88,9 @@ jobs:
       - name: Hardening (guard + control room regressions from docs/tech-debt.md)
         run: python3 tests/test_hardening.py
 
+      - name: Run GITCRAFT report (read-only cross-department project report)
+        run: python3 tests/test_report.py
+
       - name: Production Director master-prompt acceptance (every department for real)
         run: python3 tests/acceptance_production.py
 

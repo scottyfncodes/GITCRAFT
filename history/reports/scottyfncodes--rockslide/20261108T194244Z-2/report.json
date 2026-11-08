@@ -1,0 +1,1080 @@
+{
+ "gitcraft_report": "1.0.0",
+ "report_id": "scottyfncodes--rockslide/20261108T194244Z-2",
+ "generated": "2026-11-08T19:42:51+00:00",
+ "refresh": "quick",
+ "read_only": true,
+ "project": {
+  "id": "scottyfncodes--rockslide",
+  "repo": "scottyfncodes/rockslide",
+  "url": "https://github.com/scottyfncodes/rockslide",
+  "name": "rockslide",
+  "path": "/home/user/scottyfncodes/rockslide",
+  "head": "667ad977f91406d8450a93639b18616956ebca01",
+  "branch": "main",
+  "dirty": false,
+  "kind": "game",
+  "maturity": "finished"
+ },
+ "health": {
+  "score": 68.5,
+  "band": "needs attention",
+  "confidence": "low",
+  "measured": 2,
+  "of": 5,
+  "stale": [
+   "playcraft"
+  ],
+  "p0": 0,
+  "parts": {
+   "playcraft": 79,
+   "designcraft": 58
+  },
+  "basis": "mean of 2 measured department score(s) (playcraft, designcraft); 3 applicable department(s) have no score; 1 stale"
+ },
+ "departments": [
+  {
+   "id": "production",
+   "title": "Production Director",
+   "family": "Production",
+   "role": "director",
+   "summary": "Discovery, engineering standard, productions and their acceptance verdicts",
+   "applicable": true,
+   "applies_because": null,
+   "status": "refreshed",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "Discovery: finished game (high confidence) \u2014 500 files, 127 code files, ~30167 lines of code; entry index.html; kind game: engine three, 39 game words; git: 1 commits, last 2026-11-08",
+    "Engineering standard: 9/9 applicable checks pass."
+   ],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "Discovery and the engineering standard re-run read-only for this report"
+   },
+   "next": null,
+   "standard": {
+    "passed": 9,
+    "of": 9,
+    "status": "ok"
+   }
+  },
+  {
+   "id": "playcraft",
+   "title": "PLAYCRAFT \u2014 game design and gameplay quality",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Assesses and improves how a game plays. Reads the repo (intent, engine, controls, systems with file:line evidence, genres across 15 genre profiles), plays the built game in Chromium on desktop and phone (response time of every control, dead time, idle motion, FPS, pause, touch targets, text size), scores 10 categories 0-100 with evidence levels (verified / observed / inferred / not tested) and confidence, ranks the highest-impact opportunities by impact, effort and risk, writes a staged plan, then verifies changes against the baseline (regressions + guardrails on the git diff) with a before/after report. full_pass adds GITCRAFT's engineering checks (TestCraft) under one plan.",
+   "applicable": true,
+   "applies_because": "PLAYCRAFT scores games",
+   "status": "stale",
+   "score": {
+    "value": 79,
+    "label": "Gameplay quality",
+    "confidence": "medium",
+    "coverage": 1.0,
+    "verified_only": 91,
+    "categories": {
+     "core_gameplay": 83,
+     "game_feel": 74,
+     "controls": 88,
+     "progression": 70,
+     "difficulty": 68,
+     "player_experience": 70,
+     "replayability": 70,
+     "technical": 90,
+     "presentation": 83,
+     "mobile": 93
+    }
+   },
+   "run": {
+    "id": "20261104234623-pass-b8cfea83",
+    "at": "2026-11-04T23:46:23+00:00",
+    "commit": "2f70374e300e",
+    "method": "de0f88a09642",
+    "runs": 5,
+    "source": "history/playcraft"
+   },
+   "age_days": 3.8,
+   "findings": [
+    {
+     "key": "playcraft:px.text",
+     "department": "playcraft",
+     "id": "px.text",
+     "title": "Text is legible on the target device (\u2265 12 px)",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "smallest visible text 8.5 px ('Map') on phone",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--rockslide",
+     "kind": "design",
+     "theme": "text"
+    },
+    {
+     "key": "playcraft:px.loads",
+     "department": "playcraft",
+     "id": "px.loads",
+     "title": "Playable quickly (load + start \u2264 3 s)",
+     "severity": "major",
+     "level": "observed",
+     "evidence": "5498 ms from navigation to playing (load 899 ms + start 4599 ms; served locally)",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--rockslide",
+     "kind": "design",
+     "theme": "perf"
+    },
+    {
+     "key": "playcraft:db.assist",
+     "department": "playcraft",
+     "id": "db.assist",
+     "title": "Assist / difficulty options",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "not found in source: assist, difficulty",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--rockslide",
+     "kind": "design",
+     "theme": "difficulty"
+    },
+    {
+     "key": "playcraft:mob.haptics",
+     "department": "playcraft",
+     "id": "mob.haptics",
+     "title": "Haptics on key moments (where supported)",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "not found in source: haptics",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--rockslide",
+     "kind": "design",
+     "theme": "feel"
+    },
+    {
+     "key": "playcraft:gf.hitstop",
+     "department": "playcraft",
+     "id": "gf.hitstop",
+     "title": "Hit-stop / slow motion on key moments",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "not found in source: hitstop",
+     "recommendation": null,
+     "source": "history/playcraft/games/scottyfncodes--rockslide",
+     "kind": "design",
+     "theme": "feel"
+    }
+   ],
+   "strengths": [
+    "Controls and responsiveness: 88",
+    "Technical gameplay quality: 90",
+    "Mobile experience: 93"
+   ],
+   "notes": [
+    "Evidence: 15 verified, 4 observed, 46 inferred, 3 not tested; the game was played.",
+    "Against its baseline: no measured change (within noise).",
+    "Deployment: live-verified at https://rockslide-game.vercel.app/",
+    "Stale: measured on 2f70374, the project is now at 667ad97"
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": "not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+   },
+   "next": "Re-run PLAYCRAFT (playcraft_pass) on the current build to refresh the gameplay score."
+  },
+  {
+   "id": "pixelcraft",
+   "title": "PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Audits the rendered application (not its source) in Chromium at iPhone 17, iPhone 13, desktop, narrow, tablet and landscape viewports: discovers its screens, captures screenshots, measures spacing, alignment, typography, touch targets, control consistency, safe areas, overflow, layout shift, hover/pressed/focus/disabled states, runs axe-core and user journeys (taps, depth, confirmations, feedback time). Scores Visual Quality, Usability and Consistency (100 each) from evidence, with coverage and confidence reported separately; every finding has screen, viewport, selector, measurements, severity, an annotated screenshot and a fix. verify replays the same routes, viewports and journeys, diffs screenshots, proves fixes and refuses score gains from lost coverage. Works on React, Vite, Next.js, static sites and browser games (HTML overlays). Never modifies the app.",
+   "applicable": true,
+   "applies_because": "PIXELCRAFT audits the rendered HTML UI of apps, sites and games",
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": "not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+   },
+   "next": "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability."
+  },
+  {
+   "id": "designcraft",
+   "title": "DESIGNCRAFT \u2014 game-design intelligence",
+   "family": "DESIGNCRAFT",
+   "role": "scored",
+   "summary": "levels, missions, story, progression and experience, from the game's own data",
+   "applicable": true,
+   "applies_because": "DESIGNCRAFT analyses game design",
+   "status": "refreshed",
+   "score": {
+    "value": 58,
+    "label": "Game design",
+    "confidence": "medium",
+    "coverage": 0.85,
+    "ceiling": 73,
+    "categories": {
+     "level": 46.0,
+     "mission": 79.3,
+     "narrative": 79.3,
+     "progression": 61.3,
+     "agency": 25.0,
+     "difficulty": 10.0,
+     "worldbuilding": 59.0,
+     "variety": 87.0
+    }
+   },
+   "run": {
+    "id": "this report",
+    "at": "2026-11-08T19:42:45+00:00",
+    "commit": "667ad977f914",
+    "method": "d98e718b8f0c",
+    "runs": 1,
+    "source": "refreshed for this report"
+   },
+   "age_days": 0.0,
+   "findings": [
+    {
+     "key": "designcraft:missioncraft.skeleton_repetition.survey_bowl-recon",
+     "department": "designcraft",
+     "id": "missioncraft.skeleton_repetition.survey_bowl-recon",
+     "title": "2 missions share the same structure: mount \u2192 travel \u2192 scan \u2192 travel",
+     "severity": "major",
+     "level": "inferred",
+     "evidence": "Eyes on Kessel Bowl and Kessel Bowl Has Reloaded have an identical sequence of objective types. 6 of 10 missions repeat a structure another mission already uses. (facts verified in source: 2)",
+     "recommendation": "Give each of Eyes on Kessel Bowl and Kessel Bowl Has Reloaded one objective the others do not have.",
+     "source": "src/missions/catalog.ts:159",
+     "kind": null,
+     "theme": "missions"
+    },
+    {
+     "key": "designcraft:storycraft.linear_story",
+     "department": "designcraft",
+     "id": "storycraft.linear_story",
+     "title": "One story path: no endings, choices or branches in the data",
+     "severity": "major",
+     "level": "inferred",
+     "evidence": "No ending definitions and no scripted choices were found, although the docs talk about choice or consequence 11 times. (facts verified in source: 1)",
+     "recommendation": "Add one decision with two outcomes at the story's midpoint.",
+     "source": null,
+     "kind": null,
+     "theme": "agency"
+    },
+    {
+     "key": "designcraft:missioncraft.single_solution",
+     "department": "designcraft",
+     "id": "missioncraft.single_solution",
+     "title": "Only 0 of 46 objectives offer more than one way to complete them",
+     "severity": "major",
+     "level": "inferred",
+     "evidence": "Almost every objective has exactly one target and one method in its definition. (facts verified in source: 5)",
+     "recommendation": "Give key objectives a second valid target or method.",
+     "source": "src/missions/catalog.ts:140",
+     "kind": null,
+     "theme": "missions"
+    },
+    {
+     "key": "designcraft:experiencecraft.agency_gap",
+     "department": "designcraft",
+     "id": "experiencecraft.agency_gap",
+     "title": "The player decides how fast, never what or how",
+     "severity": "major",
+     "level": "inferred",
+     "evidence": "No objective offers alternatives, none is optional, and the story has no endings or choices in the data; free play exists (14 references) but is separate from the missions. (facts verified in source: 1)",
+     "recommendation": "Add alternatives and optional goals to the five most-played missions.",
+     "source": null,
+     "kind": null,
+     "theme": "agency"
+    },
+    {
+     "key": "designcraft:levelcraft.unused_space",
+     "department": "designcraft",
+     "id": "levelcraft.unused_space",
+     "title": "20 of 45 named places are never a mission destination",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "No mission objective targets Tannberg Base, Fernhut Cabin, Slope A, Slope B, Slope C and 15 more. They exist in the world data but the mission structure never asks the player to go there. (facts verified in source: 6)",
+     "recommendation": "Route existing missions through the unused places.",
+     "source": "src/world/places.ts:27",
+     "kind": null,
+     "theme": "level"
+    },
+    {
+     "key": "designcraft:levelcraft.empty_zone",
+     "department": "designcraft",
+     "id": "levelcraft.empty_zone",
+     "title": "56% of the mapped area holds nothing to find or do",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "Dividing the playable extent (1720\u00d71305 units) into a 6\u00d76 grid, 20 cells contain no placed location and no mission target; the emptiest quarter is the north-east (6 of 9 cells empty). (facts verified in source: 1)",
+     "recommendation": "Add landmarks and small finds to the north-east of the map.",
+     "source": "src/world/places.ts:25",
+     "kind": null,
+     "theme": "level"
+    },
+    {
+     "key": "designcraft:storycraft.faceless_missions",
+     "department": "designcraft",
+     "id": "storycraft.faceless_missions",
+     "title": "7 of 10 missions mention no character",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "The briefs, objectives and completion text of Eyes on Kessel Bowl, Controlled Release, Firewood for the Kettle, Kessel Bowl Has Reloaded and 3 more name none of the 7 characters. (facts verified in source: 5)",
+     "recommendation": "Put a person in Eyes on Kessel Bowl, Controlled Release and Firewood for the Kettle: who asked, who is helped.",
+     "source": "src/missions/catalog.ts:159",
+     "kind": null,
+     "theme": "story"
+    },
+    {
+     "key": "designcraft:progressioncraft.economy_gap",
+     "department": "designcraft",
+     "id": "progressioncraft.economy_gap",
+     "title": "Buying everything costs 5.1\u00d7 what the campaign pays",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "The non-repeating missions pay 1390 funds in total; the 35 priced unlocks cost 7100. The gap is meant to be filled by 4 repeatable mission(s) (Kessel Bowl Has Reloaded, Bring Down the Bowl, Tree Down on the Pass and Stuck in the Drift). (facts verified in source: 2)",
+     "recommendation": "Bring prices and income closer: raise campaign rewards or lower top prices.",
+     "source": "src/progress/catalog.ts:58",
+     "kind": null,
+     "theme": "progression"
+    },
+    {
+     "key": "designcraft:missioncraft.no_failure",
+     "department": "designcraft",
+     "id": "missioncraft.no_failure",
+     "title": "Missions define no way to fail",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "No mission definition has a fail condition, time limit or loss state; the source has 14 fail-state references, so failure may live in code outside the mission data. (facts verified in source: 1)",
+     "recommendation": "Add a soft fail state to missions with a clock or a threat.",
+     "source": "src/missions/catalog.ts:140",
+     "kind": null,
+     "theme": "difficulty"
+    },
+    {
+     "key": "designcraft:missioncraft.no_optional",
+     "department": "designcraft",
+     "id": "missioncraft.no_optional",
+     "title": "No optional or bonus objectives",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "None of the 46 objectives is marked optional or bonus. (facts verified in source: 1)",
+     "recommendation": "Add one optional bonus objective to each mission.",
+     "source": "src/missions/catalog.ts:140",
+     "kind": null,
+     "theme": "agency"
+    },
+    {
+     "key": "designcraft:experiencecraft.slow_start",
+     "department": "designcraft",
+     "id": "experiencecraft.slow_start",
+     "title": "PLAYCRAFT measured 5.1 s from load to first input",
+     "severity": "minor",
+     "level": "observed",
+     "evidence": "In PLAYCRAFT run 20261105001110-pass-06bc6f6e the game took 5.1 s before it accepted play (software renderer; real devices are usually faster).",
+     "recommendation": "Let the player act during loading.",
+     "source": "history/playcraft/games/scottyfncodes--rockslide/runs/20261105001110-pass-06bc6f6e.json",
+     "kind": null,
+     "theme": "perf"
+    },
+    {
+     "key": "designcraft:missioncraft.long_briefs",
+     "department": "designcraft",
+     "id": "missioncraft.long_briefs",
+     "title": "2 briefings run past 45 words",
+     "severity": "info",
+     "level": "inferred",
+     "evidence": "Kessel Bowl Has Reloaded and Bring Down the Bowl have long briefs (67, 70 words). (facts verified in source: 2)",
+     "recommendation": null,
+     "source": "src/missions/catalog.ts:258",
+     "kind": null,
+     "theme": "missions"
+    }
+   ],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "re-analysed read-only; the game's design data changed (or no recorded run)"
+   },
+   "next": null
+  },
+  {
+   "id": "testcraft",
+   "title": "TestCraft \u2014 automated QA",
+   "family": "Studio",
+   "role": "qa",
+   "summary": "Browser QA for web games with Playwright + Chromium: smoke tests on desktop, phone and tablet emulation (errors, missing files, blank screens, overflow, canvas), scripted gameplay with assertions on game state and video capture, FPS / frame-time / heap profiling, visual regression (YIQ pixel diff, baselines), asset integrity (every file opened by format; GLBs through the Khronos validator; texture budgets), animation playback (GLB clips really move; sprite frames differ), the project's own Vitest/Jest suite, and HTML/JSON reports.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence."
+  },
+  {
+   "id": "assetcraft",
+   "title": "AssetCraft \u2014 asset management",
+   "family": "Studio",
+   "role": "catalogue",
+   "summary": "One asset catalogue for every project (SQLite in ~/.gitcraft/assetcraft): every department run registers its outputs with licence and provenance; scan existing projects; search across projects; versions on content change; exact and perceptual (dHash) duplicates; unused assets (not referenced by source); dependency tracing (glTF, Tiled, HTML/CSS); licence inventory with ATTRIBUTION.md and non-commercial flags; hash re-verification; hash-verified integration into a project (never overwriting silently); 3D-library sync; a browsable HTML catalogue.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."
+  },
+  {
+   "id": "3d",
+   "title": "3D Department \u2014 ForgeCraft + MeshCraft",
+   "family": "3D Department",
+   "role": "maker",
+   "summary": "3D assets: route, generate, engine-check, library",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No 3D Department jobs reference this project."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "animcraft",
+   "title": "AnimCraft \u2014 rigging and animation",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Automatic rigging (humanoid, quadruped, chain/tentacle/tail) from mesh landmarks with heat-map skin weights (Mixamo bone names optional); procedural clips (idle, walk, run, wave, jump; quadruped walk/run/idle; chain wave/slither/sway/curl; object bob/spin/hover/squash/shake); world-space retargeting between rigs with different names and proportions (BVH, FBX, GLB sources); rigid-body physics drops baked to keyframes; sprite sheets from 3D clips (N directions) or frame folders; playback verification in three.js.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "audiocraft",
+   "title": "AudioCraft \u2014 game audio",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Sound effects, seamless ambiences, adaptive multi-stem music with MIDI source, character dialogue (Kokoro-82M neural TTS, CPU), loop-point detection, trimming, EBU R128 loudness normalisation, layering and WAV/OGG/MP3/Opus/FLAC conversion.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "cinematiccraft",
+   "title": "CinematicCraft \u2014 cinematics and video",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Camera choreography (orbit, dolly in/out, crane up, flyby, push-in zoom, handheld, static) over any GLB/FBX/OBJ/.blend scene with lighting presets (studio three-point, golden hour, night, overcast, dramatic, daylight) and optional HDR/equirect sky, rendered with Cycles to MP4 + editable .blend + an engine camera path (JSON) for in-game cutscenes; storyboards (PNG + PDF); animated title cards; trailer assembly with crossfades and a loudness-normalised music bed; gameplay capture from a web game.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "fxcraft",
+   "title": "FXCraft \u2014 visual effects",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Game-ready effects: flipbook atlases from particle simulations (fire, smoke, magic, energy/portal, rain, snow loops that repeat exactly; explosion, sparks, dust, splash, lightning, debris one-shots) with Phaser/PixiJS atlas JSON, GIF and MP4 previews; portable emitter presets (.fx.json) with a dependency-free three.js runtime, played in three.js r170; three.quarks particle systems (QuarksLoader JSON); Blender Voronoi destruction with baked rigid-body physics as an animated GLB.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "levelcraft",
+   "title": "LevelCraft \u2014 levels and maps",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Procedural dungeons (BSP rooms + corridors + doors), caves (cellular automata), completable platformer levels (jump-physics reachability solver), overworlds (biomes, A* roads with bridges between settlements, camps, resources) and towns (road grid, building plots with doors, plaza) \u2014 as Tiled TMJ maps and LDtk 1.5.3 projects with a generated tileset, entity/collision/navigation object layers, generic JSON, preview and a 3D blockout GLB, each solved and loaded in Phaser 3.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "materialcraft",
+   "title": "MaterialCraft \u2014 PBR materials and shaders",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Seamless procedural PBR materials (21 kinds: stone, cobblestone, brick, tiles, wood, planks, bark, metal, brushed metal, rust, fabric, leather, sand, grass, dirt, ice, lava, water, marble, concrete, snow) with dirt/moss/wear/wet weathering and a toon style; glTF metallic-roughness map sets (basecolor, normal GL/DX, roughness, metallic, AO, 16-bit height, packed ORM, emission), a sample sphere GLB, a three.js render and seam checks; seamless-izing of any image; toon gradient ramps; swatch sheets.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  },
+  {
+   "id": "worldcraft",
+   "title": "WorldCraft \u2014 procedural environments",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Terrains (island, archipelago, atoll, coast, mountains, canyon, volcano, plains) with hydraulic + thermal erosion, biomes, 16-bit heightmaps, normal/splat/biome maps and masks, vegetation and rock scatter, coastlines and a vertex-coloured GLB; caves (surface-nets meshes); physical skies (Blender Nishita) as equirect + HDR + cubemap with sun lighting; seamless time-looping FFT oceans; rule-based scatter on any heightmap.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null
+  }
+ ],
+ "reconciliation": {
+  "corroborated": [
+   {
+    "theme": "difficulty",
+    "title": "Difficulty and balance",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "count": 2,
+    "findings": [
+     {
+      "department": "playcraft",
+      "title": "Assist / difficulty options",
+      "level": "inferred",
+      "severity": "minor"
+     },
+     {
+      "department": "designcraft",
+      "title": "Missions define no way to fail",
+      "level": "inferred",
+      "severity": "minor"
+     }
+    ],
+    "note": "The same problem area is flagged by more than one department: one fix should address all of these, so they are one action."
+   },
+   {
+    "theme": "perf",
+    "title": "Performance and loading",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "count": 2,
+    "findings": [
+     {
+      "department": "playcraft",
+      "title": "Playable quickly (load + start \u2264 3 s)",
+      "level": "observed",
+      "severity": "major"
+     },
+     {
+      "department": "designcraft",
+      "title": "PLAYCRAFT measured 5.1 s from load to first input",
+      "level": "observed",
+      "severity": "minor"
+     }
+    ],
+    "note": "The same problem area is flagged by more than one department: one fix should address all of these, so they are one action."
+   }
+  ],
+  "conflicts": [
+   {
+    "title": "Difficulty: DESIGNCRAFT 10% vs PLAYCRAFT 68%",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "detail": "DESIGNCRAFT reads the design data (source); PLAYCRAFT measures the played build. A large gap means the design intent and the played experience disagree. Trust measured play for how it plays today, and the design analysis for what the data allows; confirm in a playtest before acting on either alone."
+   }
+  ],
+  "dependencies": [
+   {
+    "title": "PLAYCRAFT is stale",
+    "departments": [
+     "playcraft"
+    ],
+    "detail": "Its score describes an older build. Re-measuring needs a current build; GITCRAFT never builds while reporting, so build first, then run the department (or report with refresh=full)."
+   },
+   {
+    "title": "DESIGNCRAFT's experience analysis reads PLAYCRAFT",
+    "departments": [
+     "designcraft",
+     "playcraft"
+    ],
+    "detail": "experiencecraft uses PLAYCRAFT runs as simulated evidence, so refresh PLAYCRAFT first, then DESIGNCRAFT."
+   }
+  ],
+  "gaps": [
+   {
+    "department": "pixelcraft",
+    "title": "PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+    "detail": "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability."
+   },
+   {
+    "department": "testcraft",
+    "title": "TestCraft \u2014 automated QA",
+    "detail": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence."
+   },
+   {
+    "department": "assetcraft",
+    "title": "AssetCraft \u2014 asset management",
+    "detail": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."
+   }
+  ]
+ },
+ "actions": [
+  {
+   "priority": "P1",
+   "theme": "coverage",
+   "title": "Refresh: PLAYCRAFT is stale",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [],
+   "level": "verified",
+   "why": "Its score describes an older build. Re-measuring needs a current build; GITCRAFT never builds while reporting, so build first, then run the department (or report with refresh=full).",
+   "do": "Re-run PLAYCRAFT (playcraft_pass) on the current build to refresh the gameplay score.",
+   "n": 1
+  },
+  {
+   "priority": "P1",
+   "theme": "text",
+   "title": "Text legibility and typography: Text is legible on the target device (\u2265 12 px)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:px.text"
+   ],
+   "level": "verified",
+   "why": "smallest visible text 8.5 px ('Map') on phone",
+   "do": null,
+   "n": 2
+  },
+  {
+   "priority": "P1",
+   "theme": "perf",
+   "title": "Performance and loading: Playable quickly (load + start \u2264 3 s)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:px.loads"
+   ],
+   "level": "observed",
+   "why": "5498 ms from navigation to playing (load 899 ms + start 4599 ms; served locally)",
+   "do": null,
+   "n": 3
+  },
+  {
+   "priority": "P2",
+   "theme": "difficulty",
+   "title": "Difficulty and balance: Assist / difficulty options (+1 related, playcraft, designcraft)",
+   "departments": [
+    "playcraft",
+    "designcraft"
+   ],
+   "findings": [
+    "playcraft:db.assist",
+    "designcraft:missioncraft.no_failure"
+   ],
+   "level": "inferred",
+   "why": "not found in source: assist, difficulty",
+   "do": null,
+   "raised": "corroborated by several departments",
+   "n": 4
+  },
+  {
+   "priority": "P2",
+   "theme": "perf",
+   "title": "Performance and loading: PLAYCRAFT measured 5.1 s from load to first input",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:experiencecraft.slow_start"
+   ],
+   "level": "observed",
+   "why": "In PLAYCRAFT run 20261105001110-pass-06bc6f6e the game took 5.1 s before it accepted play (software renderer; real devices are usually faster).",
+   "do": "Let the player act during loading.",
+   "n": 5
+  },
+  {
+   "priority": "P2",
+   "theme": "missions",
+   "title": "Mission design: 2 missions share the same structure: mount \u2192 travel \u2192 scan \u2192 travel",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:missioncraft.skeleton_repetition.survey_bowl-recon",
+    "designcraft:missioncraft.single_solution"
+   ],
+   "level": "inferred",
+   "why": "Eyes on Kessel Bowl and Kessel Bowl Has Reloaded have an identical sequence of objective types. 6 of 10 missions repeat a structure another mission already uses. (facts verified in source: 2)",
+   "do": "Give each of Eyes on Kessel Bowl and Kessel Bowl Has Reloaded one objective the others do not have.",
+   "n": 6
+  },
+  {
+   "priority": "P2",
+   "theme": "agency",
+   "title": "Player agency and choice: One story path: no endings, choices or branches in the data",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:storycraft.linear_story",
+    "designcraft:experiencecraft.agency_gap"
+   ],
+   "level": "inferred",
+   "why": "No ending definitions and no scripted choices were found, although the docs talk about choice or consequence 11 times. (facts verified in source: 1)",
+   "do": "Add one decision with two outcomes at the story's midpoint.",
+   "n": 7
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: AssetCraft \u2014 asset management",
+   "departments": [
+    "assetcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+   "n": 8
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability.",
+   "n": 9
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: TestCraft \u2014 automated QA",
+   "departments": [
+    "testcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+   "n": 10
+  },
+  {
+   "priority": "P3",
+   "theme": "feel",
+   "title": "Feedback and game feel: Haptics on key moments (where supported)",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [
+    "playcraft:mob.haptics",
+    "playcraft:gf.hitstop"
+   ],
+   "level": "inferred",
+   "why": "not found in source: haptics",
+   "do": null,
+   "n": 11
+  },
+  {
+   "priority": "P3",
+   "theme": "level",
+   "title": "Level design: 20 of 45 named places are never a mission destination",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:levelcraft.unused_space",
+    "designcraft:levelcraft.empty_zone"
+   ],
+   "level": "inferred",
+   "why": "No mission objective targets Tannberg Base, Fernhut Cabin, Slope A, Slope B, Slope C and 15 more. They exist in the world data but the mission structure never asks the player to go there. (facts verified in source: 6)",
+   "do": "Route existing missions through the unused places.",
+   "n": 12
+  },
+  {
+   "priority": "P3",
+   "theme": "missions",
+   "title": "Mission design: 2 briefings run past 45 words",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:missioncraft.long_briefs"
+   ],
+   "level": "inferred",
+   "why": "Kessel Bowl Has Reloaded and Bring Down the Bowl have long briefs (67, 70 words). (facts verified in source: 2)",
+   "do": null,
+   "n": 13
+  },
+  {
+   "priority": "P3",
+   "theme": "agency",
+   "title": "Player agency and choice: No optional or bonus objectives",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:missioncraft.no_optional"
+   ],
+   "level": "inferred",
+   "why": "None of the 46 objectives is marked optional or bonus. (facts verified in source: 1)",
+   "do": "Add one optional bonus objective to each mission.",
+   "n": 14
+  },
+  {
+   "priority": "P3",
+   "theme": "progression",
+   "title": "Progression and rewards: Buying everything costs 5.1\u00d7 what the campaign pays",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:progressioncraft.economy_gap"
+   ],
+   "level": "inferred",
+   "why": "The non-repeating missions pay 1390 funds in total; the 35 priced unlocks cost 7100. The gap is meant to be filled by 4 repeatable mission(s) (Kessel Bowl Has Reloaded, Bring Down the Bowl, Tree Down on the Pass and Stuck in the Drift). (facts verified in source: 2)",
+   "do": "Bring prices and income closer: raise campaign rewards or lower top prices.",
+   "n": 15
+  },
+  {
+   "priority": "P3",
+   "theme": "story",
+   "title": "Story, characters and world: 7 of 10 missions mention no character",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:storycraft.faceless_missions"
+   ],
+   "level": "inferred",
+   "why": "The briefs, objectives and completion text of Eyes on Kessel Bowl, Controlled Release, Firewood for the Kettle, Kessel Bowl Has Reloaded and 3 more name none of the 7 characters. (facts verified in source: 5)",
+   "do": "Put a person in Eyes on Kessel Bowl, Controlled Release and Firewood for the Kettle: who asked, who is helped.",
+   "n": 16
+  }
+ ],
+ "levels": {
+  "verified": 1,
+  "observed": 2,
+  "inferred": 14
+ },
+ "unavailable": [],
+ "not_refreshed": [
+  {
+   "department": "playcraft",
+   "why": "not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+  },
+  {
+   "department": "pixelcraft",
+   "why": "not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+  }
+ ],
+ "title": "ROCKSLIDE: Mountain Patrol",
+ "summary": [
+  "ROCKSLIDE: Mountain Patrol scores **68.5/100** overall (needs attention, low confidence): mean of 2 measured department score(s) (playcraft, designcraft); 3 applicable department(s) have no score; 1 stale.",
+  "3 of 14 departments have results for this project; 2 refreshed now, 1 stale, 11 no data.",
+  "Action plan: 0 P0, 3 P1, 7 P2, 6 P3. Findings by evidence: 1 verified, 2 observed, 14 inferred.",
+  "2 problem area(s) are flagged by several departments at once \u2014 the strongest signals in this report."
+ ],
+ "next_actions": [
+  "[P1] Refresh: PLAYCRAFT is stale \u2014 Re-run PLAYCRAFT (playcraft_pass) on the current build to refresh the gameplay score.",
+  "[P1] Text legibility and typography: Text is legible on the target device (\u2265 12 px)",
+  "[P1] Performance and loading: Playable quickly (load + start \u2264 3 s)",
+  "Re-run PLAYCRAFT (playcraft_pass) on the current build to refresh the gameplay score.",
+  "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability.",
+  "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+  "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+  "Report again after the changes land (Run GITCRAFT report) to measure progress against this report."
+ ],
+ "changes": {
+  "first": false,
+  "against": "scottyfncodes--rockslide/20261108T194244Z",
+  "at": "2026-11-08T19:42:44+00:00",
+  "health": {
+   "from": 68.0,
+   "to": 68.5,
+   "delta": 0.5
+  },
+  "departments": [
+   {
+    "id": "production",
+    "change": "Unavailable \u2192 Refreshed now",
+    "same_run": true
+   },
+   {
+    "id": "playcraft",
+    "change": "Current \u2192 Stale",
+    "same_run": true
+   },
+   {
+    "id": "designcraft",
+    "change": "Current \u2192 Refreshed now; score 57 \u2192 58 (new measurement)",
+    "same_run": false
+   },
+   {
+    "id": "assetcraft",
+    "change": "Unavailable \u2192 No data",
+    "same_run": true
+   }
+  ],
+  "new_actions": [
+   "Mission design: 2 briefings run past 45 words",
+   "Mission design: 2 missions share the same structure: mount \u2192 travel \u2192 scan \u2192 travel",
+   "No data: AssetCraft \u2014 asset management",
+   "Refresh: PLAYCRAFT is stale",
+   "Story, characters and world: 7 of 10 missions mention no character"
+  ],
+  "resolved_actions": [
+   "Mission design: 'interact' is 37% of all objectives",
+   "Mission design: Only 0 of 35 objectives offer more than one way to complete them",
+   "Story, characters and world: 5 of 8 missions mention no character"
+  ],
+  "new_findings": [
+   "designcraft:missioncraft.long_briefs",
+   "designcraft:missioncraft.skeleton_repetition.survey_bowl-recon"
+  ],
+  "resolved_findings": [
+   "designcraft:missioncraft.objective_repetition",
+   "designcraft:missioncraft.skeleton_repetition.tree_drift"
+  ],
+  "note": "A finding disappears only when its department re-measured and no longer reports it, or the department's data is no longer available (see each department's status)."
+ },
+ "paths": {
+  "dir": "/home/user/GITCRAFT/history/reports/scottyfncodes--rockslide/20261108T194244Z-2",
+  "json": "/home/user/GITCRAFT/history/reports/scottyfncodes--rockslide/20261108T194244Z-2/report.json",
+  "markdown": "/home/user/GITCRAFT/history/reports/scottyfncodes--rockslide/20261108T194244Z-2/report.md",
+  "html": "/home/user/GITCRAFT/history/reports/scottyfncodes--rockslide/20261108T194244Z-2/report.html"
+ }
+}
