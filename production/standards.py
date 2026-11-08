@@ -117,7 +117,8 @@ def attribution(project, cfg=None):
         checks.append({"name": "the byline is not hidden", "ok": not hidden, "detail": hidden.group(0) if hidden else None})
         hrefs = re.findall(r"href\s*=\s*[\"'{]+([^\"'}]+)", f["raw"])
         if cfg.get("url") and cfg.get("url_verified"):
-            checks.append({"name": f"the byline links to the verified HaveAnApp site ({cfg['url']})", "ok": cfg["url"] in hrefs or any("COMPANY_URL" in h for h in hrefs), "detail": hrefs or "no link"})
+            okl = any(h.strip().rstrip("/") == cfg["url"].rstrip("/") or "COMPANY_URL" in h for h in hrefs)
+            checks.append({"name": f"the byline links to the official HaveAnApp site ({cfg['url']})", "ok": okl, "detail": hrefs or "no link"})
         else:
             checks.append({"name": "the byline links nowhere unverified (no official HaveAnApp URL is verified yet)", "ok": not [h for h in hrefs if "haveanapp" in h.lower()],
                            "detail": hrefs or None})

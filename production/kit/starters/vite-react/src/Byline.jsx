@@ -5,7 +5,7 @@
  */
 export const COMPANY_NAME = 'HaveAnApp';
 /** Set only to the verified official HaveAnApp URL (production/kit/haveanapp/attribution.json). */
-export const COMPANY_URL = null;
+export const COMPANY_URL = 'https://haveanapp.com';
 
 export function Byline({ appName }) {
   const by = COMPANY_URL

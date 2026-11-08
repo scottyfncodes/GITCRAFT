@@ -65,22 +65,21 @@ The reference is HangarBook (read-only), which credits its maker as "HangarBook 
 The GITCRAFT standard (`production/kit/haveanapp/`):
 
 - **`attribution.json`**: the company name, the byline text, the placements, the rules and the URL setting.
-- **`byline.html` / `byline-linked.html`**: the plain markup. It works in any framework.
+- **`byline.html`**: the plain markup, linked to https://haveanapp.com. It works in any framework.
 - **`byline.css`**: small, medium weight and muted. It inherits the app's own text colour, so it follows light and dark themes without a palette of its own. It respects safe areas and keeps a 24 px touch target when linked.
 - **`Byline.tsx`**: the React version.
 
 **Placement:** in a footer, an About or Settings screen, under the app's name on a launch or title screen, or on a game's title or pause screen.
 The app's name stays the hero; HaveAnApp is a quiet maker's signature, never an advertisement, and never inside the app icon.
 
-**Link:** no official HaveAnApp website could be verified (HangarBook doesn't link one, and no address could be confirmed),
-so `url` is `null` and generated apps show the credit as text. When the official address is confirmed, set `url` and
-`url_verified: true` in `attribution.json`. Every later production then links it, and `qa.attribution` checks the link.
-Until then, `qa.attribution` fails any byline that links to an unverified "haveanapp" address.
+**Link:** the byline links to the official site, **https://haveanapp.com** (confirmed by its owner; `attribution.json`).
+HaveAnAppHQ is used only for Instagram posting and is never the byline's link. Every starter and every generated project
+links it, and `qa.attribution` checks the link (a missing link, or any other address, fails).
 
 **`qa.attribution`** checks that:
 - the app's visible markup (HTML, JSX/TSX, Vue, Svelte, Astro; not `<meta>`, `<title>` or comments) has an element marked `data-haveanapp` that reads "by HaveAnApp";
 - that element is not hidden;
-- it links only to the verified URL.
+- it links to https://haveanapp.com.
 
 ## Engineering standards (proportionate)
 

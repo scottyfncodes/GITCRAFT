@@ -191,7 +191,7 @@ man = dict(dr["snippet"]["manifest"], description="Test App by HaveAnApp")
 json.dump(man, open(os.path.join(site, "manifest.webmanifest"), "w"))
 open(os.path.join(site, "index.html"), "w").write(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>Test App</title>{dr['snippet']['head']}<meta name="author" content="HaveAnApp"></head><body><main>Hi</main>
-<footer><p class="haveanapp-byline" data-haveanapp>Test App <span>by HaveAnApp</span></p></footer>
+<footer><p class="haveanapp-byline" data-haveanapp>Test App <a href="https://haveanapp.com">by HaveAnApp</a></p></footer>
 <script>addEventListener('error', e => document.body.dataset.err = 1)</script></body></html>""")
 vr = icons.verify(site)
 check("verify: the wired icon set passes (favicon, Apple 180 opaque, manifest 192/512, maskable)", vr["status"] == "ok", [c for c in vr["checks"] if not c["ok"]])
@@ -205,7 +205,12 @@ check("verify: a framework default favicon fails", gen["status"] == "failed" and
 # ---------------------------------------------------------------- attribution and the standards
 ar = standards.attribution(site)
 check("attribution: the visible, marked byline passes", ar["status"] == "ok", ar["checks"])
-check("attribution: no URL is invented while none is verified", standards.attribution_config()["url"] is None)
+check("attribution: the official site is https://haveanapp.com (owner-confirmed)", standards.attribution_config()["url"] == "https://haveanapp.com"
+      and standards.attribution_config()["url_verified"])
+ig = os.path.join(ws, "ig"); os.makedirs(ig); open(os.path.join(ig, "index.html"), "w").write('<footer><p data-haveanapp>by <a href="https://www.instagram.com/haveanapphq">HaveAnApp</a></p></footer>')
+check("attribution: a byline linked to HaveAnAppHQ (Instagram) instead of the site fails", standards.attribution(ig)["status"] == "failed")
+nl = os.path.join(ws, "nl"); os.makedirs(nl); open(os.path.join(nl, "index.html"), "w").write('<footer><p data-haveanapp>by HaveAnApp</p></footer>')
+check("attribution: an unlinked byline fails now that the site is confirmed", standards.attribution(nl)["status"] == "failed")
 open(os.path.join(existing, "about.html"), "w").write("<html><head><meta name=author content=HaveAnApp><title>by HaveAnApp</title></head><body>About</body></html>")
 check("attribution: metadata alone is not attribution", standards.attribution(existing)["status"] == "failed")
 hid = os.path.join(ws, "hid"); os.makedirs(hid); open(os.path.join(hid, "index.html"), "w").write('<footer><p data-haveanapp hidden>by HaveAnApp</p></footer>')
@@ -213,7 +218,7 @@ check("attribution: a hidden byline fails", standards.attribution(hid)["status"]
 lk = os.path.join(ws, "lk"); os.makedirs(lk); open(os.path.join(lk, "index.html"), "w").write('<footer><a data-haveanapp href="https://haveanapp.example">by HaveAnApp</a></footer>')
 check("attribution: a link to an unverified HaveAnApp URL fails", standards.attribution(lk)["status"] == "failed")
 rx = os.path.join(ws, "rx"); os.makedirs(os.path.join(rx, "src"))
-open(os.path.join(rx, "src", "Footer.tsx"), "w").write('export const F = () => <p className="haveanapp-byline" data-haveanapp="">{name} <span>by HaveAnApp</span></p>;')
+open(os.path.join(rx, "src", "Footer.tsx"), "w").write('export const F = () => <p className="haveanapp-byline" data-haveanapp="">{name} <a href={COMPANY_URL}>by HaveAnApp</a></p>;')
 check("attribution: works in React components", standards.attribution(rx)["status"] == "ok")
 st = standards.check(site, "personal")
 check("standards: a small static app passes the personal standard (server checks n/a)", st["status"] == "ok" and any(c["status"] == "n/a" for c in st["checks"]), [c for c in st["checks"] if not c["ok"]])
@@ -293,7 +298,7 @@ if executors.studio_python():
           and "fix.qa.attribution.r1" in prx["tasks"], {k: (v["state"], v.get("error") or v.get("reason")) for k, v in prx["tasks"].items() if v["state"] != "passed"})
     check("qa.icons: the approved, wired icon set passes", engine.eff(prx, "qa.icons")["state"] == "passed", engine.eff(prx, "qa.icons").get("error"))
     check("qa.standards: the personal standard passes", engine.eff(prx, "qa.standards")["state"] == "passed", engine.eff(prx, "qa.standards").get("error"))
-    open(os.path.join(proj, "index.html"), "w").write(page('<footer><p class="haveanapp-byline" data-haveanapp>Tidepool <span>by HaveAnApp</span></p></footer>'))
+    open(os.path.join(proj, "index.html"), "w").write(page('<footer><p class="haveanapp-byline" data-haveanapp>Tidepool <a href="https://haveanapp.com">by HaveAnApp</a></p></footer>'))
     st = engine.submit(pr["id"], "fix.qa.attribution.r1", [os.path.join(proj, "index.html")], "added the byline", run_after=True)
     prx = store.load(pr["id"])
     acc = {a["id"]: a["status"] for a in report.acceptance(prx)}

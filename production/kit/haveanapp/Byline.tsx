@@ -4,8 +4,8 @@
  * or the app's own design system, keeping it small, muted and theme-aware.
  */
 export const COMPANY_NAME = 'HaveAnApp';
-/** Set only to the verified official HaveAnApp URL (production/kit/haveanapp/attribution.json). */
-export const COMPANY_URL: string | null = null;
+/** The official HaveAnApp website (production/kit/haveanapp/attribution.json). Never HaveAnAppHQ (Instagram only). */
+export const COMPANY_URL: string | null = 'https://haveanapp.com';
 
 export function Byline({ appName }: { appName?: string }) {
   const by = COMPANY_URL

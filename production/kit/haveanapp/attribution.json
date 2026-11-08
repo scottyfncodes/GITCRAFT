@@ -1,11 +1,16 @@
 {
  "company": "HaveAnApp",
  "byline": "by HaveAnApp",
- "url": null,
- "url_verified": false,
- "url_note": "No official HaveAnApp website could be verified (HangarBook, the reference, credits HaveAnApp without a link). Set url to the official address and url_verified to true once it is confirmed; every later production then links the byline to it and qa.attribution checks the link.",
- "reference": "HangarBook (scottyfncodes/HANGARBOOK): src/components/Brand.tsx Byline, src/styles/global.css .byline, Settings → About card, manifest description",
- "placements": ["footer of the main screen", "About / Settings screen", "launch or sign-in screen beneath the app name", "a game's title or pause screen"],
+ "url": "https://haveanapp.com",
+ "url_verified": true,
+ "url_note": "The official HaveAnApp website, confirmed by its owner (November 2026). HaveAnAppHQ is used only for Instagram posting: it is never the byline's link.",
+ "reference": "HangarBook (scottyfncodes/HANGARBOOK): src/components/Brand.tsx Byline, src/styles/global.css .byline, Settings \u2192 About card, manifest description",
+ "placements": [
+  "footer of the main screen",
+  "About / Settings screen",
+  "launch or sign-in screen beneath the app name",
+  "a game's title or pause screen"
+ ],
  "rules": [
   "The app's own name is the hero; the byline is the maker's small signature beneath or beside it.",
   "Visible text, not only metadata: a person can find it without hunting (one tap or scroll from the first screen).",
