@@ -103,6 +103,9 @@ jobs:
       - name: Runtime updates never break running servers (versioned runtime, Landlock)
         run: python3 tests/test_runtime_update.py
 
+      - name: PLAYCRAFT is told only what the person stated (assumed genre / platform are detected)
+        run: python3 tests/test_playcraft_hints.py
+
       - name: Production Director master-prompt acceptance (every department for real)
         run: python3 tests/acceptance_production.py
 

@@ -69,12 +69,15 @@ def parse(prompt, project=None, overrides=None):
     viewports = ["phone", "desktop", "tablet"] if mobile else (["desktop"] if desktop_only else ["desktop", "phone"])
     native = sorted({p for p, words in RULES["native_words"].items() if _w(t, words)})
     native = ["android", "ios"] if "both" in native else native
-    platform = {"mobile_first": mobile or bool(native), "viewports": viewports, "engine": engine, "web": True, "native": native}
+    # mobile_stated: what the person said (True mobile, False desktop only, None nothing): evaluators detect the rest
+    platform = {"mobile_first": mobile or bool(native), "viewports": viewports, "engine": engine, "web": True, "native": native,
+                "mobile_stated": True if (mobile or native) else (False if desktop_only else None)}
     if native: because["native"] = native
 
     # ---- genres (PLAYCRAFT profiles) for games
     genres = [g for g, words in RULES["genres"].items() if _w(t, words)] if deliverable == "game" else []
-    if deliverable == "game" and not genres: genres = ["arcade"]; assumptions.append("genre not named: arcade")
+    genres_assumed = deliverable == "game" and not genres
+    if genres_assumed: genres = ["arcade"]; assumptions.append("genre not named: arcade")
 
     # ---- features
     feats = {k: bool(_w(t, v)) for k, v in RULES["features"].items()}
@@ -154,7 +157,7 @@ def parse(prompt, project=None, overrides=None):
     if not pw: assumptions.append(f"nobody named who uses it or what it holds: the {prof} engineering standard")
     web = deliverable in ("game", "app", "site")
     spec = {"title": title, "prompt": prompt, "deliverable": deliverable, "dimension": dimension, "platform": platform,
-            "genres": genres, "features": feats, "assets": assets, "quality": q, "project": proj, "authorisations": auth,
+            "genres": genres, "genres_assumed": genres_assumed, "features": feats, "assets": assets, "quality": q, "project": proj, "authorisations": auth,
             "engineering": {"profile": prof, "because": pw}, "icon": {"mode": None, "required": web and not existing},
             "attribution": {"required": web and not existing}, "mode": _mode(prompt, project, existing, overrides),
             "deploy": {"target": None}, "analytics": {"provider": None},
