@@ -76,6 +76,12 @@ jobs:
       - name: Production Director (unit + a real production through the sandboxed server)
         run: python3 tests/test_production.py
 
+      - name: Lifecycle, App Icon Studio, HaveAnApp attribution, engineering standards
+        run: python3 tests/test_lifecycle.py
+
+      - name: Hardening (guard + control room regressions from docs/tech-debt.md)
+        run: python3 tests/test_hardening.py
+
       - name: Production Director master-prompt acceptance (every department for real)
         run: python3 tests/acceptance_production.py
 
