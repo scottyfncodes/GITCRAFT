@@ -11,31 +11,48 @@
 
 Resuming is the same call as running: a task interrupted mid-run starts again, a passed task is reused only
 while its outputs still exist with the hashes it recorded, and QA evidence is re-measured when the project
-changed after it passed (checked by a fingerprint of the project's files before release)."""
+changed after it passed (checked by a fingerprint of the project's files before release).
+
+Evaluation never feeds itself (production/artifacts.py): the store is kept outside the evaluated project, the
+fingerprint skips every evaluation artifact, every browser check measures one target chosen by the
+source-vs-build policy, re-measurement is bounded (STALE_ROUNDS), and every run ends with a verdict:
+READY, NOT READY, or INCOMPLETE with the reasons the evaluation could not finish."""
 import concurrent.futures as cf, copy, hashlib, json, os, threading, time, traceback
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
-from . import inside_roots, roots, store_root
+from . import inside_roots, roots, store_root, store_root_for
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
-from . import lifecycle, recon, icons, maturity
+from . import lifecycle, recon, icons, maturity, artifacts
 
 RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1}
 # "exclusive": a timing measurement (frame rate) is only valid with the machine to itself, so such a task starts
 # only when nothing else runs, and nothing else starts while it runs
-FINGERPRINT_SKIP = {".git", "node_modules", "__pycache__", ".cache"}
+FINGERPRINT_SKIP = artifacts.VCS_AND_CACHE   # plus every evaluation artifact folder (artifacts.is_artifact_dir)
+# without an agent submission in between, the project should not change while it is evaluated: after this many
+# automatic re-measurements the evaluation stops re-measuring and ends INCOMPLETE, naming what kept changing
+STALE_ROUNDS = 2
 
 
 # ---------------------------------------------------------------- helpers
-def fingerprint(project):
-    """SHA-256 over every file in the project (path + content hash): what a QA measurement was taken on."""
-    if not project or not os.path.isdir(project): return None
-    h = hashlib.sha256()
-    for d, dirs, files in sorted(os.walk(project)):
-        dirs[:] = sorted(x for x in dirs if x not in FINGERPRINT_SKIP)
-        for f in sorted(files):
-            p = os.path.join(d, f)
-            try: h.update(os.path.relpath(p, project).encode() + b"\0" + builtins.sha256(p).encode() + b"\n")
-            except OSError: pass
-    return h.hexdigest()
+def fingerprint(project, exclude=()):
+    """SHA-256 over every source file in the project (path + content hash): what a QA measurement was taken on.
+    Evaluation artifacts (gitcraft-out/, marked folders, the production store) are not source and never count."""
+    return artifacts.digest(artifacts.snapshot(project, exclude))
+
+
+def _fp(prod):
+    """The project's fingerprint now; its file list is kept in the store so a later change can be named."""
+    snap = artifacts.snapshot(_project(prod), [prod.get("store")])
+    fp = artifacts.digest(snap)
+    if fp:
+        p = os.path.join(prod["store"], "snapshots", fp + ".json")
+        if not os.path.exists(p): store.write_json(p, snap)
+    return fp
+
+
+def _changed_since(prod, fp):
+    try: was = json.load(open(os.path.join(prod["store"], "snapshots", fp + ".json")))
+    except (OSError, ValueError, TypeError): return []
+    return artifacts.diff(was, artifacts.snapshot(_project(prod), [prod.get("store")]))
 
 
 def eff(prod, tid):
@@ -76,7 +93,19 @@ def _hex_rgb(h):
 class HandoffError(Exception): pass
 
 
+class TargetMissing(Exception): pass
+
+
+def eval_target(prod):
+    """The one folder every browser check measures (artifacts.target_policy), or TargetMissing with the reason."""
+    pol = prod.get("evaluation") or artifacts.target_policy(prod["spec"], _project(prod))
+    d, why = artifacts.resolve_target(_project(prod), pol)
+    if not d: raise TargetMissing(why)
+    return d
+
+
 def resolve(prod, v):
+    if v == "$target": return eval_target(prod)
     if isinstance(v, str) and v.startswith("$project"): return _project(prod) + v[len("$project"):]
     if isinstance(v, dict) and "$from" in v:
         src = eff(prod, v["$from"])
@@ -138,6 +167,9 @@ def idea(text, project=None, overrides=None, store_dir=None, source=None):
     prod = {"id": store.new_id(spec["title"]), "spec": spec, "brief": lifecycle.brief(text, p, source), "overrides": overrides or {},
             "tasks": {}, "order": [], "decisions": [], "parallel_groups": [], "problems": [], "status": "idea"}
     lifecycle.move(prod, "idea")
+    why = None
+    if not store_dir: store_dir, why = store_root_for(p)
+    if why: prod["decisions"].append(f"evaluation output isolated from the project: {why}")
     store.create(prod, store_dir)
     return prod
 
@@ -184,7 +216,9 @@ def _discover_and_plan(prod):
         bp = os.path.join(prod["store"], "baseline.json")
         if not os.path.exists(bp): store.write_json(bp, maturity.baseline(p))
         pl["tasks"]["qa.preserve"]["params"]["baseline"] = bp
-    prod.update({"spec": spec, "discovery": disc, "icon_state": icon_state, "tasks": pl["tasks"], "order": pl["order"],
+    pol = artifacts.target_policy(spec, p)
+    pl["decisions"].append(f"evaluation target: {'the built app ' + pol['dir'] + '/' if pol['chosen'] == 'build' else 'the project source'} ({pol['why']})")
+    prod.update({"evaluation": pol, "spec": spec, "discovery": disc, "icon_state": icon_state, "tasks": pl["tasks"], "order": pl["order"],
                  "decisions": pl["decisions"], "parallel_groups": pl["parallel_groups"], "problems": problems,
                  "readiness": planner.readiness(pl, disc), "unmeasured_criteria": unmeasured,
                  "warnings": [f"acceptance criterion {c} is not measured by any planned task: it will report NOT PLANNED and the "
@@ -435,16 +469,32 @@ def _ready_tasks(prod):
 
 
 def _stale_qa(prod, t):
-    """Before a release task starts: QA evidence measured on an older project state is re-measured."""
+    """Before a release task starts: QA evidence measured on an older project state is re-measured, a bounded
+    number of times. Only project source counts (artifacts are excluded), so evaluation output cannot cause this;
+    if the source still keeps changing with no agent submission in between, re-measuring stops and the release
+    reports the evidence as stale (INCOMPLETE) with the files that changed."""
     if t["stage"] != "release": return False
-    fp = fingerprint(_project(prod)); stale = False
-    for tid in prod["order"]:
-        q = eff(prod, tid)
-        if q["kind"] != "agent" and q["stage"] in ("qa", "release") and q["state"] == PASSED and q.get("measured_fingerprint") and q["measured_fingerprint"] != fp and q["id"] != t["id"]:
-            q["attempts"].append({"n": len(q["attempts"]) + 1, "status": "stale", "note": "the project changed after this passed: re-measuring", "at": store.now()})
-            _set(prod, q, PENDING, reason="stale evidence: the project changed after this check passed", outputs=[], result=None, gate_results=None)
-            stale = True
-    return stale
+    fp = _fp(prod)
+    stale = [q for q in (eff(prod, tid) for tid in prod["order"]) if q["kind"] != "agent" and q["stage"] in ("qa", "release") and q["state"] == PASSED
+             and q.get("measured_fingerprint") and q["measured_fingerprint"] != fp and q["id"] != t["id"]]
+    if not stale: return False
+    changed = _changed_since(prod, stale[0]["measured_fingerprint"])
+    n = prod.get("stale_rounds", 0) + 1
+    if n > STALE_ROUNDS:
+        if not prod.get("unstable"):
+            prod["unstable"] = {"rounds": n - 1, "changed": changed[:20], "at": store.now(),
+                                "reason": f"the project kept changing while it was evaluated ({n - 1} re-measurements with no submission in between): "
+                                          + (", ".join(changed[:6]) or "unknown files") + ". Re-measuring stopped; the evidence is stale."}
+            store.event(prod, "evaluation_unstable", rounds=n - 1, changed=changed[:20])
+        return False
+    prod["stale_rounds"] = n
+    for q in stale:
+        q["attempts"].append({"n": len(q["attempts"]) + 1, "status": "stale", "note": "the project changed after this passed: re-measuring", "at": store.now(),
+                              "changed": changed[:10]})
+        _set(prod, q, PENDING, reason="stale evidence: the project changed after this check passed (" + (", ".join(changed[:4]) or "?") + ")",
+             outputs=[], result=None, gate_results=None)
+    store.event(prod, "stale_evidence", round=n, tasks=[q["id"] for q in stale], changed=changed[:20])
+    return True
 
 
 def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
@@ -476,6 +526,7 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
                     store.save(prod)
                 if not running:
                     if not _ready_tasks(prod): break
+                    if max_seconds and time.time() - t0 > max_seconds: break   # the time budget ends a run even while tasks keep becoming ready
                     continue
                 done, _ = cf.wait(list(running.values()), return_when=cf.FIRST_COMPLETED, timeout=5)
                 for fut in done:
@@ -490,8 +541,8 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
                         _finish(prod, t, res); store.save(prod)
                         if on_event: on_event(t)
                 if max_seconds and time.time() - t0 > max_seconds and not running: break
-        prod["status"] = overall(prod); store.save(prod)
-        store.event(prod, "run_stopped", status=prod["status"])
+        prod["status"] = overall(prod); prod["verdict"] = _report.final(prod); store.save(prod)
+        store.event(prod, "run_stopped", status=prod["status"], verdict=prod["verdict"]["verdict"], reasons=prod["verdict"]["reasons"] or None)
         _report.write(prod)
         return status(prod)
 
@@ -540,10 +591,13 @@ def _prepare(prod, t):
     out_dir = _task_dir(prod, t["id"])
     try:
         params = resolve(prod, copy.deepcopy(t["params"]))
+    except TargetMissing as e:   # cannot be evaluated here: an explicit, reasoned blocked state (never the source instead)
+        return None, {"status": "blocked", "reason": str(e), "install": [c for c in [(prod.get("evaluation") or {}).get("build_command")] if c]}
     except (HandoffError, OSError, ValueError) as e:
         return None, {"status": "failed", "failure": "handoff", "error": f"hand-off: {e}"}
     _handoff(prod, t, params)
-    if t["stage"] in ("qa", "release"): t["measured_fingerprint"] = fingerprint(_project(prod))
+    if "$target" in json.dumps(t["params"]): t["evaluated_target"] = eval_target(prod)
+    if t["stage"] in ("qa", "release"): t["measured_fingerprint"] = _fp(prod)
     kind, dept, action, timeout = t["kind"], t["department"], t["action"], t["timeout"]
     if kind == "studio":
         req = dict({k: v for k, v in params.items() if v is not None}, out_dir=out_dir, tags=[f"production:{prod['id']}"])
@@ -608,6 +662,7 @@ def _integrated(prod):
 def _remediate(prod, t, res, gr):
     """A failed QA gate becomes a fix work order and a re-verification of the modified project."""
     if t["stage"] not in ("qa", "release") or t["kind"] == "builtin" and t["action"] == "release": return
+    if (prod["spec"].get("mode") or {}).get("workflow") == "review": return   # review measures; it never orders changes
     root = t.get("chain") or t["id"]; rnd = (t.get("round") or 0) + 1
     maxr = prod["spec"]["quality"].get("max_rounds", 2)
     if rnd > maxr:
@@ -654,7 +709,7 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
                 checks.append({"name": f"{os.path.relpath(p, proj) if proj and p.startswith(proj) else f} opens as {v.get('format')}", "ok": v.get("ok", False), "detail": v.get("error")})
                 if v.get("ok"): outs.append({"path": p, "role": "submitted", "format": v.get("format"), "ok": True})
         if t.get("fix_for"):
-            now_fp = fingerprint(proj)
+            now_fp = _fp(prod)
             checks.append({"name": "the project changed since the failed check measured it", "ok": now_fp != t.get("failed_fingerprint"),
                            "detail": None if now_fp != t.get("failed_fingerprint") else "no file in the project differs: nothing was fixed"})
         verified = None
@@ -671,7 +726,7 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
         t["gate_results"] = [{"condition": c["name"], "ok": c["ok"], "detail": c.get("detail")} for c in checks]
         att.update(status=t["result"]["status"], outcome="ok" if t["result"]["status"] == "ok" else "quality")
         if all(c["ok"] for c in checks):
-            _set(prod, t, PASSED)
+            _set(prod, t, PASSED); prod["stale_rounds"] = 0; prod.pop("unstable", None)   # the agent changed the project: re-measuring is expected
         else:
             # an agent submission that does not validate stays open: the work order is still owed
             _set(prod, t, AWAITING_AGENT, reason="submission rejected: " + "; ".join(c["name"] + (f" ({c['detail']})" if c.get("detail") else "") for c in checks if not c["ok"])[:1200])
@@ -721,11 +776,15 @@ def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
 # ---------------------------------------------------------------- release, status
 def _release(prod, t, out_dir):
     acc = _report.acceptance(prod, exclude={"release_ready", "deployment"})
-    fp = fingerprint(_project(prod))
+    fp = _fp(prod)
     stale = [q["id"] for q in (eff(prod, i) for i in prod["order"]) if q["stage"] in ("qa", "release") and q["state"] == PASSED
              and q.get("measured_fingerprint") not in (None, fp)]
     checks = [{"name": f"criterion {a['id']}: {a['text']}", "ok": a["status"] == "passed", "detail": a.get("why")} for a in acc]
-    checks.append({"name": "every QA result was measured on the build being released", "ok": not stale, "detail": stale or None})
+    checks.append({"name": "every QA result was measured on the build being released", "ok": not stale,
+                   "detail": (stale + ([prod["unstable"]["reason"]] if prod.get("unstable") else [])) if stale else None})
+    tg = sorted({q["evaluated_target"] for q in (eff(prod, i) for i in prod["order"]) if q.get("evaluated_target") and q["state"] == PASSED})
+    checks.append({"name": "every browser check measured the same target (" + ((prod.get("evaluation") or {}).get("why") or "evaluation policy") + ")",
+                   "ok": len(tg) <= 1, "detail": tg if len(tg) > 1 else None})
     rel = os.path.join(out_dir, "RELEASE.md")
     prod["release"] = {"fingerprint": fp, "at": store.now(), "criteria": acc}
     with open(rel, "w") as f: f.write(_report.markdown(prod, release=True))
@@ -774,6 +833,8 @@ def status(prod_or_id, store_dir=None):
     lv = lifecycle.summary(prod)
     for d in ((prod.get("lifecycle") or {}).get("revision") and ["revision"]) or []: nxt.insert(0, "person: approve or decline the pending revision (production_decide)")
     if lv["stage"] == "decisions": nxt.insert(0, "person: review the Decision Room and approve the blueprint (production_decide)")
+    v = _report.final(prod)
     return {"production": prod["id"], "title": prod["spec"]["title"], "status": prod.get("status"), "stage": lv["stage"], "summary": lv["summary"],
+            "verdict": v["verdict"], "verdict_reasons": v["reasons"] or None, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
             "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
             "report": os.path.join(prod["store"], "REPORT.md")}

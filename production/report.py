@@ -24,7 +24,13 @@ def acceptance(prod, exclude=()):
             st = "passed" if others and all(o["status"] == "passed" for o in others) else \
                  "not_planned" if any(o["status"] == "not_planned" for o in others) and not any(o["status"] in ("failed", "blocked") for o in others) else \
                  "pending" if any(o["status"] == "pending" for o in others) else "failed"
-            out.append(dict(c, status=st, why=None if st == "passed" else [o["id"] for o in others if o["status"] != "passed"], evidence=[])); continue
+            why = None if st == "passed" else [o["id"] for o in others if o["status"] != "passed"]
+            rel = [t for t in ts if t["state"] != "passed"]
+            if st == "passed" and rel:   # the release gate itself must pass (e.g. evidence measured on the build released)
+                r = rel[0]
+                st = "blocked" if prod.get("unstable") or r["state"] == "blocked" else "pending" if r["state"] not in ("failed",) else "failed"
+                why = [f"{r['id']}: {r['state']}" + (f" — {r.get('error') or r.get('reason')}" if r.get("error") or r.get("reason") else "")]
+            out.append(dict(c, status=st, why=why, evidence=[])); continue
         if not ts:   # never dropped, never assumed: an unmeasured requirement blocks READY
             out.append(dict(c, status="not_planned", why=["NOT PLANNED: no task in this production measures this criterion"], evidence=[])); continue
         states = [t["state"] for t in ts]
@@ -48,14 +54,40 @@ def acceptance(prod, exclude=()):
     return out
 
 
+INCOMPLETE_STATES = ("blocked", "pending", "needs_approval")
+
+
 def verdict(acc):
+    """READY (every criterion measured and passed), NOT READY (a criterion was measured and failed, or is NOT PLANNED),
+    or INCOMPLETE (nothing failed, but a check could not run or has not finished: blocked, pending, awaiting someone)."""
     s = {a["id"]: a["status"] for a in acc}
-    core = {k: v for k, v in s.items() if k != "deployment"}
+    core = {k: v for k, v in s.items() if k not in ("deployment", "release_ready")}
     if not acc or any(v == "not_planned" for v in s.values()): return "NOT READY"
-    if all(v == "passed" for v in core.values()):
+    if all(v == "passed" for v in core.values()) and s.get("release_ready") in (None, "passed"):
         if s.get("deployment") in (None, "passed"): return "READY"
         return "READY — deployment " + s["deployment"].replace("_", " ")
-    return "NOT READY"
+    if any(v == "failed" for v in core.values()): return "NOT READY"
+    if s.get("release_ready") == "failed" and all(v == "passed" for v in core.values()): return "NOT READY"   # the release gate itself failed
+    return "INCOMPLETE"
+
+
+def final(prod):
+    """{verdict, reasons}: the verdict every run ends with, and in plain words why it is not READY."""
+    acc = acceptance(prod)
+    v = verdict(acc)
+    reasons = []
+    if prod.get("unstable"): reasons.append(prod["unstable"]["reason"])
+    for a in acc:
+        if a["status"] == "passed" or a["id"] == "release_ready" and any(x["status"] != "passed" for x in acc if x["id"] not in ("release_ready", "deployment")): continue
+        if a["id"] == "deployment" and v.startswith("READY"): continue
+        label = {"failed": "failed", "blocked": "could not run", "pending": "did not finish", "needs_approval": "waiting for a person",
+                 "not_planned": "not planned", "skipped": "skipped"}.get(a["status"], a["status"])
+        reasons.append(f"{a['id']} {label}: " + "; ".join(map(str, a.get("why") or []))[:400])
+    for t in prod.get("tasks", {}).values():
+        if t["state"] == "awaiting_agent" and not t.get("superseded_by"):
+            reasons.append(f"{t['id']} is waiting for the agent's work order ({t.get('work_order_path')})")
+    if v == "NOT READY" and not reasons: reasons.append("not every acceptance criterion passed")
+    return {"verdict": v, "reasons": reasons}
 
 
 def markdown(prod, release=False):
@@ -63,6 +95,7 @@ def markdown(prod, release=False):
     spec = prod["spec"]
     L = [f"# {'Release' if release else 'Production'} report — {spec['title']}", "",
          f"Production `{prod['id']}` · status **{prod.get('status')}** · verdict **{verdict(acc)}** · updated {store.now()}", "",
+         *([f"Evaluation target: {(prod.get('evaluation') or {}).get('why')}", ""] if prod.get("evaluation") else []),
          f"> {spec['prompt'][:600]}", "",
          f"Deliverable: **{spec['deliverable']}** ({spec['dimension']}, {'mobile-first' if spec['platform']['mobile_first'] else 'desktop + phone'}) · "
          f"project `{spec['project']['path']}` · quality bar **{spec['quality']['level']}**", ""]
@@ -76,6 +109,8 @@ def markdown(prod, release=False):
                      + "; ".join(f"{d['title']}: **{d['answer']}**" for d in bp.get("decisions") or []))
             L.append("")
         if prod.get("recon"): L += [f"Recon ({prod['recon']['depth']}): **{prod['recon']['recommendation'].get('verdict')}** — `{prod['recon'].get('report')}`", ""]
+    fin = final(prod)
+    if fin["reasons"]: L += [f"## Why {fin['verdict']}", ""] + [f"- {r}" for r in fin["reasons"]] + [""]
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]
     for a in acc:
         seen = {}

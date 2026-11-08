@@ -10,7 +10,7 @@
 Writes are atomic (temp file + rename) and one runner holds the production's lock at a time, so an
 interrupted run leaves a readable record that `resume` continues from."""
 import contextlib, datetime, fcntl, json, os, re, tempfile, uuid
-from . import store_root, inside_roots, VERSION
+from . import store_root, store_roots, inside_roots, VERSION, artifacts
 
 
 def now():
@@ -46,9 +46,10 @@ def write_json(p, data):
 
 def create(prod, root=None):
     base = os.path.realpath(root or store_root())
-    if not inside_roots(base):
+    if not inside_roots(base) and not artifacts.inside(base, artifacts.isolated_home()):
         raise PermissionError(f"GITCRAFT policy: the production store {base} is outside the workspace roots")
     d = path(prod["id"], root=base); os.makedirs(os.path.join(d, "tasks"), exist_ok=True); os.makedirs(os.path.join(d, "handoffs"), exist_ok=True)
+    artifacts.mark(base); artifacts.mark(d)   # evaluation output: never counted as a change to any project it sits in
     prod.setdefault("store", d); prod.setdefault("created", now()); prod["updated"] = now(); prod["production_version"] = VERSION
     save(prod); event(prod, "created", title=prod["spec"].get("title"))
     return prod
@@ -59,8 +60,11 @@ def save(prod):
 
 
 def load(pid, root=None):
-    p = pid if os.path.isabs(pid) and pid.endswith(".json") else path(pid, "production.json", root=root)
-    if not os.path.exists(p): raise KeyError(f"no production {pid!r} in {root or store_root()}")
+    if os.path.isabs(pid) and pid.endswith(".json"): p = pid
+    else:   # a production lives in one of the stores (store_root_for keeps it out of the project it evaluates)
+        cands = [path(pid, "production.json", root=r) for r in ([root] if root else store_roots())]
+        p = next((c for c in cands if os.path.exists(c)), cands[0])
+    if not os.path.exists(p): raise KeyError(f"no production {pid!r} in {root or ', '.join(store_roots())}")
     with open(p) as f: return json.load(f)
 
 
@@ -93,10 +97,9 @@ def lock(prod, wait=False):
 
 
 def list_all(root=None):
-    base = os.path.realpath(root or store_root())
-    if not os.path.isdir(base): return []
+    bases = [os.path.realpath(root)] if root else store_roots()
     out = []
-    for d in sorted(os.listdir(base), reverse=True):
+    for base, d in sorted(((b, d) for b in bases if os.path.isdir(b) for d in os.listdir(b)), key=lambda x: x[1], reverse=True):
         p = os.path.join(base, d, "production.json")
         if not os.path.exists(p): continue
         try:
