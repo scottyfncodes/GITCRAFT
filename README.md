@@ -12,14 +12,17 @@ Give Claude Code the whole request, and GITCRAFT does the rest:
 
 The **Production Director** (`production/`, served as studiocraft's `production_*` tools; the `produce` skill) works through the request in order:
 
+0. (Optional) An idea can be saved and researched first. **Recon** is quick or deep and evidence-bound: a Reality Check, Competition Radar, Identity Check, The Zag, and a Build / Pivot / Park recommendation.
 1. It interprets the prompt: the deliverable, platform, features, a quality bar, measurable acceptance criteria, its assumptions, and only the essential questions.
-2. It inspects the project and checks what can really run on this machine.
+2. It inspects the project, read-only, and checks what can really run on this machine. The result is a **Discovery Report**.
 3. It plans every department's work as a dependency graph with parallel waves, structured hand-offs and quality gates.
-4. It runs the graph:
+4. It opens the **Decision Room**: only the material choices (scope, architecture, design and icon direction, engineering standard, cost, deployment), each with a recommendation. Nothing is built until a person approves the blueprint, and a material change later needs approval again.
+5. It runs the graph:
    - Department tasks execute concurrently, with retries and honest `blocked` states.
    - Work only Claude can do (code, wiring the assets in, VectorCraft art) goes out as validated work orders.
    - A failed QA gate (TestCraft, PLAYCRAFT, PIXELCRAFT, asset integrity, licences) becomes a fix work order, followed by a re-verification of the modified build.
-5. It releases only when every criterion is measured on the exact build being released, and never treats a deployment as live without a check against it.
+   - Every web app gets the **App Icon Studio**: concepts → a person's choice → a 1024 master → the PWA, Apple and favicon set, wired in and verified. It also gets the quiet **"by HaveAnApp"** maker's credit and **proportionate engineering checks** ([docs/app-standards.md](docs/app-standards.md)).
+6. It releases only when every criterion is measured on the exact build being released, and never treats a deployment as live without a check against it.
 
 Productions persist and resume. The usage guide is [docs/production.md](docs/production.md) and the audit behind the design is [docs/orchestration-audit.md](docs/orchestration-audit.md). The acceptance run is `tests/acceptance_production.py`.
 

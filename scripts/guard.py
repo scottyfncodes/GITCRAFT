@@ -91,6 +91,31 @@ def result_paths(res, roots, seen):
     return found
 
 
+def check_call(msg, o):
+    """(refusal or None, inner command, tool name, arguments, resolved paths) for one tools/call."""
+    p = msg.get("params")
+    if p is None: p = {}
+    if not isinstance(p, dict): raise ValueError("params must be an object")
+    name, args = p.get("name", ""), p.get("arguments")
+    if args is None: args = {}
+    if not isinstance(name, str): raise ValueError("params.name must be a string")
+    if not isinstance(args, dict): raise ValueError("params.arguments must be an object")
+    if "id" in msg and (not isinstance(msg["id"], (str, int)) or isinstance(msg["id"], bool)): raise ValueError("id must be a string or a number")
+    inner = args.get("id") or args.get("command") or args.get("name") if name in ("command_run", "run_command", "execute", "execute_command", "tool_call") else None
+    if inner is not None and not isinstance(inner, str): raise ValueError("the command id must be a string")
+    if name in o["deny"] or (inner and inner in o["deny"]):
+        return f"GITCRAFT policy: `{inner or name}` is disabled for {o['tool']}.", inner, name, args, []
+    paths = []
+    if o["roots"]:
+        for c in candidate_paths(args):
+            ok, real = inside(c, o["roots"])
+            if not ok:
+                return (f"GITCRAFT policy: {o['tool']} may only read and write inside {', '.join(o['roots'])}; "
+                        f"`{c}` resolves to `{real}`. Copy the file into the workspace or set GITCRAFT_ROOT."), inner, name, args, []
+            paths.append(real)
+    return None, inner, name, args, paths
+
+
 def main():
     o = parse(sys.argv[1:])
     if not o["cmd"]:
@@ -129,38 +154,29 @@ def main():
             emit(line)
         os._exit(proc.wait() or 0)
 
-    threading.Thread(target=from_server, daemon=True).start()
+    reader = threading.Thread(target=from_server, daemon=True); reader.start()
     for line in sys.stdin.buffer:
         try:
             msg = json.loads(line)
         except Exception:
             proc.stdin.write(line); proc.stdin.flush(); continue
         if isinstance(msg, dict) and msg.get("method") == "tools/call":
-            p = msg.get("params") or {}
-            name, args = p.get("name", ""), p.get("arguments") or {}
-            inner = args.get("id") or args.get("command") or args.get("name") if name in ("command_run", "run_command", "execute", "execute_command", "tool_call") else None
-            refusal = None
-            if name in o["deny"] or (inner and inner in o["deny"]):
-                refusal = f"GITCRAFT policy: `{inner or name}` is disabled for {o['tool']}."
-            paths = []
-            if not refusal and o["roots"]:
-                for c in candidate_paths(args):
-                    ok, real = inside(c, o["roots"])
-                    if not ok:
-                        refusal = (f"GITCRAFT policy: {o['tool']} may only read and write inside {', '.join(o['roots'])}; "
-                                   f"`{c}` resolves to `{real}`. Copy the file into the workspace or set GITCRAFT_ROOT.")
-                        break
-                    paths.append(real)
+            try:
+                refusal, inner, name, args, paths = check_call(msg, o)
+            except Exception as e:   # a malformed request is answered, never allowed to stop the guard (and the server with it)
+                refusal, inner, name, args, paths = f"GITCRAFT policy: malformed tools/call refused ({type(e).__name__}: {e})", None, "?", {}, []
             if refusal:
                 audit.write(json.dumps({"t": time.strftime("%Y-%m-%dT%H:%M:%S"), "server": o["tool"], "tool": inner or name,
-                                        "ok": False, "refused": True, "error": refusal, "args": json.dumps(args)[:600]}) + "\n")
+                                        "ok": False, "refused": True, "error": refusal, "args": json.dumps(args, default=str)[:600]}) + "\n")
                 if "id" in msg:
-                    emit({"jsonrpc": "2.0", "id": msg["id"], "result": {"isError": True, "content": [{"type": "text", "text": refusal}]}})
+                    rid = msg["id"] if isinstance(msg["id"], (str, int)) and not isinstance(msg["id"], bool) else None
+                    emit({"jsonrpc": "2.0", "id": rid, "result": {"isError": True, "content": [{"type": "text", "text": refusal}]}})
                 continue
             if "id" in msg: pending[msg["id"]] = (inner or name, args, time.time(), paths)
         proc.stdin.write(line); proc.stdin.flush()
     proc.stdin.close()
     proc.wait()
+    reader.join(timeout=5)   # let the last responses reach the client before exiting
 
 
 if __name__ == "__main__":

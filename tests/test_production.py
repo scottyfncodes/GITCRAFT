@@ -117,6 +117,10 @@ if executors.studio_python():
     ok, p = c.call("production_plan", {"prompt": "Make a sound pack with jump and coin sound effects and calm music", "project": os.path.join(ws, "pack"),
                                        "overrides": {"deliverable": "asset_pack"}}, timeout=300)
     check("server: production_plan inside the sandbox", ok and p["status"] == "planned" and {"audio.sfx.jump", "audio.sfx.coin", "audio.music"} <= {t["id"] for t in p["tasks"]}, p)
+    ok, r = c.call("production_run", {"production": p["production"]}, timeout=120)
+    check("server: nothing is built before the blueprint is approved", ok and "not approved" in str(r.get("refused")) and p["stage"] == "decisions", r)
+    ok, d = c.call("production_decide", {"production": p["production"], "approve": True}, timeout=120)
+    check("server: production_decide approves the blueprint", ok and d["stage"] == "approved", d)
     ok, r = c.call("production_run", {"production": p["production"]}, timeout=600)
     check("server: a real run passes every task and the release gate", ok and r["status"] == "passed" and r["counts"].get("passed") == len(p["tasks"]), r.get("counts"))
     pr = store.load(p["production"])
@@ -133,6 +137,7 @@ if executors.studio_python():
     # regression (PR #42 review): a requirement whose task was removed can never end READY, in a real run
     ok, p = c.call("production_plan", {"prompt": "Make a sound pack with jump and coin sound effects and calm music", "project": os.path.join(ws, "pack2"),
                                        "overrides": {"deliverable": "asset_pack", "skip_tasks": ["audio.music"]}}, timeout=300)
+    c.call("production_decide", {"production": p["production"], "approve": True}, timeout=120)
     check("server: the music criterion stays in the plan as unmeasured", ok and p["unmeasured_criteria"] == ["asset_music"]
           and "asset_music" in {x["id"] for x in p["acceptance"]}, p.get("unmeasured_criteria"))
     ok, r = c.call("production_run", {"production": p["production"]}, timeout=600)

@@ -58,6 +58,16 @@ def load(pid):
 def tasks_in(st, state): return [t["id"] for t in st["tasks"] if t["state"] == state]
 
 
+def approve_blueprint(c, pid):
+    """The person approves the Decision Room's blueprint (the acceptance test stands in for them). Refused plans stay refused."""
+    ok, r = c.call("production_decide", {"production": pid, "approve": True}, timeout=300)
+    return r if ok else {"refused": r}
+
+
+# Part B exercises the engine's negative paths, so its small games leave the icon and attribution standards out (explicitly)
+NO_STD = {"icon": {"required": False}, "attribution": {"required": False}}
+
+
 def git_commit(proj, msg):
     if not os.path.isdir(os.path.join(proj, ".git")): subprocess.run(["git", "init", "-q", "-b", "claude/production", proj], check=True)
     subprocess.run(["git", "-C", proj, "add", "-A"], check=True)
@@ -87,7 +97,8 @@ def part_a(c):
     print("\n== A. one master prompt → a verified release ==", flush=True)
     names = {t["name"] for t in c.tools()}
     check("studiocraft serves the Production Director tools", {"production_plan", "production_run", "production_status", "production_submit",
-                                                              "production_approve", "production_report", "production_contracts"} <= names)
+                                                              "production_approve", "production_report", "production_contracts", "production_idea",
+                                                              "production_recon", "production_promote", "production_decide", "production_revise"} <= names)
     con = call(c, "production_contracts", {})
     check("every department has a contract (accepts, produces, requires, success, failure, storage, provenance)",
           all(all(k in v for k in ("accepts", "requires", "success", "failure", "storage", "provenance")) for v in list(con["studio"].values()) + [con[k] for k in ("forgecraft", "designcraft", "agent", "builtin")])
@@ -127,6 +138,10 @@ def part_a(c):
           < min(pos[t] for t in T if t.startswith("qa.")) <= max(pos[t] for t in T if t.startswith("qa.")) < pos["release.regression"] < pos["release.report"] < pos["release.deploy"])
     check("5 hand-off dependency: palette-tinted effects wait for the identity", "foundation.identity" in T["vfx.dust"]["depends_on"] and T["vfx.dust"]["params"]["color"]["$from"] == "foundation.identity")
     check("6 parallel plan: ≥ 8 tasks in one wave", max(len(g) for g in plan["parallel_groups"]) >= 8, [len(g) for g in plan["parallel_groups"]])
+    check("lifecycle: the plan waits in the Decision Room with a Discovery Report (icon, engineering, deployment decisions)", plan["stage"] == "decisions"
+          and os.path.isfile(plan["discovery_report"]) and {"app_icon", "engineering", "deployment"} <= {d["id"] for d in plan["decision_room"]})
+    check("lifecycle: building before approval is refused", "not approved" in str(call(c, "production_run", {"production": pid}).get("refused")))
+    check("lifecycle: the person approves the blueprint", approve_blueprint(c, pid).get("stage") == "approved")
 
     # ---- run: production departments, then the identity work order
     st = call(c, "production_run", {"production": pid})
@@ -147,9 +162,22 @@ def part_a(c):
     check("B invalid output: a corrupt PNG and a palette missing keys are rejected; the work order stays open",
           not r["submission"]["accepted"] and "foundation.identity" in tasks_in(r, "awaiting_agent"), r["submission"])
     files = agent.identity(order, env)
-    check("agent: VectorCraft drew and exported the logo (SVG) and icon (PNG)", all(os.path.getsize(f) > 1000 for f in files if not f.endswith(".json")) and len(files) == 3)
+    check("agent: VectorCraft drew and exported the logo (SVG)", all(os.path.getsize(f) > 1000 for f in files if not f.endswith(".json")) and len(files) == 2)
     st = call(c, "production_submit", {"production": pid, "task": "foundation.identity", "files": files, "notes": "VectorCraft identity"})
-    check("identity accepted; production continued to the build work order", st["status"] == "awaiting_agent" and "build" in tasks_in(st, "awaiting_agent"), st["counts"])
+    check("identity accepted; the App Icon Studio asks for concepts", st["status"] == "awaiting_agent" and "icon.concepts" in tasks_in(st, "awaiting_agent"), st["counts"])
+    # ---- App Icon Studio: concepts (VectorCraft) → a person chooses → the master → the platform set
+    co = json.load(open(os.path.join(prod["store"], "tasks", "icon.concepts", "work_order.json")))
+    st = call(c, "production_submit", {"production": pid, "task": "icon.concepts", "files": agent.icon_concepts(co, env), "notes": "three VectorCraft concepts"})
+    check("icon: three concepts accepted; the choice waits for a person (never silently selected)", "icon.select" in tasks_in(st, "needs_approval"), st["counts"])
+    sel = load(pid)["tasks"]["icon.select"]
+    check("icon: the comparison sheet shows every concept", os.path.isfile(sel["result"]["sheet"]) and open(sel["result"]["sheet"]).read().count("<article>") == 3)
+    call(c, "production_approve", {"production": pid, "task": "icon.select", "approved": True, "choice": "lantern", "note": "acceptance test: the person picks the lantern"})
+    st = call(c, "production_run", {"production": pid})
+    mo = json.load(open(os.path.join(prod["store"], "tasks", "icon.master", "work_order.json")))
+    st = call(c, "production_submit", {"production": pid, "task": "icon.master", "files": agent.icon_master(mo, env), "notes": "the approved lantern, 1024 master"})
+    prod = load(pid)
+    check("icon: the platform set was derived from the approved master", prod["tasks"]["icon.derivatives"]["state"] == "passed", prod["tasks"]["icon.derivatives"].get("error"))
+    check("identity and icons done; production continued to the build work order", st["status"] == "awaiting_agent" and "build" in tasks_in(st, "awaiting_agent"), st["counts"])
     prod = load(pid)
     h = json.load(open(os.path.join(prod["store"], "handoffs", "vfx.dust.json")))
     check("7 hand-off: FXCraft received the identity's accent colour", h["params"].get("color") == [63, 193, 201], h["params"])
@@ -168,7 +196,7 @@ def part_a(c):
     check("9 real testing: TestCraft found the missing script on load (gate failed)", sm["state"] == "failed" and sm.get("failure") == "quality"
           and "missing-boot.js" in json.dumps(sm.get("gate_results")), sm.get("error"))
     check("9 a failed gate became a fix work order + a re-verification", "fix.qa.smoke.r1" in prod["tasks"] and prod["tasks"]["qa.smoke"].get("superseded_by") == "qa.smoke.r1")
-    ran = {t: prod["tasks"][t]["state"] for t in ("qa.playcraft", "qa.pixelcraft", "qa.perf", "qa.assets", "qa.licences", "qa.designcraft")}
+    ran = {t: prod["tasks"][t]["state"] for t in ("qa.playcraft", "qa.pixelcraft", "qa.perf", "qa.assets", "qa.licences", "qa.designcraft", "qa.icons", "qa.attribution", "qa.standards")}
     check("9 every QA department measured the build", all(s in ("passed", "failed") for s in ran.values()), ran)
     pc = (prod["tasks"]["qa.playcraft"].get("result") or {}).get("summary", {}).get("overall", {}).get("score")
     check("9 PLAYCRAFT score is a measurement in the record", isinstance(pc, (int, float)), pc)
@@ -210,6 +238,7 @@ def part_a(c):
           and "release.deploy" in tasks_in(st, "needs_approval"), st["counts"])
     rep = call(c, "production_report", {"production": pid})
     acc = {x["id"]: x["status"] for x in rep["acceptance"]}
+    check("11 the app icon, HaveAnApp attribution and engineering standard were measured and passed", all(acc.get(k) == "passed" for k in ("app_icon", "attribution", "engineering_standards")), acc)
     check("11 every acceptance criterion passed except deployment (needs approval)", all(v == "passed" for k, v in acc.items() if k != "deployment") and acc["deployment"] == "needs_approval", acc)
     check("11 the report shows measured evidence (scores) and says READY — deployment needs approval", "READY — deployment needs approval" in rep["markdown"] and "PLAYCRAFT overall" in rep["markdown"])
     # the deployment: approved by "the person" here, but never recorded live without evidence
@@ -237,6 +266,7 @@ def part_b(c):
     # B0: a request a department would refuse is caught at planning, before anything runs
     p = call(c, "production_plan", {"prompt": "Make a sound pack of retro arcade sound effects", "project": os.path.join(ws, "pack0"),
                                     "overrides": {"extra_tasks": [{"id": "audio.bad", "department": "audiocraft", "action": "sfx", "params": {"preset": "kazoo"}}]}})
+    check("B a plan with problems cannot be approved", "refused" in approve_blueprint(c, p["production"]))
     check("B plan-time validation: a request the department would refuse is a plan problem", p["status"] == "needs_input" and any("audio.bad" in x for x in p["problems"]), p["problems"])
     r = call(c, "production_run", {"production": p["production"]})
     check("B a plan with problems does not run", "refused" in r)
@@ -249,8 +279,8 @@ def part_b(c):
              {"id": "audio.coin_b", "department": "audiocraft", "action": "sfx", "params": {"preset": "laser", "name": "pickup"}, "ship": {"dest": "$project/assets/audio", "roles": ["sfx"], "formats": ["ogg"]}},
              {"id": "after.gpu", "department": "audiocraft", "action": "sfx", "params": {"preset": "blip"}, "depends_on": ["anim.gpu"]}]
     p = call(c, "production_plan", {"prompt": "Build a small arcade game with sound", "project": os.path.join(ws, "neg"),
-                                    "overrides": {"extra_tasks": extra, "assets": {"sfx": ["click"], "music": None}, "quality": {"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False}}})
-    pid = p["production"]
+                                    "overrides": dict(NO_STD, extra_tasks=extra, assets={"sfx": ["click"], "music": None}, quality={"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False})})
+    pid = p["production"]; approve_blueprint(c, pid)
     check("B1 missing runtime known before production starts", "anim.gpu" in p["blocked_up_front"], p["blocked_up_front"])
     st = call(c, "production_run", {"production": pid})
     prod = load(pid); T = prod["tasks"]
@@ -264,7 +294,8 @@ def part_b(c):
     check("B production status is honest (blocked/failed, not passed)", st["status"] in ("failed", "blocked"), st["status"])
     # the conflict on its own (no failed upstream): two different files → one path
     p = call(c, "production_plan", {"prompt": "Build a small arcade game with sound", "project": os.path.join(ws, "neg2"),
-                                    "overrides": {"extra_tasks": extra[2:4], "assets": {"sfx": [], "music": None}, "quality": {"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False}}})
+                                    "overrides": dict(NO_STD, extra_tasks=extra[2:4], assets={"sfx": [], "music": None}, quality={"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False})})
+    approve_blueprint(c, p["production"])
     call(c, "production_run", {"production": p["production"]})
     T = load(p["production"])["tasks"]
     check("B3 integration conflict: two different files for one path → failed, nothing copied", T["integrate.assets"]["state"] == "failed"
@@ -274,7 +305,8 @@ def part_b(c):
     proj = os.path.join(ws, "neg3"); os.makedirs(os.path.join(proj, "assets", "fx"))
     tiny_png(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"))   # the project's own (different) art
     p = call(c, "production_plan", {"prompt": "Build a small arcade game with sparks effects", "project": proj,
-                                    "overrides": {"assets": {"sfx": [], "music": None, "vfx": ["sparks"]}, "quality": {"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False}}})
+                                    "overrides": dict(NO_STD, assets={"sfx": [], "music": None, "vfx": ["sparks"]}, quality={"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False})})
+    approve_blueprint(c, p["production"])
     st = call(c, "production_run", {"production": p["production"]})
     check("B existing different asset → integrate needs approval, file untouched", "integrate.assets" in tasks_in(st, "needs_approval")
           and open(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"), "rb").read()[:4] == b"\x89PNG", st["counts"])
@@ -282,7 +314,7 @@ def part_b(c):
     # B4: an interrupted run resumes without redoing passed work
     p = call(c, "production_plan", {"prompt": "Make a platformer level pack with five levels and music", "project": os.path.join(ws, "pack5"),
                                     "overrides": {"deliverable": "asset_pack", "assets": {"sfx": []}}})
-    pid = p["production"]
+    pid = p["production"]; approve_blueprint(c, pid)
     runner = subprocess.Popen([sys.executable, "-m", "production", "run", pid, "--workers", "1"], cwd=REPO, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                               start_new_session=True)
     t0 = time.time()
@@ -306,9 +338,9 @@ def part_b(c):
     # B5: a quality gate that stays failed after its remediation rounds
     game = os.path.join(ws, "mini"); shutil.copytree(os.path.join(HERE, "fixtures", "studio", "mini_game"), game); git_commit(game, "mini game")
     p = call(c, "production_plan", {"prompt": "Improve this existing arcade game for release", "project": game,
-                                    "overrides": {"assets": {"sfx": [], "music": None, "vfx": [], "identity": False},
-                                                  "quality": {"playcraft_min": 99, "max_rounds": 1, "pixelcraft": False, "designcraft": False, "perf": False, "require_known_licences": False}}})
-    pid = p["production"]
+                                    "overrides": dict(NO_STD, skip_tasks=["qa.standards"], assets={"sfx": [], "music": None, "vfx": [], "identity": False},
+                                                  quality={"playcraft_min": 99, "max_rounds": 1, "pixelcraft": False, "designcraft": False, "perf": False, "require_known_licences": False})})
+    pid = p["production"]; approve_blueprint(c, pid)
     call(c, "production_run", {"production": pid})
     st = call(c, "production_submit", {"production": pid, "task": "build", "files": [os.path.join(game, "index.html")], "notes": "existing game"}, timeout=1500)
     check("B5 PLAYCRAFT gate failed against a 99 bar → fix work order", "fix.qa.playcraft.r1" in tasks_in(st, "awaiting_agent"), st["counts"])

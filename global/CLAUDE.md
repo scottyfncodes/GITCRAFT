@@ -13,7 +13,11 @@ gameplay quality, and PIXELCRAFT: visual quality and UI/UX). The `gitcraft` skil
 For a WHOLE deliverable from one master prompt (a game, app, site or asset
 pack: "build a polished mobile-first game with sound, levels and deployment"),
 follow the `produce` skill: pass the prompt verbatim to studiocraft
-`production_plan`, then `production_run`. The Production Director picks the
+`production_plan` (read-only Discovery + the Decision Room), get the person's
+approval of the blueprint (`production_decide`), then `production_run`.
+Ideas can be saved and researched first (`production_idea`, `production_recon`).
+Every app gets an approved icon (App Icon Studio), the quiet "by HaveAnApp"
+credit and a proportionate engineering standard (docs/app-standards.md). The Production Director picks the
 departments, orders and parallelises them, gates every result, turns failed
 gates into fix work orders and re-verifies, and writes the acceptance report.
 You do its work orders (code, wiring assets, the 2D tools) and submit them

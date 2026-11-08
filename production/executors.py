@@ -11,7 +11,7 @@ department's own entry point and returns its own result unchanged:
 
 Each department runs as a child process: a crash, a hang (timeout) or a bad request in one task cannot take
 down the run or another task, and tasks run truly in parallel."""
-import importlib.util, json, os, subprocess, sys
+import importlib.util, json, os, re, subprocess, sys
 from . import REPO
 
 STUDIO_CLI = os.path.join(REPO, "studio", "cli.py")
@@ -96,7 +96,19 @@ def validate_file(path, expect=None):
         _validate = importlib.util.module_from_spec(spec); spec.loader.exec_module(_validate)
     if not os.path.isfile(path): return {"ok": False, "error": "missing"}
     try:
-        return _validate.check(path, expect=expect)
-    except ImportError as e:
-        ok = os.path.getsize(path) > 0
-        return {"ok": ok, "format": _validate.sniff(path), "note": f"format not opened ({e}); checked non-empty only", **({} if ok else {"error": "empty file"})}
+        r = _validate.check(path, expect=expect)
+        # check() reports a missing library as a failed file; that is this interpreter's limit, not the file's
+        if r.get("ok") or not re.match(r"(ImportError|ModuleNotFoundError)\b", str(r.get("error") or "")): return r
+        e = r["error"]
+    except ImportError as ex:
+        e = str(ex)
+    fmt = expect or _validate.sniff(path)
+    if fmt == "png":   # the Production Director's own standard-library PNG reader
+        from . import icons
+        try:
+            w, h, *_ = icons.header(path)
+            return {"ok": True, "format": "png", "width": w, "height": h, "note": "opened with the standard-library PNG reader (Pillow is not available here)"}
+        except (OSError, icons.PNGError) as pe:
+            return {"ok": False, "format": "png", "error": str(pe)}
+    ok = os.path.getsize(path) > 0
+    return {"ok": ok, "format": fmt, "note": f"format not opened ({e}); checked non-empty only", **({} if ok else {"error": "empty file"})}

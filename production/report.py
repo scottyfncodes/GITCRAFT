@@ -66,6 +66,16 @@ def markdown(prod, release=False):
          f"> {spec['prompt'][:600]}", "",
          f"Deliverable: **{spec['deliverable']}** ({spec['dimension']}, {'mobile-first' if spec['platform']['mobile_first'] else 'desktop + phone'}) · "
          f"project `{spec['project']['path']}` · quality bar **{spec['quality']['level']}**", ""]
+    bp = prod.get("blueprint")
+    if bp or prod.get("lifecycle"):
+        from . import lifecycle
+        lv = lifecycle.summary(prod)
+        L += ["## Where it stands", "", f"**{lv['stage']}** — {lv['summary']}", ""]
+        if bp:
+            L.append(f"Blueprint v{bp.get('version', 1)} approved {bp.get('approved_at')} (`{bp.get('hash')}`): "
+                     + "; ".join(f"{d['title']}: **{d['answer']}**" for d in bp.get("decisions") or []))
+            L.append("")
+        if prod.get("recon"): L += [f"Recon ({prod['recon']['depth']}): **{prod['recon']['recommendation'].get('verdict')}** — `{prod['recon'].get('report')}`", ""]
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]
     for a in acc:
         seen = {}

@@ -7,7 +7,7 @@
              existing different file in the project is never overwritten without `replace_assets` (needs approval)
   licences   AssetCraft scan of the shipped folder, then its licence report (unknown / NC / ND licences fail)
 """
-import hashlib, json, os, shutil
+import hashlib, json, os, re, shutil
 from . import executors
 
 PREVIEW_ROLES = {"preview", "source", "manifest", "engine_screenshot", "blockout", "blockout_render", "ldtk_project", "render", "contact_sheet", "waveform"}
@@ -90,14 +90,14 @@ def integrate(ctx):
         ok = sha256(dest) == it["sha256"]
         side = {"license": it.get("license") or "LicenseRef-Project-Owned", "attribution": it.get("attribution"),
                 "source": {"production": prod["id"], "task": it["task"], "record": it.get("record")}}
-        json.dump(side, open(dest + ".license.json", "w"), indent=1)
+        with open(dest + ".license.json", "w") as f: json.dump(side, f, indent=1)
         rel = os.path.relpath(dest, proj)
         manifest.append({"dest": dest, "dest_rel": rel, "sha256": it["sha256"], "role": it["role"], "format": it["format"], "task": it["task"], "replaced": replaced})
         outs.append({"path": dest, "role": it["role"], "format": it["format"], "sha256": it["sha256"], "ok": ok})
         checks.append({"name": f"{rel} copied and hash-verified", "ok": ok})
     if not manifest and not checks:
         checks.append({"name": "something to integrate", "ok": True, "detail": "no shipped outputs (nothing upstream ships)"})
-    json.dump(manifest, open(os.path.join(ctx["out_dir"], "integrated.json"), "w"), indent=1)
+    with open(os.path.join(ctx["out_dir"], "integrated.json"), "w") as f: json.dump(manifest, f, indent=1)
     return {"status": "ok" if all(c["ok"] for c in checks) else "failed", "outputs": outs, "checks": checks, "integrated": manifest,
             "replaced": [m["dest_rel"] for m in manifest if m["replaced"]]}
 
@@ -114,3 +114,91 @@ def licences(ctx):
     outs = [dict(o, path=o["path"] if os.path.isabs(o["path"]) else os.path.join(r["out_dir"], o["path"])) for o in r.get("outputs", [])] if r.get("out_dir") else []
     return {"status": r.get("status"), "error": r.get("error"), "outputs": outs, "checks": (s.get("checks") or []) + (r.get("checks") or []),
             "record": r.get("record"), "scan": {k: s.get(k) for k in ("catalogued", "by_kind")}}
+
+
+# ---------------------------------------------------------------- App Icon Studio and the app standards (production/icons.py, standards.py)
+def _concepts_file(ctx):
+    for up in ctx["upstream"]:
+        for o in up.get("outputs", []):
+            if os.path.basename(o["path"]) == "concepts.json": return o["path"]
+    return None
+
+
+def icon_select(ctx):
+    """A person chooses the icon from a side-by-side sheet. Never chosen silently: without an approval it waits."""
+    from . import icons
+    cf = _concepts_file(ctx)
+    if not cf: return {"status": "failed", "failure": "handoff", "error": "icon.concepts handed on no concepts.json", "outputs": []}
+    data = json.load(open(cf)); base = os.path.dirname(cf); cs = data.get("concepts") or []
+    sheet = icons.comparison_sheet(cs, base, os.path.join(ctx["out_dir"], "concepts.html"), ctx["spec"]["title"], data.get("recommended"))
+    listing = [{"id": c.get("id"), "idea": c.get("idea"), "file": c["file"] if os.path.isabs(c["file"]) else os.path.join(base, c["file"])} for c in cs]
+    if not ctx.get("approved"):
+        return {"status": "needs_approval", "approval": "icon", "concepts": listing, "recommended": data.get("recommended"), "sheet": sheet,
+                "reason": f"choose the app icon: open {sheet} and approve a concept (production_approve with choice; recommended: {data.get('recommended')}), "
+                          "or decline with a note to ask for new concepts",
+                "outputs": [{"path": sheet, "role": "icon_sheet", "format": "html"}], "checks": []}
+    choice = ctx.get("choice") or data.get("recommended")
+    pick = next((c for c in listing if c["id"] == choice), None)
+    if not pick: return {"status": "failed", "failure": "request", "error": f"no concept {choice!r} (concepts: {[c['id'] for c in listing]})", "outputs": []}
+    sel = {"choice": choice, "file": pick["file"], "idea": pick["idea"], "recommended": data.get("recommended"),
+           "approved_by": "a person (production_approve)", "note": ctx.get("approval_note")}
+    sp = os.path.join(ctx["out_dir"], "selection.json"); json.dump(sel, open(sp, "w"), indent=1)
+    return {"status": "ok", "selection": sel, "outputs": [{"path": sp, "role": "selection", "format": "json"}, {"path": pick["file"], "role": "icon_concept", "format": "png"},
+                                                          {"path": sheet, "role": "icon_sheet", "format": "html"}],
+            "checks": [{"name": f"a person approved concept {choice}", "ok": True}]}
+
+
+def icon_derivatives(ctx):
+    from . import icons
+    p = ctx["params"]; master = p.get("master")
+    if not master or not os.path.isfile(master): return {"status": "failed", "failure": "handoff", "error": "no approved 1024 px master was handed on", "outputs": []}
+    svg = next((o["path"] for up in ctx["upstream"] for o in up.get("outputs", []) if o["path"].endswith(".svg") and "icon" in os.path.basename(o["path"])), None)
+    try:
+        return icons.derivatives(master, ctx["out_dir"], background=p.get("background"), name=p.get("name") or "App",
+                                 prefix=icons.href_prefix(ctx["spec"]["project"].get("asset_dir")), source_svg=svg)
+    except icons.PNGError as e:
+        return {"status": "failed", "failure": "request", "error": f"the master cannot be decoded: {e}", "outputs": []}
+
+
+def check_icons(ctx):
+    from . import icons
+    proj, mode = ctx["project"], ctx["params"].get("mode") or "new"
+    r = icons.verify(proj, require_manifest=True, decision=mode)
+    tasks = ctx.get("tasks") or {}
+    if mode in ("new", "refine"):
+        sel = tasks.get("icon.select") or {}
+        r["checks"].append({"name": "the icon was chosen by a person (icon.select approved)", "ok": sel.get("state") == "passed" and bool(sel.get("approved")),
+                            "detail": sel.get("state")})
+        made = {os.path.basename(o["path"]): o.get("sha256") for up in ctx["upstream"] if up["id"].startswith("icon.derivatives") for o in up.get("outputs", [])}
+        ed = os.path.dirname(icons._entry(proj) or proj)
+        linked = [h for rels, h, _ in icons._links(open(icons._entry(proj), errors="ignore").read()) if "icon" in " ".join(rels)] if icons._entry(proj) else []
+        mism = []
+        for h in linked:
+            f = icons._resolve(proj, ed, h)
+            if f and os.path.isfile(f) and os.path.basename(f) in made and sha256(f) != made[os.path.basename(f)]: mism.append(h)
+        ours = [h for h in linked if os.path.basename(re.sub(r"[?#].*$", "", h)) in made]
+        r["checks"].append({"name": "the linked icons are the approved set (same bytes as icon.derivatives made)", "ok": bool(ours) and not mism,
+                            "detail": (mism or None) if ours else "the page links none of the approved icon files"})
+    else:
+        r["checks"].append({"name": "keeping the existing icon was decided in the Decision Room", "ok": True})
+    r["status"] = "ok" if all(c["ok"] for c in r["checks"]) else "failed"
+    return _with_report(ctx, r, "icons.json")
+
+
+def _with_report(ctx, r, name):
+    """A measured check keeps its evidence as a file (so a failure is a quality finding, not a crash)."""
+    rp = os.path.join(ctx["out_dir"], name)
+    with open(rp, "w") as f: json.dump(r, f, indent=1)
+    r["outputs"] = [{"path": rp, "role": "report", "format": "json"}]
+    return r
+
+
+def check_attribution(ctx):
+    from . import standards
+    return _with_report(ctx, standards.attribution(ctx["project"]), "attribution.json")
+
+
+def check_standards(ctx):
+    from . import standards
+    p = ctx["params"]
+    return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app"), "standards.json")

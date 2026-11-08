@@ -288,6 +288,9 @@ def list_dir(cfg, path, exts=None):
 def file_allowed(cfg, path):
     real = os.path.realpath(path)
     ext = os.path.splitext(real)[1].lower()
+    roots = cfg["roots"] + [cfg["library"]]
+    under = next((r for r in roots if real.startswith(r + os.sep)), None)
+    if under and any(part.startswith(".") for part in os.path.relpath(real, under).split(os.sep)): return None   # never dotfiles/dot-folders (credentials, config)
     ok = ext in FILE_TYPES and os.path.isfile(real) and any(real == r or real.startswith(r + os.sep) for r in cfg["roots"] + [cfg["library"]])
     return real if ok else None
 
@@ -351,9 +354,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self._send(200, data, FILE_TYPES[os.path.splitext(real)[1].lower()],
                               {"Content-Security-Policy": "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox", "Cache-Control": "private, max-age=60"})
         if u.path.startswith("/vendor/three/"):
-            rel = os.path.normpath(u.path[len("/vendor/three/"):])
-            p = os.path.join(THREE, rel)
-            if rel.startswith("..") or not p.endswith(".js") or not os.path.isfile(p): return self._err(404, "not found")
+            base = os.path.realpath(THREE)
+            p = os.path.realpath(os.path.join(base, urllib.parse.unquote(u.path[len("/vendor/three/"):]).lstrip("/")))
+            if not p.startswith(base + os.sep) or not p.endswith(".js") or not os.path.isfile(p): return self._err(404, "not found")
             src = open(p, encoding="utf-8").read().replace("from 'three'", "from '/vendor/three/build/three.module.js'")
             return self._send(200, src, "text/javascript; charset=utf-8", {"Cache-Control": "max-age=3600"})
         name = "index.html" if u.path in ("/", "/index.html") else u.path.lstrip("/")
@@ -372,7 +375,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if not self._token_ok(): return self._err(403, "missing or wrong token")
         if (self.headers.get("Content-Type") or "").split(";")[0].strip() != "application/json":
             return self._err(415, "send application/json")
-        n = int(self.headers.get("Content-Length") or 0)
+        try: n = int(self.headers.get("Content-Length") or 0)
+        except ValueError: return self._err(400, "invalid Content-Length")
+        if n < 0: return self._err(400, "invalid Content-Length")
         if n > MAX_BODY: return self._err(413, "request too large")
         try: body = json.loads(self.rfile.read(n) or b"{}")
         except ValueError: return self._err(400, "invalid JSON")

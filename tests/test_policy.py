@@ -193,6 +193,7 @@ if ("network" in want or not sys.argv[1:]) and os.access(studio_py, os.X_OK):
                     ok, p = c.call("production_plan", {"prompt": "Audit the interface of the running app for release", "project": os.path.join(ws, f"netapp-{value}"),
                                                        "overrides": {"deliverable": "asset_pack", "assets": {}, "extra_tasks": [
                                                            {"id": "net.audit", "department": "pixelcraft", "action": "audit", "params": {"target": url, "viewports": req["viewports"]}}]}}, timeout=300)
+                    c.call("production_decide", {"production": p["production"], "approve": True}, timeout=120)   # the blueprint must be approved before anything runs
                     c.call("production_run", {"production": p["production"]}, timeout=600)
                     t = json.load(open(os.path.join(ws, "gitcraft-out", "production", p["production"], "production.json")))["tasks"]["net.audit"]
                     sb = (sb or "") + f" [net.audit ran {len(t['attempts'])}x: {t['state']}]"

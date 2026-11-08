@@ -45,7 +45,8 @@ library. They have no network.
 | Catalogue, duplicates, unused assets, licences/ATTRIBUTION.md, safe import | studiocraft `assetcraft_*` | every department registers its outputs |
 | Visual quality / UI-UX audit of an app or site: spacing, layout, typography, buttons and touch targets, safe areas, states, accessibility, journeys, before/after verify (`pixelcraft` skill) | studiocraft `pixelcraft_*` | playcraft (how a game plays), testcraft (engineering smoke) |
 | Not sure which department | studiocraft `route` / forgecraft `department_route` | — |
-| A whole game, app, site or asset pack from one master prompt | studiocraft `production_plan` → `production_run` (the `produce` skill) | every department, gated and integrated |
+| A whole game, app, site or asset pack from one master prompt | studiocraft `production_plan` → `production_decide` (the person approves the blueprint) → `production_run` (the `produce` skill) | every department, gated and integrated; an approved app icon, the HaveAnApp credit and proportionate engineering checks |
+| An idea to explore before building ("is this worth making?") | studiocraft `production_idea` → `production_recon` (quick/deep, evidence-bound) → `production_promote` | Recon report, Build / Pivot / Park |
 
 Typical projects:
 - **New game:** decide 2D vs 3D from the engine; then key art, sprites or 3D

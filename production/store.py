@@ -35,8 +35,13 @@ def path(pid, *parts, root=None):
 def write_json(p, data):
     os.makedirs(os.path.dirname(p), exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(p), prefix=".tmp-")
-    with os.fdopen(fd, "w") as f: json.dump(data, f, indent=1, default=str)
-    os.replace(tmp, p)
+    try:
+        with os.fdopen(fd, "w") as f: json.dump(data, f, indent=1, default=str)
+        os.replace(tmp, p)
+    except BaseException:   # never leave a half-written temp file behind
+        try: os.unlink(tmp)
+        except OSError: pass
+        raise
 
 
 def create(prod, root=None):
