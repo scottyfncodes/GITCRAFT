@@ -322,7 +322,10 @@ def part_b(c):
         time.sleep(0.5)
         try: pr = load(pid)
         except (OSError, ValueError): continue
-        if sum(1 for t in pr["tasks"].values() if t["state"] == "passed") >= 3: break
+        # kill in the state the check below asserts: some passed AND one running. Breaking on "3 passed" alone
+        # could land in the gap after a task passes and before the next is marked in_progress (seen in CI)
+        if (sum(1 for t in pr["tasks"].values() if t["state"] == "passed") >= 3
+                and any(t["state"] == "in_progress" for t in pr["tasks"].values())): break
     os.killpg(runner.pid, signal.SIGKILL); runner.wait()
     pr = load(pid)
     passed_before = {t: len(x["attempts"]) for t, x in pr["tasks"].items() if x["state"] == "passed"}
