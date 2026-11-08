@@ -80,6 +80,23 @@ say "  global (every project):"
 runtime="$GITCRAFT_HOME/runtime"
 if [[ -x "$runtime/scripts/mcp.sh" ]]; then
   say "    runtime:      $runtime (from $(tail -1 "$runtime/.gitcraft-source" 2>/dev/null) @ $(head -1 "$runtime/.gitcraft-source" 2>/dev/null))"
+  # servers keep the runtime version they started with (scripts/install-runtime.sh); after an update they run the
+  # old code until they restart. Name them, so a tool that misbehaves after an update has an obvious fix.
+  current="$(cd "$runtime" && pwd -P)"
+  if [[ -L "$runtime" ]]; then say "    version:      $current"; else say "    version:      plain folder (installed before versioned runtimes; the next install moves it)"; fi
+  stale_servers=(); installed_at="$(stat -c %Y "$current/.gitcraft-source" 2>/dev/null || echo 0)"
+  for f in /proc/[0-9]*/cmdline; do
+    cmd="$(tr '\0' ' ' < "$f" 2>/dev/null)"
+    [[ "$cmd" == *"/scripts/guard.py --tool "* ]] || continue
+    t="${cmd#*--tool }"; t="${t%% *}"; launched="${cmd%%/scripts/guard.py*}"; launched="${launched##* }"
+    started="$(stat -c %Y "${f%/cmdline}" 2>/dev/null || echo 0)"
+    # another version's folder, or (a plain-folder runtime, same path) started before the current install
+    if [[ "$launched" != "$current" ]] || ((started < installed_at)); then stale_servers+=("$t"); fi
+  done
+  if ((${#stale_servers[@]})); then
+    say "    running:      ${stale_servers[*]} started from an older runtime (they run the code they started with)"
+    problems+=("servers running an older runtime: ${stale_servers[*]}. Run /mcp (reconnect) to start them on the current one")
+  fi
 else
   say "    runtime:      MISSING"; problems+=("no runtime in $runtime: run scripts/install-global.sh")
 fi

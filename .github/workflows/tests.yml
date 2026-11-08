@@ -97,6 +97,12 @@ jobs:
       - name: Evaluation follow-ups (task output isolated for every production, replacement checks keep their criterion)
         run: python3 tests/test_evaluation_followups.py
 
+      - name: Source-change fingerprints (a check's output never invalidates another check)
+        run: python3 tests/test_fingerprint.py
+
+      - name: Runtime updates never break running servers (versioned runtime, Landlock)
+        run: python3 tests/test_runtime_update.py
+
       - name: Production Director master-prompt acceptance (every department for real)
         run: python3 tests/acceptance_production.py
 

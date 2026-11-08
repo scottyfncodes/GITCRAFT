@@ -24,19 +24,9 @@ source "$here/tools.sh"
 runtime="$GITCRAFT_HOME/runtime"
 claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 
-# 1) runtime copy (no .git, no acceptance packages, no caches)
-if [[ "$(cd "$src" && pwd -P)" != "$(mkdir -p "$runtime" && cd "$runtime" && pwd -P)" ]]; then
-  ex=(.git acceptance __pycache__ '*.pyc' forgecraft/ui/dist .vercel)
-  if command -v rsync >/dev/null; then
-    rsync -a --delete $(printf -- "--exclude=%s " "${ex[@]}") "$src/" "$runtime/"
-  else
-    tmp="$runtime.new.$$"; rm -rf "$tmp"; mkdir -p "$tmp"
-    tar -C "$src" $(printf -- "--exclude=%s " "${ex[@]}") -cf - . | tar -C "$tmp" -xf - && rm -rf "$runtime" && mv "$tmp" "$runtime"
-  fi || { echo "gitcraft: couldn't copy the runtime to $runtime" >&2; exit 1; }
-  git -C "$src" rev-parse --short HEAD 2>/dev/null > "$runtime/.gitcraft-source" || echo "unknown" > "$runtime/.gitcraft-source"
-  echo "$src" >> "$runtime/.gitcraft-source"
-  echo "gitcraft: runtime ready at $runtime (from $src @ $(head -1 "$runtime/.gitcraft-source"))"
-fi
+# 1) runtime copy (no .git, no acceptance packages, no caches): a new version folder behind the runtime symlink,
+#    so servers already running keep the complete version they started with (scripts/install-runtime.sh)
+GITCRAFT_HOME="$GITCRAFT_HOME" "$here/install-runtime.sh" "$src" || exit 1
 
 # 2) user-scope registration from the runtime
 "$runtime/scripts/register.sh"
