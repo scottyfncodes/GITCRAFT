@@ -166,7 +166,8 @@ Rf = PR.generate(game, refresh="full", save="store")    # now measured
 check("regressions: findings of a department that was not measured in the previous report are never called regressions",
       not any(x["department"] in ("playcraft", "testcraft", "assetcraft") for x in Rf["regressions"]), Rf["regressions"])
 check("overall: a different set of evaluated departments is not compared (no overall delta, the difference named)",
-      Rf["health"]["vs_previous"]["delta"] is None and "different departments" in Rf["health"]["vs_previous"]["compare"], Rf["health"]["vs_previous"])
+      Rf["health"]["vs_previous"]["delta"] is None and "different departments" in Rf["health"]["vs_previous"]["compare"]
+      and "different departments were evaluated" in Rf["summary"][0] and "method" not in Rf["summary"][0], (Rf["health"]["vs_previous"], Rf["summary"][:1]))
 
 same = [{"report_id": f"p/20261109T190000Z" + (f"-{n}" if n > 1 else ""), "generated": "2026-11-09T19:00:00+00:00"} for n in range(1, 13)]
 import random as _r; shuffled = same[:]; _r.Random(7).shuffle(shuffled)

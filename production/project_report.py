@@ -1012,7 +1012,7 @@ def executive(R):
     else:
         vp = H.get("vs_previous") or {}
         tail = (f", {vp['delta']:+} since the previous report" if vp.get("delta") is not None else
-                f"; the previous report's {vp['previous']} used another method, so no change is claimed" if vp.get("previous") is not None and "not comparable" in (vp.get("compare") or "") else "")
+                f"; not compared with the previous report's {vp['previous']}: " + (vp.get("compare") or "").replace("not comparable: ", "") + ", so no change is claimed" if vp.get("previous") is not None and "not comparable" in (vp.get("compare") or "") else "")
         s.append(f"{R['title']} scores **{H['score']}/100** ({H['band']}, {H['confidence']} confidence, {round(100 * H['coverage'])}% of the applicable weight evaluated{tail}).")
     if G.get("verdict"): s.append(f"Director verdict: **{G['verdict']}** for production `{G['production']}` ({G.get('status')})" + (f"; release {G['release_status']}" if G.get("release_status") else "") + ".")
     else: s.append("No production has run for this project, so there is no Director verdict or release gate.")

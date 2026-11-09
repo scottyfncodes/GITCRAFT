@@ -21,7 +21,7 @@ LEGACY_METHOD = "mean/1"
 #  legacy: the rubric version a report made before METHOD existed is treated as (None = not comparable).
 RUBRICS = {
     "playcraft": {"label": "Gameplay quality", "weight": 25, "version": "playcraft/1", "legacy": "playcraft/1",
-                  "source": "PLAYCRAFT's own overall score from the Game Quality History",
+                  "source": "PLAYCRAFT's own overall score from the Game Quality History, or measured for the report on the existing build (refresh=full, not recorded)",
                   "criteria": ["10 categories (core gameplay, game feel, controls, progression, difficulty, player experience, replayability, "
                                "technical, presentation, mobile), genre-weighted",
                                "Each criterion pass/partial/fail, weighted by evidence: verified 1, observed 0.85, inferred 0.45",
