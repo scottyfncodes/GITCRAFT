@@ -168,6 +168,11 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   kind, `planner.py` (what a request schedules, `$from` hand-offs, gates), `builtins.integrate`, `gates.remediation`, PLAYCRAFT's
   not-a-game refusal, `studio/core/routing.py` or `scripts/register.sh`. A project that reads as an app is never scored as a game unless
   the person says so, and a requested asset (trailer, ocean, animation) is planned or reported NOT PLANNED, never dropped.
+- `tests/test_release_verification.py` must pass after any change to `production/verification.py`, `production/live.py`, the
+  verdict/acceptance logic in `production/report.py`, unverified handling in `gates.py`/`engine.py`, `studio/core/netclass.py`, the
+  TestCraft smoke console policy, or the CORS/analytics/accepted-decision checks in `production/standards.py` (POW NOW PR #40):
+  BLOCKER, UNVERIFIED, ADVISORY and PASS stay distinct; never READY with a mandatory check unverified, never NOT READY for an
+  advisory alone, never a sandbox-network failure as an app defect, never a global console-error ignore (`docs/release-verification.md`).
 - `tests/test_report.py` must pass after any change to `production/project_report.py`, the report path in `production/entry.py` or the
   `production_project_report` tool; "Run GITCRAFT report" is read-only (never writes inside the project, builds, merges or deploys), never
   reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).

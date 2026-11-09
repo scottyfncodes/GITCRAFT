@@ -21,10 +21,11 @@ def acceptance(prod, exclude=()):
         ts = [_eff(prod, i) for i in roots_ if prod["tasks"][i].get("criterion") == c["id"]]
         if c["id"] == "release_ready":
             others = acceptance(prod, exclude={"release_ready", "deployment"})
-            st = "passed" if others and all(o["status"] == "passed" for o in others) else \
-                 "not_planned" if any(o["status"] == "not_planned" for o in others) and not any(o["status"] in ("failed", "blocked") for o in others) else \
-                 "pending" if any(o["status"] == "pending" for o in others) else "failed"
-            why = None if st == "passed" else [o["id"] for o in others if o["status"] != "passed"]
+            st = "passed" if others and all(o["status"] in PASSING for o in others) else \
+                 "failed" if any(o["status"] == "failed" for o in others) else \
+                 "not_planned" if any(o["status"] == "not_planned" for o in others) and not any(o["status"] in ("blocked", "unverified") for o in others) else \
+                 "unverified" if any(o["status"] in ("blocked", "unverified") for o in others) else "pending"   # incomplete, not failed
+            why = None if st == "passed" else [o["id"] for o in others if o["status"] not in PASSING]
             rel = [t for t in ts if t["state"] != "passed"]
             if st == "passed" and rel:   # the release gate itself must pass (e.g. evidence measured on the build released)
                 r = rel[0]
@@ -39,7 +40,11 @@ def acceptance(prod, exclude=()):
             st = "passed" if t["state"] == "passed" and dep.get("verified") else "needs_approval" if t["state"] == "needs_approval" else \
                  "skipped" if t["state"] == "skipped" else "pending" if t["state"] in ("pending", "awaiting_agent", "in_progress") else "failed"
         elif all(s == "passed" for s in states): st = "passed"
+        elif all(t.get("advisory") for t in ts) and all(s in ("passed", "skipped") or s == "failed" and not t.get("failure") for s, t in zip(states, ts)):
+            st = "advisory"   # measured by advisory tasks only: their findings are recorded and never block (a crash measured nothing: not advisory)
         elif any(s == "failed" for s in states): st = "failed"
+        elif any(s == "blocked" and t.get("unverified") for s, t in zip(states, ts)) and not any(s == "blocked" and not t.get("unverified") for s, t in zip(states, ts)):
+            st = "passed" if _confirmed_live(prod, ts) else "unverified"   # the check ran but could not be completed (e.g. sandbox network)
         elif any(s == "blocked" for s in states): st = "blocked"
         elif any(s == "needs_approval" for s in states): st = "needs_approval"
         else: st = "pending"
@@ -50,8 +55,26 @@ def acceptance(prod, exclude=()):
             rec = (t.get("result") or {}).get("record")
             if rec: ev.append({"task": t["id"], "record": rec})
         why = [f"{t['id']}: {t['state']}" + (f" — {t.get('reason') or t.get('error')}" if (t.get('reason') or t.get('error')) else "") for t in ts if t["state"] != "passed"]
-        out.append(dict(c, status=st, why=why or None, evidence=ev[:30]))
+        if st == "passed" and any(t.get("unverified") for t in ts):
+            why = None; ev.append({"condition": "verified independently in production (the live check reached every service the sandbox could not)", "ok": True})
+        adv = [f"{ch['name']}: {str(ch.get('detail'))[:160]}" for t in ts for ch in ((t.get("result") or {}).get("checks") or []) if ch.get("category") == "advisory"]
+        extra = {"cause": ", ".join(sorted({u.get("cause") or "unverified" for t in ts for u in t.get("unverified") or []}))} if st == "unverified" else {}
+        out.append(dict(c, status=st, why=why or None, evidence=ev[:30], advisories=adv[:12] or None, **extra))
     return out
+
+
+PASSING = ("passed", "advisory")
+
+
+def _confirmed_live(prod, ts):
+    """An UNVERIFIED sandbox check is resolved only by independent production evidence: the live check (run with
+    network, against the deployed release) reached every host the sandbox could not, and served this release."""
+    hosts = {u.get("host") for t in ts for u in t.get("unverified") or []}
+    if not hosts or None in hosts: return False
+    from . import verification
+    rec = verification.live_record(prod)
+    if not rec or not (rec.get("deployment") or {}).get("serving"): return False
+    return hosts <= set(rec.get("hosts_ok") or [])
 
 
 INCOMPLETE_STATES = ("blocked", "pending", "needs_approval")
@@ -59,8 +82,11 @@ INCOMPLETE_STATES = ("blocked", "pending", "needs_approval")
 
 def verdict(acc):
     """READY (every criterion measured and passed), NOT READY (a criterion was measured and failed, or is NOT PLANNED),
-    or INCOMPLETE (nothing failed, but a check could not run or has not finished: blocked, pending, awaiting someone)."""
-    s = {a["id"]: a["status"] for a in acc}
+    or INCOMPLETE (nothing failed, but a check could not run, could not be verified, or has not finished: blocked,
+    unverified, pending, awaiting someone). An `advisory` criterion (measured by advisory tasks only) never blocks;
+    an `unverified` one never reads as a failure and never as READY. The release status line, which also says
+    whether the release is deployed, is verification.release_summary()."""
+    s = {a["id"]: ("passed" if a["status"] == "advisory" else "blocked" if a["status"] == "unverified" else a["status"]) for a in acc}
     core = {k: v for k, v in s.items() if k not in ("deployment", "release_ready")}
     if not acc or any(v == "not_planned" for v in s.values()): return "NOT READY"
     if all(v == "passed" for v in core.values()) and s.get("release_ready") in (None, "passed"):
@@ -78,9 +104,9 @@ def final(prod):
     reasons = []
     if prod.get("unstable"): reasons.append(prod["unstable"]["reason"])
     for a in acc:
-        if a["status"] == "passed" or a["id"] == "release_ready" and any(x["status"] != "passed" for x in acc if x["id"] not in ("release_ready", "deployment")): continue
+        if a["status"] in PASSING or a["id"] == "release_ready" and any(x["status"] not in PASSING for x in acc if x["id"] not in ("release_ready", "deployment")): continue
         if a["id"] == "deployment" and v.startswith("READY"): continue
-        label = {"failed": "failed", "blocked": "could not run", "pending": "did not finish", "needs_approval": "waiting for a person",
+        label = {"failed": "failed", "blocked": "could not run", "unverified": "could not be verified (not an application failure)", "pending": "did not finish", "needs_approval": "waiting for a person",
                  "not_planned": "not planned", "skipped": "skipped"}.get(a["status"], a["status"])
         reasons.append(f"{a['id']} {label}: " + "; ".join(map(str, a.get("why") or []))[:400])
     for t in prod.get("tasks", {}).values():
@@ -109,6 +135,8 @@ def markdown(prod, release=False):
                      + "; ".join(f"{d['title']}: **{d['answer']}**" for d in bp.get("decisions") or []))
             L.append("")
         if prod.get("recon"): L += [f"Recon ({prod['recon']['depth']}): **{prod['recon']['recommendation'].get('verdict')}** — `{prod['recon'].get('report')}`", ""]
+    from . import verification
+    L += verification.markdown(verification.release_summary(prod, acc))
     fin = final(prod)
     if fin["reasons"]: L += [f"## Why {fin['verdict']}", ""] + [f"- {r}" for r in fin["reasons"]] + [""]
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]

@@ -187,6 +187,11 @@ def parse(prompt, project=None, overrides=None):
         ex = spec.get("mode", {}).get("existing")
         if "icon" not in overrides: spec["icon"]["required"] = w and not ex
         if "attribution" not in overrides: spec["attribution"]["required"] = w and not ex
+    if spec.get("mode", {}).get("existing") and proj["path"] and os.path.isdir(proj["path"]) and not (overrides or {}).get("analytics"):
+        found = standards.discover_analytics(proj["path"])   # Discovery recognises what the project already ships
+        if found:
+            spec["analytics"] = {"provider": "pulse" if any(f["provider"] == "pulse" for f in found) else None, "source": "discovered", "found": found}
+            assumptions.append("existing analytics recognised: " + ", ".join(f["name"] for f in found))
     spec["acceptance"] = acceptance(spec)
     return spec
 

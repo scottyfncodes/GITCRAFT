@@ -736,6 +736,10 @@ def _finish(prod, t, res):
         _set(prod, t, PASSED if res.get("status") == "ok" else FAILED, reason="advisory"); return
     if all(g["ok"] for g in gr):
         _set(prod, t, PASSED); return
+    if all(g.get("category") == "unverified" for g in gr if not g["ok"]):   # could not be verified: incomplete, never a defect to "fix"
+        unv = [u for g in gr if not g["ok"] for u in g.get("unverified") or []]
+        _set(prod, t, BLOCKED, unverified=unv, reason="verification incomplete (not an application failure): "
+             + "; ".join(f"{u['check']} [{u['cause']}]" for u in unv)[:1200]); return
     _set(prod, t, FAILED, failure="quality", error="; ".join(f"{g['condition']}: {g.get('detail') or g.get('measured')}" for g in gr if not g["ok"])[:1500])
     _remediate(prod, t, res, gr)
 
@@ -832,6 +836,9 @@ def _verify_deploy(url, evidence):
     try: rec = json.load(open(p))
     except ValueError: return {"ok": False, "detail": "evidence is not a check record (JSON)"}
     target = json.dumps(rec.get("request") or {})
+    if rec.get("status") == "incomplete":   # deployed and serving, but some live checks could not be verified: never recorded as verified live
+        return {"ok": False, "incomplete": True, "detail": "DEPLOYED · VERIFICATION INCOMPLETE: " + "; ".join(
+            f"{c['name']} [{c.get('cause') or 'unverified'}]" for c in rec.get("checks", []) if c.get("category") == "unverified")[:600]}
     if rec.get("status") != "ok": return {"ok": False, "detail": f"the evidence check did not pass ({rec.get('status')})"}
     if url not in target: return {"ok": False, "detail": "the evidence check ran against a different target than the submitted URL"}
     return {"ok": True, "detail": f"{rec.get('department')}.{rec.get('action')} passed against {url}"}
@@ -868,7 +875,9 @@ def _release(prod, t, out_dir):
     fp = _fp(prod)
     stale = [q["id"] for q in (eff(prod, i) for i in prod["order"]) if q["stage"] in ("qa", "release") and q["state"] == PASSED
              and q.get("measured_fingerprint") not in (None, fp)]
-    checks = [{"name": f"criterion {a['id']}: {a['text']}", "ok": a["status"] == "passed", "detail": a.get("why")} for a in acc]
+    checks = [{"name": f"criterion {a['id']}: {a['text']}", "ok": a["status"] in _report.PASSING, "detail": a.get("why") or a.get("advisories"),
+               **({"category": "unverified", "cause": a.get("cause") or a["status"]} if a["status"] in ("unverified", "blocked") else
+                  {"category": "advisory"} if a["status"] == "advisory" else {})} for a in acc]
     checks.append({"name": "every QA result was measured on the build being released", "ok": not stale,
                    "detail": (stale + ([prod["unstable"]["reason"]] if prod.get("unstable") else [])) if stale else None})
     tg = sorted({q["evaluated_target"] for q in (eff(prod, i) for i in prod["order"]) if q.get("evaluated_target") and q["state"] == PASSED})
@@ -923,7 +932,10 @@ def status(prod_or_id, store_dir=None):
     for d in ((prod.get("lifecycle") or {}).get("revision") and ["revision"]) or []: nxt.insert(0, "person: approve or decline the pending revision (production_decide)")
     if lv["stage"] == "decisions": nxt.insert(0, "person: review the Decision Room and approve the blueprint (production_decide)")
     v = _report.final(prod)
+    from . import verification
+    rs = verification.release_summary(prod)
     return {"production": prod["id"], "title": prod["spec"]["title"], "status": prod.get("status"), "stage": lv["stage"], "summary": lv["summary"],
-            "verdict": v["verdict"], "verdict_reasons": v["reasons"] or None, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
+            "verdict": v["verdict"], "verdict_reasons": v["reasons"] or None, "release_status": rs["release_status"],
+            "release": {k: rs[k] for k in ("deployment", "functional", "security", "visual", "blockers", "unverified", "advisories", "verification_complete")}, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
             "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
             "report": os.path.join(prod["store"], "REPORT.md")}

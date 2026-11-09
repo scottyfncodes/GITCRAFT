@@ -95,6 +95,13 @@ shows the reason and lets the person change it:
 `qa.standards` measures each check from the project's files and reports one of these results:
 - `ok` or `failed`: measured;
 - `review`: the check applies but can't be decided from files, so it goes to the report as a review item and never counts as a pass;
+- `advisory`: measured and non-blocking: a configuration-metadata mismatch (analytics the project ships but the blueprint never
+  declared, a Pulse tag without `data-app`) or a deliberate design read in context (a public, GET-only, credential-free API with
+  wildcard CORS, with any abuse exposure named: an upstream proxied without caching or a rate limit);
+- `accepted`: an advisory or review item the person accepted in the project's `.gitcraft/accepted.json`
+  (`[{check, fingerprint, reason}]`). The fingerprint covers the finding and the files it read, so it is raised again when they
+  change. A `failed` check (a secret, SQL interpolation, writes or credentials open to every origin, a route returning
+  `process.env`) can never be accepted;
 - `n/a`.
 
 Only checks the profile requires can fail the gate.
@@ -157,7 +164,9 @@ The recommendation is **hosted Postgres + a small API**; the alternative is **on
 Optional, chosen in the Decision Room: the anonymous, cookieless page counter HangarBook ships
 (`<script defer src="https://haveanapp-pulse-collect.vercel.app/p.js" data-app="<app>">`). It is recommended for
 public apps and sites and not for private ones. `qa.standards` checks it is on the entry page when chosen, and that no
-analytics is on the page when it was not. `verify-live` checks the script answers on the deployed site.
+analytics is on the page when the Decision Room chose none. In an existing project nobody chose: Discovery recognises the
+analytics it already ships (Pulse, Vercel, Google, Plausible, PostHog, Umami, Fathom, Cloudflare, Segment) and the standard
+reports them as an advisory, not a failure. `verify-live` checks the script answers on the deployed site.
 
 ## Native app icons
 

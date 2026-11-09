@@ -35,7 +35,7 @@ export async function serveGame(page, root, R) {
   };
   await page.route('**/*', async (route) => {
     const u = new URL(route.request().url());
-    if (u.host !== 'game.local') { R.blocked.push(u.href.slice(0, 200)); return route.abort(); }
+    if (u.host !== 'game.local') { R.blocked.push(u.href.slice(0, 200)); (R.blocked_types ||= []).push(route.request().resourceType()); return route.abort(); }
     R.requests++;
     let rel = decodeURIComponent(u.pathname); if (rel.endsWith('/')) rel += 'index.html';
     const file = find(rel);
