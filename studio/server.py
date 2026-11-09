@@ -138,6 +138,19 @@ PRODUCTION_TOOLS = [
      {"type": "object", "required": ["project"], "properties": {"project": {"type": "string", "description": "the project folder, a GitHub owner/repo or URL, or a history id (owner--repo)"},
                                                                "refresh": {"type": "string", "enum": ["none", "quick", "full"]},
                                                                "save": {"type": "string", "enum": ["store", "none"], "description": "store (default): keep it for comparison; none: return only"}}}),
+    ("production_vision", "The project's vision contract, a reference for the Creative Review (never a gate or a score). action draft: a new draft version "
+     "(fields: promise, audience, context, identity, pillars, differentiators, non_goals, success_signals, open_questions; unstated ones are prefilled from the README "
+     "or listed as open questions). approve: a person's approval of a draft version (only when the person has said so; approved_by records who). show: the latest. "
+     "Versions are append-only in GITCRAFT's history/vision/.",
+     {"type": "object", "required": ["project", "action"], "properties": {"project": {"type": "string"}, "action": {"type": "string", "enum": ["draft", "approve", "show"]},
+      "fields": {"type": "object"}, "version": {"type": "integer"}, "approved_by": {"type": "string"}}}),
+    ("production_creative", "Creative Review (advisory, never scored; only when the person asks for one). action pack: index existing PLAYCRAFT/PIXELCRAFT captures "
+     "(captures: their output folders) and department findings into an evidence pack with BRIEF.md: no model call, no new capture. Then read the brief and the images, "
+     "write the review JSON and action submit (pack, review): it is validated (citations, evidence labels, no scores, playtest hypotheses for anything about fun) and stored "
+     "in history/creative/. action show: the latest review and whether it is current. It never changes a score, gate, verdict, priority or plan.",
+     {"type": "object", "required": ["action"], "properties": {"action": {"type": "string", "enum": ["pack", "submit", "show"]}, "project": {"type": "string"},
+      "captures": {"type": "array", "items": {"type": "string"}}, "pack": {"type": "string", "description": "submit: the pack.json path"},
+      "review": {"description": "submit: the review (object) or the path of its JSON file"}}}),
     ("production_contracts", "Every department's contract: what it accepts and produces, what it requires, how success and failure are reported, where outputs go, how provenance and licences are recorded.", _P()),
 ]
 _bg = {}
@@ -188,6 +201,18 @@ def _production(name, a):
         pr = store.load(a["production"]); return {"production": pr["id"], "markdown": report.markdown(pr), "acceptance": report.acceptance(pr)}
     if name == "production_list": return {"productions": store.list_all()}
     if name == "production_contracts": return contracts.all_contracts()
+    if name == "production_vision":
+        from production import vision, project_report
+        if a["action"] == "draft": return vision.summary(vision.draft(a["project"], a.get("fields"), by="production_vision"))
+        if a["action"] == "approve": return vision.summary(vision.approve(a["project"], a.get("version"), a.get("approved_by")))
+        return vision.summary(vision.latest(project_report.resolve(a["project"])["id"]))
+    if name == "production_creative":
+        from production import creative, project_report
+        if a["action"] == "pack":
+            K = creative.pack(a["project"], a.get("captures") or []); return {k: K[k] for k in ("fingerprint", "counts", "warnings", "paths", "vision")}
+        if a["action"] == "submit":
+            Rv = creative.submit(a["pack"], a["review"]); return {"review_id": Rv["review_id"], "dir": Rv["_dir"], "bound_to": Rv["bound_to"]}
+        return creative.for_report(project_report.resolve(a["project"]))
     if name == "production_project_report":
         from production import project_report, entry
         R = project_report.generate(a["project"], refresh=a.get("refresh") or "quick", save=a.get("save") or "store")

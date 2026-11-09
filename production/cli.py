@@ -18,7 +18,7 @@
   python3 -m production contracts                       every department's contract
 
 The store is $GITCRAFT_PRODUCTION_HOME or <first GITCRAFT root>/gitcraft-out/production."""
-import argparse, json, sys
+import argparse, json, os, sys
 from . import engine, store, report, contracts
 
 
@@ -51,6 +51,12 @@ def main(argv=None):
     gr.add_argument("--refresh", default="quick", choices=["none", "quick", "full"])
     gr.add_argument("--save", default="store", choices=["store", "archive", "none"], help="archive: history/reports (committed, published at /reports/)")
     gr.add_argument("--out", help="write this report into this folder instead"); gr.add_argument("--json", action="store_true", help="print the JSON instead of Markdown")
+    vi = sp.add_parser("vision", help="the product vision contract (a reference for the Creative Review)")
+    vi.add_argument("action", choices=["draft", "approve", "show"]); vi.add_argument("project"); vi.add_argument("--fields", help="JSON object or file of vision fields (draft)")
+    vi.add_argument("--version", type=int, help="the draft version to approve"); vi.add_argument("--by", help="who approved it (approve) or drafted it")
+    cr = sp.add_parser("creative", help="Creative Review: pack existing evidence, submit a review, show the latest (advisory, never scored)")
+    cr.add_argument("action", choices=["pack", "submit", "show"]); cr.add_argument("target", help="pack/show: the project; submit: the pack.json")
+    cr.add_argument("--capture", action="append", default=[], help="a PLAYCRAFT or PIXELCRAFT output folder (repeatable)"); cr.add_argument("--review", help="submit: the review JSON file")
     pu = sp.add_parser("publish-reports", help="build the /reports/ site from an archive"); pu.add_argument("archive", nargs="?"); pu.add_argument("dist")
     o = ap.parse_args(argv)
     if o.cmd == "plan":
@@ -92,6 +98,24 @@ def main(argv=None):
         if not o.json:
             print(project_report.markdown(R)); print(f"\nSaved: {R['paths'].get('html') or 'not saved (--save none)'}", file=sys.stderr); return 0
         out = R
+    elif o.cmd == "vision":
+        from . import vision
+        if o.action == "draft":
+            f = json.load(open(o.fields)) if o.fields and os.path.isfile(o.fields) else json.loads(o.fields) if o.fields else None
+            out = vision.summary(vision.draft(o.project, f, by=o.by))
+        elif o.action == "approve": out = vision.summary(vision.approve(o.project, o.version, o.by))
+        else:
+            from . import project_report
+            out = vision.summary(vision.latest(project_report.resolve(o.project)["id"]))
+    elif o.cmd == "creative":
+        from . import creative
+        if o.action == "pack":
+            K = creative.pack(o.target, o.capture); out = {k: K[k] for k in ("fingerprint", "counts", "warnings", "paths", "vision")}
+        elif o.action == "submit":
+            Rv = creative.submit(o.target, o.review); out = {"review_id": Rv["review_id"], "dir": Rv["_dir"], "bound_to": Rv["bound_to"]}
+        else:
+            from . import project_report
+            out = creative.for_report(project_report.resolve(o.target))
     elif o.cmd == "publish-reports":
         from . import project_report
         n = project_report.publish_site(o.archive or project_report.archive_root(), o.dist); print(f"published {n} report(s) to {o.dist}"); return 0

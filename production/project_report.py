@@ -29,7 +29,7 @@ Rules
   * Comparable. Each report stores the run ids it used, so a later report says whether a department changed because
     it was re-measured or because nothing new was recorded."""
 import datetime, glob, gzip, hashlib, html, importlib.util, json, os, re, sqlite3, subprocess, sys
-from . import REPO, roots, scoring
+from . import REPO, roots, scoring, creative
 
 VERSION = "2.0.0"
 STALE_DAYS = 14
@@ -797,6 +797,9 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
     R["blockers"] = blockers(R, earlier)
     R["summary"] = executive(R)
     R["next_actions"] = next_actions(R)
+    # the Creative Review is read last and feeds nothing above: no score, gate, verdict, priority, plan or trend reads it
+    try: R["creative"] = creative.for_report(P)
+    except Exception as e: R["creative"] = {"status": "unavailable", "why": [f"{type(e).__name__}: {e}"[:200]]}
     R["paths"] = {"dir": run_dir}
     if save != "none":
         os.makedirs(run_dir, exist_ok=True)
@@ -877,11 +880,14 @@ def blockers(R, earlier):
 
 def _title(R, ctx):
     t = None
+    if R["project"].get("path"):   # a checkout names itself (a renamed game keeps its old title in older histories)
+        from . import vision
+        t = vision._readme_pitch(R["project"]["path"])[0]
     try:
         ph = _load(os.path.join(REPO, "studio", "departments", "playcraft", "history.py"))
         for root in (ph.store_root(), ph.archive_root()):
             g = _json(os.path.join(root, "games", R["project"]["id"], "game.json"))
-            if g and g.get("title"): t = g["title"]; break
+            if g and g.get("title") and not t: t = g["title"]; break
     except Exception:
         pass
     if not t:
@@ -993,6 +999,7 @@ def markdown(R):
           "of the evaluated departments only. Not Evaluated departments carry no weight and are never filled in. A previous score is compared only under the same rubric and department method.", "",
           "| Department | Score | Weight | Rubric | Source |", "|---|---|---|---|---|"] + \
          [f"| {d['title'].split(' — ')[0]} | {d['quality']['label']} | {d['quality']['weight']} | `{d['quality']['rubric']}` | {d['quality']['source']} |" for d in R["departments"] if d["quality"]["evaluation"] != "not_applicable"] + [""]
+    L += _creative_md(R.get("creative"))
     L += ["## Evidence and limits", "", "- **Verified**: measured by a department tool (a played build, a rendered UI, a parsed source fact, a check).",
           "- **Observed**: seen while playing or simulated, not a hard measurement.", "- **Inferred (assumption)**: a department's judgement from indirect evidence; confirm before acting alone.",
           "- **Unavailable**: no data; nothing is filled in for it."] + [f"- Not refreshed — {x['department']}: {x['why']}" for x in R["not_refreshed"]] + \
@@ -1012,7 +1019,7 @@ CSS = """
 --ok:#6ad19a;--ok-bg:#16301f;--warn:#e5b062;--warn-bg:#33291a;--bad:#f08a80;--bad-bg:#3a1f1d;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-text-size-adjust:100%;font-variant-numeric:tabular-nums}
 main{max-width:960px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
-a{color:var(--accent)}code{font:12px var(--mono)}
+a{color:var(--accent)}code{font:12px var(--mono);overflow-wrap:anywhere}
 header.top{padding:18px 0 6px}.k{font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
 h1{font:600 32px/1.12 var(--serif);margin:8px 0 12px;text-wrap:balance;letter-spacing:-.01em}
 h2{font:600 21px/1.25 var(--serif);margin:36px 0 12px;text-wrap:balance}h3{font-size:15px;margin:0;line-height:1.3}
@@ -1118,7 +1125,7 @@ def chart_svg(points, key=None, w=640, h=180, label=True):
     return "".join(o)
 
 
-def render_html(R, back=None, downloads=True):
+def render_html(R, back=None, downloads=True, evidence_base=None):
     H = R["health"]; P = R["project"]; G = R.get("gates") or {}; I = R.get("identity") or {}
     md = lambda s: re.sub(r"`(.+?)`", r"<code>\1</code>", re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", _e(s)))
     band = slug(H["band"]); bcls = {"healthy": "ok", "needs-attention": "warn", "at-risk": "bad", "blocked": "bad"}.get(band, "")
@@ -1138,7 +1145,7 @@ def render_html(R, back=None, downloads=True):
                  ("Report", f"<code>{_e(R['report_id'].split('/')[-1])}</code>" + (" · <a href='report.json'>JSON</a> · <a href='report.md'>Markdown</a>" if downloads else ""))))
              + "</dl></header>")
     o.append("<nav class='jump' aria-label='Sections'>" + "".join(f"<a href='#{i}'>{t}</a>" for i, t in (("health", "Summary"), ("top", "Next 3"), ("depts", "Departments"), ("trends", "Trends"),
-             ("gates", "Release gates"), ("findings", "Findings"), ("p0", "Blockers"), ("plan", "Action plan"), ("method", "Scoring"), ("limits", "Evidence"))) + "</nav>")
+             ("gates", "Release gates"), ("findings", "Findings"), ("p0", "Blockers"), ("plan", "Action plan"), ("method", "Scoring"), ("limits", "Evidence")) + ((("creative", "Creative (advisory)"),) if R.get("creative") else ())) + "</nav>")
     # hero: the quality score and, apart from it, the Director's verdict (a gate)
     vp = H.get("vs_previous") or {}
     sc = H["score"]
@@ -1159,6 +1166,7 @@ def render_html(R, back=None, downloads=True):
     else:
         o.append(f"<div class='card verdict'><div class='k'>Director verdict · release gate</div><div class='v' style='color:var(--mute)'>No verdict</div><div class='small'>{_e(G.get('note'))}</div></div>")
     o.append("</section><div class='card'><div class='k'>Executive summary</div><ul class='sum'>" + "".join(f"<li>{md(s)}</li>" for s in R["summary"]) + "</ul></div>")
+    if R.get("creative"): o.append(_creative_card(R["creative"]))
     # the three highest-impact next actions
     o.append("<h2 id='top'>Three highest-impact next actions</h2>")
     if R.get("top_actions"):
@@ -1267,6 +1275,7 @@ def render_html(R, back=None, downloads=True):
              "A previous score is compared only when the rubric and the department's own method are unchanged.</p><div class='tbl'><table><tr><th>Department</th><th>Score</th><th>Weight</th><th>Rubric</th><th>Source</th></tr>"
              + "".join(f"<tr><td>{_e(d['title'].split(' — ')[0])}</td><td>{_e(d['quality']['label'])}</td><td>{d['quality']['weight']}</td><td><code>{_e(d['quality']['rubric'])}</code></td><td>{_e(d['quality']['source'])}</td></tr>" for d in shown)
              + f"</table></div><p class='small' style='margin-bottom:0'>{_e(H['basis'])}.</p></div>")
+    if R.get("creative"): o.append(_creative_section(R["creative"], evidence_base))
     o.append("<h2 id='limits'>Evidence and limits</h2><div class='card small'><p style='margin-top:0'><span class='tag verified'>Verified</span> measured by a department tool · "
              "<span class='tag observed'>Observed</span> seen in play or simulated · <span class='tag inferred'>Inferred (assumption)</span> a judgement to confirm · "
              "<b>Not Evaluated</b> no measured result, nothing filled in.</p>" + "".join(f"<p>Not refreshed — {_e(x['department'])}: {_e(x['why'])}</p>" for x in R["not_refreshed"])
@@ -1274,6 +1283,106 @@ def render_html(R, back=None, downloads=True):
              + "<p style='margin-bottom:0'>Report generation is read-only: it changed no code, merged nothing and deployed nothing.</p></div>")
     o.append(f"<footer>GITCRAFT Production Report {VERSION} · <code>{_e(R['report_id'])}</code></footer></main></body></html>")
     return "".join(o)
+
+
+BASIS_CLS = {"observed_render": "observed", "observed_interaction": "observed", "source_analysis": "verified", "hypothesis_playtest": "inferred"}
+
+
+def _basis(b):
+    return f"<span class='tag {BASIS_CLS.get(b, '')}'>{_e(creative.BASES.get(b, b))}</span>"
+
+
+def _creative_head(C):
+    B = C.get("bound_to") or {}
+    return (f"Judgement by {_e(C.get('reviewer'))} · {_e(str(C.get('created'))[:10])} · commit <code>{_e(str(B.get('commit') or '')[:7])}</code> · "
+            f"vision v{_e(B.get('vision_version'))} " + ("<span class='chip warn'>unapproved draft</span>" if B.get("vision_status") != "approved" else "<span class='chip ok'>approved</span>"))
+
+
+def _creative_card(C):
+    """The advisory Creative Opportunity summary near the top: only a current review's content, never a stale one's."""
+    o = ["<section class='card' style='border-style:dashed'><div class='k'>Creative opportunities · advisory judgement, not scored</div>"]
+    if C["status"] != "current":
+        o.append(f"<p class='small' style='margin:8px 0 0'>A Creative Review exists ({_e(C.get('review_id'))}) but it is <b>{_e(C['status'])}</b>, so it is not shown as a current assessment: "
+                 + _e("; ".join(C.get("why") or [])) + ". Run a new Creative Review to refresh it.</p></section>")
+        return "".join(o)
+    o.append(f"<p class='small' style='margin:6px 0'>{_creative_head(C)}</p>")
+    if C.get("vision_summary"): o.append(f"<p style='margin:6px 0 10px;max-width:72ch'>{_e(C['vision_summary'])}</p>")
+    for x in (C.get("opportunities") or [])[:3]:
+        o.append(f"<div class='f'><span class='tag'>{_e(x.get('tier'))}</span>{_basis(x.get('basis'))}"
+                 + ("<span class='chip warn'>proposal · needs your approval</span> " if x.get("needs_approval") else "") + f"<b>{_e(x.get('title'))}</b>"
+                 f"<div class='small'>{_e(x.get('recommendation'))}</div></div>")
+    o.append("<p class='small' style='margin:8px 0 0'>Advisory only: it does not change any score, release gate, the Director's verdict or the technical action plan. "
+             "<a href='#creative'>Full Creative Review</a></p></section>")
+    return "".join(o)
+
+
+def _creative_section(C, evidence_base=None):
+    o = ["<h2 id='creative'>Creative Review (advisory)</h2>"]
+    if C["status"] != "current":
+        return o[0] + f"<div class='card small'>Not shown: the latest review is {_e(C['status'])} — {_e('; '.join(C.get('why') or []))}.</div>"
+    ev = C.get("evidence") or {}
+    cite = lambda ids: " · ".join(f"<code>{_e(i)}</code>" for i in ids or []) or "—"
+    o.append(f"<div class='card'><p class='small' style='margin-top:0'>{_creative_head(C)}</p>"
+             "<p class='small'>This is a model's judgement against the project's vision, with every claim labelled by what it rests on. It carries no score, is never compared "
+             "run to run, and does not affect department scores, the overall score, release gates, the Director's verdict, P0–P3 or the technical top three. "
+             "Recommendations marked as proposals need your approval before anyone acts on them.</p>")
+    va = C.get("vision_assessment") or {}
+    o.append(f"<h3>Assessment against the vision</h3><p style='max-width:72ch'>{_e(va.get('summary'))}</p>")
+    for part, label in (("delivers", "Delivers"), ("gaps", "Falls short")):
+        for c in va.get(part) or []:
+            o.append(f"<div class='f'><span class='tag'>{label}</span><span class='tag'>{_e(c.get('clause'))}</span>{_basis(c.get('basis'))} {_e(c.get('assessment'))}"
+                     f"<div class='small'>Evidence: {cite(c.get('evidence'))}</div></div>")
+    o.append("<h3 style='margin-top:16px'>Opportunities</h3>")
+    for x in C.get("opportunities") or []:
+        o.append(f"<div class='f'><span class='tag'>{_e(x.get('tier'))}</span>{_basis(x.get('basis'))}"
+                 + ("<span class='chip warn'>beyond the vision · proposal</span> " if x.get("beyond_vision") else "")
+                 + ("<span class='chip warn'>needs your approval</span> " if x.get("needs_approval") else "") + f"<b>{_e(x.get('title'))}</b>"
+                 f"<div class='small'><b>Seen:</b> {_e(x.get('observation'))}</div><div class='small'><b>Why it matters:</b> {_e(x.get('why_it_matters'))}</div>"
+                 f"<div class='small'><b>Change:</b> {_e(x.get('recommendation'))}</div><div class='small'><b>Expected:</b> {_e(x.get('expected_improvement'))}"
+                 + (f" <b>Playtest:</b> {_e(x.get('playtest'))}" if x.get("playtest") else "") + "</div>"
+                 f"<div class='small'>Effort {_e(x.get('effort'))} · risk {_e(x.get('risk'))} · confidence {_e(x.get('confidence'))} · "
+                 + (f"vision clause <code>{_e(x.get('vision_clause'))}</code> · " if x.get("vision_clause") else "") + f"evidence {cite(x.get('evidence'))}</div></div>")
+    o.append("<h3 style='margin-top:16px'>What works</h3>")
+    if not C.get("strengths"): o.append(f"<p class='small'>{_e(C.get('strengths_note') or 'None earned yet.')}</p>")
+    for x in C.get("strengths") or []:
+        o.append(f"<div class='f'>{_basis(x.get('basis'))}<b>{_e(x.get('title'))}</b><div class='small'>{_e(x.get('observation'))} {_e(x.get('why_it_works'))}</div>"
+                 + (f"<div class='small'><b>Protect:</b> {_e(x.get('protect'))}</div>" if x.get("protect") else "") + f"<div class='small'>Evidence: {cite(x.get('evidence'))}</div></div>")
+    G = C.get("gameplay")
+    if G:
+        o.append("<h3 style='margin-top:16px'>Gameplay</h3>")
+        for k, label in (("observed", "Observed in automated play"), ("source_based", "From source and design data"), ("hypotheses", "Hypotheses for a human playtest")):
+            o.append(f"<p class='small' style='margin:10px 0 2px'><b>{label}</b></p>")
+            for c in G.get(k) or []:
+                o.append(f"<div class='f'>{_e(c.get('claim'))}" + (f"<div class='small'><b>Playtest:</b> {_e(c.get('playtest'))}</div>" if c.get("playtest") else "")
+                         + f"<div class='small'>Evidence: {cite(c.get('evidence'))}</div></div>")
+            if not G.get(k): o.append("<p class='small'>None.</p>")
+    shots = [e for e in (C.get("evidence") or {}).values() if e.get("file")]
+    if shots:   # what the reviewer looked at, so a reader can check every observed claim
+        base = evidence_base if evidence_base is not None else (C.get("dir") or "") + "/"
+        o.append("<h3 style='margin-top:16px'>Captures the review cites</h3><div class='multi' style='grid-template-columns:repeat(auto-fill,minmax(150px,1fr))'>"
+                 + "".join(f"<figure style='margin:0'><img src='{_e(base + e['file'])}' alt='{_e(e['id'])}' loading='lazy' style='width:100%;border-radius:8px;border:1px solid var(--line)'>"
+                           f"<figcaption class='small'><code>{_e(e['id'])}</code></figcaption></figure>" for e in shots) + "</div>")
+    cov = C.get("coverage") or {}
+    o.append(f"<p class='small' style='margin-bottom:0'>Coverage: {len(cov.get('viewed') or [])} captures viewed of {(cov.get('pack_counts') or {}).get('screenshot', 0)} screenshots and "
+             f"{(cov.get('pack_counts') or {}).get('play_frame', 0)} play frames. " + _e(cov.get("not_seen") or "") + f" Review <code>{_e(C['review_id'])}</code>; cited images are kept with it.</p></div>")
+    return "".join(o)
+
+
+def _creative_md(C):
+    if not C: return []
+    L = ["## Creative Review (advisory, not scored)", ""]
+    if C["status"] != "current":
+        return L + [f"The latest review ({C.get('review_id')}) is **{C['status']}** and is not shown as a current assessment: " + "; ".join(C.get("why") or []) + ".", ""]
+    B = C["bound_to"]
+    L += [f"Judgement by {C.get('reviewer')} · commit `{str(B.get('commit') or '')[:7]}` · vision v{B.get('vision_version')} ({'approved' if B.get('vision_status') == 'approved' else 'unapproved draft'}). "
+          "It does not change any score, gate, verdict, priority or the technical plan.", "", f"**Assessment against the vision:** {(C.get('vision_assessment') or {}).get('summary')}", ""]
+    L += [f"- **{x.get('tier')}** · {creative.BASES.get(x.get('basis'), x.get('basis'))}" + (" · proposal, needs approval" if x.get("needs_approval") else "") + f" — {x.get('title')}: {x.get('recommendation')}"
+          for x in C.get("opportunities") or []] + [""]
+    L += ["What works:", ""] + ([f"- {x.get('title')}: {x.get('why_it_works')}" for x in C.get("strengths") or []] or [f"- {C.get('strengths_note') or 'None earned yet.'}"]) + [""]
+    if C.get("gameplay"):
+        for k, label in (("observed", "Observed in automated play"), ("source_based", "From source and design data"), ("hypotheses", "Hypotheses for a human playtest")):
+            L += [f"{label}:", ""] + ([f"- {c.get('claim')}" for c in C["gameplay"].get(k) or []] or ["- None."]) + [""]
+    return L
 
 
 def _act(a):
@@ -1319,7 +1428,13 @@ def publish_site(archive, dist):
         for i, (g, stamp, R, p) in enumerate(rs):
             R["trend"] = scoring.series([x[2] for x in rs[max(0, i - 11):i]], R)   # the archive's own history, as published
             out = os.path.join(dist, pid, stamp); os.makedirs(out, exist_ok=True)
-            with open(os.path.join(out, "index.html"), "w") as f: f.write(render_html(R, back="../../"))
+            C = R.get("creative") or {}
+            src = os.path.join(REPO, os.path.relpath(C["dir"], C["dir"][:C["dir"].index("history/creative")])) if "history/creative" in str(C.get("dir") or "") else None
+            for e in (C.get("evidence") or {}).values() if C.get("status") == "current" and src else []:
+                if e.get("file") and os.path.isfile(os.path.join(src, e["file"])):
+                    os.makedirs(os.path.join(out, "creative", os.path.dirname(e["file"])), exist_ok=True)
+                    shutil.copy(os.path.join(src, e["file"]), os.path.join(out, "creative", e["file"]))
+            with open(os.path.join(out, "index.html"), "w") as f: f.write(render_html(R, back="../../", evidence_base="creative/"))
             shutil.copy(p, os.path.join(out, "report.json"))
             md = os.path.join(os.path.dirname(p), "report.md")
             if os.path.isfile(md): shutil.copy(md, os.path.join(out, "report.md"))
