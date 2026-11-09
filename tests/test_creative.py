@@ -216,7 +216,7 @@ check("stale: the report says so and shows none of its opportunities as a curren
 K2 = CR.pack(game, [pc, px])
 Rv2 = CR.submit(K2["paths"]["pack"], GOOD)
 check("a new review against the approved vision is current and says 'approved'", st()["status"] == "current" and "<span class='chip ok'>approved</span>" in PR.render_html(PR.generate(game, refresh="none", save="none")))
-open(os.path.join(game, "src", "main.js"), "a").write("// change\n"); git("commit", "-qam", "change")
+open(os.path.join(game, "src", "main.js"), "a").write("// change\n"); git("-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qam", "change")
 C = st()
 check("stale: a new commit makes the review stale", C["status"] == "stale" and any("now at" in w for w in C["why"]), C)
 C = CR.for_report({"id": K["project"]["id"], "head": None})
