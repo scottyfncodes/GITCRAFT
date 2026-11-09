@@ -76,7 +76,7 @@ check("plan: an animated character goes 3D model → AnimCraft rig → AnimCraft
 check("plan: the animated GLB ships into the project and integration waits for it", T["anim.1.clips"]["ship"]["roles"] == ["animated_mesh"]
       and "anim.1.clips" in T["integrate.assets"]["depends_on"])
 check("plan: built-in tasks are gated (integration and scaffold used to pass a partial failure)", T["integrate.assets"]["gate"] and T["foundation.scaffold"]["gate"])
-check("plan: PLAYCRAFT runs after DESIGNCRAFT, so its fix orders can carry the design proposals", "qa.designcraft" in T["qa.playcraft"]["depends_on"])
+check("plan: DESIGNCRAFT and PLAYCRAFT stay in the parallel QA wave", T["qa.playcraft"]["depends_on"] == ["build"] and T["qa.designcraft"]["depends_on"] == ["build"])
 s2, d2, pl2 = plan("Build a 3D low-poly island game with a 3D model of a lighthouse, animated", "lighthouse")
 check("plan: a prop is never auto-rigged (autorig replaces an armature)", not any(t.startswith("anim.") for t in pl2["tasks"]) and any("animation asked" in a for a in s2["assumptions"]))
 

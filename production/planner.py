@@ -215,8 +215,7 @@ def build(spec, disc):
             qa.append("qa.playcraft")
             add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
                   params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
-                  # after DESIGNCRAFT (static, quick), so a failed gameplay gate's fix carries its design proposals too
-                  deps=["build"] + (["qa.designcraft"] if q.get("designcraft") else []), resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
+                  deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
         if q.get("pixelcraft"):
             qa.append("qa.pixelcraft")

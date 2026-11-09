@@ -755,7 +755,7 @@ def _remediate(prod, t, res, gr):
         t["exhausted"] = True
         store.event(prod, "quality_gate_exhausted", task=t["id"], rounds=rnd - 1); return
     fix_id, rv_id = f"fix.{root}.r{rnd}", f"{root}.r{rnd}"
-    design = None
+    design = None   # DESIGNCRAFT runs beside PLAYCRAFT (static, seconds) and is nearly always done when a gameplay fix is written
     if t.get("department") == "playcraft" and "qa.designcraft" in prod["tasks"]:
         design = (eff(prod, "qa.designcraft").get("result") or {}).get("proposals")
     items = gates.remediation(t, res, gr, design)
