@@ -186,6 +186,10 @@ def overall_delta(prev, H):
     pv = ph.get("score"); pm = ph.get("method") or LEGACY_METHOD
     if pv is None or H.get("score") is None: return {"previous": pv, "delta": None, "compare": "no overall score in one of the two reports"}
     if pm != H["method"]: return {"previous": pv, "previous_method": pm, "delta": None, "compare": f"not comparable: the overall method changed ({pm} → {H['method']})"}
+    pp, cp = set((ph.get("parts") or {})), set((H.get("parts") or {}))
+    if ph.get("parts") is not None and pp != cp:   # a different set of departments is a different average, not a change in quality
+        diff = ", ".join([f"+{x}" for x in sorted(cp - pp)] + [f"-{x}" for x in sorted(pp - cp)])
+        return {"previous": pv, "delta": None, "compare": f"not comparable: different departments were evaluated ({diff})"}
     return {"previous": pv, "delta": round(H["score"] - pv, 1), "compare": "same method"}
 
 

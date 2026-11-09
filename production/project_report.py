@@ -951,6 +951,7 @@ def regressions(R):
     if not R["changes"].get("first"):
         new = set(R["changes"].get("new_findings") or [])
         for d in R["departments"]:
+            if d["quality"].get("previous") is None: continue   # not measured last time: its findings are first findings, not regressions
             for f in d["findings"]:
                 if f["key"] in new and f["severity"] in ("critical", "major") and f["level"] != "inferred" and not f["id"].startswith("regression:"):
                     out.append({"department": d["id"], "title": f"New since the previous report: {f['title']}", "level": f["level"], "kind": "new_finding"})

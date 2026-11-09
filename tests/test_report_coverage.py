@@ -158,6 +158,16 @@ check("no runtime: every Studio refresh is Not Evaluated (no score, no weight) w
 check("quick refresh: TestCraft and AssetCraft are not run, and the report says how to measure them",
       all("refresh=full" in ({d["id"]: d for d in PR.generate(game, refresh="quick", save="none")["departments"]}[i]["refresh"]["detail"] or "") for i in ("testcraft", "assetcraft")))
 
+# a department measured for the first time: its findings are first findings, not regressions; the overall score is not compared
+PR._studio_call = lambda action, args, timeout=3600, env=None: (None, "the Studio runtime is not installed (/x); scripts/install-studio.sh")
+Rq = PR.generate(game, refresh="quick", save="store")   # PLAYCRAFT, TestCraft, AssetCraft not measured
+PR._studio_call = fake
+Rf = PR.generate(game, refresh="full", save="store")    # now measured
+check("regressions: findings of a department that was not measured in the previous report are never called regressions",
+      not any(x["department"] in ("playcraft", "testcraft", "assetcraft") for x in Rf["regressions"]), Rf["regressions"])
+check("overall: a different set of evaluated departments is not compared (no overall delta, the difference named)",
+      Rf["health"]["vs_previous"]["delta"] is None and "different departments" in Rf["health"]["vs_previous"]["compare"], Rf["health"]["vs_previous"])
+
 # deltas: only under the same rubric and method
 PR._studio_call = fake
 R2 = PR.generate(game, refresh="full", save="store")
