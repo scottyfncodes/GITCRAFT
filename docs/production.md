@@ -255,6 +255,37 @@ re-plan an in-flight v2 production with `production_revise` after a rollback.
   failed). An optional one is recorded as not delivered instead of asking anyone. Changing department is a plan revision.
 - **v1 records are unchanged**: no optional criteria, no routing, no escalation.
 
+### Layered QA (plan v2)
+
+A build that completed is not a product that was verified. Every check belongs to one of three layers
+(`production/qa.py`); the layers are a view over the checks, not a second verdict or a second routing system:
+failures go through the remediation path above (owner, optionality, bounded rounds, escalation) and the verdict is
+still the acceptance criteria's.
+
+| Layer | What it checks | Tasks | A failure goes to |
+|---|---|---|---|
+| **Department QA** | each deliverable before hand-off: the department's own checks, plus `deliverables` (the files integration will ship exist and validate, by ship role and format) | every production task, the build, build.wire | that department (re-run, seed varied); the agent for code |
+| **Integration QA** | the assembled product: transactional integration, the final manifest, every integrated asset opens and is loaded by the build, licences, the icon wired in, the build loads with no missing file | `integrate.*`, `qa.assets`, `qa.licences`, `qa.icons`, `qa.smoke` | the department that made a defective file; the agent for wiring |
+| **Product QA** | the finished product against the request, plus the evaluators | `qa.request`, `qa.features`, PIXELCRAFT, PLAYCRAFT, DESIGNCRAFT, `qa.perf`, `qa.standards`, `qa.preserve`, `qa.attribution`, `release.regression` | the agent (code) |
+
+`qa.request` (criterion `request_fulfilled`, required, a release standard) reads the project's source, never runs it,
+and makes no model call. **Objective** (BLOCKER): the entry page exists and names the product; every requested feature
+with a necessary, machine-checkable signal shows it: requested sound → the build plays audio; accounts → a sign-in
+surface; mobile → a viewport, and touch or pointer input in a game; accessibility → a page language and alt text on
+every image. Only what the person stated counts: an extra GITCRAFT implied is never a missing-feature blocker.
+**Advisory** (never blocks, never routed, never re-run): unrequested additions (audio nobody asked for, a password
+field without accounts) and coherence suggestions (the product's name on its page, the identity palette in the styles,
+leftover TODO or lorem ipsum text). In an existing project `qa.request` is advisory, like the engineering standard.
+
+Every report (`REPORT.md`, `production_status` → `qa`) shows the three layers (passed / failed / incomplete / pending /
+not run), one line — `BUILT · PRODUCT VERIFIED`, `BUILT · NOT VERIFIED (…)` or `NOT BUILT (…)` — and every finding
+with its layer, criterion (and whether it is optional), severity (blocker, incomplete, optional, advisory), owner, who it
+was routed to, evidence, resolution (resolved in round n, being fixed, open, retries exhausted, escalated, declined,
+not delivered (optional), unavailable, unverified, listed) and retry / escalation status (n of the limit). Known limits:
+`qa.licences` reports counts, not files, so a licence failure is still the agent's; `qa.request`'s signals are
+necessary conditions, not proof a feature works (`qa.features`, PLAYCRAFT and PIXELCRAFT measure that). v1 records get
+neither `qa.request` nor the `deliverables` gate.
+
 ## Task states
 
 | State | Meaning |

@@ -96,6 +96,8 @@ jobs:
 
       - name: Orchestration (plan v2 graph, transactional integration, ownership, consolidated approval, v1 compatibility)
         run: python3 tests/test_orchestration.py
+      - name: Layered QA (department, integration and product QA; routing, retries, optional, unavailable, verdicts)
+        run: python3 tests/test_layered_qa.py
       - name: Creative Review (advisory, never scored; technical output identical with and without it)
         run: python3 tests/test_creative.py
 

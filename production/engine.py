@@ -222,9 +222,12 @@ def _discover_and_plan(prod):
     measured = {t.get("criterion") for t in pl["tasks"].values()}
     have = {c["id"] for c in spec["acceptance"]}
     for cid, text in (("asset_integrity", "Every integrated asset opens as its format and is referenced by the build"),
-                      ("licensing", "Every shipped asset has a recorded licence; nothing non-commercial or no-derivatives")):
+                      ("licensing", "Every shipped asset has a recorded licence; nothing non-commercial or no-derivatives"),
+                      ("request_fulfilled", "Product QA: the finished product delivers what was asked (every requested feature shows in the build); "
+                                            "unrequested additions and coherence suggestions are listed, never blocking")):
         if cid in measured and cid not in have:   # planning may add criteria (the project's existing assets), never remove one
-            spec["acceptance"].insert(-1, {"id": cid, "text": text, "measured_by": "planning: the project has assets"})
+            spec["acceptance"].insert(-1, {"id": cid, "text": text, "measured_by": "qa.request" if cid == "request_fulfilled" else "planning: the project has assets",
+                                           "required": True, "source": "standard"})
     unmeasured = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
     problems = planner.validate(pl, disc) + [f"optional_criteria: {c} was named in the prompt or is a GITCRAFT release standard, so it stays required "
                                              "(only extras GITCRAFT added can be made optional)" for c in spec.get("optional_refused") or []]
@@ -765,7 +768,7 @@ def _finish(prod, t, res):
         _set(prod, t, NEEDS_APPROVAL, reason=res.get("reason"), approval=res.get("approval")); return
     if cls == "blocked":   # a department that reports blocked lacks a runtime or capability here: unavailable, never a defect
         _set(prod, t, BLOCKED, reason=res.get("reason"), install=res.get("install"), alternatives=res.get("alternatives"),
-             unavailable=t["kind"] in ("studio", "forgecraft", "designcraft")); return
+             unavailable=t["kind"] in ("studio", "forgecraft", "designcraft") or bool(res.get("install"))); return
     if cls in ("execution",) and len([a for a in t["attempts"] if a.get("outcome") == "execution"]) <= t["retries"]:
         _set(prod, t, PENDING, reason=f"retrying after an execution failure: {att['error']}"); return
     if cls in ("execution", "request") or res.get("failure") in ("handoff", "conflict"):
@@ -773,7 +776,7 @@ def _finish(prod, t, res):
              reason="not retried: the request itself is the problem" if cls == "request" else None); return
     # the department ran: the task is complete; only its gate decides passed
     _set(prod, t, COMPLETE)
-    gr = gates.evaluate(t, res, {"project": _project(prod), "integrated": _integrated(prod)})
+    gr = gates.evaluate(t, res, {"project": _project(prod), "integrated": _integrated(prod), "outputs": t["outputs"]})
     t["gate_results"] = gr
     if t.get("advisory"):   # recorded evidence that never blocks (and is never "remediated")
         _set(prod, t, PASSED if res.get("status") == "ok" else FAILED, reason="advisory"); return
@@ -811,6 +814,7 @@ def _remediate(prod, t, res, gr):
     if t["stage"] not in ("qa", "release") or t["kind"] == "builtin" and t["action"] == "release": return
     root = t.get("chain") or t["id"]; rnd = (t.get("round") or 0) + 1
     maxr = prod["spec"]["quality"].get("max_rounds", 2)
+    t["routed"] = {"to": ["agent"]}
     if rnd > maxr:
         t["exhausted"] = True
         store.event(prod, "quality_gate_exhausted", task=t["id"], rounds=rnd - 1); return
@@ -867,6 +871,7 @@ def _department_rework(prod, t, route, force=False):
     escalated to a person (an optional one is recorded as not delivered), never retried automatically."""
     producers, why = route
     maxr = DEPARTMENT_ROUNDS
+    t["routed"] = {"to": sorted({prod["tasks"][p]["owner"] for p in producers}), "producers": list(producers), "because": why}   # read by qa.findings
     qa_root = None if t["stage"] == "production" else (t.get("chain") or t["id"])
     new_integrations = []
     for p in producers:
@@ -1168,4 +1173,10 @@ def status(prod_or_id, store_dir=None):
             "release": {k: rs[k] for k in ("deployment", "functional", "security", "visual", "blockers", "unverified", "advisories", "verification_complete")}, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
             "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
             "report": os.path.join(prod["store"], "REPORT.md"), "production_report": prod.get("production_report"),
-            "plan_version": prod.get("plan_version", 1), "replace_assets": replace_assets_request(prod)}
+            "plan_version": prod.get("plan_version", 1), "replace_assets": replace_assets_request(prod), "qa": _qa_view(prod)}
+
+
+def _qa_view(prod):
+    from . import qa
+    A = qa.assurance(prod)
+    return {"line": A["line"], "layers": A["layers"], "findings": [f for f in qa.findings(prod) if not f["status"].startswith("resolved")][:30]}

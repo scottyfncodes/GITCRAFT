@@ -70,8 +70,9 @@ check("v2: every QA and release task measures the final wired build (build.wire 
       all({"build.wire", "integrate.final"} <= upstream_of(T2, t) for t in qa), [t for t in qa if not {"build.wire", "integrate.final"} <= upstream_of(T2, t)])
 check("v2: the icon choice is off the code path but on the release path (qa.icons and release depend on icon.select)",
       "icon.select" not in up and "icon.select" in upstream_of(T2, "qa.icons") and "icon.select" in upstream_of(T2, "release.report"))
-check("v2: no required criterion is dropped or downgraded (same criteria measured, none made advisory)",
-      {t.get("criterion") for t in T1.values()} == {t.get("criterion") for t in T2.values()}
+check("v2: no required criterion is dropped or downgraded (every v1 criterion measured, none made advisory; v2 adds only Product QA's request_fulfilled)",
+      {t.get("criterion") for t in T2.values()} - {t.get("criterion") for t in T1.values()} == {"request_fulfilled"}
+      and {t.get("criterion") for t in T1.values()} <= {t.get("criterion") for t in T2.values()}
       and {t.get("criterion") for t in T1.values() if t.get("advisory")} == {t.get("criterion") for t in T2.values() if t.get("advisory")})
 check("v2: qa.assets checks real references (strict), never the manifest", any(g.get("type") == "referenced" and g.get("strict") for g in T2["qa.assets"]["gate"]))
 check("v2: the build work order builds on placeholders and leaves the icon and the manifest alone; build.wire wires both",

@@ -153,6 +153,8 @@ def markdown(prod, release=False):
     miss = [x for x in acc if x["status"] == "optional_missing"]
     if miss: L += ["## Optional, not delivered", "", "Made optional by a person in the Decision Room; the release does not wait for them, and they are never hidden:", ""] + \
                   [f"- {x['id']}: {'; '.join(map(str, x.get('why') or []))[:300]}" for x in miss] + [""]
+    from . import qa
+    L += qa.markdown(prod)
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]
     for a in acc:
         seen = {}
