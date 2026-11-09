@@ -75,6 +75,13 @@ iPhone 13 and desktop (plus narrow, tablet, landscape), scores Visual Quality,
 Usability and Consistency with evidence and coverage, and never edits the app.
 For games, run it beside PLAYCRAFT (it measures the HTML UI, not the canvas).
 
+Before designing, redesigning or polishing an interface (screens, menus, HUD,
+"make it look good", a generic-looking UI), follow the `ui-design` skill:
+Explore distinct directions only when there is none, Build on the project's own
+tokens, Audit the rendered result with PIXELCRAFT (incl. its advisory generic-
+design tells), Refine what was found, then stop. The project's own art
+direction always wins; never replace an established identity unasked.
+
 "Run Creative Review" (only when the person asks for one): follow the
 `creative-review` skill. An advisory, evidence-cited judgement of the rendered
 product against its vision (studiocraft `production_vision`, then

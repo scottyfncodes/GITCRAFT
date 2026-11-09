@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nimbus: generic landing (PIXELCRAFT tells fixture)</title>
+<style>
+  /* Every default an unguided build reaches for, on purpose: PIXELCRAFT should raise each tell once. */
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, system-ui, sans-serif; color: #1f2937; background: #f9fafb; }
+  .hero { padding: 72px 24px; background: linear-gradient(135deg, #7c3aed, #4f46e5 50%, #2563eb); color: #fff; text-align: center; }
+  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 8px; opacity: .9; }
+  h1 { font-size: 40px; margin: 0 0 16px; }
+  .grad { background: linear-gradient(90deg, #f472b6, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .cta { display: inline-block; padding: 14px 28px; border-radius: 999px; background: #fff; color: #4f46e5; text-decoration: none; font-weight: 600;
+         box-shadow: 0 0 24px rgba(139, 92, 246, .8); }
+  main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; padding: 20px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; }
+  .card { padding: 20px; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .card h3 { margin: 0 0 8px; font-size: 18px; }
+  .callout { margin: 32px 0; padding: 16px 20px; background: #eef2ff; border-left: 4px solid #6366f1; border-radius: 6px; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .actions button { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #d1d5db; background: #fff; font: inherit; }
+</style></head>
+<body>
+  <section class="hero">
+    <p class="eyebrow">Introducing Nimbus</p>
+    <h1>Work smarter with <span class="grad">AI-powered</span> flow</h1>
+    <a class="cta" href="#start">Get started</a>
+  </section>
+  <main id="start">
+    <p class="eyebrow" style="color:#6366f1">Features</p>
+    <h2>Everything you need</h2>
+    <div class="features">
+      <div class="card"><h3>🚀 Fast setup</h3><p>Go from zero to shipped in minutes with smart defaults.</p></div>
+      <div class="card"><h3>🔒 Secure by default</h3><p>Enterprise-grade protection for every workflow you run.</p></div>
+      <div class="card"><h3>📊 Insights</h3><p>Understand your team with real-time analytics dashboards.</p></div>
+    </div>
+    <div class="callout"><strong>Tip:</strong> connect your calendar to unlock smart scheduling across every project.</div>
+    <div class="actions"><button>✨ Generate</button><button>📁 Import</button><button>Share 🔗</button></div>
+  </main>
+</body></html>

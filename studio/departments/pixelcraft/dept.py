@@ -27,7 +27,7 @@ def _load(name):
     spec = _ilu.spec_from_file_location(f"pixelcraft_{name}", os.path.join(HERE, f"{name}.py")); m = _ilu.module_from_spec(spec); spec.loader.exec_module(m); return m
 
 
-measure = _load("measure"); rubric = _load("rubric"); report = _load("report"); site = _load("site")
+measure = _load("measure"); rubric = _load("rubric"); report = _load("report"); site = _load("site"); tells = _load("tells")
 
 # iPhone-first viewport profiles (CSS pixels). Safe-area insets are the devices' own, emulated through CDP.
 PROFILES = {
@@ -131,7 +131,7 @@ def _probe(ctx, target, vps, p, screens=None, journeys=None):
            "max_screens": p.get("max_screens", 8), "max_depth": p.get("max_depth", 2), "wait_ms": p.get("wait_ms", 600),
            "state_viewports": p.get("state_viewports") or [v["name"] for v in vps if v["name"] in ("iphone17", "desktop")] or [vps[0]["name"]],
            "toolbar_viewports": [v["name"] for v in vps if v.get("mobile") and v["height"] > v["width"]][:2],
-           "reduced_motion": p.get("reduced_motion", False), "allow_origins": p.get("allow_origins") or []}
+           "reduced_motion": p.get("reduced_motion", False), "allow_origins": p.get("allow_origins") or [], "tells": p.get("tells", True)}
     ctx.used("studio_pixelcraft", "playwright", "chromium")
     if axe: ctx.used("axe-core")
     n = len(screens or p.get("screens") or []) or p.get("max_screens", 8)
@@ -204,10 +204,12 @@ def _assemble(ctx, app, vps, req, res, p, judgements, physical):
          "gallery": [{"screen": c["screen"], "viewport": c["viewport"], "thumb": c.get("thumb"), "shot": c.get("shot_rel"), "full": c.get("full_rel")} for c in res["captures"] if c.get("thumb")],
          "captures": [{k: c.get(k) for k in ("screen", "viewport", "load_ms", "error", "page_errors", "console_errors", "cls", "shot_rel", "full_rel")} | {"axe": {"violations": [{"id": v["id"], "impact": v["impact"], "count": v["count"]} for v in (c.get("axe") or {}).get("violations", [])]} if c.get("axe") else None} for c in res["captures"]],
          "physical": physical, "judgements": judgements,
+         "tells": tells.aggregate(res["captures"], p.get("accept_tells")) if req.get("tells", True) else None,
          "evidence_mix": _mix(C.metrics),
          "limits": _limits(vps, res, physical, req["target"]),
          "replay": {"target": req["target"], "viewports": vps, "screens": res["screens"], "journeys": res.get("journeys_used") or [], "max_screens": req["max_screens"],
-                    "wait_ms": req["wait_ms"], "state_viewports": req["state_viewports"], "axe": req["axe"], "method": rubric.METHOD, "allow_origins": req["allow_origins"]}}
+                    "wait_ms": req["wait_ms"], "state_viewports": req["state_viewports"], "axe": req["axe"], "method": rubric.METHOD, "allow_origins": req["allow_origins"],
+                    "tells": req.get("tells", True), "accept_tells": p.get("accept_tells") or []}}
     json.dump(res, open(ctx.path("probe.json"), "w"), default=str)
     return A, caps, sheet
 
@@ -232,7 +234,8 @@ def _summary(A):
             "coverage": {k: c["coverage"] for k, c in A["categories"].items()},
             "screens": [s["name"] for s in A["screens"]], "viewports": [v["name"] for v in A["viewports"]],
             "top_findings": [{"title": f["title"], "severity": f["severity"], "frequency": f["frequency"], "evidence": f["evidence"], "fix": f["recommendation"]} for f in A["findings"][:8]],
-            "findings": len(A["findings"])}
+            "findings": len(A["findings"]),
+            "design_tells": [{"id": r["id"], "title": r["title"], "count": r["count"], "ask": r["ask"]} for r in (A.get("tells") or {}).get("raised", [])]}
 
 
 # ---------------------------------------------------------------- history (append-only)
@@ -368,7 +371,8 @@ def verify(ctx, p):
     app["git"] = _git_state(proj or (target.get("root") if target["kind"] == "folder" else None)); app["target"] = target.get("url") or target.get("root")
     vps = rp["viewports"]
     # exactly the baseline's probe: same screens (with their steps), viewports, journeys, state sampling, method
-    params = {"axe": rp.get("axe", True), "wait_ms": rp.get("wait_ms", 600), "state_viewports": rp.get("state_viewports"), "max_screens": rp.get("max_screens", 8), "allow_origins": rp.get("allow_origins")}
+    params = {"axe": rp.get("axe", True), "wait_ms": rp.get("wait_ms", 600), "state_viewports": rp.get("state_viewports"), "max_screens": rp.get("max_screens", 8), "allow_origins": rp.get("allow_origins"),
+              "tells": rp.get("tells", True), "accept_tells": p.get("accept_tells") if p.get("accept_tells") is not None else rp.get("accept_tells") or []}
     screens = [{k: v for k, v in s.items() if k in ("name", "path", "steps", "depth", "via", "link_steps")} for s in rp["screens"]]
     req, res = _probe(ctx, target, vps, params, screens=screens, journeys=rp.get("journeys") or [])
     judgements = _judgements({"judgements": p.get("judgements") or before.get("judgements") or []}) if (p.get("judgements") or before.get("judgements")) else []
@@ -376,6 +380,7 @@ def verify(ctx, p):
     A["replay"]["journeys"] = rp.get("journeys") or []
     A["_dir"] = ctx.out_dir
     cmp = compare(before, A, ctx.out_dir); A.pop("_dir", None)
+    if A.get("tells"): cmp["tells"] = tells.compare(before.get("tells"), A["tells"])   # informational: a tell is never a regression
     A["comparison"] = cmp; A["baseline"] = {"path": bpath, "created": before.get("created"), "git": (before["app"].get("git") or {}).get("head"), "overall": before["overall"]["score"]}
     if p.get("changes"): A["changes"] = p["changes"]
     outs = _write(ctx, A, sheet)

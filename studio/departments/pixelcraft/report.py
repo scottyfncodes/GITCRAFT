@@ -129,9 +129,19 @@ def markdown(A):
     for j in A["journeys"]:
         L.append(f"| {j['name']}{' (auto)' if j.get('auto') else ''} | {j['viewport']} | {'ok' if j['ok'] else 'FAILED'} | {j['taps']} | {j.get('expected_taps') or '—'} | {j['confirmations']} | "
                  + ", ".join(str(s.get('feedback_ms')) for s in j['steps'] if s.get('tap')) + " |")
+    L += _tells_md(A)
     L += ["", "## Evidence and limits", ""] + [f"- {x}" for x in A["limits"]]
     if A.get("comparison"): L += ["", comparison_md(A["comparison"])]
     return "\n".join(L) + "\n"
+
+
+def _tells_md(A):
+    import importlib.util as u
+    spec = u.spec_from_file_location("pixelcraft_tells_r", os.path.join(os.path.dirname(os.path.abspath(__file__)), "tells.py")); m = u.module_from_spec(spec); spec.loader.exec_module(m)
+    L = m.markdown(A.get("tells"))
+    t = (A.get("comparison") or {}).get("tells")
+    if t: L += ["", f"Tells since the baseline (informational): resolved {', '.join(t['resolved']) or 'none'} · persisting {', '.join(t['persisting']) or 'none'} · new {', '.join(t['new']) or 'none'}."]
+    return L
 
 
 def comparison_md(cmp):
@@ -229,5 +239,13 @@ def html_report(A):
         H.append(f"</table><p>Resolved {len(cmp['resolved'])} · persisting {len(cmp['persisting'])} · new {len(cmp['new'])} · regressions {len(cmp['regressions'])} · coverage lost: {_e(', '.join(cmp['coverage_lost']) or 'none')}</p><ul>")
         H += [f"<li>✅ {_e(r['title'])}</li>" for r in cmp["resolved"]] + [f"<li>❌ {_e(r)}</li>" for r in cmp["regressions"]] + [f"<li>⚠️ new: {_e(r['title'])}</li>" for r in cmp["new"]]
         H.append("</ul></div><div class=gal>" + "".join(f"<figure><img loading=lazy src='{_e(d['diff'])}'><figcaption>{_e(d['screen'])} · {_e(d['viewport'])} · {d['changed_pct']}% changed</figcaption></figure>" for d in cmp["screens"]) + "</div>")
+    T = A.get("tells")
+    if T:
+        H.append("<h2>Generic design tells <span class=sub>(advisory, not scored)</span></h2><div class='card tbl'><p class=sub>Defaults unguided builds reach for, read from the rendered page. "
+                 "Each is a question, not a defect: the project's own art direction wins. Accept a deliberate one with <code>accept_tells</code>.</p><ul>")
+        H += [f"<li><b>{_e(r['title'])}</b> — {r['count']}× on {_e(', '.join(r['screens']))}. {_e(r['why'])} <i>Ask:</i> {_e(r['ask'])}"
+              + "".join(f"<br><code>{_e(x['sel'])}</code> {_e(x.get('text'))} · {_e(x['screen'])} @ {_e(x['viewport'])}" for x in r["examples"][:3]) + "</li>" for r in T["raised"]]
+        H += [f"<li>Accepted: <b>{_e(r['title'])}</b> ({r['count']}×) — {_e(r['accepted'])}</li>" for r in T["accepted"]]
+        H.append(("<li>None raised.</li>" if not T["raised"] and not T["accepted"] else "") + "</ul></div>")
     H.append("<h2>Evidence and limits</h2><ul class=sub>" + "".join(f"<li>{_e(x)}</li>" for x in A["limits"]) + "</ul></main></body></html>")
     return "".join(H)

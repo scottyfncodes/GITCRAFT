@@ -279,6 +279,15 @@
       "type": "boolean",
       "default": true,
       "description": "record the run in the PIXELCRAFT history"
+     },
+     "accept_tells": {
+      "type": "array",
+      "description": "generic design tells the project chose on purpose (its art direction): [{id: 'glow_shadow', reason: 'neon arcade HUD'}] or ids; listed as accepted instead of raised. Tells are advisory and never scored (ids: gradient_text, violet_gradient, glow_shadow, accent_stripe, nested_cards, emoji_icons, eyebrow, default_type)"
+     },
+     "tells": {
+      "type": "boolean",
+      "default": true,
+      "description": "read the rendered pages for generic design tells (advisory, unscored)"
      }
     }
    }
@@ -343,6 +352,10 @@
      "record": {
       "type": "boolean",
       "default": true
+     },
+     "accept_tells": {
+      "type": "array",
+      "description": "generic design tells the project chose on purpose (its art direction): [{id: 'glow_shadow', reason: 'neon arcade HUD'}] or ids; listed as accepted instead of raised. Tells are advisory and never scored (ids: gradient_text, violet_gradient, glow_shadow, accent_stripe, nested_cards, emoji_icons, eyebrow, default_type); default: the baseline's"
      }
     }
    }
