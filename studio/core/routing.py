@@ -8,6 +8,9 @@ import re
 from . import contract
 
 THREE_D = ["3d model", "3d", "mesh", "glb", "low-poly model", "model of", "sculpt", "character model", "prop model", "fbx", "blender model"]
+# game design (missions, story, systems, balance) is DESIGNCRAFT (gamedesign/), not a Studio department: pointed at, like 3D
+GAME_DESIGN = ["game design", "design review", "mission design", "quest design", "narrative design", "story review", "level design review",
+               "game balance", "economy balance", "progression design", "pacing", "designcraft"]
 STOP = {"a", "an", "the", "for", "of", "to", "and", "with", "my", "me", "make", "create", "generate", "some", "that", "in", "on", "it", "is", "from", "this", "game"}
 
 
@@ -57,7 +60,10 @@ def route(brief, limit=5):
     res = {"brief": brief, "suggestions": cands[:limit]}
     if three:
         res["three_d"] = {"matched": three, "use": "forgecraft route / generate (the 3D Department)"}
-    res["chosen"] = cands[0] if cands and not (three and cands[0]["score"] < 6) else None
+    design = _hits(t, GAME_DESIGN)
+    if design:
+        res["game_design"] = {"matched": design, "use": "DESIGNCRAFT: python3 -m gamedesign assess <game-repo> (or a production's qa.designcraft); docs/designcraft.md"}
+    res["chosen"] = cands[0] if cands and not ((three or design) and cands[0]["score"] < 6) else None
     if not res["chosen"]:
-        res["note"] = "3D modelling request: use ForgeCraft" if three else "no department matched; describe the deliverable (sound, terrain, material, level, effect, cinematic, test, asset)"
+        res["note"] = "3D modelling request: use ForgeCraft" if three else "game-design review: use DESIGNCRAFT (gamedesign/)" if design else "no department matched; describe the deliverable (sound, terrain, material, level, effect, cinematic, test, asset)"
     return res

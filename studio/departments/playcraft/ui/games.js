@@ -162,7 +162,7 @@
       </div>
 
       <section class="panel"><h3>Findings across runs</h3>
-        <div class="tabs2" role="tablist"><button class="on" data-f="open">Open ${open.length}</button><button data-f="fixed">Fixed ${fixed.length}</button>${unm.length ? `<button data-f="unm">Not measured ${unm.length}</button>` : ""}</div>
+        <div class="tabs2" role="group" aria-label="Show findings"><button aria-pressed="true" aria-controls="flist" class="on" data-f="open">Open ${open.length}</button><button aria-pressed="false" aria-controls="flist" data-f="fixed">Fixed ${fixed.length}</button>${unm.length ? `<button aria-pressed="false" aria-controls="flist" data-f="unm">Not measured ${unm.length}</button>` : ""}</div>
         <ul class="list" id="flist"></ul></section>
 
       <div class="two">
@@ -179,7 +179,7 @@
       const xs = k === "open" ? open : k === "fixed" ? fixed : unm;
       document.getElementById("flist").innerHTML = xs.map((f) => `<li><div class="k"><b>${esc(f.title)}</b><span>${f.type === "defect" ? `<span class="cls regressed">defect</span> ` : ""}${lvl(f.state === "resolved" ? f.resolved_level : f.level)}</span></div>
         <p>${f.state === "resolved" ? `fixed in the run of ${when(f.resolved_in)}${f.resolved_by && f.resolved_by !== "change" ? " · by measurement on an unchanged commit, not credited" : ""}` : `seen in ${f.occurrences} run${f.occurrences > 1 ? "s" : ""} since ${when(f.first_seen)}`}${f.reopened ? ` · reopened ${f.reopened}×` : ""}${f.evidence ? ` · ${esc(String(f.evidence).slice(0, 140))}` : ""}</p></li>`).join("") || "<li>None.</li>";
-      document.querySelectorAll("[data-f]").forEach((b) => b.classList.toggle("on", b.dataset.f === k));
+      document.querySelectorAll("[data-f]").forEach((b) => { b.classList.toggle("on", b.dataset.f === k); b.setAttribute("aria-pressed", String(b.dataset.f === k)); });
     };
     document.querySelectorAll("[data-f]").forEach((b) => (b.onclick = () => show(b.dataset.f)));
     show("open");

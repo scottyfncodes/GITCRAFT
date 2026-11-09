@@ -149,6 +149,21 @@ def _norm_outputs(res):
     return outs
 
 
+def _forge_outputs(r):
+    """A finished ForgeCraft job as outputs the next department can take: its exports, from the hash-verified copy in
+    the task's own folder (the hand-off) when there is one, else from the library. Without these, a model never
+    reaches AnimCraft or the integration manifest."""
+    if r.get("outputs"): return r
+    files, base = r.get("files") or {}, r.get("handoff")
+    outs = []
+    for rel, lib_path in files.items():
+        p = os.path.join(base, rel) if base and os.path.isfile(os.path.join(base, rel)) else lib_path
+        ext = os.path.splitext(p)[1].lower().lstrip(".")
+        outs.append({"path": p, "role": "source" if ext == "blend" else "model", "format": ext})
+    asset = r.get("asset") or {}
+    return dict(r, outputs=outs, asset_id=asset.get("id"), asset_version=asset.get("version"))
+
+
 def _slim(res):
     """What the production record keeps of a department result (the full record stays in its .studio.json)."""
     drop = {"outputs", "stages", "request", "tools", "dependencies", "stderr", "catalog"}
@@ -678,7 +693,7 @@ def _prepare(prod, t):
         req = dict(params, handoff_dir=out_dir, wait=True)
         def forge():
             r = executors.forgecraft_call(action, req, timeout=timeout)
-            return dict(r, status="ok") if r.get("status") in ("done", "done_with_fallback") else r
+            return _forge_outputs(dict(r, status="ok")) if r.get("status") in ("done", "done_with_fallback") else r
         return forge, None
     if kind == "designcraft":
         return (lambda: executors.designcraft_assess(params["project"], os.path.join(out_dir, "designcraft.json"), timeout=timeout)), None
@@ -740,7 +755,10 @@ def _remediate(prod, t, res, gr):
         t["exhausted"] = True
         store.event(prod, "quality_gate_exhausted", task=t["id"], rounds=rnd - 1); return
     fix_id, rv_id = f"fix.{root}.r{rnd}", f"{root}.r{rnd}"
-    items = gates.remediation(t, res, gr)
+    design = None   # DESIGNCRAFT runs beside PLAYCRAFT (static, seconds) and is nearly always done when a gameplay fix is written
+    if t.get("department") == "playcraft" and "qa.designcraft" in prod["tasks"]:
+        design = (eff(prod, "qa.designcraft").get("result") or {}).get("proposals")
+    items = gates.remediation(t, res, gr, design)
     fix = planner.T(fix_id, f"Fix what {root} found (round {rnd})", t["stage"], "agent", deps=[],
                     work_order={"brief": f"{t['title']} failed its gate. Fix the project so it passes; the check then runs again on the modified files.",
                                 "findings": items, "instructions": ["Change the project to address the findings (keep every existing feature).",

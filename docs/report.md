@@ -51,6 +51,8 @@ It is written as `report.json` (for tools), `report.md` and `report.html` (self-
   blocker makes the band *blocked* whatever the score.
 - **Stale** means older than 14 days, measured on a different commit than the project's HEAD, or older than newer
   commits recorded on main.
+- **Unverified** means the project is not checked out where the report runs, so the analysed commit could not be
+  compared with the current one. It is never reported as current; it lowers confidence like a stale result.
 - **Reconciliation.** Findings are grouped into problem areas (text, touch, accessibility, performance, difficulty,
   progression, …), first by the words of their title, then by their department's own category. One area flagged by several
   departments becomes a single action and moves up one priority. A large disagreement between DESIGNCRAFT and PLAYCRAFT

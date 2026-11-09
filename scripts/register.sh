@@ -26,6 +26,12 @@ PY
   exit 0
 fi
 
+# Two SessionStart hooks (the repo's and the global one) can run this at the same moment. Each run removes and
+# re-adds every server, so without a lock one run's remove lands between the other's remove and add, and that add
+# fails although the server ends up registered: the log said "couldn't register" for servers that were connected.
+lockdir="${GITCRAFT_HOME:-$HOME/.gitcraft}"; mkdir -p "$lockdir"
+exec 9>"$lockdir/register.lock"
+command -v flock >/dev/null && flock -w 120 9
 for entry in "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
   # the 3D servers are registered before Blender is in: Claude Code only reads MCP servers when a session starts, and
@@ -37,6 +43,8 @@ for entry in "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}"; do
   claude mcp remove -s user "$name" >/dev/null 2>&1
   if claude mcp add -s user "$name" -- "$here/mcp.sh" "$name" >/dev/null 2>&1; then
     echo "gitcraft: registered $name"
+  elif claude mcp get "$name" 2>/dev/null | grep -qF "$here/mcp.sh"; then
+    echo "gitcraft: registered $name (already registered with this launcher)"
   else
     echo "gitcraft: couldn't register $name" >&2
   fi

@@ -88,6 +88,9 @@ jobs:
       - name: Hardening (guard + control room regressions from docs/tech-debt.md)
         run: python3 tests/test_hardening.py
 
+      - name: Department linkage (project kind, hand-offs, gates, findings into work orders, registration race)
+        run: python3 tests/test_linkage.py
+
       - name: Run GITCRAFT report (read-only cross-department project report)
         run: python3 tests/test_report.py
 
