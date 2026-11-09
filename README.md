@@ -4,6 +4,24 @@ Seven open-source creative apps from [ArtCraft](https://github.com/storytold), w
 
 PhotoCraft · VectorCraft · DesignCraft · PdfCraft · LightCraft · FilmCraft · EffectCraft · **MeshCraft** (3D, Blender) · **ForgeCraft** (3D Department orchestrator) · **StudioCraft** (nine production departments: AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft, TestCraft, AssetCraft)
 
+## Live site
+
+**https://meshcraft-vert.vercel.app** is deployed from `main` by Vercel on every merge (`vercel.json`). It shows only what
+GITCRAFT publishes from the committed archives:
+
+| Page | What it shows |
+|------|---------------|
+| [/](https://meshcraft-vert.vercel.app/) | 3D Department: the asset library and pipeline |
+| [/reports/](https://meshcraft-vert.vercel.app/reports/) | "Run GITCRAFT report" archive (`history/reports`) |
+| [/games/](https://meshcraft-vert.vercel.app/games/) | PLAYCRAFT Game Quality History (`history/playcraft`) |
+| [/pixelcraft/](https://meshcraft-vert.vercel.app/pixelcraft/) | PIXELCRAFT audits (`history/pixelcraft`) |
+| [/designcraft/](https://meshcraft-vert.vercel.app/designcraft/) | DESIGNCRAFT and the Design Lab (`history/designcraft`) |
+
+Changes to the toolchain itself (installer, sandbox, MCP servers, the Production Director) do not appear on this site. Check
+them on the project they were made for: re-run GITCRAFT there and look at that project's live URL and its new report (see the
+checklist in `.github/pull_request_template.md`). Other `*.vercel.app` aliases of this project sit behind Vercel login; use the
+URL above.
+
 ## One master prompt → a finished production
 
 Say **"Run GITCRAFT"** with an idea, a pasted prompt, a GitHub repository URL, or inside an existing project. GITCRAFT reads
