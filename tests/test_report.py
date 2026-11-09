@@ -52,8 +52,54 @@ check("history-only: PLAYCRAFT score is a recorded run's, with its run id", pc_s
 check("history-only: departments without results have no score and status no_data/unavailable/not_applicable",
       all(d["score"] is None and d["status"] in ("no_data", "unavailable", "not_applicable") for i, d in dd.items() if i not in ("playcraft", "designcraft")),
       {i: (d["status"], d["score"]) for i, d in dd.items()})
-check("history-only: health is the mean of the measured scores only, with its basis", R["health"]["parts"] == {"playcraft": dd["playcraft"]["score"]["value"], "designcraft": dc_latest["overall"]}
-      and abs(R["health"]["score"] - (dd["playcraft"]["score"]["value"] + dc_latest["overall"]) / 2) < 0.06 and "measured" in R["health"]["basis"], R["health"])
+from production import scoring as SC  # noqa: E402
+wp, wd = SC.RUBRICS["playcraft"]["weight"], SC.RUBRICS["designcraft"]["weight"]
+check("history-only: the overall score is the rubric-weighted mean of the evaluated scores only, with its basis and method",
+      R["health"]["parts"] == {"playcraft": dd["playcraft"]["score"]["value"], "designcraft": dc_latest["overall"]} and R["health"]["method"] == SC.METHOD
+      and abs(R["health"]["score"] - (dd["playcraft"]["score"]["value"] * wp + dc_latest["overall"] * wd) / (wp + wd)) < 0.06 and "weighted mean" in R["health"]["basis"], R["health"])
+ne = [d for d in R["departments"] if d["quality"]["evaluation"] == "not_evaluated"]
+check("Not Evaluated: applicable departments without a measured result have no value and no weight in the overall score",
+      ne and all(d["quality"]["value"] is None and d["id"] not in R["health"]["parts"] and d["quality"].get("why") for d in ne), [(d["id"], d["quality"]) for d in ne])
+check("coverage: evaluated weight ÷ applicable weight, shown beside the score (never folded in)",
+      abs(R["health"]["coverage"] - (wp + wd) / sum(d["quality"]["weight"] for d in R["departments"] if d["quality"]["evaluation"] != "not_applicable")) < 0.01, R["health"])
+check("every department has a rubric (label, weight, version, source, criteria)", all(d["quality"]["rubric"] and d["quality"]["criteria"] and d["quality"]["source"] for d in R["departments"]))
+# method change, against the archived reports made before the rubrics (plain mean, report 1.0.0)
+legacy_rs = sorted((json.load(open(p)) for p in glob.glob(os.path.join(REPO, "history", "reports", "scottyfncodes--rockslide", "*", "report.json"))), key=lambda x: x["generated"])
+legacy_rs = [x for x in legacy_rs if not (x.get("health") or {}).get("method")]
+vp = SC.overall_delta(legacy_rs[-1], R["health"])
+check("method change: an archived plain-mean report is never compared as if it were the same method", legacy_rs and vp["delta"] is None and "method changed" in vp["compare"], vp)
+cp = json.loads(json.dumps(R["departments"])); SC.deltas(legacy_rs[-1], cp); cq = {d["id"]: d["quality"] for d in cp}
+check("method change: a department whose rubric is unchanged keeps its previous score; one whose rubric changed is not compared",
+      cq["playcraft"]["previous"] is not None and cq["production"].get("delta") is None, (cq["playcraft"], cq["production"]))
+T = SC.series(legacy_rs, R)
+check("trend: every earlier report of the project, the method recorded per point", len(T) == len(legacy_rs) + 1 and T[-1]["method"] == SC.METHOD
+      and all(p["method"] == SC.LEGACY_METHOD for p in T[:-1]), [(p["report_id"], p["method"]) for p in T])
+check("trend chart: points from different methods are not joined (the plain-mean points and the weighted point are separate)",
+      "method changed" in PR.chart_svg(T) and PR.chart_svg(T).count("<polyline") == (1 if len(legacy_rs) > 1 else 0), PR.chart_svg(T)[:300])
+check("trend: the report's own trend reads the saved history (store + archive)", len(R["trend"]) >= 2 and R["trend"][-1]["report_id"] == R["report_id"])
+check("top actions: three at most, impact from the priority rule, effort only from a department's own estimate",
+      0 < len(R["top_actions"]) <= 3 and all(a["impact"].split()[0] == SC.IMPACT[a["priority"]] for a in R["top_actions"])
+      and all((a["effort"] is None) == (a["effort_basis"] == "not estimated by the department") for a in R["top_actions"]), R["top_actions"])
+fk = {f["key"]: f for d in R["departments"] for f in d["findings"]}
+acts = {a["n"]: a for a in R["actions"]}
+labels = lambda a: [SC.effort_label(fk[k].get("effort")) for k in acts[a["n"]]["findings"] if k in fk and SC.effort_label(fk[k].get("effort"))]
+check("effort: taken from the action's own findings' department estimates, never attached when none gave one",
+      all((a["effort"] is None and not labels(a)) or (a["effort"] in labels(a)) for a in R["top_actions"]), [(a["title"], a["effort"], labels(a)) for a in R["top_actions"]])
+check("delta: two re-analyses (both 'this report') at different times are different measurements",
+      not SC.same_measurement({"id": "this report", "at": "2026-11-08T19:42:45"}, {"id": "this report", "at": "2026-11-09T13:09:24"})
+      and SC.same_measurement({"id": "r1", "at": "2026-11-04T23:46:23+00:00"}, {"id": "r1", "at": "2026-11-04T23:46:23+00:00"}))
+check("gates: with no production there is no Director verdict and no gate (said plainly)", R["gates"]["verdict"] is None and "No production" in R["gates"]["note"])
+check("identity: project, commit (from the department run, labelled), run date", R["identity"]["repo"] == "scottyfncodes/rockslide" and R["identity"]["commit"]
+      and R["identity"]["commit_source"] == "latest department run", R["identity"])
+# an older recorded measurement read after a re-analysed one is not a regression
+prev_fake = {"report_id": "x/1", "generated": "2026-11-09T00:00:00+00:00", "health": {"score": 60, "method": SC.METHOD},
+             "departments": [{"id": "designcraft", "quality": {"value": 99, "rubric": "designcraft/1", "method": dd["designcraft"]["quality"]["method"]}, "run": {"id": "other", "at": "2099-01-01T00:00:00"}}]}
+cp = json.loads(json.dumps(R["departments"])); SC.deltas(prev_fake, cp)
+q = {d["id"]: d for d in cp}["designcraft"]["quality"]
+check("delta: a previous re-analysis newer than today's recorded run is not compared (no false regression)", q["delta"] is None and "older measurement" in q["compare"], q)
+prev_fake["departments"][0]["run"]["at"] = "2000-01-01T00:00:00"; cp = json.loads(json.dumps(R["departments"])); SC.deltas(prev_fake, cp)
+q = {d["id"]: d for d in cp}["designcraft"]["quality"]
+check("delta: same rubric and method, newer measurement → a signed delta against the previous score", q["delta"] == round(dc_latest["overall"] - 99, 1) and q["compare"] == "new measurement", q)
 check("history-only: what could not be refreshed is listed with the reason", any(x["department"] == "playcraft" and "not checked out" in x["why"] for x in R["not_refreshed"]), R["not_refreshed"])
 check("every finding keeps an evidence level and a department", all(f["level"] in ("verified", "observed", "inferred") and f["department"] for d in R["departments"] for f in d["findings"]))
 check("plan: P0–P3 only, numbered, each with its departments", R["actions"] and all(a["priority"] in ("P0", "P1", "P2", "P3") and a["departments"] for a in R["actions"])
@@ -88,6 +134,13 @@ check("first report says so", R1["changes"]["first"] is True)
 R2 = PR.generate(game, refresh="none")
 check("second report compares against the first (health, departments, findings)", R2["changes"]["first"] is False and R2["changes"]["against"] == R1["report_id"]
       and "health" in R2["changes"], R2["changes"])
+q1 = {d["id"]: d for d in R1["departments"]}; q2 = {d["id"]: d for d in R2["departments"]}
+check("production rubric: the engineering standard is the Production Director's quality score; acceptance criteria are gates, not a score",
+      q1["production"]["quality"]["label"] == "Engineering standard" and (q1["production"]["quality"]["value"] is None) == (not (q1["production"].get("standard") or {}).get("checks")), q1["production"]["quality"])
+check("delta: the second report compares each evaluated department under the same rubric (testcraft 50 → 50, same measurement)",
+      q2["testcraft"]["quality"]["previous"] == 50.0 and q2["testcraft"]["quality"]["delta"] == 0 and "same measurement" in q2["testcraft"]["quality"]["compare"]
+      and R2["health"]["vs_previous"]["delta"] is not None, (q2["testcraft"]["quality"], R2["health"]["vs_previous"]))
+check("regressions: none claimed without a measured drop", R2["regressions"] == [], R2["regressions"])
 check("refresh none: nothing is re-analysed", all(not d["refresh"].get("ok") or d["id"] == "production" for d in R2["departments"]))
 lines = [json.loads(l) for l in open(os.path.join(os.environ["GITCRAFT_REPORTS"], "index.jsonl"))]
 check("index.jsonl: one line per saved report (append-only)", [l["report_id"] for l in lines][-2:] == [R1["report_id"], R2["report_id"]], lines)
@@ -109,8 +162,36 @@ check("studiocraft exposes production_project_report", '"production_project_repo
 out = subprocess.run([sys.executable, "-m", "production", "project-report", game, "--save", "none"], cwd=REPO, capture_output=True, text=True)
 check("CLI: python3 -m production project-report", out.returncode == 0 and "## Prioritized action plan" in out.stdout, out.stderr[-300:])
 
+# ---------------------------------------------------------------- 4b. every production run ends with a Production Report
+from production import engine, store as pstore  # noqa: E402
+pl = engine.plan("Run GITCRAFT: review this game", project=game)
+pid = pl.get("production") or pl.get("id")
+prod = pstore.load(pid)
+info = engine.production_report(prod)
+check("run → Production Report: written outside the project, linked from the production and its status",
+      info["status"] == "ok" and os.path.isfile(info["html"]) and not info["html"].startswith(game) and pstore.load(pid).get("production_report", {}).get("html") == info["html"]
+      and engine.status(pstore.load(pid))["production_report"]["html"] == info["html"], info)
+Rp = json.load(open(info["json"]))
+check("run → the Director's verdict and the gates come from that production; gates never enter the quality score",
+      Rp["gates"]["production"] == pid and Rp["gates"]["verdict"] and Rp["gates"]["criteria"] and Rp["identity"]["verdict"] == Rp["gates"]["verdict"]
+      and Rp["health"]["parts"].get("production") == {d["id"]: d for d in Rp["departments"]}["production"]["quality"]["value"]
+      and {d["id"]: d for d in Rp["departments"]}["production"]["quality"]["label"] == "Engineering standard", Rp["gates"])
+src = open(os.path.join(REPO, "production", "engine.py")).read()
+check("run → the engine makes the report at the end of every run, before REPORT.md", src.index("production_report(prod)\n        _report.write(prod)") > 0)
+os.environ["GITCRAFT_PRODUCTION_REPORT"] = "0"
+check("run → GITCRAFT_PRODUCTION_REPORT=0 turns it off", engine.production_report(prod) is None); del os.environ["GITCRAFT_PRODUCTION_REPORT"]
+check("read-only: still byte-identical after the production report", tree_hash(game) == before)
+
 # ---------------------------------------------------------------- 5. the report reads well on a phone, and publishes
 H = open(R1["paths"]["html"]).read()
+check("html: the Production Report sections (identity, verdict, next 3, departments with deltas, trends, gates, findings, scoring)",
+      all(f"id='{s}'" in H for s in ("top", "trends", "gates", "findings", "method")) and "Release / version" in H and "Director verdict" in H)
+Hn = PR.render_html(R)
+check("html: a Not Evaluated department shows 'Not Evaluated', never a number", Hn.count("Not Evaluated</span>") == len(ne), (Hn.count("Not Evaluated</span>"), len(ne)))
+legacy = json.load(open(sorted(glob.glob(os.path.join(REPO, "history", "reports", "scottyfncodes--rockslide", "*", "report.json")))[0]))
+Lr = PR.upgrade(legacy)
+check("legacy reports (plain mean) render under the new layout with their recorded number, labelled as the old method",
+      Lr["health"]["score"] == legacy["health"]["score"] and Lr["health"]["method"] == SC.LEGACY_METHOD and "id='gates'" in PR.render_html(Lr) and "gitcraft_report" in legacy)
 check("html: self-contained, mobile viewport, every section", "width=device-width" in H and not re.search(r"<(script|link)[^>]+(src|href)=['\"]https?:", H)
       and all(f"id='{s}'" in H for s in ("health", "depts", "p0", "cross", "plan", "changes", "next", "limits")))
 M = open(R1["paths"]["markdown"]).read()
