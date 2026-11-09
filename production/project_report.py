@@ -243,20 +243,43 @@ def _stale(D, ctx, commit):
     return D
 
 
-def _studio_call(action, args, timeout=3600):
-    """A Studio action through studio/cli.py --call in the Studio venv (the same contract and checks as the MCP tool)."""
+def _studio_call(action, args, timeout=3600, env=None):
+    """A Studio action through studio/cli.py --call in the Studio venv (the same contract and checks as the MCP tool).
+    env: extra variables for this call only (e.g. a private AssetCraft catalogue in the report's run folder)."""
     home = os.environ.get("GITCRAFT_STUDIO_HOME") or os.path.join(os.environ.get("GITCRAFT_HOME") or os.path.expanduser("~/.gitcraft"), "studio")
     py = os.path.join(home, "venv", "bin", "python")
     if not os.path.exists(py): return None, f"the Studio runtime is not installed ({py}); scripts/install-studio.sh"
     try:
         r = subprocess.run([py, os.path.join(REPO, "studio", "cli.py"), "--call", action, json.dumps(args)], capture_output=True, text=True,
-                           timeout=timeout, stdin=subprocess.DEVNULL)
+                           timeout=timeout, stdin=subprocess.DEVNULL, env=dict(os.environ, **(env or {})))
     except subprocess.TimeoutExpired:
         return None, f"{action} timed out after {timeout} s"
     lines = (r.stdout or "").strip().splitlines()
-    if r.returncode != 0 or not lines: return None, f"{action} failed: {(r.stderr or '')[-400:]}"
+    if r.returncode != 0 or not lines:
+        err = [x for x in (r.stderr or "").strip().splitlines() if x.strip()]
+        return None, f"{action} failed: " + (err[-1].strip() if err else f"exit code {r.returncode}, no output")[:400]
     try: return json.loads(lines[-1]), None
     except ValueError: return None, f"{action} returned no JSON"
+
+
+def _dept_env(ctx, **extra):
+    """The environment for a department the report runs: the session's roots plus exactly the project being reported on
+    and the report's own run folder. Nothing else is widened (other repositories stay outside, as in every session), and
+    the report reads the project and writes only into its run folder."""
+    P = ctx["project"]
+    rs = list(dict.fromkeys(roots() + [p for p in (P.get("path"), ctx["run_dir"]) if p]))
+    return dict({"GITCRAFT_ROOTS": ":".join(rs)}, **extra)
+
+
+def _why(action, res, err):
+    """The actual reason a refresh did not produce a result (never just "failed")."""
+    if err: return err
+    if not res: return f"{action}: no result"
+    if res.get("status") == "ok": return "ok"
+    why = res.get("error") or res.get("reason") or "; ".join(f"{c.get('name')}" + (f" ({str(c.get('detail'))[:120]})" if c.get("detail") not in (None, "", [], {}) else "")
+                                                              for c in res.get("checks") or [] if not c.get("ok"))[:300]
+    fix = res.get("install") or res.get("hint")
+    return f"{action} {res.get('status') or 'returned no status'}: {why or 'no reason given'}" + (f" (fix: {fix if isinstance(fix, str) else ', '.join(map(str, fix))})" if fix else "")
 
 
 # ---------------------------------------------------------------- collectors (one per department)
@@ -271,13 +294,18 @@ def c_playcraft(D, ctx):
     for root, st in stores:
         G = ph.game_report(st, P["id"])
         if G and (not best or (G["timeline"][-1]["at"] or "") > (best[1]["timeline"][-1]["at"] or "")): best = (root, G, st)
+    measured = None
     if ctx["refresh"] == "full" and P["path"] and ctx["kind"] == "game":
         b = _build_dir(P["path"]); D["refresh"]["attempted"] = True
-        if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting)")
+        if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting; build it, e.g. npm run build, then report again)")
         else:
-            res, err = _studio_call("playcraft_assess", {"project": P["path"], "out_dir": os.path.join(ctx["run_dir"], "refresh", "playcraft"), "record_history": False})
-            D["refresh"].update(ok=bool(res and res.get("status") == "ok"), detail=err or (res or {}).get("status"))
-            if res and res.get("status") == "ok": D["notes"].append("PLAYCRAFT re-assessed the existing build for this report (not recorded in the Game Quality History).")
+            out = os.path.join(ctx["run_dir"], "refresh", "playcraft")
+            res, err = _studio_call("playcraft_assess", {"project": P["path"], "target": b, "out_dir": out, "record_history": False}, env=_dept_env(ctx))
+            ok = bool(res and res.get("status") == "ok" and os.path.isfile(os.path.join(out, "playcraft.json")))
+            D["refresh"].update(ok=ok, detail="ok" if ok else _why("playcraft_assess", res, err))
+            if ok: measured = _json(os.path.join(out, "playcraft.json"))
+    if measured and (measured.get("overall") or {}).get("score") is not None:
+        return _playcraft_measured(D, ctx, measured, os.path.join(ctx["run_dir"], "refresh", "playcraft", "playcraft.json"))
     if not best:
         if D["applicable"]: D["next"] = "Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays."
         else: D["status"] = "not_applicable"
@@ -317,6 +345,33 @@ def c_playcraft(D, ctx):
     return D
 
 
+def _playcraft_measured(D, ctx, A, path):
+    """PLAYCRAFT scored from the assessment it made for this report (the build was played now): never recorded in the
+    Game Quality History. Its method is PLAYCRAFT's own, so a delta against an earlier report is shown only when the
+    rubric and that method match (scoring.deltas)."""
+    ov = A.get("overall") or {}; git = A.get("git") or {}
+    D.update(status="current", age_days=0,
+             run={"id": "this report", "at": A.get("created"), "commit": (git.get("head") or "")[:12] or None, "method": A.get("method"), "runs": 1,
+                  "source": "measured for this report, not recorded in the Game Quality History"},
+             score={"value": ov.get("score"), "label": "Gameplay quality", "confidence": ov.get("confidence"), "coverage": ov.get("coverage"),
+                    "categories": {k: v.get("score") for k, v in (A.get("categories") or {}).items()}})
+    played = (A.get("played") or {}).get("played")
+    D["notes"].append("PLAYCRAFT played the existing build for this report" + (f" on {', '.join((A.get('played') or {}).get('viewports') or [])}" if played else " (it could NOT play it: source evidence only)")
+                      + "; measured for this report, not recorded in the Game Quality History.")
+    if ov.get("note"): D["notes"].append(str(ov["note"])[:300])
+    for f in A.get("findings") or []:
+        if f.get("status") not in ("fail", "partial"): continue
+        lvl = _level(f.get("level")); imp = f.get("impact") or 0
+        sev = "critical" if f.get("type") == "defect" and lvl != "inferred" else "major" if imp >= 3 and lvl != "inferred" else "minor"
+        D["findings"].append(_finding("playcraft", f["id"], f.get("title"), sev, lvl, f.get("evidence"), f.get("recommendation"), path,
+                                      kind=f.get("type"), extra=f.get("category"), effort=scoring.playcraft_effort(f["id"]), impact=f.get("impact")))
+    ctx["playcraft_categories"] = D["score"]["categories"]
+    D["strengths"] = [f"{v.get('title', k)}: {v.get('score')}" for k, v in (A.get("categories") or {}).items() if (v.get("score") or 0) >= 85][:5]
+    D["next"] = "Record it in the Game Quality History with a full PLAYCRAFT pass (playcraft_pass) to track it over time."
+    _stale(D, ctx, D["run"]["commit"])
+    return D
+
+
 def _pixel_runs(P):
     roots_ = [os.environ.get("GITCRAFT_PIXELCRAFT_HISTORY") or os.path.join(os.environ.get("GITCRAFT_HOME") or os.path.expanduser("~/.gitcraft"), "pixelcraft", "history"),
               os.path.join(REPO, "history", "pixelcraft")]
@@ -339,12 +394,12 @@ def c_pixelcraft(D, ctx):
     runs = _pixel_runs(P)
     if ctx["refresh"] == "full" and P["path"]:
         b = _build_dir(P["path"]); D["refresh"]["attempted"] = True
-        if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting)")
+        if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting; build it, e.g. npm run build, then report again)")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "pixelcraft")
-            res, err = _studio_call("pixelcraft_audit", {"project": P["path"], "target": b, "out_dir": out, "record": False})
+            res, err = _studio_call("pixelcraft_audit", {"project": P["path"], "target": b, "out_dir": out, "record": False}, env=_dept_env(ctx))
             ok = bool(res and res.get("status") == "ok" and os.path.isfile(os.path.join(out, "audit.json")))
-            D["refresh"].update(ok=ok, detail=err or (res or {}).get("status"))
+            D["refresh"].update(ok=ok, detail="ok" if ok else _why("pixelcraft_audit", res, err))
             if ok: runs[("refresh", "now")] = os.path.join(out, "audit.json")
     if not runs:
         D["next"] = "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability."
@@ -441,9 +496,10 @@ def c_records(D, ctx):
     if D["id"] == "testcraft" and checks:
         D["score"] = {"value": round(100 * ok / len(checks), 1), "label": "QA checks passed", "confidence": "high", "coverage": None}
     D["notes"].append(f"{len(recs)} run(s): " + ", ".join(sorted({r.get('action') for r in recs})) + f"; {ok}/{len(checks)} output checks passed.")
-    for r in failed:
+    for r in failed:   # the evidence is the department's error, or the checks that failed (never an empty "failed")
+        bad = "; ".join(f"{c.get('name')}" + (f": {str(c.get('detail'))[:100]}" if c.get("detail") not in (None, "", [], {}) else "") for c in r.get("checks") or [] if not c.get("ok"))
         D["findings"].append(_finding(D["id"], f"{r.get('action')}:{os.path.basename(r['_path'])}", f"{D['id']} {r.get('action')} failed",
-                                      "major", "verified", (r.get("error") or "")[:240], r.get("hint"), r["_path"]))
+                                      "major", "verified", (r.get("error") or bad or "")[:240], r.get("hint"), r["_path"]))
     for r in recs:
         for c in r.get("checks") or []:
             if not c.get("ok") and r.get("status") == "ok":
@@ -452,12 +508,54 @@ def c_records(D, ctx):
     return D
 
 
+def c_testcraft(D, ctx):
+    """TestCraft: its records for this project; with refresh=full, a smoke test of the existing build first (read-only:
+    the build is served and loaded, its output goes to the report's run folder, never into the project)."""
+    P = ctx["project"]
+    if ctx["refresh"] == "full" and P["path"] and ctx["kind"] in ("game", "app", "site"):
+        b = _build_dir(P["path"]); D["refresh"]["attempted"] = True
+        if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting; build it, e.g. npm run build, then report again)")
+        else:
+            out = os.path.join(ctx["run_dir"], "refresh", "testcraft")
+            res, err = _studio_call("testcraft_smoke", {"target": b, "expect_canvas": ctx["kind"] == "game", "out_dir": out, "name": "smoke", "register": False}, env=_dept_env(ctx))
+            rec = next(iter(sorted(glob.glob(os.path.join(out, "*.studio.json")))), None)
+            measured = bool(res and res.get("status") in ("ok", "failed") and rec and not err)   # a failed smoke is a measurement (its checks failed)
+            D["refresh"].update(ok=measured, detail="ok" if measured else _why("testcraft_smoke", res, err))
+            if measured:
+                r = _json(rec)
+                if isinstance(r, dict) and r.get("department"):
+                    ctx["records"] = [x for x in ctx["records"]] + [dict(r, _path=os.path.realpath(rec))]
+                    D["notes"].append("TestCraft smoke-tested the existing build for this report.")
+    return c_records(D, ctx)
+
+
+def _asset_refresh(D, ctx):
+    """refresh=full: catalogue the project's assets into a private catalogue in the report's run folder (the shared
+    catalogue and the project are never written) and run the licence report on it. The catalogue path, or None."""
+    P = ctx["project"]
+    D["refresh"]["attempted"] = True
+    out = os.path.join(ctx["run_dir"], "refresh", "assetcraft"); os.makedirs(out, exist_ok=True)
+    cat = os.path.join(out, "catalog.sqlite"); env = _dept_env(ctx, GITCRAFT_ASSET_CATALOG=cat)
+    res, err = _studio_call("assetcraft_scan", {"folder": P["path"], "project": P["path"], "out_dir": os.path.join(out, "scan"), "name": "scan", "register": False}, env=env)
+    if err or not res or res.get("status") not in ("ok", "failed") or not os.path.isfile(cat):
+        D["refresh"].update(ok=False, detail=_why("assetcraft_scan", res, err)); return None
+    res2, err2 = _studio_call("assetcraft_license_report", {"project": P["path"], "out_dir": os.path.join(out, "licences"), "name": "licences", "register": False}, env=env)
+    if err2 or not res2 or res2.get("status") not in ("ok", "failed"):
+        D["refresh"].update(ok=False, detail=_why("assetcraft_license_report", res2, err2)); return None
+    D["refresh"].update(ok=True, detail="ok")
+    D["notes"].append(f"AssetCraft catalogued the project's assets for this report ({res.get('catalogued', 0)} files) in a private catalogue "
+                      "(the shared catalogue and the project were not written).")
+    return cat
+
+
 def c_assetcraft(D, ctx):
     P = ctx["project"]
     cat = os.environ.get("GITCRAFT_ASSET_CATALOG") or os.path.join(os.environ.get("GITCRAFT_HOME") or os.path.expanduser("~/.gitcraft"), "assetcraft", "catalog.sqlite")
     if not P["path"]:
         D["notes"].append("The project is not checked out here, so its catalogue entries (keyed by folder) cannot be matched.")
         D["status"] = "unavailable"; return D
+    if ctx["refresh"] == "full":
+        cat = _asset_refresh(D, ctx) or cat
     if not os.path.isfile(cat):
         D["next"] = "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."; return D
     try:
@@ -588,7 +686,7 @@ def c_production(D, ctx):
 
 
 COLLECTORS = {"playcraft": c_playcraft, "pixelcraft": c_pixelcraft, "designcraft": c_designcraft, "assetcraft": c_assetcraft, "3d": c_3d,
-              "production": c_production, "testcraft": c_records, **{m: c_records for m in MAKERS}}
+              "production": c_production, "testcraft": c_testcraft, **{m: c_records for m in MAKERS}}
 ROLE = {"playcraft": "scored", "pixelcraft": "scored", "designcraft": "scored", "testcraft": "qa", "assetcraft": "catalogue", "3d": "maker",
         "production": "director", **{m: "maker" for m in MAKERS}}
 
@@ -698,7 +796,15 @@ def history(pid, roots_=None, before=None):
         for p in glob.glob(os.path.join(r, pid or "-", "*", "report.json")):
             R = _json(p)
             if R and R.get("report_id") and (before is None or R["generated"] < before): seen.setdefault(R["report_id"], R)
-    return sorted(seen.values(), key=lambda R: R["generated"])
+    return sorted(seen.values(), key=_report_order)
+
+
+def _report_order(R):
+    """Oldest first. Reports made in the same second share `generated` and their stamp (YYYYmmddTHHMMSSZ, then -2, -3 …):
+    the numeric suffix orders them, never the folder listing."""
+    stamp = str(R.get("report_id") or "").rsplit("/", 1)[-1]
+    base, _, n = stamp.partition("-")
+    return (R.get("generated") or "", base, int(n) if n.isdigit() else 1)
 
 
 def previous(pid, roots_=None):
@@ -763,8 +869,9 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
         try: fn(D, ctx)
         except Exception as e:   # one department's failure never hides the others, and is never reported as data
             D["status"] = "failed"; D["notes"].append(f"Could not read this department's results: {type(e).__name__}: {e}"[:300])
-        if D["refresh"]["attempted"] is False and refresh != "none" and spec["id"] in ("playcraft", "pixelcraft") and D["status"] != "not_applicable":
-            D["refresh"]["detail"] = ("not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+        if D["refresh"]["attempted"] is False and refresh != "none" and spec["id"] in ("playcraft", "pixelcraft", "testcraft", "assetcraft") and D["status"] != "not_applicable":
+            D["refresh"]["detail"] = (("not refreshed: needs a browser session on an existing build; report with refresh=full, or run the department itself"
+                                       if spec["id"] != "assetcraft" else "not refreshed: report with refresh=full to catalogue the project's assets, or run assetcraft_scan")
                                       if P["path"] else "not refreshed: the project is not checked out here")
         if D["status"] == "no_data" and not D["applicable"]: D["status"] = "not_applicable"
         D["findings"].sort(key=lambda f: (SEVERITIES.index(f["severity"]), f["level"] != "verified", f["title"] or ""))
@@ -861,6 +968,7 @@ def regressions(R):
     if not R["changes"].get("first"):
         new = set(R["changes"].get("new_findings") or [])
         for d in R["departments"]:
+            if d["quality"].get("previous") is None: continue   # not measured last time: its findings are first findings, not regressions
             for f in d["findings"]:
                 if f["key"] in new and f["severity"] in ("critical", "major") and f["level"] != "inferred" and not f["id"].startswith("regression:"):
                     out.append({"department": d["id"], "title": f"New since the previous report: {f['title']}", "level": f["level"], "kind": "new_finding"})
@@ -904,7 +1012,7 @@ def executive(R):
     else:
         vp = H.get("vs_previous") or {}
         tail = (f", {vp['delta']:+} since the previous report" if vp.get("delta") is not None else
-                f"; the previous report's {vp['previous']} used another method, so no change is claimed" if vp.get("previous") is not None and "not comparable" in (vp.get("compare") or "") else "")
+                f"; not compared with the previous report's {vp['previous']}: " + (vp.get("compare") or "").replace("not comparable: ", "") + ", so no change is claimed" if vp.get("previous") is not None and "not comparable" in (vp.get("compare") or "") else "")
         s.append(f"{R['title']} scores **{H['score']}/100** ({H['band']}, {H['confidence']} confidence, {round(100 * H['coverage'])}% of the applicable weight evaluated{tail}).")
     if G.get("verdict"): s.append(f"Director verdict: **{G['verdict']}** for production `{G['production']}` ({G.get('status')})" + (f"; release {G['release_status']}" if G.get("release_status") else "") + ".")
     else: s.append("No production has run for this project, so there is no Director verdict or release gate.")

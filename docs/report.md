@@ -23,11 +23,12 @@ appears in the report automatically.
 
 | Department | Read from | Refreshed by the report |
 |---|---|---|
-| PLAYCRAFT | Game Quality History: local store + `history/playcraft` (`game_report`) | `refresh=full` only, on an existing build (`playcraft_assess`, not recorded) |
+| PLAYCRAFT | Game Quality History: local store + `history/playcraft` (`game_report`) | `refresh=full` only, on an existing build (`playcraft_assess`, not recorded). The department is then scored from that measurement, labelled "measured for this report, not recorded in the Game Quality History"; a delta against an earlier report only under the same rubric and PLAYCRAFT method |
 | PIXELCRAFT | `history/pixelcraft` + `$GITCRAFT_PIXELCRAFT_HISTORY` (`audit.json`) | `refresh=full` only, on an existing build (`pixelcraft_audit`, not recorded) |
 | DESIGNCRAFT | `history/designcraft` | `quick`/`full`: `gamedesign.engine.assess` (read-only, not recorded) |
-| TestCraft, AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft | their `.studio.json` records in the project and in its productions' task folders | no: they make things, and re-running them would create outputs |
-| AssetCraft | the catalogue (SQLite, opened read-only) | no: a scan writes to the catalogue (`assetcraft_scan` is recommended instead) |
+| TestCraft | its `.studio.json` records in the project and in its productions' task folders | `refresh=full` only: `testcraft_smoke` on an existing build folder, output in the report's run folder |
+| AudioCraft, AnimCraft, WorldCraft, FXCraft, MaterialCraft, LevelCraft, CinematicCraft | their `.studio.json` records in the project and in its productions' task folders | no: they make things, and re-running them would create outputs |
+| AssetCraft | the catalogue (SQLite, opened read-only) | `refresh=full` only: `assetcraft_scan` + `assetcraft_license_report` into a **private** catalogue in the report's run folder (the shared catalogue and the project are never written); scored from it |
 | 3D Department | the job store (`$GITCRAFT_3D_LIBRARY/jobs`) | no |
 | Production Director | the production store (acceptance verdicts), Discovery (`maturity.assess`), the engineering standard (`standards.check`) | `quick`/`full`: Discovery and the standard |
 
@@ -40,8 +41,15 @@ It is written as `report.json` (for tools), `report.md` and `report.html` (self-
 ## Rules
 
 - **Read-only.** Nothing is written inside the project. A report folder inside it is refused. Nothing is built,
-  committed, merged or deployed. PLAYCRAFT and PIXELCRAFT are refreshed only against a build folder that already exists.
-  Refreshed results are not recorded in the departments' histories.
+  committed, merged or deployed. PLAYCRAFT, PIXELCRAFT and TestCraft are refreshed only against a build folder that already
+  exists (no build: Not Evaluated, with how to build). Refreshed results are not recorded in the departments' histories, and
+  every refresh writes only into the report's run folder.
+- **Reach.** The departments a report runs get the session's roots plus exactly the project being reported on and the
+  report's run folder (`_dept_env`), so a project cloned beside the GITCRAFT checkout can be reported on without widening
+  anything else: other repositories stay outside, as in every session (`docs/security.md`).
+- **No silent failures.** A refresh that does not produce a result says why: the department's own error (e.g.
+  `GITCRAFT policy: … outside the workspace roots`), its failing checks, or the install command for a missing runtime. Never
+  just "failed".
 - **Never manufactured.** A department with no results has status *No data* and no score. The report gives the command
   that would produce its results. A missing runtime is *Unavailable*, with its reason. Every finding keeps its
   department's evidence level: **verified** (measured by a tool, or a fact parsed from source), **observed** (seen in

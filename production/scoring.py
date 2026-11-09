@@ -21,7 +21,7 @@ LEGACY_METHOD = "mean/1"
 #  legacy: the rubric version a report made before METHOD existed is treated as (None = not comparable).
 RUBRICS = {
     "playcraft": {"label": "Gameplay quality", "weight": 25, "version": "playcraft/1", "legacy": "playcraft/1",
-                  "source": "PLAYCRAFT's own overall score from the Game Quality History",
+                  "source": "PLAYCRAFT's own overall score from the Game Quality History, or measured for the report on the existing build (refresh=full, not recorded)",
                   "criteria": ["10 categories (core gameplay, game feel, controls, progression, difficulty, player experience, replayability, "
                                "technical, presentation, mobile), genre-weighted",
                                "Each criterion pass/partial/fail, weighted by evidence: verified 1, observed 0.85, inferred 0.45",
@@ -186,6 +186,10 @@ def overall_delta(prev, H):
     pv = ph.get("score"); pm = ph.get("method") or LEGACY_METHOD
     if pv is None or H.get("score") is None: return {"previous": pv, "delta": None, "compare": "no overall score in one of the two reports"}
     if pm != H["method"]: return {"previous": pv, "previous_method": pm, "delta": None, "compare": f"not comparable: the overall method changed ({pm} → {H['method']})"}
+    pp, cp = set((ph.get("parts") or {})), set((H.get("parts") or {}))
+    if ph.get("parts") is not None and pp != cp:   # a different set of departments is a different average, not a change in quality
+        diff = ", ".join([f"+{x}" for x in sorted(cp - pp)] + [f"-{x}" for x in sorted(pp - cp)])
+        return {"previous": pv, "delta": None, "compare": f"not comparable: different departments were evaluated ({diff})"}
     return {"previous": pv, "delta": round(H["score"] - pv, 1), "compare": "same method"}
 
 
