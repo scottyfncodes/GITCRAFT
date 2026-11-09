@@ -30,21 +30,8 @@ STATES = [PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKE
 STAGES = ["intake", "discovery", "foundation", "production", "integration", "qa", "release"]
 
 
-def default_root(env=None, cwd=None):
-    """The default GITCRAFT_ROOT, identical to scripts/tools.sh and studio/core default_root(): home, or the workspace when
-    it lives outside home; in a cloud session (CLAUDE_CODE_REMOTE=true) a workspace that is one repository checkout gives
-    way to its parent, the folder that holds every cloned repository."""
-    env = os.environ if env is None else env
-    home = os.path.realpath(env.get("HOME") or os.path.expanduser("~"))
-    ws = os.path.realpath(env.get("CLAUDE_PROJECT_DIR") or cwd or os.getcwd())
-    if ws == home or ws.startswith(home.rstrip(os.sep) + os.sep) or ws == os.sep or not os.path.isdir(ws): return home
-    up = os.path.dirname(ws)
-    if env.get("CLAUDE_CODE_REMOTE") == "true" and os.path.exists(os.path.join(ws, ".git")) and up != os.sep: return up
-    return ws
-
-
 def roots():
-    rs = os.environ.get("GITCRAFT_ROOTS") or os.environ.get("GITCRAFT_ROOT") or default_root()
+    rs = os.environ.get("GITCRAFT_ROOTS") or os.environ.get("GITCRAFT_ROOT") or os.getcwd()
     return [os.path.realpath(r) for r in rs.split(":") if r]
 
 

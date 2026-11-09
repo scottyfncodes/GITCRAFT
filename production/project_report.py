@@ -262,6 +262,15 @@ def _studio_call(action, args, timeout=3600, env=None):
     except ValueError: return None, f"{action} returned no JSON"
 
 
+def _dept_env(ctx, **extra):
+    """The environment for a department the report runs: the session's roots plus exactly the project being reported on
+    and the report's own run folder. Nothing else is widened (other repositories stay outside, as in every session), and
+    the report reads the project and writes only into its run folder."""
+    P = ctx["project"]
+    rs = list(dict.fromkeys(roots() + [p for p in (P.get("path"), ctx["run_dir"]) if p]))
+    return dict({"GITCRAFT_ROOTS": ":".join(rs)}, **extra)
+
+
 def _why(action, res, err):
     """The actual reason a refresh did not produce a result (never just "failed")."""
     if err: return err
@@ -291,7 +300,7 @@ def c_playcraft(D, ctx):
         if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting; build it, e.g. npm run build, then report again)")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "playcraft")
-            res, err = _studio_call("playcraft_assess", {"project": P["path"], "target": b, "out_dir": out, "record_history": False})
+            res, err = _studio_call("playcraft_assess", {"project": P["path"], "target": b, "out_dir": out, "record_history": False}, env=_dept_env(ctx))
             ok = bool(res and res.get("status") == "ok" and os.path.isfile(os.path.join(out, "playcraft.json")))
             D["refresh"].update(ok=ok, detail="ok" if ok else _why("playcraft_assess", res, err))
             if ok: measured = _json(os.path.join(out, "playcraft.json"))
@@ -388,7 +397,7 @@ def c_pixelcraft(D, ctx):
         if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting; build it, e.g. npm run build, then report again)")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "pixelcraft")
-            res, err = _studio_call("pixelcraft_audit", {"project": P["path"], "target": b, "out_dir": out, "record": False})
+            res, err = _studio_call("pixelcraft_audit", {"project": P["path"], "target": b, "out_dir": out, "record": False}, env=_dept_env(ctx))
             ok = bool(res and res.get("status") == "ok" and os.path.isfile(os.path.join(out, "audit.json")))
             D["refresh"].update(ok=ok, detail="ok" if ok else _why("pixelcraft_audit", res, err))
             if ok: runs[("refresh", "now")] = os.path.join(out, "audit.json")
@@ -508,7 +517,7 @@ def c_testcraft(D, ctx):
         if not b: D["refresh"].update(ok=False, detail="not refreshed: no build folder with index.html (GITCRAFT never builds the project while reporting; build it, e.g. npm run build, then report again)")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "testcraft")
-            res, err = _studio_call("testcraft_smoke", {"target": b, "expect_canvas": ctx["kind"] == "game", "out_dir": out, "name": "smoke", "register": False})
+            res, err = _studio_call("testcraft_smoke", {"target": b, "expect_canvas": ctx["kind"] == "game", "out_dir": out, "name": "smoke", "register": False}, env=_dept_env(ctx))
             rec = next(iter(sorted(glob.glob(os.path.join(out, "*.studio.json")))), None)
             measured = bool(res and res.get("status") in ("ok", "failed") and rec and not err)   # a failed smoke is a measurement (its checks failed)
             D["refresh"].update(ok=measured, detail="ok" if measured else _why("testcraft_smoke", res, err))
@@ -526,7 +535,7 @@ def _asset_refresh(D, ctx):
     P = ctx["project"]
     D["refresh"]["attempted"] = True
     out = os.path.join(ctx["run_dir"], "refresh", "assetcraft"); os.makedirs(out, exist_ok=True)
-    cat = os.path.join(out, "catalog.sqlite"); env = {"GITCRAFT_ASSET_CATALOG": cat}
+    cat = os.path.join(out, "catalog.sqlite"); env = _dept_env(ctx, GITCRAFT_ASSET_CATALOG=cat)
     res, err = _studio_call("assetcraft_scan", {"folder": P["path"], "project": P["path"], "out_dir": os.path.join(out, "scan"), "name": "scan", "register": False}, env=env)
     if err or not res or res.get("status") not in ("ok", "failed") or not os.path.isfile(cat):
         D["refresh"].update(ok=False, detail=_why("assetcraft_scan", res, err)); return None
@@ -787,7 +796,15 @@ def history(pid, roots_=None, before=None):
         for p in glob.glob(os.path.join(r, pid or "-", "*", "report.json")):
             R = _json(p)
             if R and R.get("report_id") and (before is None or R["generated"] < before): seen.setdefault(R["report_id"], R)
-    return sorted(seen.values(), key=lambda R: R["generated"])
+    return sorted(seen.values(), key=_report_order)
+
+
+def _report_order(R):
+    """Oldest first. Reports made in the same second share `generated` and their stamp (YYYYmmddTHHMMSSZ, then -2, -3 …):
+    the numeric suffix orders them, never the folder listing."""
+    stamp = str(R.get("report_id") or "").rsplit("/", 1)[-1]
+    base, _, n = stamp.partition("-")
+    return (R.get("generated") or "", base, int(n) if n.isdigit() else 1)
 
 
 def previous(pid, roots_=None):

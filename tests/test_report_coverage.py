@@ -6,8 +6,8 @@
   2. refresh=full runs TestCraft (smoke of the existing build) and AssetCraft (scan + licence report into a private
      catalogue in the report's run folder): read-only for the project and the shared catalogue; no build or no runtime
      → Not Evaluated with the reason, never a score.
-  3. The default workspace root in a cloud session is the folder that holds the cloned repositories (identical in
-     scripts/tools.sh, studio/core and production).
+  3. The departments the report runs can reach the project it reports on: the report grants them exactly the project and
+     its own run folder (the session's roots, and project isolation, are unchanged).
   4. A refresh that fails says why (the actual error), never just "failed".
 
 Fast: the department calls are stand-ins that write exactly what the department writes, except one real call through
@@ -168,6 +168,11 @@ check("regressions: findings of a department that was not measured in the previo
 check("overall: a different set of evaluated departments is not compared (no overall delta, the difference named)",
       Rf["health"]["vs_previous"]["delta"] is None and "different departments" in Rf["health"]["vs_previous"]["compare"], Rf["health"]["vs_previous"])
 
+same = [{"report_id": f"p/20261109T190000Z" + (f"-{n}" if n > 1 else ""), "generated": "2026-11-09T19:00:00+00:00"} for n in range(1, 13)]
+import random as _r; shuffled = same[:]; _r.Random(7).shuffle(shuffled)
+check("ordering: twelve reports made in the same second are ordered by their suffix (…Z, -2 … -12), never by folder listing",
+      [x["report_id"] for x in sorted(shuffled, key=PR._report_order)] == [x["report_id"] for x in same])
+
 # deltas: only under the same rubric and method
 PR._studio_call = fake
 R2 = PR.generate(game, refresh="full", save="store")
@@ -185,41 +190,29 @@ q3 = {d["id"]: d for d in R3["departments"]}["playcraft"]["quality"]
 check("trend: a measurement under a different PLAYCRAFT method is never compared (no delta)", q3["delta"] is None and "method" in (q3["compare"] or ""), q3)
 PR._studio_call = real_call
 
-# ---------------------------------------------------------------- 3. workspace roots: the folder that holds the repositories
-home = os.path.join(WS, "home"); os.makedirs(home)
-wsr = os.path.join(WS, "workspace"); repo = os.path.join(wsr, "GITCRAFT"); plain = os.path.join(wsr, "notes")
-for d in (repo, plain): os.makedirs(d)
-os.makedirs(os.path.join(repo, ".git"))
-from importlib import util as _u
-spec = _u.spec_from_file_location("studio_core", os.path.join(REPO, "studio", "core", "__init__.py")); sc = _u.module_from_spec(spec); spec.loader.exec_module(sc)
-
-
-def sh_root(cwd, extra):
-    env = {k: v for k, v in os.environ.items() if not k.startswith(("GITCRAFT_", "CLAUDE_"))}
-    env.update(HOME=home, **extra)
-    return subprocess.run(["bash", "-c", f"source {os.path.join(REPO, 'scripts', 'tools.sh')} >/dev/null 2>&1; printf %s \"$GITCRAFT_ROOT\""],
-                          cwd=cwd, env=env, capture_output=True, text=True).stdout
-
-
-cases = [("cloud session started inside one checkout → the folder holding the repositories", repo, {"CLAUDE_CODE_REMOTE": "true"}, wsr),
-         ("cloud session started in the workspace itself → the workspace", wsr, {"CLAUDE_CODE_REMOTE": "true"}, wsr),
-         ("cloud session in a folder that is not a checkout → that folder (never wider)", plain, {"CLAUDE_CODE_REMOTE": "true"}, plain),
-         ("local machine, project outside home → the project folder (unchanged)", repo, {}, repo),
-         ("inside home → home (unchanged)", home, {"CLAUDE_CODE_REMOTE": "true"}, home)]
-for label, cwd, extra, want in cases:
-    env = dict(extra, HOME=home)
-    got = (sh_root(cwd, extra), production.default_root(env, cwd), sc.default_root(env, cwd))
-    check(f"roots: {label} (scripts/tools.sh, production and studio/core agree)", got == (want, want, want), got)
-check("roots: never '/' — a checkout directly under / keeps itself", production.default_root({"HOME": home, "CLAUDE_CODE_REMOTE": "true"}, "/") == os.path.realpath(home))
-
-# a real call through studio/cli.py: the policy error reaches the report (the first Bruh report said only "failed")
+# ---------------------------------------------------------------- 3. roots: the project reported on, never the whole workspace
+other = os.path.realpath(tempfile.mkdtemp(prefix="gcr-other-"))   # a project outside the session's roots (like a sibling clone)
+os.makedirs(os.path.join(other, "img")); open(os.path.join(other, "img", "a.png"), "wb").write(b"\x89PNG\r\n\x1a\n")
+run = os.path.realpath(tempfile.mkdtemp(prefix="gcr-run-"))
+ctx = {"project": {"path": other}, "run_dir": run}
+env = PR._dept_env(ctx)
+rs = env["GITCRAFT_ROOTS"].split(":")
+check("roots: a department the report runs gets the session's roots plus exactly the project and the report's run folder (nothing wider)",
+      rs == list(dict.fromkeys(production.roots() + [other, run])) and os.path.dirname(other) not in rs and os.environ["GITCRAFT_ROOTS"] == WS, rs)
+check("roots: the session's own roots and the launcher default are unchanged (another project can still never write into this checkout)",
+      production.roots() == [WS] and "CLAUDE_CODE_REMOTE" not in open(os.path.join(REPO, "scripts", "tools.sh")).read())
 studio_py = os.path.join(os.environ.get("GITCRAFT_HOME") or os.path.expanduser("~/.gitcraft"), "studio", "venv", "bin", "python")
 if os.path.exists(studio_py):
-    res, err = PR._studio_call("assetcraft_scan", {"folder": game, "out_dir": "/proc/nope-outside-roots", "name": "x"}, timeout=120)
-    why = PR._why("assetcraft_scan", res, err)
-    check("real call: a sandbox refusal through studio/cli.py reaches the report as its reason ('GITCRAFT policy: …')", "GITCRAFT policy" in why, why)
+    args = {"folder": other, "project": other, "out_dir": os.path.join(run, "scan"), "name": "scan", "register": False}
+    res0, err0 = PR._studio_call("assetcraft_scan", args, timeout=120, env={"GITCRAFT_ASSET_CATALOG": os.path.join(run, "cat0.sqlite")})
+    why = PR._why("assetcraft_scan", res0, err0)
+    check("real call: without the grant, a project outside the roots is refused, and the report says so ('GITCRAFT policy: …', never just 'failed')",
+          "GITCRAFT policy" in why, why)
+    res1, err1 = PR._studio_call("assetcraft_scan", args, timeout=120, env=PR._dept_env(ctx, GITCRAFT_ASSET_CATALOG=os.path.join(run, "cat1.sqlite")))
+    check("real call: with the grant, the department reads the project outside the session's roots and writes only into the run folder",
+          not err1 and res1 and res1.get("status") in ("ok", "failed") and res1.get("catalogued", 0) >= 1 and os.listdir(other) == ["img"], (res1, err1))
 else:
-    print("SKIP real call: the Studio runtime is not installed here")
+    print("SKIP real calls: the Studio runtime is not installed here")
 
 print(f"\n{'ALL PASSED' if not fails else f'{fails} FAILED'}")
 sys.exit(1 if fails else 0)

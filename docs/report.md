@@ -44,6 +44,9 @@ It is written as `report.json` (for tools), `report.md` and `report.html` (self-
   committed, merged or deployed. PLAYCRAFT, PIXELCRAFT and TestCraft are refreshed only against a build folder that already
   exists (no build: Not Evaluated, with how to build). Refreshed results are not recorded in the departments' histories, and
   every refresh writes only into the report's run folder.
+- **Reach.** The departments a report runs get the session's roots plus exactly the project being reported on and the
+  report's run folder (`_dept_env`), so a project cloned beside the GITCRAFT checkout can be reported on without widening
+  anything else: other repositories stay outside, as in every session (`docs/security.md`).
 - **No silent failures.** A refresh that does not produce a result says why: the department's own error (e.g.
   `GITCRAFT policy: … outside the workspace roots`), its failing checks, or the install command for a missing runtime. Never
   just "failed".

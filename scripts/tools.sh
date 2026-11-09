@@ -60,22 +60,12 @@ fi
 # Folder the tools may read from and write to. Defaults to the session home, or
 # to the workspace when it lives outside home (cloud sessions check repos out to
 # /home/user while HOME is /root, which would otherwise fence every repo out).
-# In a cloud session (CLAUDE_CODE_REMOTE=true) the workspace is the folder that
-# holds the cloned repositories: when the session starts inside one checkout
-# (/home/user/GITCRAFT), its parent (/home/user) is the workspace, so a second
-# repository cloned beside it (/home/user/<owner>/<repo>) is inside the roots.
-# studio/core roots() computes the same default (keep the two identical).
 if [[ -z "${GITCRAFT_ROOT:-}" ]]; then
   GITCRAFT_ROOT="$HOME"
   _gc_ws="${CLAUDE_PROJECT_DIR:-$PWD}"
   case "$_gc_ws/" in
     "$HOME"/*) ;;
-    /?*) if [[ -d "$_gc_ws" && "$_gc_ws" != / ]]; then
-           GITCRAFT_ROOT="$_gc_ws"
-           _gc_up="$(dirname "$_gc_ws")"
-           [[ "${CLAUDE_CODE_REMOTE:-}" == true && -e "$_gc_ws/.git" && "$_gc_up" != / ]] && GITCRAFT_ROOT="$_gc_up"
-           unset _gc_up
-         fi ;;
+    /?*) [[ -d "$_gc_ws" && "$_gc_ws" != / ]] && GITCRAFT_ROOT="$_gc_ws" ;;
   esac
   unset _gc_ws
 fi

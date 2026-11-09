@@ -30,8 +30,7 @@ def _env(extra=None):
     their outputs there; the first root, and so every default, is unchanged."""
     from .artifacts import isolated_home
     e = dict(os.environ, **(extra or {}))
-    from . import default_root
-    rs = [r for r in (e.get("GITCRAFT_ROOTS") or e.get("GITCRAFT_ROOT") or default_root(e)).split(":") if r]
+    rs = [r for r in (e.get("GITCRAFT_ROOTS") or e.get("GITCRAFT_ROOT") or os.getcwd()).split(":") if r]
     iso = isolated_home()
     if os.path.isdir(iso) and iso not in rs: e["GITCRAFT_ROOTS"] = ":".join(rs + [iso])
     return e

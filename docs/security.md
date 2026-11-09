@@ -83,7 +83,7 @@ cleanly with 502 and `allowed-failed` in `net.jsonl`.
 
 ## Choosing the roots
 
-- `GITCRAFT_ROOT` is the primary folder (it defaults to `$HOME`, or to the session workspace when that is outside `$HOME`). In a cloud session (`CLAUDE_CODE_REMOTE=true`) that starts inside one repository checkout (`/home/user/GITCRAFT`), the workspace is the folder that holds the cloned repositories (`/home/user`), so a second repository cloned beside it is inside the roots; never `/`. `scripts/tools.sh`, `studio/core` and `production` compute the same default. Tools with a single native root flag (PhotoCraft) get this one.
+- `GITCRAFT_ROOT` is the primary folder (it defaults to `$HOME`, or to the session workspace when that is outside `$HOME`). Tools with a single native root flag (PhotoCraft) get this one.
 - `GITCRAFT_ROOTS` is a colon-separated list of every authorized folder, e.g. one per repo. It defaults to `GITCRAFT_ROOT`. Narrow it to scope tools to specific repositories:
   `GITCRAFT_ROOTS=/home/user/TIDEBREAKERS:/home/user/GITCRAFT`.
 - Set these in the environment's variables (or before launching Claude Code); `mcp.sh` reads them each time a server starts.
