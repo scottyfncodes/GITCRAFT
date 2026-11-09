@@ -94,6 +94,8 @@ jobs:
       - name: Run GITCRAFT report (read-only cross-department project report)
         run: python3 tests/test_report.py
 
+      - name: Report coverage (measured refreshes are scored, TestCraft/AssetCraft refreshed read-only, workspace roots, failure reasons)
+        run: python3 tests/test_report_coverage.py
       - name: Orchestration (plan v2 graph, transactional integration, ownership, consolidated approval, v1 compatibility)
         run: python3 tests/test_orchestration.py
       - name: Layered QA (department, integration and product QA; routing, retries, optional, unavailable, verdicts)

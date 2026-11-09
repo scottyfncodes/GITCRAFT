@@ -190,6 +190,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).
   A Not Evaluated department never gets a score or weight, release gates never enter a quality score, and a delta is shown only under the same
   rubric and method; every production run ends with a Production Report that never fails the run.
+- `tests/test_report_coverage.py` must pass after any change to the report's refresh (`project_report.c_playcraft`/`c_testcraft`/`c_assetcraft`,
+  `_studio_call`, `_why`) or to the default workspace roots (`scripts/tools.sh`, `default_root` in `studio/core` and `production`): a department a
+  full report measured is scored from that measurement (never "No data"), never recorded in its history; every refresh writes only into the report's
+  run folder (never the project or the shared catalogue); a failed refresh gives its actual reason; the three root defaults stay identical.
 - `tests/test_creative.py` must pass after any change to `production/creative.py`, `production/vision.py`, the Creative Review parts of
   `project_report.py`, the `production_vision`/`production_creative` tools or `global/skills/creative-review/`. A Creative Review is advisory
   judgement: it never changes a department score, the overall score or confidence, a release gate, the Director's verdict, P0–P3, the technical
