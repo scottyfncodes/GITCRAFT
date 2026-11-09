@@ -163,6 +163,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   Only an implied extra becomes optional, and only by the Decision Room; an optional criterion never blocks READY and is always listed; an
   unavailable department makes a required criterion INCOMPLETE, never a pass; a failure goes to the department that owns it, at most two
   re-runs per owner, then a person (required) or a recorded "not delivered" (optional).
+- `tests/test_layered_qa.py` must pass after any change to `production/qa.py`, the `deliverables` gate, `qa.request`/`check_request`, `planner._layered_qa`,
+  the `routed` records in `engine._remediate`/`_department_rework`, or the QA section of the reports: the three layers are a view, never a second
+  verdict or routing path; a required QA failure prevents READY, an optional or advisory one never does; a missing tool is unavailable (INCOMPLETE),
+  never a defect; a suggestion or unrequested addition is never a blocker; only stated requests are checked; v1 records get no layered QA tasks.
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
   gate or substitute a mocked department result to make it pass.

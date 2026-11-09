@@ -11,6 +11,9 @@ A department returning `ok` makes a task `complete`; the gate decides `passed`. 
   expected              (agent) every expected file exists inside the roots and opens as its format
   changed               (fix) the project's files differ from what the failed check measured
   advisory              recorded, never blocks (DESIGNCRAFT's design review)
+  deliverables          (department QA, plan v2) before hand-off: every file integration will ship (the task's ship roles and
+                        formats) exists and validated; a department that ran but produced nothing shippable fails its own gate
+                        and the work goes back to it, not to integration or the agent
 
 A check may carry a `category` (production/verification.py): a gate whose only failing checks are `unverified`
 (the check could not be completed: sandbox network, an external service down) is reported as unverified, and the
@@ -74,6 +77,13 @@ def evaluate(task, res, ctx):
                         "measured": f"{len(man) - len(missing)}/{len(man)} referenced"})
         elif ty == "advisory":
             out.append({"condition": "advisory (recorded, does not block)", "ok": True})
+        elif ty == "deliverables":
+            from .builtins import select
+            outs = [o for o in ctx.get("outputs") or [] if o.get("path") and os.path.isfile(o["path"])]
+            got = select(outs, g.get("roles") or ("*",), g.get("formats"))
+            out.append({"condition": "department QA: the deliverables integration will ship exist and validate", "ok": bool(got),
+                        "measured": f"{len(got)} shippable file(s)", "detail": None if got else
+                        f"no validated output with role {'/'.join(g.get('roles') or ['*'])}" + (f" as {'/'.join(g['formats'])}" if g.get("formats") else "")})
     return out
 
 

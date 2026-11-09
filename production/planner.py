@@ -365,8 +365,28 @@ def _graph_v2(spec, tasks, decisions):
     if any(t["id"] == "qa.assets" for t in tasks):
         for g in next(t for t in tasks if t["id"] == "qa.assets")["gate"]:
             if g["type"] == "referenced": g["strict"] = True   # real loads only: no comments, no unrelated JSON, never the manifest
+    _layered_qa(spec, tasks, ids, ready, wires)
     decisions.append("plan v2: the code build starts after the foundation with placeholders; assets are integrated as they pass; build.wire wires them "
                      "and the approved icon in; QA measures the final wired build" + ("; the build uses a local data mock until backend.wire" if "backend.provision" in ids else ""))
+
+
+def _layered_qa(spec, tasks, ids, ready, wires):
+    """Plan v2's layered QA (production/qa.py): department QA before hand-off and Product QA against the request.
+    Integration QA is the integration tasks and the existing checks of the assembled build; nothing else is added."""
+    from . import qa
+    for t in tasks:   # department QA: a shipping department's own deliverables exist and validate before integration takes them
+        sh = t.get("ship") or {}
+        if t["stage"] == "production" and t["kind"] in ("studio", "agent") and sh.get("roles") and not any(g["type"] == "deliverables" for g in t["gate"] or []):
+            t["gate"] = (t["gate"] or []) + [{"type": "deliverables", "roles": list(sh["roles"]), **({"formats": list(sh["formats"])} if sh.get("formats") else {})}]
+    existing = bool((spec.get("mode") or {}).get("existing"))
+    deps = [ready] + ([] if wires else ["integrate.final"])
+    rq = T("qa.request", "Product QA: the finished product against the request (requested features, unrequested additions, coherence)"
+           + (" (advisory: an existing project's code is reported, not imposed)" if existing else ""), "qa", "builtin", action="check_request",
+           params=qa.params_for(spec), deps=deps, criterion="request_fulfilled", gate=[{"type": "status_ok"}], advisory=existing)
+    reg = next((t for t in tasks if t["id"] == "release.regression"), None)
+    tasks.insert(tasks.index(reg) if reg else len(tasks), rq)
+    for t in tasks:   # the final regression and the release wait for it like every other QA check
+        if t["id"] in ("release.regression", "release.report") and "qa.request" not in t["depends_on"]: t["depends_on"].append("qa.request")
 
 
 def _wire_instructions(spec, icon):
@@ -533,6 +553,14 @@ def _build_instructions(spec, v2=False):
     if spec["platform"].get("native"):
         ins.append("Native icon sets for " + " and ".join(spec["platform"]["native"]) + " are in native-icons/ (ios/AppIcon.appiconset, android/res): "
                    "leave them for the native wrapper; the web build does not reference them.")
+    if v2:
+        from . import qa as _qa
+        req = _qa.requested(spec)
+        ins.append("Product QA (qa.request) checks the finished product against the request: the entry page has a <title> naming the product"
+                   + ("; " + "; ".join({"sound": "the requested sound plays (Audio/AudioContext)", "accounts": "a sign-in surface for the requested accounts",
+                                         "mobile": "a viewport meta" + (" and touch/pointer controls" if spec["deliverable"] == "game" else ""),
+                                         "accessibility": "<html lang> and alt text on every image"}[r] for r in req) if req else "")
+                   + ". Add nothing that was not asked for (unrequested additions are reported).")
     ins.append("Run no build step that needs the network. Submit the files you changed.")
     return ins
 

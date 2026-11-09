@@ -261,6 +261,12 @@ def check_preserve(ctx):
     return _with_report(ctx, maturity.preserve_check(ctx["project"], base, p.get("allow") or (), p.get("kind") or "app"), "preserve.json")
 
 
+def check_request(ctx):
+    """Product QA (plan v2): the finished product against the person's request (production/qa.py)."""
+    from . import qa
+    return qa.check_request(ctx)
+
+
 def check_features(ctx):
     """Every feature in tests/gitcraft.features.json, run in Chromium through TestCraft's scripted play (a fresh page each)."""
     from . import icons
