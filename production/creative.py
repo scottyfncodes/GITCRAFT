@@ -357,7 +357,7 @@ def reviews(pid):
         for p in glob.glob(os.path.join(r, pid or "-", "*", "review.json")):
             Rv = _json(p)
             if Rv and Rv.get("review_id"): seen.setdefault(Rv["review_id"], dict(Rv, _dir=os.path.dirname(p)))
-    return sorted(seen.values(), key=lambda x: x["created"])
+    return sorted(seen.values(), key=lambda x: (x["created"], x["review_id"].split("-")[0], int(x["review_id"].split("-")[1]) if "-" in x["review_id"] else 1))
 
 
 def status(Rv, head, V):

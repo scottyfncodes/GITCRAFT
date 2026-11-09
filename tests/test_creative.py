@@ -222,6 +222,17 @@ check("stale: a new commit makes the review stale", C["status"] == "stale" and a
 C = CR.for_report({"id": K["project"]["id"], "head": None})
 check("unverified: without a checkout the commit cannot be compared, so it is not current", C["status"] == "unverified" and "opportunities" not in C, C)
 
+# ---------------------------------------------------------------- 6b. ordering: many reviews in one second (suffixes -2 … -12)
+od = os.path.join(WS, "order-creative"); pid_o = "test--order"
+for rid in ["20261109T143852Z"] + [f"20261109T143852Z-{n}" for n in range(2, 13)]:
+    os.makedirs(os.path.join(od, pid_o, rid))
+    json.dump({"review_id": rid, "created": "2026-11-09T14:38:52+00:00"}, open(os.path.join(od, pid_o, rid, "review.json"), "w"))
+_cd = os.environ["GITCRAFT_CREATIVE_DIR"]; os.environ["GITCRAFT_CREATIVE_DIR"] = od
+ordered = [r["review_id"] for r in CR.reviews(pid_o)]
+os.environ["GITCRAFT_CREATIVE_DIR"] = _cd
+check("ordering: 12 reviews in the same second come out in creation order and the newest (-12, double-digit suffix) is latest",
+      ordered == ["20261109T143852Z"] + [f"20261109T143852Z-{n}" for n in range(2, 13)] and ordered[-1].endswith("-12"), ordered)
+
 # ---------------------------------------------------------------- 7. the tools
 sys.path.insert(0, os.path.join(REPO, "studio"))
 import server  # noqa: E402
