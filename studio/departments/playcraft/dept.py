@@ -61,13 +61,36 @@ def _extra_patterns():
     return {c["id"]: c["patterns"] for g in PROFILES.values() for c in g.get("criteria", []) if c.get("patterns")}
 
 
-def _discover(ctx, project):
+_MATURITY = None
+
+
+def project_kind(root):
+    """game | app | site, with confidence and evidence: the Production Director's classifier (production/maturity.py,
+    standard library only), so PLAYCRAFT and the Decision Room never disagree about what a project is."""
+    global _MATURITY
+    if _MATURITY is None:
+        spec = _ilu.spec_from_file_location("gitcraft_maturity", os.path.join(HERE, "..", "..", "..", "production", "maturity.py"))
+        _MATURITY = _ilu.module_from_spec(spec); spec.loader.exec_module(_MATURITY)
+    return _MATURITY.kind(root)
+
+
+def _discover(ctx, project, p=None):
+    """Read the repository. A scoring action (p given) refuses a project that reads as an app or a site: genre
+    detection always finds *some* genre, so without this an e-book reader gets a gameplay scorecard. The caller
+    overrides with `genres` (the person knows it is a game) or treat_as_game: true."""
     root = ctx.need(project, "project")
     if not os.path.isdir(root): raise StudioError(f"project must be a folder (the game's repository): {root}")
     ctx.used("studio_playcraft")
     info = scan.scan(root, _extra_patterns())
     info["genre"] = scan.detect_genres(info, PROFILES)
-    ctx.stage("discover", files=info["counts"]["source"], genres=[g["genre"] for g in info["genre"]["genres"]])
+    info["project_kind"] = project_kind(root)
+    ctx.stage("discover", files=info["counts"]["source"], genres=[g["genre"] for g in info["genre"]["genres"]], kind=info["project_kind"]["kind"])
+    k = info["project_kind"]
+    if p is not None and k["kind"] != "game" and k["confidence"] in ("high", "medium") and not (p.get("genres") or p.get("treat_as_game")):
+        raise StudioError(f"not a game: this project reads as {'an' if k['kind'] == 'app' else 'a'} {k['kind']} ({k['confidence']} confidence: "
+                          + "; ".join(k["evidence"]) + "). PLAYCRAFT scores games only; use PIXELCRAFT for an app or a site",
+                          hint="if it is a game, pass genres: [...] or treat_as_game: true", stage="discover")
+    if k["kind"] != "game": ctx.note(f"the project reads as {k['kind']} ({k['confidence']} confidence); scored as a game because the caller said so or the reading is weak")
     return info
 
 
@@ -112,9 +135,11 @@ def discover(ctx, p):
                                                                          for k, v in info["signals"].items() if v["count"]]
     lines += ["", "## Not found", "", ", ".join(scan.SIGNALS[k][1] for k, v in info["signals"].items() if not v["count"] and k in scan.SIGNALS)]
     outs = [_write_json(ctx, "discovery.json", pub), _write_text(ctx, "discovery.md", "\n".join(lines) + "\n")]
+    k = info["project_kind"]
     checks = [{"name": "the repository has game source to read", "ok": info["counts"]["source"] > 0, "detail": info["counts"]},
+              {"name": "the project is a game", "ok": k["kind"] == "game" or k["confidence"] == "low", "detail": f"{k['kind']} ({k['confidence']}): " + "; ".join(k["evidence"])},
               {"name": "at least one genre identified", "ok": bool(info["genre"]["genres"]), "detail": info["genre"]["primary"]}]
-    return {"outputs": outs, "checks": checks, "game": {k: pub[k] for k in ("name", "title", "pitch", "engine", "build", "mobile", "keys", "hooks")}, "genre": info["genre"]}
+    return {"outputs": outs, "checks": checks, "game": {x: pub[x] for x in ("name", "title", "pitch", "engine", "build", "mobile", "keys", "hooks")}, "genre": info["genre"], "project_kind": k}
 
 
 # ---------------------------------------------------------------- phase 2: play
@@ -354,7 +379,7 @@ def _summary(card):
 
 
 def assess(ctx, p):
-    info = _discover(ctx, p["project"])
+    info = _discover(ctx, p["project"], p)
     metrics, shots, vps = None, [], []
     if p.get("play_report"):
         d = json.load(open(ctx.need(p["play_report"], "play_report"))); metrics = d["metrics"]; vps = list(metrics["viewports"])
@@ -400,7 +425,7 @@ def make_plan(card, limit=12):
 
 
 def pass_(ctx, p):
-    info = _discover(ctx, p["project"])
+    info = _discover(ctx, p["project"], p)
     metrics, shots, vps = None, [], []
     if p.get("target") or info["build"]["playable_dir"]:
         res, metrics, req = _play(ctx, p, info); vps = [r["viewport"] for r in res]
@@ -523,7 +548,7 @@ def merge_runs(a, b):
 def verify(ctx, p):
     base = json.load(open(ctx.need(p["baseline"], "baseline")))
     req = dict(base.get("baseline", {}).get("request") or {}); req.update({k: v for k, v in p.items() if v is not None})
-    info = _discover(ctx, p.get("project") or base["game"]["root"])
+    info = _discover(ctx, p.get("project") or base["game"]["root"], dict(p, treat_as_game=True))
     target = p.get("target") or base.get("baseline", {}).get("target")
     req["target"] = target
     metrics, shots, vps = None, [], []
@@ -564,7 +589,7 @@ def full_pass(ctx, p):
     run. Overlaps are measured once: PLAYCRAFT's probe owns frame rate and input; TestCraft owns load errors per
     viewport and asset validity. The plan merges both, engineering defects first, with one owner per item."""
     from core import contract
-    info = _discover(ctx, p["project"])
+    info = _discover(ctx, p["project"], p)
     target = p.get("target") or info["build"]["playable_dir"]
     eng = {}
     if target:

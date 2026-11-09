@@ -164,6 +164,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - Never commit model weights or Meshroom: they install into
   `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.
+- `tests/test_linkage.py` must pass after any change to how departments hand work to each other: `production/maturity.py`'s project
+  kind, `planner.py` (what a request schedules, `$from` hand-offs, gates), `builtins.integrate`, `gates.remediation`, PLAYCRAFT's
+  not-a-game refusal, `studio/core/routing.py` or `scripts/register.sh`. A project that reads as an app is never scored as a game unless
+  the person says so, and a requested asset (trailer, ocean, animation) is planned or reported NOT PLANNED, never dropped.
 - `tests/test_report.py` must pass after any change to `production/project_report.py`, the report path in `production/entry.py` or the
   `production_project_report` tool; "Run GITCRAFT report" is read-only (never writes inside the project, builds, merges or deploys), never
   reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).

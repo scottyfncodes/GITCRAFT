@@ -69,13 +69,15 @@ def scaffold(ctx):
 def integrate(ctx):
     prod, proj = ctx["prod"], ctx["project"]
     previous = {m["dest"]: m for m in (ctx.get("previous_manifest") or [])}
-    plan, conflicts = {}, []
+    plan, conflicts, noid = {}, [], []
     for up in ctx["upstream"]:
         ship = up.get("ship")
         if not ship or up["state"] != "passed": continue
         dest_dir = ship["dest"].replace("$project", proj)
         if ship.get("library"):   # a 3D Department asset: ForgeCraft's hash-verified library export
-            aid = (up.get("result") or {}).get("asset_id") or ((up.get("result") or {}).get("library") or {}).get("asset")
+            res = up.get("result") or {}   # ForgeCraft reports the library asset as asset: {id, version}
+            aid = res.get("asset_id") or (res.get("asset") or {}).get("id") or (res.get("library") or {}).get("asset")
+            if not aid: noid.append(up["id"]); continue
             if aid: plan[f"library:{aid}"] = {"task": up["id"], "library_asset": aid, "dest_dir": dest_dir}
             continue
         for o in select(up.get("outputs", []), ship.get("roles", ["*"]), ship.get("formats")):
@@ -86,6 +88,9 @@ def integrate(ctx):
             if dest in plan and plan[dest]["sha256"] != item["sha256"]:
                 conflicts.append({"dest": os.path.relpath(dest, proj), "tasks": [plan[dest]["task"], up["id"]]})
             plan[dest] = item
+    if noid:
+        return {"status": "failed", "failure": "handoff", "error": f"{', '.join(noid)} passed but reported no 3D library asset to export; nothing was copied",
+                "checks": [{"name": "every 3D task names its library asset", "ok": False, "detail": noid}], "outputs": []}
     if conflicts:
         return {"status": "failed", "failure": "conflict", "error": "integration conflict: different files ship to the same path; nothing was copied",
                 "conflicts": conflicts, "checks": [{"name": "no two deliverables ship to the same path", "ok": False, "detail": conflicts}], "outputs": []}
@@ -104,8 +109,20 @@ def integrate(ctx):
     for dest, it in plan.items():
         if "library_asset" in it:
             r = executors.forgecraft_call("library_export", {"asset": it["library_asset"], "dest": it["dest_dir"]}, timeout=600)
-            ok = r.get("status") not in ("failed", "blocked") and not r.get("error")
+            ok = r.get("status") not in ("failed", "blocked") and not r.get("error") and bool(r.get("files"))
             checks.append({"name": f"3D asset {it['library_asset']} exported from the library (hash-verified)", "ok": ok, "detail": r.get("error") or r.get("reason")})
+            lic = None
+            try: lic = ((json.load(open(os.path.join(r["dir"], "asset.json"))).get("license") or {}).get("asset"))
+            except (OSError, ValueError, KeyError, TypeError, AttributeError): pass
+            for f in r.get("files") or []:   # the build is told about every exported file, like any other shipped asset
+                ext = os.path.splitext(f["path"])[1].lower().lstrip(".")
+                role = "model" if ext in ("glb", "gltf", "fbx", "obj") else "model_source"
+                rel = os.path.relpath(f["path"], proj)
+                if role == "model":
+                    with open(f["path"] + ".license.json", "w") as fh:
+                        json.dump({"license": lic or "LicenseRef-Project-Owned", "source": {"production": prod["id"], "task": it["task"], "library_asset": it["library_asset"]}}, fh, indent=1)
+                manifest.append({"dest": f["path"], "dest_rel": rel, "sha256": f["sha256"], "role": role, "format": ext, "task": it["task"], "replaced": False})
+                outs.append({"path": f["path"], "role": role, "format": ext, "sha256": f["sha256"], "ok": True})
             continue
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         replaced = os.path.exists(dest) and sha256(dest) != it["sha256"]

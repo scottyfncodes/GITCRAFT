@@ -21,11 +21,12 @@ pre { background: #051427; border: 1px solid var(--line); border-radius: 10px; p
 .brand b { display: block; letter-spacing: .14em; }
 .brand small { color: var(--gold); font-weight: 600; }
 .cube { width: 30px; height: 30px; background: linear-gradient(135deg, var(--teal), #0e7c96); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
-.tabs { display: flex; gap: 4px; margin-left: 10px; }
+.tabs { display: flex; gap: 4px; margin-left: 10px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.top > * { min-width: 0; }
 .tabs a { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 10px; color: var(--mute); text-decoration: none; font-weight: 600; }
 .tabs a i { font-style: normal; color: var(--teal); }
 .tabs a.on { background: var(--panel2); color: var(--ink); }
-.mode { margin-left: auto; font-size: 12px; color: var(--mute); text-align: right; }
+.mode { margin-left: auto; font-size: 12px; color: var(--mute); text-align: right; flex-shrink: 1; overflow-wrap: anywhere; }
 .mode b { color: var(--gold); }
 
 main { max-width: 1320px; margin: 0 auto; padding: 22px 20px 90px; }
@@ -117,6 +118,9 @@ dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--li
 dialog::backdrop { background: rgba(0,0,0,.55); }
 dialog menu { padding: 0; margin: 14px 0 0; display: flex; justify-content: flex-end; }
 
+@media (max-width: 1100px) {
+  .mode { display: none; }   /* the snapshot label pushed the header 107 px past an 820 px tablet */
+}
 @media (max-width: 960px) {
   .grid2 { grid-template-columns: 1fr; }
   .grid3 { grid-template-columns: 1fr 1fr; }

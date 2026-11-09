@@ -87,6 +87,71 @@ def _refs(html):
     return out
 
 
+TEMPLATE_DIR = re.compile(r"(^|/)(starters?|templates?|fixtures?|__fixtures__|examples?|boilerplates?|scaffolds?)/")
+GAME_ENGINES = (("phaser", r"from ['\"]phaser['\"]|new Phaser\.Game|\bPhaser\.(Scene|Game)\b"), ("pixi", r"from ['\"]pixi\.js['\"]|\bPIXI\.Application\b"),
+                ("kaboom", r"from ['\"]kaboom['\"]|\bkaboom\(\s*\{"), ("godot", r"extends (Node2D|KinematicBody2?D?|CharacterBody[23]D)"),
+                ("three", r"\bTHREE\.|from ['\"]three['\"]"))
+GAME_DEPS = {"phaser": "phaser", "pixi.js": "pixi", "kaboom": "kaboom", "kaplay": "kaboom", "three": "three", "excalibur": "excalibur",
+             "melonjs": "melonjs", "@babylonjs/core": "babylon", "babylonjs": "babylon", "playcanvas": "playcanvas", "matter-js": "matter"}
+# what an application has and a game rarely does: a UI framework, a data layer, forms and routes
+APP_DEPS = ("next", "react-dom", "vue", "nuxt", "svelte", "@sveltejs/kit", "@angular/core", "@remix-run/react", "solid-js", "astro",
+            "dexie", "idb", "prisma", "@prisma/client", "@supabase/supabase-js", "firebase", "drizzle-orm", "mongoose", "express", "@tanstack/react-query")
+APP_CODE = re.compile(r"<form\b|\bonSubmit\b|addEventListener\(\s*['\"]submit|\buseRouter\b|\bnext/navigation\b|\bindexedDB\b|\bfetch\(\s*['\"`]/api/")
+_COMMENTS = re.compile(r"/\*.*?\*/|<!--.*?-->|(?<![:\"'\w])//[^\n]*|^\s*#[^\n]*", re.S | re.M)
+
+
+def _kind(src, readme, deps, scripts, rel):
+    """game | app | site, with its own confidence and evidence. Game words count only in code (comments and
+    stylesheets left out, where 'level', 'lives' and 'score' are ordinary English) and in the README; a 2D canvas
+    alone is not a game engine (readers, charts and editors draw on canvases too); app signals count against."""
+    code = {r: _COMMENTS.sub(" ", t) for r, t in src.items() if not r.endswith(".css")}
+    text = " ".join(code.values())[:400000]
+    strong = sorted({e for e, pat in GAME_ENGINES if re.search(pat, text)} | {v for k, v in GAME_DEPS.items() if k in deps})
+    canvas_files = [r for r, t in code.items() if re.search(r"getContext\(\s*['\"]2d", t)]
+    # a canvas counts as a game engine only with a game loop and player input in the same file
+    canvas_loop = [r for r in canvas_files if re.search(r"requestAnimationFrame|setInterval\(", code[r]) and
+                   re.search(r"key(down|up)|\bpointerdown\b|\btouchstart\b|\bgamepad", code[r], re.I)]
+    words = GAME_WORDS.findall(text[:200000]) + GAME_WORDS.findall(readme)
+    hits = len(words)
+    readme_game = bool(re.search(r"\b(a|an|the|this)\s+(?:[\w-]+\s+){0,3}(game|platformer|roguelike|shooter|puzzler)\b", readme, re.I))
+    app_sig = sorted({d for d in APP_DEPS if d in deps} | ({"app routes"} if any(r.startswith(("app/", "pages/", "src/app/", "src/pages/")) and r.endswith((".tsx", ".jsx")) for r in rel) else set())
+                     | ({"forms / data layer in code"} if APP_CODE.search(text) else set()))
+    game_files = [r for r in rel if re.search(r"(\.tscn|(^|/)project\.godot|\.tmj|\.tmx|\.ldtk|\.yarn)$", r)]
+    game_entry = [r for r in rel if re.search(r"(^|/)(game|main_game)\.(ts|js|mjs)$|(^|/)src/game/", r)]
+    if any(r.endswith(".tscn") or r.endswith("project.godot") for r in game_files) and "godot" not in strong: strong.append("godot")
+    engines = strong + (["canvas"] if canvas_files else [])
+    ev = []
+    if game_files: ev.append(f"game project files: {', '.join(game_files[:3])}" + (f" (+{len(game_files) - 3})" if len(game_files) > 3 else ""))
+    if game_entry: ev.append(f"game code: {game_entry[0]}")
+    if strong: ev.append(f"game engine: {', '.join(strong)}")
+    if canvas_files: ev.append(f"2D canvas in {len(canvas_files)} file(s)" + (f", with a game loop and input in {canvas_loop[0]}" if canvas_loop else " (no game loop with player input: not counted as a game engine)"))
+    ev.append(f"{hits} game words in code and README (comments and CSS excluded)")
+    if readme_game: ev.append("the README calls it a game")
+    if app_sig: ev.append(f"app signals: {', '.join(app_sig[:6])}")
+    game_score = (3 if game_files else 0) + (1 if game_entry else 0) + (3 if strong and (hits >= 3 or game_files) else 0) + (2 if canvas_loop else 0) + (2 if readme_game else 0) + (1 if canvas_files and hits >= 6 else 0) + (2 if hits >= 25 else 0)
+    app_score = len(app_sig)
+    if game_score >= 3 and game_score > app_score:
+        kind = "game"
+        conf = "high" if game_score >= 5 and app_score == 0 else "medium" if game_score - app_score >= 2 else "low"
+    else:
+        kind = "site" if not scripts.get("dev") and not app_sig and not re.search(r"\b(useState|localStorage|fetch\()", text) else "app"
+        conf = "high" if game_score == 0 and hits < 6 else "medium" if game_score <= 2 else "low"
+    return kind, conf, engines, ev
+
+
+def kind(project):
+    """game | app | site for a project folder, with confidence and evidence (read-only; PLAYCRAFT uses it to refuse
+    scoring something that is not a game)."""
+    files = list(_walk(project)); rel = [os.path.relpath(f, project) for f in files]
+    src = {os.path.relpath(f, project): _read(f) for f in [f for f in files if f.endswith(CODE)][:400]}
+    pkg = {}
+    try: pkg = json.load(open(os.path.join(project, "package.json")))
+    except (OSError, ValueError): pass
+    deps = {**(pkg.get("dependencies") or {}), **(pkg.get("devDependencies") or {})}
+    k, conf, engines, ev = _kind(src, _readme(project)[1], deps, pkg.get("scripts") or {}, rel)
+    return {"kind": k, "confidence": conf, "engines": engines, "evidence": ev}
+
+
 def assess(project):
     """Read-only maturity assessment with evidence. Never runs the project."""
     if not is_existing(project):
@@ -108,12 +173,8 @@ def assess(project):
     deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
     ev.append(f"{len(files)} files, {len(code)} code files, ~{lines} lines of code" + (f"; entry {entry}" if entry else "; no entry point found"))
     # kind
-    alltext = " ".join(src.values())[:400000] + " " + readme
-    engines = [e for e, pat in (("phaser", r"phaser"), ("three", r"\bTHREE\.|from ['\"]three['\"]"), ("pixi", r"pixi"), ("kaboom", r"kaboom"),
-                                 ("canvas", r"getContext\(\s*['\"]2d"), ("godot", r"extends (Node2D|KinematicBody|CharacterBody)")) if re.search(pat, alltext, re.I) or e in deps]
-    game_hits = len(GAME_WORDS.findall(alltext[:200000]))
-    kind = "game" if engines and game_hits >= 3 or game_hits >= 25 else ("site" if not scripts.get("dev") and not re.search(r"\b(useState|addEventListener\(['\"]submit|<form|localStorage|fetch\()", alltext) else "app")
-    ev.append(f"kind {kind}: " + (f"engine {', '.join(engines)}, " if engines else "") + f"{game_hits} game words")
+    kind, kind_conf, engines, kind_ev = _kind(src, readme, deps, scripts, rel)
+    ev.append(f"kind {kind} ({kind_conf} confidence): " + "; ".join(kind_ev))
     # what works (evidence: the README's own feature list and checked boxes)
     inv["working"] += [{"what": f, "where": rname, "evidence": "checked in the README"} for f in done]
     inv["working"] += [{"what": f, "where": rname, "evidence": "listed as a feature in the README (not run)"} for f in listed if f not in done and f not in todo_boxes]
@@ -127,7 +188,8 @@ def assess(project):
     inv["unfinished"] += todos[:40]
     # defects: references to files that are not there
     for r, t in src.items():
-        if not r.endswith(".html"): continue
+        # template folders (a starter kit, fixtures, examples) hold placeholders a build fills in: not the project's own pages
+        if not r.endswith(".html") or TEMPLATE_DIR.search(r): continue
         for u in _refs(t):
             p = os.path.normpath(os.path.join(project, os.path.dirname(r), u.lstrip("/"))) if not u.startswith("/") else os.path.join(project, u.lstrip("/"))
             if not (os.path.exists(p) or os.path.exists(os.path.join(project, "public", u.lstrip("/")))):
@@ -161,7 +223,8 @@ def assess(project):
     confidence = "high" if agree >= 2 and agree == total else "medium" if agree >= max(1, total - agree) else "low"
     if not votes: ev.append("no strong signal either way: read as nearly complete (low confidence)"); confidence = "low"
     ev += [f"{m}: {why}" for m, why in votes]
-    return {"existing": True, "maturity": maturity, "kind": kind, "engines": engines, "confidence": confidence, "evidence": ev, "inventory": inv,
+    return {"existing": True, "maturity": maturity, "kind": kind, "kind_confidence": kind_conf, "kind_evidence": kind_ev, "engines": engines,
+            "confidence": confidence, "evidence": ev, "inventory": inv,
             "entry": entry, "tests": tests[:20], "deploy": deploy, "test_script": scripts.get("test"), "readme": rname,
             "save_keys": save_keys(src), "git": {"commits": commits, "last": last, "branch": _git(project, "rev-parse", "--abbrev-ref", "HEAD"),
                                                   "remote": _git(project, "remote", "get-url", "origin"), "dirty": bool(_git(project, "status", "--porcelain"))}}

@@ -108,6 +108,14 @@ def summary(R):
             "next_actions": R["next_actions"], "changes": R["changes"], "paths": R["paths"]}
 
 
+def _stated_kind(text):
+    """'my e-reader app', 'this game', 'our website': the kind the person named, if exactly one."""
+    t = text or ""
+    found = {k for k, pat in (("game", r"\b(game|platformer|roguelike|shooter)\b"), ("app", r"\b(app|application|web app|tool|dashboard)\b"),
+                              ("site", r"\b(website|web site|landing page|homepage|blog)\b")) if re.search(pat, t, re.I)}
+    return found.pop() if len(found) == 1 else None
+
+
 def start(text, project=None, store_dir=None, overrides=None, issues=None):
     r = route(text, project)
     if REPORT.match(r["request"] or ""):   # a repository that is not cloned is reported from the departments' histories
@@ -132,10 +140,13 @@ def start(text, project=None, store_dir=None, overrides=None, issues=None):
     question = None
     if intent == "update" and _vague(r["request"]) and a["maturity"] == "finished":
         question = "This project looks finished. What should change? (GITCRAFT changes only what you name, plus the fixes it needs.)"
-    kind = a["kind"]
-    prompt = (r["request"] if len(r["request"]) >= 12 else "") or f"{maturity.WORKFLOW[intent].split(':')[0].capitalize()} this existing {kind}"
+    stated = _stated_kind(r["request"])   # the person's own words beat the heuristic
+    kind = stated or a["kind"]
+    prompt =(r["request"] if len(r["request"]) >= 12 else "") or f"{maturity.WORKFLOW[intent].split(':')[0].capitalize()} this existing {kind}"
     if kind and not re.search(r"\b(game|app|application|site|website|tool|dashboard)\b", prompt, re.I): prompt += f" (an existing {kind})"
     mode = {"existing": True, "maturity": a["maturity"], "kind": kind, "workflow": intent, "because": because, "confidence": a["confidence"],
+            "kind_confidence": "stated" if stated else a.get("kind_confidence"),
+            "kind_evidence": [f"you called it {'an' if stated == 'app' else 'a'} {stated}"] if stated else a.get("kind_evidence"),
             "request": r["request"] if not _vague(r["request"]) else None, "question": question, "repository": r["repository"]}
     ov = {"mode": mode, "deliverable": kind or "app"}
     if kind == "game" and a.get("engines"): ov["platform"] = {"engine": next((e for e in a["engines"] if e != "canvas"), a["engines"][0])}

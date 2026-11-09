@@ -127,6 +127,18 @@ def parse(prompt, project=None, overrides=None):
         if terr or feats["world"]: assets["world"] = {"terrain": terr or "island", "sky": _first(t, RULES["sky"])[0] or "morning", "ocean": bool(_w(t, ["ocean", "sea", "waves"]))}
         models = re.findall(r"(?:3d model|model) of (?:an? |the )?([a-z][a-z \-]{2,30}?)(?:[,.;]| and |$)", t)
         if models: assets["models"] = models[:4]
+        # animated characters: AnimCraft rigs and animates the model, TestCraft proves the clips move. Only when asked:
+        # autorig replaces an existing armature, and ForgeCraft's character templates already ship rigged clips
+        if models and _w(t, ["animated", "animation", "animations", "rigged", "walk cycle", "walking", "animate"]):
+            anim = []
+            for i, brief in enumerate(assets["models"], 1):
+                b = brief.lower()
+                rig = ("chain" if re.search(r"\b(snake|serpent|tentacle|eel|worm|tail|vine|rope)\b", b) else
+                       "quadruped" if re.search(r"\b(dog|cat|horse|wolf|fox|deer|cow|pig|sheep|bear|lion|tiger|quadruped|hound|goat)\b", b) else
+                       "humanoid" if re.search(r"\b(character|hero|heroine|person|man|woman|kid|knight|pirate|sailor|deckhand|robot|villager|npc|soldier|wizard|zombie|crew|humanoid)\b", b) else None)
+                if rig: anim.append({"model": i, "rig": rig, "clips": {"humanoid": ["idle", "walk", "run"], "quadruped": ["idle", "walk"], "chain": ["slither", "sway"]}[rig]})
+            if anim: assets["animate"] = anim
+            else: assumptions.append("animation asked, but no model brief names a character or creature: models are left static (AnimCraft can animate props with bob/spin/hover on request)")
     if feats["identity"] or (deliverable in ("game", "app", "site") and polished and not existing):
         assets["identity"] = True
         if not feats["identity"]: assumptions.append("'polished': an original visual identity (logo, icon, palette) is included")
@@ -188,6 +200,7 @@ def _mode(prompt, project, existing, overrides):
     a = maturity.assess(project) if project else {"maturity": "nearly_complete", "kind": None, "confidence": "low"}
     wf, because = maturity.intent(prompt, a["maturity"])
     return {"existing": True, "maturity": a["maturity"], "kind": a.get("kind"), "confidence": a.get("confidence"), "workflow": wf, "because": because,
+            "kind_confidence": a.get("kind_confidence"), "kind_evidence": a.get("kind_evidence"),
             "request": prompt if wf in ("update", "fix", "complete", "continue") else None}
 
 
@@ -213,6 +226,10 @@ def acceptance(spec):
     web = d in ("game", "app", "site")
     for kind in ("sfx", "music", "ambience", "voice", "levels", "vfx", "materials", "world", "models", "identity"):
         if a.get(kind): add(f"asset_{kind}", f"{kind} produced by its department, validated" + (", and integrated into the project" if web else ""), "integrate" if web else "production")
+    if a.get("animate"):
+        add("asset_animation", "Every animated character is rigged and animated by AnimCraft, and TestCraft shows each clip really moves", "animation")
+    if a.get("trailer"):
+        add("asset_trailer", "A trailer cut from the running build (title card + gameplay capture" + (" + the music" if a.get("music") else "") + "), validated as video", "trailer")
     if web and any(a.get(k) for k in ("sfx", "music", "ambience", "voice", "levels", "vfx", "materials", "world", "models", "identity")):
         # only when the deliverable ships assets into a build; a project's own existing assets add these at planning
         add("asset_integrity", "Every integrated asset opens as its format and is referenced by the build", "qa.assets")

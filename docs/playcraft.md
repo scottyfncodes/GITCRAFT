@@ -10,6 +10,10 @@ global install and discovery as the other nine: no separate installation, no sep
 
 ## Invoking it
 
+PLAYCRAFT scores games only. `assess`, `pass` and `full_pass` refuse a project that reads as an app or a site (the Production Director's
+classifier, `production/maturity.py`: a 2D canvas alone is not a game engine, and game words in comments and CSS do not count), because
+genre detection always finds *some* genre. Pass `genres` or `treat_as_game: true` when it is a game; `discover` reports the reading as a check.
+
 From any game repository (GITCRAFT does not need to be attached; the tools are user-scope):
 
 | Say | What happens |

@@ -260,6 +260,22 @@ read from the manifests, so they can't drift from the code. Executors:
 
 ForgeCraft keeps the 3D Department. The Director gives it a brief and records the result; it never reimplements routing, Blender work or the engine check.
 
+### Hand-offs between departments
+
+| Request | Chain | Gate |
+|---|---|---|
+| A 3D model | ForgeCraft `generate` → its exports become the task's outputs (role `model`) → `integrate.assets` exports the library asset (`asset.id`) and lists every file in the manifest the build is handed | `status_ok`; `qa.assets` `referenced` (a model's .blend and record are `model_source`) |
+| An animated character ("…a 3D model of a pirate, animated") | model → AnimCraft `autorig` (humanoid / quadruped / chain from the brief) → AnimCraft `animate` (ships the animated GLB) → TestCraft `animation` | each `status_ok`; props are never auto-rigged (autorig replaces an armature) |
+| Voice lines | the script work order → AudioCraft `voice` (`lines` handed on by `$from`; plan validation checks a hand-off when it resolves) | `status_ok` |
+| An ocean | WorldCraft `ocean` beside terrain and sky | `status_ok` |
+| A trailer | CinematicCraft `title_card` + `capture` (the evaluated build) → `assemble` (with the music when there is music) | `status_ok`; criterion `asset_trailer` |
+| A failed PLAYCRAFT gate | the fix work order carries PLAYCRAFT's plan and findings plus DESIGNCRAFT's proposals (DESIGNCRAFT runs first and stays advisory) | the re-verification |
+| A failed PIXELCRAFT gate | each finding becomes one readable instruction (title, severity, evidence, fix) | the re-verification |
+
+Built-in tasks are gated like department tasks (`status_ok`), so a partial integration failure cannot pass. Which departments judge an
+existing project follows its kind (game, app or site), read by `production/maturity.py` with its own confidence and evidence, shown in
+the Decision Room (`kind`), and asked as an essential question when the reading is weak; the kind the person names wins.
+
 ## Correcting the plan
 
 `production_plan` takes `overrides`, deep-merged into the spec. For example:

@@ -497,6 +497,11 @@
      "pr": {
       "type": "string",
       "description": "the pull request this run belongs to (URL), stored with the run"
+     },
+     "treat_as_game": {
+      "type": "boolean",
+      "default": false,
+      "description": "score it as a game even though it reads as an app or a site (PLAYCRAFT otherwise refuses: genre detection always finds some genre)"
      }
     }
    },
@@ -797,6 +802,11 @@
      "pr": {
       "type": "string",
       "description": "the pull request this run belongs to (URL), stored with the run"
+     },
+     "treat_as_game": {
+      "type": "boolean",
+      "default": false,
+      "description": "score it as a game even though it reads as an app or a site (PLAYCRAFT otherwise refuses: genre detection always finds some genre)"
      }
     }
    },
@@ -1120,6 +1130,11 @@
      "pr": {
       "type": "string",
       "description": "the pull request this run belongs to (URL), stored with the run"
+     },
+     "treat_as_game": {
+      "type": "boolean",
+      "default": false,
+      "description": "score it as a game even though it reads as an app or a site (PLAYCRAFT otherwise refuses: genre detection always finds some genre)"
      }
     }
    },
@@ -1425,6 +1440,11 @@
      "pr": {
       "type": "string",
       "description": "the pull request this run belongs to (URL), stored with the run"
+     },
+     "treat_as_game": {
+      "type": "boolean",
+      "default": false,
+      "description": "score it as a game even though it reads as an app or a site (PLAYCRAFT otherwise refuses: genre detection always finds some genre)"
      }
     }
    },

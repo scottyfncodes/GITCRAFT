@@ -68,6 +68,21 @@ def decisions(spec, disc, icon_state=None):
         if mode.get("question") and not mode.get("request"):
             out.append(_d("request", "What should change", mode["question"], None, [], {"$answer": {"mode": {"request": "$answer"}}},
                           "essential: the project looks finished, so GITCRAFT changes only what you name", kind="question"))
+        # what kind of project it is decides which departments judge it (PLAYCRAFT and DESIGNCRAFT only judge games):
+        # the reading is shown with its evidence, and a weak reading must be confirmed by the person
+        kind, kc = mode.get("kind") or spec["deliverable"], mode.get("kind_confidence")
+        if kind in ("game", "app", "site") and kc != "stated":
+            kopts = [{"value": k, "label": {"game": "A game", "app": "An app", "site": "A website"}[k],
+                      "tradeoff": {"game": "judged as a game too: PLAYCRAFT gameplay score and DESIGNCRAFT design review",
+                                   "app": "judged as an app: PIXELCRAFT usability and visual quality; no gameplay scoring",
+                                   "site": "judged as a website: PIXELCRAFT visual quality; no gameplay scoring"}[k]} for k in ("game", "app", "site")]
+            kopts.sort(key=lambda o: o["value"] != kind)
+            weak = kc == "low"
+            out.append(_d("kind", "What kind of project this is", f"This reads as {'a' if kind != 'app' else 'an'} {kind} ({kc or 'unmeasured'} confidence: "
+                          + "; ".join((mode.get("kind_evidence") or [])[:4]) + "). Is that right?", kind, kopts,
+                          {o["value"]: {"deliverable": o["value"], "mode": {"kind": o["value"], "kind_confidence": "stated"}} for o in kopts},
+                          ("essential: the reading is uncertain, and a wrong one scores the project with the wrong departments" if weak
+                           else "decides which departments judge it; the Discovery Report shows the evidence"), kind="question" if weak else "choice"))
         out.append(_d("scope", "What GITCRAFT will do", f"This looks like a {mat} {mode.get('kind') or spec['deliverable']} ({mode.get('confidence')} confidence). "
                       f"{WORKFLOW[wf].split(':', 1)[1].strip().capitalize()}" + (f": {mode['request']}" if mode.get("request") else "") + "?",
                       wf, opts, {o["value"]: {"mode": {"workflow": o["value"]}} for o in opts},

@@ -16,7 +16,7 @@ import json, os, re
 from . import executors
 
 
-SOURCE_ROLES = {"icon_master", "icon_native"}   # kept in the project, not referenced by the web build
+SOURCE_ROLES = {"icon_master", "icon_native", "model_source"}   # kept in the project, not referenced by the web build (a model's .blend, previews, record)
 
 
 def get(d, path):
@@ -98,7 +98,20 @@ def check_expected(expected, base, project, roots_ok):
 
 
 # ---------------------------------------------------------------- remediation: what a failed QA gate asks to be fixed
-def remediation(task, res, gate_results):
+def _pixel_item(f):
+    """A PIXELCRAFT finding as one readable instruction (it arrives as a dict: title, severity, frequency, evidence, fix)."""
+    if not isinstance(f, dict): return f"PIXELCRAFT finding: {f}"
+    ev = f.get("evidence")
+    if isinstance(ev, dict): ev = ", ".join(f"{k} {v}" for k, v in list(ev.items())[:4] if not isinstance(v, (dict, list)))
+    elif isinstance(ev, list): ev = "; ".join(str(x) for x in ev[:3])
+    head = ", ".join(str(x) for x in (f.get("severity"), f.get("frequency")) if x)
+    return (f"PIXELCRAFT finding ({head}): {f.get('title')}" if head else f"PIXELCRAFT finding: {f.get('title')}") \
+        + (f" (evidence: {str(ev)[:200]})" if ev else "") + (f". Fix: {f['fix']}" if f.get("fix") else "")
+
+
+def remediation(task, res, gate_results, design=None):
+    """The findings a fix work order carries. `design`: DESIGNCRAFT's proposals for the same game (its review is
+    advisory and never blocks, so its findings reach the agent through the gameplay fix instead of being dropped)."""
     items = []
     for g in gate_results:
         if not g["ok"] and g.get("detail"):
@@ -108,8 +121,9 @@ def remediation(task, res, gate_results):
     if dept == "playcraft":
         items += [f"PLAYCRAFT plan: {x}" for x in (res.get("plan") or [])[:5]]
         items += [f"PLAYCRAFT finding: {x}" for x in (get(res, "summary.top_findings") or [])[:6]]
+        items += [f"DESIGNCRAFT proposal ({p.get('priority') or 'unranked'}): {p.get('title')}" for p in (design or [])[:5] if p.get("title")]
     elif dept == "pixelcraft":
-        items += [f"PIXELCRAFT finding: {x}" for x in (get(res, "summary.top_findings") or [])[:8]]
+        items += [_pixel_item(x) for x in (get(res, "summary.top_findings") or [])[:8]]
         r = get(res, "summary.overall.confidence_reasons")
         if r: items.append("PIXELCRAFT coverage: " + "; ".join(r[:4]))
     if res.get("record"): items.append(f"evidence: {res['record']}")

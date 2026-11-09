@@ -33,7 +33,7 @@ def _playcraft_hints(spec):
 def T(tid, title, stage, kind, *, department=None, action=None, params=None, deps=(), gate=None, ship=None, resources=(), retries=1,
       timeout=1800, owner=None, work_order=None, advisory=False, criterion=None):
     return {"id": tid, "title": title, "stage": stage, "kind": kind, "department": department, "action": action, "params": params or {},
-            "depends_on": list(deps), "gate": gate or ([{"type": "status_ok"}] if kind in ("studio", "forgecraft", "designcraft") else []),
+            "depends_on": list(deps), "gate": gate or ([{"type": "status_ok"}] if kind != "agent" else []),   # a built-in (integration, scaffold) is gated too: all([]) passed a partial failure
             "ship": ship, "resources": list(resources), "retries": retries, "timeout": timeout, "owner": owner or _owner(kind, department),
             "work_order": work_order, "advisory": advisory, "criterion": criterion, "state": "pending", "attempts": []}
 
@@ -157,10 +157,29 @@ def build(spec, disc):
         prod.append("world.sky")
         add(T("world.sky", f"Sky: {w['sky']}", "production", "studio", department="worldcraft", action="sky", params={"preset": w["sky"], "name": "sky"},
               deps=["foundation.scaffold"], ship={"dest": adir("materials"), "roles": ["*"], "formats": ["png", "hdr", "json"]}, criterion="asset_world"))
+        if w.get("ocean"):
+            prod.append("world.ocean")
+            add(T("world.ocean", "Ocean: seamless time-looping FFT surface", "production", "studio", department="worldcraft", action="ocean", params={"name": "ocean"},
+                  deps=["foundation.scaffold"], resources=["browser"], ship={"dest": adir("models"), "roles": ["mesh", "normal_map", "normal_flipbook", "foam_flipbook", "manifest"]},
+                  criterion="asset_world"))
     for i, brief in enumerate(a.get("models", []), 1):
         tid = f"models.{i}"; prod.append(tid)
         add(T(tid, f"3D model: {brief}", "production", "forgecraft", action="generate", params={"brief": brief, "name": f"model_{i}"},
               deps=["foundation.scaffold"], resources=["blender"], timeout=3600, ship={"dest": adir("models"), "library": True}, criterion="asset_models"))
+    # animated characters: the 3D Department's model → AnimCraft rig → AnimCraft clips → TestCraft proves every clip moves
+    for an in a.get("animate", []):
+        i = an["model"]; src, rig, clips = f"models.{i}", f"anim.{i}.rig", f"anim.{i}.clips"
+        if src not in {x["id"] for x in tasks}: continue
+        prod += [rig, clips, f"anim.{i}.check"]
+        add(T(rig, f"Rig model {i} ({an['rig']}, heat-map weights)", "production", "studio", department="animcraft", action="autorig",
+              params={"input": {"$from": src, "role": "model", "format": "glb"}, "rig": an["rig"], "name": f"model_{i}_rigged"}, deps=[src], resources=["blender", "browser"],
+              criterion="asset_animation"))
+        add(T(clips, f"Animate model {i}: {', '.join(an['clips'])}", "production", "studio", department="animcraft", action="animate",
+              params={"input": {"$from": rig, "role": "rigged_mesh", "format": "glb"}, "clips": an["clips"], "name": f"model_{i}_animated"}, deps=[rig], resources=["blender", "browser"],
+              ship={"dest": adir("models"), "roles": ["animated_mesh"], "formats": ["glb"]}, criterion="asset_animation"))
+        add(T(f"anim.{i}.check", f"TestCraft: model {i}'s clips play and really move", "production", "studio", department="testcraft", action="animation",
+              params={"input": {"$from": clips, "role": "animated_mesh", "format": "glb"}, "name": f"model_{i}_animation"}, deps=[clips], resources=["browser"],
+              criterion="asset_animation"))
 
     # ---------------------------------------------------------------- tasks the agent added to the spec (validated like the rest)
     for x in _extra_tasks(spec, add, tasks):
@@ -196,7 +215,8 @@ def build(spec, disc):
             qa.append("qa.playcraft")
             add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
                   params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
-                  deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
+                  # after DESIGNCRAFT (static, quick), so a failed gameplay gate's fix carries its design proposals too
+                  deps=["build"] + (["qa.designcraft"] if q.get("designcraft") else []), resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
                   gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
         if q.get("pixelcraft"):
             qa.append("qa.pixelcraft")
@@ -223,6 +243,19 @@ def build(spec, disc):
             qa.append("qa.attribution")
             add(T("qa.attribution", "HaveAnApp attribution: the maker's credit is in the app", "qa", "builtin", action="check_attribution",
                   deps=["build"], criterion="attribution", gate=[{"type": "status_ok"}]))
+        if a.get("trailer"):   # cut from the build that QA measures: title card + gameplay capture (+ the music), never shipped into the app
+            qa += ["trailer.title", "trailer.capture", "trailer.assemble"]
+            add(T("trailer.title", "Trailer title card", "qa", "studio", department="cinematiccraft", action="title_card",
+                  params={"text": spec["title"], **({"accent": _hex_from(identity)} if identity else {}), "name": "trailer_title"}, deps=[identity] if identity else ["foundation.scaffold"],
+                  criterion="asset_trailer"))
+            add(T("trailer.capture", "Trailer: gameplay capture from the running build", "qa", "studio", department="cinematiccraft", action="capture",
+                  params={"target": "$target", "steps": [{"wait": 1500}, {"press": "Space"}, {"wait": 4000}], "name": "trailer_capture"}, deps=["build"], resources=["browser"],
+                  criterion="asset_trailer"))
+            add(T("trailer.assemble", "Trailer: title + gameplay" + (" + music" if a.get("music") else "") + ", crossfaded, loudness-normalised", "qa", "studio",
+                  department="cinematiccraft", action="assemble",
+                  params={"clips": [{"path": {"$from": "trailer.title", "role": "title", "format": "mp4"}}, {"path": {"$from": "trailer.capture", "role": "capture", "format": "mp4"}}],
+                          **({"music": {"$from": "audio.music", "role": "music", "format": "ogg"}} if a.get("music") else {}), "name": "trailer"},
+                  deps=["trailer.title", "trailer.capture"] + (["audio.music"] if a.get("music") else []), criterion="asset_trailer"))
         qa.append("qa.standards")
         add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks"
               + (" (advisory: findings in existing code are reported, not imposed)" if existing else ""), "qa", "builtin", action="check_standards",
@@ -465,7 +498,7 @@ def parallel_groups(plan):
 
 
 def _strip_refs(v):
-    if isinstance(v, dict) and "$from" in v: return None
+    if isinstance(v, dict) and "$from" in v: return "/placeholder"   # inside a list or object: a path stands in (top-level hand-offs are left out by validate)
     if v == "$target" or isinstance(v, str) and v.startswith("$project"): return "/placeholder"
     if isinstance(v, dict): return {k: _strip_refs(x) for k, x in v.items()}
     if isinstance(v, list): return [_strip_refs(x) for x in v]
@@ -561,8 +594,14 @@ def validate(plan, disc=None):
         try:
             m = contract.manifest(t["department"])
             if t["action"] not in m["actions"]: problems.append(f"{t['id']}: {t['department']} has no action {t['action']}"); continue
-            params = {k: v for k, v in (_strip_refs(t["params"]) or {}).items() if v is not None}
-            contract.validate_params(m["actions"][t["action"]].get("params", {}), params)
+            # a value handed on from an upstream task ({"$from": ...}) is checked when it is resolved, not here: it is left
+            # out, and so is its `required` entry (otherwise every hand-off of a required input, e.g. the voice
+            # task's lines from the script, makes the plan unapprovable)
+            refs = {k for k, v in (t["params"] or {}).items() if isinstance(v, dict) and "$from" in v}
+            params = {k: v for k, v in (_strip_refs(t["params"]) or {}).items() if v is not None and k not in refs}
+            schema = copy.deepcopy(m["actions"][t["action"]].get("params", {}))
+            if refs and schema.get("required"): schema["required"] = [r for r in schema["required"] if r not in refs]
+            contract.validate_params(schema, params)
         except Exception as e:
             problems.append(f"{t['id']}: {t['department']}.{t['action']} would refuse the request: {e}")
     return problems

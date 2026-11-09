@@ -35,7 +35,7 @@ VERSION = "1.0.0"
 STALE_DAYS = 14
 SEVERITIES = ("critical", "major", "minor", "info")
 LEVEL_LABEL = {"verified": "Verified", "observed": "Observed", "inferred": "Inferred (assumption)", "unavailable": "Unavailable"}
-STATUS_LABEL = {"current": "Current", "refreshed": "Refreshed now", "stale": "Stale", "no_data": "No data", "not_applicable": "Not applicable",
+STATUS_LABEL = {"current": "Current", "refreshed": "Refreshed now", "stale": "Stale", "unverified": "Unverified (commit not compared)", "no_data": "No data", "not_applicable": "Not applicable",
                 "unavailable": "Unavailable", "failed": "Failed"}
 MAKERS = ("audiocraft", "animcraft", "worldcraft", "fxcraft", "materialcraft", "levelcraft", "cinematiccraft")
 SKIP = {".git", "node_modules", "__pycache__", ".venv", "venv", ".next", ".cache", ".vercel", "target", "gitcraft-out"}
@@ -235,7 +235,10 @@ def _stale(D, ctx, commit):
     if why:
         D["status"] = "stale"; D["notes"].append("Stale: " + "; ".join(why))
     elif not head and commit:
-        D["notes"].append("The project is not checked out here, so the analysed commit could not be compared with the current one.")
+        # "current" is a claim about the commit; without a checkout it cannot be made (a report with the checkout
+        # seconds later called the same score stale)
+        if D["status"] == "current": D["status"] = "unverified"
+        D["notes"].append("Unverified: the project is not checked out here, so the analysed commit could not be compared with the current one. Clone it and report again.")
     return D
 
 
@@ -592,7 +595,7 @@ def reconcile(depts, ctx):
         if d["status"] == "stale" and d["id"] in ("playcraft", "pixelcraft"):
             out["dependencies"].append({"title": f"{d['title'].split(' — ')[0]} is stale", "departments": [d["id"]], "detail": "Its score describes an older build. Re-measuring needs a current build; "
                                         "GITCRAFT never builds while reporting, so build first, then run the department (or report with refresh=full)."})
-    if (D.get("designcraft") or {}).get("status") in ("current", "refreshed", "stale") and (D.get("playcraft") or {}).get("status") == "stale":
+    if (D.get("designcraft") or {}).get("status") in ("current", "refreshed", "stale", "unverified") and (D.get("playcraft") or {}).get("status") == "stale":
         out["dependencies"].append({"title": "DESIGNCRAFT's experience analysis reads PLAYCRAFT", "departments": ["designcraft", "playcraft"],
                                     "detail": "experiencecraft uses PLAYCRAFT runs as simulated evidence, so refresh PLAYCRAFT first, then DESIGNCRAFT."})
     prodD = D.get("production") or {}
@@ -602,7 +605,7 @@ def reconcile(depts, ctx):
     for d in depts:
         if d["applicable"] and d["status"] == "no_data" and d["next"]:
             out["gaps"].append({"department": d["id"], "title": d["title"], "detail": d["next"]})
-    if not any(d["status"] in ("current", "refreshed", "stale") for d in depts if d["id"] == "testcraft"):
+    if not any(d["status"] in ("current", "refreshed", "stale", "unverified") for d in depts if d["id"] == "testcraft"):
         if not any(g["department"] == "testcraft" for g in out["gaps"]):
             out["gaps"].append({"department": "testcraft", "title": "TestCraft — automated QA", "detail": "No automated QA evidence for this project."})
     return out
@@ -643,9 +646,9 @@ def plan(depts, rec):
 
 
 def health(depts, actions):
-    sc = [(d["id"], d["score"]["value"]) for d in depts if d.get("score") and d["score"].get("value") is not None and d["status"] in ("current", "refreshed", "stale")]
+    sc = [(d["id"], d["score"]["value"]) for d in depts if d.get("score") and d["score"].get("value") is not None and d["status"] in ("current", "refreshed", "stale", "unverified")]
     applicable_scored = [d for d in depts if d["applicable"] and d["role"] in ("scored", "qa", "director") and d["status"] != "not_applicable"]
-    stale = [d["id"] for d in depts if d["status"] == "stale"]
+    stale = [d["id"] for d in depts if d["status"] in ("stale", "unverified")]   # unverified: not compared with the current commit
     p0 = sum(1 for a in actions if a["priority"] == "P0")
     if not sc:
         return {"score": None, "band": "insufficient data", "confidence": "none", "measured": 0, "of": len(applicable_scored), "stale": stale, "p0": p0,
@@ -789,7 +792,7 @@ def _title(R, ctx):
 
 def executive(R):
     H = R["health"]; ds = R["departments"]
-    have = [d for d in ds if d["status"] in ("current", "refreshed", "stale")]
+    have = [d for d in ds if d["status"] in ("current", "refreshed", "stale", "unverified")]
     pc = {p: sum(1 for a in R["actions"] if a["priority"] == p) for p in ("P0", "P1", "P2", "P3")}
     s = []
     if H["score"] is None: s.append(f"No department has a measured score for {R['title']} yet, so there is no health score. {len(have)} department(s) have any data.")
@@ -893,7 +896,7 @@ ul.sum{margin:12px 0 0;padding-left:18px}ul.sum li{margin:4px 0}
 .dept{margin:0}.dept .h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.dept .fam{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
 .score{font-size:24px;font-weight:700;line-height:1}.score small{font-size:12px;color:var(--mute);font-weight:500}
 .st{font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--chip);white-space:nowrap}
-.st.current,.st.refreshed{color:var(--ok)}.st.stale{color:var(--warn)}.st.failed,.st.unavailable{color:var(--bad)}.st.no_data,.st.not_applicable{color:var(--mute)}
+.st.current,.st.refreshed{color:var(--ok)}.st.stale,.st.unverified{color:var(--warn)}.st.failed,.st.unavailable{color:var(--bad)}.st.no_data,.st.not_applicable{color:var(--mute)}
 .bar{height:6px;border-radius:9px;background:var(--chip);margin:10px 0 6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
 .small{font-size:13px;color:var(--mute)}details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);min-height:44px;display:flex;align-items:center;list-style:none}
 summary::-webkit-details-marker{display:none}summary::before{content:"▸";margin-right:6px}details[open]>summary::before{content:"▾"}
@@ -931,7 +934,7 @@ def render_html(R, back=None):
              "</div></div><ul class='sum'>" + "".join(f"<li>{md(s)}</li>" for s in R["summary"]) + "</ul>"
              "<div class='counts'>" + "".join(f"<div><b style='color:var(--{p.lower()})'>{pc[p]}</b><span>{p}</span></div>" for p in pc) + "</div></section>")
     o.append("<h2 id='depts'>Department scorecards</h2><div class='grid'>")
-    order = {"refreshed": 0, "current": 0, "stale": 1, "failed": 2, "unavailable": 3, "no_data": 4, "not_applicable": 5}
+    order = {"refreshed": 0, "current": 0, "unverified": 1, "stale": 1, "failed": 2, "unavailable": 3, "no_data": 4, "not_applicable": 5}
     quiet = [d for d in R["departments"] if d["status"] in ("no_data", "not_applicable") and not d["findings"] and not d.get("next")]
     for d in sorted(R["departments"], key=lambda d: (order[d["status"]], d["score"] is None)):
         if d in quiet: continue
