@@ -39,7 +39,8 @@ def _report(ctx, title, sections, checks):
         im = Image.open(p).convert("RGB"); im.thumbnail((480, 480)); b = io.BytesIO(); im.save(b, "JPEG", quality=80)
         return "data:image/jpeg;base64," + base64.b64encode(b.getvalue()).decode()
     ok = all(c["ok"] for c in checks)
-    rows = "".join(f"<tr class='{'ok' if c['ok'] else 'bad'}'><td>{'PASS' if c['ok'] else 'FAIL'}</td><td>{html.escape(c['name'])}</td><td><code>{html.escape(json.dumps(c.get('detail'), default=str)[:300])}</code></td></tr>" for c in checks)
+    lab = lambda c: c["category"].upper() if c.get("category") in ("unverified", "advisory") else "PASS" if c["ok"] else "FAIL"
+    rows = "".join(f"<tr class='{'ok' if c['ok'] else 'bad'}'><td>{lab(c)}</td><td>{html.escape(c['name'])}</td><td><code>{html.escape(json.dumps(c.get('detail'), default=str)[:300])}</code></td></tr>" for c in checks)
     body = ""
     for s in sections:
         imgs = "".join(f"<figure><img src='{thumb(i)}'><figcaption>{html.escape(os.path.basename(i))}</figcaption></figure>" for i in s.get("images", []) if os.path.exists(i))
@@ -49,17 +50,56 @@ def _report(ctx, title, sections, checks):
 table{{border-collapse:collapse;width:100%;background:#fff}}td{{border-bottom:1px solid #e3e6ea;padding:6px;vertical-align:top}}tr.bad td:first-child{{color:#c0392b;font-weight:700}}tr.ok td:first-child{{color:#1f8a4c}}
 code{{font-size:12px;word-break:break-all}}section{{background:#fff;margin:16px 0;padding:12px;border-radius:6px}}pre{{font-size:12px;overflow:auto;max-height:240px;background:#f0f2f5;padding:8px}}
 .g{{display:flex;flex-wrap:wrap;gap:8px}}figure{{margin:0;max-width:100%}}img{{max-width:100%;border:1px solid #ddd}}figcaption{{font-size:12px;color:#667}}</style></head>
-<body><h1>{html.escape(title)} <span class="badge">{'PASS' if ok else 'FAIL'} {sum(c['ok'] for c in checks)}/{len(checks)}</span></h1><table>{rows}</table>{body}
+<body><h1>{html.escape(title)} <span class="badge">{'PASS' if ok else 'INCOMPLETE' if all(c.get('category') == 'unverified' for c in checks if not c['ok']) else 'FAIL'} {sum(c['ok'] for c in checks)}/{len(checks)}</span></h1><table>{rows}</table>{body}
 <p style="color:#889">GITCRAFT TestCraft · Playwright + Chromium</p></body></html>"""
     path = ctx.path(f"{ctx.params.get('name') or ctx.action}_report.html"); open(path, "w").write(page); return path
+
+
+def _console_checks(vp, r, p):
+    """The smoke test's console-error policy (core/netclass.py). Never a global ignore:
+      * errors the browser raised for requests the harness blocked (no network in tests) are explained, and each
+        blocked host becomes an UNVERIFIED check: its integration was not tested here, which is not a defect;
+      * errors matched by a documented exception ({pattern, reason, host?}) are listed with their reason;
+      * anything else fails the check, or with the deprecated allow_console_errors is an ADVISORY (still listed).
+    Page exceptions and missing files are separate checks and are never excepted."""
+    from core import netclass
+    cons = netclass.classify_console(r["console_errors"], r.get("console_error_sources"), r.get("blocked"), p.get("console_error_exceptions"))
+    out = []
+    if cons["unexplained"] and p.get("allow_console_errors"):
+        out.append({"name": f"{vp}: no console errors", "ok": True, "category": "advisory",
+                    "detail": {"unexplained (allow_console_errors: reported, not ignored)": cons["unexplained"][:3]}})
+    else:
+        out.append({"name": f"{vp}: no console errors", "ok": not cons["unexplained"],
+                    "detail": cons["unexplained"][:3] or ({"explained": [e["text"][:120] for e in cons["sandbox"] + cons["excepted"]][:4]} if cons["sandbox"] or cons["excepted"] else [])})
+    if cons["excepted"]:
+        out.append({"name": f"{vp}: console errors covered by documented exceptions", "ok": True, "category": "advisory",
+                    "detail": [f"{e['text'][:100]} — {e['reason']}" for e in cons["excepted"]][:5]})
+    if cons["refused_exceptions"]:
+        out.append({"name": f"{vp}: console-error exceptions are narrow and documented", "ok": False,
+                    "detail": [f"{x['why']}: {x['exception']}" for x in cons["refused_exceptions"]][:3]})
+    types = {}
+    for i, u in enumerate(r.get("blocked") or []):
+        h = netclass.host(u)
+        if h: types.setdefault(h, set()).add((r.get("blocked_types") or [])[i] if i < len(r.get("blocked_types") or []) else "other")
+    for h, ts in sorted(types.items()):
+        if ts & DEPENDENCY_TYPES or "other" in ts:   # data, scripts, sockets: the app depends on it → its integration is unverified
+            out.append({"name": f"{vp}: external service {h} verified", "ok": False, "category": "unverified", "cause": "sandbox_network", "host": h,
+                        "detail": f"blocked by the test harness (no network here; {', '.join(sorted(ts))}): the integration is not verified here, "
+                                  "which is not a defect; verify it in production (verify-live)"})
+        else:   # fonts, styles, images, media from a CDN: presentation, not an integration
+            out.append({"name": f"{vp}: external resources from {h} loaded", "ok": True, "category": "advisory",
+                        "detail": f"blocked by the test harness ({', '.join(sorted(ts))}): not loaded here; the page was checked without them"})
+    return out
+
+
+DEPENDENCY_TYPES = {"fetch", "xhr", "script", "websocket", "eventsource", "document"}
 
 
 def smoke(ctx, p):
     res = _browser(ctx, p); checks = []; outs = []; sections = []
     for r in res:
         vp = r["viewport"]; st = _img_stats(r["screenshots"][0])
-        checks += [{"name": f"{vp}: no page errors", "ok": not r["page_errors"], "detail": r["page_errors"][:3]},
-                   {"name": f"{vp}: no console errors", "ok": not r["console_errors"] or p["allow_console_errors"], "detail": r["console_errors"][:3]},
+        checks += [{"name": f"{vp}: no page errors", "ok": not r["page_errors"], "detail": r["page_errors"][:3]}] + _console_checks(vp, r, p) + [
                    {"name": f"{vp}: no missing files", "ok": not r["missing"], "detail": r["missing"][:5]},
                    {"name": f"{vp}: renders something (not a blank screen)", "ok": st["std"] > 0.01 and st["distinct_colours"] > 3, "detail": st},
                    {"name": f"{vp}: no horizontal overflow", "ok": r["layout"]["scroll_width"] <= r["layout"]["inner_width"] + 1, "detail": [r["layout"]["scroll_width"], r["layout"]["inner_width"]]}]

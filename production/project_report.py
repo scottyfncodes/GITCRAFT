@@ -523,14 +523,21 @@ def c_production(D, ctx):
             D["findings"].append(_finding("production", "unfinished", f"{len(inv['unfinished'])} unfinished item(s) (stubs, TODOs, open roadmap items)", "minor", "verified",
                                           "; ".join(f"{u['what']} ({u['where']})" for u in inv["unfinished"][:4]), "Finish or remove them before release.", None, theme="release"))
         try:
-            sc = standards.check(P["path"], deliverable=a.get("kind") or "app")
+            found = a.get("analytics") or []   # Discovery's analytics: recognised, never "undeclared" failures
+            sc = standards.check(P["path"], deliverable=a.get("kind") or "app", analytics="pulse" if any(f["provider"] == "pulse" for f in found) else None,
+                                 analytics_decided=False)
             checks = sc.get("checks") or []; rel = [c for c in checks if c["status"] != "n/a"]
-            ok = [c for c in rel if c["status"] == "ok"]
-            D["standard"] = {"passed": len(ok), "of": len(rel), "status": sc.get("status")}
+            ok = [c for c in rel if c["status"] in ("ok", "accepted")]
+            D["standard"] = {"passed": len(ok), "of": len(rel), "status": sc.get("status"), "advisory": len([c for c in rel if c["status"] == "advisory"]),
+                             "accepted": len([c for c in rel if c["status"] == "accepted"])}
+            if found: D["notes"].append("Analytics recognised: " + ", ".join(f"{f['name']} ({', '.join(f['where'][:2])})" for f in found) + ".")
             for c in rel:
                 if c["status"] == "failed":
                     D["findings"].append(_finding("production", f"standard:{c['id']}", f"Engineering standard: {c['name']}", "major", "verified", str(c.get("detail") or "")[:200], None, "docs/app-standards.md", theme="engineering"))
-                elif c["status"] not in ("ok",):
+                elif c["status"] == "advisory":   # measured, non-blocking (accepted decisions are not raised again)
+                    D["findings"].append(_finding("production", f"standard:{c['id']}", f"Engineering standard (advisory): {c['name']}", "info", "verified", str(c.get("detail") or "")[:240],
+                                                  f"Non-blocking. To stop it being raised again, accept it in .gitcraft/accepted.json with fingerprint {c.get('fingerprint')}.", "docs/app-standards.md", theme="engineering", kind="advisory"))
+                elif c["status"] == "review":
                     D["findings"].append(_finding("production", f"standard:{c['id']}", f"Engineering standard (review): {c['name']}", "minor", "inferred", str(c.get("detail") or "")[:200], None, "docs/app-standards.md", theme="engineering"))
             D["notes"].append(f"Engineering standard: {len(ok)}/{len(rel)} applicable checks pass.")
         except Exception as e:
@@ -546,10 +553,19 @@ def c_production(D, ctx):
         D["score"] = {"value": round(100 * passed / len(A), 1), "label": "Acceptance criteria passed", "confidence": "high", "coverage": None} if A and ran else None
         D["run"] = {"id": pr["id"], "at": pr.get("updated"), "runs": len(prods), "source": pr["_dir"]}
         D["age_days"] = _age(pr.get("updated"))
+        from . import verification
+        rs = verification.release_summary(pr, A)
+        D["production"]["release_status"] = rs["release_status"]
+        D["notes"].append(f"Release: {rs['release_status']} — deployment {rs['deployment']['label']}; functional {rs['functional']}; security {rs['security']}; "
+                          f"visual {rs['visual']}; {len(rs['unverified'])} unverified, {len(rs['advisories'])} advisory.")
         for x in (A if ran else []):
-            if x["status"] in ("failed", "blocked", "not_planned"):
-                D["findings"].append(_finding("production", f"criterion:{x['id']}", f"Acceptance criterion {x['status']}: {x.get('title') or x['id']}", "critical" if x["status"] == "failed" else "major",
+            if x["status"] == "failed":   # measured and failed: a confirmed blocker
+                D["findings"].append(_finding("production", f"criterion:{x['id']}", f"Acceptance criterion failed: {x.get('title') or x['id']}", "critical",
                                               "verified", "; ".join(x.get("why") or [])[:240], None, os.path.join(pr["_dir"], "REPORT.md"), kind="blocker", theme="release"))
+            elif x["status"] in ("blocked", "unverified", "not_planned"):   # verification incomplete: never presented as an application failure
+                D["findings"].append(_finding("production", f"criterion:{x['id']}", f"Verification incomplete ({x['status'].replace('_', ' ')}): {x.get('title') or x['id']}", "major",
+                                              "verified", "; ".join(x.get("why") or [])[:240], "Complete the verification (run it where the dependency is reachable, or verify in production); "
+                                              "this is not evidence of an application defect.", os.path.join(pr["_dir"], "REPORT.md"), kind="unverified", theme="release"))
             elif x["status"] == "needs_approval":
                 D["findings"].append(_finding("production", f"approval:{x['id']}", f"Waiting for a person's approval: {x.get('title') or x['id']}", "major", "verified",
                                               "; ".join(x.get("why") or [])[:240], "Approve or decline it (production_approve); reporting never approves.", None, kind="approval", theme="release"))

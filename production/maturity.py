@@ -226,8 +226,15 @@ def assess(project):
     return {"existing": True, "maturity": maturity, "kind": kind, "kind_confidence": kind_conf, "kind_evidence": kind_ev, "engines": engines,
             "confidence": confidence, "evidence": ev, "inventory": inv,
             "entry": entry, "tests": tests[:20], "deploy": deploy, "test_script": scripts.get("test"), "readme": rname,
-            "save_keys": save_keys(src), "git": {"commits": commits, "last": last, "branch": _git(project, "rev-parse", "--abbrev-ref", "HEAD"),
+            "analytics": _analytics(project), "save_keys": save_keys(src), "git": {"commits": commits, "last": last, "branch": _git(project, "rev-parse", "--abbrev-ref", "HEAD"),
                                                   "remote": _git(project, "remote", "get-url", "origin"), "dirty": bool(_git(project, "status", "--porcelain"))}}
+
+
+def _analytics(project):
+    """Analytics the project already ships (HaveAnApp Pulse, Vercel, Google, Plausible…): recognised, not imposed."""
+    from . import standards
+    try: return standards.discover_analytics(project)
+    except Exception: return []
 
 
 def save_keys(src):

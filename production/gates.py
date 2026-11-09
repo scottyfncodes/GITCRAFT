@@ -10,6 +10,11 @@ A department returning `ok` makes a task `complete`; the gate decides `passed`. 
   changed               (fix) the project's files differ from what the failed check measured
   advisory              recorded, never blocks (DESIGNCRAFT's design review)
 
+A check may carry a `category` (production/verification.py): a gate whose only failing checks are `unverified`
+(the check could not be completed: sandbox network, an external service down) is reported as unverified, and the
+engine records the task as blocked (verification incomplete) instead of failed: no fix work order is written for
+something the application did not do wrong, and the verdict is never READY while it stands.
+
 classify() separates a quality failure (the department ran and measured a problem: remediate) from an
 execution failure (crash/timeout: retry) and a request failure (bad parameters: fix the plan, never retry)."""
 import json, os, re
@@ -32,7 +37,9 @@ def classify(res):
     if s == "blocked": return "blocked"
     if res.get("failure") in ("request",): return "request"
     if res.get("failure") in ("timeout", "crash"): return "execution"
-    if any(not c.get("ok") for c in res.get("checks", [])) and res.get("outputs"): return "quality"
+    bad = [c for c in res.get("checks", []) if not c.get("ok")]
+    if bad and all(c.get("category") == "unverified" for c in bad): return "quality"   # it ran; the gate says what could not be verified
+    if bad and res.get("outputs"): return "quality"
     return "execution"
 
 
@@ -42,9 +49,15 @@ def evaluate(task, res, ctx):
     for g in task.get("gate") or []:
         ty = g["type"]
         if ty == "status_ok":
-            bad = [c["name"] + (f" ({str(c.get('detail'))[:160]})" if c.get("detail") not in (None, "", [], {}) else "") for c in res.get("checks", []) if not c.get("ok")]
-            out.append({"condition": "the department reports ok (outputs validated, its checks passed)", "ok": res.get("status") == "ok",
-                        "detail": res.get("error") or (bad[:8] if bad else None)})
+            failing = [c for c in res.get("checks", []) if not c.get("ok")]
+            bad = [c["name"] + (f" ({str(c.get('detail'))[:160]})" if c.get("detail") not in (None, "", [], {}) else "") for c in failing]
+            r = {"condition": "the department reports ok (outputs validated, its checks passed)", "ok": res.get("status") == "ok",
+                 "detail": res.get("error") or (bad[:8] if bad else None)}
+            # every failing check says it could not be verified (sandbox network, a service down): incomplete, not a defect
+            if not r["ok"] and failing and (not res.get("error") or res.get("verification") == "incomplete") and all(c.get("category") == "unverified" for c in failing):
+                r.update(category="unverified", unverified=[{"check": c["name"], "cause": c.get("cause") or "unverified", "host": c.get("host"),
+                                                            "detail": c.get("detail")} for c in failing])
+            out.append(r)
         elif ty == "min":
             v = get(res, g["path"])
             ok = isinstance(v, (int, float)) and v >= g["min"]

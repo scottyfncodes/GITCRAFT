@@ -175,7 +175,7 @@ def decisions(spec, disc, icon_state=None):
             out.append(_d("analytics", "Usage counts", "Count visits with HaveAnApp Pulse (anonymous and cookieless, as in HangarBook)?", rec_a,
                           [{"value": "pulse", "label": "HaveAnApp Pulse", "tradeoff": "anonymous page counts; no cookies, no personal data; one script tag"},
                            {"value": "none", "label": "No analytics", "tradeoff": "nothing is counted"}],
-                          {"pulse": {"analytics": {"provider": "pulse"}}, "none": {"analytics": {"provider": None}}},
+                          {"pulse": {"analytics": {"provider": "pulse", "source": "decision_room"}}, "none": {"analytics": {"provider": None, "source": "decision_room"}}},
                           "recommended for public apps and sites; a private app does not need it"))
         if spec["platform"].get("native"):
             out.append(_d("native", "Native app icons", f"Also produce the {' and '.join(spec['platform']['native'])} icon sets from the approved master?", "yes",

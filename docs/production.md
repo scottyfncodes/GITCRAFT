@@ -109,14 +109,21 @@ You approve the deploy itself at release (`release.deploy` needs `deploy`). Clau
 python3 -m production verify-live <production> https://your-app.vercel.app --submit
 ```
 
-`verify-live` (`production/live.py`):
-1. Fetches the live page and requires it to equal the released entry page. A login wall (Vercel deployment protection) or an older deployment fails here, and it says which.
-2. Requires every local file the page references to be served with the same bytes.
+`verify-live` (`production/live.py`) checks the release by provenance and behaviour, not by file names
+(`docs/release-verification.md` has the full policy):
+1. **This release**: the deployment's commit (`--commit <sha>`, e.g. Vercel's `githubCommitSha`, or a commit meta tag in the
+   live page) equals the project's HEAD; otherwise the live entry page must equal the released one once content-hashed
+   asset names are masked (two builds of one commit legitimately produce different bundle names). A different commit, a
+   different title or a login wall (Vercel deployment protection) is a BLOCKER; a page that differs with no provenance is UNVERIFIED.
+2. Every same-origin file the **live** page references loads; files with stable names that ship verbatim are byte-identical.
 3. Checks the deployed manifest and its icons at their sizes.
-4. Checks the HaveAnApp Pulse script answers, when it was chosen.
-5. Opens the site in Chromium on a phone and a desktop: it must load with no page errors or failed requests, with the byline visible.
+4. Checks the HaveAnApp Pulse script answers, when it was chosen or found by Discovery.
+5. Opens the site in Chromium on a phone and a desktop: no page errors, no failed required requests, the byline visible. A
+   third-party host the verifier cannot reach (proxy, DNS) or that answers 5xx is UNVERIFIED with its cause, never an app defect.
 
-It writes `tasks/release.deploy/live-check.json` and, with `--submit`, hands it to the deployment gate. A deployment is recorded live only when this passes. The report then says **Delivered**, with the live URL.
+It writes `tasks/release.deploy/live-check.json` (status `ok`, `failed` or `incomplete`) and, with `--submit`, hands it to the
+deployment gate. A deployment is recorded live only when it is `ok`; `incomplete` reads **DEPLOYED · VERIFICATION INCOMPLETE**.
+The report then says **Delivered**, with the live URL.
 
 TLS is always verified, and the check goes through the session's HTTPS proxy when there is one. Plain `http://` is refused, except a local test server with `GITCRAFT_LIVE_ALLOW_LOCAL=1` (tests only).
 
@@ -241,8 +248,13 @@ The rules live in `production/artifacts.py` and hold for every game, app and sit
   review (DESIGNCRAFT, standards, preservation, asset folders) reads the source.
 - **Every run ends with a verdict**, in `production_run`/`production_status` (`verdict`, `verdict_reasons`), `production.json` and
   `REPORT.md` (a "Why …" section). **READY**: every criterion measured and passed. **NOT READY**: a criterion was measured and
-  failed, or is NOT PLANNED. **INCOMPLETE**: nothing failed, but a check could not run (blocked, for example not built), has not finished
-  (the time budget ran out, or it waits for the agent or a person), or measured a project that kept changing.
+  failed, or is NOT PLANNED. **INCOMPLETE**: nothing failed, but a check could not run (blocked, for example not built), could not be
+  verified (`unverified`: the sandbox could not reach a service), has not finished (the time budget ran out, or it waits for the agent
+  or a person), or measured a project that kept changing. A criterion measured only by advisory tasks is `advisory` and never blocks.
+- **Every report leads with a release summary** (`production/verification.py`; `release` and `release_status` in `production_status`):
+  deployment status, functional verification, security/blockers, visual audit, unverified checks with their causes, advisories,
+  and the release status line: READY, NOT READY, **DEPLOYED · VERIFICATION INCOMPLETE** (the URL serves this release, no blocker,
+  mandatory checks unverified) or VERIFICATION INCOMPLETE. See `docs/release-verification.md`.
 
 ## Departments and their contracts
 

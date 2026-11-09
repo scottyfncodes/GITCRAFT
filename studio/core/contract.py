@@ -200,6 +200,10 @@ def run(dept, action, params=None, register=None):
     if not outputs: record["error"] = "the action produced no output files"
     if bad: record["error"] = "invalid output: " + "; ".join(bad)
     if failed_checks: record["error"] = "failed checks: " + "; ".join(c["name"] + (f" ({c.get('detail')})" if c.get("detail") else "") for c in failed_checks)
+    if failed_checks and outputs and not bad and all(c.get("category") == "unverified" for c in failed_checks):
+        # it ran and found nothing wrong; some checks could not be completed (e.g. no network here): incomplete, not a defect
+        record["verification"] = "incomplete"
+        record["error"] = "unverified checks (not failures): " + "; ".join(f"{c['name']} [{c.get('cause') or 'unverified'}]" for c in failed_checks)
     rec_path = os.path.join(out_dir, f"{slugify(params.get('name') or action)}.studio.json")
     json.dump(record, open(rec_path, "w"), indent=1, default=str)
     record["record"] = rec_path

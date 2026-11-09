@@ -94,6 +94,9 @@ jobs:
       - name: Run GITCRAFT report (read-only cross-department project report)
         run: python3 tests/test_report.py
 
+      - name: Release verification (POW NOW PR #40 - blocker / unverified / advisory / pass stay distinct)
+        run: python3 tests/test_release_verification.py
+
       - name: Evaluation orchestration (no self-triggering loops, one target, isolated store, a final verdict)
         run: python3 tests/test_evaluation.py
 

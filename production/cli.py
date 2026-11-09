@@ -29,6 +29,7 @@ def main(argv=None):
     st = sp.add_parser("start", help="Run GITCRAFT: any idea, spec, repo URL or project folder"); st.add_argument("text", nargs="?", default=""); st.add_argument("--project")
     vl = sp.add_parser("verify-live", help="after deploying: prove the live URL serves this release (run from your own shell)")
     vl.add_argument("id"); vl.add_argument("url"); vl.add_argument("--submit", action="store_true"); vl.add_argument("--no-browser", action="store_true")
+    vl.add_argument("--commit", help="the commit the deployment was built from (e.g. Vercel's githubCommitSha): build provenance compared with the project's HEAD")
     i = sp.add_parser("idea"); i.add_argument("text"); i.add_argument("--project")
     rc = sp.add_parser("recon"); rc.add_argument("id"); rc.add_argument("--depth", default="quick", choices=["quick", "deep"]); rc.add_argument("--findings", help="JSON file of findings to submit")
     pm = sp.add_parser("promote"); pm.add_argument("id"); pm.add_argument("--overrides")
@@ -60,8 +61,11 @@ def main(argv=None):
         out = entry.start(o.text, o.project)
     elif o.cmd == "verify-live":
         from . import live
-        rec = live.verify(store.load(o.id), o.url, browser=not o.no_browser)
-        out = {"status": rec["status"], "record": rec["record"], "failed": [c for c in rec["checks"] if not c["ok"]] or None}
+        rec = live.verify(store.load(o.id), o.url, browser=not o.no_browser, deployed_commit=o.commit)
+        out = {"status": rec["status"], "release_status": rec.get("release_status"), "record": rec["record"], "summary": rec.get("summary"),
+               "blockers": [c for c in rec["checks"] if c.get("category") == "blocker"] or None,
+               "unverified": [c for c in rec["checks"] if c.get("category") == "unverified"] or None,
+               "advisories": [c for c in rec["checks"] if c.get("category") == "advisory"] or None}
         if o.submit:
             pr = store.load(o.id); t = pr["tasks"].get("release.deploy")
             if not t: out["submit"] = "this production has no deployment task"

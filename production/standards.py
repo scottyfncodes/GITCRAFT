@@ -11,6 +11,13 @@ Each check is measured statically on the project's files and reports one of:
   ok / failed   measured (failed gates qa.standards for the profiles that require it)
   review        the check applies but cannot be decided from files (it goes to the build work order and the report
                 as an explicit review item, never as a pass)
+  advisory      measured and non-blocking: a configuration-metadata mismatch (analytics found but not declared, a
+                Pulse tag without data-app) or a deliberate design read in context (an intentionally public,
+                read-only endpoint with wildcard CORS). Shown in every report; never fails the gate
+  accepted      an advisory/review item a person accepted in the project's .gitcraft/accepted.json with the same
+                evidence fingerprint; it is not raised again until the evidence changes. A failed check (a secret,
+                SQL interpolation, credentials or writes open to every origin, leaked environment) can never be
+                accepted
   n/a           does not apply to this project
 
 attribution(project) measures the HaveAnApp byline (kit/haveanapp): visible text marked data-haveanapp, linked
@@ -34,6 +41,57 @@ PROFILE_WORDS = {
 
 
 PULSE_SRC = "https://haveanapp-pulse-collect.vercel.app/p.js"   # HaveAnApp Pulse, as HangarBook ships it (index.html)
+
+
+# analytics Discovery recognises (repository discovery and the engineering standard read the same list)
+ANALYTICS = {
+    "pulse": ("HaveAnApp Pulse", r"haveanapp-pulse"),
+    "vercel": ("Vercel Web Analytics", r"@vercel/analytics|/_vercel/insights/script\.js|@vercel/speed-insights"),
+    "google": ("Google Analytics", r"googletagmanager\.com/gtag|google-analytics\.com/analytics|\bgtag\(\s*['\"]config"),
+    "plausible": ("Plausible", r"plausible\.io/js"),
+    "posthog": ("PostHog", r"posthog-js|posthog\.init\("),
+    "umami": ("Umami", r"umami\.(?:is|js)|data-website-id"),
+    "fathom": ("Fathom", r"cdn\.usefathom\.com"),
+    "cloudflare": ("Cloudflare Web Analytics", r"static\.cloudflareinsights\.com"),
+    "segment": ("Segment", r"cdn\.segment\.com|@segment/analytics"),
+}
+
+
+def discover_analytics(project, src=None, deps=None):
+    """[{provider, name, where}] for every analytics integration already in the project (read-only)."""
+    if src is None: src = {p: _read(p) for p in _files(project)}
+    if deps is None:
+        try:
+            pj = json.load(open(os.path.join(project, "package.json"))); deps = {**pj.get("dependencies", {}), **pj.get("devDependencies", {})}
+        except (OSError, ValueError): deps = {}
+    out = []
+    for pid, (name, rx) in ANALYTICS.items():
+        where = sorted({os.path.relpath(p, project) for p, t in src.items() if re.search(rx, t)})
+        if any(re.search(rx, d) for d in deps): where.append("package.json")
+        if where: out.append({"provider": pid, "name": name, "where": where[:5]})
+    return out
+
+
+def _fingerprint(cid, detail, project=None, files=()):
+    """The evidence a finding rests on: its detail plus the content of the files it read. An acceptance holds only
+    while this is unchanged."""
+    import hashlib
+    h = hashlib.sha256((cid + "\n" + json.dumps(detail, sort_keys=True, default=str)).encode())
+    for f in files or ():
+        h.update(b"\0" + f.encode() + b"\0" + _read(os.path.join(project, f), 2_000_000).encode(errors="ignore"))
+    return h.hexdigest()[:12]
+
+
+def accepted_decisions(project):
+    """The person's accepted architectural decisions, committed in the project: .gitcraft/accepted.json
+    [{check, fingerprint, reason, by?, at?}] (read-only; GITCRAFT never writes it)."""
+    for rel in (".gitcraft/accepted.json", "gitcraft.accepted.json"):
+        try:
+            with open(os.path.join(project, rel)) as f: d = json.load(f)
+            items = d.get("accepted", d) if isinstance(d, dict) else d
+            return [dict(x, _file=rel) for x in items if isinstance(x, dict) and x.get("check") and str(x.get("reason") or "").strip()]
+        except (OSError, ValueError, AttributeError): continue
+    return []
 
 
 def pulse_snippet(title):
@@ -141,12 +199,45 @@ def _built_output(project):
     return m.group(1) if m else None
 
 
-def _check(cid, title, status, detail=None, profiles=PROFILES):
-    return {"id": cid, "name": title, "status": status, "ok": status != "failed", "detail": detail, "required_for": profiles}
+def _check(cid, title, status, detail=None, profiles=PROFILES, files=None):
+    c = {"id": cid, "name": title, "status": status, "ok": status != "failed", "detail": detail, "required_for": profiles}
+    if files: c["evidence_files"] = list(files)[:20]   # what the check read: part of its evidence fingerprint
+    return c
 
 
-def check(project, profile="personal", deliverable="app", analytics=None, backend=None):
-    """→ {status, checks, review, profile}. A failed check required by the profile fails the gate; `review` items never pass silently."""
+WRITE_ROUTE = re.compile(r"\b(?:app|router|server|fastify|api)\.(?:post|put|patch|delete|all)\s*\(|export\s+(?:async\s+)?function\s+(?:POST|PUT|PATCH|DELETE)\b|"
+                         r"export\s+const\s+(?:POST|PUT|PATCH|DELETE)\b|method\s*[!=]==?\s*['\"](?:POST|PUT|PATCH|DELETE)|@app\.(?:post|put|patch|delete)\b|"
+                         r"\breq(?:uest)?\.body\b|request\.json\(\)|Allow-Methods['\"]?\s*[,:]\s*['\"][^'\"]*(?:POST|PUT|PATCH|DELETE)|\b(?:INSERT|UPDATE|DELETE)\s+(?:INTO|FROM|\w+\s+SET)\b")
+CREDENTIALS = re.compile(r"Allow-Credentials['\"]?\s*[,:]\s*['\"]?true|credentials\s*:\s*true|\bset-cookie\b|req\.cookies|cookies\(\)|req\.session|getServerSession|"
+                         r"headers\.(?:get\(\s*)?['\"]?authorization", re.I)
+ENV_LEAK = re.compile(r"(?:\.json|\.send|Response\.json|JSON\.stringify)\(\s*(?:\{\s*\.\.\.)?process\.env\b(?!\.)|jsonify\(\s*(?:dict\()?os\.environ\b")
+
+
+def _cors_in_context(project, server, src, cors):
+    """Wildcard CORS read with what the routes do → (status, detail). Only GET/HEAD/OPTIONS handlers without
+    credentials are an intentionally public, read-only API (advisory, with what still matters: abuse exposure,
+    caching); writes or credentials open to every origin are a vulnerability (failed)."""
+    if not cors: return "ok", None
+    wild = [p for p in server if re.search(r"Access-Control-Allow-Origin['\"]?\s*[,:]\s*['\"]\*|\bcors\(\s*\)|cors['\"]\)\(\s*\)|origin\s*:\s*['\"]\*['\"]", src[p])] or server
+    writes = sorted({os.path.relpath(p, project) for p in wild if WRITE_ROUTE.search(src[p])})
+    creds = sorted({os.path.relpath(p, project) for p in wild if CREDENTIALS.search(src[p])})
+    if writes or creds:
+        return "failed", (f"every origin may call write routes ({', '.join(writes[:3])})" if writes else "") + ("; " if writes and creds else "") + \
+            (f"every origin may call routes that use credentials/cookies ({', '.join(creds[:3])})" if creds else "")
+    ro = sorted(os.path.relpath(p, project) for p in wild)
+    upstream = [os.path.relpath(p, project) for p in wild if re.search(r"\bfetch\(|axios|got\(|requests\.get", src[p])]
+    guarded = [os.path.relpath(p, project) for p in wild if re.search(r"Cache-Control|s-maxage|revalidate|rate.?limit|ratelimit|throttle", src[p], re.I)]
+    exposed = [u for u in upstream if u not in guarded]
+    return "advisory", ("intentionally public, read-only endpoint(s) " + ", ".join(ro[:4]) + ": GET-only, no credentials, so wildcard CORS exposes nothing "
+                        "a browser could not already read" + (f"; abuse exposure: {', '.join(exposed[:3])} proxies an upstream service without caching or a rate limit "
+                        "(add Cache-Control s-maxage or a rate limit)" if exposed else ""))
+
+
+def check(project, profile="personal", deliverable="app", analytics=None, backend=None, analytics_decided=True, accepted=None):
+    """→ {status, checks, review, advisories, profile}. A failed check required by the profile fails the gate; `review`
+    items never pass silently; `advisory` items are reported and never fail. analytics_decided=False when nobody chose
+    analytics for this project (an existing project, a review): analytics already in it are recognised, not failed.
+    accepted: extra accepted decisions (beside the project's .gitcraft/accepted.json)."""
     out = []; codefiles = list(_files(project)); src = {p: _read(p) for p in codefiles}
     entry = _entry(project); etext = _read(entry) if entry else ""
     pkg = os.path.join(project, "package.json"); pj = {}
@@ -199,7 +290,11 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
     if server:
         stext = "\n".join(src[p] for p in server)
         cors = re.search(r"Access-Control-Allow-Origin['\"]?\s*[,:]\s*['\"]\*|\bcors\(\s*\)|cors['\"]\)\(\s*\)|origin\s*:\s*['\"]\*['\"]", stext)
-        out.append(_check("cors", "the API does not allow every origin", "failed" if cors else "ok", cors.group(0) if cors else None, ["public", "sensitive"]))
+        leak = sorted({os.path.relpath(p, project) for p in server if ENV_LEAK.search(src[p])})
+        out.append(_check("env_leak", "server routes never return the process environment (secrets)", "failed" if leak else "ok", leak[:4] or None))
+        cst, cdetail = _cors_in_context(project, server, src, cors)
+        out.append(_check("cors", "the API does not allow every origin" + (" to write or use credentials" if cst == "advisory" else ""), cst,
+                          f"{cors.group(0)}: {cdetail}" if cst == "failed" else cdetail, ["public", "sensitive"], files=[os.path.relpath(p, project) for p in server]))
         val = re.search(r"\b(zod|yup|joi|ajv|valibot|pydantic|express-validator|safeParse|validate\()", stext + json.dumps(deps))
         out.append(_check("input_validation", "server inputs are validated", "ok" if val else "review", None if val else "no validation library or validate() call in server code", ["public", "sensitive"]))
         auth = re.search(r"\b(auth|session|jwt|getServerSession|clerk|supabase\.auth|passport|bearer)\b", stext, re.I)
@@ -216,20 +311,47 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
                                               None if idx else "tables defined without any index: add indexes for the columns queries filter or join on", ["public", "sensitive"]))
     else:
         out.append(_check("server", "server-side checks (auth, validation, rate limits, CORS, SQL)", "n/a", "no server code: a static client app"))
-    if analytics == "pulse":   # chosen in the Decision Room: the counter is on the entry page, deferred, with this app's name
+    found = discover_analytics(project, src, deps)
+    if analytics == "pulse":   # chosen in the Decision Room (or found by Discovery): the counter is on the entry page, deferred, with this app's name
         m = re.search(r"""<script\b[^>]*src=["']""" + re.escape(PULSE_SRC) + r"""["'][^>]*>""", etext)
-        out.append(_check("analytics", "HaveAnApp Pulse is on the entry page (deferred, with data-app)", "ok" if m and "defer" in m.group(0) and "data-app=" in m.group(0) else "failed",
-                          None if m else "add " + pulse_snippet(os.path.basename(project.rstrip("/")))))
-    elif analytics is None and PULSE_SRC in etext:
+        if not m:
+            out.append(_check("analytics", "HaveAnApp Pulse is on the entry page (deferred, with data-app)", "failed", "add " + pulse_snippet(os.path.basename(project.rstrip("/")))))
+        else:   # the integration is there; a missing attribute is configuration metadata, not a broken integration
+            miss = [a for a in ("defer", "data-app=") if a not in m.group(0)]
+            out.append(_check("analytics", "HaveAnApp Pulse is on the entry page (deferred, with data-app)", "advisory" if miss else "ok",
+                              f"the Pulse tag lacks {' and '.join(x.rstrip('=') for x in miss)}: " + pulse_snippet(os.path.basename(project.rstrip("/"))) if miss else None))
+    elif analytics is None and analytics_decided and PULSE_SRC in etext:
         out.append(_check("analytics", "no analytics the blueprint did not approve", "failed", "HaveAnApp Pulse is on the page but the Decision Room chose no analytics"))
+    elif analytics is None and found:   # nobody decided: recognise what the project already ships
+        out.append(_check("analytics", "existing analytics are recognised and declared", "advisory",
+                          "found " + "; ".join(f"{f['name']} ({', '.join(f['where'][:2])})" for f in found) +
+                          ": not declared in the blueprint, recorded as discovered (declare it, or accept it in .gitcraft/accepted.json)",
+                          files=sorted({w for f in found for w in f["where"]})))
     if backend == "postgres":
         has_mig = any(re.search(r"(^|/)(migrations?|db|schema|drizzle|prisma)(/|\.)", os.path.relpath(p, project)) for p in _files(project, (".sql", ".prisma", ".ts", ".js")))
         out.append(_check("migrations", "the database schema lives in the repository as migrations", "ok" if has_mig else "failed",
                           None if has_mig else "add the schema as migrations (e.g. migrations/001_init.sql) with its indexes"))
+    # accepted architectural decisions: an advisory/review item with the same evidence is not raised again
+    acc = accepted_decisions(project) + list(accepted or [])
+    for c in out:
+        c["fingerprint"] = _fingerprint(c["id"], c.get("detail"), project, c.get("evidence_files"))
+        a = next((x for x in acc if x["check"] == c["id"]), None)
+        if not a: continue
+        if c["status"] == "failed":
+            c["detail"] = f"{c['detail']} (an acceptance in {a.get('_file', 'the blueprint')} is ignored: a failed check is a blocker and cannot be accepted)"
+        elif c["status"] in ("advisory", "review") and a.get("fingerprint") in (None, "", c["fingerprint"]):
+            c.update(status="accepted", accepted={"reason": a["reason"], "by": a.get("by"), "at": a.get("at"), "file": a.get("_file")})
+        elif c["status"] in ("advisory", "review"):
+            c["detail"] = f"{c['detail']} — previously accepted ({a['reason']}), but the evidence changed since (fingerprint {c['fingerprint']}, accepted {a.get('fingerprint')})"
     req = [c for c in out if profile in c["required_for"]]
     failed = [c for c in req if c["status"] == "failed"]
     review = [c for c in req if c["status"] == "review"]
-    for c in out: c["ok"] = not (c["status"] == "failed" and profile in c["required_for"])
+    for c in out:
+        c["ok"] = not (c["status"] == "failed" and profile in c["required_for"])
+        if c["status"] in ("advisory", "accepted"): c["category"] = "advisory"
+    advisories = [c for c in out if c["status"] == "advisory"]
     return {"status": "failed" if failed else "ok", "profile": profile, "checks": out, "review": [f"{c['name']}: {c['detail']}" for c in review],
-            "outputs": [], "summary": {"measured": len([c for c in out if c["status"] in ("ok", "failed")]), "failed": len(failed), "review": len(review),
+            "advisories": [f"{c['name']}: {c['detail']}" for c in advisories], "analytics_found": found,
+            "outputs": [], "summary": {"measured": len([c for c in out if c["status"] in ("ok", "failed", "advisory")]), "failed": len(failed), "review": len(review),
+                                       "advisory": len(advisories), "accepted": len([c for c in out if c["status"] == "accepted"]),
                                        "not_applicable": len([c for c in out if c["status"] == "n/a"])}}

@@ -246,7 +246,8 @@ def check_standards(ctx):
     from . import standards
     p = ctx["params"]
     return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app",
-                                             analytics=p.get("analytics"), backend=p.get("backend")), "standards.json")
+                                             analytics=p.get("analytics"), backend=p.get("backend"), analytics_decided=p.get("analytics_decided", True),
+                                             accepted=(ctx.get("spec") or {}).get("accepted")), "standards.json")
 
 
 def check_preserve(ctx):

@@ -39,8 +39,10 @@ It works out the rest; the person never needs to know these tools.
 - When you can read the repository's open issues (GitHub connection), pass them: `production_start {text, project, issues: [{number, title, labels}]}`.
 - Deliver in the project's own way: its branch and PR conventions, its CI, its deployment. Give the PR link and, when it deploys,
   the live URL. After deploying, prove it from your shell: `python3 -m production verify-live <production> <url> --submit`
-  (same build as released, files byte-identical, icons, Pulse, phone + desktop in Chromium). A login wall or an older
-  deployment fails: fix the deployment, never the check. Never say done or live without the report's evidence.
+  (this release by commit provenance — pass `--commit <deployed sha>` — or the entry page modulo content hashes; every asset
+  the live page loads; icons, Pulse, phone + desktop in Chromium). A login wall or an older deployment fails: fix the deployment,
+  never the check. A host the sandbox cannot reach is UNVERIFIED, not a defect: report DEPLOYED · VERIFICATION INCOMPLETE, never
+  READY and never NOT READY for it. Never say done or live without the report's evidence.
 - New apps start from a starter (standards already wired in). Write `tests/gitcraft.features.json`: one check per planned
   feature, ending in what a person sees. `qa.features` runs them in Chromium.
 - A backend (hosted Postgres) is set up only after the person approves `backend.provision`. Use the connected Neon account

@@ -24,10 +24,11 @@ const out = { url: req.url, viewports: [] };
 for (const [name, vp, mobile] of [['phone', { width: 390, height: 844 }, true], ['desktop', { width: 1280, height: 800 }, false]]) {
   const ctx = await browser.newContext({ viewport: vp, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
-  const R = { viewport: name, page_errors: [], console_errors: [], failed: [] };
+  const R = { viewport: name, page_errors: [], console_errors: [], console_error_sources: [], failed: [], hosts_ok: [] };
   page.on('pageerror', (e) => R.page_errors.push(String(e).slice(0, 300)));
-  page.on('console', (m) => { if (m.type() === 'error') R.console_errors.push(m.text().slice(0, 300)); });
-  page.on('response', (r) => { if (r.status() >= 400) R.failed.push(`${r.status()} ${r.url()}`.slice(0, 300)); });
+  page.on('console', (m) => { if (m.type() === 'error') { R.console_errors.push(m.text().slice(0, 300)); R.console_error_sources.push(String((m.location() || {}).url || '').slice(0, 300)); } });
+  page.on('response', (r) => { if (r.status() >= 400) R.failed.push(`${r.status()} ${r.url()}`.slice(0, 300));
+    else { try { const h = new URL(r.url()).hostname; if (h && !R.hosts_ok.includes(h)) R.hosts_ok.push(h); } catch {} } });
   page.on('requestfailed', (r) => R.failed.push(`failed ${r.url()} (${r.failure()?.errorText || ''})`.slice(0, 300)));
   try {
     const resp = await page.goto(req.url, { waitUntil: 'load', timeout: 45000 });

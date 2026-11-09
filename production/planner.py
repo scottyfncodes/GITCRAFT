@@ -259,6 +259,7 @@ def build(spec, disc):
         add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks"
               + (" (advisory: findings in existing code are reported, not imposed)" if existing else ""), "qa", "builtin", action="check_standards",
               params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d, "analytics": (spec.get("analytics") or {}).get("provider"),
+                      "analytics_decided": not existing or (spec.get("analytics") or {}).get("source") == "decision_room",
                       "backend": (spec.get("backend") or {}).get("provider")}, deps=["build"], criterion="engineering_standards",
               gate=[{"type": "status_ok"}], advisory=existing))
         if existing:
@@ -346,7 +347,8 @@ def _review_plan(spec, proj, decisions):
                   params={"target": "$target", "seconds": 4, "min_fps": q["min_fps"], "max_p95_ms": q["max_p95_ms"], "name": "perf"},
                   resources=["browser", "exclusive"], criterion="performance", advisory=True))
     add(T("qa.standards", f"Engineering standard ({spec.get('engineering', {}).get('profile', 'personal')}): measured checks (advisory)", "qa", "builtin",
-          action="check_standards", params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d}, criterion="engineering_standards",
+          action="check_standards", params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d,
+                                            "analytics": (spec.get("analytics") or {}).get("provider"), "analytics_decided": False}, criterion="engineering_standards",
           gate=[{"type": "status_ok"}], advisory=True))
     add(T("release.report", "Review report: the project as it is, measured; nothing changed", "release", "builtin", action="release", deps=[t["id"] for t in tasks],
           criterion="release_ready", gate=[{"type": "status_ok"}]))

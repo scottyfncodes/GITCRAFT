@@ -163,7 +163,31 @@
      },
      "allow_console_errors": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "deprecated: never ignores console errors; unexplained console errors become ADVISORY (listed in the report) instead of failing"
+     },
+     "console_error_exceptions": {
+      "type": "array",
+      "default": [],
+      "description": "narrow, documented console-error exceptions: [{pattern, reason, host?}]. pattern is a regex that must not match every message; reason is required; with host, the exception applies only in a run where that host was blocked. Never applies to page exceptions or missing files.",
+      "items": {
+       "type": "object",
+       "properties": {
+        "pattern": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "host": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "pattern",
+        "reason"
+       ]
+      }
      }
     }
    },

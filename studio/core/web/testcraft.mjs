@@ -22,8 +22,8 @@ try {
     if (req.record_video) ctxOpts.recordVideo = { dir: path.join(req.out_dir, 'video-' + vp.name), size: ctxOpts.viewport };
     const context = await browser.newContext(ctxOpts);
     const page = await context.newPage();
-    const R = { viewport: vp.name, size: ctxOpts.viewport, console_errors: [], page_errors: [], blocked: [], missing: [], requests: 0, screenshots: [], steps: [], asserts: [], values: {} };
-    page.on('console', (m) => { if (m.type() === 'error') R.console_errors.push(m.text().slice(0, 300)); });
+    const R = { viewport: vp.name, size: ctxOpts.viewport, console_errors: [], console_error_sources: [], page_errors: [], blocked: [], missing: [], requests: 0, screenshots: [], steps: [], asserts: [], values: {} };
+    page.on('console', (m) => { if (m.type() === 'error') { R.console_errors.push(m.text().slice(0, 300)); R.console_error_sources.push(String((m.location() || {}).url || '').slice(0, 300)); } });
     page.on('pageerror', (e) => R.page_errors.push(String(e).slice(0, 300)));
     await page.addInitScript(() => {   // frame timing for perf: every rAF tick
       window.__frames = []; let last = performance.now();
