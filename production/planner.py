@@ -12,12 +12,22 @@ Request parameters may reference upstream results, resolved when the task starts
   {"$from": "<task>", "role": r, "json": "key", "as": "rgb"}   a value read from an upstream JSON output
 
 validate(plan) refuses a plan with an unknown dependency, a cycle, an unknown department action or a
-request its department would reject, before anything runs."""
+request its department would reject, before anything runs.
+
+Plan versions (stored on the production record as `plan_version`; a revision keeps the version it was planned with):
+  1  assets → integrate.assets → build → QA: the build waits for every asset and the app icon.
+  2  the code build starts after the foundation (scaffold, identity, and any design-stage task) with placeholders;
+     each asset is integrated as soon as it passes (integrate.<task>, transactional), integrate.final checks the
+     ledger and the asset manifest, build.wire wires every integrated asset and the approved icon into the app,
+     and QA measures that final wired build. The icon choice is off the code path and on the release path.
+     The v2 graph is built from the v1 graph (_graph_v2), so v1 stays exactly what it was."""
 import copy, os, sys
 from . import REPO
 from . import discovery as _disc
 
 STUDIO_DIR = os.path.join(REPO, "studio")
+PLAN_VERSION = 2   # new productions; records without plan_version are 1
+MANIFEST = "gitcraft.assets.json"   # the asset manifest in the project: owned by integration, never by the agent
 PREVIEW_ROLES = {"preview", "source", "manifest", "engine_screenshot", "blockout", "blockout_render", "ldtk_project", "render", "contact_sheet"}
 
 
@@ -46,7 +56,7 @@ def _owner(kind, dept):
 def _hex_from(t): return {"$from": t, "role": "palette", "json": "accent", "as": "rgb"}
 
 
-def build(spec, disc):
+def build(spec, disc, version=1):
     q, a, d = spec["quality"], spec["assets"], spec["deliverable"]
     proj = disc["project"]
     tasks, decisions = [], []
@@ -290,10 +300,74 @@ def build(spec, disc):
         add(T("release.deploy", "Deploy and verify the live URL", "release", "agent", deps=["release.report"], criterion="deployment",
               work_order={"approval": "deploy", "brief": "Deploy the verified release and prove the live URL serves it.",
                           "instructions": _deploy_instructions(spec), "expected": [], "requires": ["url", "evidence"]}))
+    if version >= 2: _graph_v2(spec, tasks, decisions)
     rproblems = _skip_and_replace(spec, tasks, decisions)   # applied last, so any task (QA and release included) can be skipped or replaced
-    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions, "replacement_problems": rproblems}
+    plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions, "replacement_problems": rproblems,
+            "plan_version": version}
     plan["parallel_groups"] = parallel_groups(plan)
     return plan
+
+
+def _graph_v2(spec, tasks, decisions):
+    """The v1 web graph → v2 (in place): the code build no longer waits for assets, the icon choice or the database.
+    Required release criteria are untouched: every asset task keeps its criterion, every integration measures
+    asset_integrity, and QA waits for the final, wired build."""
+    ids = {t["id"]: t for t in tasks}
+    if "integrate.assets" not in ids or "build" not in ids: return   # not a web build: nothing to restructure
+    ia, b = ids["integrate.assets"], ids["build"]
+    shipping = [d for d in ia["depends_on"] if (ids.get(d) or {}).get("ship")]
+    per = [T(f"integrate.{s}", f"Integrate {s} into the project (staged, hash-verified, committed atomically)", "integration", "builtin",
+             action="integrate", params={"v2": True}, deps=[s], resources=["integration"], criterion="asset_integrity") for s in shipping]
+    final = T("integrate.final", "Final integration: every artifact committed, hashes and the asset manifest consistent", "integration", "builtin",
+              action="integrate_final", deps=[x["id"] for x in per] or ["foundation.scaffold"], resources=["integration"], criterion="asset_integrity")
+    i = tasks.index(ia); tasks[i:i + 1] = per + [final]
+    # the code build: the foundation, the identity and any design-stage task (the hook for pre-build design deliverables)
+    design = [t["id"] for t in tasks if t["stage"] == "design"]
+    identity = "foundation.identity" if "foundation.identity" in ids else None
+    b["depends_on"] = ["foundation.scaffold"] + ([identity] if identity else []) + design
+    b["consumes"] = shipping   # used through placeholders until build.wire; never blocks
+    b["work_order"]["instructions"] = _build_instructions(spec, v2=True)
+    b["work_order"]["inputs"] = "planned_assets in the hand-off: every asset being produced, its roles and its destination folder"
+    after_build = ["build"]
+    if "backend.provision" in ids:   # build against a local mock; switch to the approved database once it exists
+        bw = T("backend.wire", "Switch the data layer from the local mock to the approved Postgres", "integration", "agent", deps=["backend.provision", "build"],
+               work_order={"brief": "The database is provisioned (backend.json in the hand-off). Replace the local mock with the real data layer.",
+                           "instructions": ["Read DATABASE_URL from the environment; keep the mock only for tests.", "Add the migrations to the repository; an index for every "
+                                            "column a query filters or joins on.", "No secret in the repository, the work order or the submission.", "Submit the files you changed."],
+                           "expected": []})
+        tasks.insert(tasks.index(b) + 1, bw); after_build = ["backend.wire"]
+    wires = bool(shipping) or "icon.derivatives" in ids
+    if wires:
+        bwire = T("build.wire", "Wire every integrated asset and the approved app icon into the application", "integration", "agent",
+                  deps=after_build + ["integrate.final"],
+                  work_order={"brief": "Every asset is integrated (integrated_assets in the hand-off). Replace the placeholders with them in the real application.",
+                              "instructions": _wire_instructions(spec, "icon.derivatives" in ids),
+                              "expected": [{"path": "$project/" + ((spec.get("project") or {}).get("entry") or "index.html"), "format": "html"}],
+                              "inputs": "integrated_assets in the hand-off: every integrated file with its role and producing task"})
+        tasks.insert(tasks.index(final) + 1, bwire)
+    ready = "build.wire" if wires else after_build[-1]
+    for t in tasks:   # QA and release measure the final, wired build (and the final integration)
+        if t["id"] in ("build", "build.wire", "backend.wire") or t["stage"] not in ("qa", "release"): continue
+        if "build" in t["depends_on"]:
+            t["depends_on"] = [ready if d == "build" else d for d in t["depends_on"]]
+            if not wires and "integrate.final" not in t["depends_on"]: t["depends_on"].append("integrate.final")
+    for t in tasks:   # anything added that named the v1 integration step depends on the final integration
+        t["depends_on"] = ["integrate.final" if d == "integrate.assets" else d for d in t["depends_on"]]
+    if any(t["id"] == "qa.assets" for t in tasks):
+        for g in next(t for t in tasks if t["id"] == "qa.assets")["gate"]:
+            if g["type"] == "referenced": g["strict"] = True   # real loads only: no comments, no unrelated JSON, never the manifest
+    decisions.append("plan v2: the code build starts after the foundation with placeholders; assets are integrated as they pass; build.wire wires them "
+                     "and the approved icon in; QA measures the final wired build" + ("; the build uses a local data mock until backend.wire" if "backend.provision" in ids else ""))
+
+
+def _wire_instructions(spec, icon):
+    ins = ["Load every asset listed in integrated_assets through its real path, from the code or markup that uses it (a filename in a comment, or in a JSON "
+           "file nothing loads, does not count: qa.assets checks real references). Remove each placeholder it replaces.",
+           f"Do not edit {MANIFEST} or any integrated asset file: integration owns them, and a submission that changes them is rejected."]
+    if icon:
+        ins.append("App icon: wire in the icon set from icon.derivatives exactly as its icons.snippet.json says (the head tags, and the manifest's icons; "
+                   "merge into an existing manifest). Remove every older, placeholder or framework-default icon reference.")
+    return ins + ["Run no build step that needs the network. Submit the files you changed."]
 
 
 WORKFLOW_BRIEF = {
@@ -391,7 +465,7 @@ def _deploy_instructions(spec):
         "If it fails, fix the deployment (not the check) and run it again."]
 
 
-def _build_instructions(spec):
+def _build_instructions(spec, v2=False):
     q, a = spec["quality"], spec["assets"]
     if (spec.get("mode") or {}).get("existing"):
         ins = _existing_instructions(spec)
@@ -403,7 +477,10 @@ def _build_instructions(spec):
     ins = [f"Implement a complete {spec['deliverable']} in the project folder (entry index.html), original in name, art and mechanics.",
            f"Platform: {'mobile-first, touch controls with ≥ 44 px targets, portrait and landscape' if spec['platform']['mobile_first'] else 'desktop and phone'}; "
            f"engine: {spec['platform']['engine'] or 'plain web'}; no new paid services.",
-           "Use the integrated assets (paths in the handoff manifest) — every one must be referenced by the build."]
+           ("Assets are produced in parallel and integrated by the Production Director as each passes (planned_assets in the hand-off: roles and destination "
+            "folders). Build now against placeholders (generated tones, simple shapes, inline level data) behind a small loader, kept outside the asset "
+            f"folders; build.wire swaps the real files in. Never write into the asset folders or {MANIFEST}." if v2 else
+            "Use the integrated assets (paths in the handoff manifest) — every one must be referenced by the build.")]
     if spec["deliverable"] == "game":
         ins += ["A full loop: start screen → play → fail/win → retry in one tap; clear objective; difficulty that ramps.",
                 "Progression that is saved (localStorage), a best score or unlocks; pause; mute."]
@@ -419,7 +496,9 @@ def _build_instructions(spec):
                    "(byline.css; Byline.tsx for React). Also <meta name=\"author\" content=\"HaveAnApp\"> and '<App> by HaveAnApp' in the manifest description. "
                    + (f"Link it to {cfg['url']}." if cfg.get("url") and cfg.get("url_verified") else "Do not link it: no official HaveAnApp URL is verified yet.")
                    + " Never put it in the app icon.")
-    if spec.get("icon", {}).get("required"):
+    if spec.get("icon", {}).get("required") and v2 and (spec.get("icon") or {}).get("mode") != "keep":
+        ins.append("App icon: a person chooses it in parallel; leave the icon tags to build.wire (a placeholder favicon is fine).")
+    elif spec.get("icon", {}).get("required"):
         mode = (spec.get("icon") or {}).get("mode")
         ins.append("App icon: " + ("wire in the icon set from icon.derivatives exactly as its icons.snippet.json says (the head tags, and the manifest's icons; "
                                    "merge into an existing manifest). Remove every older or framework-default icon reference." if mode != "keep" else
@@ -431,7 +510,12 @@ def _build_instructions(spec):
         from . import standards as _s2
         ins.append("Analytics (approved): add HaveAnApp Pulse to the entry page: " + _s2.pulse_snippet(spec["title"]) + " (anonymous, cookieless).")
     be = (spec.get("backend") or {}).get("provider")
-    if be == "postgres":
+    if be == "postgres" and v2:
+        ins.append("Backend (approved): a small API (serverless functions on the deploy target) behind one data-access interface. Until backend.wire, "
+                   "back it with a local mock (in memory or a local file) so the app runs and is testable without a database; backend.wire switches it to the "
+                   "provisioned Postgres (DATABASE_URL). Migrations in the repository with an index for every column a query filters or joins on; validate every "
+                   "input; authenticate every route that reads or writes someone's data; parameterised SQL only.")
+    elif be == "postgres":
         ins.append("Backend (approved): a small API (serverless functions on the deploy target) over the Postgres from backend.provision, reading DATABASE_URL "
                    "from the environment; migrations in the repository with an index for every column a query filters or joins on; validate every input; "
                    "authenticate every route that reads or writes someone's data; parameterised SQL only.")
@@ -482,6 +566,17 @@ def _icon_tasks(spec, proj, identity, adir):
     return [concepts, select, master, deriv]
 
 
+def _reaches(tasks, a, b, seen=None):
+    """True when task a depends (directly or not) on task b."""
+    seen = seen if seen is not None else set()
+    for d in tasks[a]["depends_on"]:
+        if d == b: return True
+        if d in tasks and d not in seen:
+            seen.add(d)
+            if _reaches(tasks, d, b, seen): return True
+    return False
+
+
 def parallel_groups(plan):
     """Waves of tasks that can run at the same time (every dependency in an earlier wave)."""
     level, tasks = {}, plan["tasks"]
@@ -490,6 +585,8 @@ def parallel_groups(plan):
         if t in level: return level[t]
         if t in seen: raise ValueError(f"dependency cycle through {t}")
         deps = tasks[t]["depends_on"]
+        for x in tasks[t].get("consumes") or []:   # a soft edge never orders the schedule, but it must not close a cycle
+            if x in tasks and _reaches(tasks, x, t): raise ValueError(f"dependency cycle through {t} (consumes {x}, which depends on it)")
         level[t] = 0 if not deps else 1 + max(lv(x, seen + (t,)) for x in deps)
         return level[t]
     for t in tasks: lv(t)
@@ -581,6 +678,8 @@ def validate(plan, disc=None):
     for t in tasks.values():
         for dep in t["depends_on"]:
             if dep not in tasks: problems.append(f"{t['id']}: unknown dependency {dep}")
+        for dep in t.get("consumes") or []:
+            if dep not in tasks: problems.append(f"{t['id']}: consumes an unknown task {dep}")
     problems = list(plan.get("replacement_problems") or []) + problems
     if len(problems) > len(plan.get("replacement_problems") or []): return problems   # the graph itself is broken: ordering it would be meaningless
     try: parallel_groups(plan)

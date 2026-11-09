@@ -94,6 +94,9 @@ jobs:
       - name: Run GITCRAFT report (read-only cross-department project report)
         run: python3 tests/test_report.py
 
+      - name: Orchestration (plan v2 graph, transactional integration, ownership, consolidated approval, v1 compatibility)
+        run: python3 tests/test_orchestration.py
+
       - name: Release verification (POW NOW PR #40 - blocker / unverified / advisory / pass stay distinct)
         run: python3 tests/test_release_verification.py
 

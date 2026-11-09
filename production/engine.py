@@ -23,7 +23,7 @@ from . import inside_roots, roots, store_root, store_root_for
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
 from . import lifecycle, recon, icons, maturity, artifacts
 
-RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1}
+RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1, "integration": 1}   # integration: one writer of the asset manifest at a time (plan v2)
 # "exclusive": a timing measurement (frame rate) is only valid with the machine to itself, so such a task starts
 # only when nothing else runs, and nothing else starts while it runs
 FINGERPRINT_SKIP = artifacts.VCS_AND_CACHE   # plus every evaluation artifact folder (artifacts.is_artifact_dir)
@@ -180,7 +180,7 @@ def idea(text, project=None, overrides=None, store_dir=None, source=None):
     if p and not inside_roots(p):
         raise PermissionError(f"GITCRAFT policy: project {p} is outside the workspace roots ({':'.join(roots())})")
     prod = {"id": store.new_id(spec["title"]), "spec": spec, "brief": lifecycle.brief(text, p, source), "overrides": overrides or {},
-            "tasks": {}, "order": [], "decisions": [], "parallel_groups": [], "problems": [], "status": "idea"}
+            "tasks": {}, "order": [], "decisions": [], "parallel_groups": [], "problems": [], "status": "idea", "plan_version": planner.PLAN_VERSION}
     lifecycle.move(prod, "idea")
     why = None
     if not store_dir: store_dir, why = store_root_for(p)
@@ -216,7 +216,7 @@ def _discover_and_plan(prod):
         spec["icon"]["existing"] = icon_state.get("best")
     essential = [q for q in spec["questions"] if q.get("essential")]
     if spec.get("mode", {}).get("question") and not spec["mode"].get("request"): essential.append({"id": "request"})
-    pl = planner.build(spec, disc)
+    pl = planner.build(spec, disc, version=prod.get("plan_version", 1))   # a record keeps the graph version it was created with
     # Every acceptance criterion from the intake stays in the spec. One that no planned task measures is reported
     # `not_planned`: it is visible in the plan and the report, and it prevents READY (the release gate fails on it).
     measured = {t.get("criterion") for t in pl["tasks"].values()}
@@ -472,6 +472,9 @@ def lifecycle_view(prod):
 def _recover(prod):
     """Make a resumed production consistent: interrupted tasks restart; passed work is reused only if intact."""
     for t in prod["tasks"].values():
+        if t["kind"] == "builtin" and t.get("action") == "integrate" and (t.get("params") or {}).get("v2"):
+            undone = builtins.integrate_recover(_task_dir(prod, t["id"]))   # an interrupted commit leaves the previous valid state
+            if undone: store.event(prod, "integration_rolled_back", task=t["id"], actions=undone[:20])
         if t["state"] in (IN_PROGRESS, COMPLETE) and t["kind"] != "agent":
             if t["attempts"] and not t["attempts"][-1].get("finished"):
                 t["attempts"][-1].update(finished=store.now(), status="interrupted")
@@ -673,8 +676,16 @@ def _issue(prod, t):
     d = _task_dir(prod, t["id"])
     h = _handoff(prod, t, {})
     if t["id"] == "build" or t["stage"] == "integration":
-        integ = eff(prod, "integrate.assets") if "integrate.assets" in prod["tasks"] else None
-        h["integrated_assets"] = [{k: m[k] for k in ("dest_rel", "role", "format", "task")} for m in ((integ or {}).get("result") or {}).get("integrated", [])]
+        h["integrated_assets"] = [{k: m[k] for k in ("dest_rel", "role", "format", "task")} for m in _integrated(prod)]
+    if t.get("consumes"):   # plan v2: what is being produced in parallel, for the placeholders
+        h["planned_assets"] = [{"task": c, "title": prod["tasks"][c]["title"], "roles": (prod["tasks"][c].get("ship") or {}).get("roles"),
+                                "dest": (prod["tasks"][c].get("ship") or {}).get("dest", "").replace("$project", _project(prod)),
+                                "state": eff(prod, c)["state"]} for c in t["consumes"] if c in prod["tasks"]]
+        h["manifest"] = os.path.join(_project(prod), planner.MANIFEST)
+    if t["id"] == "build.wire" and "icon.derivatives" in prod["tasks"]:   # v2: the icon set is not upstream of the wiring step, so name it
+        h["icon_snippet"] = next((o["path"] for o in eff(prod, "icon.derivatives").get("outputs") or [] if o.get("role") == "icon_snippet"), None)
+    if prod.get("plan_version", 1) >= 2 and t["kind"] == "agent":   # what the agent must not write (checked on submit)
+        h["integration_owned"] = [planner.MANIFEST] + [m["dest_rel"] for m in _integrated(prod)]
     order = {"production": prod["id"], "task": t["id"], "title": t["title"], "owner": t["owner"], "out_dir": d, "project": _project(prod),
              **{k: v for k, v in wo.items() if k != "approval"}, "handoff": h,
              **({"existing_project": {k: (prod.get("maturity") or {}).get(k) for k in ("maturity", "kind", "confidence", "inventory", "save_keys", "deploy", "tests")},
@@ -726,7 +737,8 @@ def _prepare(prod, t):
                "upstream": copy.deepcopy(_upstream(prod, t)), "auth": dict(prod["spec"]["authorisations"]), "approved": t.get("approved"),
                "spec": copy.deepcopy(prod["spec"]), "choice": t.get("choice"), "approval_note": t.get("approval_note"),
                "tasks": {k: {"state": eff(prod, k)["state"], "approved": eff(prod, k).get("approved")} for k in prod["tasks"]},
-               "inside_roots": inside_roots, "previous_manifest": copy.deepcopy((t.get("last_result") or {}).get("integrated"))}
+               "inside_roots": inside_roots, "previous_manifest": copy.deepcopy((t.get("last_result") or {}).get("integrated")),
+               "replace_auth": dict((prod.get("replace_assets") or {}).get("authorized") or {}), "integrated": copy.deepcopy(_integrated(prod))}
         return (lambda: getattr(builtins, action)(ctx)), None
     return None, {"status": "failed", "failure": "request", "error": f"unknown executor {kind}"}
 
@@ -742,6 +754,11 @@ def _finish(prod, t, res):
     att.update(status=res.get("status"), outcome=cls, error=(res.get("error") or res.get("reason") or None) and str(res.get("error") or res.get("reason"))[:1500])
     t["outputs"] = _norm_outputs(res)
     t["result"] = _slim(res)
+    if cls == "approval" and res.get("consolidated"):   # plan v2: one replace_assets approval for the whole production
+        ra = prod.setdefault("replace_assets", {"authorized": {}, "pending": {}, "history": []})
+        for f in res.get("files") or []: ra["pending"][f["file"]] = {"sha256": f["sha256"], "task": f["task"]}
+        _set(prod, t, NEEDS_APPROVAL, reason="waiting for the production's one replace_assets approval (production_approve task=replace_assets): "
+             + ", ".join(f["file"] for f in res.get("files") or [])[:600], approval="replace_assets", consolidated=True); return
     if cls == "approval":
         _set(prod, t, NEEDS_APPROVAL, reason=res.get("reason"), approval=res.get("approval")); return
     if cls == "blocked":
@@ -768,8 +785,16 @@ def _finish(prod, t, res):
 
 
 def _integrated(prod):
-    if "integrate.assets" not in prod["tasks"]: return []
-    return (eff(prod, "integrate.assets").get("result") or {}).get("integrated") or []
+    """The integration ledger: every file integration committed into the project (v1: integrate.assets; v2: each integrate.<task>
+    that passed, in plan order, a later commit of the same path replacing an earlier one)."""
+    if "integrate.assets" in prod["tasks"]:
+        return (eff(prod, "integrate.assets").get("result") or {}).get("integrated") or []
+    led = {}
+    for tid in prod["order"]:
+        t = prod["tasks"][tid]
+        if t["kind"] == "builtin" and t.get("action") == "integrate" and not t.get("reverifies") and eff(prod, tid)["state"] == PASSED:
+            for m in (eff(prod, tid).get("result") or {}).get("integrated") or []: led[m["dest_rel"]] = m
+    return list(led.values())
 
 
 def _remediate(prod, t, res, gr):
@@ -824,6 +849,10 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
                 v = executors.validate_file(p)
                 checks.append({"name": f"{os.path.relpath(p, proj) if proj and p.startswith(proj) else f} opens as {v.get('format')}", "ok": v.get("ok", False), "detail": v.get("error")})
                 if v.get("ok"): outs.append({"path": p, "role": "submitted", "format": v.get("format"), "ok": True})
+        if prod.get("plan_version", 1) >= 2 and proj:   # disjoint write ownership: integration's files are not the agent's to change
+            bad = _scope_violations(prod, files or [])
+            checks.append({"name": "integration-owned files are untouched (the asset manifest and every integrated file)", "ok": not bad,
+                           "detail": bad[:12] or None})
         if t.get("fix_for"):
             now_fp = _fp(prod)
             checks.append({"name": "the project changed since the failed check measured it", "ok": now_fp != t.get("failed_fingerprint"),
@@ -852,6 +881,23 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
     return dict(status(prod), submission={"task": task, "accepted": t["state"] == PASSED, "checks": checks})
 
 
+def _scope_violations(prod, files):
+    """Integration-owned paths the agent changed or submitted: every integrated file must still have its committed hash, and the
+    asset manifest must list exactly the ledger. A submission naming an owned path is refused too."""
+    proj = _project(prod)
+    led = {m["dest_rel"]: m for m in _integrated(prod)}
+    out = [f"{r} (changed after integration)" for r, m in led.items() if not os.path.isfile(m["dest"]) or builtins.sha256(m["dest"]) != m["sha256"]]
+    man = builtins.read_manifest(proj)["assets"] if os.path.exists(os.path.join(proj, planner.MANIFEST)) else {}
+    if os.path.exists(os.path.join(proj, planner.MANIFEST)) or led:
+        if {k: v.get("sha256") for k, v in man.items()} != {k: m["sha256"] for k, m in led.items()}:
+            out.append(f"{planner.MANIFEST} (does not match what integration committed)")
+    owned = set(led) | {planner.MANIFEST}
+    for f in files:
+        rel = os.path.relpath(f, proj) if os.path.isabs(f) else f
+        if rel in owned: out.append(f"{rel} (submitted, but owned by integration)")
+    return out
+
+
 def _verify_deploy(url, evidence):
     if not evidence: return {"ok": False, "detail": "no evidence: a deployment is never recorded as live without a check against it"}
     p = evidence if os.path.isabs(evidence) else None
@@ -867,8 +913,22 @@ def _verify_deploy(url, evidence):
     return {"ok": True, "detail": f"{rec.get('department')}.{rec.get('action')} passed against {url}"}
 
 
+def replace_assets_request(prod):
+    """The consolidated replace_assets approval (plan v2): {files, ready, waiting_on}. It is presented only when the overwrite set
+    is complete: every asset task and every integration has settled, so the person sees every file at once."""
+    ra = prod.get("replace_assets") or {}
+    pending = ra.get("pending") or {}
+    if not pending: return None
+    shipping = [i for i in prod["order"] if prod["tasks"][i].get("ship") and not prod["tasks"][i].get("reverifies")]
+    integ = [i for i in prod["order"] if prod["tasks"][i]["kind"] == "builtin" and prod["tasks"][i].get("action") == "integrate"]
+    waiting = [i for i in shipping if eff(prod, i)["state"] not in TERMINAL] + \
+              [i for i in integ if eff(prod, i)["state"] not in TERMINAL and not (eff(prod, i)["state"] == NEEDS_APPROVAL and eff(prod, i).get("consolidated"))]
+    return {"files": [{"file": k, **v} for k, v in sorted(pending.items())], "ready": not waiting, "waiting_on": waiting}
+
+
 def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
     prod = store.load(pid, store_dir)
+    if task == "replace_assets": return _approve_replace(pid, approved, note, store_dir)
     with store.lock(prod):
         prod = store.load(pid, store_dir)
         t = prod["tasks"].get(task)
@@ -888,6 +948,34 @@ def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
             _set(prod, t, PENDING, reason="waiting for the new concepts", outputs=[], result=None)
         else:
             _set(prod, t, SKIPPED, reason=f"declined by a person{': ' + note if note else ''}")
+        store.save(prod)
+    return status(prod)
+
+
+def _approve_replace(pid, approved, note, store_dir):
+    """A person's decision on the consolidated overwrite set. Approval authorises exactly the listed files with exactly the listed
+    content; any other overwrite later (a different file, or new content for a listed one) asks again. Declining skips the
+    integrations that would overwrite (their files are untouched); the release criteria they carry then cannot pass."""
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        req = replace_assets_request(prod)
+        if not req: raise ValueError("no replace_assets approval is pending")
+        if not req["ready"]:
+            raise ValueError("the overwrite set is not complete yet (still producing or integrating: " + ", ".join(req["waiting_on"][:8])
+                             + "); the approval is presented once every asset has settled")
+        ra = prod["replace_assets"]
+        files = {f["file"]: f["sha256"] for f in req["files"]}
+        waiting = [t for t in prod["tasks"].values() if t["state"] == NEEDS_APPROVAL and t.get("consolidated")]
+        ra["history"].append({"at": store.now(), "approved": approved, "files": files, "note": note})
+        if approved:
+            ra["authorized"].update(files)
+            for t in waiting: _set(prod, t, PENDING, reason=f"replace_assets approved for {len(files)} listed file(s)")
+        else:
+            for t in waiting: _set(prod, t, SKIPPED, reason="declined by a person: existing files are not replaced" + (f" — {note}" if note else ""))
+        ra["pending"] = {}
+        prod.setdefault("decisions", []).append(f"{'approved' if approved else 'declined'}: replace_assets for {', '.join(sorted(files))}" + (f" — {note}" if note else ""))
+        store.event(prod, "approval", task="replace_assets", approved=approved, files=sorted(files), note=note)
         store.save(prod)
     return status(prod)
 
@@ -950,7 +1038,12 @@ def status(prod_or_id, store_dir=None):
     for tid in prod["order"]:
         t = prod["tasks"][tid]
         if t["state"] == AWAITING_AGENT: nxt.append(f"agent: do {tid} ({t.get('work_order_path')}) then production_submit")
-        if t["state"] == NEEDS_APPROVAL: nxt.append(f"person: approve or decline {tid} — {t.get('reason')}")
+        if t["state"] == NEEDS_APPROVAL and not t.get("consolidated"): nxt.append(f"person: approve or decline {tid} — {t.get('reason')}")
+    rr = replace_assets_request(prod)
+    if rr and rr["ready"]:
+        nxt.append(f"person: approve or decline replacing {len(rr['files'])} existing file(s) (production_approve task=replace_assets): "
+                   + ", ".join(f["file"] for f in rr["files"])[:600])
+    elif rr: nxt.append(f"waiting: the replace_assets approval is presented once {', '.join(rr['waiting_on'][:5])} settle(s)")
     lv = lifecycle.summary(prod)
     for d in ((prod.get("lifecycle") or {}).get("revision") and ["revision"]) or []: nxt.insert(0, "person: approve or decline the pending revision (production_decide)")
     if lv["stage"] == "decisions": nxt.insert(0, "person: review the Decision Room and approve the blueprint (production_decide)")
@@ -961,4 +1054,5 @@ def status(prod_or_id, store_dir=None):
             "verdict": v["verdict"], "verdict_reasons": v["reasons"] or None, "release_status": rs["release_status"],
             "release": {k: rs[k] for k in ("deployment", "functional", "security", "visual", "blockers", "unverified", "advisories", "verification_complete")}, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
             "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
-            "report": os.path.join(prod["store"], "REPORT.md"), "production_report": prod.get("production_report")}
+            "report": os.path.join(prod["store"], "REPORT.md"), "production_report": prod.get("production_report"),
+            "plan_version": prod.get("plan_version", 1), "replace_assets": replace_assets_request(prod)}

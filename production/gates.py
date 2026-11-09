@@ -5,7 +5,9 @@ A department returning `ok` makes a task `complete`; the gate decides `passed`. 
   status_ok             the department's own status is ok (its outputs validated by format, its checks passed)
   min {path, min}       a measured number in the result (e.g. PLAYCRAFT summary.overall.score) is at least min;
                         a missing measurement fails (never assumed)
-  referenced            every asset integrated into the project is referenced by the project's source
+  referenced            every asset integrated into the project is referenced by the project's source (never by the asset
+                        manifest gitcraft.assets.json). strict (plan v2): only code and markup count, with comments removed,
+                        plus JSON files that code itself loads: a filename in a comment or an unread JSON file is not a reference
   expected              (agent) every expected file exists inside the roots and opens as its format
   changed               (fix) the project's files differ from what the failed check measured
   advisory              recorded, never blocks (DESIGNCRAFT's design review)
@@ -65,7 +67,7 @@ def evaluate(task, res, ctx):
                         "detail": None if ok else ("not measured" if v is None else f"measured {v}")})
         elif ty == "referenced":
             man = ctx.get("integrated") or []
-            src = _source_text(ctx["project"])
+            src = _source_text(ctx["project"], strict=bool(g.get("strict")))
             # an icon master is preserved source artwork (the derivatives are what the build references)
             missing = [m["dest_rel"] for m in man if m.get("role") not in SOURCE_ROLES and os.path.basename(m["dest_rel"]) not in src]
             out.append({"condition": "every integrated asset is referenced by the build", "ok": not missing, "detail": missing[:20] or None,
@@ -75,15 +77,30 @@ def evaluate(task, res, ctx):
     return out
 
 
-def _source_text(project):
-    buf = []
+MANIFEST = "gitcraft.assets.json"   # the asset manifest lists every integrated file: it is never evidence that the build uses one
+CODE = (".js", ".mjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".webmanifest", ".vue", ".svelte")
+_COMMENTS = [re.compile(r"<!--.*?-->", re.S), re.compile(r"/\*.*?\*/", re.S), re.compile(r"(?<![:'\"\\])//[^\n]*")]
+
+
+def _strip_comments(text):
+    for rx in _COMMENTS: text = rx.sub(" ", text)
+    return text
+
+
+def _source_text(project, strict=False):
+    code, data = [], {}
     for d, dirs, files in os.walk(project):
         dirs[:] = [x for x in dirs if x not in (".git", "node_modules")]
         for f in files:
-            if f.endswith((".js", ".mjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".webmanifest", ".vue", ".svelte")) and "assets" not in os.path.relpath(d, project).split(os.sep)[:2]:
-                try: buf.append(open(os.path.join(d, f), errors="ignore").read(2_000_000))
-                except OSError: pass
-    return "\n".join(buf)
+            if f == MANIFEST and os.path.normpath(d) == os.path.normpath(project): continue
+            if f.endswith(CODE + (".json",)) and "assets" not in os.path.relpath(d, project).split(os.sep)[:2]:
+                try: txt = open(os.path.join(d, f), errors="ignore").read(2_000_000)
+                except OSError: continue
+                if f.endswith(".json"): data[f] = txt
+                else: code.append(_strip_comments(txt) if strict else txt)
+    if not strict: return "\n".join(code + list(data.values()))
+    src = "\n".join(code)
+    return "\n".join([src] + [txt for name, txt in data.items() if name in src])   # a JSON file counts only when the code loads it
 
 
 def check_expected(expected, base, project, roots_ok):

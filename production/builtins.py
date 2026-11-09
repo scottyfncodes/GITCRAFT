@@ -67,6 +67,7 @@ def scaffold(ctx):
 
 
 def integrate(ctx):
+    if (ctx.get("params") or {}).get("v2"): return integrate_v2(ctx)
     prod, proj = ctx["prod"], ctx["project"]
     previous = {m["dest"]: m for m in (ctx.get("previous_manifest") or [])}
     plan, conflicts, noid = {}, [], []
@@ -282,3 +283,186 @@ def check_features(ctx):
         checks.append({"name": f"feature: {ft['name']}", "ok": ok, "detail": None if ok else (failed[:4] or r.get("error"))})
         runs.append({"feature": ft["name"], "record": r.get("record"), "status": r.get("status")})
     return _with_report(ctx, {"status": "ok" if all(c["ok"] for c in checks) else "failed", "checks": checks, "runs": runs, "outputs": []}, "features.json")
+
+
+# ---------------------------------------------------------------- plan v2: one transactional integration per asset
+MANIFEST = "gitcraft.assets.json"
+JOURNAL = "integrate.journal.json"
+
+
+def _atomic_json(path, data):
+    tmp = f"{path}.gitcraft-tmp"
+    with open(tmp, "w") as f: json.dump(data, f, indent=1, sort_keys=True)
+    os.replace(tmp, path)
+
+
+def read_manifest(proj):
+    try:
+        with open(os.path.join(proj, MANIFEST)) as f: m = json.load(f)
+        return m if isinstance(m, dict) and isinstance(m.get("assets"), dict) else {"schema": "gitcraft-assets/1", "owner": "integration", "assets": {}}
+    except (OSError, ValueError):
+        return {"schema": "gitcraft-assets/1", "owner": "integration", "assets": {}}
+
+
+def integrate_v2(ctx):
+    """One upstream task's shipped outputs → the project, as one transaction:
+      1 stage   every file (and its licence sidecar) is copied next to its destination as *.gitcraft-tmp and hash-verified
+      2 check   overwriting a different existing file needs the production's consolidated replace_assets approval for that
+                exact file and content (ctx["replace_auth"] {dest_rel: sha256}); anything else → needs_approval, nothing written
+      3 commit  a journal (task folder) records each destination and its backup; every staged file is os.replace()d into place,
+                then the asset manifest (owned by integration) is rewritten atomically; the journal is removed
+      on any error during commit, every destination is restored from its backup (or removed if it was new) and the manifest
+      is restored, so the project is left in its previous valid state. integrate_recover() does the same after a crash."""
+    prod, proj, out = ctx["prod"], ctx["project"], ctx["out_dir"]
+    auth = ctx.get("replace_auth") or {}
+    items, checks = [], []
+    for up in ctx["upstream"]:
+        ship = up.get("ship")
+        if not ship or up["state"] != "passed": continue
+        dest_dir = ship["dest"].replace("$project", proj)
+        if ship.get("library"):   # a 3D Department asset: export into the task folder, then commit like any other file
+            res = up.get("result") or {}
+            aid = res.get("asset_id") or (res.get("asset") or {}).get("id") or (res.get("library") or {}).get("asset")
+            if not aid:
+                return {"status": "failed", "failure": "handoff", "error": f"{up['id']} passed but reported no 3D library asset to export; nothing was copied",
+                        "checks": [{"name": "the 3D task names its library asset", "ok": False}], "outputs": []}
+            stage_dir = os.path.join(out, "library-export")
+            r = executors.forgecraft_call("library_export", {"asset": aid, "dest": stage_dir}, timeout=600)
+            if r.get("status") in ("failed", "blocked") or r.get("error") or not r.get("files"):
+                return {"status": "failed", "error": f"3D asset {aid} could not be exported: {r.get('error') or r.get('reason')}",
+                        "checks": [{"name": f"3D asset {aid} exported from the library (hash-verified)", "ok": False}], "outputs": []}
+            lic = None
+            try: lic = ((json.load(open(os.path.join(r["dir"], "asset.json"))).get("license") or {}).get("asset"))
+            except (OSError, ValueError, KeyError, TypeError, AttributeError): pass
+            for f in r["files"]:
+                ext = os.path.splitext(f["path"])[1].lower().lstrip(".")
+                role = "model" if ext in ("glb", "gltf", "fbx", "obj") else "model_source"
+                items.append({"task": up["id"], "src": f["path"], "dest": os.path.join(dest_dir, os.path.relpath(f["path"], r.get("dir") or stage_dir)),
+                              "sha256": f.get("sha256") or sha256(f["path"]), "role": role, "format": ext,
+                              "sidecar": {"license": lic or "LicenseRef-Project-Owned", "source": {"production": prod["id"], "task": up["id"], "library_asset": aid}} if role == "model" else None})
+            continue
+        for o in select(up.get("outputs", []), ship.get("roles", ["*"]), ship.get("formats")):
+            dd = (ship.get("role_dest") or {}).get(o.get("role"), ship["dest"]).replace("$project", proj)
+            side = {"license": up.get("license") or "LicenseRef-Project-Owned", "attribution": up.get("attribution"),
+                    "source": {"production": prod["id"], "task": up["id"], "record": (up.get("result") or {}).get("record")}}
+            folder = o.get("role") in (ship.get("folder_licence_roles") or [])
+            items.append({"task": up["id"], "src": o["path"], "dest": os.path.join(dd, o.get("rel") or os.path.basename(o["path"])), "sha256": o.get("sha256") or sha256(o["path"]),
+                          "role": o.get("role"), "format": o.get("format"), "sidecar": None if folder else side, "folder_sidecar": (os.path.join(dd, "LICENSE.assets.json"), side) if folder else None})
+    seen = {}
+    for it in items:   # two outputs of this task for one path
+        if it["dest"] in seen and seen[it["dest"]] != it["sha256"]:
+            return {"status": "failed", "failure": "conflict", "error": "integration conflict: different files ship to the same path; nothing was copied",
+                    "checks": [{"name": "no two outputs ship to the same path", "ok": False, "detail": os.path.relpath(it["dest"], proj)}], "outputs": []}
+        seen[it["dest"]] = it["sha256"]
+    man = read_manifest(proj)
+    owned = {k: v for k, v in man["assets"].items() if v.get("task") not in {it["task"] for it in items}}
+    for it in items:   # another task's integrated file at this path is an integration conflict, never a silent overwrite
+        rel = os.path.relpath(it["dest"], proj)
+        if rel in owned and owned[rel]["sha256"] != it["sha256"]:
+            return {"status": "failed", "failure": "conflict", "error": f"integration conflict: {rel} is already integrated from {owned[rel]['task']}; nothing was copied",
+                    "checks": [{"name": "no two deliverables ship to the same path", "ok": False, "detail": [rel, owned[rel]["task"]]}], "outputs": []}
+    mine = {k: v for k, v in man["assets"].items() if v.get("task") in {it["task"] for it in items}}
+    over = []
+    for it in items:
+        rel = os.path.relpath(it["dest"], proj)
+        if os.path.exists(it["dest"]) and sha256(it["dest"]) != it["sha256"] and not (rel in mine and mine[rel]["sha256"] == sha256(it["dest"])):
+            it["replaces"] = True
+            if auth.get(rel) != it["sha256"]: over.append({"file": rel, "sha256": it["sha256"], "task": it["task"]})
+    if over:
+        return {"status": "needs_approval", "approval": "replace_assets", "consolidated": True,
+                "reason": f"{len(over)} existing project file(s) would be replaced by different content", "files": over,
+                "checks": [{"name": "no existing file overwritten without the production's replace_assets approval for that exact file", "ok": False,
+                            "detail": [o["file"] for o in over]}], "outputs": []}
+    # 1 stage
+    staged, checks = [], []
+    try:
+        for it in items:
+            os.makedirs(os.path.dirname(it["dest"]), exist_ok=True)
+            tmp = it["dest"] + ".gitcraft-tmp"
+            shutil.copy2(it["src"], tmp)
+            staged.append(tmp)
+            if sha256(tmp) != it["sha256"]: raise IOError(f"{os.path.relpath(it['dest'], proj)}: staged copy does not match its sha256")
+            for sc in [(it["dest"] + ".license.json", it["sidecar"])] if it.get("sidecar") else ([it["folder_sidecar"]] if it.get("folder_sidecar") else []):
+                with open(sc[0] + ".gitcraft-tmp", "w") as f: json.dump(sc[1], f, indent=1)
+                staged.append(sc[0] + ".gitcraft-tmp")
+    except (OSError, IOError) as e:
+        for t in staged:
+            try: os.remove(t)
+            except OSError: pass
+        return {"status": "failed", "error": f"staging failed, nothing was written: {e}", "checks": [{"name": "every file staged and hash-verified", "ok": False, "detail": str(e)}], "outputs": []}
+    # 2 commit, journalled
+    new_man = {"schema": "gitcraft-assets/1", "owner": "integration", "assets": dict(owned)}
+    for it in items:
+        new_man["assets"][os.path.relpath(it["dest"], proj)] = {"task": it["task"], "role": it["role"], "format": it["format"], "sha256": it["sha256"]}
+    bdir = os.path.join(out, "backup"); os.makedirs(bdir, exist_ok=True)
+    targets = [t[:-len(".gitcraft-tmp")] for t in staged] + [os.path.join(proj, MANIFEST)]
+    journal = {"status": "committing", "project": proj, "entries": []}
+    for n, d in enumerate(targets):
+        e = {"dest": d, "backup": None, "staged": d + ".gitcraft-tmp" if d != targets[-1] else None}
+        if os.path.exists(d):
+            e["backup"] = os.path.join(bdir, f"{n}.bak"); shutil.copy2(d, e["backup"])
+        journal["entries"].append(e)
+    _atomic_json(os.path.join(out, JOURNAL), journal)
+    try:
+        if ctx.get("_fail_after"):   # tests: an interruption in the middle of the commit
+            for e in journal["entries"][:ctx["_fail_after"]]:
+                if e["staged"]: os.replace(e["staged"], e["dest"])
+            raise OSError("simulated failure during commit")
+        for e in journal["entries"]:
+            if e["staged"]: os.replace(e["staged"], e["dest"])
+        _atomic_json(os.path.join(proj, MANIFEST), new_man)
+        bad = [os.path.relpath(it["dest"], proj) for it in items if sha256(it["dest"]) != it["sha256"]]
+        if bad: raise OSError(f"after commit the hash does not match: {bad}")
+    except OSError as e:
+        rolled = integrate_recover(out)
+        return {"status": "failed", "error": f"commit failed and was rolled back (the project is as it was): {e}", "rolled_back": rolled,
+                "checks": [{"name": "every file committed and hash-verified", "ok": False, "detail": str(e)}], "outputs": []}
+    os.remove(os.path.join(out, JOURNAL)); shutil.rmtree(bdir, ignore_errors=True)
+    manifest, outs = [], []
+    for it in items:
+        rel = os.path.relpath(it["dest"], proj)
+        manifest.append({"dest": it["dest"], "dest_rel": rel, "sha256": it["sha256"], "role": it["role"], "format": it["format"], "task": it["task"],
+                         "replaced": bool(it.get("replaces"))})
+        outs.append({"path": it["dest"], "role": it["role"], "format": it["format"], "sha256": it["sha256"], "ok": True})
+        checks.append({"name": f"{rel} committed and hash-verified", "ok": True})
+    if not items: checks.append({"name": "something to integrate", "ok": True, "detail": "the task shipped no outputs"})
+    with open(os.path.join(out, "integrated.json"), "w") as f: json.dump(manifest, f, indent=1)
+    return {"status": "ok", "outputs": outs, "checks": checks, "integrated": manifest, "replaced": [m["dest_rel"] for m in manifest if m["replaced"]],
+            "manifest_sha256": sha256(os.path.join(proj, MANIFEST))}
+
+
+def integrate_recover(out_dir):
+    """Undo an interrupted or failed commit from its journal: restore each destination from its backup (or remove it if it
+    was new), remove staged files. Returns what was done; nothing when there is no journal."""
+    jp = os.path.join(out_dir, JOURNAL)
+    try: j = json.load(open(jp))
+    except (OSError, ValueError): return []
+    done = []
+    for e in j.get("entries", []):
+        if e.get("backup") and os.path.exists(e["backup"]):
+            shutil.copy2(e["backup"], e["dest"]); done.append(f"restored {e['dest']}")
+        elif os.path.exists(e["dest"]) and not e.get("backup"):
+            os.remove(e["dest"]); done.append(f"removed {e['dest']}")
+        if e.get("staged") and os.path.exists(e["staged"]): os.remove(e["staged"])
+    os.remove(jp); shutil.rmtree(os.path.join(out_dir, "backup"), ignore_errors=True)
+    return done
+
+
+def integrate_final(ctx):
+    """The final integration check: every artifact in the ledger (ctx["integrated"]) is in the project with its hash, the
+    asset manifest lists exactly those files with those hashes, and no staged or journalled integration is left behind."""
+    proj, ledger = ctx["project"], ctx.get("integrated") or []
+    checks = []
+    bad = [m["dest_rel"] for m in ledger if not os.path.isfile(m["dest"]) or sha256(m["dest"]) != m["sha256"]]
+    checks.append({"name": "every integrated file is in the project with its committed hash", "ok": not bad, "detail": bad[:20] or None})
+    man = read_manifest(proj)["assets"]
+    led = {m["dest_rel"]: m["sha256"] for m in ledger}
+    diff = sorted(k for k in set(man) | set(led) if man.get(k, {}).get("sha256") != led.get(k))
+    checks.append({"name": f"{MANIFEST} lists exactly the integrated files and hashes", "ok": not diff, "detail": diff[:20] or None})
+    left = []
+    for d, ds, fs in os.walk(proj):
+        ds[:] = [x for x in ds if x not in (".git", "node_modules")]
+        left += [os.path.relpath(os.path.join(d, f), proj) for f in fs if f.endswith(".gitcraft-tmp")]
+    checks.append({"name": "no staged integration left in the project", "ok": not left, "detail": left[:20] or None})
+    return {"status": "ok" if all(c["ok"] for c in checks) else "failed", "checks": checks, "outputs": [],
+            "integrated_count": len(ledger)}
