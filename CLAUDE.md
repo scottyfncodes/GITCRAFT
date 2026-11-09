@@ -179,3 +179,8 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).
   A Not Evaluated department never gets a score or weight, release gates never enter a quality score, and a delta is shown only under the same
   rubric and method; every production run ends with a Production Report that never fails the run.
+- `tests/test_creative.py` must pass after any change to `production/creative.py`, `production/vision.py`, the Creative Review parts of
+  `project_report.py`, the `production_vision`/`production_creative` tools or `global/skills/creative-review/`. A Creative Review is advisory
+  judgement: it never changes a department score, the overall score or confidence, a release gate, the Director's verdict, P0–P3, the technical
+  top three or a trend; it is run only when a person asks; "observed" needs a cited capture; fun or engagement is only ever a playtest hypothesis;
+  a review is current only for its commit, vision version and evidence fingerprints; never rewrite `history/vision/` or `history/creative/` (`docs/creative-review.md`).

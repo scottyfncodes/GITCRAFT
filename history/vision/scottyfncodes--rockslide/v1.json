@@ -1,0 +1,51 @@
+{
+ "schema": "gitcraft-vision/1",
+ "project": "scottyfncodes--rockslide",
+ "repo": "scottyfncodes/rockslide",
+ "title": "SNOW PATROL",
+ "version": 1,
+ "status": "draft",
+ "based_on": null,
+ "created": "2026-11-09T13:45:14+00:00",
+ "by": "Claude Code session, drafted from the SNOW PATROL README",
+ "note": null,
+ "fields": {
+  "promise": {
+   "text": "The mountain is the world. The patrol station is home. You run the mountain patrol for the Kessel valley: its slopes, its roads, its village and the people who get lost on it.",
+   "source": "README.md tagline and first paragraph (drafted, not stated as a vision by a person)"
+  },
+  "context": {
+   "text": "Third-person, iPhone first, plays in the browser; progress saves and Continue picks up mid-mission.",
+   "source": "README.md (drafted)"
+  },
+  "identity": {
+   "text": "Colorado high country: exposed granite, blowing snow and a working avalanche operation; Vince, the newest hand, and Koda, a grey-and-white husky with one ear that never stands up.",
+   "source": "README.md (drafted)"
+  },
+  "pillars": [
+   {
+    "text": "A working patrol day: wake in the lodge, pick a call or free patrol, do the job, get paid, build up the station, sleep into a new forecast.",
+    "source": "README.md 'A day on patrol' (drafted)"
+   },
+   {
+    "text": "Avalanche control and rescue as real procedures: danger rating, control route, howitzer and hand charges, transceiver search, probe and dig.",
+    "source": "README.md 'Avalanche control and rescue' (drafted)"
+   },
+   {
+    "text": "Koda is useful without being a tool: a companion with a job, a personality and a bond that grows.",
+    "source": "README.md 'Koda' (drafted)"
+   },
+   {
+    "text": "One hand-laid 2 km valley to cross on foot, by snowmobile, helicopter and skis, with tricks in the air.",
+    "source": "README.md 'The valley', 'Getting around' (drafted)"
+   }
+  ],
+  "open_questions": [
+   "audience: not stated yet",
+   "differentiators: not stated yet",
+   "non goals: not stated yet",
+   "success signals: not stated yet"
+  ]
+ },
+ "sha256": "2f9b8359da5c8dbd"
+}

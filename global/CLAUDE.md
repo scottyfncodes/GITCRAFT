@@ -75,6 +75,13 @@ iPhone 13 and desktop (plus narrow, tablet, landscape), scores Visual Quality,
 Usability and Consistency with evidence and coverage, and never edits the app.
 For games, run it beside PLAYCRAFT (it measures the HTML UI, not the canvas).
 
+"Run Creative Review" (only when the person asks for one): follow the
+`creative-review` skill. An advisory, evidence-cited judgement of the rendered
+product against its vision (studiocraft `production_vision`, then
+`production_creative` pack → your review → submit), reusing existing PLAYCRAFT
+and PIXELCRAFT captures. It never scores and never changes a department score,
+gate, verdict or plan; fun is only ever a playtest hypothesis.
+
 Project isolation:
 - The active project is whatever repo you are working in. Never assume it is
   GITCRAFT, and never write generated assets into GITCRAFT or any other repo.
