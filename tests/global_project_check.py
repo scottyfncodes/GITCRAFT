@@ -68,12 +68,23 @@ ok1, _ = vc.call("draw_shape", {"shape": "ellipse", "x": 156, "y": 246, "width":
 ok2, _ = vc.call("draw_shape", {"shape": "star", "cx": 306, "cy": 396, "radius1": 120, "radius2": 52, "points": 5, "fill": palette["brand-accent"], "stroke": "none"})
 ok3, _ = vc.call("add_text", {"text": "ORBIT", "x": 206, "y": 600, "size": 72, "color": palette["brand-ink"]})
 ok4, r4 = vc.call("export", {"path": logo_svg, "format": "svg"})
-ok5, r5 = vc.call("export", {"path": logo_png, "format": "png", "options": {"resolution": 144}})
+# PNG export options come from the installed binary (document.formats), not from memory: an option VectorCraft
+# does not offer is refused by current builds and was silently ignored by older ones (`resolution` was never one).
+okf, rf = vc.call("command_run", {"id": "document.formats", "params": {}})
+png_opts = next((f.get("options", {}) for f in (rf.get("formats", []) if okf and isinstance(rf, dict) else []) if f.get("id") == "png"), {})
+check("vectorcraft: the installed binary describes its PNG export options, including ppi (document.formats)", "ppi" in png_opts,
+      f"PNG options offered: {sorted(png_opts) or rf}")
+logo_png_1x = os.path.join(work, "logo-72ppi.png")
+ok5a, r5a = vc.call("export", {"path": logo_png_1x, "format": "png", "options": {"ppi": 72}}) if "ppi" in png_opts else (False, "no ppi option")
+ok5, r5 = vc.call("export", {"path": logo_png, "format": "png", "options": {"ppi": 144}}) if "ppi" in png_opts else (False, "no ppi option")
 ok6, r6 = vc.call("export", {"path": os.path.join(checkout, "gitcraft-xrepo-should-not-exist.svg"), "format": "svg"})
 vc.close() if hasattr(vc, "close") else vc.p.terminate()
 check("vectorcraft: logo drawn in the project's palette and exported as SVG into the project", ok1 and ok2 and ok3 and ok4 and os.path.getsize(logo_svg) > 200
       and palette["brand-primary"].lower() in open(logo_svg).read().lower(), (ok1, ok2, ok3, r4))
-check("vectorcraft: PNG hand-off file written to the project's work folder", ok5 and png_size(logo_png), r5)
+s1, s2 = (png_size(p) if os.path.exists(p) else None for p in (logo_png_1x, logo_png))
+check("vectorcraft: PNG hand-off file written to the project's work folder", ok5 and s2, r5)
+check("vectorcraft: ppi takes effect (144 ppi is exactly twice the pixels of 72 ppi, not silently ignored)",
+      ok5a and ok5 and s1 and s2 and s2 == (2 * s1[0], 2 * s1[1]), (s1, s2, r5a, r5))
 check("isolation: writing into the GITCRAFT checkout from another project is refused",
       not ok6 and not os.path.exists(os.path.join(checkout, "gitcraft-xrepo-should-not-exist.svg")), r6)
 
