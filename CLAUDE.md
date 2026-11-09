@@ -173,6 +173,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   TestCraft smoke console policy, or the CORS/analytics/accepted-decision checks in `production/standards.py` (POW NOW PR #40):
   BLOCKER, UNVERIFIED, ADVISORY and PASS stay distinct; never READY with a mandatory check unverified, never NOT READY for an
   advisory alone, never a sandbox-network failure as an app defect, never a global console-error ignore (`docs/release-verification.md`).
-- `tests/test_report.py` must pass after any change to `production/project_report.py`, the report path in `production/entry.py` or the
+- `tests/test_report.py` must pass after any change to `production/project_report.py`, `production/scoring.py` (the Production Report's rubrics),
+  `engine.production_report`, the report path in `production/entry.py` or the
   `production_project_report` tool; "Run GITCRAFT report" is read-only (never writes inside the project, builds, merges or deploys), never
   reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).
+  A Not Evaluated department never gets a score or weight, release gates never enter a quality score, and a delta is shown only under the same
+  rubric and method; every production run ends with a Production Report that never fails the run.

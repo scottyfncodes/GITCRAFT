@@ -29,9 +29,9 @@ Rules
   * Comparable. Each report stores the run ids it used, so a later report says whether a department changed because
     it was re-measured or because nothing new was recorded."""
 import datetime, glob, gzip, hashlib, html, importlib.util, json, os, re, sqlite3, subprocess, sys
-from . import REPO, roots
+from . import REPO, roots, scoring
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 STALE_DAYS = 14
 SEVERITIES = ("critical", "major", "minor", "info")
 LEVEL_LABEL = {"verified": "Verified", "observed": "Observed", "inferred": "Inferred (assumption)", "unavailable": "Unavailable"}
@@ -129,10 +129,11 @@ def _level(raw):
     return "inferred"
 
 
-def _finding(dept, fid, title, severity, level, evidence=None, recommendation=None, source=None, theme=None, kind=None, extra=None):
+def _finding(dept, fid, title, severity, level, evidence=None, recommendation=None, source=None, theme=None, kind=None, extra=None, effort=None, impact=None):
+    """effort / impact: the owning department's own estimate when it makes one (never filled in here)."""
     f = {"key": f"{dept}:{fid}", "department": dept, "id": fid, "title": title, "severity": severity if severity in SEVERITIES else "minor",
          "level": level, "evidence": evidence, "recommendation": recommendation, "source": source, "kind": kind,
-         "theme": theme or theme_of(title, extra)}
+         "theme": theme or theme_of(title, extra), "effort": effort, "impact": impact}
     return f
 
 
@@ -303,7 +304,7 @@ def c_playcraft(D, ctx):
         rf = run_f.get(f["id"], {}); lvl = _level(f.get("level")); imp = f.get("impact") or 0
         sev = "critical" if f.get("type") == "defect" and lvl != "inferred" else "major" if imp >= 3 and lvl != "inferred" else "minor"
         D["findings"].append(_finding("playcraft", f["id"], f["title"], sev, lvl, f.get("evidence"), rf.get("recommendation"), f"{D['run']['source']}/games/{P['id']}",
-                                      kind=f.get("type"), extra=f.get("category")))
+                                      kind=f.get("type"), extra=f.get("category"), effort=scoring.playcraft_effort(f["id"]), impact=f.get("impact")))
     for r in G.get("recurring_regressions") or []:
         D["findings"].append(_finding("playcraft", "regression:" + slug(r.get("what")), f"Recurring regression: {r.get('what')}", "major", "verified", json.dumps(r)[:200]))
     ctx["playcraft_categories"] = D["score"]["categories"]
@@ -357,16 +358,17 @@ def c_pixelcraft(D, ctx):
     for app, rs in sorted(apps.items()):
         rs.sort(); at, run, p, A = rs[-1]
         ov = A.get("overall") or {}; cats = {k: v.get("score") for k, v in (A.get("categories") or {}).items()}
-        D["apps"].append({"app": app, "name": (A.get("app") or {}).get("name"), "run": run, "at": at, "overall": ov.get("score"), "categories": cats, "coverage": ov.get("coverage"),
+        D["apps"].append({"app": app, "name": (A.get("app") or {}).get("name"), "run": run, "at": at, "overall": ov.get("score"), "categories": cats, "coverage": ov.get("coverage"), "method": A.get("method"),
                           "confidence": ov.get("confidence"), "commit": ((A.get("app") or {}).get("git") or {}).get("head", "")[:12] or None, "runs": len(rs)})
         scores.append(ov.get("score"))
         for f in A.get("findings") or []:
             lvl = _level(f.get("evidence"))
             D["findings"].append(_finding("pixelcraft", f"{app}:{f['id']}", f.get("title"), f.get("severity"), lvl, (f.get("explanation") or "")[:240],
-                                          (f.get("recommendation") or "")[:240], os.path.relpath(p, REPO) if p.startswith(REPO) else p, extra=f.get("area")))
+                                          (f.get("recommendation") or "")[:240], os.path.relpath(p, REPO) if p.startswith(REPO) else p, extra=f.get("area"),
+                                          effort=f.get("cost"), impact=f.get("impact")))
     newest = max(D["apps"], key=lambda a: a["at"])
     D.update(status="current", age_days=_age(newest["at"]),
-             run={"id": newest["run"], "at": newest["at"], "commit": newest["commit"], "method": "pixelcraft", "runs": sum(a["runs"] for a in D["apps"]), "apps": len(D["apps"])},
+             run={"id": newest["run"], "at": newest["at"], "commit": newest["commit"], "method": newest.get("method") or "pixelcraft", "runs": sum(a["runs"] for a in D["apps"]), "apps": len(D["apps"])},
              score={"value": round(sum(scores) / len(scores), 1) if scores else None, "label": "Visual quality and usability" + (f" (mean of {len(scores)} UIs)" if len(scores) > 1 else ""),
                     "confidence": newest["confidence"], "coverage": newest["coverage"], "categories": newest["categories"]})
     if ("refresh", "now") in runs: D["status"] = "refreshed"
@@ -414,7 +416,7 @@ def c_designcraft(D, ctx):
         src = next((f"{e['file']}:{e['line']}" if e.get("line") else e["file"] for e in f.get("evidence") or [] if e.get("file")), None)
         D["findings"].append(_finding("designcraft", f["id"], f["title"], f.get("severity"), _level(f.get("level")),
                                       (f.get("summary") or "") + (f" (facts verified in source: {len(facts)})" if facts else ""),
-                                      (pr or {}).get("proposal") or (pr or {}).get("label"), src, extra=f.get("dept")))
+                                      (pr or {}).get("proposal") or (pr or {}).get("label"), src, extra=f.get("dept"), effort=(pr or {}).get("complexity"), impact=(pr or {}).get("impact")))
     ctx["designcraft_categories"] = D["score"]["categories"]
     if D["status"] != "refreshed": _stale(D, ctx, D["run"]["commit"])
     return D
@@ -435,6 +437,7 @@ def c_records(D, ctx):
     last = recs[-1]
     D.update(status="current", age_days=_age(last.get("created")),
              run={"id": os.path.basename(last["_path"]), "at": last.get("created"), "runs": len(recs), "source": last["_path"]})
+    D["checks"] = {"passed": ok, "of": len(checks)}
     if D["id"] == "testcraft" and checks:
         D["score"] = {"value": round(100 * ok / len(checks), 1), "label": "QA checks passed", "confidence": "high", "coverage": None}
     D["notes"].append(f"{len(recs)} run(s): " + ", ".join(sorted({r.get('action') for r in recs})) + f"; {ok}/{len(checks)} output checks passed.")
@@ -502,6 +505,7 @@ def c_3d(D, ctx):
     jobs.sort(key=lambda j: j.get("created") or "")
     bad = [j for j in jobs if j.get("status") in ("failed", "blocked")]
     D.update(status="current", age_days=_age(jobs[-1].get("created")), run={"id": jobs[-1]["id"], "at": jobs[-1].get("created"), "runs": len(jobs), "source": jd})
+    D["jobs"] = {s: sum(1 for j in jobs if j.get("status") == s) for s in ("succeeded", "failed", "blocked")}
     D["notes"].append(f"{len(jobs)} job(s): " + ", ".join(f"{s} {sum(1 for j in jobs if j.get('status') == s)}" for s in sorted({str(j.get('status')) for j in jobs})))
     for j in bad:
         D["findings"].append(_finding("3d", j["id"], f"3D job {j.get('asset_id') or j['id']} {j.get('status')}", "major", "verified", (j.get("error") or "")[:240],
@@ -529,7 +533,8 @@ def c_production(D, ctx):
             checks = sc.get("checks") or []; rel = [c for c in checks if c["status"] != "n/a"]
             ok = [c for c in rel if c["status"] in ("ok", "accepted")]
             D["standard"] = {"passed": len(ok), "of": len(rel), "status": sc.get("status"), "advisory": len([c for c in rel if c["status"] == "advisory"]),
-                             "accepted": len([c for c in rel if c["status"] == "accepted"])}
+                             "accepted": len([c for c in rel if c["status"] == "accepted"]), "checks": [c["status"] for c in rel]}
+            if rel: D["score"] = {"value": scoring._std_score(D["standard"]), "label": "Engineering standard", "confidence": "high", "coverage": None}
             if found: D["notes"].append("Analytics recognised: " + ", ".join(f"{f['name']} ({', '.join(f['where'][:2])})" for f in found) + ".")
             for c in rel:
                 if c["status"] == "failed":
@@ -546,11 +551,18 @@ def c_production(D, ctx):
     if prods:
         pr = prods[-1]; A = acc.acceptance(pr); v = acc.verdict(A)
         passed = sum(1 for x in A if x["status"] == "passed")
-        D["production"] = {"id": pr["id"], "status": pr.get("status"), "verdict": v, "criteria": len(A), "passed": passed, "updated": pr.get("updated")}
-        D["notes"].append(f"Production {pr['id']}: {pr.get('status')}, verdict {v}, {passed}/{len(A)} acceptance criteria passed.")
         ran = any(t.get("state") not in ("pending", None) for t in (pr.get("tasks") or {}).values())
+        try: reasons = acc.final(pr)["reasons"]
+        except Exception: reasons = []
+        from . import lifecycle
+        try: stage = lifecycle.summary(pr)["stage"]
+        except Exception: stage = None
+        D["production"] = {"id": pr["id"], "status": pr.get("status"), "verdict": v, "reasons": reasons[:8], "criteria": len(A), "passed": passed, "updated": pr.get("updated"),
+                           "ran": ran, "stage": stage, "title": (pr.get("spec") or {}).get("title"),
+                           "criteria_list": [{"id": x["id"], "title": x.get("title") or x.get("text") or x["id"], "status": x["status"]} for x in A]}
+        D["notes"].append(f"Production {pr['id']}: {pr.get('status')}, verdict {v}, {passed}/{len(A)} acceptance criteria passed.")
         if not ran: D["notes"].append("That production is planned but has not run yet: its criteria are unmeasured, so it has no score and no findings.")
-        D["score"] = {"value": round(100 * passed / len(A), 1), "label": "Acceptance criteria passed", "confidence": "high", "coverage": None} if A and ran else None
+        # acceptance criteria are release gates (pass/fail), shown as gates and never averaged into a quality score
         D["run"] = {"id": pr["id"], "at": pr.get("updated"), "runs": len(prods), "source": pr["_dir"]}
         D["age_days"] = _age(pr.get("updated"))
         from . import verification
@@ -662,20 +674,12 @@ def plan(depts, rec):
 
 
 def health(depts, actions):
-    sc = [(d["id"], d["score"]["value"]) for d in depts if d.get("score") and d["score"].get("value") is not None and d["status"] in ("current", "refreshed", "stale", "unverified")]
-    applicable_scored = [d for d in depts if d["applicable"] and d["role"] in ("scored", "qa", "director") and d["status"] != "not_applicable"]
-    stale = [d["id"] for d in depts if d["status"] in ("stale", "unverified")]   # unverified: not compared with the current commit
-    p0 = sum(1 for a in actions if a["priority"] == "P0")
-    if not sc:
-        return {"score": None, "band": "insufficient data", "confidence": "none", "measured": 0, "of": len(applicable_scored), "stale": stale, "p0": p0,
-                "basis": "No department has measured this project yet."}
-    v = round(sum(x for _, x in sc) / len(sc), 1)
-    cov = len(sc) / max(1, len(applicable_scored))
-    conf = "high" if cov >= 0.75 and not stale else "medium" if cov >= 0.5 and len(stale) <= 1 else "low"
-    band = "blocked" if p0 else "healthy" if v >= 80 else "needs attention" if v >= 60 else "at risk"
-    return {"score": v, "band": band, "confidence": conf, "measured": len(sc), "of": len(applicable_scored), "stale": stale, "p0": p0, "parts": dict(sc),
-            "basis": f"mean of {len(sc)} measured department score(s) ({', '.join(i for i, _ in sc)}); {len(applicable_scored) - len(sc)} applicable department(s) have no score"
-                     + (f"; {len(stale)} stale" if stale else "")}
+    """The overall quality score: the weighted mean of the evaluated departments' rubric scores (scoring.overall).
+    Release gates and approvals are kept apart (scoring.gates)."""
+    for d in depts:
+        if "quality" not in d: scoring.evaluate(d)
+    stale = [d["id"] for d in depts if d["status"] in ("stale", "unverified") and d["quality"]["evaluation"] == "evaluated"]
+    return scoring.overall(depts, p0=sum(1 for a in actions if a["priority"] == "P0"), stale=stale)
 
 
 # ---------------------------------------------------------------- store + comparison
@@ -687,13 +691,19 @@ def archive_root():
     return os.path.join(REPO, "history", "reports")
 
 
-def previous(pid, roots_=None):
-    best = None
+def history(pid, roots_=None, before=None):
+    """Every earlier report of this project (store + archive, oldest first, one per report id)."""
+    seen = {}
     for r in roots_ or (store_root(), archive_root()):
         for p in glob.glob(os.path.join(r, pid or "-", "*", "report.json")):
             R = _json(p)
-            if R and (not best or R["generated"] > best["generated"]): best = R
-    return best
+            if R and R.get("report_id") and (before is None or R["generated"] < before): seen.setdefault(R["report_id"], R)
+    return sorted(seen.values(), key=lambda R: R["generated"])
+
+
+def previous(pid, roots_=None):
+    h = history(pid, roots_)
+    return h[-1] if h else None
 
 
 def compare(prev, cur):
@@ -706,7 +716,7 @@ def compare(prev, cur):
         p = pd.get(d["id"])
         if not p: out["departments"].append({"id": d["id"], "change": "new department since the previous report"}); continue
         a, b = (p.get("score") or {}).get("value"), (d.get("score") or {}).get("value")
-        same_run = (p.get("run") or {}).get("id") == (d.get("run") or {}).get("id")
+        same_run = scoring.same_measurement(p.get("run"), d.get("run"))
         ch = None
         if p["status"] != d["status"]: ch = f"{STATUS_LABEL.get(p['status'])} → {STATUS_LABEL.get(d['status'])}"
         if a != b and a is not None and b is not None:
@@ -765,6 +775,10 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
     rec = reconcile(depts, ctx)
     actions = plan(depts, rec)
     H = health(depts, actions)
+    earlier = history(P["id"])
+    prev = earlier[-1] if earlier else None
+    scoring.deltas(prev, depts)
+    H["vs_previous"] = scoring.overall_delta(prev, H)
     R = {"gitcraft_report": VERSION, "report_id": f"{P['id']}/{stamp}", "generated": now(), "refresh": refresh, "read_only": True,
          "project": {k: P.get(k) for k in ("id", "repo", "url", "name", "path", "head", "branch", "dirty")} | {
              "kind": ctx["kind"], "maturity": (assessment or {}).get("maturity")},
@@ -773,9 +787,16 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
          "unavailable": [{"department": d["id"], "status": d["status"], "why": (d["notes"] or [d.get("next") or ""])[-1]} for d in depts if d["status"] in ("unavailable", "failed")],
          "not_refreshed": [{"department": d["id"], "why": d["refresh"]["detail"]} for d in depts if d["refresh"].get("detail") and not d["refresh"].get("ok")]}
     R["title"] = _title(R, ctx)
+    R["gates"] = scoring.gates(depts)
+    R["identity"] = identity(P, depts, R["gates"], ctx)
+    R["changes"] = compare(prev, R)
+    R["trend"] = scoring.series(earlier[-11:], R)
+    R["top_actions"] = scoring.top_actions(actions, {f["key"]: f for d in depts for f in d["findings"]})
+    R["major_findings"] = major_findings(depts)
+    R["regressions"] = regressions(R)
+    R["blockers"] = blockers(R, earlier)
     R["summary"] = executive(R)
     R["next_actions"] = next_actions(R)
-    R["changes"] = compare(previous(P["id"]), R)
     R["paths"] = {"dir": run_dir}
     if save != "none":
         os.makedirs(run_dir, exist_ok=True)
@@ -783,12 +804,75 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
         with open(R["paths"]["json"], "w") as f: json.dump(R, f, indent=1, default=str)
         with open(R["paths"]["markdown"], "w") as f: f.write(markdown(R))
         with open(R["paths"]["html"], "w") as f: f.write(render_html(R))
-        line = {"report_id": R["report_id"], "generated": R["generated"], "project": P["id"], "title": R["title"], "health": H.get("score"), "band": H.get("band"),
+        line = {"report_id": R["report_id"], "generated": R["generated"], "project": P["id"], "title": R["title"], "health": H.get("score"), "method": H.get("method"), "band": H.get("band"),
+                "verdict": R["gates"].get("verdict"),
                 "confidence": H.get("confidence"), "p": {p: sum(1 for a in actions if a["priority"] == p) for p in ("P0", "P1", "P2", "P3")},
-                "departments": {d["id"]: {"status": d["status"], "score": (d.get("score") or {}).get("value")} for d in depts}, "dir": os.path.relpath(run_dir, base)}
+                "departments": {d["id"]: {"status": d["status"], "score": d["quality"]["value"], "evaluation": d["quality"]["evaluation"], "rubric": d["quality"]["rubric"]} for d in depts},
+                "dir": os.path.relpath(run_dir, base)}
         idx = os.path.join(os.path.dirname(os.path.dirname(run_dir)) if not out_dir else run_dir, "index.jsonl")
         with open(idx, "a") as f: f.write(json.dumps(line) + "\n")
     return R
+
+
+def identity(P, depts, G, ctx):
+    """Who and what this report is about: project, release/version, commit, Director verdict, production status.
+    Every field comes from the project's files, git or a department record; absent ones stay None."""
+    version, vsrc = None, None
+    if P.get("path"):
+        pk = _json(os.path.join(P["path"], "package.json"), {}) or {}
+        if pk.get("version"): version, vsrc = pk["version"], "package.json"
+        tag = _git(P["path"], "describe", "--tags", "--always", "--dirty")
+        if tag and not version: version, vsrc = tag, "git describe"
+        elif tag: vsrc += f" · git {tag}"
+    commits = [(d["run"].get("at") or "", d["run"].get("commit")) for d in depts if d.get("run") and d["run"].get("commit")]
+    commit = (P.get("head") or "")[:12] or (max(commits)[1] if commits else None)
+    return {"name": P.get("name"), "repo": P.get("repo"), "url": P.get("url"), "kind": ctx.get("kind"), "maturity": (ctx.get("assessment") or {}).get("maturity"),
+            "branch": P.get("branch"), "commit": commit, "commit_source": "project checkout" if P.get("head") else ("latest department run" if commit else None),
+            "version": version, "version_source": vsrc, "production": G.get("production"), "verdict": G.get("verdict"), "production_status": G.get("status"),
+            "release_status": G.get("release_status")}
+
+
+def major_findings(depts, n=6):
+    """The strongest findings: critical and major, measured before inferred, one per problem area."""
+    fs = [f for d in depts for f in d["findings"] if f["severity"] in ("critical", "major") and f.get("kind") not in ("unverified", "approval")]
+    fs.sort(key=lambda f: (SEVERITIES.index(f["severity"]), {"verified": 0, "observed": 1}.get(f["level"], 2), f["title"] or ""))
+    out, themes = [], set()
+    for f in fs:
+        k = f["theme"] if f["theme"] != "other" else f["key"]
+        if k in themes: continue
+        themes.add(k); out.append(f)
+        if len(out) >= n: break
+    return out
+
+
+def regressions(R):
+    """Measured regressions only: a comparable department score that fell on a new measurement, PLAYCRAFT's recurring
+    regressions, and critical/major measured findings that are new since the previous report."""
+    out = []
+    for d in R["departments"]:
+        q = d["quality"]
+        if q.get("delta") is not None and q["delta"] < 0 and q.get("compare") == "new measurement":
+            out.append({"department": d["id"], "title": f"{q['label']} fell {q['previous']} → {q['value']} ({q['delta']:+})", "level": "verified", "kind": "score"})
+        for f in d["findings"]:
+            if f["id"].startswith("regression:"): out.append({"department": d["id"], "title": f["title"], "level": f["level"], "kind": "recurring"})
+    if not R["changes"].get("first"):
+        new = set(R["changes"].get("new_findings") or [])
+        for d in R["departments"]:
+            for f in d["findings"]:
+                if f["key"] in new and f["severity"] in ("critical", "major") and f["level"] != "inferred" and not f["id"].startswith("regression:"):
+                    out.append({"department": d["id"], "title": f"New since the previous report: {f['title']}", "level": f["level"], "kind": "new_finding"})
+    return out
+
+
+def blockers(R, earlier):
+    """Unresolved blockers: P0 actions, each with the first report it appeared in (from the report history)."""
+    out = []
+    for a in R["actions"]:
+        if a["priority"] != "P0": continue
+        since = next((E["generated"] for E in earlier if any(f["key"] in a["findings"] for d in E.get("departments") or [] for f in d.get("findings") or [])), None)
+        out.append({"title": a["title"], "departments": a["departments"], "level": a["level"], "do": a.get("do"), "why": a.get("why"), "open_since": since or R["generated"],
+                    "first_seen_now": since is None})
+    return out
 
 
 def _title(R, ctx):
@@ -807,17 +891,22 @@ def _title(R, ctx):
 
 
 def executive(R):
-    H = R["health"]; ds = R["departments"]
-    have = [d for d in ds if d["status"] in ("current", "refreshed", "stale", "unverified")]
-    pc = {p: sum(1 for a in R["actions"] if a["priority"] == p) for p in ("P0", "P1", "P2", "P3")}
+    H = R["health"]; ds = R["departments"]; G = R["gates"]
+    ev = [d for d in ds if d["quality"]["evaluation"] == "evaluated"]; ne = [d for d in ds if d["quality"]["evaluation"] == "not_evaluated"]
     s = []
-    if H["score"] is None: s.append(f"No department has a measured score for {R['title']} yet, so there is no health score. {len(have)} department(s) have any data.")
-    else: s.append(f"{R['title']} scores **{H['score']}/100** overall ({H['band']}, {H['confidence']} confidence): {H['basis']}.")
-    s.append(f"{len(have)} of {len(ds)} departments have results for this project; " + ", ".join(f"{sum(1 for d in ds if d['status'] == k)} {STATUS_LABEL[k].lower()}"
-             for k in STATUS_LABEL if any(d["status"] == k for d in ds)) + ".")
-    s.append(f"Action plan: {pc['P0']} P0, {pc['P1']} P1, {pc['P2']} P2, {pc['P3']} P3. Findings by evidence: {R['levels']['verified']} verified, {R['levels']['observed']} observed, {R['levels']['inferred']} inferred.")
-    if pc["P0"]: s.append("There are P0 blockers: resolve them before shipping anything else.")
-    if R["reconciliation"]["corroborated"]: s.append(f"{len(R['reconciliation']['corroborated'])} problem area(s) are flagged by several departments at once — the strongest signals in this report.")
+    if H["score"] is None: s.append(f"{R['title']} has no overall score yet: no applicable department has a measured result.")
+    else:
+        vp = H.get("vs_previous") or {}
+        tail = (f", {vp['delta']:+} since the previous report" if vp.get("delta") is not None else
+                f"; the previous report's {vp['previous']} used another method, so no change is claimed" if vp.get("previous") is not None and "not comparable" in (vp.get("compare") or "") else "")
+        s.append(f"{R['title']} scores **{H['score']}/100** ({H['band']}, {H['confidence']} confidence, {round(100 * H['coverage'])}% of the applicable weight evaluated{tail}).")
+    if G.get("verdict"): s.append(f"Director verdict: **{G['verdict']}** for production `{G['production']}` ({G.get('status')})" + (f"; release {G['release_status']}" if G.get("release_status") else "") + ".")
+    else: s.append("No production has run for this project, so there is no Director verdict or release gate.")
+    s.append(f"{len(ev)} department(s) evaluated" + (f", {len(ne)} applicable but not evaluated ({', '.join(d['id'] for d in ne)})" if ne else "") + ".")
+    if R["blockers"]: s.append(f"{len(R['blockers'])} unresolved blocker(s): resolve them before anything else.")
+    if R["regressions"]: s.append(f"{len(R['regressions'])} measured regression(s) since the previous report.")
+    if R["top_actions"]: s.append(f"Highest-impact next action: {R['top_actions'][0]['title']}.")
+    if R["reconciliation"]["corroborated"]: s.append(f"{len(R['reconciliation']['corroborated'])} problem area(s) are flagged by several departments at once.")
     return s
 
 
@@ -836,18 +925,36 @@ def next_actions(R):
 # ---------------------------------------------------------------- Markdown
 def markdown(R):
     H = R["health"]; P = R["project"]
-    L = [f"# GITCRAFT report — {R['title']}", "",
+    L = [f"# GITCRAFT report — {R['title']}", "", "_Production Report_", "",
          f"`{R['report_id']}` · generated {R['generated']} · refresh **{R['refresh']}** · read-only" +
          (f" · commit `{(P.get('head') or '')[:7]}`" if P.get("head") else "") + (f" · [{P['repo']}]({P['url']})" if P.get("url") else ""), "",
          "## Executive summary", ""] + [f"- {s}" for s in R["summary"]] + [""]
-    L += ["## Overall health", "", "| Health | Band | Confidence | Measured departments |", "|---|---|---|---|",
-          f"| {H['score'] if H['score'] is not None else '—'} | {H['band']} | {H['confidence']} | {H['measured']} of {H['of']} applicable |", "", f"Basis: {H['basis']}.", ""]
-    L += ["## Department scorecards", "", "| Department | Status | Score | Latest run | Findings |", "|---|---|---|---|---|"]
+    I = R.get("identity") or {}; G = R.get("gates") or {}; vp = H.get("vs_previous") or {}
+    L += ["## Production identity", "", "| Project | Run date | Release / version | Commit | Production | Director verdict |", "|---|---|---|---|---|---|",
+          f"| {I.get('repo') or I.get('name') or '—'} | {R['generated'][:16].replace('T', ' ')} UTC | {I.get('version') or 'not recorded'} | {(I.get('commit') or '—')[:7]} | "
+          f"{(I.get('production') or 'none run') + (' (' + str(I.get('production_status')) + ')' if I.get('production_status') else '')} | {G.get('verdict') or 'no verdict'} |", ""]
+    L += ["## Overall health", "", "| Overall score | Band | Confidence | Evaluated departments | Coverage | vs previous |", "|---|---|---|---|---|---|",
+          f"| {H['score'] if H['score'] is not None else '—'} | {H['band']} | {H['confidence']} | {H['measured']} of {H['of']} applicable | {round(100 * (H.get('coverage') or 0))}% | "
+          f"{(format(vp['delta'], '+') + ' vs ' + str(vp['previous'])) if vp.get('delta') is not None else (vp.get('compare') or '—')} |", "", f"Basis: {H['basis']}.", ""]
+    L += ["## Top 3 next actions", ""] + ([f"{i}. **{a['title']}** — impact {a['impact']}, effort {a['effort'] or 'not estimated'} ({a['effort_basis']})" + (f"<br>Do: {a['do']}" if a.get("do") else "")
+                                         for i, a in enumerate(R.get("top_actions") or [], 1)] or ["- None."]) + ["", f"_{scoring.EFFORT_NOTE}_", ""]
+    L += ["## Department scorecards", "", "| Department | Score | Previous | Delta | Weight | Rubric | Status | Findings |", "|---|---|---|---|---|---|---|---|"]
     for d in R["departments"]:
-        sc = d.get("score") or {}
-        L.append(f"| {d['title']} | {STATUS_LABEL[d['status']]} | {sc.get('value') if sc.get('value') is not None else '—'}{' (' + sc['label'] + ')' if sc.get('label') else ''} | "
-                 f"{((d.get('run') or {}).get('at') or '—')[:10]} | {len(d['findings'])} |")
+        q = d["quality"]
+        if q["evaluation"] == "not_applicable": continue
+        L.append(f"| {d['title']} | {q['value'] if q['evaluation'] == 'evaluated' else 'Not Evaluated'} ({q['label']}) | {q['previous'] if q.get('previous') is not None else '—'} | "
+                 f"{format(q['delta'], '+') if q.get('delta') is not None else (q.get('compare') or '—')} | {q['weight']} | `{q['rubric']}` | {STATUS_LABEL[d['status']]} | {len(d['findings'])} |")
     L.append("")
+    L += ["## Release gates and approvals", ""] + ([f"- {c['title']}: **{c['status'].replace('_', ' ')}**" for c in G.get("criteria") or []] or [f"- {G.get('note') or 'None recorded.'}"]) + \
+         ["", "Gates are pass/fail and never part of a quality score.", ""]
+    T = R.get("trend") or []
+    L += ["## Trends", ""] + (["First report: trends start with the next one."] if len(T) < 2 else
+                              [f"- Overall: " + " → ".join(f"{'—' if p['overall'] is None else p['overall']} ({p['method']})" for p in T)]
+                              + [f"- {d['quality']['label']}: " + " → ".join('—' if (p['departments'].get(d['id']) or {}).get('value') is None else str(p['departments'][d['id']]['value']) for p in T)
+                                 for d in R["departments"] if d["quality"]["evaluation"] == "evaluated"]) + [""]
+    L += ["## Major findings", ""] + ([f"- **{f['severity']}** · {LEVEL_LABEL[f['level']]} — {f['title']} ({f['department']})" for f in R.get("major_findings") or []] or ["- None."]) + [""]
+    L += ["## Regressions", ""] + ([f"- {x['title']} ({x['department']}, {LEVEL_LABEL.get(x['level'], x['level'])})" for x in R.get("regressions") or []]
+                                 or ["- First report: nothing to compare yet." if R["changes"].get("first") else "- None measured."]) + [""]
     quiet = [d for d in R["departments"] if d["status"] in ("no_data", "not_applicable") and not d["findings"] and not d.get("next")]
     if quiet: L += ["No results for this project (nothing to report, nothing assumed): " + ", ".join(d["title"].split(" — ")[0] + f" ({STATUS_LABEL[d['status']].lower()})" for d in quiet) + ".", ""]
     for d in R["departments"]:
@@ -861,8 +968,8 @@ def markdown(R):
             L.append(f"- **{f['severity']}** · {LEVEL_LABEL[f['level']]} — {f['title']}" + (f": {f['evidence']}" if f.get("evidence") else ""))
         if len(d["findings"]) > 8: L.append(f"- … {len(d['findings']) - 8} more in report.json")
         L.append("")
-    crit = [a for a in R["actions"] if a["priority"] == "P0"]
-    L += ["## Critical issues and blockers", ""] + ([f"- {a['title']} ({', '.join(a['departments'])}; {LEVEL_LABEL[a['level']]})" for a in crit] or ["- None measured."]) + [""]
+    L += ["## Critical issues and blockers", ""] + ([f"- {b['title']} ({', '.join(b['departments'])}; {LEVEL_LABEL.get(b['level'], b['level'])}; open since {b['open_since'][:10]})" for b in R.get("blockers") or []]
+                                                   or ["- None measured."]) + [""]
     rc = R["reconciliation"]
     L += ["## Cross-department findings", ""]
     L += ["**Corroborated (one fix, several departments)**", ""] + ([f"- {c['title']}: {', '.join(c['departments'])} ({c['count']} findings)" for c in rc["corroborated"]] or ["- None."]) + [""]
@@ -882,6 +989,10 @@ def markdown(R):
         L += [f"- {x['id']}: {x['change']}" for x in C["departments"]] or ["- No department changed."]
         L += ["", f"New findings: {len(C['new_findings'])} · resolved or no longer reported: {len(C['resolved_findings'])}", "", C["note"], ""]
     L += ["## Recommended next actions", ""] + [f"{i}. {s}" for i, s in enumerate(R["next_actions"], 1)] + [""]
+    L += ["## Scoring method", "", f"Overall: `{H.get('method')}`. Each department's score is its own measured result under the rubric below; the overall score is the weighted mean "
+          "of the evaluated departments only. Not Evaluated departments carry no weight and are never filled in. A previous score is compared only under the same rubric and department method.", "",
+          "| Department | Score | Weight | Rubric | Source |", "|---|---|---|---|---|"] + \
+         [f"| {d['title'].split(' — ')[0]} | {d['quality']['label']} | {d['quality']['weight']} | `{d['quality']['rubric']}` | {d['quality']['source']} |" for d in R["departments"] if d["quality"]["evaluation"] != "not_applicable"] + [""]
     L += ["## Evidence and limits", "", "- **Verified**: measured by a department tool (a played build, a rendered UI, a parsed source fact, a check).",
           "- **Observed**: seen while playing or simulated, not a hard measurement.", "- **Inferred (assumption)**: a department's judgement from indirect evidence; confirm before acting alone.",
           "- **Unavailable**: no data; nothing is filled in for it."] + [f"- Not refreshed — {x['department']}: {x['why']}" for x in R["not_refreshed"]] + \
@@ -891,105 +1002,246 @@ def markdown(R):
 
 # ---------------------------------------------------------------- HTML (self-contained, mobile-first)
 CSS = """
-:root{--bg:#f6f7f9;--card:#fff;--ink:#14171f;--mute:#5b6372;--line:#e3e6eb;--accent:#1f7a75;--p0:#c62828;--p1:#d9730d;--p2:#2f6fd6;--p3:#6b7280;--ok:#1f8a4c;--warn:#b7791f;--bad:#c62828;--chip:#eef1f4}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1216;--card:#171b21;--ink:#e8ebf0;--mute:#9aa3b2;--line:#2a3039;--accent:#4fc1b9;--chip:#222831}}
-:root[data-theme=dark]{--bg:#0f1216;--card:#171b21;--ink:#e8ebf0;--mute:#9aa3b2;--line:#2a3039;--accent:#4fc1b9;--chip:#222831}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
-main{max-width:920px;margin:0 auto;padding:16px 16px calc(40px + env(safe-area-inset-bottom))}
-header.top{padding:20px 0 8px}header.top .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
-h1{font-size:26px;line-height:1.2;margin:4px 0 6px}h2{font-size:19px;margin:28px 0 10px}h3{font-size:16px;margin:0}
-.meta{color:var(--mute);font-size:13px;word-break:break-word}.meta code{font-size:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0}
-.hero{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.ring{--v:0;width:112px;height:112px;border-radius:50%;flex:none;display:grid;place-items:center;
-background:conic-gradient(var(--c,var(--accent)) calc(var(--v)*1%),var(--chip) 0)}.ring b{display:grid;place-items:center;width:88px;height:88px;border-radius:50%;background:var(--card);font-size:28px}
-.ring b small{display:block;font-size:11px;color:var(--mute);font-weight:500;margin-top:-6px}.hero .t{flex:1;min-width:200px}
-.band{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600;background:var(--chip)}
-.band.healthy{color:var(--ok)}.band.blocked,.band.at-risk{color:var(--bad)}.band.needs-attention{color:var(--warn)}
-ul.sum{margin:12px 0 0;padding-left:18px}ul.sum li{margin:4px 0}
-.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.counts div{background:var(--chip);border-radius:10px;padding:8px;text-align:center}
-.counts b{display:block;font-size:20px}.counts span{font-size:12px;color:var(--mute)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.dept{margin:0}.dept .h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.dept .fam{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
-.score{font-size:24px;font-weight:700;line-height:1}.score small{font-size:12px;color:var(--mute);font-weight:500}
-.st{font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--chip);white-space:nowrap}
-.st.current,.st.refreshed{color:var(--ok)}.st.stale,.st.unverified{color:var(--warn)}.st.failed,.st.unavailable{color:var(--bad)}.st.no_data,.st.not_applicable{color:var(--mute)}
-.bar{height:6px;border-radius:9px;background:var(--chip);margin:10px 0 6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
-.small{font-size:13px;color:var(--mute)}details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);min-height:44px;display:flex;align-items:center;list-style:none}
-summary::-webkit-details-marker{display:none}summary::before{content:"▸";margin-right:6px}details[open]>summary::before{content:"▾"}
-.f{border-top:1px solid var(--line);padding:8px 0;font-size:14px}.f .tags{margin-bottom:2px}
+:root{--bg:#f4f5f2;--card:#fff;--ink:#16191a;--mute:#5d6663;--line:#e1e4df;--accent:#1d6f66;--accent-2:#9fd3cb;--chip:#ebeeea;
+--ok:#1e7a46;--ok-bg:#e3f2e8;--warn:#9a6212;--warn-bg:#f8eedb;--bad:#b3261e;--bad-bg:#f9e3e1;--p0:#b3261e;--p1:#c46510;--p2:#2b62c4;--p3:#6b7280;
+--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Charter,Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1211;--card:#161b1a;--ink:#e6ebe9;--mute:#9ba6a2;--line:#27302e;--accent:#5cc2b5;--accent-2:#2c5d57;--chip:#1f2725;
+--ok:#6ad19a;--ok-bg:#16301f;--warn:#e5b062;--warn-bg:#33291a;--bad:#f08a80;--bad-bg:#3a1f1d;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0e1211;--card:#161b1a;--ink:#e6ebe9;--mute:#9ba6a2;--line:#27302e;--accent:#5cc2b5;--accent-2:#2c5d57;--chip:#1f2725;
+--ok:#6ad19a;--ok-bg:#16301f;--warn:#e5b062;--warn-bg:#33291a;--bad:#f08a80;--bad-bg:#3a1f1d;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-text-size-adjust:100%;font-variant-numeric:tabular-nums}
+main{max-width:960px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+a{color:var(--accent)}code{font:12px var(--mono)}
+header.top{padding:18px 0 6px}.k{font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:600 32px/1.12 var(--serif);margin:8px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 21px/1.25 var(--serif);margin:36px 0 12px;text-wrap:balance}h3{font-size:15px;margin:0;line-height:1.3}
+.ident{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:2px 16px;margin:0;font-size:13px}
+.ident div{min-width:0;padding:6px 0;border-top:1px solid var(--line)}.ident dt{color:var(--mute);font-size:11px;letter-spacing:.06em;text-transform:uppercase}.ident dd{margin:0;overflow-wrap:anywhere}
+nav.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:8px 0 0;background:var(--bg);scrollbar-width:none}
+nav.jump::-webkit-scrollbar{display:none}nav.jump a{flex:none;font-size:13px;padding:8px 13px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;min-height:36px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:10px 0}
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px}
+.hero .card{margin:0}.big{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}.big b{font:600 64px/0.9 var(--serif);letter-spacing:-.02em}.big span{color:var(--mute);font-size:15px;padding-bottom:6px}
+.bar{position:relative;height:8px;border-radius:9px;background:var(--chip);margin:14px 0 8px}.bar i{position:absolute;inset:0 auto 0 0;border-radius:9px;background:var(--accent)}
+.bar s{position:absolute;top:-4px;width:2px;height:16px;background:var(--ink);opacity:.55;text-decoration:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.chip{display:inline-flex;align-items:center;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--chip);color:var(--mute);max-width:100%}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.bad{background:var(--bad-bg);color:var(--bad)}.chip.acc{color:var(--accent)}
+.verdict{display:flex;flex-direction:column;gap:8px}.verdict .v{font:600 26px/1.1 var(--serif)}.verdict.ok{border-color:var(--ok)}.verdict.bad{border-color:var(--bad)}.verdict.warn{border-color:var(--warn)}
+.verdict.ok .v{color:var(--ok)}.verdict.bad .v{color:var(--bad)}.verdict.warn .v{color:var(--warn)}
+ul.sum{margin:14px 0 0;padding-left:18px}ul.sum li{margin:5px 0;max-width:72ch}
+.small{font-size:13px;color:var(--mute)}.top3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.top3 .card{margin:0;display:flex;flex-direction:column;gap:8px}
+.top3 .n{font:600 13px var(--mono);color:var(--accent)}.top3 h3{font-size:15px}
+.drow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;padding:14px 0;border-top:1px solid var(--line)}.drow:first-child{border-top:0;padding-top:4px}
+.drow .nm{min-width:0}.drow .fam{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}.drow .val{text-align:right}
+.drow .val b{font:600 26px/1 var(--serif)}.drow .val .ne{font-size:13px;font-weight:600;color:var(--mute)}.drow .meta{grid-column:1/-1}.drow .bar{margin:6px 0 4px}
+.delta{font-size:12px;font-weight:600}.delta.up{color:var(--ok)}.delta.down{color:var(--bad)}.delta.flat{color:var(--mute)}
+details{margin-top:6px}summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);min-height:44px;display:flex;align-items:center;list-style:none}
+summary::-webkit-details-marker{display:none}summary::before{content:"\\25B8";margin-right:6px}details[open]>summary::before{content:"\\25BE"}
+.f{border-top:1px solid var(--line);padding:9px 0;font-size:14px}.f:first-child{border-top:0}
 .tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:6px;margin-right:4px;background:var(--chip);color:var(--mute)}
 .tag.critical{color:#fff;background:var(--p0)}.tag.major{color:#fff;background:var(--p1)}.tag.verified{color:var(--ok)}.tag.observed{color:var(--p2)}.tag.inferred{color:var(--warn)}
 .act{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.act:first-child{border-top:0}.pr{flex:none;font-size:12px;font-weight:700;color:#fff;border-radius:6px;padding:2px 7px;height:fit-content}
 .pr.P0{background:var(--p0)}.pr.P1{background:var(--p1)}.pr.P2{background:var(--p2)}.pr.P3{background:var(--p3)}.act .do{font-size:13px;color:var(--mute);margin-top:2px}
 .x{padding:8px 0;border-top:1px solid var(--line)}.x:first-of-type{border-top:0}ol.next li{margin:6px 0}
-.delta.up{color:var(--ok)}.delta.down{color:var(--bad)}nav.jump{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
-nav.jump a{flex:none;font-size:13px;padding:8px 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;min-height:36px}
-a{color:var(--accent)}footer{color:var(--mute);font-size:12px;margin-top:32px;text-align:center}
-@media (max-width:520px){h1{font-size:22px}.ring{width:96px;height:96px}.ring b{width:76px;height:76px;font-size:24px}.counts b{font-size:18px}}
+.chart{width:100%;height:auto;display:block}.chart text{font:11px var(--sans);fill:var(--mute)}.chart .g{stroke:var(--line);stroke-width:1}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.chart .pt{fill:var(--card);stroke:var(--accent);stroke-width:2}
+.chart .last{fill:var(--accent)}.chart .mc{stroke:var(--warn);stroke-dasharray:3 3}.chart .mct{fill:var(--warn)}
+.multi{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.multi .card{margin:0;padding:12px 14px}
+.gate{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:14px}.gate:first-child{border-top:0}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.cols .card{margin:0}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:600}
+footer{color:var(--mute);font-size:12px;margin-top:36px;text-align:center}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.narrow{display:none}
+@media (max-width:720px){.hero,.top3,.cols{grid-template-columns:1fr}.wide{display:none}.narrow{display:block}}
+@media (max-width:520px){h1{font-size:26px}.big b{font-size:52px}.card{padding:15px}}
 """
 
 
 def _e(s): return html.escape(str("—" if s is None else s))
 
 
-def render_html(R, back=None):
-    H = R["health"]; P = R["project"]; pc = {p: sum(1 for a in R["actions"] if a["priority"] == p) for p in ("P0", "P1", "P2", "P3")}
-    band = slug(H["band"])
-    col = {"healthy": "var(--ok)", "needs-attention": "var(--warn)", "at-risk": "var(--bad)", "blocked": "var(--bad)"}.get(band, "var(--mute)")
-    md = lambda s: re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", _e(s))
+def _delta_html(q):
+    d = q.get("delta")
+    if d is None: return f"<span class='delta flat'>{_e(q.get('compare') or '')}</span>"
+    cls = "up" if d > 0 else "down" if d < 0 else "flat"
+    return f"<span class='delta {cls}'>{d:+} vs {_e(q['previous'])}</span>" + (f" <span class='small'>· {_e(q['compare'])}</span>" if q.get("compare") else "")
+
+
+def _verdict_cls(v):
+    v = str(v or "")
+    return "ok" if v.startswith("READY") else "bad" if v.startswith("NOT READY") else "warn" if v else ""
+
+
+def chart_svg(points, key=None, w=640, h=180, label=True):
+    """A 0–100 line chart of report points (oldest first). The line breaks where a value is missing or the scoring
+    method changed between two points; a method change is marked. Pure SVG, no script."""
+    vals = []
+    for p in points:
+        if key is None: vals.append((p.get("overall"), p.get("method")))
+        else:
+            d = (p.get("departments") or {}).get(key) or {}
+            vals.append((d.get("value"), d.get("rubric")))
+    padl, padr, padt, padb = (30, 12, 12, 22) if label else (4, 4, 6, 6)
+    iw, ih = w - padl - padr, h - padt - padb
+    n = len(vals)
+    X = lambda i: padl + (iw * (i / (n - 1)) if n > 1 else iw / 2)
+    Y = lambda v: padt + ih * (1 - v / 100)
+    o = [f"<svg class='chart' viewBox='0 0 {w} {h}' role='img' aria-label='{'Overall' if key is None else _e(key)} score by report, 0 to 100'>"]
+    for g in (0, 50, 100) if label else (50,):
+        o.append(f"<line class='g' x1='{padl}' x2='{w - padr}' y1='{Y(g):.1f}' y2='{Y(g):.1f}'/>")
+        if label: o.append(f"<text x='{padl - 6}' y='{Y(g) + 4:.1f}' text-anchor='end'>{g}</text>")
+    seg = []
+    for i, (v, m) in enumerate(vals):
+        if i and vals[i - 1][1] != m and v is not None:
+            o.append(f"<line class='mc' x1='{(X(i - 1) + X(i)) / 2:.1f}' x2='{(X(i - 1) + X(i)) / 2:.1f}' y1='{padt}' y2='{h - padb}'/>")
+            if label:
+                mx = (X(i - 1) + X(i)) / 2; right = mx + 100 > w - padr   # keep the label inside the chart
+                o.append(f"<text class='mct' x='{mx + (-4 if right else 4):.1f}' y='{padt + 10}' text-anchor='{'end' if right else 'start'}'>method changed</text>")
+            if len(seg) > 1: o.append("<polyline class='ln' points='" + " ".join(seg) + "'/>")
+            seg = []
+        if v is None:
+            if len(seg) > 1: o.append("<polyline class='ln' points='" + " ".join(seg) + "'/>")
+            seg = []; continue
+        seg.append(f"{X(i):.1f},{Y(v):.1f}")
+    if len(seg) > 1: o.append("<polyline class='ln' points='" + " ".join(seg) + "'/>")
+    for i, (v, m) in enumerate(vals):
+        if v is None: continue
+        last = i == n - 1
+        o.append(f"<circle class='{'pt last' if last else 'pt'}' cx='{X(i):.1f}' cy='{Y(v):.1f}' r='{4 if label else 3}'><title>{_e(points[i]['at'][:16].replace('T', ' '))}: {v}</title></circle>")
+        if label and (last or i == 0): o.append(f"<text x='{X(i):.1f}' y='{Y(v) - 9:.1f}' text-anchor='middle' style='fill:var(--ink);font-weight:600'>{v}</text>")
+    if label and n:
+        o.append(f"<text x='{X(0):.1f}' y='{h - 5}' text-anchor='{'start' if n > 1 else 'middle'}'>{_e(points[0]['at'][:10])}</text>")
+        if n > 1: o.append(f"<text x='{X(n - 1):.1f}' y='{h - 5}' text-anchor='end'>{_e(points[-1]['at'][:10])}</text>")
+    o.append("</svg>")
+    return "".join(o)
+
+
+def render_html(R, back=None, downloads=True):
+    H = R["health"]; P = R["project"]; G = R.get("gates") or {}; I = R.get("identity") or {}
+    md = lambda s: re.sub(r"`(.+?)`", r"<code>\1</code>", re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", _e(s)))
+    band = slug(H["band"]); bcls = {"healthy": "ok", "needs-attention": "warn", "at-risk": "bad", "blocked": "bad"}.get(band, "")
     o = [f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>",
-         f"<title>{_e(R['title'])} report</title><meta name='description' content='GITCRAFT report for {_e(R['title'])}'><style>{CSS}</style></head><body><main>"]
+         f"<title>{_e(R['title'])} · Production Report</title><meta name='description' content='GITCRAFT Production Report for {_e(R['title'])}: department scores, release gates and next actions.'>"
+         f"<style>{CSS}</style></head><body><main>"]
     if back: o.append(f"<p class='small' style='margin:8px 0 0'><a href='{_e(back)}'>← All reports</a></p>")
-    o.append(f"<header class='top'><div class='k'>GITCRAFT report</div><h1>{_e(R['title'])}</h1><div class='meta'>{_e(R['generated'][:16].replace('T', ' '))} UTC · refresh {_e(R['refresh'])} · read-only"
-             + (f" · commit <code>{_e((P.get('head') or '')[:7])}</code>" if P.get("head") else "") + (f" · <a href='{_e(P['url'])}'>{_e(P['repo'])}</a>" if P.get("url") else "") + "</div></header>")
-    o.append("<nav class='jump'>" + "".join(f"<a href='#{i}'>{t}</a>" for i, t in (("health", "Health"), ("depts", "Departments"), ("p0", "Blockers"), ("cross", "Cross-dept"),
-                                                                                   ("plan", "Action plan"), ("changes", "Changes"), ("next", "Next"), ("limits", "Evidence"))) + "</nav>")
-    v = H["score"] if H["score"] is not None else 0
-    o.append(f"<section id='health' class='card'><div class='hero'><div class='ring' style='--v:{v};--c:{col}'><b>{_e(H['score'] if H['score'] is not None else '—')}<small>/ 100</small></b></div>"
-             f"<div class='t'><span class='band {band}'>{_e(H['band'].capitalize())}</span> <span class='small'>{_e(H['confidence'])} confidence · {H['measured']} of {H['of']} departments measured</span>"
-             "</div></div><ul class='sum'>" + "".join(f"<li>{md(s)}</li>" for s in R["summary"]) + "</ul>"
-             "<div class='counts'>" + "".join(f"<div><b style='color:var(--{p.lower()})'>{pc[p]}</b><span>{p}</span></div>" for p in pc) + "</div></section>")
-    o.append("<h2 id='depts'>Department scorecards</h2><div class='grid'>")
-    order = {"refreshed": 0, "current": 0, "unverified": 1, "stale": 1, "failed": 2, "unavailable": 3, "no_data": 4, "not_applicable": 5}
-    quiet = [d for d in R["departments"] if d["status"] in ("no_data", "not_applicable") and not d["findings"] and not d.get("next")]
-    for d in sorted(R["departments"], key=lambda d: (order[d["status"]], d["score"] is None)):
-        if d in quiet: continue
-        sc = d.get("score") or {}; val = sc.get("value")
-        title, _, sub = d["title"].partition(" — ")
-        o.append(f"<article class='card dept'><div class='h'><div><div class='fam'>{_e(d['family'])}</div><h3>{_e(title)}</h3><div class='small'>{_e(sub or d['summary'])}</div></div>"
-                 f"<span class='st {d['status']}'>{_e(STATUS_LABEL[d['status']])}</span></div>")
-        if val is not None:
-            o.append(f"<div style='margin-top:10px' class='score'>{_e(val)}<small> {_e(sc.get('label'))}</small></div><div class='bar'><i style='width:{max(0, min(100, val))}%'></i></div>")
-        bits = []
-        if d.get("run"): bits.append(f"latest {_e((d['run'].get('at') or '')[:10])}" + (f" · {d['run'].get('runs')} run(s)" if d["run"].get("runs") else ""))
-        if sc.get("confidence"): bits.append(f"{_e(sc['confidence'])} confidence")
-        if d["findings"]: bits.append(f"{len(d['findings'])} finding(s)")
-        if bits: o.append(f"<div class='small'>{' · '.join(bits)}</div>")
-        if d["notes"] or d["findings"] or d.get("next") or d["refresh"].get("detail"):
-            o.append("<details><summary>Evidence and findings</summary>")
-            for n in d["notes"]: o.append(f"<p class='small' style='margin:4px 0'>{_e(n)}</p>")
-            if d["refresh"].get("detail"): o.append(f"<p class='small' style='margin:4px 0'>Refresh: {_e(d['refresh']['detail'])}</p>")
-            if d.get("next"): o.append(f"<p class='small' style='margin:4px 0'><b>Next:</b> {_e(d['next'])}</p>")
-            for f in d["findings"][:12]:
-                o.append(f"<div class='f'><div class='tags'><span class='tag {f['severity']}'>{f['severity']}</span><span class='tag {f['level']}'>{_e(LEVEL_LABEL[f['level']])}</span></div>"
-                         f"{_e(f['title'])}" + (f"<div class='small'>{_e(f['evidence'])}</div>" if f.get("evidence") else "") + "</div>")
-            if len(d["findings"]) > 12: o.append(f"<p class='small'>… {len(d['findings']) - 12} more in report.json</p>")
-            o.append("</details>")
-        o.append("</article>")
-    if quiet:
-        o.append("<article class='card dept'><div class='h'><div><div class='fam'>No results for this project</div><h3>Nothing to report, nothing assumed</h3></div>"
-                 f"<span class='st no_data'>{len(quiet)}</span></div><p class='small'>These departments have no outputs or analysis for this project:</p><div>"
-                 + "".join(f"<span class='tag' style='margin:0 4px 6px 0;padding:4px 8px'>{_e(d['title'].split(' — ')[0])}"
-                           + (" · n/a" if d["status"] == "not_applicable" else "") + "</span>" for d in quiet) + "</div></article>")
+    run_date = R["generated"][:16].replace("T", " ") + " UTC"
+    o.append("<header class='top'><div class='k'>GITCRAFT · Production Report</div>"
+             f"<h1>{_e(R['title'])}</h1><dl class='ident'>"
+             + "".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in (
+                 ("Project", f"<a href='{_e(I.get('url'))}'>{_e(I.get('repo'))}</a>" if I.get("url") else _e(I.get("repo") or I.get("name"))),
+                 ("Run date", _e(run_date)),
+                 ("Release / version", _e(I.get("version") or "not recorded") + (f" <span class='small'>({_e(I['version_source'])})</span>" if I.get("version_source") else "")),
+                 ("Commit", (f"<code>{_e((I.get('commit') or '')[:7])}</code> <span class='small'>{_e(I.get('commit_source'))}</span>") if I.get("commit") else "not recorded"),
+                 ("Production", _e(I.get("production") or "none run") + (f" · {_e(I.get('production_status'))}" if I.get("production_status") else "")),
+                 ("Report", f"<code>{_e(R['report_id'].split('/')[-1])}</code>" + (" · <a href='report.json'>JSON</a> · <a href='report.md'>Markdown</a>" if downloads else ""))))
+             + "</dl></header>")
+    o.append("<nav class='jump' aria-label='Sections'>" + "".join(f"<a href='#{i}'>{t}</a>" for i, t in (("health", "Summary"), ("top", "Next 3"), ("depts", "Departments"), ("trends", "Trends"),
+             ("gates", "Release gates"), ("findings", "Findings"), ("p0", "Blockers"), ("plan", "Action plan"), ("method", "Scoring"), ("limits", "Evidence"))) + "</nav>")
+    # hero: the quality score and, apart from it, the Director's verdict (a gate)
+    vp = H.get("vs_previous") or {}
+    sc = H["score"]
+    o.append("<section id='health' class='hero'><div class='card'><div class='k'>Overall quality score</div>"
+             f"<div class='big'><b>{_e(sc if sc is not None else '—')}</b><span>/ 100</span></div>"
+             + (f"<div class='bar'><i style='width:{max(0, min(100, sc))}%'></i>" + (f"<s style='left:calc({vp['previous']}% - 1px)' title='previous {vp['previous']}'></s>" if vp.get("delta") is not None else "") + "</div>" if sc is not None else "")
+             + f"<div class='chips'><span class='chip {bcls}'>{_e(H['band'].capitalize())}</span><span class='chip'>{_e(H['confidence'])} confidence</span>"
+             f"<span class='chip'>{H['measured']} of {H['of']} departments evaluated · {round(100 * (H.get('coverage') or 0))}% weight</span></div>"
+             f"<p class='small' style='margin:10px 0 0'>{_delta_html({'delta': vp.get('delta'), 'previous': vp.get('previous'), 'compare': vp.get('compare')})}</p></div>")
+    vc = _verdict_cls(G.get("verdict"))
+    if G.get("verdict"):
+        np_ = sum(1 for c in G.get("criteria") or [] if c["status"] in ("passed", "advisory"))
+        o.append(f"<div class='card verdict {vc}'><div class='k'>Director verdict · release gate</div><div class='v'>{_e(G['verdict'])}</div>"
+                 f"<div class='chips'><span class='chip'>{np_}/{len(G.get('criteria') or [])} gates passed</span>"
+                 + (f"<span class='chip'>{_e(G.get('status'))}</span>" if G.get("status") else "") + (f"<span class='chip'>release {_e(G.get('release_status'))}</span>" if G.get("release_status") else "")
+                 + (f"<span class='chip warn'>{len(G['approvals'])} awaiting approval</span>" if G.get("approvals") else "") + "</div>"
+                 + "".join(f"<div class='small'>{_e(r)}</div>" for r in (G.get("reasons") or [])[:3]) + "</div>")
+    else:
+        o.append(f"<div class='card verdict'><div class='k'>Director verdict · release gate</div><div class='v' style='color:var(--mute)'>No verdict</div><div class='small'>{_e(G.get('note'))}</div></div>")
+    o.append("</section><div class='card'><div class='k'>Executive summary</div><ul class='sum'>" + "".join(f"<li>{md(s)}</li>" for s in R["summary"]) + "</ul></div>")
+    # the three highest-impact next actions
+    o.append("<h2 id='top'>Three highest-impact next actions</h2>")
+    if R.get("top_actions"):
+        o.append("<div class='top3'>")
+        for i, a in enumerate(R["top_actions"], 1):
+            ic = "bad" if a["impact"].startswith("High") else "warn" if a["impact"].startswith("Medium") else ""
+            o.append(f"<article class='card'><span class='n'>{i:02d} · {a['priority']}</span><h3>{_e(a['title'])}</h3>"
+                     f"<div class='chips'><span class='chip {ic}' title='{_e(a['impact_basis'])}'>Impact: {_e(a['impact'])}</span>"
+                     f"<span class='chip' title='{_e(a['effort_basis'])}'>Effort: {_e(a['effort'] or 'not estimated')}</span><span class='tag {a['level']}'>{_e(LEVEL_LABEL.get(a['level'], a['level']))}</span></div>"
+                     + (f"<div class='small'>{_e(a['why'])}</div>" if a.get("why") else "") + (f"<div class='small'><b>Do:</b> {_e(a['do'])}</div>" if a.get("do") else "")
+                     + f"<div class='small'>{_e(', '.join(a['departments']))}</div></article>")
+        o.append("</div><p class='small'>Impact follows the priority rule (P0/P1 high, P2 medium, P3 low). " + _e(scoring.EFFORT_NOTE) + "</p>")
+    else: o.append("<div class='card small'>No actions: no department reported a finding.</div>")
+    # department scores
+    o.append("<h2 id='depts'>Department scores</h2><div class='card'>")
+    shown = [d for d in R["departments"] if d["quality"]["evaluation"] != "not_applicable"]
+    shown.sort(key=lambda d: (d["quality"]["evaluation"] != "evaluated", -(d["quality"]["weight"] or 0)))
+    for d in shown:
+        q = d["quality"]; title, _, sub = d["title"].partition(" — ")
+        o.append(f"<div class='drow'><div class='nm'><div class='fam'>{_e(q['label'])} · weight {q['weight']}</div><h3>{_e(title)}</h3><div class='small'>{_e(sub or d['summary'])}</div></div>")
+        if q["evaluation"] == "evaluated":
+            o.append(f"<div class='val'><b>{_e(q['value'])}</b><div>{_delta_html(q)}</div></div><div class='meta'><div class='bar'><i style='width:{max(0, min(100, q['value']))}%'></i>"
+                     + (f"<s style='left:calc({q['previous']}% - 1px)' title='previous {q['previous']}'></s>" if q.get("previous") is not None and q.get("delta") is not None else "") + "</div>")
+        else:
+            o.append(f"<div class='val'><span class='ne'>Not Evaluated</span></div><div class='meta'><div class='small'>{_e(q.get('why'))}</div>")
+        bits = [f"<span class='chip {'ok' if d['status'] in ('current', 'refreshed') else 'warn' if d['status'] in ('stale', 'unverified') else ''}'>{_e(STATUS_LABEL[d['status']])}</span>"]
+        if d.get("run") and d["run"].get("at"): bits.append(f"<span class='small'>measured {_e(str(d['run']['at'])[:10])}</span>")
+        if q.get("confidence") and q["evaluation"] == "evaluated": bits.append(f"<span class='small'>{_e(q['confidence'])} confidence</span>")
+        if q.get("coverage") is not None and q["evaluation"] == "evaluated": bits.append(f"<span class='small'>coverage {round(100 * q['coverage']) if q['coverage'] <= 1 else q['coverage']}%</span>")
+        o.append("<div class='chips' style='margin-top:4px'>" + "".join(bits) + "</div>")
+        o.append("<details><summary>Criteria, evidence and findings</summary>"
+                 f"<p class='small' style='margin:2px 0'><b>Rubric</b> <code>{_e(q['rubric'])}</code> — {_e(q['source'])}</p><ul class='small' style='margin:4px 0;padding-left:18px'>"
+                 + "".join(f"<li>{_e(c)}</li>" for c in q["criteria"]) + "</ul>"
+                 + (f"<p class='small' style='margin:4px 0'><b>Basis:</b> {_e(q['basis'])}</p>" if q.get("basis") else "")
+                 + "".join(f"<p class='small' style='margin:4px 0'>{_e(n)}</p>" for n in d["notes"])
+                 + (f"<p class='small' style='margin:4px 0'>Refresh: {_e(d['refresh']['detail'])}</p>" if d["refresh"].get("detail") else "")
+                 + (f"<p class='small' style='margin:4px 0'><b>Next:</b> {_e(d['next'])}</p>" if d.get("next") else ""))
+        for f in d["findings"][:10]:
+            o.append(f"<div class='f'><span class='tag {f['severity']}'>{f['severity']}</span><span class='tag {f['level']}'>{_e(LEVEL_LABEL[f['level']])}</span> {_e(f['title'])}"
+                     + (f"<div class='small'>{_e(f['evidence'])}</div>" if f.get("evidence") else "") + "</div>")
+        if len(d["findings"]) > 10: o.append(f"<p class='small'>… {len(d['findings']) - 10} more in report.json</p>")
+        o.append("</details></div></div>")
+    na = [d for d in R["departments"] if d["quality"]["evaluation"] == "not_applicable"]
+    o.append("</div>" + (f"<p class='small'>Not applicable to this project (nothing made or asked for): {_e(', '.join(d['title'].split(' — ')[0] for d in na))}.</p>" if na else ""))
+    # trends
+    T = R.get("trend") or []
+    o.append("<h2 id='trends'>Trends</h2>")
+    if len(T) < 2: o.append("<div class='card small'>This is the first report for this project: trends start with the next one.</div>")
+    else:
+        o.append(f"<div class='card'><div class='k'>Overall score · {len(T)} reports</div><div class='wide'>{chart_svg(T)}</div><div class='narrow'>{chart_svg(T, w=340, h=190)}</div><p class='small' style='margin:4px 0 0'>Points from different scoring methods are never joined; a dashed line marks a method change.</p></div><div class='multi'>")
+        for d in shown:
+            if d["quality"]["evaluation"] != "evaluated" and not any(((p["departments"].get(d["id"]) or {}).get("value") is not None) for p in T): continue
+            vs = [(p["departments"].get(d["id"]) or {}).get("value") for p in T]
+            o.append(f"<div class='card'><div class='small'><b style='color:var(--ink)'>{_e(d['quality']['label'])}</b> · {sum(v is not None for v in vs)} measured</div>{chart_svg(T, d['id'], w=220, h=56, label=False)}"
+                     f"<div class='small'>{' → '.join('—' if v is None else str(v) for v in vs[-5:])}</div></div>")
+        o.append("</div>")
+    # release gates and approvals (pass/fail, never averaged)
+    o.append("<h2 id='gates'>Release gates and approvals</h2><div class='card'>")
+    if G.get("criteria"):
+        stc = {"passed": "ok", "advisory": "ok", "failed": "bad", "not_planned": "bad", "needs_approval": "warn", "blocked": "warn", "unverified": "warn", "pending": ""}
+        for c in G["criteria"]:
+            o.append(f"<div class='gate'><span>{_e(c['title'])}</span><span class='chip {stc.get(c['status'], '')}'>{_e(c['status'].replace('_', ' '))}</span></div>")
+        o.append("<p class='small'>Gates are pass/fail. They decide the Director's verdict and never add to or subtract from a quality score.</p>")
+    else: o.append(f"<p class='small' style='margin:0'>{_e(G.get('note') or 'No release gates recorded.')}</p>")
     o.append("</div>")
-    crit = [a for a in R["actions"] if a["priority"] == "P0"]
-    o.append("<h2 id='p0'>Critical issues and blockers</h2><div class='card'>" + ("".join(_act(a) for a in crit) or "<p class='small' style='margin:0'>No measured blockers.</p>") + "</div>")
+    # findings, regressions, blockers
+    o.append("<h2 id='findings'>Major findings, regressions and blockers</h2><div class='cols'>")
+    o.append("<div class='card'><div class='k'>Major findings</div>" + ("".join(
+        f"<div class='f'><span class='tag {f['severity']}'>{f['severity']}</span><span class='tag {f['level']}'>{_e(LEVEL_LABEL[f['level']])}</span> {_e(f['title'])}<div class='small'>{_e(f['department'])}</div></div>"
+        for f in R.get("major_findings") or []) or "<p class='small'>No critical or major findings.</p>") + "</div>")
+    o.append("<div class='card'><div class='k'>Regressions</div>" + ("".join(
+        f"<div class='f'>{_e(x['title'])}<div class='small'>{_e(x['department'])} · {_e(LEVEL_LABEL.get(x['level'], x['level']))}</div></div>" for x in R.get("regressions") or [])
+        or ("<p class='small'>First report: nothing to compare yet.</p>" if R["changes"].get("first") else "<p class='small'>No measured regression since the previous report.</p>")) + "</div>")
+    o.append("<div class='card' id='p0'><div class='k'>Unresolved blockers</div>" + ("".join(
+        f"<div class='f'><span class='pr P0'>P0</span> {_e(b['title'])}<div class='small'>{_e(', '.join(b['departments']))} · open since {_e(b['open_since'][:10])}</div></div>" for b in R.get("blockers") or [])
+        or "<p class='small'>No measured blockers.</p>") + "</div></div>")
+    # cross-department + full plan + changes (the earlier report's sections, kept)
     rc = R["reconciliation"]
     o.append("<h2 id='cross'>Cross-department findings</h2><div class='card'>")
     for key, label, empty in (("corroborated", "Corroborated — one fix, several departments", "None."), ("conflicts", "Conflicts", "None found."),
                               ("dependencies", "Dependencies", "None."), ("gaps", "Gaps — no data", "None.")):
-        o.append(f"<h3 style='margin:6px 0'>{label}</h3>")
-        if not rc[key]: o.append(f"<p class='small'>{empty}</p>")
+        o.append(f"<h3 style='margin:8px 0 4px'>{label}</h3>")
+        if not rc[key]: o.append(f"<p class='small' style='margin:0'>{empty}</p>")
         for c in rc[key]:
             if key == "corroborated":
                 o.append(f"<div class='x'><b>{_e(c['title'])}</b> <span class='small'>· {_e(', '.join(c['departments']))} · {c['count']} findings</span><div class='small'>" +
@@ -1004,18 +1256,23 @@ def render_html(R, back=None):
     o.append("<h2 id='changes'>Changes since the previous report</h2><div class='card'>")
     if C.get("first"): o.append(f"<p class='small' style='margin:0'>{_e(C['note'])}</p>")
     else:
-        h = C["health"]; dl = h.get("delta")
-        o.append(f"<p style='margin:0 0 8px'>Health {_e(h.get('from'))} → <b>{_e(h.get('to'))}</b>" + (f" <span class='delta {'up' if dl > 0 else 'down' if dl < 0 else ''}'>({dl:+})</span>" if dl is not None else "")
-                 + f" <span class='small'>vs {_e(C['at'][:10])}</span></p>")
+        o.append(f"<p style='margin:0 0 8px'>Against <code>{_e(C['against'])}</code> ({_e(C['at'][:10])}): {_delta_html({'delta': vp.get('delta'), 'previous': vp.get('previous'), 'compare': vp.get('compare')})}</p>")
         for x in C["departments"]: o.append(f"<div class='x small'><b>{_e(x['id'])}</b>: {_e(x['change'])}</div>")
         o.append(f"<p class='small'>{len(C['new_findings'])} new finding(s), {len(C['resolved_findings'])} resolved or no longer reported. {_e(C['note'])}</p>")
     o.append("</div><h2 id='next'>Recommended next actions</h2><div class='card'><ol class='next'>" + "".join(f"<li>{_e(s)}</li>" for s in R["next_actions"]) + "</ol></div>")
+    # scoring method
+    o.append("<h2 id='method'>How the scores work</h2><div class='card'><p style='margin-top:0'>Each department's 0–100 score is its own measured result under a published rubric. "
+             f"The overall score is the weighted mean of the <b>evaluated</b> departments only (method <code>{_e(H.get('method'))}</code>); departments that apply but have no measured result are "
+             "<b>Not Evaluated</b>, carry no weight and are never filled in. Coverage shows how much of the applicable weight was evaluated. Release gates and approvals are separate pass/fail states. "
+             "A previous score is compared only when the rubric and the department's own method are unchanged.</p><div class='tbl'><table><tr><th>Department</th><th>Score</th><th>Weight</th><th>Rubric</th><th>Source</th></tr>"
+             + "".join(f"<tr><td>{_e(d['title'].split(' — ')[0])}</td><td>{_e(d['quality']['label'])}</td><td>{d['quality']['weight']}</td><td><code>{_e(d['quality']['rubric'])}</code></td><td>{_e(d['quality']['source'])}</td></tr>" for d in shown)
+             + f"</table></div><p class='small' style='margin-bottom:0'>{_e(H['basis'])}.</p></div>")
     o.append("<h2 id='limits'>Evidence and limits</h2><div class='card small'><p style='margin-top:0'><span class='tag verified'>Verified</span> measured by a department tool · "
              "<span class='tag observed'>Observed</span> seen in play or simulated · <span class='tag inferred'>Inferred (assumption)</span> a judgement to confirm · "
-             "<b>Unavailable</b> no data, nothing filled in.</p>" + "".join(f"<p>Not refreshed — {_e(x['department'])}: {_e(x['why'])}</p>" for x in R["not_refreshed"])
+             "<b>Not Evaluated</b> no measured result, nothing filled in.</p>" + "".join(f"<p>Not refreshed — {_e(x['department'])}: {_e(x['why'])}</p>" for x in R["not_refreshed"])
              + "".join(f"<p>{_e(x['department'])}: {_e(STATUS_LABEL.get(x['status']))} — {_e(x['why'])}</p>" for x in R["unavailable"])
              + "<p style='margin-bottom:0'>Report generation is read-only: it changed no code, merged nothing and deployed nothing.</p></div>")
-    o.append(f"<footer>GITCRAFT report {VERSION} · <code>{_e(R['report_id'])}</code></footer></main></body></html>")
+    o.append(f"<footer>GITCRAFT Production Report {VERSION} · <code>{_e(R['report_id'])}</code></footer></main></body></html>")
     return "".join(o)
 
 
@@ -1026,6 +1283,26 @@ def _act(a):
 
 
 # ---------------------------------------------------------------- the published site (/reports/)
+def upgrade(R):
+    """A report saved before the Production Report (v1: plain-mean health, no rubrics) → the fields the current
+    layout reads. Scores are kept as recorded; nothing is re-measured and nothing is filled in."""
+    if all(d.get("quality") for d in R.get("departments") or []) and "gates" in R: return R
+    R = json.loads(json.dumps(R))
+    for d in R["departments"]:
+        d.setdefault("notes", []); d.setdefault("findings", []); d.setdefault("refresh", {})
+        scoring.evaluate(d); d["quality"].update(previous=None, delta=None, compare="report made before department rubrics")
+    R["health"].setdefault("method", scoring.LEGACY_METHOD); R["health"].setdefault("coverage", round(R["health"].get("measured", 0) / max(1, R["health"].get("of") or 1), 2))
+    R["health"].setdefault("vs_previous", {"compare": f"{scoring.LEGACY_METHOD}: plain mean of department scores (before weighted rubrics)"})
+    R["gates"] = scoring.gates(R["departments"])
+    R["identity"] = {"name": R["project"].get("name"), "repo": R["project"].get("repo"), "url": R["project"].get("url"), "commit": R["project"].get("head"),
+                     "commit_source": "project checkout" if R["project"].get("head") else None, "production": R["gates"].get("production"), "verdict": R["gates"].get("verdict")}
+    R.setdefault("top_actions", scoring.top_actions(R.get("actions") or [], {f["key"]: f for d in R["departments"] for f in d["findings"]}))
+    R.setdefault("major_findings", major_findings(R["departments"])); R.setdefault("regressions", [])
+    R.setdefault("blockers", [{"title": a["title"], "departments": a["departments"], "level": a["level"], "open_since": R["generated"]} for a in R.get("actions") or [] if a["priority"] == "P0"])
+    R["summary"] = list(R.get("summary") or []) + [f"Made with GITCRAFT report {R.get('gitcraft_report', '1')}: the overall number is the earlier plain mean ({scoring.LEGACY_METHOD}), not the weighted score."]
+    return R
+
+
 def publish_site(archive, dist):
     """Every archived report (history/reports/<project>/<stamp>/report.json) → dist: an index of projects with their
     health trend, and each report page. Standard library only (runs in the Vercel build). Returns the report count."""
@@ -1036,30 +1313,35 @@ def publish_site(archive, dist):
     for p in sorted(glob.glob(os.path.join(archive, "*", "*", "report.json"))):
         R = _json(p)
         if not R: continue
-        pid, stamp = R["project"]["id"], os.path.basename(os.path.dirname(p))
-        out = os.path.join(dist, pid, stamp); os.makedirs(out, exist_ok=True)
-        with open(os.path.join(out, "index.html"), "w") as f: f.write(render_html(R, back="../../"))
-        shutil.copy(p, os.path.join(out, "report.json"))
-        md = os.path.join(os.path.dirname(p), "report.md")
-        if os.path.isfile(md): shutil.copy(md, os.path.join(out, "report.md"))
-        projects.setdefault(pid, []).append((R["generated"], stamp, R))
+        projects.setdefault(R["project"]["id"], []).append((R["generated"], os.path.basename(os.path.dirname(p)), upgrade(R), p))
+    for pid, rs in projects.items():
+        rs.sort(key=lambda x: x[0])
+        for i, (g, stamp, R, p) in enumerate(rs):
+            R["trend"] = scoring.series([x[2] for x in rs[max(0, i - 11):i]], R)   # the archive's own history, as published
+            out = os.path.join(dist, pid, stamp); os.makedirs(out, exist_ok=True)
+            with open(os.path.join(out, "index.html"), "w") as f: f.write(render_html(R, back="../../"))
+            shutil.copy(p, os.path.join(out, "report.json"))
+            md = os.path.join(os.path.dirname(p), "report.md")
+            if os.path.isfile(md): shutil.copy(md, os.path.join(out, "report.md"))
+    projects = {pid: [(g, st, R) for g, st, R, _ in rs] for pid, rs in projects.items()}
     rows = []
-    for rs in projects.values(): rs.sort(key=lambda x: x[0])
     for pid, rs in sorted(projects.items(), key=lambda kv: kv[1][-1][0], reverse=True):
-        g, stamp, R = rs[-1]; H = R["health"]
-        trend = " → ".join(str(x[2]["health"].get("score") if x[2]["health"].get("score") is not None else "—") for x in rs[-6:])
-        pc = {p: sum(1 for a in R["actions"] if a["priority"] == p) for p in ("P0", "P1")}
+        g, stamp, R = rs[-1]; H = R["health"]; G = R.get("gates") or {}
+        bcls = {"healthy": "ok", "needs attention": "warn", "at risk": "bad", "blocked": "bad"}.get(H["band"], "")
         when = lambda st: f"{st[4:6]}/{st[6:8]} {st[9:11]}:{st[11:13]}" + (f" #{st.split('-')[1]}" if "-" in st else "")
-        rows.append(f"<article class='card dept'><div class='h'><div><div class='fam'>{_e(R['project'].get('repo') or pid)}</div>"
-                    f"<h3><a href='{_e(pid)}/{_e(stamp)}/' style='color:inherit'>{_e(R['title'])}</a></h3></div><span class='st {'current' if H['band'] == 'healthy' else 'stale' if H['band'] == 'needs attention' else 'failed' if H['score'] is not None else 'no_data'}'>{_e(H['band'])}</span></div>"
-                    f"<div style='margin-top:10px' class='score'>{_e(H['score'])}<small> / 100 · {_e(H['confidence'])} confidence</small></div>"
-                    f"<div class='bar'><i style='width:{H['score'] or 0}%'></i></div><div class='small'>{len(rs)} report(s) · latest {_e(g[:10])} · trend {_e(trend)} · {pc['P0']} P0, {pc['P1']} P1</div>"
-                    "<div class='small' style='margin-top:6px'>Reports (UTC): " + " · ".join(f"<a href='{_e(pid)}/{_e(s)}/' style='display:inline-block;padding:6px 0'>{_e(when(s))}</a>" for _, s, _ in reversed(rs[-5:])) + "</div></article>")
-    page = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><title>GITCRAFT reports</title>"
-            f"<meta name='description' content='Every GITCRAFT project report: one view across all departments.'><style>{CSS}</style></head><body><main><p class='small' style='margin:8px 0 0'><a href='../'>← GITCRAFT</a></p>"
-            "<header class='top'><div class='k'>Run GITCRAFT report</div><h1>Project reports</h1><div class='meta'>One report per run, built from the latest analysis of every GITCRAFT department. "
-            "Each report is timestamped and kept, so progress is measured report to report. Read-only: reporting never changes code, merges or deploys.</div></header>"
-            + ("<div class='grid'>" + "".join(rows) + "</div>" if rows else "<div class='card small'>No reports archived yet.</div>")
-            + f"<footer>GITCRAFT report {VERSION}</footer></main></body></html>")
+        T = R.get("trend") or []
+        rows.append(f"<article class='card'><div class='small'>{_e(R['project'].get('repo') or pid)}</div>"
+                    f"<h3 style='font:600 19px/1.25 var(--serif);margin:4px 0 8px'><a href='{_e(pid)}/{_e(stamp)}/' style='color:inherit'>{_e(R['title'])}</a></h3>"
+                    f"<div class='big'><b style='font-size:44px'>{_e(H['score'])}</b><span>/ 100 · {_e(H.get('method'))}</span></div>"
+                    + (chart_svg(T, w=320, h=60, label=False) if len(T) > 1 else "")
+                    + f"<div class='chips' style='margin-top:8px'><span class='chip {bcls}'>{_e(H['band'])}</span><span class='chip {_verdict_cls(G.get('verdict'))}'>{_e(G.get('verdict') or 'no verdict')}</span>"
+                    f"<span class='chip'>{len(rs)} report(s)</span></div>"
+                    "<div class='small' style='margin-top:8px'>Reports (UTC): " + " · ".join(f"<a href='{_e(pid)}/{_e(s)}/' style='display:inline-block;padding:8px 0'>{_e(when(s))}</a>" for _, s, _ in reversed(rs[-5:])) + "</div></article>")
+    page = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><title>GITCRAFT Production Reports</title>"
+            f"<meta name='description' content='Every GITCRAFT Production Report: department scores, release gates and trends per project.'><style>{CSS}</style></head><body><main><p class='small' style='margin:8px 0 0'><a href='../'>← GITCRAFT</a></p>"
+            "<header class='top'><div class='k'>GITCRAFT</div><h1>Production Reports</h1><p class='small' style='max-width:68ch'>One report per run, built from the latest measured results of every GITCRAFT department. "
+            "Reports are timestamped and kept, so progress is compared report to report under the same scoring method. Read-only: reporting never changes code, merges or deploys.</p></header>"
+            + ("<div class='multi' style='grid-template-columns:repeat(auto-fill,minmax(280px,1fr))'>" + "".join(rows) + "</div>" if rows else "<div class='card small'>No reports archived yet.</div>")
+            + f"<footer>GITCRAFT Production Report {VERSION}</footer></main></body></html>")
     with open(os.path.join(dist, "index.html"), "w") as f: f.write(page)
     return sum(len(v) for v in projects.values())

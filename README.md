@@ -12,7 +12,7 @@ GITCRAFT publishes from the committed archives:
 | Page | What it shows |
 |------|---------------|
 | [/](https://meshcraft-vert.vercel.app/) | 3D Department: the asset library and pipeline |
-| [/reports/](https://meshcraft-vert.vercel.app/reports/) | "Run GITCRAFT report" archive (`history/reports`) |
+| [/reports/](https://meshcraft-vert.vercel.app/reports/) | Production Reports: department scores, trends, release gates and next actions per project ("Run GITCRAFT report" and every production run; archive `history/reports`) |
 | [/games/](https://meshcraft-vert.vercel.app/games/) | PLAYCRAFT Game Quality History (`history/playcraft`) |
 | [/pixelcraft/](https://meshcraft-vert.vercel.app/pixelcraft/) | PIXELCRAFT audits (`history/pixelcraft`) |
 | [/designcraft/](https://meshcraft-vert.vercel.app/designcraft/) | DESIGNCRAFT and the Design Lab (`history/designcraft`) |

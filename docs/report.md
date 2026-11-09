@@ -1,13 +1,14 @@
-# Run GITCRAFT report
+# Run GITCRAFT report — the Production Report
 
-One command, one project report, built from the latest analysis of **every department GITCRAFT defines**.
+One command, one project report, built from the latest analysis of **every department GITCRAFT defines**. Since report 2.0
+every production run also ends with one (see *Production Report* below), so each run has a visual report beside its acceptance report.
 
 ```
 Run GITCRAFT report                                     # in a session: production_start passes it here
 studiocraft production_project_report {project, refresh: quick|full|none, save: store|none}
 python3 -m production project-report <folder | owner/repo | owner--repo> [--refresh quick|full|none] [--save store|archive|none]
 python3 -m production publish-reports [history/reports] <dist>   # the /reports/ site (run by the Vercel build)
-tests/test_report.py                                    # 31 checks
+tests/test_report.py                                    # 59 checks
 ```
 
 ## Why it is a reader, not a new system
@@ -67,3 +68,49 @@ It is written as `report.json` (for tools), `report.md` and `report.html` (self-
   says whether a department changed because it was re-measured, or because the method changed on the same run. To keep
   a report (cloud containers are ephemeral), use `--save archive`, which writes to `history/reports/` (committed,
   append-only). The site publishes every archived report at `/reports/`.
+
+## Production Report (report 2.0)
+
+The same report, extended so every run has a polished, comparable record. Nothing here is a parallel system:
+`production/project_report.py` still gathers, reconciles and saves; `production/scoring.py` adds the rubrics.
+
+**Every run.** `engine.run` ends with `engine.production_report(prod)`: `project_report.generate(<project>, refresh="none")`
+(it reads what the departments recorded and re-measures nothing), saved to the report store outside the project. The
+paths are on the production (`production_report`), in `production_status` / `production_run` results, and in `REPORT.md`.
+A report that cannot be made is recorded with its reason and never fails the run. `GITCRAFT_PRODUCTION_REPORT=0` turns it off.
+
+**What it shows.** Identity (project, run date, release/version from `package.json` or `git describe`, commit with its
+source, production), the Director's verdict, an executive summary, the three highest-impact next actions, every
+applicable department's 0–100 score with its rubric, evidence, criteria, previous score and delta, trend charts,
+release gates and approvals, major findings, regressions, unresolved blockers (with the report they first appeared in),
+then the existing reconciliation, P0–P3 plan, changes, scoring method and evidence limits. The HTML is self-contained
+(no script, no external font), phone-first, light and dark; `report.json` and `report.md` sit beside it to download.
+
+**Department rubrics** (`scoring.RUBRICS`, each versioned):
+
+| Department | Score | Weight | Source |
+|---|---|---|---|
+| PLAYCRAFT | Gameplay quality | 25 | its overall score (Game Quality History) |
+| PIXELCRAFT | Visual quality and usability | 20 | its audit score (mean over audited UIs) |
+| DESIGNCRAFT | Game design | 15 | its 100-point design score |
+| TestCraft | Automated QA | 15 | passed checks ÷ all checks |
+| Production Director | Engineering standard | 15 | ok/accepted 1, advisory 0.5, review/failed 0, over applicable checks |
+| AssetCraft | Asset licensing | 5 | assets with a known licence ÷ catalogued assets |
+| 3D Department | 3D jobs succeeded | 5 | succeeded ÷ finished jobs (only when it worked on the project) |
+| Maker departments | Output checks passed | 5 | passed ÷ all output checks (only when they made something) |
+
+- **Not Evaluated**: the department applies but has no measured result. No score, no weight, the reason and the command
+  that would produce one. Nothing is ever estimated.
+- **Overall** (`gitcraft-score/2`): weighted mean of the evaluated departments only. **Coverage** (evaluated weight ÷
+  applicable weight) and confidence sit beside it and are never folded into it. A measured P0 makes the band *blocked*.
+- **Gates are not scores.** Acceptance criteria and the Director's verdict (READY / NOT READY / INCOMPLETE) are pass/fail
+  states shown in their own panel. They were part of the plain mean before 2.0; they are not part of any score now.
+- **Comparisons.** A previous score and delta are shown only when the rubric version and the department's own method are
+  unchanged, and only when today's measurement is not older than the previous one (a recorded run read after a
+  re-analysis is not a regression). Reports made before 2.0 (`mean/1`) keep their recorded number; the overall delta
+  across the method change is shown as *not comparable*, and trend lines break where the method changed.
+- **Impact and effort** for the top three actions: impact follows the priority rule (P0/P1 high, P2 medium, P3 low);
+  effort is the owning department's own estimate (PLAYCRAFT effort, PIXELCRAFT cost, DESIGNCRAFT complexity) or
+  *not estimated*.
+- **Regressions** are measured only: a comparable score that fell on a new measurement, PLAYCRAFT's recurring
+  regressions, and critical/major measured findings that are new since the previous report.

@@ -629,8 +629,31 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
                 if max_seconds and time.time() - t0 > max_seconds and not running: break
         prod["status"] = overall(prod); prod["verdict"] = _report.final(prod); store.save(prod)
         store.event(prod, "run_stopped", status=prod["status"], verdict=prod["verdict"]["verdict"], reasons=prod["verdict"]["reasons"] or None)
+        production_report(prod)
         _report.write(prod)
         return status(prod)
+
+
+def production_report(prod):
+    """Every run ends with a Production Report (project_report.generate, refresh none: it reads what the departments
+    recorded and re-measures nothing). It is written to the report store, outside the project, and linked from the
+    run's status and REPORT.md. A report that cannot be made is recorded with its reason and never fails the run.
+    GITCRAFT_PRODUCTION_REPORT=0 turns it off."""
+    if os.environ.get("GITCRAFT_PRODUCTION_REPORT", "1") == "0": return None
+    info = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    try:
+        path = _project(prod)
+        if not path or not os.path.isdir(path): info.update(status="skipped", why="the project folder does not exist yet")
+        else:
+            from . import project_report
+            R = project_report.generate(path, refresh="none", save="store")
+            info.update(status="ok", report_id=R["report_id"], html=R["paths"].get("html"), json=R["paths"].get("json"), markdown=R["paths"].get("markdown"),
+                        overall=R["health"].get("score"), method=R["health"].get("method"), verdict=R["gates"].get("verdict"))
+    except Exception as e:   # the report never fails the run it describes
+        info.update(status="failed", why=f"{type(e).__name__}: {e}"[:300])
+    prod["production_report"] = info; store.save(prod)
+    store.event(prod, "production_report", status=info["status"], report=info.get("html"), why=info.get("why"))
+    return info
 
 
 def _build_authorised(prod):
@@ -938,4 +961,4 @@ def status(prod_or_id, store_dir=None):
             "verdict": v["verdict"], "verdict_reasons": v["reasons"] or None, "release_status": rs["release_status"],
             "release": {k: rs[k] for k in ("deployment", "functional", "security", "visual", "blockers", "unverified", "advisories", "verification_complete")}, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
             "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,
-            "report": os.path.join(prod["store"], "REPORT.md")}
+            "report": os.path.join(prod["store"], "REPORT.md"), "production_report": prod.get("production_report")}

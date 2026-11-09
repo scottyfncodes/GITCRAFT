@@ -123,6 +123,8 @@ def markdown(prod, release=False):
          f"Production `{prod['id']}` · status **{prod.get('status')}** · verdict **{verdict(acc)}** · updated {store.now()}", "",
          *([f"Evaluation target: {(prod.get('evaluation') or {}).get('why')}", ""] if prod.get("evaluation") else []),
          f"> {spec['prompt'][:600]}", "",
+         *([f"Production Report: `{(prod.get('production_report') or {}).get('html')}` (overall {(prod.get('production_report') or {}).get('overall')}, "
+            f"method {(prod.get('production_report') or {}).get('method')})", ""] if (prod.get("production_report") or {}).get("status") == "ok" and not release else []),
          f"Deliverable: **{spec['deliverable']}** ({spec['dimension']}, {'mobile-first' if spec['platform']['mobile_first'] else 'desktop + phone'}) · "
          f"project `{spec['project']['path']}` · quality bar **{spec['quality']['level']}**", ""]
     bp = prod.get("blueprint")
