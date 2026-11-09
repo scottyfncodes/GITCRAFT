@@ -115,6 +115,16 @@ def decisions(spec, disc, icon_state=None):
                         "tradeoff": "no separate brand work; the build picks a clean palette" if not keep_design else "no new brand work; the build follows existing assets"}],
                       {"original": {"assets": {"identity": True}}, "keep": {"assets": {"identity": False}}},
                       "Every app keeps its own identity; there is no shared GITCRAFT style."))
+        from .intake import implied
+        imp = sorted(implied(spec))
+        if imp and not existing:   # D3: extras GITCRAFT added are shown as required; only a person can make them optional
+            names = {"asset_sfx": "sound effects", "asset_music": "music", "asset_identity": "the visual identity"}
+            out.append(_d("extras", "Extras GITCRAFT added", "These were added from the quality bar, not named in your prompt: "
+                          + ", ".join(names.get(c, c) for c in imp) + ". Must the release wait for them?", "required",
+                          [{"value": "required", "label": "Required", "tradeoff": "the release is READY only when they pass"},
+                           {"value": "optional", "label": "Optional", "tradeoff": "the release can be READY without them; a missing one is listed on the report, never hidden"}],
+                          {"required": {"optional_criteria": []}, "optional": {"optional_criteria": imp}},
+                          "What you named in the prompt and GITCRAFT's own release standards always stay required."))
         st = (icon_state or {}).get("status", "none")
         if existing:   # an existing project's icon is never replaced unless the person asks
             out.append(_d("app_icon", "App icon", f"Leave the project's icon as it is? ({(icon_state or {}).get('reason') or 'no change'})", "leave",
@@ -213,7 +223,7 @@ def overrides_for(decs, answers):
 
 # ---------------------------------------------------------------- the blueprint and deviations
 MATERIAL_KEYS = ("deliverable", "dimension", "platform", "genres", "features", "assets", "authorisations", "engineering", "icon", "attribution",
-                 "deploy", "analytics", "backend",
+                 "deploy", "analytics", "backend", "optional_criteria",
                  "extra_tasks", "skip_tasks", "project")
 
 
@@ -232,7 +242,8 @@ def blueprint(prod):
 
 def material(old_spec, new_spec):
     """[changed key] for every material difference (an empty list = only the quality bar or wording changed)."""
-    return [k for k in MATERIAL_KEYS if json.dumps(old_spec.get(k), sort_keys=True, default=str) != json.dumps(new_spec.get(k), sort_keys=True, default=str)]
+    norm = lambda sp, k: (sp.get(k) or []) if k == "optional_criteria" else sp.get(k)   # records made before it have no key: same as none optional
+    return [k for k in MATERIAL_KEYS if json.dumps(norm(old_spec, k), sort_keys=True, default=str) != json.dumps(norm(new_spec, k), sort_keys=True, default=str)]
 
 
 # ---------------------------------------------------------------- where the project is

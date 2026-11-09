@@ -337,7 +337,7 @@ def integrate_v2(ctx):
             for f in r["files"]:
                 ext = os.path.splitext(f["path"])[1].lower().lstrip(".")
                 role = "model" if ext in ("glb", "gltf", "fbx", "obj") else "model_source"
-                items.append({"task": up["id"], "src": f["path"], "dest": os.path.join(dest_dir, os.path.relpath(f["path"], r.get("dir") or stage_dir)),
+                items.append({"task": up.get("owner_task") or up["id"], "src": f["path"], "dest": os.path.join(dest_dir, os.path.relpath(f["path"], r.get("dir") or stage_dir)),
                               "sha256": f.get("sha256") or sha256(f["path"]), "role": role, "format": ext,
                               "sidecar": {"license": lic or "LicenseRef-Project-Owned", "source": {"production": prod["id"], "task": up["id"], "library_asset": aid}} if role == "model" else None})
             continue
@@ -346,7 +346,7 @@ def integrate_v2(ctx):
             side = {"license": up.get("license") or "LicenseRef-Project-Owned", "attribution": up.get("attribution"),
                     "source": {"production": prod["id"], "task": up["id"], "record": (up.get("result") or {}).get("record")}}
             folder = o.get("role") in (ship.get("folder_licence_roles") or [])
-            items.append({"task": up["id"], "src": o["path"], "dest": os.path.join(dd, o.get("rel") or os.path.basename(o["path"])), "sha256": o.get("sha256") or sha256(o["path"]),
+            items.append({"task": up.get("owner_task") or up["id"], "src": o["path"], "dest": os.path.join(dd, o.get("rel") or os.path.basename(o["path"])), "sha256": o.get("sha256") or sha256(o["path"]),
                           "role": o.get("role"), "format": o.get("format"), "sidecar": None if folder else side, "folder_sidecar": (os.path.join(dd, "LICENSE.assets.json"), side) if folder else None})
     seen = {}
     for it in items:   # two outputs of this task for one path

@@ -87,3 +87,12 @@ A gate whose only failing checks are UNVERIFIED reports `category: unverified`. 
 with `unverified: [...]` and the reason "verification incomplete (not an application failure)", and writes no fix work order.
 The criterion reads `unverified` and the verdict reads INCOMPLETE. A criterion measured only by advisory tasks is `advisory`
 and counts as passing.
+
+## Optional and unavailable (plan v2)
+
+Two more acceptance statuses, kept distinct from the four above:
+
+- `optional_missing`: a criterion a person made optional in the Decision Room was not delivered. It never blocks READY,
+  is never counted as unverified, and is always listed ("Optional, not delivered").
+- `unavailable`: a required criterion whose department cannot run here (missing runtime or capability). It is never a
+  pass and never an application defect: the verdict is INCOMPLETE and the release summary lists it as unverified.

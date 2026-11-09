@@ -45,6 +45,7 @@ def acceptance(prod, exclude=()):
         elif any(s == "failed" for s in states): st = "failed"
         elif any(s == "blocked" and t.get("unverified") for s, t in zip(states, ts)) and not any(s == "blocked" and not t.get("unverified") for s, t in zip(states, ts)):
             st = "passed" if _confirmed_live(prod, ts) else "unverified"   # the check ran but could not be completed (e.g. sandbox network)
+        elif any(s == "blocked" and t.get("unavailable") for s, t in zip(states, ts)): st = "unavailable"   # a capability missing here, not a defect
         elif any(s == "blocked" for s in states): st = "blocked"
         elif any(s == "needs_approval" for s in states): st = "needs_approval"
         else: st = "pending"
@@ -59,11 +60,18 @@ def acceptance(prod, exclude=()):
             why = None; ev.append({"condition": "verified independently in production (the live check reached every service the sandbox could not)", "ok": True})
         adv = [f"{ch['name']}: {str(ch.get('detail'))[:160]}" for t in ts for ch in ((t.get("result") or {}).get("checks") or []) if ch.get("category") == "advisory"]
         extra = {"cause": ", ".join(sorted({u.get("cause") or "unverified" for t in ts for u in t.get("unverified") or []}))} if st == "unverified" else {}
+        if not c.get("required", True) and st not in ("passed", "advisory", "pending", "needs_approval"):
+            # an optional criterion (a person made an implied extra optional) that ended without passing: listed, never a blocker
+            why = [f"optional, not delivered ({st}): " + "; ".join(why or [])][:1]; st = "optional_missing"
         out.append(dict(c, status=st, why=why or None, evidence=ev[:30], advisories=adv[:12] or None, **extra))
     return out
 
 
-PASSING = ("passed", "advisory")
+PASSING = ("passed", "advisory", "optional_missing")   # optional_missing never blocks READY and is always listed (optional_not_delivered)
+
+
+def optional_not_delivered(acc):
+    return [a["id"] for a in acc if a["status"] == "optional_missing"]
 
 
 def _confirmed_live(prod, ts):
@@ -86,7 +94,7 @@ def verdict(acc):
     unverified, pending, awaiting someone). An `advisory` criterion (measured by advisory tasks only) never blocks;
     an `unverified` one never reads as a failure and never as READY. The release status line, which also says
     whether the release is deployed, is verification.release_summary()."""
-    s = {a["id"]: ("passed" if a["status"] == "advisory" else "blocked" if a["status"] == "unverified" else a["status"]) for a in acc}
+    s = {a["id"]: ("passed" if a["status"] in ("advisory", "optional_missing") else "blocked" if a["status"] in ("unverified", "unavailable") else a["status"]) for a in acc}
     core = {k: v for k, v in s.items() if k not in ("deployment", "release_ready")}
     if not acc or any(v == "not_planned" for v in s.values()): return "NOT READY"
     if all(v == "passed" for v in core.values()) and s.get("release_ready") in (None, "passed"):
@@ -107,7 +115,8 @@ def final(prod):
         if a["status"] in PASSING or a["id"] == "release_ready" and any(x["status"] not in PASSING for x in acc if x["id"] not in ("release_ready", "deployment")): continue
         if a["id"] == "deployment" and v.startswith("READY"): continue
         label = {"failed": "failed", "blocked": "could not run", "unverified": "could not be verified (not an application failure)", "pending": "did not finish", "needs_approval": "waiting for a person",
-                 "not_planned": "not planned", "skipped": "skipped"}.get(a["status"], a["status"])
+                 "not_planned": "not planned", "skipped": "skipped",
+                 "unavailable": "cannot run here (a capability is missing; not an application failure)"}.get(a["status"], a["status"])
         reasons.append(f"{a['id']} {label}: " + "; ".join(map(str, a.get("why") or []))[:400])
     for t in prod.get("tasks", {}).values():
         if t["state"] == "awaiting_agent" and not t.get("superseded_by"):
@@ -141,6 +150,9 @@ def markdown(prod, release=False):
     L += verification.markdown(verification.release_summary(prod, acc))
     fin = final(prod)
     if fin["reasons"]: L += [f"## Why {fin['verdict']}", ""] + [f"- {r}" for r in fin["reasons"]] + [""]
+    miss = [x for x in acc if x["status"] == "optional_missing"]
+    if miss: L += ["## Optional, not delivered", "", "Made optional by a person in the Decision Room; the release does not wait for them, and they are never hidden:", ""] + \
+                  [f"- {x['id']}: {'; '.join(map(str, x.get('why') or []))[:300]}" for x in miss] + [""]
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]
     for a in acc:
         seen = {}

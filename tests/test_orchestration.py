@@ -230,6 +230,117 @@ engine._recover(P)
 check("recovery: the engine rolls back an interrupted integration and runs it again", not os.path.exists(victim) and iv["state"] == PENDING
       and not os.path.exists(os.path.join(d, builtins.JOURNAL)))
 
+# ---------------------------------------------------------------- 5. PR 2: optional criteria (D3/D4), unavailable capabilities, routing to owners (D5)
+from production import lifecycle, verification
+POL = "Build a polished mobile platformer game called Ember Run with three levels"
+sp = intake.parse(POL)
+imp = intake.implied(sp)
+check("criteria: every one carries required + source; implied extras are exactly what GITCRAFT added (sound, music, identity), all required by default",
+      imp == {"asset_sfx", "asset_music", "asset_identity"} and all(c["required"] for c in sp["acceptance"])
+      and {c["id"]: c["source"] for c in sp["acceptance"]}["asset_levels"] == "stated" and {c["id"]: c["source"] for c in sp["acceptance"]}["loads_everywhere"] == "standard", imp)
+so = intake.parse(POL, overrides={"optional_criteria": ["asset_music", "asset_levels", "loads_everywhere"]})
+req = {c["id"]: c["required"] for c in so["acceptance"]}
+check("criteria: only an implied extra can be made optional; a stated or standard one stays required and the request is refused (never silent)",
+      req["asset_music"] is False and req["asset_levels"] and req["loads_everywhere"] and so["optional_refused"] == ["asset_levels", "loads_everywhere"], (req, so["optional_refused"]))
+room = {d["id"]: d for d in lifecycle.decisions(sp, DISC)}
+check("Decision Room (D3): an 'extras' decision lists the implied extras, recommended required; 'optional' sets exactly them",
+      room["extras"]["recommended"] == "required" and room["extras"]["sets"]["optional"] == {"optional_criteria": sorted(imp)} and room["extras"]["sets"]["required"] == {"optional_criteria": []})
+check("Decision Room: no extras decision when nothing was implied", "extras" not in {d["id"] for d in lifecycle.decisions(intake.parse("Build a mobile platformer game called Ember Run with sound, music, an original visual identity and three levels"), DISC)})
+check("blueprint: making a criterion optional after approval is a material change (needs a person); none vs an empty list is not",
+      "optional_criteria" in lifecycle.material(sp, so) and lifecycle.material({k: v for k, v in sp.items() if k != "optional_criteria"}, sp) == [])
+spo = intake.parse(POL, overrides={"optional_criteria": ["asset_music"]}); spo["project"]["path"] = os.path.join(ws, "p")
+po = planner.build(spo, DISC, version=2); TO = po["tasks"]
+check("graph: an optional asset's integration settles the final integration (never required); required ones stay hard dependencies",
+      planner.validate(po) == [] and "integrate.audio.music" not in TO["integrate.final"]["depends_on"] and TO["integrate.final"]["settles"] == ["integrate.audio.music"]
+      and TO["audio.music"].get("optional") and "integrate.levels.1" in TO["integrate.final"]["depends_on"]
+      and TO["integrate.audio.music"]["criterion"] == "asset_music" and TO["integrate.levels.1"]["criterion"] == "asset_integrity", (TO["integrate.final"]["depends_on"], TO["integrate.final"].get("settles")))
+bad = copy.deepcopy(po); bad["tasks"]["integrate.final"]["settles"] = ["nope"]
+check("graph: a settles edge to an unknown task is refused", any("settles on an unknown task" in x for x in planner.validate(bad)))
+bad = copy.deepcopy(po); bad["tasks"]["integrate.audio.music"]["depends_on"].append("integrate.final")
+check("graph: a settles edge that closes a cycle is refused", any("cycle" in x for x in planner.validate(bad)), planner.validate(bad))
+
+pr = engine.plan(POL, os.path.join(ws, "opt"), {"optional_criteria": ["asset_music"]}); Q = store.load(pr.get("id") or pr.get("production"))
+for tid in Q["order"]:
+    t = Q["tasks"][tid]
+    if tid not in ("integrate.final", "build.wire", "audio.music", "integrate.audio.music") and t["stage"] in ("foundation", "production", "integration"): engine._set(Q, t, PASSED)
+check("readiness: the final integration waits while the optional asset is still being made", "integrate.final" not in [t["id"] for t in engine._ready_tasks(Q)])
+engine._set(Q, Q["tasks"]["audio.music"], BLOCKED, unavailable=True, reason="music runtime not installed")
+ready = [t["id"] for t in engine._ready_tasks(Q)]
+check("readiness: an unavailable optional asset (its integration blocked) does not block the final integration",
+      Q["tasks"]["integrate.audio.music"]["state"] == BLOCKED and "integrate.final" in ready, (Q["tasks"]["integrate.audio.music"]["state"], ready))
+for tid in Q["order"]:
+    if Q["tasks"][tid]["state"] not in (BLOCKED,) and tid not in ("release.deploy",): engine._set(Q, Q["tasks"][tid], PASSED)
+acc = {a["id"]: a for a in report.acceptance(Q)}
+rs = verification.release_summary(Q)
+check("report (D4): the optional, unavailable asset is optional_missing; the verdict is READY and the release summary lists it, verification complete",
+      acc["asset_music"]["status"] == "optional_missing" and report.verdict(report.acceptance(Q)).startswith("READY") and rs["optional_not_delivered"][0]["criterion"] == "asset_music"
+      and rs["verification_complete"] and "## Optional, not delivered" in report.markdown(Q), (acc["asset_music"]["status"], report.verdict(report.acceptance(Q)), rs["release_status"]))
+R = store.load(Q["id"]); R["spec"]["acceptance"] = [dict(c, required=True) if c["id"] == "asset_music" else c for c in R["spec"]["acceptance"]]
+for tid in R["order"]:
+    if R["tasks"][tid]["state"] != BLOCKED and tid != "release.deploy": engine._set(R, R["tasks"][tid], PASSED)
+engine._set(R, R["tasks"]["audio.music"], BLOCKED, unavailable=True, reason="music runtime not installed")
+accR = {a["id"]: a for a in report.acceptance(R)}
+rsR = verification.release_summary(R)
+check("report: a REQUIRED criterion whose department is unavailable is 'unavailable' → INCOMPLETE (never READY, never NOT READY as a defect)",
+      accR["asset_music"]["status"] == "unavailable" and report.verdict(report.acceptance(R)) == "INCOMPLETE" and any(u["criterion"] == "asset_music" for u in rsR["unverified"]),
+      (accR["asset_music"]["status"], report.verdict(report.acceptance(R))))
+
+# routing (D5)
+pr = engine.plan(POL, os.path.join(ws, "route")); S = store.load(pr.get("id") or pr.get("production"))
+lvl = S["tasks"]["levels.1"]; lvl["attempts"] = [{"n": 1, "started": "x"}]
+fail = {"status": "failed", "checks": [{"name": "the level is solvable", "ok": False}], "outputs": [{"path": "/x.json", "role": "level_data", "format": "json"}]}
+engine._finish(S, lvl, json.loads(json.dumps(fail)))
+r1 = S["tasks"].get("levels.1.r1")
+check("routing: a department's own failed gate goes back to that department (re-run, seed varied deterministically), not to the agent",
+      r1 and r1["department"] == "levelcraft" and r1["params"]["seed"] == (lvl["params"].get("seed") or 0) + engine.REWORK_SEED and r1["routed_to"] == lvl["owner"]
+      and "own output failed its gate" in r1["routed_because"] and lvl["superseded_by"] == "levels.1.r1" and not any(k.startswith("fix.levels") for k in S["tasks"]), r1)
+check("routing: the asset's integration now waits for the re-run (eff), not for the failed attempt", engine.eff(S, "levels.1")["id"] == "levels.1.r1")
+r1["attempts"] = [{"n": 1, "started": "x"}]; engine._finish(S, r1, json.loads(json.dumps(fail)))
+r2 = S["tasks"]["levels.1.r2"]; r2["attempts"] = [{"n": 1, "started": "x"}]; engine._finish(S, r2, json.loads(json.dumps(fail)))
+check("routing: bounded — after max_rounds (2) re-runs a REQUIRED criterion is escalated to a person; no third automatic re-run",
+      "levels.1.r3" not in S["tasks"] and S["tasks"]["escalate.levels.1"]["state"] == NEEDS_APPROVAL and S["tasks"]["escalate.levels.1"]["origin"] in ("levels.1.r2",), list(S["tasks"])[-4:])
+check("escalation: a person's wait, not a failure — unrelated tasks still schedule", "foundation.scaffold" in [t["id"] for t in engine._ready_tasks(S)])
+store.save(S); engine.approve(S["id"], "escalate.levels.1", note="try once more")
+S = store.load(S["id"])
+check("escalation approved: exactly one more re-run, recorded as a person's decision; the escalation itself is not a pass of the criterion",
+      "levels.1.r3" in S["tasks"] and S["tasks"]["escalate.levels.1"]["state"] == PASSED and S["tasks"]["escalate.levels.1"]["criterion"] is None
+      and engine.eff(S, "levels.1")["id"] == "levels.1.r3")
+pr = engine.plan(POL, os.path.join(ws, "route2"), {"optional_criteria": ["asset_music"]}); U = store.load(pr.get("id") or pr.get("production"))
+mus = U["tasks"]["audio.music"]
+for n in range(3):
+    t = engine.eff(U, "audio.music"); t["attempts"] = [{"n": 1, "started": "x"}]
+    engine._finish(U, t, {"status": "failed", "checks": [{"name": "loops cleanly", "ok": False}], "outputs": [{"path": "/m.ogg", "role": "music", "format": "ogg"}]})
+check("routing: an OPTIONAL criterion is not escalated after its rounds — recorded as not delivered (no approval bottleneck)",
+      "escalate.audio.music" not in U["tasks"] and any("optional not delivered: asset_music" in d for d in U["decisions"]) and "audio.music.r3" not in U["tasks"])
+# QA finding a defective department file → that department, re-integration, re-verification
+pr = engine.plan(POL, os.path.join(ws, "route3")); V = store.load(pr.get("id") or pr.get("production"))
+for tid in V["order"]:
+    if V["tasks"][tid]["stage"] in ("foundation", "production"): engine._set(V, V["tasks"][tid], PASSED)
+iv = V["tasks"]["integrate.audio.sfx.jump"]
+iv["result"] = {"integrated": [{"dest": "/p/assets/audio/jump.ogg", "dest_rel": "assets/audio/jump.ogg", "sha256": "a", "role": "sfx", "format": "ogg", "task": "audio.sfx.jump", "replaced": False}]}
+engine._set(V, iv, PASSED)
+qa_ = V["tasks"]["qa.assets"]; qa_["attempts"] = [{"n": 1, "started": "x"}]
+engine._finish(V, qa_, {"status": "failed", "checks": [{"name": "3 assets open and validate", "ok": False, "detail": [{"path": "audio/jump.ogg", "ok": False, "error": "truncated"}]}],
+                         "outputs": [{"path": "/r.json", "role": "report", "format": "json"}]})
+check("routing: qa.assets finding a defective file goes to the department that made it (AudioCraft re-run → re-integration → qa.assets again); no agent fix",
+      "audio.sfx.jump.r1" in V["tasks"] and V["tasks"]["integrate.audio.sfx.jump.r1"]["depends_on"] == ["audio.sfx.jump"] and V["tasks"]["qa.assets.r1"]["depends_on"] == ["integrate.audio.sfx.jump.r1"]
+      and qa_["superseded_by"] == "qa.assets.r1" and V["tasks"]["audio.sfx.jump.r1"]["routed_to"] == "Studio · audiocraft" and not any(k.startswith("fix.qa.assets") for k in V["tasks"]),
+      [k for k in V["tasks"] if ".r1" in k])
+W = store.load(V["id"]); qw = W["tasks"]["qa.assets"]; qw.pop("superseded_by", None); qw["state"] = PENDING; qw["attempts"] = [{"n": 1, "started": "x"}]
+engine._finish(W, qw, {"status": "failed", "checks": [{"name": "assets open", "ok": False, "detail": [{"path": "audio/handmade.ogg", "ok": False}]}], "outputs": [{"path": "/r", "role": "report"}]})
+check("routing: a defective file no department produced is the agent's (fix work order, routed and recorded)",
+      W["tasks"]["fix.qa.assets.r1"]["routed_to"] == "agent" and "audio.sfx.jump.r1" not in W["tasks"])
+X = store.load(V["id"]); X["plan_version"] = 1; lv = X["tasks"]["levels.2"]; lv["attempts"] = [{"n": 1, "started": "x"}]
+engine._finish(X, lv, json.loads(json.dumps(fail)))
+check("v1 records: unchanged — a department's failed gate is not re-routed (no rework task)", "levels.2.r1" not in X["tasks"] and lv["state"] == "failed")
+def rework_of(folder):
+    p_ = engine.plan(POL, os.path.join(ws, folder)); Z = store.load(p_.get("id") or p_.get("production")); z = Z["tasks"]["levels.1"]; z["attempts"] = [{"n": 1, "started": "x"}]
+    engine._finish(Z, z, json.loads(json.dumps(fail)))
+    r = Z["tasks"]["levels.1.r1"]
+    return json.dumps({k: r[k] for k in ("id", "params", "depends_on", "department", "action", "routed_to", "routed_because")}, sort_keys=True), Z["order"].index("levels.1.r1")
+check("deterministic: the same failure on two identical productions produces the same rework (id, params, deps, owner, position)",
+      rework_of("det1") == rework_of("det2"))
+
 shutil.rmtree(ws, ignore_errors=True)
 print(f"\n{'ALL PASSED' if not fails else f'{fails} FAILED'}")
 sys.exit(1 if fails else 0)
