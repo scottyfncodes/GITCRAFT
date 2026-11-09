@@ -1,0 +1,15 @@
+{
+ "total": 4,
+ "by_license": {
+  "UNKNOWN": 4
+ },
+ "unknown": [
+  "public/apple-touch-icon.png",
+  "public/favicon-32.png",
+  "public/icon-192.png",
+  "public/icon-512.png"
+ ],
+ "restricted": {},
+ "copyleft": {},
+ "attributions": []
+}
