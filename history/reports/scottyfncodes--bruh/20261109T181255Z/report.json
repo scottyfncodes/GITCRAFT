@@ -1,0 +1,1311 @@
+{
+ "gitcraft_report": "2.0.0",
+ "report_id": "scottyfncodes--bruh/20261109T181255Z",
+ "generated": "2026-11-09T18:15:40+00:00",
+ "refresh": "full",
+ "read_only": true,
+ "project": {
+  "id": "scottyfncodes--bruh",
+  "repo": "scottyfncodes/bruh",
+  "url": "https://github.com/scottyfncodes/bruh",
+  "name": "bruh",
+  "path": "/home/user/scottyfncodes/bruh",
+  "head": "a3933b9602f865c8c1d9df2397cc9956e7bd1815",
+  "branch": "main",
+  "dirty": false,
+  "kind": "game",
+  "maturity": "finished"
+ },
+ "health": {
+  "score": 62.2,
+  "method": "gitcraft-score/2",
+  "band": "blocked",
+  "confidence": "medium",
+  "measured": 3,
+  "of": 6,
+  "coverage": 0.53,
+  "stale": [],
+  "p0": 1,
+  "parts": {
+   "production": 81.2,
+   "pixelcraft": 84.2,
+   "designcraft": 14
+  },
+  "weights": {
+   "production": 15,
+   "pixelcraft": 20,
+   "designcraft": 15
+  },
+  "basis": "weighted mean of 3 evaluated department score(s) (production \u00d715, pixelcraft \u00d720, designcraft \u00d715); 3 applicable department(s) not evaluated (playcraft, testcraft, assetcraft); coverage 53% of the applicable weight",
+  "vs_previous": {
+   "previous": null,
+   "delta": null,
+   "compare": "first report"
+  }
+ },
+ "departments": [
+  {
+   "id": "production",
+   "title": "Production Director",
+   "family": "Production",
+   "role": "director",
+   "summary": "Discovery, engineering standard, productions and their acceptance verdicts",
+   "applicable": true,
+   "applies_because": null,
+   "status": "refreshed",
+   "score": {
+    "value": 81.2,
+    "label": "Engineering standard",
+    "confidence": "high",
+    "coverage": null
+   },
+   "run": null,
+   "age_days": null,
+   "findings": [
+    {
+     "key": "production:standard:input_validation",
+     "department": "production",
+     "id": "standard:input_validation",
+     "title": "Engineering standard (review): server inputs are validated",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "no validation library or validate() call in server code",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering",
+     "effort": null,
+     "impact": null
+    },
+    {
+     "key": "production:standard:authorization",
+     "department": "production",
+     "id": "standard:authorization",
+     "title": "Engineering standard (review): server routes check who is calling",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "no authentication in server code",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering",
+     "effort": null,
+     "impact": null
+    },
+    {
+     "key": "production:standard:rate_limit",
+     "department": "production",
+     "id": "standard:rate_limit",
+     "title": "Engineering standard (review): sign-in and write routes are rate limited",
+     "severity": "minor",
+     "level": "inferred",
+     "evidence": "no rate limiting found",
+     "recommendation": null,
+     "source": "docs/app-standards.md",
+     "kind": null,
+     "theme": "engineering",
+     "effort": null,
+     "impact": null
+    }
+   ],
+   "strengths": [],
+   "notes": [
+    "Discovery: finished game (high confidence) \u2014 136 files, 123 code files, ~29952 lines of code; entry index.html; kind game (medium confidence): game code: src/game/scoring.ts; game engine: three; 2D canvas in 3 file(s), with a game loop and input in src/ui/SlingScreen.tsx; 106 game words in code and README (comments and CSS excluded); the README calls it a game; app signals: react-dom; git: 90 commits, last 2026-10-29",
+    "Analytics recognised: HaveAnApp Pulse (index.html).",
+    "Engineering standard: 13/16 applicable checks pass."
+   ],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "Discovery and the engineering standard re-run read-only for this report"
+   },
+   "next": null,
+   "standard": {
+    "passed": 13,
+    "of": 16,
+    "status": "ok",
+    "advisory": 0,
+    "accepted": 0,
+    "checks": [
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "ok",
+     "review",
+     "review",
+     "review",
+     "ok",
+     "ok"
+    ]
+   },
+   "quality": {
+    "evaluation": "evaluated",
+    "value": 81.2,
+    "label": "Engineering standard",
+    "weight": 15,
+    "rubric": "standard/1",
+    "method": null,
+    "source": "the engineering standard (docs/app-standards.md), checked read-only on the project",
+    "criteria": [
+     "Applicable checks only (n/a excluded)",
+     "ok or accepted = 1, advisory (measured, non-blocking) = 0.5, review or failed = 0",
+     "Acceptance criteria are release gates, not part of this score"
+    ],
+    "basis": "13/16 applicable checks pass",
+    "confidence": "high",
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "playcraft",
+   "title": "PLAYCRAFT \u2014 game design and gameplay quality",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Assesses and improves how a game plays. Reads the repo (intent, engine, controls, systems with file:line evidence, genres across 15 genre profiles), plays the built game in Chromium on desktop and phone (response time of every control, dead time, idle motion, FPS, pause, touch targets, text size), scores 10 categories 0-100 with evidence levels (verified / observed / inferred / not tested) and confidence, ranks the highest-impact opportunities by impact, effort and risk, writes a staged plan, then verifies changes against the baseline (regressions + guardrails on the git diff) with a before/after report. full_pass adds GITCRAFT's engineering checks (TestCraft) under one plan.",
+   "applicable": true,
+   "applies_because": "PLAYCRAFT scores games",
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "PLAYCRAFT re-assessed the existing build for this report (not recorded in the Game Quality History)."
+   ],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "ok"
+   },
+   "next": "Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays.",
+   "quality": {
+    "evaluation": "not_evaluated",
+    "value": null,
+    "label": "Gameplay quality",
+    "weight": 25,
+    "rubric": "playcraft/1",
+    "method": null,
+    "source": "PLAYCRAFT's own overall score from the Game Quality History",
+    "criteria": [
+     "10 categories (core gameplay, game feel, controls, progression, difficulty, player experience, replayability, technical, presentation, mobile), genre-weighted",
+     "Each criterion pass/partial/fail, weighted by evidence: verified 1, observed 0.85, inferred 0.45",
+     "A category with no played (verified/observed) evidence is capped at 70; untested criteria count for nothing"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "why": "Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays.",
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "pixelcraft",
+   "title": "PIXELCRAFT \u2014 visual quality, UI/UX and interface efficiency",
+   "family": "Studio",
+   "role": "scored",
+   "summary": "Audits the rendered application (not its source) in Chromium at iPhone 17, iPhone 13, desktop, narrow, tablet and landscape viewports: discovers its screens, captures screenshots, measures spacing, alignment, typography, touch targets, control consistency, safe areas, overflow, layout shift, hover/pressed/focus/disabled states, runs axe-core and user journeys (taps, depth, confirmations, feedback time). Scores Visual Quality, Usability and Consistency (100 each) from evidence, with coverage and confidence reported separately; every finding has screen, viewport, selector, measurements, severity, an annotated screenshot and a fix. verify replays the same routes, viewports and journeys, diffs screenshots, proves fixes and refuses score gains from lost coverage. Works on React, Vite, Next.js, static sites and browser games (HTML overlays). Never modifies the app.",
+   "applicable": true,
+   "applies_because": "PIXELCRAFT audits the rendered HTML UI of apps, sites and games",
+   "status": "refreshed",
+   "score": {
+    "value": 84.2,
+    "label": "Visual quality and usability",
+    "confidence": "low",
+    "coverage": 0.65,
+    "categories": {
+     "visual": 96.0,
+     "usability": 81.0,
+     "consistency": 75.7
+    }
+   },
+   "run": {
+    "id": "now",
+    "at": "2026-11-09T18:13:15+00:00",
+    "commit": "a3933b9602f8",
+    "method": "pixelcraft-1.0",
+    "runs": 1,
+    "apps": 1
+   },
+   "age_days": 0.0,
+   "findings": [
+    {
+     "key": "pixelcraft:refresh:axe.meta-viewport",
+     "department": "pixelcraft",
+     "id": "refresh:axe.meta-viewport",
+     "title": "Accessibility: Zooming and scaling must not be disabled",
+     "severity": "critical",
+     "level": "verified",
+     "evidence": "axe-core rule meta-viewport (wcag2aa, wcag144): Zooming and scaling must not be disabled.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/meta-viewport?application=axeAPI \u2014 Fix any of the following:   user-scalable=no on <meta> tag disables zooming on mobile devices",
+     "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+     "kind": null,
+     "theme": "a11y",
+     "effort": 1,
+     "impact": 5
+    },
+    {
+     "key": "pixelcraft:refresh:mobile.chrome",
+     "department": "pixelcraft",
+     "id": "refresh:mobile.chrome",
+     "title": "Fixed bars take too much of the screen",
+     "severity": "major",
+     "level": "verified",
+     "evidence": "Fixed or sticky bars cover 100% of the phone screen height, leaving little room for content.",
+     "recommendation": "Shrink or hide bars on scroll, or merge them.",
+     "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+     "kind": null,
+     "theme": "touch",
+     "effort": 2,
+     "impact": 3
+    },
+    {
+     "key": "pixelcraft:refresh:axe.region",
+     "department": "pixelcraft",
+     "id": "refresh:axe.region",
+     "title": "Accessibility: All page content should be contained by landmarks",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "axe-core rule region (best practice): All page content should be contained by landmarks.",
+     "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/region?application=axeAPI \u2014 Fix any of the following:   Some page content is not contained by landmarks",
+     "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+     "kind": null,
+     "theme": "a11y",
+     "effort": 1,
+     "impact": 2
+    },
+    {
+     "key": "pixelcraft:refresh:resp.content_missing",
+     "department": "pixelcraft",
+     "id": "refresh:resp.content_missing",
+     "title": "Content disappears at one screen size",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "At narrow, 'home' shows only 70% of the words other sizes show; hidden content on phones is a common source of 'where did it go?'.",
+     "recommendation": "Reflow content instead of hiding it; move secondary content behind a disclosure rather than display: none.",
+     "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+     "kind": null,
+     "theme": "other",
+     "effort": 2,
+     "impact": 2
+    },
+    {
+     "key": "pixelcraft:refresh:states.no_hover",
+     "department": "pixelcraft",
+     "id": "refresh:states.no_hover",
+     "title": "No hover state",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "The pointer over this control changes nothing (colour, shadow, underline), so it does not signal that it is clickable.",
+     "recommendation": "Add a hover style (tone shift, underline, elevation) for every interactive component variant.",
+     "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+     "kind": null,
+     "theme": "feel",
+     "effort": 1,
+     "impact": 2
+    },
+    {
+     "key": "pixelcraft:refresh:spacing.off_scale",
+     "department": "pixelcraft",
+     "id": "refresh:spacing.off_scale",
+     "title": "Spacing does not follow a consistent scale",
+     "severity": "minor",
+     "level": "verified",
+     "evidence": "Paddings, gaps and margins use many unrelated values, so the rhythm between elements looks accidental rather than designed.",
+     "recommendation": "Adopt a spacing scale (4/8-px steps: 4, 8, 12, 16, 24, 32) as tokens and replace one-off values with the nearest step.",
+     "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+     "kind": null,
+     "theme": "layout",
+     "effort": 2,
+     "impact": 2
+    }
+   ],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "ok"
+   },
+   "next": null,
+   "apps": [
+    {
+     "app": "refresh",
+     "name": "bruh",
+     "run": "now",
+     "at": "2026-11-09T18:13:15+00:00",
+     "overall": 84.2,
+     "categories": {
+      "visual": 96.0,
+      "usability": 81.0,
+      "consistency": 75.7
+     },
+     "coverage": 0.65,
+     "method": "pixelcraft-1.0",
+     "confidence": "low",
+     "commit": "a3933b9602f8",
+     "runs": 1
+    }
+   ],
+   "quality": {
+    "evaluation": "evaluated",
+    "value": 84.2,
+    "label": "Visual quality and usability",
+    "weight": 20,
+    "rubric": "pixelcraft/1",
+    "method": "pixelcraft-1.0",
+    "source": "PIXELCRAFT's overall audit score (mean over audited UIs)",
+    "criteria": [
+     "Visual Quality, Usability and Consistency, 100 points each, measured in Chromium at iPhone 17, iPhone 13 and desktop",
+     "Each metric scored 0.6 \u00d7 mean + 0.4 \u00d7 worst screen, so one bad screen counts",
+     "Areas without evidence are not tested and are excluded (coverage shown beside the score)"
+    ],
+    "basis": "Visual quality and usability",
+    "confidence": "low",
+    "coverage": 0.65,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "designcraft",
+   "title": "DESIGNCRAFT \u2014 game-design intelligence",
+   "family": "DESIGNCRAFT",
+   "role": "scored",
+   "summary": "levels, missions, story, progression and experience, from the game's own data",
+   "applicable": true,
+   "applies_because": "DESIGNCRAFT analyses game design",
+   "status": "refreshed",
+   "score": {
+    "value": 14,
+    "label": "Game design",
+    "confidence": "low",
+    "coverage": 0.25,
+    "ceiling": 89,
+    "categories": {
+     "level": 0.0,
+     "mission": 0.0,
+     "narrative": 16.7,
+     "progression": 16.7,
+     "agency": 5.0,
+     "difficulty": 68.0,
+     "worldbuilding": 1.0,
+     "variety": 17.0
+    }
+   },
+   "run": {
+    "id": "this report",
+    "at": "2026-11-09T18:15:36+00:00",
+    "commit": "a3933b9602f8",
+    "method": "d98e718b8f0c",
+    "runs": 0,
+    "source": "refreshed for this report"
+   },
+   "age_days": 0.0,
+   "findings": [
+    {
+     "key": "designcraft:storycraft.underdeveloped_character",
+     "department": "designcraft",
+     "id": "storycraft.underdeveloped_character",
+     "title": "6 named characters are barely present in the writing",
+     "severity": "major",
+     "level": "inferred",
+     "evidence": "Chad, Melissa, Dyno Dave, Kevin and 2 more are defined as characters but appear in at most one authored line and never speak. (facts verified in source: 6)",
+     "recommendation": "Give Chad, Melissa and Dyno Dave a voice: one line each where the player meets them, one more later.",
+     "source": "src/content/setters.ts:17",
+     "kind": null,
+     "theme": "story",
+     "effort": "low",
+     "impact": 3.2
+    }
+   ],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": true,
+    "ok": true,
+    "detail": "re-analysed read-only; the game's design data changed (or no recorded run)"
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "evaluated",
+    "value": 14,
+    "label": "Game design",
+    "weight": 15,
+    "rubric": "designcraft/1",
+    "method": "d98e718b8f0c",
+    "source": "DESIGNCRAFT's 100-point design score",
+    "criteria": [
+     "Level 15 \u00b7 Mission 15 \u00b7 Narrative 15 \u00b7 Progression 15 \u00b7 Agency 10 \u00b7 Difficulty 10 \u00b7 Worldbuilding 10 \u00b7 Variety 10",
+     "Untested criteria score 0 and raise the ceiling; having code earns nothing"
+    ],
+    "basis": "Game design",
+    "confidence": "low",
+    "coverage": 0.25,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "testcraft",
+   "title": "TestCraft \u2014 automated QA",
+   "family": "Studio",
+   "role": "qa",
+   "summary": "Browser QA for web games with Playwright + Chromium: smoke tests on desktop, phone and tablet emulation (errors, missing files, blank screens, overflow, canvas), scripted gameplay with assertions on game state and video capture, FPS / frame-time / heap profiling, visual regression (YIQ pixel diff, baselines), asset integrity (every file opened by format; GLBs through the Khronos validator; texture budgets), animation playback (GLB clips really move; sprite frames differ), the project's own Vitest/Jest suite, and HTML/JSON reports.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+   "quality": {
+    "evaluation": "not_evaluated",
+    "value": null,
+    "label": "Automated QA",
+    "weight": 15,
+    "rubric": "testcraft/1",
+    "method": null,
+    "source": "share of TestCraft output checks that passed",
+    "criteria": [
+     "Every check recorded in TestCraft's .studio.json records for this project",
+     "score = passed checks \u00f7 all checks \u00d7 100"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "why": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "assetcraft",
+   "title": "AssetCraft \u2014 asset management",
+   "family": "Studio",
+   "role": "catalogue",
+   "summary": "One asset catalogue for every project (SQLite in ~/.gitcraft/assetcraft): every department run registers its outputs with licence and provenance; scan existing projects; search across projects; versions on content change; exact and perceptual (dHash) duplicates; unused assets (not referenced by source); dependency tracing (glTF, Tiled, HTML/CSS); licence inventory with ATTRIBUTION.md and non-commercial flags; hash re-verification; hash-verified integration into a project (never overwriting silently); 3D-library sync; a browsable HTML catalogue.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+   "quality": {
+    "evaluation": "not_evaluated",
+    "value": null,
+    "label": "Asset licensing",
+    "weight": 5,
+    "rubric": "assetcraft/1",
+    "method": null,
+    "source": "the AssetCraft catalogue",
+    "criteria": [
+     "score = catalogued assets with a known licence \u00f7 all catalogued assets \u00d7 100"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "why": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "3d",
+   "title": "3D Department \u2014 ForgeCraft + MeshCraft",
+   "family": "3D Department",
+   "role": "maker",
+   "summary": "3D assets: route, generate, engine-check, library",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No 3D Department jobs reference this project."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "3D jobs succeeded",
+    "weight": 0,
+    "rubric": "jobs/1",
+    "method": null,
+    "source": "the 3D Department's job store",
+    "criteria": [
+     "score = succeeded jobs \u00f7 finished jobs \u00d7 100",
+     "Only applies when the 3D Department worked on this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "animcraft",
+   "title": "AnimCraft \u2014 rigging and animation",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Automatic rigging (humanoid, quadruped, chain/tentacle/tail) from mesh landmarks with heat-map skin weights (Mixamo bone names optional); procedural clips (idle, walk, run, wave, jump; quadruped walk/run/idle; chain wave/slither/sway/curl; object bob/spin/hover/squash/shake); world-space retargeting between rigs with different names and proportions (BVH, FBX, GLB sources); rigid-body physics drops baked to keyframes; sprite sheets from 3D clips (N directions) or frame folders; playback verification in three.js.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "audiocraft",
+   "title": "AudioCraft \u2014 game audio",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Sound effects, seamless ambiences, adaptive multi-stem music with MIDI source, character dialogue (Kokoro-82M neural TTS, CPU), loop-point detection, trimming, EBU R128 loudness normalisation, layering and WAV/OGG/MP3/Opus/FLAC conversion.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "cinematiccraft",
+   "title": "CinematicCraft \u2014 cinematics and video",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Camera choreography (orbit, dolly in/out, crane up, flyby, push-in zoom, handheld, static) over any GLB/FBX/OBJ/.blend scene with lighting presets (studio three-point, golden hour, night, overcast, dramatic, daylight) and optional HDR/equirect sky, rendered with Cycles to MP4 + editable .blend + an engine camera path (JSON) for in-game cutscenes; storyboards (PNG + PDF); animated title cards; trailer assembly with crossfades and a loudness-normalised music bed; gameplay capture from a web game.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "fxcraft",
+   "title": "FXCraft \u2014 visual effects",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Game-ready effects: flipbook atlases from particle simulations (fire, smoke, magic, energy/portal, rain, snow loops that repeat exactly; explosion, sparks, dust, splash, lightning, debris one-shots) with Phaser/PixiJS atlas JSON, GIF and MP4 previews; portable emitter presets (.fx.json) with a dependency-free three.js runtime, played in three.js r170; three.quarks particle systems (QuarksLoader JSON); Blender Voronoi destruction with baked rigid-body physics as an animated GLB.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "levelcraft",
+   "title": "LevelCraft \u2014 levels and maps",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Procedural dungeons (BSP rooms + corridors + doors), caves (cellular automata), completable platformer levels (jump-physics reachability solver), overworlds (biomes, A* roads with bridges between settlements, camps, resources) and towns (road grid, building plots with doors, plaza) \u2014 as Tiled TMJ maps and LDtk 1.5.3 projects with a generated tileset, entity/collision/navigation object layers, generic JSON, preview and a 3D blockout GLB, each solved and loaded in Phaser 3.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "materialcraft",
+   "title": "MaterialCraft \u2014 PBR materials and shaders",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Seamless procedural PBR materials (21 kinds: stone, cobblestone, brick, tiles, wood, planks, bark, metal, brushed metal, rust, fabric, leather, sand, grass, dirt, ice, lava, water, marble, concrete, snow) with dirt/moss/wear/wet weathering and a toon style; glTF metallic-roughness map sets (basecolor, normal GL/DX, roughness, metallic, AO, 16-bit height, packed ORM, emission), a sample sphere GLB, a three.js render and seam checks; seamless-izing of any image; toon gradient ramps; swatch sheets.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  },
+  {
+   "id": "worldcraft",
+   "title": "WorldCraft \u2014 procedural environments",
+   "family": "Studio",
+   "role": "maker",
+   "summary": "Terrains (island, archipelago, atoll, coast, mountains, canyon, volcano, plains) with hydraulic + thermal erosion, biomes, 16-bit heightmaps, normal/splat/biome maps and masks, vegetation and rock scatter, coastlines and a vertex-coloured GLB; caves (surface-nets meshes); physical skies (Blender Nishita) as equirect + HDR + cubemap with sun lighting; seamless time-looping FFT oceans; rule-based scatter on any heightmap.",
+   "applicable": true,
+   "applies_because": null,
+   "status": "no_data",
+   "score": null,
+   "run": null,
+   "age_days": null,
+   "findings": [],
+   "strengths": [],
+   "notes": [
+    "No outputs from this department were found for this project (its .studio.json records live beside its outputs)."
+   ],
+   "refresh": {
+    "attempted": false,
+    "ok": null,
+    "detail": null
+   },
+   "next": null,
+   "quality": {
+    "evaluation": "not_applicable",
+    "value": null,
+    "label": "Output checks passed",
+    "weight": 0,
+    "rubric": "outputs/1",
+    "method": null,
+    "source": "the department's .studio.json records (every output validated and hashed)",
+    "criteria": [
+     "score = output checks passed \u00f7 all output checks \u00d7 100",
+     "Only applies when the department made outputs for this project"
+    ],
+    "basis": null,
+    "confidence": null,
+    "coverage": null,
+    "previous": null,
+    "delta": null,
+    "compare": "first report"
+   }
+  }
+ ],
+ "reconciliation": {
+  "corroborated": [],
+  "conflicts": [],
+  "dependencies": [],
+  "gaps": [
+   {
+    "department": "playcraft",
+    "title": "PLAYCRAFT \u2014 game design and gameplay quality",
+    "detail": "Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays."
+   },
+   {
+    "department": "testcraft",
+    "title": "TestCraft \u2014 automated QA",
+    "detail": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence."
+   },
+   {
+    "department": "assetcraft",
+    "title": "AssetCraft \u2014 asset management",
+    "detail": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."
+   }
+  ]
+ },
+ "actions": [
+  {
+   "priority": "P0",
+   "theme": "a11y",
+   "title": "Accessibility and contrast: Accessibility: Zooming and scaling must not be disabled",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:refresh:axe.meta-viewport"
+   ],
+   "level": "verified",
+   "why": "axe-core rule meta-viewport (wcag2aa, wcag144): Zooming and scaling must not be disabled.",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/meta-viewport?application=axeAPI \u2014 Fix any of the following:   user-scalable=no on <meta> tag disables zooming on mobile devices",
+   "n": 1
+  },
+  {
+   "priority": "P1",
+   "theme": "touch",
+   "title": "Touch targets and mobile ergonomics: Fixed bars take too much of the screen",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:refresh:mobile.chrome"
+   ],
+   "level": "verified",
+   "why": "Fixed or sticky bars cover 100% of the phone screen height, leaving little room for content.",
+   "do": "Shrink or hide bars on scroll, or merge them.",
+   "n": 2
+  },
+  {
+   "priority": "P2",
+   "theme": "a11y",
+   "title": "Accessibility and contrast: Accessibility: All page content should be contained by landmarks",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:refresh:axe.region"
+   ],
+   "level": "verified",
+   "why": "axe-core rule region (best practice): All page content should be contained by landmarks.",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/region?application=axeAPI \u2014 Fix any of the following:   Some page content is not contained by landmarks",
+   "n": 3
+  },
+  {
+   "priority": "P2",
+   "theme": "other",
+   "title": "Content disappears at one screen size",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:refresh:resp.content_missing"
+   ],
+   "level": "verified",
+   "why": "At narrow, 'home' shows only 70% of the words other sizes show; hidden content on phones is a common source of 'where did it go?'.",
+   "do": "Reflow content instead of hiding it; move secondary content behind a disclosure rather than display: none.",
+   "n": 4
+  },
+  {
+   "priority": "P2",
+   "theme": "feel",
+   "title": "Feedback and game feel: No hover state",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:refresh:states.no_hover"
+   ],
+   "level": "verified",
+   "why": "The pointer over this control changes nothing (colour, shadow, underline), so it does not signal that it is clickable.",
+   "do": "Add a hover style (tone shift, underline, elevation) for every interactive component variant.",
+   "n": 5
+  },
+  {
+   "priority": "P2",
+   "theme": "layout",
+   "title": "Layout, spacing and consistency: Spacing does not follow a consistent scale",
+   "departments": [
+    "pixelcraft"
+   ],
+   "findings": [
+    "pixelcraft:refresh:spacing.off_scale"
+   ],
+   "level": "verified",
+   "why": "Paddings, gaps and margins use many unrelated values, so the rhythm between elements looks accidental rather than designed.",
+   "do": "Adopt a spacing scale (4/8-px steps: 4, 8, 12, 16, 24, 32) as tokens and replace one-off values with the nearest step.",
+   "n": 6
+  },
+  {
+   "priority": "P2",
+   "theme": "story",
+   "title": "Story, characters and world: 6 named characters are barely present in the writing",
+   "departments": [
+    "designcraft"
+   ],
+   "findings": [
+    "designcraft:storycraft.underdeveloped_character"
+   ],
+   "level": "inferred",
+   "why": "Chad, Melissa, Dyno Dave, Kevin and 2 more are defined as characters but appear in at most one authored line and never speak. (facts verified in source: 6)",
+   "do": "Give Chad, Melissa and Dyno Dave a voice: one line each where the player meets them, one more later.",
+   "n": 7
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: AssetCraft \u2014 asset management",
+   "departments": [
+    "assetcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+   "n": 8
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: PLAYCRAFT \u2014 game design and gameplay quality",
+   "departments": [
+    "playcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays.",
+   "n": 9
+  },
+  {
+   "priority": "P2",
+   "theme": "coverage",
+   "title": "No data: TestCraft \u2014 automated QA",
+   "departments": [
+    "testcraft"
+   ],
+   "findings": [],
+   "level": "unavailable",
+   "why": "this department has never analysed the project",
+   "do": "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+   "n": 10
+  },
+  {
+   "priority": "P3",
+   "theme": "engineering",
+   "title": "Engineering standard: Engineering standard (review): server inputs are validated",
+   "departments": [
+    "production"
+   ],
+   "findings": [
+    "production:standard:input_validation",
+    "production:standard:authorization",
+    "production:standard:rate_limit"
+   ],
+   "level": "inferred",
+   "why": "no validation library or validate() call in server code",
+   "do": null,
+   "n": 11
+  }
+ ],
+ "levels": {
+  "verified": 6,
+  "observed": 0,
+  "inferred": 4
+ },
+ "unavailable": [],
+ "not_refreshed": [],
+ "title": "Bruh",
+ "gates": {
+  "production": null,
+  "verdict": null,
+  "status": null,
+  "release_status": null,
+  "criteria": [],
+  "approvals": [],
+  "note": "No production has run for this project, so there is no Director verdict and no release gates."
+ },
+ "identity": {
+  "name": "bruh",
+  "repo": "scottyfncodes/bruh",
+  "url": "https://github.com/scottyfncodes/bruh",
+  "kind": "game",
+  "maturity": "finished",
+  "branch": "main",
+  "commit": "a3933b9602f8",
+  "commit_source": "project checkout",
+  "version": "0.1.0",
+  "version_source": "package.json \u00b7 git a3933b9",
+  "production": null,
+  "verdict": null,
+  "production_status": null,
+  "release_status": null
+ },
+ "changes": {
+  "first": true,
+  "note": "This is the first GITCRAFT report for this project: future reports will compare against it."
+ },
+ "trend": [
+  {
+   "report_id": "scottyfncodes--bruh/20261109T181255Z",
+   "at": "2026-11-09T18:15:40+00:00",
+   "overall": 62.2,
+   "method": "gitcraft-score/2",
+   "departments": {
+    "production": {
+     "value": 81.2,
+     "rubric": "standard/1"
+    },
+    "playcraft": {
+     "value": null,
+     "rubric": "playcraft/1"
+    },
+    "pixelcraft": {
+     "value": 84.2,
+     "rubric": "pixelcraft/1"
+    },
+    "designcraft": {
+     "value": 14,
+     "rubric": "designcraft/1"
+    },
+    "testcraft": {
+     "value": null,
+     "rubric": "testcraft/1"
+    },
+    "assetcraft": {
+     "value": null,
+     "rubric": "assetcraft/1"
+    },
+    "3d": {
+     "value": null,
+     "rubric": "jobs/1"
+    },
+    "animcraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    },
+    "audiocraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    },
+    "cinematiccraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    },
+    "fxcraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    },
+    "levelcraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    },
+    "materialcraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    },
+    "worldcraft": {
+     "value": null,
+     "rubric": "outputs/1"
+    }
+   }
+  }
+ ],
+ "top_actions": [
+  {
+   "n": 1,
+   "priority": "P0",
+   "title": "Accessibility and contrast: Accessibility: Zooming and scaling must not be disabled",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/meta-viewport?application=axeAPI \u2014 Fix any of the following:   user-scalable=no on <meta> tag disables zooming on mobile devices",
+   "why": "axe-core rule meta-viewport (wcag2aa, wcag144): Zooming and scaling must not be disabled.",
+   "departments": [
+    "pixelcraft"
+   ],
+   "level": "verified",
+   "impact": "High",
+   "impact_basis": "P0: a measured blocker",
+   "effort": "S",
+   "effort_basis": "department estimate"
+  },
+  {
+   "n": 2,
+   "priority": "P1",
+   "title": "Touch targets and mobile ergonomics: Fixed bars take too much of the screen",
+   "do": "Shrink or hide bars on scroll, or merge them.",
+   "why": "Fixed or sticky bars cover 100% of the phone screen height, leaving little room for content.",
+   "departments": [
+    "pixelcraft"
+   ],
+   "level": "verified",
+   "impact": "High",
+   "impact_basis": "P1: a measured major finding or one several departments flag",
+   "effort": "M",
+   "effort_basis": "department estimate"
+  },
+  {
+   "n": 3,
+   "priority": "P2",
+   "title": "Accessibility and contrast: Accessibility: All page content should be contained by landmarks",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/region?application=axeAPI \u2014 Fix any of the following:   Some page content is not contained by landmarks",
+   "why": "axe-core rule region (best practice): All page content should be contained by landmarks.",
+   "departments": [
+    "pixelcraft"
+   ],
+   "level": "verified",
+   "impact": "Medium",
+   "impact_basis": "P2: an inferred major finding, a measured minor one or a gap",
+   "effort": "S",
+   "effort_basis": "department estimate"
+  }
+ ],
+ "major_findings": [
+  {
+   "key": "pixelcraft:refresh:axe.meta-viewport",
+   "department": "pixelcraft",
+   "id": "refresh:axe.meta-viewport",
+   "title": "Accessibility: Zooming and scaling must not be disabled",
+   "severity": "critical",
+   "level": "verified",
+   "evidence": "axe-core rule meta-viewport (wcag2aa, wcag144): Zooming and scaling must not be disabled.",
+   "recommendation": "See https://dequeuniversity.com/rules/axe/4.10/meta-viewport?application=axeAPI \u2014 Fix any of the following:   user-scalable=no on <meta> tag disables zooming on mobile devices",
+   "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+   "kind": null,
+   "theme": "a11y",
+   "effort": 1,
+   "impact": 5
+  },
+  {
+   "key": "pixelcraft:refresh:mobile.chrome",
+   "department": "pixelcraft",
+   "id": "refresh:mobile.chrome",
+   "title": "Fixed bars take too much of the screen",
+   "severity": "major",
+   "level": "verified",
+   "evidence": "Fixed or sticky bars cover 100% of the phone screen height, leaving little room for content.",
+   "recommendation": "Shrink or hide bars on scroll, or merge them.",
+   "source": "history/reports/scottyfncodes--bruh/20261109T181255Z/refresh/pixelcraft/audit.json",
+   "kind": null,
+   "theme": "touch",
+   "effort": 2,
+   "impact": 3
+  },
+  {
+   "key": "designcraft:storycraft.underdeveloped_character",
+   "department": "designcraft",
+   "id": "storycraft.underdeveloped_character",
+   "title": "6 named characters are barely present in the writing",
+   "severity": "major",
+   "level": "inferred",
+   "evidence": "Chad, Melissa, Dyno Dave, Kevin and 2 more are defined as characters but appear in at most one authored line and never speak. (facts verified in source: 6)",
+   "recommendation": "Give Chad, Melissa and Dyno Dave a voice: one line each where the player meets them, one more later.",
+   "source": "src/content/setters.ts:17",
+   "kind": null,
+   "theme": "story",
+   "effort": "low",
+   "impact": 3.2
+  }
+ ],
+ "regressions": [],
+ "blockers": [
+  {
+   "title": "Accessibility and contrast: Accessibility: Zooming and scaling must not be disabled",
+   "departments": [
+    "pixelcraft"
+   ],
+   "level": "verified",
+   "do": "See https://dequeuniversity.com/rules/axe/4.10/meta-viewport?application=axeAPI \u2014 Fix any of the following:   user-scalable=no on <meta> tag disables zooming on mobile devices",
+   "why": "axe-core rule meta-viewport (wcag2aa, wcag144): Zooming and scaling must not be disabled.",
+   "open_since": "2026-11-09T18:15:40+00:00",
+   "first_seen_now": true
+  }
+ ],
+ "summary": [
+  "Bruh scores **62.2/100** (blocked, medium confidence, 53% of the applicable weight evaluated).",
+  "No production has run for this project, so there is no Director verdict or release gate.",
+  "3 department(s) evaluated, 3 applicable but not evaluated (playcraft, testcraft, assetcraft).",
+  "1 unresolved blocker(s): resolve them before anything else.",
+  "Highest-impact next action: Accessibility and contrast: Accessibility: Zooming and scaling must not be disabled."
+ ],
+ "next_actions": [
+  "[P0] Accessibility and contrast: Accessibility: Zooming and scaling must not be disabled \u2014 See https://dequeuniversity.com/rules/axe/4.10/meta-viewport?application=axeAPI \u2014 Fix any of the following:   user-scalable=no on <meta> tag disables zooming on mobile devices",
+  "[P1] Touch targets and mobile ergonomics: Fixed bars take too much of the screen \u2014 Shrink or hide bars on scroll, or merge them.",
+  "Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays.",
+  "Run TestCraft (testcraft_smoke / testcraft_play) on the build for automated QA evidence.",
+  "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files.",
+  "Report again after the changes land (Run GITCRAFT report) to measure progress against this report."
+ ],
+ "creative": null,
+ "paths": {
+  "dir": "/home/user/GITCRAFT/history/reports/scottyfncodes--bruh/20261109T181255Z",
+  "json": "/home/user/GITCRAFT/history/reports/scottyfncodes--bruh/20261109T181255Z/report.json",
+  "markdown": "/home/user/GITCRAFT/history/reports/scottyfncodes--bruh/20261109T181255Z/report.md",
+  "html": "/home/user/GITCRAFT/history/reports/scottyfncodes--bruh/20261109T181255Z/report.html"
+ }
+}
