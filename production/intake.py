@@ -174,7 +174,7 @@ def parse(prompt, project=None, overrides=None):
             "attribution": {"required": web and not existing}, "mode": _mode(prompt, project, existing, overrides),
             "deploy": {"target": None}, "analytics": {"provider": None},
             "evaluation": {"target": "auto"},   # source-vs-build policy for every browser check: auto | build | source
-            "backend": {"provider": None, "needed": bool(feats.get("backend")), "because": _w(t, RULES["features"]["backend"])}, "because": because, "assumptions": assumptions, "questions": questions}
+            "backend": {"provider": None, "needed": bool(feats.get("backend")), "because": _w(t, RULES["features"]["backend"])}, "because": because, "assumptions": assumptions, "questions": questions, "optional_criteria": []}
     if overrides:
         spec = merge(spec, overrides)
         # what follows from the deliverable is re-derived when an override changed it (unless also overridden), so
@@ -257,4 +257,30 @@ def acceptance(spec):
             + (", game art/audio/levels and saved progress intact" if d == "game" else "") + " (unless approved)", "qa.preserve")
     if spec["features"].get("deploy"): add("deployment", "Deployed and the live URL verified (needs approval)", "release.deploy")
     add("release_ready", "Release report written with every criterion's evidence measured on the final build", "release.report")
+    return requirements(spec, out)
+
+
+def implied(spec):
+    """Asset criteria GITCRAFT added on its own (the quality bar or a default), not named in the prompt: the only ones a
+    person may make optional. Everything stated, and every standard GITCRAFT holds a release to, stays required."""
+    a, f, assum = spec["assets"], spec.get("features") or {}, " ".join(spec.get("assumptions") or [])
+    out = set()
+    if a.get("sfx") and "'polished' game: sound effects included" in assum: out.add("asset_sfx")
+    if a.get("music") and not f.get("music"): out.add("asset_music")   # added because sound was asked or implied
+    if a.get("identity") and not f.get("identity"): out.add("asset_identity")
     return out
+
+
+def requirements(spec, crits):
+    """Each criterion carries `required` and `source` (stated | implied | standard). A criterion becomes optional only when the
+    person made it so (spec optional_criteria, set by the Decision Room's 'extras' decision) and only if it was implied;
+    an optional request for anything else is refused (spec optional_refused, a plan problem), never applied silently."""
+    imp = implied(spec)
+    stated = {c for c in ("asset_sfx", "asset_music", "asset_ambience", "asset_voice", "asset_levels", "asset_vfx", "asset_materials", "asset_world",
+                          "asset_models", "asset_identity", "asset_animation", "asset_trailer", "backend", "deployment", "features_work")} - imp
+    want = set(spec.get("optional_criteria") or [])
+    spec["optional_refused"] = sorted(want - imp)
+    for c in crits:
+        c["source"] = "implied" if c["id"] in imp else "stated" if c["id"] in stated else "standard"
+        c["required"] = not (c["id"] in want and c["id"] in imp)
+    return crits

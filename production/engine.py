@@ -126,7 +126,7 @@ def _upstream(prod, t):
     out = []
     for d in t["depends_on"]:
         e = eff(prod, d)
-        out.append({"id": e["id"], "state": e["state"], "ship": e.get("ship"), "outputs": e.get("outputs", []), "result": e.get("result"),
+        out.append({"id": e["id"], "state": e["state"], "ship": e.get("ship"), "outputs": e.get("outputs", []), "result": e.get("result"), "owner_task": e.get("rework_of") or e["id"],
                     "license": (e.get("result") or {}).get("output_license") or (e.get("work_order") or {}).get("license"),
                     "attribution": (e.get("result") or {}).get("attribution")})
     return out
@@ -226,7 +226,8 @@ def _discover_and_plan(prod):
         if cid in measured and cid not in have:   # planning may add criteria (the project's existing assets), never remove one
             spec["acceptance"].insert(-1, {"id": cid, "text": text, "measured_by": "planning: the project has assets"})
     unmeasured = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
-    problems = planner.validate(pl, disc)
+    problems = planner.validate(pl, disc) + [f"optional_criteria: {c} was named in the prompt or is a GITCRAFT release standard, so it stays required "
+                                             "(only extras GITCRAFT added can be made optional)" for c in spec.get("optional_refused") or []]
     if "qa.preserve" in pl["tasks"]:   # the baseline lives in the production store; the project is only read
         bp = os.path.join(prod["store"], "baseline.json")
         if not os.path.exists(bp): store.write_json(bp, maturity.baseline(p))
@@ -553,7 +554,8 @@ def _ready_tasks(prod):
             _set(prod, t, BLOCKED, blocked_by=[eff(prod, d)["id"] for d in dead],
                  reason="upstream did not pass: " + ", ".join(f"{eff(prod, d)['id']} ({eff(prod, d)['state']})" for d in dead))
             continue
-        if all(s == "ok" for s in states.values()): ready.append(t)
+        settled = all(eff(prod, d)["state"] in TERMINAL for d in t.get("settles") or [] if d in prod["tasks"])   # optional work: any end state
+        if all(s == "ok" for s in states.values()) and settled: ready.append(t)
     return ready
 
 
@@ -761,8 +763,9 @@ def _finish(prod, t, res):
              + ", ".join(f["file"] for f in res.get("files") or [])[:600], approval="replace_assets", consolidated=True); return
     if cls == "approval":
         _set(prod, t, NEEDS_APPROVAL, reason=res.get("reason"), approval=res.get("approval")); return
-    if cls == "blocked":
-        _set(prod, t, BLOCKED, reason=res.get("reason"), install=res.get("install"), alternatives=res.get("alternatives")); return
+    if cls == "blocked":   # a department that reports blocked lacks a runtime or capability here: unavailable, never a defect
+        _set(prod, t, BLOCKED, reason=res.get("reason"), install=res.get("install"), alternatives=res.get("alternatives"),
+             unavailable=t["kind"] in ("studio", "forgecraft", "designcraft")); return
     if cls in ("execution",) and len([a for a in t["attempts"] if a.get("outcome") == "execution"]) <= t["retries"]:
         _set(prod, t, PENDING, reason=f"retrying after an execution failure: {att['error']}"); return
     if cls in ("execution", "request") or res.get("failure") in ("handoff", "conflict"):
@@ -798,9 +801,14 @@ def _integrated(prod):
 
 
 def _remediate(prod, t, res, gr):
-    """A failed QA gate becomes a fix work order and a re-verification of the modified project."""
-    if t["stage"] not in ("qa", "release") or t["kind"] == "builtin" and t["action"] == "release": return
+    """A failed QA gate becomes a fix work order and a re-verification of the modified project. Plan v2 routes a failure to the
+    department that owns it (_route): a department's own output failing its gate, or QA finding a defective file that
+    department produced, goes back to that department; everything else is the agent's (code)."""
     if (prod["spec"].get("mode") or {}).get("workflow") == "review": return   # review measures; it never orders changes
+    if prod.get("plan_version", 1) >= 2:
+        r = _route(prod, t, res)
+        if r: return _department_rework(prod, t, r)
+    if t["stage"] not in ("qa", "release") or t["kind"] == "builtin" and t["action"] == "release": return
     root = t.get("chain") or t["id"]; rnd = (t.get("round") or 0) + 1
     maxr = prod["spec"]["quality"].get("max_rounds", 2)
     if rnd > maxr:
@@ -816,7 +824,8 @@ def _remediate(prod, t, res, gr):
                                 "findings": items, "instructions": ["Change the project to address the findings (keep every existing feature).",
                                                                     "Submit the files you changed; the re-verification measures the new project state."],
                                 "expected": []})
-    fix.update(fix_for=t["id"], failed_fingerprint=t.get("measured_fingerprint"), chain=root, round=rnd)
+    fix.update(fix_for=t["id"], failed_fingerprint=t.get("measured_fingerprint"), chain=root, round=rnd, routed_to="agent",
+               routed_because="a code or wiring finding (no department output is at fault)")
     rv = planner.T(rv_id, f"{t['title']} — re-verification {rnd}", t["stage"], t["kind"], department=t["department"], action=t["action"],
                    params=copy.deepcopy(t["params"]), deps=[fix_id], gate=copy.deepcopy(t["gate"]), resources=t["resources"], retries=t["retries"],
                    timeout=t["timeout"], criterion=t.get("criterion"))
@@ -826,6 +835,88 @@ def _remediate(prod, t, res, gr):
     prod["order"][i:i] = [fix_id, rv_id]
     t["superseded_by"] = rv_id
     store.event(prod, "remediation", task=t["id"], fix=fix_id, reverify=rv_id, round=rnd, findings=len(items))
+
+
+REWORK_SEED = 1009   # a department re-run varies its seed by this per round (every Studio action accepts `seed`): deterministic
+DEPARTMENT_ROUNDS = 2   # D5: two re-runs per owning department, then a person decides; never an unbounded automatic loop
+
+
+def _route(prod, t, res):
+    """(producer task ids, why) when a department owns the failure, else None (the agent's).
+      - a production-stage department task whose own gate failed: that department
+      - qa.assets (TestCraft) failing on files that integration committed: the department that produced each file"""
+    if t["stage"] == "production" and t["kind"] in ("studio", "forgecraft"):
+        return [t.get("chain") or t["id"]], f"{t['owner']}'s own output failed its gate"
+    if t.get("department") == "testcraft" and t.get("action") == "assets":
+        folder = os.path.relpath((t.get("params") or {}).get("folder", "").replace("$project", _project(prod)), _project(prod))
+        bad = [row.get("path") for c in res.get("checks") or [] if not c.get("ok") for row in (c.get("detail") or []) if isinstance(row, dict)]
+        led = {m["dest_rel"]: m["task"] for m in _integrated(prod)}
+        owners = [led.get(os.path.normpath(os.path.join(folder, b))) for b in bad if b]
+        if owners and all(owners):   # every defective file is a department's output: route to them; anything else is the agent's
+            return sorted(set(owners)), "qa.assets found defective files produced by " + ", ".join(sorted({prod["tasks"][o]["owner"] for o in owners}))
+    return None
+
+
+def _rework_round(prod, root):
+    return 1 + sum(1 for x in prod["tasks"].values() if x.get("rework_of") == root)
+
+
+def _department_rework(prod, t, route, force=False):
+    """Send the work back to the producing department(s): a re-run of the same action with its seed varied, re-integrated when it
+    had shipped, then the failed check again. At most max_rounds re-runs per producer; after that a required criterion is
+    escalated to a person (an optional one is recorded as not delivered), never retried automatically."""
+    producers, why = route
+    maxr = DEPARTMENT_ROUNDS
+    qa_root = None if t["stage"] == "production" else (t.get("chain") or t["id"])
+    new_integrations = []
+    for p in producers:
+        rnd = _rework_round(prod, p)
+        src = prod["tasks"][p]
+        if rnd > maxr and not force:
+            _escalate(prod, p, src, f"{why}; {maxr} re-run(s) by {src['owner']} did not fix it", origin=t["id"]); continue
+        rid = f"{p}.r{rnd}"
+        params = copy.deepcopy(src["params"])
+        if src["kind"] == "studio": params["seed"] = int(params.get("seed") or 0) + REWORK_SEED * rnd
+        rv = planner.T(rid, f"{src['title']} — rework {rnd} by its department", src["stage"], src["kind"], department=src.get("department"), action=src.get("action"),
+                       params=params, deps=list(src["depends_on"]), gate=copy.deepcopy(src["gate"]), ship=copy.deepcopy(src.get("ship")),
+                       resources=src["resources"], retries=src["retries"], timeout=src["timeout"], criterion=src.get("criterion"))
+        rv.update(chain=p, round=rnd, reverifies=eff(prod, p)["id"], rework_of=p, routed_to=src["owner"], routed_because=why, optional=src.get("optional"))
+        cur = eff(prod, p)
+        prod["tasks"][rid] = rv; prod["order"].insert(prod["order"].index(cur["id"]) + 1, rid); cur["superseded_by"] = rid
+        integ = f"integrate.{p}"
+        if qa_root and integ in prod["tasks"]:   # the old file is in the project: integrate the re-made one (same transactional path)
+            iid = f"{integ}.r{rnd}"
+            it = planner.T(iid, f"Re-integrate {p} after its rework", "integration", "builtin", action="integrate", params={"v2": True}, deps=[p],
+                           resources=["integration"], criterion="asset_integrity")
+            it.update(reintegrates=integ, routed_to="Production Director", routed_because=f"re-made by {src['owner']}")
+            prod["tasks"][iid] = it; prod["order"].insert(prod["order"].index(integ) + 1, iid); new_integrations.append(iid)
+        store.event(prod, "rework", task=p, rework=rid, round=rnd, owner=src["owner"], because=why)
+    if qa_root and new_integrations:   # the failed check measures again once every re-made file is integrated
+        rnd = (t.get("round") or 0) + 1
+        rv_id = f"{qa_root}.r{rnd}"
+        rv = planner.T(rv_id, f"{t['title']} — re-verification {rnd}", t["stage"], t["kind"], department=t["department"], action=t["action"],
+                       params=copy.deepcopy(t["params"]), deps=new_integrations, gate=copy.deepcopy(t["gate"]), resources=t["resources"], retries=t["retries"],
+                       timeout=t["timeout"], criterion=t.get("criterion"))
+        rv.update(chain=qa_root, round=rnd, reverifies=t["id"], routed_to=t["owner"], routed_because=why)
+        prod["tasks"][rv_id] = rv; prod["order"].insert(prod["order"].index(t["id"]) + 1, rv_id); t["superseded_by"] = rv_id
+
+
+def _escalate(prod, p, src, why, origin=None):
+    """A required criterion a department could not fix in max_rounds: one decision for a person (retry once more, or leave it
+    failed). An optional one is not escalated: it is recorded as not delivered and the release can still be READY."""
+    crit = src.get("criterion")
+    req = next((c.get("required", True) for c in prod["spec"]["acceptance"] if c["id"] == crit), True)
+    if not req:
+        prod.setdefault("decisions", []).append(f"optional not delivered: {crit} ({why})")
+        store.event(prod, "optional_not_delivered", task=p, criterion=crit, because=why); return
+    eid = f"escalate.{p}"
+    if eid in prod["tasks"] and prod["tasks"][eid]["state"] == NEEDS_APPROVAL: return
+    e = planner.T(eid, f"Decide: {src['title']} still fails after its department's re-runs", src["stage"], "builtin", action="escalate")
+    e.update(escalates=p, origin=origin, routed_to="person", routed_because=why, gate=[])
+    prod["tasks"][eid] = e; prod["order"].append(eid)
+    _set(prod, e, NEEDS_APPROVAL, reason=f"{why}. Approve to let {src['owner']} try once more (production_approve task={eid}); decline to leave {crit} failed "
+         "(the release cannot be READY). Changing the department is a plan revision (production_revise).")
+    store.event(prod, "escalated", task=p, criterion=crit, because=why)
 
 
 # ---------------------------------------------------------------- agent hand-back and approvals
@@ -929,6 +1020,7 @@ def replace_assets_request(prod):
 def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
     prod = store.load(pid, store_dir)
     if task == "replace_assets": return _approve_replace(pid, approved, note, store_dir)
+    if task.startswith("escalate."): return _approve_escalation(pid, task, approved, note, store_dir)
     with store.lock(prod):
         prod = store.load(pid, store_dir)
         t = prod["tasks"].get(task)
@@ -948,6 +1040,27 @@ def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
             _set(prod, t, PENDING, reason="waiting for the new concepts", outputs=[], result=None)
         else:
             _set(prod, t, SKIPPED, reason=f"declined by a person{': ' + note if note else ''}")
+        store.save(prod)
+    return status(prod)
+
+
+def _approve_escalation(pid, task, approved, note, store_dir):
+    """A person's decision on an escalated failure: approved → its department re-runs once more (recorded as granted by a
+    person, beyond max_rounds); declined → the criterion stays failed. Never a pass."""
+    prod = store.load(pid, store_dir)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        e = prod["tasks"].get(task)
+        if not e or e["state"] != NEEDS_APPROVAL: raise ValueError(f"{task} is not waiting for a decision")
+        p = e["escalates"]; src = prod["tasks"][p]
+        if approved:
+            o = eff(prod, e.get("origin") or p)   # the check that failed: the department's own gate, or the QA check that found the file
+            _department_rework(prod, o, ([p], f"a person asked for one more re-run{': ' + note if note else ''}"), force=True)
+            _set(prod, e, PASSED, reason="a person granted one more re-run")
+        else:
+            _set(prod, e, SKIPPED, reason=f"declined by a person: {src.get('criterion')} stays failed" + (f" — {note}" if note else ""))
+        prod.setdefault("decisions", []).append(f"{'approved' if approved else 'declined'}: {task}" + (f" — {note}" if note else ""))
+        store.event(prod, "approval", task=task, approved=approved, note=note)
         store.save(prod)
     return status(prod)
 
@@ -987,7 +1100,7 @@ def _release(prod, t, out_dir):
     stale = [q["id"] for q in (eff(prod, i) for i in prod["order"]) if q["stage"] in ("qa", "release") and q["state"] == PASSED
              and q.get("measured_fingerprint") not in (None, fp)]
     checks = [{"name": f"criterion {a['id']}: {a['text']}", "ok": a["status"] in _report.PASSING, "detail": a.get("why") or a.get("advisories"),
-               **({"category": "unverified", "cause": a.get("cause") or a["status"]} if a["status"] in ("unverified", "blocked") else
+               **({"category": "unverified", "cause": a.get("cause") or a["status"]} if a["status"] in ("unverified", "blocked", "unavailable") else
                   {"category": "advisory"} if a["status"] == "advisory" else {})} for a in acc]
     checks.append({"name": "every QA result was measured on the build being released", "ok": not stale,
                    "detail": (stale + ([prod["unstable"]["reason"]] if prod.get("unstable") else [])) if stale else None})

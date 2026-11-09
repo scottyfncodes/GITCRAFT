@@ -231,6 +231,30 @@ v2  scaffold → identity (→ design-stage tasks, PR 4 hook) → build         
 Rollback: an engine without v2 support reads a v2 record's `depends_on` edges only, which is stricter and still correct;
 re-plan an in-flight v2 production with `production_revise` after a rollback.
 
+### Optional criteria, unavailable capabilities and ownership (plan v2)
+
+- **Required by default.** Every acceptance criterion carries `required` and `source`: *stated* (named in the prompt),
+  *standard* (a release standard GITCRAFT holds, e.g. loads everywhere, licences, the engineering standard) or *implied*
+  (an extra GITCRAFT added from the quality bar: sound effects for a "polished" game, music that comes with sound, an
+  original identity). Only implied extras can become optional, and only by a person's answer to the Decision Room's
+  **Extras** decision (recommended: required). Asking to make anything else optional is a plan problem, never applied.
+  Changing it after approval is a material revision.
+- **Optional never blocks.** An optional asset's integration *settles* the final integration (it is waited for in any end
+  state) and measures the asset's own criterion, never `asset_integrity`. If it is not delivered, the criterion reads
+  `optional_missing`: the verdict can still be READY, and the report and release summary list it under
+  "Optional, not delivered". A required criterion is unchanged: if it does not pass, the release is not READY.
+- **Unavailable is not a defect.** A department that reports `blocked` (its runtime or capability is missing here) is
+  marked unavailable. A required criterion it measures reads `unavailable` → INCOMPLETE (never READY, never NOT READY).
+- **Routed to the owner.** A department whose own output fails its gate re-runs (same action, seed varied by
+  `REWORK_SEED` per round, deterministic). When `qa.assets` finds a defective file that integration committed, the
+  department that produced it re-runs, the file is re-integrated (transactionally, under its original producer), and
+  `qa.assets` measures again. Anything else, or a file no department produced, is the agent's fix work order. Every
+  rework and fix records `routed_to` and `routed_because`.
+- **Bounded, then a person.** Two re-runs per owning department (`DEPARTMENT_ROUNDS`, D5). After that a required
+  criterion becomes one `escalate.<task>` decision: approve for exactly one more re-run, or decline (the criterion stays
+  failed). An optional one is recorded as not delivered instead of asking anyone. Changing department is a plan revision.
+- **v1 records are unchanged**: no optional criteria, no routing, no escalation.
+
 ## Task states
 
 | State | Meaning |

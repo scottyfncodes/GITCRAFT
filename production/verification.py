@@ -113,9 +113,11 @@ def release_summary(prod, acc=None):
     rec = live_record(prod)
     dep = deployment_status(prod, rec)
     dims = {"functional": [], "security": [], "visual": []}
-    unverified, advisories, blockers = [], [], []
+    unverified, advisories, blockers, optional = [], [], [], []
     for a in acc:
         if a["id"] in NOT_DIMENSION: continue
+        if a["status"] == "optional_missing":   # optional by a person's decision: listed, never a blocker, never "incomplete"
+            optional.append({"criterion": a["id"], "detail": "; ".join(map(str, a.get("why") or []))[:300]}); continue
         cat = {"passed": PASS, "advisory": ADVISORY, "failed": BLOCKER, "not_planned": UNVERIFIED}.get(a["status"], UNVERIFIED)
         dim = "security" if a["id"] in SECURITY else "visual" if a["id"] in VISUAL else "functional"
         dims[dim].append(cat)
@@ -138,7 +140,7 @@ def release_summary(prod, acc=None):
         line = "DEPLOYED · VERIFICATION INCOMPLETE" if dep["status"] in ("live_verified", "deployed_incomplete") else "VERIFICATION INCOMPLETE"
     else: line = v   # READY, or READY — deployment <state> (the release passed; the deploy is still owed or unverified)
     return {"deployment": dep, "functional": st["functional"], "security": st["security"], "visual": st["visual"],
-            "blockers": blockers, "unverified": unverified, "advisories": advisories, "verdict": v, "release_status": line,
+            "blockers": blockers, "unverified": unverified, "advisories": advisories, "optional_not_delivered": optional, "verdict": v, "release_status": line,
             "verification_complete": not unverified and v != "INCOMPLETE"}
 
 
@@ -151,4 +153,6 @@ def markdown(rs):
     if rs["blockers"]: L += ["**Blockers** (confirmed failures)", ""] + [f"- {b['criterion']}: {b['detail']}" for b in rs["blockers"][:20]] + [""]
     if rs["unverified"]: L += ["**Unverified** (could not be verified; not application failures)", ""] + [f"- {u['criterion']} [{u['cause']}]: {u['detail']}" for u in rs["unverified"][:20]] + [""]
     if rs["advisories"]: L += ["**Advisories** (non-blocking)", ""] + [f"- {a['criterion']}: {a['detail']}" for a in rs["advisories"][:20]] + [""]
+    if rs.get("optional_not_delivered"): L += ["**Optional, not delivered** (made optional by a person; listed, not blocking)", ""] + \
+                                             [f"- {o['criterion']}: {o['detail']}" for o in rs["optional_not_delivered"][:20]] + [""]
     return L

@@ -318,8 +318,17 @@ def _graph_v2(spec, tasks, decisions):
     shipping = [d for d in ia["depends_on"] if (ids.get(d) or {}).get("ship")]
     per = [T(f"integrate.{s}", f"Integrate {s} into the project (staged, hash-verified, committed atomically)", "integration", "builtin",
              action="integrate", params={"v2": True}, deps=[s], resources=["integration"], criterion="asset_integrity") for s in shipping]
+    # optional assets (a person made an implied extra optional in the Decision Room): their integration is waited for
+    # (settles: passed, failed, blocked or skipped), never required, so a missing optional asset cannot block the release
+    req = {c["id"]: c.get("required", True) for c in spec.get("acceptance") or []}
+    opt = {s for s in shipping if ids[s].get("criterion") and not req.get(ids[s]["criterion"], True)}
+    for x in per:
+        if x["depends_on"][0] in opt:   # it measures the optional asset's own criterion, never the required asset_integrity
+            x["optional"] = True; x["criterion"] = ids[x["depends_on"][0]]["criterion"]; ids[x["depends_on"][0]]["optional"] = True
     final = T("integrate.final", "Final integration: every artifact committed, hashes and the asset manifest consistent", "integration", "builtin",
-              action="integrate_final", deps=[x["id"] for x in per] or ["foundation.scaffold"], resources=["integration"], criterion="asset_integrity")
+              action="integrate_final", deps=[x["id"] for x in per if not x.get("optional")] or ["foundation.scaffold"], resources=["integration"],
+              criterion="asset_integrity")
+    if opt: final["settles"] = [x["id"] for x in per if x.get("optional")]
     i = tasks.index(ia); tasks[i:i + 1] = per + [final]
     # the code build: the foundation, the identity and any design-stage task (the hook for pre-build design deliverables)
     design = [t["id"] for t in tasks if t["stage"] == "design"]
@@ -569,7 +578,7 @@ def _icon_tasks(spec, proj, identity, adir):
 def _reaches(tasks, a, b, seen=None):
     """True when task a depends (directly or not) on task b."""
     seen = seen if seen is not None else set()
-    for d in tasks[a]["depends_on"]:
+    for d in tasks[a]["depends_on"] + list(tasks[a].get("settles") or []):
         if d == b: return True
         if d in tasks and d not in seen:
             seen.add(d)
@@ -584,7 +593,7 @@ def parallel_groups(plan):
     def lv(t, seen=()):
         if t in level: return level[t]
         if t in seen: raise ValueError(f"dependency cycle through {t}")
-        deps = tasks[t]["depends_on"]
+        deps = tasks[t]["depends_on"] + [x for x in tasks[t].get("settles") or [] if x in tasks]   # a settles edge orders like a dependency
         for x in tasks[t].get("consumes") or []:   # a soft edge never orders the schedule, but it must not close a cycle
             if x in tasks and _reaches(tasks, x, t): raise ValueError(f"dependency cycle through {t} (consumes {x}, which depends on it)")
         level[t] = 0 if not deps else 1 + max(lv(x, seen + (t,)) for x in deps)
@@ -680,6 +689,8 @@ def validate(plan, disc=None):
             if dep not in tasks: problems.append(f"{t['id']}: unknown dependency {dep}")
         for dep in t.get("consumes") or []:
             if dep not in tasks: problems.append(f"{t['id']}: consumes an unknown task {dep}")
+        for dep in t.get("settles") or []:
+            if dep not in tasks: problems.append(f"{t['id']}: settles on an unknown task {dep}")
     problems = list(plan.get("replacement_problems") or []) + problems
     if len(problems) > len(plan.get("replacement_problems") or []): return problems   # the graph itself is broken: ordering it would be meaningless
     try: parallel_groups(plan)

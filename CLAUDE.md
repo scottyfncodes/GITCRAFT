@@ -160,6 +160,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   (`builtins.integrate*`), the engine's scheduling, hand-offs, ownership checks, `replace_assets` approval or recovery: v1 records keep the v1
   graph, every v2 integration is transactional, integration alone owns `gitcraft.assets.json`, the replace_assets approval is one request for
   an exact file set, no required criterion is dropped, and the review-only plan is identical in both versions (`docs/production.md`).
+  Only an implied extra becomes optional, and only by the Decision Room; an optional criterion never blocks READY and is always listed; an
+  unavailable department makes a required criterion INCOMPLETE, never a pass; a failure goes to the department that owns it, at most two
+  re-runs per owner, then a person (required) or a recorded "not delivered" (optional).
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
   gate or substitute a mocked department result to make it pass.
