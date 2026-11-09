@@ -156,6 +156,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - `tests/test_evaluation.py` must pass after any change to change detection, the production store location, evaluation targets or
   verdicts (`production/artifacts.py`, `engine.py`, `report.py`, `planner.py` targets): evaluation output is never source, never lives
   in the evaluated project, every browser check measures one `$target`, and every run ends READY, NOT READY or INCOMPLETE (`docs/production.md`).
+- `tests/test_orchestration.py` must pass after any change to the dependency graph (`planner.build`/`_graph_v2`), integration
+  (`builtins.integrate*`), the engine's scheduling, hand-offs, ownership checks, `replace_assets` approval or recovery: v1 records keep the v1
+  graph, every v2 integration is transactional, integration alone owns `gitcraft.assets.json`, the replace_assets approval is one request for
+  an exact file set, no required criterion is dropped, and the review-only plan is identical in both versions (`docs/production.md`).
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
   gate or substitute a mocked department result to make it pass.

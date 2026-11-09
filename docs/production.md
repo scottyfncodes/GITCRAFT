@@ -191,6 +191,46 @@ See [app-standards.md](app-standards.md).
 | 9 Release | The final regression smoke on the exact build, then the release report. Any QA evidence measured on an older project state is re-measured first. Deployment needs approval, and is only "verified" with a passing check against the live URL. | `engine._release` |
 | 10 Memory | `production.json`, `events.jsonl`, hand-offs, work orders, every department's `.studio.json`, and `REPORT.md`. A run can be resumed at any time. | `store.py`, `report.py` |
 
+## Dependency graph: plan v1 and v2
+
+Every production record stores `plan_version`. New productions are **v2**; records made before it have no version and are
+**v1**. A revision re-plans with the version the record was created with, so an existing production never changes graph
+underneath its finished work. The review-only workflow plans the same tasks in both versions.
+
+```
+v1  scaffold → identity ─┐
+    scaffold → assets… ──┼→ integrate.assets → build → QA… → release.regression → release.report → release.deploy
+    icon.concepts → icon.select (person) → icon.master → icon.derivatives ┘
+v2  scaffold → identity (→ design-stage tasks, PR 4 hook) → build          (placeholders; consumes every asset, never waits)
+    each asset → integrate.<asset>   (as soon as it passes; one integration writer at a time)
+    icon chain (person) → icon.derivatives → integrate.icon.derivatives
+    every integrate.<asset> → integrate.final → build.wire (agent) → QA… → release.regression → release.report → release.deploy
+    backend.provision (approval) → backend.wire (agent; the build runs on a local mock until then) → build.wire
+```
+
+- **Code starts early.** The build waits only for the foundation (and, from PR 4, the approved design). It uses placeholders;
+  `build.wire` (automated, no approval) wires every integrated asset and the approved icon into the app. QA measures that final,
+  wired build, so the icon choice is off the code path and on the release path (`qa.icons` and the release depend on it).
+- **Transactional integration.** `integrate.<asset>` stages every file next to its destination, verifies each SHA-256, journals
+  the destinations and their backups, commits with `os.replace`, then rewrites `gitcraft.assets.json` atomically. A failure
+  during the commit restores the previous valid state; after a crash, the engine's recovery rolls the journal back before the
+  task runs again. `integrate.final` checks that the ledger, the files and the manifest agree and nothing staged is left.
+- **Disjoint ownership.** Integration exclusively owns `gitcraft.assets.json` and every file it committed. An agent submission
+  that names one, or that changed one, is rejected and its work order stays open. Two tasks shipping different files to one path
+  is an integration conflict: the second fails, naming both, and nothing of it is copied. In v2 the first file stays (v1 copied
+  nothing); either way the final integration and the release are blocked until the conflict is resolved.
+- **One replace_assets approval.** Replacing a file the project already had (not one integration wrote) needs a person. In v2
+  the request is presented once, when every asset has settled, listing every file and its new content
+  (`production_approve task=replace_assets`). It authorises exactly those files with exactly that content; any other overwrite
+  asks again. Every replacement is recorded (`replaced` on the integration, the approval history on the record).
+- **Real references.** `qa.assets` (v2) counts a reference only in code or markup with comments removed, or in a JSON file the
+  code loads. `gitcraft.assets.json` never counts, in v1 or v2.
+- **Unchanged.** Every acceptance criterion, gate and approval of v1 (blueprint, icon choice, infrastructure, deployment).
+  A failed asset still blocks its criterion, the final integration and the release; in v2 it no longer blocks the code build.
+
+Rollback: an engine without v2 support reads a v2 record's `depends_on` edges only, which is stricter and still correct;
+re-plan an in-flight v2 production with `production_revise` after a rollback.
+
 ## Task states
 
 | State | Meaning |

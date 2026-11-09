@@ -133,9 +133,15 @@ def part_a(c):
     check("3 every acceptance criterion is measured by a planned task", plan["unmeasured_criteria"] == [], plan["unmeasured_criteria"])
     # ---- 5. dependency order
     pos = {t: i for i, g in enumerate(plan["parallel_groups"]) for t in g}
-    check("5 order: assets → integrate → build → QA → regression → release report → deploy",
-          max(pos[t] for t in T if t.startswith(("audio.", "levels.", "vfx."))) < pos["integrate.assets"] < pos["build"]
-          < min(pos[t] for t in T if t.startswith("qa.")) <= max(pos[t] for t in T if t.startswith("qa.")) < pos["release.regression"] < pos["release.report"] < pos["release.deploy"])
+    check("5 order (plan v2): foundation → build (beside the assets) ; assets → integrate.<asset> → integrate.final → build.wire → QA → regression → release report → deploy",
+          load(pid).get("plan_version") == 2 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity"}
+          and all(pos[t] < pos[f"integrate.{t}"] < pos["integrate.final"] for t in T if t.startswith(("audio.", "levels.", "vfx.")))
+          and max(pos["build"], pos["integrate.final"]) < pos["build.wire"] < min(pos[t] for t in T if t.startswith("qa."))
+          <= max(pos[t] for t in T if t.startswith("qa.")) < pos["release.regression"] < pos["release.report"] < pos["release.deploy"])
+    from production import planner as _pl
+    _p1 = _pl.build(load(pid)["spec"], load(pid)["discovery"], version=1); _w = {t: i for i, g in enumerate(_p1["parallel_groups"]) for t in g}
+    check("5 order (plan v1, existing records): assets → integrate → build → QA, unchanged",
+          max(_w[t] for t in _p1["tasks"] if t.startswith(("audio.", "levels.", "vfx."))) < _w["integrate.assets"] < _w["build"] < min(_w[t] for t in _p1["tasks"] if t.startswith("qa.")))
     check("5 hand-off dependency: palette-tinted effects wait for the identity", "foundation.identity" in T["vfx.dust"]["depends_on"] and T["vfx.dust"]["params"]["color"]["$from"] == "foundation.identity")
     check("6 parallel plan: ≥ 8 tasks in one wave", max(len(g) for g in plan["parallel_groups"]) >= 8, [len(g) for g in plan["parallel_groups"]])
     check("lifecycle: the plan waits in the Decision Room with a Discovery Report (icon, engineering, deployment decisions)", plan["stage"] == "decisions"
@@ -165,6 +171,8 @@ def part_a(c):
     check("agent: VectorCraft drew and exported the logo (SVG)", all(os.path.getsize(f) > 1000 for f in files if not f.endswith(".json")) and len(files) == 2)
     st = call(c, "production_submit", {"production": pid, "task": "foundation.identity", "files": files, "notes": "VectorCraft identity"})
     check("identity accepted; the App Icon Studio asks for concepts", st["status"] == "awaiting_agent" and "icon.concepts" in tasks_in(st, "awaiting_agent"), st["counts"])
+    check("plan v2: the code build is issued beside the icon concepts, before any icon choice", "build" in tasks_in(st, "awaiting_agent")
+          and load(pid)["tasks"]["icon.select"]["state"] == "pending", tasks_in(st, "awaiting_agent"))
     # ---- App Icon Studio: concepts (VectorCraft) → a person chooses → the master → the platform set
     co = json.load(open(os.path.join(prod["store"], "tasks", "icon.concepts", "work_order.json")))
     st = call(c, "production_submit", {"production": pid, "task": "icon.concepts", "files": agent.icon_concepts(co, env), "notes": "three VectorCraft concepts"})
@@ -181,16 +189,26 @@ def part_a(c):
     prod = load(pid)
     h = json.load(open(os.path.join(prod["store"], "handoffs", "vfx.dust.json")))
     check("7 hand-off: FXCraft received the identity's accent colour", h["params"].get("color") == [63, 193, 201], h["params"])
-    man = prod["tasks"]["integrate.assets"]["result"]["integrated"]
+    man = [m for i in prod["order"] if prod["tasks"][i]["kind"] == "builtin" and prod["tasks"][i].get("action") == "integrate" and prod["tasks"][i]["state"] == "passed"
+           for m in prod["tasks"][i]["result"]["integrated"]]
     proj = prod["spec"]["project"]["path"]
-    check("8 integration: every shipped asset copied into the project, hash-verified, with a licence sidecar",
-          len(man) >= 20 and all(os.path.exists(m["dest"]) and os.path.exists(m["dest"] + ".license.json") for m in man), len(man))
+    check("8 integration: every shipped asset committed into the project, hash-verified, with a licence sidecar",
+          len(man) >= 20 and all(os.path.exists(m["dest"]) and (os.path.exists(m["dest"] + ".license.json") or m["role"] in ("icon_native",)) for m in man), len(man))
+    am = json.load(open(os.path.join(proj, "gitcraft.assets.json")))["assets"]
+    check("8 integration: the asset manifest lists exactly the committed files and hashes (owned by integration)", {m["dest_rel"]: m["sha256"] for m in man} == {k: v["sha256"] for k, v in am.items()})
     bo = json.load(open(os.path.join(prod["store"], "tasks", "build", "work_order.json")))
-    check("build work order lists every integrated asset", len(bo["handoff"]["integrated_assets"]) == len(man))
+    ships = {t for t in prod["tasks"] if prod["tasks"][t].get("ship")}
+    check("build work order lists every planned asset (placeholders until build.wire)", {a["task"] for a in bo["handoff"]["planned_assets"]} == ships)
 
     # ---- build (with a real defect), QA, remediation
     changed = agent.build(bo, defect=True); git_commit(proj, "Lantern Drift: first build")
     st = call(c, "production_submit", {"production": pid, "task": "build", "files": [os.path.join(proj, f) for f in changed], "notes": "first build"}, timeout=2400)
+    check("build.wire follows the build and the final integration; QA has not started", "build.wire" in tasks_in(st, "awaiting_agent")
+          and load(pid)["tasks"]["qa.smoke"]["state"] == "pending", st["counts"])
+    wo = json.load(open(os.path.join(prod["store"], "tasks", "build.wire", "work_order.json")))
+    check("build.wire work order lists every integrated asset and the approved icon set", len(wo["handoff"]["integrated_assets"]) == len(man) and wo["handoff"].get("icon_snippet"))
+    changed = agent.wire(wo, defect=True); git_commit(proj, "Lantern Drift: assets and icon wired")
+    st = call(c, "production_submit", {"production": pid, "task": "build.wire", "files": [os.path.join(proj, f) for f in changed], "notes": "wired"}, timeout=2400)
     prod = load(pid)
     sm = prod["tasks"]["qa.smoke"]
     check("9 real testing: TestCraft found the missing script on load (gate failed)", sm["state"] == "failed" and sm.get("failure") == "quality"
@@ -289,18 +307,26 @@ def part_b(c):
     check("B1 blocked propagates to dependents", T["after.gpu"]["state"] == "blocked" and T["after.gpu"].get("blocked_by") == ["anim.gpu"])
     check("B2 failed department: retried once, then failed with its error", T["audio.broken"]["state"] == "failed" and len(T["audio.broken"]["attempts"]) == 2, T["audio.broken"].get("error"))
     check("B independent tasks still completed", T["audio.sfx.click"]["state"] == "passed" and T["audio.coin_a"]["state"] == "passed" and T["audio.coin_b"]["state"] == "passed")
-    check("B2 integration does not start on a failed upstream (blocked, nothing copied)", T["integrate.assets"]["state"] == "blocked"
-          and not os.path.exists(os.path.join(ws, "neg", "assets", "audio", "pickup.ogg")))
-    check("B production status is honest (blocked/failed, not passed)", st["status"] in ("failed", "blocked"), st["status"])
+    check("B2 integration of a failed asset does not start (blocked, nothing copied); the final integration is blocked, the code build is not",
+          T["integrate.audio.broken"]["state"] == "blocked" and T["integrate.final"]["state"] == "blocked" and T["build"]["state"] == "awaiting_agent"
+          and not os.path.exists(os.path.join(ws, "neg", "assets", "audio", "corrupt.wav")), {k: T[k]["state"] for k in ("integrate.audio.broken", "integrate.final", "build")})
+    rep_ = call(c, "production_report", {"production": pid})
+    check("B production status is honest: never passed while an asset failed (plan v2 keeps building, so it is awaiting the agent), and not READY",
+          st["status"] in ("failed", "blocked", "awaiting_agent") and st["status"] != "passed" and not rep_["markdown"].split("verdict **")[1].startswith("READY"),
+          (st["status"], rep_["markdown"][:300]))
     # the conflict on its own (no failed upstream): two different files → one path
     p = call(c, "production_plan", {"prompt": "Build a small arcade game with sound", "project": os.path.join(ws, "neg2"),
                                     "overrides": dict(NO_STD, extra_tasks=extra[2:4], assets={"sfx": [], "music": None}, quality={"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False})})
     approve_blueprint(c, p["production"])
     call(c, "production_run", {"production": p["production"]})
     T = load(p["production"])["tasks"]
-    check("B3 integration conflict: two different files for one path → failed, nothing copied", T["integrate.assets"]["state"] == "failed"
-          and T["integrate.assets"].get("failure") == "conflict" and not os.path.exists(os.path.join(ws, "neg2", "assets", "audio", "pickup.ogg")), T["integrate.assets"].get("error"))
-    check("B3 conflict blocks the build", T["build"]["state"] == "blocked")
+    ab = [T["integrate.audio.coin_a"], T["integrate.audio.coin_b"]]
+    loser = next((x for x in ab if x["state"] == "failed"), {})
+    check("B3 integration conflict: the second file for one path fails as a conflict naming both tasks; nothing of it is copied",
+          loser.get("failure") == "conflict" and "audio.coin_" in (loser.get("error") or "") and sorted(x["state"] for x in ab) == ["failed", "passed"]
+          and json.load(open(os.path.join(ws, "neg2", "gitcraft.assets.json")))["assets"]["assets/audio/pickup.ogg"]["task"] in ("audio.coin_a", "audio.coin_b"),
+          [(x["id"], x["state"], x.get("error")) for x in ab])
+    check("B3 conflict blocks the final integration and the release, not the code build", T["integrate.final"]["state"] == "blocked" and T["build"]["state"] == "awaiting_agent")
     # an existing different asset is never overwritten without approval
     proj = os.path.join(ws, "neg3"); os.makedirs(os.path.join(proj, "assets", "fx"))
     tiny_png(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"))   # the project's own (different) art
@@ -308,8 +334,10 @@ def part_b(c):
                                     "overrides": dict(NO_STD, assets={"sfx": [], "music": None, "vfx": ["sparks"]}, quality={"playcraft": False, "pixelcraft": False, "designcraft": False, "perf": False})})
     approve_blueprint(c, p["production"])
     st = call(c, "production_run", {"production": p["production"]})
-    check("B existing different asset → integrate needs approval, file untouched", "integrate.assets" in tasks_in(st, "needs_approval")
-          and open(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"), "rb").read()[:4] == b"\x89PNG", st["counts"])
+    check("B existing different asset → one consolidated replace_assets request listing exactly that file; file untouched",
+          "integrate.vfx.sparks" in tasks_in(st, "needs_approval") and st["replace_assets"] and st["replace_assets"]["ready"]
+          and [f["file"] for f in st["replace_assets"]["files"]] == ["assets/fx/sparks_flipbook.png"] and sum("replace_assets" in n for n in st["next"]) == 1
+          and open(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"), "rb").read()[:4] == b"\x89PNG", (st["counts"], st.get("replace_assets")))
 
     # B4: an interrupted run resumes without redoing passed work
     p = call(c, "production_plan", {"prompt": "Make a platformer level pack with five levels and music", "project": os.path.join(ws, "pack5"),

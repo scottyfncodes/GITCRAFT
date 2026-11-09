@@ -76,9 +76,14 @@ pb = P("Build a shared shopping list app for my family with user accounts and sy
 check("backend: accounts/sync → the hosted Postgres decision (recommended), on-device as the alternative", room(pb)["backend"]["recommended"] == "postgres"
       and "local" in [o["value"] for o in room(pb)["backend"]["options"]])
 engine.decide(pb["id"], approve=True); pr = store.load(pb["id"])
-check("backend: approved → backend.provision is planned, needs the 'infrastructure' approval, and the build waits for it",
-      "backend.provision" in pr["tasks"] and pr["tasks"]["backend.provision"]["work_order"]["approval"] == "infrastructure" and "backend.provision" in pr["tasks"]["build"]["depends_on"]
-      and "backend" in {c["id"] for c in pr["spec"]["acceptance"]})
+check("backend: approved → backend.provision is planned, needs the 'infrastructure' approval; plan v2: the build runs on a local mock and "
+      "backend.wire (after the approved provisioning) switches it before wiring and QA",
+      pr.get("plan_version") == 2 and "backend.provision" in pr["tasks"] and pr["tasks"]["backend.provision"]["work_order"]["approval"] == "infrastructure"
+      and "backend.provision" not in pr["tasks"]["build"]["depends_on"] and pr["tasks"]["backend.wire"]["depends_on"] == ["backend.provision", "build"]
+      and "backend.wire" in pr["tasks"]["build.wire"]["depends_on"] and "backend" in {c["id"] for c in pr["spec"]["acceptance"]})
+from production import planner as _pl   # plan v1 (existing records) keeps the build waiting for the provisioning
+_v1 = _pl.build(pr["spec"], pr["discovery"], version=1)
+check("backend: plan v1 unchanged (the build waits for backend.provision)", "backend.provision" in _v1["tasks"]["build"]["depends_on"] and "backend.wire" not in _v1["tasks"])
 st = engine.run(pb["id"])
 check("backend: provisioning is never pre-authorised (the run stops for a person)", "backend.provision" in [t["id"] for t in st["tasks"] if t["state"] == "needs_approval"], st["counts"])
 bj = os.path.join(ws, "backend.json")

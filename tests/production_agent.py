@@ -186,10 +186,30 @@ requestAnimationFrame(loop);
 """
 
 
+def _assets(order):
+    """The integrated assets: the hand-off's list, or (plan v2, when the build starts before every asset is integrated) the
+    project's asset manifest, which the agent may read but never writes."""
+    ia = order["handoff"].get("integrated_assets") or []
+    if any(a["dest_rel"].endswith("palette.json") for a in ia): return ia
+    m = json.load(open(os.path.join(order["project"], "gitcraft.assets.json")))["assets"]
+    return [{"dest_rel": k, "role": v.get("role"), "format": v.get("format"), "task": v.get("task")} for k, v in sorted(m.items())]
+
+
+def _snippet(order):
+    p = order["handoff"].get("icon_snippet") or next((o["path"] for u in order["handoff"].get("upstream") or [] for o in u["outputs"] if o["path"].endswith("icons.snippet.json")), None)
+    return json.load(open(p)) if p else None
+
+
+def wire(order, defect=True):
+    """build.wire (plan v2): the same game, now with every integrated asset and the approved icon set wired in."""
+    return build(order, defect)
+
+
 def build(order, defect=True):
-    """The game the build work order asks for, using every integrated asset (paths from the hand-off)."""
+    """The game the build work order asks for, using every integrated asset (paths from the hand-off). In plan v2 the first
+    build has no icon set yet (a person is still choosing it): it ships a placeholder favicon, and wire() adds the set."""
     proj = order["project"]
-    ia = order["handoff"]["integrated_assets"]
+    ia = _assets(order)
     by = lambda role: [a["dest_rel"] for a in ia if a["role"] == role]
     sfx = {os.path.splitext(os.path.basename(p))[0]: p for p in by("sfx")}
     levels = sorted(p for p in by("level_data"))
@@ -204,7 +224,7 @@ def build(order, defect=True):
     assets = {"palette": palette, "sfx": sfx, "music": by("music")[0], "levels": levels, "fx": fxs,
               "editor_sources": other, "atlases": atlases, "brand": brand}
     logo = next((b for b in brand if b.endswith(".svg")), "")
-    snip = next(json.load(open(o["path"])) for u in order["handoff"]["upstream"] for o in u["outputs"] if o["path"].endswith("icons.snippet.json"))
+    snip = _snippet(order) or {"head": '<link rel="icon" href="data:,">', "manifest": {"name": "Lantern Drift", "icons": []}}
     json.dump(dict(snip["manifest"], description="Lantern Drift by HaveAnApp"), open(os.path.join(proj, "manifest.webmanifest"), "w"), indent=1)
     html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">

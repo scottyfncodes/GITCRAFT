@@ -251,6 +251,9 @@ if executors.studio_python():
     od = order["out_dir"]; json.dump({"background": "#0E2A3B", "primary": "#4FB3BF", "accent": "#F4D35E", "text": "#F7F7F2"}, open(os.path.join(od, "palette.json"), "w"))
     open(os.path.join(od, "logo.svg"), "w").write('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60"><rect width="200" height="60" fill="#0E2A3B"/></svg>')
     st = engine.submit(pr["id"], "foundation.identity", [os.path.join(od, f) for f in ("palette.json", "logo.svg")], "identity", run_after=True)
+    waiting = [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"]
+    check("plan v2: the code build is issued right after the identity, beside the icon concepts (the icon choice is not on the code path)",
+          store.load(pr["id"]).get("plan_version") == 2 and {"build", "icon.concepts"} <= set(waiting), waiting)
     co = json.load(open(os.path.join(pr["store"], "tasks", "icon.concepts", "work_order.json")))["out_dir"]
     art(os.path.join(co, "wave.png"), 1024, (79, 179, 191), (14, 42, 59)); art(os.path.join(co, "moon.png"), 1024, (244, 211, 94), (14, 42, 59), shape="bar")
     json.dump({"concepts": [{"id": "wave", "file": "wave.png", "idea": "a rising tide disc"}, {"id": "moon", "file": "moon.png", "idea": "a moonlit bar of water"}],
@@ -276,29 +279,39 @@ if executors.studio_python():
     check("icon: derivatives made from the approved master and integrated into the project", prx["tasks"]["icon.derivatives"]["state"] == "passed"
           and os.path.isfile(os.path.join(proj, "assets", "icons", "apple-touch-icon.png")),
           {k: (prx["tasks"][k]["state"], prx["tasks"][k].get("reason") or prx["tasks"][k].get("error"), (prx["tasks"][k].get("result") or {}).get("checks"))
-           for k in ("icon.master", "icon.derivatives", "integrate.assets")})
+           for k in ("icon.master", "icon.derivatives", "integrate.icon.derivatives", "integrate.final")})
     bo = json.load(open(os.path.join(pr["store"], "tasks", "build", "work_order.json")))
-    check("build work order: asks for the attribution, the icon set and the proportionate standard",
-          any("HaveAnApp" in i for i in bo["instructions"]) and any("icons.snippet.json" in i for i in bo["instructions"]) and any("personal" in i for i in bo["instructions"]))
+    check("build work order: asks for the attribution and the proportionate standard, builds on placeholders, leaves the icon tags to build.wire",
+          any("HaveAnApp" in i for i in bo["instructions"]) and any("personal" in i for i in bo["instructions"]) and any("placeholders" in i for i in bo["instructions"])
+          and not any("icons.snippet.json" in i for i in bo["instructions"]) and "planned_assets" in bo["handoff"])
     snip = json.load(open(next(o["path"] for o in prx["tasks"]["icon.derivatives"]["outputs"] if o["role"] == "icon_snippet")))
-    integrated = [m["dest_rel"] for m in prx["tasks"]["integrate.assets"]["result"]["integrated"]]
-    json.dump(dict(snip["manifest"], description="Tidepool by HaveAnApp"), open(os.path.join(proj, "manifest.webmanifest"), "w"))
-    page = lambda byline: f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tidepool</title>
-{snip['head']}<meta name="author" content="HaveAnApp"><link rel="stylesheet" href="assets/brand/logo.svg"></head><body><img src="assets/brand/logo.svg" alt="Tidepool">
+    page = lambda byline, head="", loads=(): f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tidepool</title>
+{head}<meta name="author" content="HaveAnApp"></head><body><img src="assets/brand/logo.svg" alt="Tidepool">
 <main><h1>Tidepool</h1><p>High tide 06:12</p></main>{byline}<script>addEventListener('error', () => document.body.classList.add('err'))</script>
-<!-- {' '.join(os.path.basename(i) for i in integrated)} --></body></html>"""
+{"".join(f'<link rel="prefetch" href="{u}">' for u in loads)}</body></html>"""
     open(os.path.join(proj, "index.html"), "w").write(page(""))
     check("starter: the new app started from the static-app starter (standards wired in)", os.path.isfile(os.path.join(proj, "app.js")) and os.path.isfile(os.path.join(proj, "tests", "gitcraft.features.json")))
     json.dump({"features": [{"name": "shows the next high tide", "requirement": "a tide timetable", "steps": [{"expect": "main p", "text": "High tide"}]}]},
               open(os.path.join(proj, "tests", "gitcraft.features.json"), "w"))
-    st = engine.submit(pr["id"], "build", [os.path.join(proj, "index.html"), os.path.join(proj, "manifest.webmanifest"), os.path.join(proj, "tests", "gitcraft.features.json")],
-                       "build without the byline", run_after=True)
+    st = engine.submit(pr["id"], "build", [os.path.join(proj, "index.html"), os.path.join(proj, "tests", "gitcraft.features.json")], "build on placeholders", run_after=True)
+    wo = json.load(open(os.path.join(pr["store"], "tasks", "build.wire", "work_order.json")))
+    integrated = [m["dest_rel"] for m in wo["handoff"]["integrated_assets"]]
+    check("build.wire: issued after the build and the final integration, with every integrated asset and the icon snippet instruction",
+          "build.wire" in [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"] and any(i.endswith("apple-touch-icon.png") for i in integrated)
+          and any("icons.snippet.json" in i for i in wo["instructions"]), [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"])
+    json.dump(dict(snip["manifest"], description="Tidepool by HaveAnApp"), open(os.path.join(proj, "manifest.webmanifest"), "w"))
+    open(os.path.join(proj, "index.html"), "w").write(page("", snip["head"], integrated))
+    bad = engine.submit(pr["id"], "build.wire", [os.path.join(proj, "gitcraft.assets.json")], "an out-of-scope submission")
+    check("ownership: a submission naming the integration-owned asset manifest is rejected (the work order stays open)",
+          not bad["submission"]["accepted"] and any("integration-owned" in c["name"] and not c["ok"] for c in bad["submission"]["checks"]))
+    st = engine.submit(pr["id"], "build.wire", [os.path.join(proj, "index.html"), os.path.join(proj, "manifest.webmanifest")], "wired, without the byline", run_after=True)
     prx = store.load(pr["id"])
     check("qa.attribution: a build without the byline fails and becomes a fix work order", prx["tasks"]["qa.attribution"]["state"] == "failed"
           and "fix.qa.attribution.r1" in prx["tasks"], {k: (v["state"], v.get("error") or v.get("reason")) for k, v in prx["tasks"].items() if v["state"] != "passed"})
     check("qa.icons: the approved, wired icon set passes", engine.eff(prx, "qa.icons")["state"] == "passed", engine.eff(prx, "qa.icons").get("error"))
     check("qa.standards: the personal standard passes", engine.eff(prx, "qa.standards")["state"] == "passed", engine.eff(prx, "qa.standards").get("error"))
-    open(os.path.join(proj, "index.html"), "w").write(page('<footer><p class="haveanapp-byline" data-haveanapp>Tidepool <a href="https://haveanapp.com">by HaveAnApp</a></p></footer>'))
+    open(os.path.join(proj, "index.html"), "w").write(page('<footer><p class="haveanapp-byline" data-haveanapp>Tidepool <a href="https://haveanapp.com">by HaveAnApp</a></p></footer>',
+                                                           snip["head"], integrated))
     st = engine.submit(pr["id"], "fix.qa.attribution.r1", [os.path.join(proj, "index.html")], "added the byline", run_after=True)
     prx = store.load(pr["id"])
     acc = {a["id"]: a["status"] for a in report.acceptance(prx)}
