@@ -21,7 +21,9 @@ concurrency:
 jobs:
   build:
     name: ${{ matrix.tool.name }}
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: a binary needs the glibc it was linked against, and the Tests runner
+    # and Claude Code cloud sessions have glibc 2.39 (Ubuntu 24.04). ubuntu-latest moved to glibc 2.43.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -58,6 +60,14 @@ jobs:
       - name: Build
         working-directory: src
         run: cargo build --release --locked -p ${{ matrix.tool.pkg }}
+
+      - name: Check glibc compatibility (must run on glibc 2.39)
+        run: |
+          bin=src/target/release/${{ matrix.tool.pkg }}
+          need=$(objdump -T "$bin" | grep -o 'GLIBC_[0-9][0-9.]*' | sed 's/GLIBC_//' | sort -uV | tail -1)
+          echo "${{ matrix.tool.pkg }} requires glibc $need (limit 2.39)"
+          [ "$(printf '%s\n' "$need" 2.39 | sort -V | tail -1)" = "2.39" ] \
+            || { echo "::error::${{ matrix.tool.pkg }} needs glibc $need, newer than 2.39: not publishing it"; exit 1; }
 
       - name: Package
         run: |
