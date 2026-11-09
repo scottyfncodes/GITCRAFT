@@ -137,7 +137,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   history actions; never rewrite or delete runs in `history/playcraft/` (the committed Game Quality History).
 - `tests/test_pixelcraft.py` must pass after any change under `studio/departments/pixelcraft/` (`--quick` for the short cycle);
   PIXELCRAFT never edits an audited app, never reports a check it did not run, and never lets a score rise through lost
-  coverage; never rewrite or delete runs in `history/pixelcraft/` (`docs/pixelcraft.md`).
+  coverage; never rewrite or delete runs in `history/pixelcraft/` (`docs/pixelcraft.md`). Generic design tells (`tells.py`) are
+  advisory: never a metric, finding, plan item, score change or verify regression, and a project's `accept_tells` is always honoured.
+- Design guidance lives in the on-demand `ui-design` skill (`global/skills/ui-design/`, `docs/design.md`); the project's own art
+  direction always outranks it. Keep its SKILL.md short and its phase guidance in `references/` (loaded only when used).
 - `tests/test_playcraft.py` must pass after any change under `studio/departments/playcraft/` or `studio/core/web/gamepage.mjs`;
   PLAYCRAFT never edits a game and never reports a score, test or regression it did not measure (`docs/playcraft.md`).
 - `tests/test_designcraft.py` must pass after any change under `gamedesign/` (`--quick` skips the browser); DESIGNCRAFT never

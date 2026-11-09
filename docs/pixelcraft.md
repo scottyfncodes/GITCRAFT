@@ -141,6 +141,29 @@ The report (`report.html`, `report.md`) has: 1 overall score, 2 category scores 
 control defects, 8 mobile-specific findings, 9 screenshot gallery, 10 prioritised improvement plan; then
 journeys, evidence and limits, and (verify) before/after.
 
+## Generic design tells (advisory, not scored)
+
+Measurements cannot see taste: a polished-but-generic page can outscore one with a real identity (the fixtures in
+`tests/fixtures/pixelcraft/tells_*` score 89 vs 86). So every capture is also read for the defaults an unguided build
+reaches for (`TELLS` in `probe.mjs`, rules and wording in `tells.py`):
+
+| id | Raised when, in the rendered page |
+|---|---|
+| `gradient_text` | a gradient background is clipped to text |
+| `violet_gradient` | a gradient on a large surface or button whose saturated stops are all violet/indigo/blue (one ≥ hue 250) |
+| `glow_shadow` | a saturated zero-offset box-shadow with ≥ 8 px blur |
+| `accent_stripe` | a ≥ 3 px saturated border on one side only, on a block ≥ 120×32 |
+| `nested_cards` | a padded, rounded, bordered or shadowed box inside another within four levels |
+| `emoji_icons` | a control, heading, label or list item starts or ends with an emoji |
+| `eyebrow` | a short uppercase, tracked-out label ≤ 14 px directly above an h1–h3 |
+| `default_type` | ≥ 90 % of text is set in one default UI face (Inter, Roboto, Arial, Helvetica, the system font) |
+
+Tells are questions, not defects. They are listed in their own report section with examples (selector, text, screen,
+viewport), never become metrics, findings or plan items, never change a score or the method, and are never a verify
+regression (verify lists resolved / persisting / new). A tell the project's art direction chose is passed as
+`accept_tells: [{id, reason}]` (kept in the replay, so verify honours it) and shown as accepted. `tells: false` skips
+the pass. The design workflow that acts on them is the `ui-design` skill (`docs/design.md`).
+
 ## Re-evaluation (verify)
 
 `pixelcraft_verify` replays the baseline's `replay` block: the same screens with their steps, the same viewports,

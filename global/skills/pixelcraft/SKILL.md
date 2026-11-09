@@ -41,6 +41,11 @@ or a login wall). Measurements cannot see taste: if a screen looks generic, unfi
 note: "…", recommendation: "…"}]` — recorded as screenshot evidence, never as measured. Do not penalise bold
 colour, large type, playful or dense game HUDs that are intentional, coherent and readable.
 
+The report also lists **generic design tells** (advisory, never scored: gradient text, violet gradients, glow halos,
+stripe-bordered cards, nested cards, emoji icons, eyebrow labels, one default sans). Each is a question for the design,
+not a defect. When the project's art direction chose one, re-run with `accept_tells: [{id, reason}]`; otherwise fix it
+with the `ui-design` skill. verify lists tells resolved / persisting / new for information only.
+
 ## 4. Fix (in the project, on a branch)
 
 Work the plan top-down (`fix now` → `next` → `polish`), one commit per theme, following the project's own

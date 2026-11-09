@@ -57,6 +57,8 @@ check "global instructions added and the user's own CLAUDE.md text kept" \
 check "gitcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/gitcraft/SKILL.md" ]]'
 check "playcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/playcraft/SKILL.md" ]]'
 check "pixelcraft skill installed at user level" '[[ -f "$HOME/.claude/skills/pixelcraft/SKILL.md" ]]'
+check "ui-design skill installed at user level, with its phase references and the directions page builder" \
+  '[[ -f "$HOME/.claude/skills/ui-design/SKILL.md" && -f "$HOME/.claude/skills/ui-design/references/craft.md" && -f "$HOME/.claude/skills/ui-design/references/games.md" && -x "$HOME/.claude/skills/ui-design/scripts/directions.py" ]] && grep -q "ui-design" "$HOME/.claude/CLAUDE.md"'
 check "'Run GITCRAFT' is routed in every project: instructions and the produce skill name production_start" \
   'grep -q "Run GITCRAFT" "$HOME/.claude/CLAUDE.md" && grep -q "production_start" "$HOME/.claude/CLAUDE.md" && grep -q "^description:.*Run GITCRAFT" "$HOME/.claude/skills/produce/SKILL.md"'
 check "the runtime the servers start from has the universal entry point" '[[ -f "$HOME/.gitcraft/runtime/production/entry.py" ]]'

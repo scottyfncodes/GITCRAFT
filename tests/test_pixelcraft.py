@@ -85,6 +85,16 @@ check("verify rules: a score cannot rise because a check was removed (lost cover
       cmp["coverage_lost"] and cmp["scores"]["usability"]["delta"] is None and cmp["scores"]["visual"]["delta"] == 0, cmp)
 cmp2 = D.compare(dict(before, method="pixelcraft-0.9"), after, os.path.join(ws, "cmp"))
 check("verify rules: a different method is not comparable", cmp2["comparable"] is False)
+TL = load("tells")
+caps_t = [{"screen": "home", "viewport": v, "tells": {"glow_shadow": {"count": 2, "examples": [{"sel": "a.cta", "text": "Go"}]}, "gradient_text": {"count": 1, "examples": []}}} for v in ("iphone17", "desktop")]
+T1 = TL.aggregate(caps_t, [{"id": "glow_shadow", "reason": "neon arcade HUD"}])
+check("tells rules: advisory and unscored; an accepted tell is listed as accepted with its reason, not raised",
+      T1["advisory"] and T1["scored"] is False and [r["id"] for r in T1["raised"]] == ["gradient_text"] and T1["accepted"][0]["accepted"] == "neon arcade HUD"
+      and T1["accepted"][0]["count"] == 4 and len(T1["accepted"][0]["examples"]) == 1, T1)
+tc = TL.compare(T1, TL.aggregate(caps_t[:1], []))
+check("tells rules: before/after is informational (resolved/persisting/new), never a regression", tc == {"resolved": [], "persisting": ["gradient_text"], "new": ["glow_shadow"], "checked_before": True}, tc)
+cmp3 = D.compare(dict(before, tells=T1), dict(after, tells=TL.aggregate(caps_t, [])), os.path.join(ws, "cmp"))
+check("tells rules: a new tell adds no regression to verify", not any("glow" in x.lower() or "tell" in x.lower() for x in cmp3["regressions"]), cmp3["regressions"])
 
 # ---------------------------------------------------------------- through the sandboxed MCP server
 c = Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=env, log=os.path.join(ws, "studiocraft.log"))
@@ -148,6 +158,31 @@ if A:
     check("report.md has the ten sections", all(s in rep for s in secs), [s for s in secs if s not in rep])
     check("report.html renders the same sections with images", all(s.split(". ", 1)[1] in html for s in secs) and html.count("<img") > 10)
     check("measured, accessibility and source/screenshot kinds are kept apart in the metrics", {"measured", "accessibility"} <= set(A["evidence_mix"]), A["evidence_mix"])
+    check("tells: checked on every capture, kept out of metrics, findings and the plan", A.get("tells") and A["tells"]["captures_checked"] == len(A["gallery"])
+          and not any(m["id"].startswith("tell") for m in A["metrics"]) and not any(f["id"].startswith("tell") for f in A["findings"]), (A.get("tells") or {}).get("captures_checked"))
+
+# ---------------------------------------------------------------- generic design tells on rendered pages
+TV = ["iphone17", "iphone13", "desktop"]
+for name in ("tells_generic", "tells_crafted"):
+    shutil.rmtree(os.path.join(ws, name), ignore_errors=True); shutil.copytree(os.path.join(FIX, name), os.path.join(ws, name))
+ok, r = c.call("pixelcraft_audit", {"target": f"{ws}/tells_generic", "viewports": TV, "record": False, "out_dir": f"{ws}/tells_generic_out"}, timeout=900)
+TG = json.load(open(f"{ws}/tells_generic_out/audit.json"))["tells"] if ok and r.get("status") == "ok" else {}
+raised = {x["id"] for x in TG.get("raised", [])}
+check("tells: every generic default on the fixture is raised from the rendered page", raised == set(TL.ORDER), sorted(set(TL.ORDER) ^ raised))
+gt = next((x for x in TG.get("raised", []) if x["id"] == "gradient_text"), {})
+check("tells: each raised tell names the element, screen and viewport, and asks a question", gt.get("examples") and gt["examples"][0]["sel"] == "span.grad" and gt["examples"][0]["viewport"] in TV and gt.get("ask"), gt)
+rep_t = open(f"{ws}/tells_generic_out/report.md").read() if ok else ""
+check("tells: report.md has the advisory section, separate from the scored ones", "Generic design tells (advisory, not scored)" in rep_t)
+ok, r = c.call("pixelcraft_audit", {"target": f"{ws}/tells_crafted", "viewports": TV, "record": False, "out_dir": f"{ws}/tells_crafted_out"}, timeout=900)
+TC = json.load(open(f"{ws}/tells_crafted_out/audit.json"))["tells"] if ok and r.get("status") == "ok" else None
+check("tells: no false positive on a page with a decided identity (serif display, offset shadows, own palette)", TC is not None and TC["raised"] == [] and TC["captures_checked"] == 3, TC)
+ok, r = c.call("pixelcraft_audit", {"target": f"{ws}/tells_generic", "viewports": TV, "record": False, "out_dir": f"{ws}/tells_accept_out",
+                                    "accept_tells": [{"id": "glow_shadow", "reason": "the brand's signature halo"}, "default_type"]}, timeout=900)
+TA = json.load(open(f"{ws}/tells_accept_out/audit.json")) if ok and r.get("status") == "ok" else {}
+G0 = json.load(open(f"{ws}/tells_generic_out/audit.json")) if os.path.exists(f"{ws}/tells_generic_out/audit.json") else {}
+check("tells: accept_tells moves a chosen tell to 'accepted' and leaves every score unchanged",
+      TA and {x["id"] for x in TA["tells"]["accepted"]} == {"glow_shadow", "default_type"} and "glow_shadow" not in {x["id"] for x in TA["tells"]["raised"]}
+      and TA["overall"]["score"] == G0.get("overall", {}).get("score") and TA["replay"]["accept_tells"], (TA.get("tells", {}).get("accepted"), TA.get("overall"), G0.get("overall")))
 
 # ---------------------------------------------------------------- verify: the fixed app on a git repo
 if A:

@@ -43,6 +43,7 @@ library. They have no network.
 | Camera moves, storyboards, title cards, teaser assembly, gameplay capture | studiocraft `cinematiccraft_*` | filmcraft (hand edit), effectcraft (titles) |
 | Smoke/gameplay/FPS/visual-regression/asset tests of a web game | studiocraft `testcraft_*` | — |
 | Catalogue, duplicates, unused assets, licences/ATTRIBUTION.md, safe import | studiocraft `assetcraft_*` | every department registers its outputs |
+| Design or refine an interface: visual directions to choose from, a craft floor for type/spacing/colour/motion, game HUD and menus inside the art direction (`ui-design` skill) | the project's own tokens + code | pixelcraft (audit + generic-design tells), vectorcraft (icons, marks) |
 | Visual quality / UI-UX audit of an app or site: spacing, layout, typography, buttons and touch targets, safe areas, states, accessibility, journeys, before/after verify (`pixelcraft` skill) | studiocraft `pixelcraft_*` | playcraft (how a game plays), testcraft (engineering smoke) |
 | Game-design review of a game: missions, story and characters, systems, balance, progression (DESIGNCRAFT, `gamedesign/` in the GITCRAFT repo; not the `designcraft` layout server) | `python3 -m gamedesign assess <game-repo>` from the GITCRAFT runtime | playcraft (how it plays) |
 | Not sure which department | studiocraft `route` / forgecraft `department_route` | — |

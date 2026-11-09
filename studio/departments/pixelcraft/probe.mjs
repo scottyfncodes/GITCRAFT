@@ -211,6 +211,83 @@ const SNAPSHOT = (opts) => {
     safe_css: (() => { try { for (const s of document.styleSheets) { try { for (const r of s.cssRules) if (/safe-area-inset/.test(r.cssText)) return true; } catch {} } } catch {} return false; })() };
 };
 
+// Generic design tells: the defaults an unguided build reaches for, read from the rendered page. Advisory only:
+// tells.py turns them into questions for the report; they never become metrics, findings or score.
+const TELLS = () => {
+  const out = {}, MAXEX = 5;
+  const add = (id, el, detail) => {
+    const t = out[id] || (out[id] = { count: 0, examples: [] }); t.count++;
+    if (t.examples.length < MAXEX && el) {
+      const b = el.getBoundingClientRect();
+      let s = el.tagName.toLowerCase(); if (el.id) s += '#' + el.id; else if (el.classList.length) s += '.' + [...el.classList].slice(0, 2).join('.');
+      t.examples.push({ sel: s.slice(0, 80), text: (el.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 50), r: [Math.round(b.left + scrollX), Math.round(b.top + scrollY), Math.round(b.width), Math.round(b.height)], detail });
+    }
+  };
+  const px = (v) => parseFloat(v) || 0;
+  const cols = (s) => [...String(s).matchAll(/rgba?\(([^)]+)\)/g)].map((m) => m[1].split(/[ ,/]+/).filter(Boolean).map(Number)).filter((c) => c.length < 4 || c[3] > 0.2);
+  const hsl = ([r, g, b]) => {
+    r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    if (!d) return [0, 0, l];
+    const s = d / (1 - Math.abs(2 * l - 1)); let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return [(h * 60 + 360) % 360, s, l];
+  };
+  const shown = (el, cs, b) => b.width >= 1 && b.height >= 1 && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0.05;
+  const isCard = (el, cs, b) => px(cs.borderTopLeftRadius) >= 6 && b.width >= 120 && b.height >= 60 && Math.min(px(cs.paddingTop), px(cs.paddingLeft)) >= 12
+    && (cs.boxShadow !== 'none' || px(cs.borderTopWidth) >= 1 || (cols(cs.backgroundColor)[0] || [0, 0, 0, 0])[3] > 0.05) && !el.matches('a,button,input,select,textarea,[role=button]');
+  const EMOJI = /^\s*\p{Extended_Pictographic}|\p{Extended_Pictographic}️?\s*$/u;
+  const VW = innerWidth, VH = innerHeight;
+  const cards = new Set(), fams = new Map();
+  for (const el of document.body ? document.body.querySelectorAll('*') : []) {
+    if (el instanceof SVGElement || /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE|CANVAS)$/.test(el.tagName)) continue;
+    const cs = getComputedStyle(el), b = el.getBoundingClientRect();
+    if (!shown(el, cs, b)) continue;
+    const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+    const bgi = cs.backgroundImage;
+    if (own) { const f = cs.fontFamily.split(',')[0].replace(/["']/g, '').trim().toLowerCase(); fams.set(f, (fams.get(f) || 0) + 1); }
+    // gradient text: a gradient painted through the glyphs
+    if (/gradient/.test(bgi) && (cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text') && (el.innerText || '').trim()) add('gradient_text', el, { background: bgi.slice(0, 120) });
+    // the default purple/violet/blue gradient on a large surface or a button
+    if (/gradient/.test(bgi) && (b.width * b.height > 0.12 * VW * VH || el.matches('button,a,[role=button]'))) {
+      const hs = cols(bgi).map(hsl).filter(([, s]) => s > 0.35);
+      if (hs.length >= 2 && hs.every(([h]) => h >= 200 && h <= 330) && hs.some(([h]) => h >= 250) && Math.max(...hs.map((x) => x[0])) - Math.min(...hs.map((x) => x[0])) >= 15) add('violet_gradient', el, { hues: hs.map((x) => Math.round(x[0])) });
+    }
+    // a coloured zero-offset halo used as depth
+    if (cs.boxShadow !== 'none') {
+      for (const part of cs.boxShadow.split(/,(?![^(]*\))/)) {
+        const c = cols(part)[0]; const nums = part.replace(/rgba?\([^)]*\)/, '').trim().split(/\s+/).map(px);
+        if (!c || /inset/.test(part) || nums.length < 3) continue;
+        const [x, y, blur] = nums, [, s] = hsl(c);
+        if (Math.abs(x) < 1 && Math.abs(y) < 1 && blur >= 8 && s > 0.4 && (c[3] ?? 1) > 0.25) { add('glow_shadow', el, { shadow: part.trim().slice(0, 80) }); break; }
+      }
+    }
+    // a thick coloured stripe down one side of a card, list item or callout
+    const bl = px(cs.borderLeftWidth), br = px(cs.borderRightWidth), bt = px(cs.borderTopWidth), bb = px(cs.borderBottomWidth);
+    const side = bl >= 3 && br <= 1 ? cs.borderLeftColor : br >= 3 && bl <= 1 ? cs.borderRightColor : null;
+    if (side && bt <= 1 && bb <= 1 && b.height >= 32 && b.width >= 120 && cs.borderLeftStyle !== 'none' && !/^(BLOCKQUOTE|INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) {
+      const c = cols(side)[0]; if (c && hsl(c)[1] > 0.3) add('accent_stripe', el, { border: `${Math.max(bl, br)}px ${side}` });
+    }
+    if (isCard(el, cs, b)) cards.add(el);
+    // emoji standing in for an icon system (controls and headings)
+    if (el.matches('button,a,[role=button],[role=tab],h1,h2,h3,h4,li,label') && EMOJI.test(el.innerText || '') && (el.innerText || '').trim().length < 60) add('emoji_icons', el, {});
+    // a small, tracked-out uppercase label sitting directly on top of a heading
+    if (/^H[1-3]$/.test(el.tagName)) {
+      const p = el.previousElementSibling;
+      if (p && !p.matches('h1,h2,h3,h4,h5,h6,img,svg,nav')) {
+        const pc = getComputedStyle(p), t = (p.innerText || '').trim(), fs = px(pc.fontSize);
+        const caps = pc.textTransform === 'uppercase' || (t.length > 2 && t === t.toUpperCase() && /[A-Z]/.test(t));
+        if (t && t.length <= 40 && caps && fs <= Math.min(14, px(cs.fontSize) * 0.6) && px(pc.letterSpacing) >= 0.05 * fs) add('eyebrow', p, { above: el.tagName.toLowerCase() });
+      }
+    }
+  }
+  for (const c of cards) { for (let a = c.parentElement, k = 0; a && k < 4; a = a.parentElement, k++) if (cards.has(a)) { add('nested_cards', c, { inside: (a.className && String(a.className).split(' ')[0]) || a.tagName.toLowerCase() }); break; } }
+  // one default sans for everything
+  const DEFAULT = /^(inter|roboto|arial|helvetica|helvetica neue|system-ui|-apple-system|blinkmacsystemfont|segoe ui|sans-serif|open sans|ui-sans-serif)$/;
+  const total = [...fams.values()].reduce((a, b) => a + b, 0);
+  const top = [...fams.entries()].sort((a, b) => b[1] - a[1]);
+  if (total >= 8 && top.length && top[0][1] / total >= 0.9 && DEFAULT.test(top[0][0])) out.default_type = { count: 1, examples: [{ sel: 'body', text: '', r: null, detail: { family: top[0][0], share: +(top[0][1] / total).toFixed(2) } }] };
+  return out;
+};
+
 const STYLE_SIG = (i) => {
   const el = document.querySelector(`[data-pxc="${i}"]`); if (!el) return null; const cs = getComputedStyle(el);
   return [cs.backgroundColor, cs.color, cs.borderTopColor, cs.boxShadow, cs.outlineStyle + parseFloat(cs.outlineWidth || 0), cs.textDecorationLine, cs.transform, cs.opacity, cs.filter].join('|');
@@ -372,6 +449,7 @@ async function capture(browser, ctxOpts, vp, screens, R) {
     rec.full = shotName(vp, sc, 'full'); await page.screenshot({ path: rec.full, fullPage: true });
     rec.cls = await page.evaluate(() => ({ cls: +(window.__pxcls || 0).toFixed(4), shifts: window.__pxshifts || 0 })).catch(() => null);
     rec.dom = await page.evaluate(SNAPSHOT, { max: req.max_elements || 1400 });
+    if (req.tells !== false) rec.tells = await page.evaluate(TELLS).catch((e) => ({ _error: String(e.message || e).slice(0, 160) }));
     if (AXE && req.axe !== false) {
       try {
         await page.addScriptTag({ content: AXE });

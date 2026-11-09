@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saltworks Ledger (PIXELCRAFT tells fixture: a decided identity)</title>
+<style>
+  /* A salvage-yard ledger with its own voice: serif display, mono for figures, rust and sea-glass from its world.
+     PIXELCRAFT should raise no generic tells here. */
+  :root { --tar: #13262e; --bone: #ece0c2; --oxide: #a04d30; --glass: #168d9c; --ink: #1b1f1d; --paper: #dddcd2; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, "Iowan Old Style", serif; color: var(--ink); background: var(--paper); }
+  header { padding: 56px 20px 40px; background: var(--tar); color: var(--bone); }
+  header h1 { font-size: 44px; line-height: 1.05; margin: 0 0 12px; letter-spacing: -.01em; }
+  header p { max-width: 34ch; margin: 0 0 24px; font-size: 18px; }
+  .go { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; background: var(--oxide); color: var(--bone); text-decoration: none;
+        font: 600 16px "Courier New", ui-monospace, monospace; box-shadow: 0 3px 8px rgba(8, 28, 38, .45); }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 20px 48px; }
+  h2 { font-size: 26px; margin: 32px 0 12px; }
+  .hauls { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(27, 31, 29, .25); }
+  .hauls li { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(27, 31, 29, .25); }
+  .hauls span { font: 15px "Courier New", ui-monospace, monospace; color: #3d4340; }
+  .note { margin-top: 28px; padding: 18px; background: #e9e4d6; }
+  .note p { margin: 0; line-height: 1.5; }
+  .tools { display: flex; gap: 12px; margin-top: 24px; }
+  .tools button { min-height: 44px; padding: 0 16px; border: 1px solid var(--ink); background: transparent; font: 600 15px Georgia, serif; color: var(--ink); }
+</style></head>
+<body>
+  <header>
+    <h1>The tide brought in nine tons</h1>
+    <p>Every haul from the drowned quarter, weighed and logged before the market opens.</p>
+    <a class="go" href="#log">Open the ledger</a>
+  </header>
+  <main id="log">
+    <h2>This week's hauls</h2>
+    <ul class="hauls">
+      <li>Copper wire, river mouth <span>412 kg</span></li>
+      <li>Hull plate, east reef <span>2,180 kg</span></li>
+      <li>Glass floats, the shallows <span>96 kg</span></li>
+      <li>Engine block, wreck 14 <span>640 kg</span></li>
+    </ul>
+    <div class="note"><p>Scales are checked at first light. A haul logged after the bell waits for tomorrow's market.</p></div>
+    <div class="tools"><button>Log a haul</button><button>Export week</button></div>
+  </main>
+</body></html>
