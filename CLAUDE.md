@@ -178,6 +178,11 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - Never commit model weights or Meshroom: they install into
   `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.
+- Release safety (`.github/workflows/build.yml`): the seven CLIs are published to `bin` only after `scripts/release-gate.sh`
+  passes on exactly those binaries (all seven built, glibc ≤ 2.39, and a fresh install of them by `tests/test_global.sh` with
+  every check passing and the installed binaries byte-identical to the candidates); only from `main`, and anything else leaves
+  `bin` untouched. Never weaken the gate, carry an older binary into a release, or publish from a pull request. Prove a gate
+  change with its self-test (`gate_selftest: glibc | broken-binary`). Heavier suites not in `tests.yml` run in `nightly.yml`.
 - `tests/test_linkage.py` must pass after any change to how departments hand work to each other: `production/maturity.py`'s project
   kind, `planner.py` (what a request schedules, `$from` hand-offs, gates), `builtins.integrate`, `gates.remediation`, PLAYCRAFT's
   not-a-game refusal, `studio/core/routing.py` or `scripts/register.sh`. A project that reads as an app is never scored as a game unless
