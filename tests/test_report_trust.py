@@ -175,6 +175,9 @@ tc = D["testcraft"]
 check("4 · TestCraft results measured before the project's latest commit are Stale, with the measured date and what re-runs them",
       tc["status"] == "stale" and all(f.get("stale", "").startswith("Stale (measured at an unrecorded commit, 2026-11-04") for f in tc["findings"])
       and "testcraft_smoke" in (tc["next"] or "") and "npm run build" in (tc["next"] or ""), (tc["status"], [f.get("stale") for f in tc["findings"]], tc["next"]))
+check("4 · re-measuring a stale department is coverage work: its Refresh action is never P0/P1 (it was a P1)",
+      [a["priority"] for a in R["actions"] if a["title"].startswith("Refresh:")] and all(a["priority"] not in ("P0", "P1") and a.get("stale") for a in R["actions"] if a["title"].startswith("Refresh:")),
+      [(a["priority"], a["title"]) for a in R["actions"] if a["title"].startswith("Refresh:")])
 check("4 · stale results have low confidence and never reach P0/P1 or the Top 3", tc["score"]["confidence"] == "low"
       and all(a["priority"] not in ("P0", "P1") for a in R["actions"] if a.get("stale"))
       and not any(k.startswith("testcraft:") for a in R["top_actions"] for k in next(x for x in R["actions"] if x["n"] == a["n"])["findings"]), R["top_actions"])

@@ -35,9 +35,12 @@ def annotate(findings, caps, out_dir, per_finding=2):
                 pad = 60 * s
                 box = (max(0, int(x0 - pad * 2)), max(0, int(y0 - pad)), min(W, int(x1 + pad * 2)), min(H, int(y1 + pad)))
                 if box[2] - box[0] < 320 * s: cx = (x0 + x1) / 2; box = (max(0, int(cx - 160 * s)), box[1], min(W, int(cx + 160 * s)), box[3])
-                dr = ImageDraw.Draw(im)
-                for t in range(max(2, int(2 * s))): dr.rectangle([x0 - 3 - t, y0 - 3 - t, x1 + 3 + t, y1 + 3 + t], outline=(230, 30, 60))
-                im = im.crop(box)
+                if box[2] > box[0] and box[3] > box[1]:
+                    dr = ImageDraw.Draw(im)
+                    for t in range(max(2, int(2 * s))): dr.rectangle([x0 - 3 - t, y0 - 3 - t, x1 + 3 + t, y1 + 3 + t], outline=(230, 30, 60))
+                    im = im.crop(box)
+                else:   # the element lies outside this screenshot (below a viewport shot, or zero-size): show the screen, never fail the audit
+                    im = im.crop((0, 0, W, min(H, int(W * 1.6)))); occ["evidence_note"] = "the element is outside this screenshot"
             else:
                 im = im.crop((0, 0, W, min(H, int(W * 1.6))))
             if im.size[0] > 720: im = im.resize((720, int(im.size[1] * 720 / im.size[0])))
