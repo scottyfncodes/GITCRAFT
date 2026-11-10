@@ -29,6 +29,7 @@ runs:
         npx -y playwright@1.56.1 install --with-deps chromium
         ln -sfn "$(node -e "console.log(require('$(npm root -g)/playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
         /opt/pw-browsers/chromium --version
+        echo "NODE_PATH=$(npm root -g)" >> "$GITHUB_ENV"   # test drivers `require('playwright')`, as sessions resolve it
 
     - name: Landlock
       shell: bash
