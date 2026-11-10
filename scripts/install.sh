@@ -189,10 +189,21 @@ if [[ "$GITCRAFT_MESHCRAFT" == 1 && $want_mesh == 1 ]]; then
       failed+=(meshcraft); mesh_state=failed
     fi
   fi
-  if command -v npm >/dev/null; then
-    (cd "$repo_dir/meshcraft/engine_check" && npm ci --silent --no-audit --no-fund >>"$GITCRAFT_LOG/meshcraft.log" 2>&1) \
-      && echo "gitcraft: meshcraft engine check ready (three@0.170, gltf-validator)" \
-      || echo "gitcraft: meshcraft engine check unavailable (npm ci failed); exports still validate with pygltflib" >&2
+  # the engine check's Node packages go to $GITCRAFT_HOME/meshcraft/engine_check, not into this code: the runtime is
+  # re-copied from a checkout on every update and would lose them (meshcraft/engine/nodemods.py resolves both)
+  ec="$GITCRAFT_HOME/meshcraft/engine_check"
+  if gitcraft_engine_check_ready "$repo_dir"; then
+    echo "gitcraft: meshcraft engine check already installed ($ec)"
+  elif command -v npm >/dev/null; then
+    # .installed-lock is written only after npm ci succeeds: an install cut off part-way never counts as ready
+    rm -f "$ec/.installed-lock"; mkdir -p "$ec" && cp "$repo_dir/meshcraft/engine_check/package.json" "$repo_dir/meshcraft/engine_check/package-lock.json" "$ec/"
+    to=(); command -v timeout >/dev/null && to=(timeout 300)   # macOS has no timeout(1)
+    if (cd "$ec" && ${to[@]+"${to[@]}"} npm ci --silent --no-audit --no-fund) >>"$GITCRAFT_LOG/meshcraft.log" 2>&1 \
+       && cp "$ec/package-lock.json" "$ec/.installed-lock" && gitcraft_engine_check_ready "$repo_dir"; then
+      echo "gitcraft: meshcraft engine check ready (three@0.170, gltf-validator in $ec)"
+    else
+      echo "gitcraft: meshcraft engine check unavailable (npm ci failed, see $GITCRAFT_LOG/meshcraft.log); exports still validate with pygltflib" >&2
+    fi
   else
     echo "gitcraft: npm not found; meshcraft's engine check is disabled" >&2
   fi

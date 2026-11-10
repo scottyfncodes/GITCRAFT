@@ -96,6 +96,15 @@ gitcraft_mesh_ready() {
   compgen -G "$GITCRAFT_HOME/meshcraft/venv/lib/python*/site-packages/bpy-*.dist-info" >/dev/null
 }
 
+# MeshCraft's engine check (three@0.170, gltf-validator) is installed into $GITCRAFT_HOME/meshcraft/engine_check, outside
+# the runtime: every runtime update is a fresh copy of a checkout without node_modules (meshcraft/engine/nodemods.py).
+# Ready when that copy was installed from this lockfile (gitcraft_engine_check_ready <repo>).
+gitcraft_engine_check_ready() {
+  local ec="$GITCRAFT_HOME/meshcraft/engine_check"
+  [[ -f "$ec/node_modules/three/package.json" && -f "$ec/node_modules/gltf-validator/package.json" ]] || return 1
+  cmp -s "$ec/.installed-lock" "$1/meshcraft/engine_check/package-lock.json"   # written only after npm ci succeeded
+}
+
 # StudioCraft counts as installed when its core venv has numpy (checked from metadata, no import).
 gitcraft_studio_ready() {
   [[ -x "$GITCRAFT_STUDIO_HOME/venv/bin/python" ]] || return 1

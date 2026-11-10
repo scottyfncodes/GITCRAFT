@@ -36,6 +36,10 @@ done
 mesh_last=$(python3 -c 'import json,os,sys;print(json.load(open(os.path.join(sys.argv[1],"status.json"))).get("tools",{}).get("meshcraft",{}).get("state",""))' "$GITCRAFT_HOME" 2>/dev/null)
 if [[ "$GITCRAFT_MESHCRAFT" != none && ( "$mesh_last" == later || "$mesh_last" == pending ) ]] && ! gitcraft_mesh_ready; then
   missing+=(meshcraft forgecraft)
+# Blender is in but the engine check's Node packages are not (lost with an older runtime copy, or a new lockfile):
+# install.sh meshcraft keeps Blender and only runs npm ci
+elif gitcraft_mesh_ready && command -v npm >/dev/null && ! gitcraft_engine_check_ready "$(dirname "$here")"; then
+  missing+=(meshcraft)
 fi
 
 # Studio: finish a core install that was cut off ("pending"/"failed" and not complete), and install a voice model
@@ -62,6 +66,12 @@ if [[ -d "$GITCRAFT_STUDIO_HOME/mocap-venv" ]] && { ! ls "$GITCRAFT_STUDIO_HOME"
   else
     setsid nohup "$here/install-studio.sh" mocap >>"$GITCRAFT_LOG/install.log" 2>&1 < /dev/null &
   fi
+fi
+
+# Heavy optional installs a setup script queued instead of running (scripts/install-later.sh: TripoSR, ACE-Step):
+# in the background, one runner at a time, after any Blender build (scripts/run-later.sh).
+if compgen -G "$GITCRAFT_HOME/later/*.job" >/dev/null; then
+  setsid nohup "$here/run-later.sh" >>"$GITCRAFT_LOG/later.log" 2>&1 < /dev/null &
 fi
 
 ((global)) || "$here/install-global.sh" >/dev/null 2>&1   # keeps ~/.gitcraft/runtime, user-scope registration and global instructions current
