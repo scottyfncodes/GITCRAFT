@@ -53,6 +53,19 @@ def load(name):
 # ---------------------------------------------------------------- scoring rules (pure, no browser)
 sys.path.insert(0, os.path.join(REPO, "studio"))
 R = load("rubric"); M = load("measure")
+# evidence for an element outside its screenshot (zero-size, or below a viewport shot) never fails the audit
+# (an audit of the GITCRAFT Reports pages died at the report stage: "Coordinate 'right' is less than 'left'")
+try:
+    from PIL import Image as _I
+    RP = load("report"); _shot = os.path.join(ws, "ev_shot.png"); _I.new("RGB", (400, 300), (255, 255, 255)).save(_shot)
+    _caps = [{"screen": "s", "viewport": "iphone17", "shot": _shot, "full": _shot, "dom": {"vw": 400, "vh": 300, "sw": 400}}]
+    _f = [{"id": "x.off", "occurrences": [{"screen": "s", "viewport": "iphone17", "rect": [900, 40, 80, 16], "fixed": True},
+                                          {"screen": "s", "viewport": "iphone17", "rect": [10, 20, 0, 0], "fixed": True}]}]
+    made = RP.annotate(_f, _caps, os.path.join(ws, "ev"))
+    check("evidence: an element outside its screenshot gets the screen as evidence, never a crashed audit",
+          len(made) == 2 and _f[0]["occurrences"][0].get("evidence_note"), made)
+except ImportError:
+    print("SKIP evidence crop: Pillow not in this Python (run with the Studio venv)")
 mk = lambda area, mid, v, ev="measured", **k: dict(area=area, id=mid, title=mid, value=v, samples=1, evidence=ev, **k)
 areas = R.area_scores([mk("spacing", "a", 1.0), mk("layout", "b", 1.0)])
 cats, ov = R.categories(areas, {"screens": 1, "viewports": 1})
