@@ -13,6 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE); sys.path.insert(0, os.path.dirname(HERE))
 import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
 from gitcraft3d import hardware, jobs, library, routing, deferred
+from gitcraft3d import calls as calls_mod   # long calls answered with a call_id before the client's timeout
 import meshcraft as mc
 import pipeline
 import studio
@@ -157,6 +158,12 @@ def main():
 
     def send(m):
         with lock: out.write(json.dumps(m, default=str) + "\n"); out.flush()
+
+    def reply(r, e=None):
+        if e is not None: return {"isError": True, "content": [{"type": "text", "text": f"{type(e).__name__}: {e}"}]}
+        err = isinstance(r, dict) and r.get("status") in ("failed", "blocked")
+        return {"isError": err, "content": [{"type": "text", "text": json.dumps(r, indent=1, default=str)}]}
+    calls = calls_mod.Calls(send, reply)
     if waiting[0]:
         def blender_arrived():
             waiting[0] = False
@@ -176,25 +183,20 @@ def main():
             # client as the server disconnecting, though the server is alive and has just announced its full list (#12)
             status_tool = {"name": "forgecraft_status", "description": "ForgeCraft status: whether MeshCraft's Blender is installed (the full tool list "
                            "appears when it is). " + ("" if not waiting[0] else deferred.install_hint("ForgeCraft")), "inputSchema": {"type": "object", "properties": {}}}
-            listed = [status_tool] + ([] if waiting[0] else [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()])
+            listed = [status_tool] + ([] if waiting[0] else [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()] + [calls_mod.TOOL])
             send({"jsonrpc": "2.0", "id": mid, "result": {"tools": listed}})
         elif method == "tools/call":
             name, args = p.get("name"), p.get("arguments") or {}
 
-            def work(mid=mid, name=name, args=args):
-                try:
-                    if waiting[0] and not deferred.ready():
-                        if name != "forgecraft_status": raise RuntimeError(deferred.install_hint("ForgeCraft"))
-                        r = deferred.status("ForgeCraft")
-                        send({"jsonrpc": "2.0", "id": mid, "result": {"content": [{"type": "text", "text": json.dumps(r, indent=1)}]}})
-                        return
-                    r = call(name, args)
-                    err = isinstance(r, dict) and r.get("status") in ("failed", "blocked")
-                    send({"jsonrpc": "2.0", "id": mid, "result": {"isError": err, "content": [{"type": "text", "text": json.dumps(r, indent=1, default=str)}]}})
-                except Exception as e:
-                    send({"jsonrpc": "2.0", "id": mid, "result": {"isError": True, "content": [{"type": "text", "text": f"{type(e).__name__}: {e}"}]}})
-                    traceback.print_exc(file=sys.stderr)
-            threading.Thread(target=work, daemon=True).start()
+            def work(name=name, args=args):
+                if waiting[0] and not deferred.ready():
+                    if name != "forgecraft_status": raise RuntimeError(deferred.install_hint("ForgeCraft"))
+                    return deferred.status("ForgeCraft")
+                return call(name, args)
+            if name == "call_result":   # waits on another call: its own thread
+                threading.Thread(target=lambda mid=mid, args=args: send({"jsonrpc": "2.0", "id": mid, "result": calls.result(args)}), daemon=True).start()
+            else:
+                calls.run(mid, name, work)
         elif method == "ping":
             send({"jsonrpc": "2.0", "id": mid, "result": {}})
         else:

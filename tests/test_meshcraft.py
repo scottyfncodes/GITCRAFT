@@ -163,8 +163,12 @@ ok2, jl = c.call("jobs_list", {"status": "failed"})
 badjob = next((j for j in jl.get("jobs", []) if j["asset_id"] == "lib_bad"), {}) if ok2 else {}
 check("jobs: a bad request fails at once with the reason (no retries)", not ok and "unknown template" in str(rx) and badjob.get("attempts") == 1, (rx, badjob))
 ok, ro = c.call("route", {"request": "blocky voxel lifeboat"}); ok2, ro2 = c.call("route", {"request": "turn this concept art into a ship", "images": 1})
-check("route: advises Blockbench for voxel work and reports image-to-3D as unavailable", ok and ok2 and ro["route"] == "blockbench" and ro2["route"] == "image_to_3d"
-      and ro2["available"] is False and "NOT derived" in ro2["alternatives"][0]["note"], (ro, ro2))
+# image-to-3D is available only where TripoSR/Hunyuan3D are installed: the expectation follows the machine, not an assumption
+okh, hw = c.call("hardware_probe", {})
+i3d = bool(okh and (hw.get("capabilities") or {}).get("image_to_3d", {}).get("available"))
+check("route: advises Blockbench for voxel work and reports image-to-3D " + ("as available (installed here)" if i3d else "as unavailable"),
+      ok and ok2 and ro["route"] == "blockbench" and ro2["route"] == "image_to_3d" and ro2["available"] is i3d
+      and (i3d or "NOT derived" in ro2["alternatives"][0]["note"]), (ro, ro2, i3d))
 
 # consolidation: mesh processing and scene composition live in MeshCraft, as jobs and library versions
 if "boat" in st["templates"] and "deckhand" in st["templates"]:

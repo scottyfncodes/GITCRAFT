@@ -1,6 +1,11 @@
 """Minimal stdio MCP client used by the GITCRAFT tests and pipelines."""
 import json, os, queue, subprocess, threading, time
 
+
+def running(v):
+    """The server's 'still running, collect it with call_result' answer (gitcraft3d/calls.py)."""
+    return isinstance(v, dict) and v.get("status") == "running" and bool(v.get("call_id")) and "call_result" in str(v.get("next", ""))
+
 class Client:
     def __init__(self, cmd, env=None, log=None, cwd=None):
         self.p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -29,8 +34,21 @@ class Client:
                 return m["result"]
 
     def call(self, tool, args=None, timeout=300):
-        """Returns (ok, parsed_or_text)."""
+        """Returns (ok, parsed_or_text). A call longer than the server's inline budget is answered {status: running,
+        call_id} (gitcraft3d/calls.py): this follows it with call_result until the result arrives or timeout passes."""
+        end = time.time() + timeout
         r = self.req("tools/call", {"name": tool, "arguments": args or {}}, timeout)
+        ok, val = self._parse(r)
+        self.detached = None
+        while running(val) and tool != "call_result":
+            self.detached = val["call_id"]
+            if time.time() > end: return False, val
+            r = self.req("tools/call", {"name": "call_result", "arguments": {"call_id": val["call_id"]}}, max(30, end - time.time()))
+            ok, val = self._parse(r)
+        return ok, val
+
+    @staticmethod
+    def _parse(r):
         txt = "\n".join(c.get("text", "") for c in r.get("content", []) if c.get("type") == "text")
         try: val = json.loads(txt)
         except Exception: val = txt
