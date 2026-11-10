@@ -112,7 +112,9 @@ def _stated_kind(text):
     """'my e-reader app', 'this game', 'our website': the kind the person named, if exactly one."""
     t = text or ""
     found = {k for k, pat in (("game", r"\b(game|platformer|roguelike|shooter)\b"), ("app", r"\b(app|application|web app|tool|dashboard)\b"),
-                              ("site", r"\b(website|web site|landing page|homepage|blog)\b")) if re.search(pat, t, re.I)}
+                              ("site", r"\b(website|web site|landing page|homepage|blog)\b"),
+                              ("tool", r"\b(cli|command[- ]line tool|library|toolchain|toolkit|sdk|mcp server)\b")) if re.search(pat, t, re.I)}
+    if found == {"app", "tool"} and not re.search(r"\b(app|application|web app|dashboard)\b", t, re.I): found = {"tool"}   # "a CLI tool" is a tool
     return found.pop() if len(found) == 1 else None
 
 
@@ -143,7 +145,7 @@ def start(text, project=None, store_dir=None, overrides=None, issues=None):
     stated = _stated_kind(r["request"])   # the person's own words beat the heuristic
     kind = stated or a["kind"]
     prompt =(r["request"] if len(r["request"]) >= 12 else "") or f"{maturity.WORKFLOW[intent].split(':')[0].capitalize()} this existing {kind}"
-    if kind and not re.search(r"\b(game|app|application|site|website|tool|dashboard)\b", prompt, re.I): prompt += f" (an existing {kind})"
+    if kind and not re.search(r"\b(game|app|application|site|website|tool|toolkit|dashboard|library|cli)\b", prompt, re.I): prompt += f" (an existing {kind})"
     mode = {"existing": True, "maturity": a["maturity"], "kind": kind, "workflow": intent, "because": because, "confidence": a["confidence"],
             "kind_confidence": "stated" if stated else a.get("kind_confidence"),
             "kind_evidence": [f"you called it {'an' if stated == 'app' else 'a'} {stated}"] if stated else a.get("kind_evidence"),

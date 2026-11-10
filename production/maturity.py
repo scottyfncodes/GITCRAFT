@@ -2,7 +2,7 @@
 
   assess(project)    → {maturity, kind, confidence, evidence, inventory, preserve, deploy, tests, ...}
                        maturity: new | partial | nearly_complete | finished
-                       kind:     game | app | site
+                       kind:     game | app | site | tool (a CLI, library, toolchain or MCP server: no page to open)
                        inventory: working (features the project already has), unfinished (TODOs, unchecked
                        roadmap items, stubs), defects (references to files that do not exist), improvements
                        (optional: no tests, no deploy config, ...). Every item names the file it came from.
@@ -184,9 +184,34 @@ def _shipped_pages(project, rel, entry):
 
 
 TEMPLATE_DIR = re.compile(r"(^|/)(starters?|templates?|fixtures?|__fixtures__|examples?|boilerplates?|scaffolds?)/")
+# code that ships with a project but is not its product: what it reads as is decided by the rest
+NOT_OWN = re.compile(r"(^|/)(starters?|templates?|fixtures?|__fixtures__|examples?|boilerplates?|scaffolds?|tests?|__tests__|spec|vendor|third_party|acceptance)/")
+WEB_ENTRY = ("index.html", "public/index.html", "src/index.html", "app/page.tsx", "app/page.jsx", "src/app/page.tsx", "pages/index.tsx", "pages/index.jsx", "src/main.tsx", "src/main.jsx")
+TOOL_README = re.compile(r"\b(command[- ]line|CLI|library|toolchain|toolkit|SDK|MCP servers?|plugin)\b")
+
+
+def _tool_meta(project, rel, pkg):
+    """What says this project is a tool (a CLI, library, toolchain or MCP server) rather than something to open in a
+    browser: declared command-line entry points, CLI modules, scripts, MCP servers. Read-only."""
+    own = [r for r in rel if not NOT_OWN.search(r)]
+    sig = []
+    pyproject = _read(os.path.join(project, "pyproject.toml")) + _read(os.path.join(project, "setup.cfg")) + _read(os.path.join(project, "setup.py"))
+    if re.search(r"\[project\.scripts\]|\[tool\.poetry\.scripts\]|console_scripts|entry_points", pyproject): sig.append("declared command-line entry points (Python packaging)")
+    elif pyproject.strip(): sig.append("a Python package (pyproject/setup)")
+    if (pkg or {}).get("bin"): sig.append("package.json declares a bin (a command-line tool)")
+    if re.search(r"\[\[bin\]\]", _read(os.path.join(project, "Cargo.toml"))) or "src/main.rs" in own or any(r.startswith("cmd/") and r.endswith(".go") for r in own):
+        sig.append("a compiled command-line binary (Cargo/Go)")
+    cli = [r for r in own if re.search(r"(^|/)(cli|__main__)\.py$|(^|/)bin/[^/]+$", r)]
+    if cli: sig.append(f"command-line modules: {', '.join(cli[:3])}" + (f" (+{len(cli) - 3})" if len(cli) > 3 else ""))
+    sh = [r for r in own if r.endswith(".sh")]
+    if len(sh) >= 2: sig.append(f"{len(sh)} shell scripts")
+    mcp = [r for r in own if r.endswith(("server.py", "server.js", "server.mjs", "server.ts")) and re.search(r"tools/list|@modelcontextprotocol/sdk|from mcp\b|\bFastMCP\b", _read(os.path.join(project, r), 60000))]
+    if mcp or "@modelcontextprotocol/sdk" in json.dumps((pkg or {}).get("dependencies") or {}): sig.append(f"MCP server(s): {', '.join(mcp[:3]) or 'package dependency'}" + (f" (+{len(mcp) - 3})" if len(mcp) > 3 else ""))
+    web = [r for r in WEB_ENTRY if r in rel]
+    return {"signals": sig, "web_entry": web[0] if web else None}
 GAME_ENGINES = (("phaser", r"from ['\"]phaser['\"]|new Phaser\.Game|\bPhaser\.(Scene|Game)\b"), ("pixi", r"from ['\"]pixi\.js['\"]|\bPIXI\.Application\b"),
                 ("kaboom", r"from ['\"]kaboom['\"]|\bkaboom\(\s*\{"), ("godot", r"extends (Node2D|KinematicBody2?D?|CharacterBody[23]D)"),
-                ("three", r"\bTHREE\.|from ['\"]three['\"]"))
+                ("three", r"\bTHREE\.|from ['\"]three['\"]"), ("pygame", r"^\s*(import pygame|from pygame\b)|^\s*import (arcade|pyglet)\b"))
 GAME_DEPS = {"phaser": "phaser", "pixi.js": "pixi", "kaboom": "kaboom", "kaplay": "kaboom", "three": "three", "excalibur": "excalibur",
              "melonjs": "melonjs", "@babylonjs/core": "babylon", "babylonjs": "babylon", "playcanvas": "playcanvas", "matter-js": "matter"}
 # what an application has and a game rarely does: a UI framework, a data layer, forms and routes
@@ -196,11 +221,15 @@ APP_CODE = re.compile(r"<form\b|\bonSubmit\b|addEventListener\(\s*['\"]submit|\b
 _COMMENTS = re.compile(r"/\*.*?\*/|<!--.*?-->|(?<![:\"'\w])//[^\n]*|^\s*#[^\n]*", re.S | re.M)
 
 
-def _kind(src, readme, deps, scripts, rel):
-    """game | app | site, with its own confidence and evidence. Game words count only in code (comments and
+def _kind(src, readme, deps, scripts, rel, meta=None):
+    """game | app | site | tool, with its own confidence and evidence. Fixtures, starters, templates, examples,
+    tests and vendored code are not the project's product and give no evidence (a toolkit's game fixtures do not make
+    it a game). A tool needs command-line/package/server signals, no web entry page and nothing playable. Game words count only in code (comments and
     stylesheets left out, where 'level', 'lives' and 'score' are ordinary English) and in the README; a 2D canvas
     alone is not a game engine (readers, charts and editors draw on canvases too); app signals count against."""
-    code = {r: _COMMENTS.sub(" ", t) for r, t in src.items() if not r.endswith(".css")}
+    excluded = sorted({m.group(2) for r in rel for m in [NOT_OWN.search(r)] if m})
+    rel = [r for r in rel if not NOT_OWN.search(r)]
+    code = {r: _COMMENTS.sub(" ", t) for r, t in src.items() if not r.endswith(".css") and not NOT_OWN.search(r)}
     text = " ".join(code.values())[:400000]
     strong = sorted({e for e, pat in GAME_ENGINES if re.search(pat, text)} | {v for k, v in GAME_DEPS.items() if k in deps})
     canvas_files = [r for r, t in code.items() if re.search(r"getContext\(\s*['\"]2d", t)]
@@ -224,9 +253,22 @@ def _kind(src, readme, deps, scripts, rel):
     ev.append(f"{hits} game words in code and README (comments and CSS excluded)")
     if readme_game: ev.append("the README calls it a game")
     if app_sig: ev.append(f"app signals: {', '.join(app_sig[:6])}")
+    if excluded: ev.append(f"not counted as the product: {', '.join(x + '/' for x in excluded[:6])}")
+    tool_sig = (meta or {}).get("signals") or []
+    if TOOL_README.search(readme[:6000]): tool_sig = tool_sig + ["the README describes a command-line tool, library or toolchain"]
+    if tool_sig: ev.append(f"tool signals: {'; '.join(tool_sig[:5])}")
+    # playable without a browser: engine project files or a desktop game library; a web game needs a page to run in
+    web_entry = (meta or {}).get("web_entry") if meta is not None else True
+    playable = bool(game_files or "pygame" in strong or (web_entry and (game_entry or canvas_loop or strong)))
     game_score = (3 if game_files else 0) + (1 if game_entry else 0) + (3 if strong and (hits >= 3 or game_files) else 0) + (2 if canvas_loop else 0) + (2 if readme_game else 0) + (1 if canvas_files and hits >= 6 else 0) + (2 if hits >= 25 else 0)
     app_score = len(app_sig)
-    if game_score >= 3 and game_score > app_score:
+    # a web framework or app routes make it an app; forms in a tool's own admin page do not (no entry page ships them)
+    app_framework = any(x in app_sig for x in APP_DEPS) or "app routes" in app_sig
+    if len(tool_sig) >= 2 and not web_entry and not playable and not app_framework and not scripts.get("dev"):
+        kind = "tool"
+        if game_score >= 3: ev.append("game engines or words but nothing playable (no game project files, and no web page for a game loop to run in): not a game")
+        conf = "high" if len(tool_sig) >= 3 and game_score < 3 else "medium"
+    elif game_score >= 3 and game_score > app_score:
         kind = "game"
         conf = "high" if game_score >= 5 and app_score == 0 else "medium" if game_score - app_score >= 2 else "low"
     else:
@@ -236,15 +278,15 @@ def _kind(src, readme, deps, scripts, rel):
 
 
 def kind(project):
-    """game | app | site for a project folder, with confidence and evidence (read-only; PLAYCRAFT uses it to refuse
+    """game | app | site | tool for a project folder, with confidence and evidence (read-only; PLAYCRAFT uses it to refuse
     scoring something that is not a game)."""
     files = list(_walk(project)); rel = [os.path.relpath(f, project) for f in files]
-    src = {os.path.relpath(f, project): _read(f) for f in [f for f in files if f.endswith(CODE)][:400]}
+    src = {os.path.relpath(f, project): _read(f) for f in sorted([f for f in files if f.endswith(CODE)], key=lambda f: bool(NOT_OWN.search(os.path.relpath(f, project))))[:400]}
     pkg = {}
     try: pkg = json.load(open(os.path.join(project, "package.json")))
     except (OSError, ValueError): pass
     deps = {**(pkg.get("dependencies") or {}), **(pkg.get("devDependencies") or {})}
-    k, conf, engines, ev = _kind(src, _readme(project)[1], deps, pkg.get("scripts") or {}, rel)
+    k, conf, engines, ev = _kind(src, _readme(project)[1], deps, pkg.get("scripts") or {}, rel, _tool_meta(project, rel, pkg))
     return {"kind": k, "confidence": conf, "engines": engines, "evidence": ev}
 
 
@@ -253,7 +295,7 @@ def assess(project):
     if not is_existing(project):
         return {"maturity": "new", "kind": None, "confidence": "high", "evidence": ["no project folder, or it is empty"], "inventory": {}, "existing": False}
     files = list(_walk(project)); rel = [os.path.relpath(f, project) for f in files]
-    code = [f for f in files if f.endswith(CODE)]
+    code = sorted([f for f in files if f.endswith(CODE)], key=lambda f: bool(NOT_OWN.search(os.path.relpath(f, project))))   # the product first, fixtures and tests last
     lines = sum(_read(f).count("\n") for f in code[:400])
     src = {os.path.relpath(f, project): _read(f) for f in code[:400]}
     rname, readme = _readme(project)
@@ -269,7 +311,7 @@ def assess(project):
     deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
     ev.append(f"{len(files)} files, {len(code)} code files, ~{lines} lines of code" + (f"; entry {entry}" if entry else "; no entry point found"))
     # kind
-    kind, kind_conf, engines, kind_ev = _kind(src, readme, deps, scripts, rel)
+    kind, kind_conf, engines, kind_ev = _kind(src, readme, deps, scripts, rel, _tool_meta(project, rel, pkg))
     ev.append(f"kind {kind} ({kind_conf} confidence): " + "; ".join(kind_ev))
     # what works (evidence: the README's own feature list and checked boxes)
     inv["working"] += [{"what": f, "where": rname, "evidence": "checked in the README"} for f in done]

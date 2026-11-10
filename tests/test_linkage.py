@@ -56,6 +56,41 @@ weak = dict(spec_ex, mode=dict(spec_ex["mode"], kind_confidence="low"))
 kw = next(d for d in lifecycle.decisions(weak, {"project": {"exists": True}}) if d["id"] == "kind")
 check("Decision Room: a low-confidence kind is an essential question (approval waits for it)", kw["kind"] == "question" and "essential" in kw["why"], kw)
 
+# ---------------------------------------------------------------- a tool is not a game (GITCRAFT read itself as a game from its own fixtures)
+toolchain = write(os.path.join(ws, "toolchain"), {
+    "pyproject.toml": "[project]\nname = 'forge'\n[project.scripts]\nforge = 'forge.cli:main'\n",
+    "README.md": "# Forge\n\nA command-line toolchain that makes game assets: sprites, levels, a player and enemies for your game.\n",
+    "forge/cli.py": "import sys\ndef main():\n    print('forge', sys.argv[1:])\n", "forge/render.mjs": "import * as THREE from 'three';\nexport const scene = new THREE.Scene();\n",
+    "scripts/install.sh": "#!/bin/sh\n", "scripts/doctor.sh": "#!/bin/sh\n",
+    "tests/fixtures/mini_game/index.html": "<canvas id=c></canvas><script src=game.js></script>",
+    "tests/fixtures/mini_game/game.js": "const cx = c.getContext('2d'); let player = {lives: 3}, score = 0;\naddEventListener('keydown', e => score++);\nfunction loop() { requestAnimationFrame(loop); }\nloop();\n",
+    "starters/platformer/level1.tscn": "[gd_scene]\n", "tests/test_cli.py": "API_KEY = 'sk-test0000000000000000000000'\n"})
+web_cli = write(os.path.join(ws, "webcli"), {"package.json": json.dumps({"bin": {"wc": "cli.js"}}), "cli.js": "#!/usr/bin/env node\n", "scripts/a.sh": "", "scripts/b.sh": "",
+                                            "index.html": "<!doctype html><title>wc</title><h1>Word counter</h1>", "README.md": "# wc\n\nA CLI and a page.\n"})
+KT, KW = maturity.kind(toolchain), maturity.kind(web_cli)
+check("kind: a CLI toolchain with game words, a three.js renderer and game fixtures is a tool, not a game", KT["kind"] == "tool", KT)
+check("kind: ...its fixtures, starters and tests are listed as not counted as the product", any(e.startswith("not counted as the product") and "tests/" in e and "starters/" in e for e in KT["evidence"]), KT["evidence"])
+check("kind: ...and the tool signals are the evidence", any(e.startswith("tool signals") and "command-line" in e for e in KT["evidence"]), KT["evidence"])
+check("kind: a command-line project that ships a web page is not read as a tool", KW["kind"] != "tool", KW)
+check("kind: canvas and Godot games are still games beside the tool reading", K["game"]["kind"] == "game" and K["godot"]["kind"] == "game")
+check("entry: 'my CLI tool' and 'this toolchain' name a tool; 'my dashboard tool' is still an app",
+      entry._stated_kind("Run GITCRAFT on my CLI tool") == "tool" and entry._stated_kind("review this toolchain") == "tool" and entry._stated_kind("my dashboard tool") == "app")
+st = intake.parse("Review this existing toolchain as it is", project=toolchain,
+                  overrides={"deliverable": "tool", "mode": {"existing": True, "kind": "tool", "kind_confidence": "medium", "workflow": "review", "maturity": "partial"}})
+ktd = next((d for d in lifecycle.decisions(st, {"project": {"exists": True}}) if d["id"] == "kind"), None)
+check("Decision Room: a tool reading is shown and can be corrected (tool among the options, recommended)", ktd and ktd["recommended"] == "tool"
+      and {"game", "app", "site", "tool"} == {o["value"] for o in ktd["options"]}, ktd)
+dt = discovery.run(st); pt = planner.build(st, dt)
+check("plan: reviewing a tool runs no game or page departments (no PLAYCRAFT, DESIGNCRAFT, PIXELCRAFT or smoke) and validates",
+      not {"qa.playcraft", "qa.designcraft", "qa.pixelcraft", "qa.smoke"} & set(pt["tasks"]) and planner.validate(pt, dt) == [], sorted(pt["tasks"]))
+check("plan: ...its engineering standard is checked as a tool", pt["tasks"]["qa.standards"]["params"]["deliverable"] == "tool", pt["tasks"].get("qa.standards"))
+SC = {c["id"]: c for c in standards.check(toolchain, deliverable="tool")["checks"]}
+check("standards: a tool has no entry page, browser error handler or browser storage to check (n/a, not failed)",
+      all(SC[k]["status"] == "n/a" for k in ("entry", "error_handling", "browser_storage")), {k: SC[k]["status"] for k in SC})
+check("standards: a key in test code is a review item (confirm it is a fake), not a leak of the product", SC["secrets"]["status"] == "review", SC["secrets"])
+write(toolchain, {"forge/config.py": "API_KEY = 'sk-live000000000000000000000000'\n"})
+check("standards: ...a key in the product's own code still fails", next(c for c in standards.check(toolchain, deliverable="tool")["checks"] if c["id"] == "secrets")["status"] == "failed")
+
 # ---------------------------------------------------------------- planning: requests that were dropped or made the plan unapprovable
 def plan(prompt, path):
     s = intake.parse(prompt); s["project"]["path"] = os.path.join(ws, path)
