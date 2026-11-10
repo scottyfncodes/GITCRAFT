@@ -42,7 +42,7 @@ h1 { font-size: 24px; line-height: 1.25; margin: 0 0 var(--s3); }
 .tab:hover { color: var(--ink); }
 .tab.active { color: var(--brand); font-weight: 600; }
 .detail { background: #fff; border-radius: 16px; padding: var(--s4); }
-.back { display: inline-flex; align-items: center; min-height: var(--tap); padding: 0 var(--s2); margin-left: calc(-1 * var(--s2)); font-size: 16px; color: var(--brand); text-decoration: none; border-radius: 12px; }
+.back { display: inline-flex; align-items: center; min-height: var(--tap); padding: 0 var(--s2); margin-left: calc(-1 * var(--s2)); font-size: 16px; color: var(--brand); text-decoration: underline; text-underline-offset: 3px; border-radius: 12px; }
 .back:hover { background: #f1f3f9; }
 .field { display: block; margin: var(--s4) 0 var(--s2); font-size: 14px; color: var(--mute); }
 .field input, .field textarea { display: block; width: 100%; margin-top: var(--s1); font-size: 16px; padding: var(--s2) var(--s3); min-height: var(--tap); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); }
