@@ -27,6 +27,8 @@ import json, os, re
 HERE = os.path.dirname(os.path.abspath(__file__))
 KIT = os.path.join(HERE, "kit", "haveanapp")
 SKIP = {".git", "node_modules", "dist", "build", ".next", "out", "__pycache__", ".venv", "venv", "gitcraft-out", ".cache", "coverage"}
+# code shipped with a project that is not its product (kept in step with production/maturity.py)
+NOT_OWN = re.compile(r"(^|/)(starters?|templates?|fixtures?|__fixtures__|examples?|boilerplates?|scaffolds?|tests?|__tests__|spec|vendor|third_party|acceptance)/")
 CODE = (".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".vue", ".svelte", ".astro", ".py", ".css")
 PROFILES = ["personal", "public", "sensitive"]
 
@@ -238,7 +240,10 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
     items never pass silently; `advisory` items are reported and never fail. analytics_decided=False when nobody chose
     analytics for this project (an existing project, a review): analytics already in it are recognised, not failed.
     accepted: extra accepted decisions (beside the project's .gitcraft/accepted.json)."""
-    out = []; codefiles = list(_files(project)); src = {p: _read(p) for p in codefiles}
+    out = []; allfiles = list(_files(project)); every = {p: _read(p) for p in allfiles}
+    # the product's own code: tests, fixtures, starters, examples and vendored code hold deliberate samples (a fake key, a
+    # wildcard CORS route under test) that are not the product's behaviour. Secrets are still looked for everywhere.
+    codefiles = [p for p in allfiles if not NOT_OWN.search(os.path.relpath(p, project))]; src = {p: every[p] for p in codefiles}
     entry = _entry(project); etext = _read(entry) if entry else ""
     pkg = os.path.join(project, "package.json"); pj = {}
     if os.path.isfile(pkg):
@@ -247,8 +252,10 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
     deps = {**pj.get("dependencies", {}), **pj.get("devDependencies", {})}
     server = [p for p in codefiles if re.search(r"(^|/)(api|server|functions|routes)/", os.path.relpath(p, project)) or
               re.search(r"\b(express\(|createServer\(|fastify\(|Hono\(|export (async )?function (GET|POST|PUT|DELETE)\b|@app\.route|FastAPI\()", src[p])]
+    tool = deliverable == "tool"   # a CLI, library or toolchain: no page, so the browser checks do not apply
     # mobile + accessibility basics (every profile)
-    if entry and entry.endswith(".html"):
+    if tool: out.append(_check("entry", "an entry page exists", "n/a", "a tool (CLI, library, toolchain): no page to open"))
+    elif entry and entry.endswith(".html"):
         out.append(_check("viewport", "the entry page sets a mobile viewport", "ok" if re.search(r'name=["\']?viewport', etext, re.I) else "failed"))
         out.append(_check("lang", "the entry page declares its language (<html lang>)", "ok" if re.search(r"<html\b[^>]*\blang=", etext, re.I) else "failed"))
         out.append(_check("title", "the entry page has a title", "ok" if re.search(r"<title>\s*[^<\s]", etext, re.I) else "failed"))
@@ -257,17 +264,18 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
         out.append(_check("entry", "an entry page exists", "review", f"generated at build time into {_built_output(project)}; measure the built site"))
     else: out.append(_check("entry", "an entry page exists", "failed", "no index.html or framework layout found"))
     # secrets (every profile)
-    leaks = []
-    for p, t in src.items():
-        for m in SECRET.finditer(t): leaks.append(f"{os.path.relpath(p, project)}: {m.group(0)[:12]}…")
+    leaks, samples = [], []
+    for p, t in every.items():
+        for m in SECRET.finditer(t): (leaks if p in src else samples).append(f"{os.path.relpath(p, project)}: {m.group(0)[:12]}…")
     for envf in (".env", ".env.local", ".env.production"):
         ep = os.path.join(project, envf)
         if os.path.isfile(ep) and re.search(r"^[A-Z_]+=\S{8,}", _read(ep), re.M):
             ign = _read(os.path.join(project, ".gitignore"))
             if not re.search(r"^\.env", ign, re.M): leaks.append(f"{envf} holds values and is not git-ignored")
-    out.append(_check("secrets", "no secrets in the source or committed env files", "failed" if leaks else "ok", leaks[:6] or None))
+    out.append(_check("secrets", "no secrets in the source or committed env files", "failed" if leaks else "review" if samples else "ok",
+                      leaks[:6] or ([f"in test or sample code, confirm each is a fake: {x}" for x in samples[:6]] if samples else None)))
     # transport: no insecure http:// subresources
-    insecure = sorted({m for t in src.values() for m in re.findall(r"""(?:src|href)\s*=\s*["'](http://(?!localhost|127\.0\.0\.1)[^"']+)""", t)})
+    insecure = sorted({m for t in src.values() for m in re.findall(r"""(?:src|href)\s*=\s*["'](http://(?!localhost|127\.0\.0\.1|[\w.-]+\.local[/:])[^"']+)""", t)})
     out.append(_check("https", "every script, style and image loads over HTTPS", "failed" if insecure else "ok", insecure[:5] or None))
     # reproducibility: dependencies pinned
     if deps:
@@ -280,12 +288,14 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
     # error handling: a failure must show a message, not a blank screen
     js = "\n".join(t for p, t in src.items() if p.endswith((".js", ".mjs", ".ts", ".tsx", ".jsx", ".html", ".vue", ".svelte")))
     has_handler = bool(re.search(r"addEventListener\(\s*['\"](error|unhandledrejection)|window\.onerror|ErrorBoundary|componentDidCatch|onErrorCaptured|error\.(tsx|jsx|js)", js))
-    out.append(_check("error_handling", "a global error handler or error boundary shows failures to the person", "ok" if has_handler else "review",
+    if tool: out.append(_check("error_handling", "a global error handler or error boundary shows failures to the person", "n/a", "a tool reports failures on its own output and exit status"))
+    else: out.append(_check("error_handling", "a global error handler or error boundary shows failures to the person", "ok" if has_handler else "review",
                       None if has_handler else "add window.addEventListener('error'/'unhandledrejection') or an error boundary with a friendly message",
                       ["public", "sensitive"]))
     # storage of secrets in the browser
     ls = sorted({os.path.relpath(p, project) for p, t in src.items() if re.search(r"localStorage\.setItem\(\s*[\"'`][^\"'`]*(token|password|secret|session|jwt|ssn|card)", t, re.I)})
-    out.append(_check("browser_storage", "no tokens, passwords or personal data in localStorage", "failed" if ls else "ok", ls[:5] or None, ["sensitive"]))
+    out.append(_check("browser_storage", "no tokens, passwords or personal data in localStorage", "n/a" if tool and not ls else "failed" if ls else "ok",
+                      "a tool has no browser storage" if tool and not ls else ls[:5] or None, ["sensitive"]))
     # server-side (only when the project has server code)
     if server:
         stext = "\n".join(src[p] for p in server)
@@ -305,13 +315,14 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
         out.append(_check("sql_injection", "no SQL built by string interpolation", "failed" if sql else "ok", sql[:5] or None))
         idx = None
         for f in _files(project, (".sql", ".prisma", ".ts", ".js")):
+            if NOT_OWN.search(os.path.relpath(f, project)): continue
             t = _read(f)
             if re.search(r"CREATE TABLE|model \w+ \{|pgTable\(", t): idx = idx or bool(re.search(r"CREATE (UNIQUE )?INDEX|@@index|@unique|\.index\(|index\(", t))
         if idx is not None: out.append(_check("indexes", "database tables declare indexes for their lookups", "ok" if idx else "review",
                                               None if idx else "tables defined without any index: add indexes for the columns queries filter or join on", ["public", "sensitive"]))
     else:
-        out.append(_check("server", "server-side checks (auth, validation, rate limits, CORS, SQL)", "n/a", "no server code: a static client app"))
-    found = discover_analytics(project, src, deps)
+        out.append(_check("server", "server-side checks (auth, validation, rate limits, CORS, SQL)", "n/a", "no web server routes" if tool else "no server code: a static client app"))
+    found = [] if tool and analytics is None else discover_analytics(project, src, deps)   # a tool ships no page to measure: its code names analytics, it does not run them
     if analytics == "pulse":   # chosen in the Decision Room (or found by Discovery): the counter is on the entry page, deferred, with this app's name
         m = re.search(r"""<script\b[^>]*src=["']""" + re.escape(PULSE_SRC) + r"""["'][^>]*>""", etext)
         if not m:

@@ -71,11 +71,13 @@ def decisions(spec, disc, icon_state=None):
         # what kind of project it is decides which departments judge it (PLAYCRAFT and DESIGNCRAFT only judge games):
         # the reading is shown with its evidence, and a weak reading must be confirmed by the person
         kind, kc = mode.get("kind") or spec["deliverable"], mode.get("kind_confidence")
-        if kind in ("game", "app", "site") and kc != "stated":
-            kopts = [{"value": k, "label": {"game": "A game", "app": "An app", "site": "A website"}[k],
+        if kind in ("game", "app", "site", "tool") and kc != "stated":
+            kopts = [{"value": k, "label": {"game": "A game", "app": "An app", "site": "A website", "tool": "A tool (CLI, library, toolchain)"}[k],
                       "tradeoff": {"game": "judged as a game too: PLAYCRAFT gameplay score and DESIGNCRAFT design review",
                                    "app": "judged as an app: PIXELCRAFT usability and visual quality; no gameplay scoring",
-                                   "site": "judged as a website: PIXELCRAFT visual quality; no gameplay scoring"}[k]} for k in ("game", "app", "site")]
+                                   "site": "judged as a website: PIXELCRAFT visual quality; no gameplay scoring",
+                                   "tool": "judged as a tool: engineering standards and its own tests; no page to audit, no gameplay scoring"}[k]}
+                     for k in ("game", "app", "site") + (("tool",) if kind == "tool" else ())]
             kopts.sort(key=lambda o: o["value"] != kind)
             weak = kc == "low"
             out.append(_d("kind", "What kind of project this is", f"This reads as {'a' if kind != 'app' else 'an'} {kind} ({kc or 'unmeasured'} confidence: "

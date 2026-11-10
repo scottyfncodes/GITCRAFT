@@ -88,7 +88,7 @@ def _discover(ctx, project, p=None):
     k = info["project_kind"]
     if p is not None and k["kind"] != "game" and k["confidence"] in ("high", "medium") and not (p.get("genres") or p.get("treat_as_game")):
         raise StudioError(f"not a game: this project reads as {'an' if k['kind'] == 'app' else 'a'} {k['kind']} ({k['confidence']} confidence: "
-                          + "; ".join(k["evidence"]) + "). PLAYCRAFT scores games only; use PIXELCRAFT for an app or a site",
+                          + "; ".join(k["evidence"]) + "). PLAYCRAFT scores games only" + ("; use PIXELCRAFT for an app or a site" if k["kind"] in ("app", "site") else ""),
                           hint="if it is a game, pass genres: [...] or treat_as_game: true", stage="discover")
     if k["kind"] != "game": ctx.note(f"the project reads as {k['kind']} ({k['confidence']} confidence); scored as a game because the caller said so or the reading is weak")
     return info

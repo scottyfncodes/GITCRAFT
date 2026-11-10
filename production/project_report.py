@@ -843,7 +843,9 @@ def c_production(D, ctx):
                                           "; ".join(f"{u['what']} ({u['where']})" for u in inv["unfinished"][:4]), "Finish or remove them before release.", None, theme="release"))
         try:
             found = a.get("analytics") or []   # Discovery's analytics: recognised, never "undeclared" failures
-            sc = standards.check(P["path"], deliverable=a.get("kind") or "app", analytics="pulse" if any(f["provider"] == "pulse" for f in found) else None,
+            dl = ctx.get("kind") or a.get("kind") or "app"   # the report's reading (a game with nothing playable is judged as a tool)
+            if dl == "tool": found = []   # a tool's code names analytics it adds to other projects; it ships no page that runs them
+            sc = standards.check(P["path"], deliverable=dl, analytics="pulse" if any(f["provider"] == "pulse" for f in found) else None,
                                  analytics_decided=False)
             checks = sc.get("checks") or []; rel = [c for c in checks if c["status"] != "n/a"]
             ok = [c for c in rel if c["status"] in ("ok", "accepted")]
@@ -1103,7 +1105,7 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
     # (a toolchain that only contains game fixtures, like GITCRAFT itself, is not one)
     hist_game = any(os.path.isdir(os.path.join(r, P["id"])) for r in (os.path.join(REPO, "history", "playcraft", "games"), os.path.join(REPO, "history", "designcraft")))
     if hist_game or (ctx["kind"] == "game" and (assessment or {}).get("entry")): ctx["kind"] = "game"
-    elif ctx["kind"] == "game": ctx["kind"] = "toolkit"; ctx["kind_note"] = "Discovery saw game engines but no playable entry point, so the game departments do not apply"
+    elif ctx["kind"] == "game": ctx["kind"] = "tool"; ctx["kind_note"] = "Discovery saw game engines but no playable entry point, so the game departments do not apply"
     elif not P["path"]: ctx["kind"] = None
     if P["path"]:
         t = _utc(_git(P["path"], "log", "-1", "--format=%cI")); ctx["head_at"] = t

@@ -380,8 +380,15 @@ ForgeCraft keeps the 3D Department. The Director gives it a brief and records th
 | A failed PIXELCRAFT gate | each finding becomes one readable instruction (title, severity, evidence, fix) | the re-verification |
 
 Built-in tasks are gated like department tasks (`status_ok`), so a partial integration failure cannot pass. Which departments judge an
-existing project follows its kind (game, app or site), read by `production/maturity.py` with its own confidence and evidence, shown in
+existing project follows its kind (game, app, site or tool), read by `production/maturity.py` with its own confidence and evidence, shown in
 the Decision Room (`kind`), and asked as an essential question when the reading is weak; the kind the person names wins.
+
+A **tool** is a CLI, library, toolchain or MCP server: at least two tool signals (declared command-line entry points, `cli.py` /
+`__main__.py` / `bin/` modules, shell scripts, MCP servers, a README that describes one), no web entry page, no web framework, and
+nothing playable (no engine project files, and no page for a game loop to run in). A tool gets no PLAYCRAFT, DESIGNCRAFT, PIXELCRAFT
+or smoke test, and its engineering standard skips the browser checks (`n/a`). Code that ships with a project but is not its product
+(`tests/`, `fixtures/`, `starters/`, `templates/`, `examples/`, `vendor/`, `acceptance/`) gives no evidence for the kind and is left
+out of the product checks of the engineering standard; a secret found there is a review item (confirm it is a fake), not a failure.
 
 ## Correcting the plan
 
