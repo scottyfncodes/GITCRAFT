@@ -415,7 +415,8 @@ async function discover(browser, ctxOpts, R) {
       sigs.add(sig);
       const nm = slug(c.kind === 'link' && !sameUrl && pattern !== urlNow.pathname + urlNow.hash ? pattern.replace(/:id/g, 'item') : (c.label || urlNow.pathname));
       const s = sameUrl || !c.path ? { name: nm, path: from.path, steps: [...from.steps, step], depth: from.depth + 1, via: c.label }
-        : { name: nm, path: urlNow.pathname + urlNow.search + urlNow.hash, steps: [], depth: from.depth + 1, via: c.label, link_steps: [...from.steps, step] };
+        : { name: nm, path: urlNow.pathname + urlNow.search + urlNow.hash, steps: [], depth: from.depth + 1, via: c.label,
+            link_steps: [...(from.link_steps || []), ...from.steps, step] };   // the whole path from the entry: a page two links deep keeps the first click
       if (screens.some((x) => x.name === s.name)) s.name += '-' + screens.length;
       s._text = now; s._pat = pattern; s._struct = struct;
       screens.push(s);
