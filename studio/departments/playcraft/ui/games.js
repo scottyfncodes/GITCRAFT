@@ -93,7 +93,7 @@
       <div class="eyebrow">PLAYCRAFT · ${P.length} games · ${P.reduce((n, r) => n + r.runs, 0)} recorded runs</div>
       <h1>How our games are changing</h1>
       <p class="lede">Every PLAYCRAFT run, kept. Each game is measured against its own first assessment and its own genre. A change only counts as an improvement if the code changed and the game proved it on screen.</p>
-      <section class="next" aria-label="Needs attention next"><div class="eyebrow">Needs attention next</div><h2>${esc(next.title)}</h2>
+      <section class="next" aria-labelledby="nx"><h2 id="nx">Needs attention next</h2><p class="nt">${esc(next.title)}</p>
         <ul>${next.reasons.slice(0, 5).map((r) => `<li>${esc(r)}</li>`).join("")}</ul><a class="go" href="#/g/${encodeURIComponent(next.id)}">Open its history</a></section>
       <h2>The games</h2>
       <div class="carts">${P.map((r) => cardHTML(r, DATA.games[r.id])).join("")}</div>
@@ -131,7 +131,7 @@
       ${G.pitch ? `<p class="lede" style="margin-top:12px">${esc(G.pitch)}</p>` : ""}
 
       <section class="panel" aria-label="Code and deployment">
-        <h3>Where the code is</h3>
+        <h2>Where the code is</h2>
         <div class="pipeline">
           <div><span>Baseline</span><b>${sha(base.commit)}</b><em>${esc(day(base.at))}</em></div>
           <div><span>Last assessed</span><b>${sha(dep.latest_assessed_commit)}</b><em>${esc(day(last.at))}</em></div>
@@ -142,37 +142,37 @@
       </section>
 
       <section class="panel" aria-label="Baseline versus latest">
-        <h3>Baseline vs latest</h3>
+        <h2>Baseline vs latest</h2>
         <div class="verdict"><div class="big num">${base.overall} → ${last.overall}</div><span class="stamp ${vc}" style="margin:0">${esc(vt)}</span></div>
         <p class="lede" style="margin-top:8px">Verified-only ${base.verified ?? "—"} → ${last.verified ?? "—"}. Measured noise on this game: ±${G.noise.band}${G.noise.measured ? ` (${G.noise.samples} repeat run${G.noise.samples > 1 ? "s" : ""} of one commit)` : " (default; no repeat runs yet)"}.</p>
         ${vb?.controlled ? `<p class="lede" style="margin-top:8px">Confirmed by a controlled comparison: the baseline commit was re-measured with the current PLAYCRAFT (${esc(day((G.timeline.find((t) => t.run === vb.controlled.from) || {}).at))}), so method changes are not counted.</p>` : ""}
         ${vb ? `<div class="counts" style="margin-top:10px">${vb.counts.improved ? `<span class="chip teal">${vb.counts.improved} improved (measured)</span>` : ""}${vb.counts.regressed ? `<span class="chip coral">${vb.counts.regressed} regressed (measured)</span>` : ""}${vb.counts.unconfirmed ? `<span class="chip ghost">${vb.counts.unconfirmed} unconfirmed (method or noise)</span>` : ""}${vb.counts.method ? `<span class="chip slate">${vb.counts.method} PLAYCRAFT method, not the game</span>` : ""}${vb.counts.unverified_code ? `<span class="chip ghost">${vb.counts.unverified_code} code change, unverified</span>` : ""}${vb.counts.measurement ? `<span class="chip slate">${vb.counts.measurement} measurement only</span>` : ""}${vb.counts.coverage ? `<span class="chip ghost">${vb.counts.coverage} coverage</span>` : ""}</div>` : ""}
       </section>
 
-      <section class="panel"><h3>Score progression</h3>${chart(G)}</section>
+      <section class="panel"><h2>Score progression</h2>${chart(G)}</section>
 
       <div class="two">
-        <section class="panel"><h3>Category by category</h3><div class="cats">${cats.map(([k, c]) => `
+        <section class="panel"><h2>Category by category</h2><div class="cats">${cats.map(([k, c]) => `
           <div class="cat"><div class="row1"><span>${esc(c.title || k)}</span><span class="num">${c.from ?? "—"} → <b>${c.to ?? "—"}</b> <span class="delta ${realIn(k) && c.delta ? dcls(c.delta) : "flat"}" style="padding:1px 6px">${sign(c.delta)}</span></span></div>
           ${c.delta && !realIn(k) ? `<div class="note">moved without a measured change (method, coverage or source-only)</div>` : ""}
           <div class="track"><div class="base" style="width:${c.from ?? 0}%"></div><div class="now ${realIn(k) && c.delta ? dcls(c.delta) : ""}" style="width:${c.to ?? 0}%"></div>${c.verified_to != null ? `<div class="ver" style="left:calc(${c.verified_to}% - 2px)" title="verified-only ${c.verified_to}"></div>` : ""}</div></div>`).join("")}</div>
           <div class="legend"><span><i style="border-color:rgba(168,188,212,.5);border-top-width:8px"></i>Baseline</span><span><i style="border-color:#fbefd5"></i>Latest</span><span><i style="border-color:#f4c542;width:4px;border-top-width:12px"></i>Verified-only</span></div></section>
-        <section class="panel"><h3>What changed, and why it counts (or not)</h3>
+        <section class="panel"><h2>What changed, and why it counts (or not)</h2>
           ${vb ? `<ul class="list">${vb.changes.slice(0, 14).map((c) => `<li><div class="k"><b>${esc(c.title)}</b><span class="cls ${clsOf(c.class || "")}">${esc(c.class)}</span></div><p>${esc(c.from.status || "—")} ${lvl(c.from.level)} → ${esc(c.to.status || "—")} ${lvl(c.to.level)}${c.why ? ` · ${esc(c.why)}` : ""}</p></li>`).join("") || "<li>No criterion changed.</li>"}</ul>` : `<p class="lede">Only the baseline so far.</p>`}</section>
       </div>
 
-      <section class="panel"><h3>Findings across runs</h3>
+      <section class="panel"><h2>Findings across runs</h2>
         <div class="tabs2" role="group" aria-label="Show findings"><button aria-pressed="true" aria-controls="flist" class="on" data-f="open">Open ${open.length}</button><button aria-pressed="false" aria-controls="flist" data-f="fixed">Fixed ${fixed.length}</button>${unm.length ? `<button aria-pressed="false" aria-controls="flist" data-f="unm">Not measured ${unm.length}</button>` : ""}</div>
         <ul class="list" id="flist"></ul></section>
 
       <div class="two">
-        <section class="panel"><h3>Improvement passes</h3>${G.passes.length ? `<ul class="list">${G.passes.map((p) => `<li><div class="k"><b>${esc(day(p.at))} · ${sha(p.commit)}</b>${p.pr ? `<a href="${esc(p.pr)}">PR</a>` : ""}</div>
+        <section class="panel"><h2>Improvement passes</h2>${G.passes.length ? `<ul class="list">${G.passes.map((p) => `<li><div class="k"><b>${esc(day(p.at))} · ${sha(p.commit)}</b>${p.pr ? `<a href="${esc(p.pr)}">PR</a>` : ""}</div>
           <p>${p.changes.map((c) => esc(c.title)).join(" · ")}</p><p><b style="color:var(--teal)">Measured:</b> ${p.measurable.map(esc).join("; ") || "none"}</p>${p.unmeasured.length ? `<p>Source only: ${p.unmeasured.map(esc).join("; ")}</p>` : ""}
           <p>Regressions: ${p.regressions.length ? p.regressions.map(esc).join("; ") : "none"}${p.not_reproduced.length ? ` · not reproduced (noise): ${p.not_reproduced.map(esc).join("; ")}` : ""} · guardrails ${p.guardrails_ok ? "clean" : p.guardrails_ok === false ? "FAILED" : "—"}</p></li>`).join("")}</ul>` : `<p class="lede">No improvement pass recorded yet.</p>`}</section>
-        <section class="panel"><h3>Regression history</h3>${G.regressions.length ? `<ul class="list">${G.regressions.map((x) => `<li><div class="k"><b>${esc(x.what)}</b><span class="cls ${x.confirmed === false ? "measurement" : "regressed"}">${esc(x.kind)}</span></div><p>commit ${sha(x.commit)} · ${when(x.run)}</p></li>`).join("")}</ul>` : `<p class="lede">None recorded.</p>`}</section>
+        <section class="panel"><h2>Regression history</h2>${G.regressions.length ? `<ul class="list">${G.regressions.map((x) => `<li><div class="k"><b>${esc(x.what)}</b><span class="cls ${x.confirmed === false ? "measurement" : "regressed"}">${esc(x.kind)}</span></div><p>commit ${sha(x.commit)} · ${when(x.run)}</p></li>`).join("")}</ul>` : `<p class="lede">None recorded.</p>`}</section>
       </div>
 
-      <section class="panel"><h3>Runs and provenance</h3><div class="scroll"><table class="prov"><thead><tr><th>Assessed</th><th>Kind</th><th>Commit</th><th>Overall</th><th>Verified</th><th>Evidence v/o/i/n</th><th>Method</th></tr></thead><tbody>
+      <section class="panel"><h2>Runs and provenance</h2><div class="scroll" tabindex="0" role="region" aria-label="Runs and provenance table"><table class="prov"><thead><tr><th>Assessed</th><th>Kind</th><th>Commit</th><th>Overall</th><th>Verified</th><th>Evidence v/o/i/n</th><th>Method</th></tr></thead><tbody>
         ${G.timeline.map((t, i) => { const pv = G.provenance[i] || {}; const e = t.evidence || {}; return `<tr><td>${esc(day(t.at))}${t.is_baseline ? ` <span class="chip gold">baseline</span>` : t.is_remeasure ? ` <span class="chip">re-measure (control)</span>` : ""}</td><td>${esc(t.kind)}</td><td class="mono" title="${esc(pv.commit_source || "")}">${sha(t.commit)}</td><td class="n">${t.overall}</td><td class="n">${t.verified ?? "—"}</td><td class="n">${e.verified || 0}/${e.observed || 0}/${e.inferred || 0}/${e.not_tested || 0}</td><td class="mono">${esc(t.method)}</td></tr>`; }).join("")}
       </tbody></table></div><p class="lede" style="font-size:13px;margin-top:8px">Every run keeps its full PLAYCRAFT card (SHA-256 recorded). The baseline is pinned and never overwritten.</p></section>`;
     const show = (k) => {
@@ -187,7 +187,9 @@
 
   function route() {
     const h = location.hash.replace(/^#\/?/, "");
-    if (h.startsWith("g/")) game(decodeURIComponent(h.slice(2))); else portfolio();
+    const home = !h.startsWith("g/"), mark = document.querySelector(".mark");
+    if (mark) home ? mark.setAttribute("aria-current", "page") : mark.removeAttribute("aria-current");
+    if (home) portfolio(); else game(decodeURIComponent(h.slice(2)));
     window.scrollTo(0, 0);
   }
   fetch("data.json", { cache: "no-cache" }).then((r) => r.json()).then((d) => {

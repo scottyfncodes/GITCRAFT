@@ -164,7 +164,7 @@ function dialog(html) { $("#dlgBody").innerHTML = html; $("#dlg").showModal(); }
 // ---------------------------------------------------------------- shared bits
 function card(m, sel) {
   return `<button class="card ${sel ? "on" : ""}" data-asset="${esc(m.id)}"><img loading="lazy" alt="" src="${esc(url(m, m.previews.thumbnail) || "")}">
-  <div><b>${esc(m.name)}</b><small>${esc(m.kind || "asset")} · ${num(m.geometry.triangles)} tris · v${m.version}</small><br><span class="pill ${esc(m.validation.status)}">${esc(m.validation.status)}</span></div></button>`;
+  <div><b>${esc(m.name)}</b><small>${esc(m.kind || "asset")} · ${num(m.geometry.triangles)} tris · v${m.version}</small><span class="pill ${esc(m.validation.status)}">${esc(m.validation.status)}</span></div></button>`;
 }
 function bindCards(root, fn) { root.querySelectorAll("[data-asset]").forEach((b) => (b.onclick = () => fn(b.dataset.asset))); }
 const COLORS = ["coral", "crimson", "gold", "lagoon", "sea", "midnight", "palm", "dusk", "cream", "timber", "black"];
@@ -177,7 +177,7 @@ pages.factory = (main) => {
   main.innerHTML = `<div class="hero"><div><h1>3D Asset Factory</h1><p>Describe an object or add reference images. ForgeCraft's router picks the best capability available on this machine, explains why, and falls back when a tool is missing. It never substitutes a 2D image.</p></div></div>
   <div class="grid2"><section class="panel"><h2>New asset</h2>
     <label for="brief">Brief</label><textarea id="brief" placeholder="e.g. stylized low-poly boat with a red hull">stylized low-poly boat with a red hull</textarea>
-    <div class="chips" id="ex">${["stylized low-poly boat with a red hull", "detailed ship from concept art", "object from photograph", "animated human pirate character", "reconstructed real-world environment", "blocky voxel treasure chest", "floating salvage debris", "small tropical island", "complete game-ready scene"].map((x) => `<span class="chip">${x}</span>`).join("")}</div>
+    <div class="chips" id="ex">${["stylized low-poly boat with a red hull", "detailed ship from concept art", "object from photograph", "animated human pirate character", "reconstructed real-world environment", "blocky voxel treasure chest", "floating salvage debris", "small tropical island", "complete game-ready scene"].map((x) => `<button type="button" class="chip">${x}</button>`).join("")}</div>
     <div class="row"><div><label for="imgs">Reference images</label><input id="imgs" type="file" accept="image/*" multiple title="On a snapshot, images are listed in the MCP call; run it from Claude Code or the control room"></div>
       <div><label for="nimg">…or count (planning)</label><input id="nimg" type="number" min="0" value="0"></div>
       <div><label for="tool">Tool</label><select id="tool"><option value="">Automatic</option>${Object.entries(S.rules.tools).filter(([k]) => !["meshcraft_import", "mixamo", "meshcraft_scene"].includes(k)).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join("")}</select></div></div>
@@ -211,15 +211,15 @@ pages.characters = (main, arg) => {
   <section><div class="panel"><h2>Create a character</h2>
     <div class="row"><div><label for="cn">Name</label><input id="cn" value="Deckhand"></div><div><label for="cb">Bandana</label><select id="cb">${COLORS.map((c) => `<option ${c === "coral" ? "selected" : ""}>${c}</option>`).join("")}</select></div>
     <div><label for="cvst">Vest</label><select id="cvst">${COLORS.map((c) => `<option ${c === "crimson" ? "selected" : ""}>${c}</option>`).join("")}</select></div><div><label for="cp">Trousers</label><select id="cp">${COLORS.map((c) => `<option ${c === "midnight" ? "selected" : ""}>${c}</option>`).join("")}</select></div></div>
-    <label><input type="checkbox" id="cw" checked> Cutlass in right hand</label>
-    <label>Clips</label><div class="chips" id="clips">${["Idle", "Walk", "Run", "Jump", "Interact", "Attack"].map((c) => `<span class="chip on">${c}</span>`).join("")}</div>
+    <label class="check" for="cw"><input type="checkbox" id="cw" checked> Cutlass in right hand</label>
+    <label>Clips</label><div class="chips" id="clips">${["Idle", "Walk", "Run", "Jump", "Interact", "Attack"].map((c) => `<button type="button" class="chip on" aria-pressed="true">${c}</button>`).join("")}</div>
     <button class="btn primary" id="mk">Create, rig and animate</button></div>
   <div class="panel"><h2>Mixamo animations</h2><p class="note" style="margin-top:0">Mixamo has no public API, so ForgeCraft never contacts mixamo.com. A person signs in (free Adobe ID), uploads and downloads. ForgeCraft prepares the upload and merges the downloads.</p>
     <ol>${S.mixamo.steps.map((s) => `<li>${esc(s.replace(/^\d+\.\s*/, ""))}</li>`).join("")}</ol>
-    ${sel ? `<div class="row"><button class="btn" id="mxu">Prepare Mixamo upload (FBX)</button><button class="btn" id="mxa">Apply downloaded clips…</button></div>` : ""}</div></section></div>`;
+    ${sel ? `<div class="row eq"><button class="btn" id="mxu">Prepare Mixamo upload (FBX)</button><button class="btn" id="mxa">Apply downloaded clips…</button></div>` : ""}</div></section></div>`;
   if (sel) $("#cv").append(viewerBox(sel));
   bindCards(main, (id) => (location.hash = "#characters/" + id));
-  $("#clips").querySelectorAll(".chip").forEach((c) => (c.onclick = () => c.classList.toggle("on")));
+  $("#clips").querySelectorAll(".chip").forEach((c) => (c.onclick = () => c.setAttribute("aria-pressed", c.classList.toggle("on"))));
   $("#mk").onclick = () => act("generate", { brief: `animated pirate character ${$("#cn").value}`, name: $("#cn").value, kind: "character", tool: "meshcraft_template", template: "deckhand",
     template_params: { colors: { bandana: $("#cb").value, vest: $("#cvst").value, pants: $("#cp").value }, weapon: $("#cw").checked,
                        clips: [...$("#clips").querySelectorAll(".chip.on")].map((c) => c.textContent) } }, "Create character");
@@ -243,13 +243,13 @@ pages.world = (main) => {
     <div class="row" style="margin-top:12px"><button class="btn primary" id="mki">Generate island terrain</button><button class="btn" id="mkl">Generate lighthouse</button></div>
     <h3 style="margin-top:16px">Environment assets</h3><div class="cards">${env.map((m) => card(m)).join("")}</div></section>
   <section class="panel"><h2>Compose a scene</h2><p class="note" style="margin-top:0">Pick library assets. Upgrades attach to the first boat's matching socket; the rest are spaced along the shore.</p>
-    <div class="chips" id="pick">${parts.map((m) => `<span class="chip ${["island", "boat"].includes(m.kind) ? "on" : ""}" data-id="${esc(m.id)}" data-kind="${esc(m.kind)}">${esc(m.name)}</span>`).join("")}</div>
+    <div class="chips" id="pick">${parts.map((m) => `<button type="button" class="chip ${["island", "boat"].includes(m.kind) ? "on" : ""}" aria-pressed="${["island", "boat"].includes(m.kind)}" data-id="${esc(m.id)}" data-kind="${esc(m.kind)}">${esc(m.name)}</button>`).join("")}</div>
     <h3>Lighting &amp; atmosphere</h3><div class="row"><div><label for="sun">Sun elevation (°)</label><input id="sun" type="range" min="5" max="85" value="48"></div><div><label for="sky">Sky</label><select id="sky"><option value="sky">Day</option><option value="#ffb27a">Golden hour</option><option value="#3b2350">Dusk</option></select></div></div>
     <div class="row"><div><label for="snm">Scene name</label><input id="snm" value="New Scene"></div></div>
     <button class="btn primary" id="cmp" style="margin-top:12px">Compose scene</button></section></div>`;
   main.querySelectorAll("[data-sv]").forEach((el) => el.append(viewerBox(S.assets.map((a) => md(a)).find((m) => m.id === el.dataset.sv), { clips: false })));
   bindCards(main, (id) => (location.hash = "#library/" + id));
-  $("#pick").querySelectorAll(".chip").forEach((c) => (c.onclick = () => c.classList.toggle("on")));
+  $("#pick").querySelectorAll(".chip").forEach((c) => (c.onclick = () => c.setAttribute("aria-pressed", c.classList.toggle("on"))));
   $("#mki").onclick = () => act("generate", { brief: "tropical island terrain", kind: "island", tool: "meshcraft_template", template: "island", name: "Island " + $("#isd").value, template_params: { radius: +$("#isz").value, palms: +$("#ipm").value, seed: +$("#isd").value }, bake: 2048, max_tris: 40000 }, "Generate island");
   $("#mkl").onclick = () => act("generate", { brief: "lighthouse on a rock", kind: "lighthouse", tool: "meshcraft_template", template: "lighthouse", name: "Lighthouse" }, "Generate lighthouse");
   $("#cmp").onclick = () => {
@@ -297,7 +297,7 @@ pages.library = (main, arg, ver) => {
       <dt>Materials</dt><dd>${m.materials.map(esc).join(", ")}</dd><dt>Textures</dt><dd>${m.textures.map((t) => esc(t.name)).join("<br>") || "vertex colours (toon) / per-profile atlas"}</dd>
       <dt>Rig</dt><dd>${m.rig ? esc(m.rig.convention) : "none"}</dd><dt>Animations</dt><dd>${m.animations.map((x) => esc(x.name) + (x.seconds ? ` ${x.seconds}s` : "")).join(", ") || "none"}</dd>
       <dt>Sockets</dt><dd>${m.sockets.map((s) => esc(s.name)).join(", ") || "none"}</dd><dt>Generation</dt><dd><pre>${esc(JSON.stringify(m.generation, null, 1))}</pre></dd></dl>
-      ${m.previews.turntable?.length ? `<h3>Turntable</h3><div class="turn">${m.previews.turntable.map((p) => `<img loading="lazy" alt="" src="${esc(url(m, p))}">`).join("")}</div>` : ""}`,
+      ${m.previews.turntable?.length ? `<h3>Turntable</h3><div class="turn" tabindex="0" role="region" aria-label="Turntable frames">${m.previews.turntable.map((p) => `<img loading="lazy" alt="" src="${esc(url(m, p))}">`).join("")}</div>` : ""}`,
     files: () => `<div class="files">${Object.entries(m.files).map(([f, v]) => `<a href="${esc(url(m, v.path))}" download><b>${esc(f)}</b><small>${fmtB(v.bytes)}</small></a>`).join("")}
       <a href="${esc(m.base)}asset.json" download><b>asset.json</b><small>metadata</small></a></div>
       <p class="note">Multi-file formats (glTF + .bin, OBJ + .mtl) also ship their companion files: ${m.companion_files.map(esc).join(", ")}</p>
@@ -312,32 +312,47 @@ pages.library = (main, arg, ver) => {
   $("#regen").onclick = () => act("generate", { brief: m.brief, name: m.name, asset_id: m.id, kind: m.kind, params: m.generation.params, tool: m.route?.chosen }, "Regenerate " + m.name);
 };
 
+const JOB_FILTERS = [["all", "All"], ["done", "Done"], ["running", "Running"], ["failed", "Failed"], ["blocked", "Blocked"]];
+const jobMatch = (x, k) => k === "all" || x.status === k || (k === "running" && x.status === "queued");
+let jobFilter = "all", jobsAll = false;
+const JOB_PAGE = 12;   // most recent first; the rest one tap away
 pages.monitor = (main, arg) => {
   const jobs = S.jobs, j = jobs.find((x) => x.id === arg) || jobs[0];
   const pb = S.probe;
   main.innerHTML = `<div class="hero"><div><h1>Pipeline Monitor</h1><p>ForgeCraft orchestration jobs and the MeshCraft jobs they start: routing decisions, stage timing, errors, retries and compute. MeshCraft retries failed bakes with lighter settings; blocked jobs explain what is missing.</p></div></div>
   <div class="stat"><div><b>${jobs.filter((x) => x.status === "done").length}</b><span>done</span></div><div><b>${jobs.filter((x) => x.status === "running" || x.status === "queued").length}</b><span>running</span></div>
   <div><b>${jobs.filter((x) => x.status === "failed").length}</b><span>failed</span></div><div><b>${jobs.filter((x) => x.status === "blocked").length}</b><span>blocked (tool unavailable)</span></div></div>
-  <div class="grid2"><section class="panel" style="overflow:auto"><table class="jobs"><thead><tr><th>Status</th><th>Job</th><th class="hide-s">Tool</th><th class="hide-s">Stages</th></tr></thead><tbody>
-    ${jobs.map((x) => `<tr class="${x === j ? "sel" : ""}" data-job="${esc(x.id)}" style="cursor:pointer"><td><span class="pill ${esc(x.status)}">${esc(x.status)}</span></td><td><b>${esc(x.spec?.name || x.spec?.brief || x.id)}</b><br><small>${esc(x.id)}</small></td>
-    <td class="hide-s">${esc(x.plan?.chosen || x.spec?.tool || "")}</td><td class="hide-s"><div class="stages">${x.stages.filter((s) => s.attempt === x.attempts.length - 1).map((s) => `<span class="stg ${esc(s.state)}">${esc(s.stage.replace("blender:", ""))}</span>`).join("")}</div></td></tr>`).join("")}
-  </tbody></table></section><section class="panel" id="jd"></section></div>
+  <div class="grid2"><section class="panel" style="overflow:auto" aria-label="Jobs">
+    <div class="subtabs" role="group" aria-label="Show jobs">${JOB_FILTERS.filter(([k]) => k === "all" || jobs.some((x) => jobMatch(x, k))).map(([k, label]) => `<button type="button" class="btn small" data-jf="${k}" aria-pressed="false">${label} ${jobs.filter((x) => jobMatch(x, k)).length}</button>`).join("")}</div>
+    <table class="jobs"><thead><tr><th>Status</th><th>Job</th><th class="hide-s">Tool</th><th class="hide-s">Stages</th></tr></thead><tbody id="jrows"></tbody></table><button type="button" class="btn small" id="jmore" hidden style="margin-top:12px"></button></section><section class="panel" id="jd"></section></div>
   <h2 style="margin-top:24px">Compute &amp; backends</h2>
   <div class="hw"><div class="panel"><h3>Machine</h3><dl class="kv"><dt>CPU</dt><dd>${pb.hardware.cpu_threads} threads</dd><dt>RAM</dt><dd>${pb.hardware.ram.total_gb} GB</dd><dt>GPU</dt><dd>${pb.hardware.gpus.map((g) => `${esc(g.name)} ${g.vram_gb} GB`).join(", ") || "none (CPU only)"}</dd>
     <dt>Network</dt><dd>${pb.hardware.network.allowed_by_gitcraft ? "allowed" : "denied to tools (GITCRAFT sandbox)"}</dd><dt>Limits</dt><dd>${pb.limits.max_concurrent_heavy_jobs} heavy job at a time · bake ≤ ${pb.limits.max_bake_resolution}px · ≤ ${num(pb.limits.max_triangles)} tris</dd></dl></div>
-    ${Object.entries(pb.backends).map(([k, b]) => `<div class="panel"><h3>${esc(k)} <span class="pill ${b.available ? "available" : "unavailable"}">${b.available ? "available" : "unavailable"}</span></h3><p style="margin:0;font-size:13.5px">${esc(b.version || b.mode || "")}</p><p class="note">${esc(b.reason || b.note || "")}</p></div>`).join("")}</div>`;
-  main.querySelectorAll("[data-job]").forEach((r) => (r.onclick = () => (location.hash = "#monitor/" + r.dataset.job)));
+    ${Object.entries(pb.backends).map(([k, b]) => `<div class="panel"><h3>${esc(k)} <span class="pill ${b.available ? "available" : "unavailable"}">${b.available ? "available" : "unavailable"}</span></h3><p style="margin:0;font-size:14px">${esc(b.version || b.mode || "")}</p><p class="note">${esc(b.reason || b.note || "")}</p></div>`).join("")}</div>`;
+  const showJobs = (k) => {
+    jobFilter = k;
+    const all = jobs.filter((x) => jobMatch(x, k)), xs = jobsAll || all.length <= JOB_PAGE ? all : all.slice(0, JOB_PAGE);
+    if (j && !xs.includes(j) && all.includes(j)) xs.push(j);   // the job being shown stays listed
+    $("#jmore").hidden = xs.length >= all.length;
+    $("#jmore").textContent = `Show all ${all.length} jobs`;
+    $("#jrows").innerHTML = xs.map((x) => `<tr class="${x === j ? "sel" : ""}"><td><span class="pill ${esc(x.status)}">${esc(x.status)}</span></td><td><a href="#monitor/${esc(x.id)}"${x === j ? ' aria-current="true"' : ""}><b>${esc(x.spec?.name || x.spec?.brief || x.id)}</b><br><small>${esc(x.id)}</small></a></td>
+    <td class="hide-s">${esc(x.plan?.chosen || x.spec?.tool || "")}</td><td class="hide-s"><div class="stages">${x.stages.filter((s) => s.attempt === x.attempts.length - 1).map((s) => `<span class="stg ${esc(s.state)}">${esc(s.stage.replace("blender:", ""))}</span>`).join("")}</div></td></tr>`).join("") || `<tr><td colspan="4">No ${k === "all" ? "" : esc(k) + " "}jobs.</td></tr>`;
+    main.querySelectorAll("[data-jf]").forEach((b) => { const on = b.dataset.jf === k; b.setAttribute("aria-pressed", String(on)); });
+  };
+  main.querySelectorAll("[data-jf]").forEach((b) => (b.onclick = () => showJobs(b.dataset.jf)));
+  $("#jmore").onclick = () => { jobsAll = true; showJobs(jobFilter); };
+  showJobs(jobs.some((x) => jobMatch(x, jobFilter)) ? jobFilter : "all");
   if (!j) return ($("#jd").innerHTML = "<p>No jobs yet.</p>");
   const att = j.attempts.length - 1, st = j.stages.filter((s) => s.attempt === att), mx = Math.max(1, ...st.map((s) => s.seconds || 0));
   const secs = (s) => s.seconds ?? (s.started && s.finished ? (Date.parse(s.finished) - Date.parse(s.started)) / 1000 : 0);
   $("#jd").innerHTML = `<h2>${esc(j.spec?.name || j.spec?.brief || j.id)}</h2><div class="chips"><span class="pill ${esc(j.status)}">${esc(j.status)}</span><span class="pill kind">${j.attempts.length} attempt${j.attempts.length > 1 ? "s" : ""}</span>${j.asset ? `<a class="chip" href="#library/${esc(j.asset.id)}">asset ${esc(j.asset.id)} v${j.asset.version}</a>` : ""}</div>
     ${j.error ? `<p class="err">${esc(j.error)}</p>` : ""}
-    ${j.plan ? `<h3>Routing</h3><p style="font-size:13.5px">${esc(j.plan.explanation)}</p>` : ""}
+    ${j.plan ? `<h3>Routing</h3><p style="font-size:14px">${esc(j.plan.explanation)}</p>` : ""}
     <h3>Stages (attempt ${att + 1})</h3><div class="timeline">${st.map((s) => { const v = secs(s); return `<div class="tl ${esc(s.state)}"><span>${esc(s.stage)} <span class="pill ${esc(s.state)}">${esc(s.state)}</span></span><div><div class="bar" style="width:${Math.max(1, (100 * v) / Math.max(mx, ...st.map(secs)))}%"></div>${s.error ? `<div class="err">${esc(s.error)}</div>` : ""}</div><small>${v ? v.toFixed(1) + "s" : ""}</small></div>`; }).join("")}</div>
     ${j.attempts.length > 1 ? `<h3>Earlier attempts</h3>${j.attempts.slice(0, -1).map((a, i) => `<p style="font-size:13px">#${i + 1}: <span class="pill ${esc(a.status)}">${esc(a.status)}</span> ${esc(a.error || "")}</p>`).join("")}` : ""}
-    ${j.children?.length ? `<h3>Delegated to MeshCraft</h3><p style="font-size:13.5px">${j.children.map((c) => `<a href="#monitor/${esc(c)}">${esc(c)}</a>`).join("<br>")}</p>` : ""}
-    ${j.parent ? `<h3>Ordered by</h3><p style="font-size:13.5px"><a href="#monitor/${esc(j.parent)}">${esc(j.parent)}</a> (ForgeCraft)</p>` : ""}
-    ${j.compute ? `<h3>Compute</h3><p style="font-size:13.5px">${esc(j.compute.tool)}: ${esc(j.compute.needs || "")}</p>` : ""}
+    ${j.children?.length ? `<h3>Delegated to MeshCraft</h3><p style="font-size:14px">${j.children.map((c) => `<a href="#monitor/${esc(c)}">${esc(c)}</a>`).join("<br>")}</p>` : ""}
+    ${j.parent ? `<h3>Ordered by</h3><p style="font-size:14px"><a href="#monitor/${esc(j.parent)}">${esc(j.parent)}</a> (ForgeCraft)</p>` : ""}
+    ${j.compute ? `<h3>Compute</h3><p style="font-size:14px">${esc(j.compute.tool)}: ${esc(j.compute.needs || "")}</p>` : ""}
     <div class="row" style="margin-top:10px"><button class="btn ${/failed|blocked/.test(j.status) ? "primary" : ""}" id="rt">Retry job</button></div>`;
   $("#rt").onclick = () => act("retry", { job: j.id }, "Retry " + j.id);
 };
@@ -346,7 +361,7 @@ pages.monitor = (main, arg) => {
 function render() {
   const [tab, arg, ver] = (location.hash.slice(1) || "factory").split("/");
   const t = pages[tab] ? tab : "factory";
-  document.querySelectorAll("#tabs a").forEach((a) => a.classList.toggle("on", a.dataset.tab === t));
+  document.querySelectorAll("#tabs a").forEach((a) => { const on = a.dataset.tab === t; a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
   pages[t]($("#main"), arg, ver);
   window.scrollTo({ top: 0 });
 }
