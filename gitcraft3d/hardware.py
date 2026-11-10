@@ -168,11 +168,19 @@ def limits(ram_gb, has_gpu):
             "meshroom_min_ram_gb": 8, "photogrammetry_max_images": 400 if has_gpu else 120}
 
 
+def _engine_check_modules():
+    """MeshCraft's resolver (meshcraft/engine/nodemods.py), loaded by path: it is standard library only."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_meshcraft_nodemods", os.path.join(MESHCRAFT_DIR, "engine", "nodemods.py"))
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod.find()
+
+
 # ------------------------------------------------------------------ probe
 def probe(roots=()):
     g, gnote = gpus(); ram = meminfo(); c = cpu()
     net = os.environ.get("GITCRAFT_ALLOW_NET") == "1"
-    engine_check = bool(shutil.which("node")) and os.path.isdir(os.path.join(MESHCRAFT_DIR, "engine_check", "node_modules", "three"))
+    engine_check = bool(shutil.which("node")) and bool(_engine_check_modules())
     b, mr, ts, hy = blender(), meshroom(), triposr(), hunyuan3d()
     backends = {"meshcraft": meshcraft(),
                 "blockbench": {"installed": True, "available": True, "mode": "MeshCraft blockbench_* (.bbmodel 5.0 read/write, import through Blender)",
@@ -188,7 +196,7 @@ def probe(roots=()):
                        "note": backends["blockbench"]["note"]},
         "mixamo": {"available": True, "how": "manual workflow: prepares the upload FBX and merges downloaded clips", "note": backends["mixamo"]["note"]},
         "engine_check": {"available": engine_check, "how": "three@0.170 in headless Chromium",
-                         "reason": None if engine_check else "needs node and `npm ci` in meshcraft/engine_check"},
+                         "reason": None if engine_check else "needs node and three@0.170 + gltf-validator: scripts/install.sh meshcraft"},
         "photogrammetry": {"available": mr["available"], "how": "ForgeCraft photogrammetry: Meshroom → MeshCraft process_mesh",
                            "reason": mr.get("reason"), "note": mr.get("note")},
         "image_to_3d": {"available": image3d, "how": "ForgeCraft generate with a reference image: TripoSR / Hunyuan3D → MeshCraft process_mesh",

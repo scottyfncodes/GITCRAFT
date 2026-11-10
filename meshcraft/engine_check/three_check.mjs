@@ -11,6 +11,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+// three@0.170: MESHCRAFT_NODE_MODULES (set by MeshCraft, meshcraft/engine/nodemods.py) or a local `npm ci`
+const mods = path.resolve(process.env.MESHCRAFT_NODE_MODULES || path.join(here, 'node_modules'));
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) => (v.startsWith('--') ? a.concat([[v.slice(2), arr[i + 1]]]) : a), []));
 const require = createRequire(import.meta.url);
 // `npm i -g playwright` lands next to this node binary (<prefix>/lib/node_modules), which require() does not search
@@ -106,8 +108,8 @@ await page.route('http://gc.local/**', async (route) => {
   const u = new URL(route.request().url());
   if (u.pathname === '/' || u.pathname === '/index.html') return route.fulfill({ body: page_html, contentType: 'text/html' });
   if (u.pathname === '/asset.glb') return route.fulfill({ body: readFileSync(glb), contentType: 'model/gltf-binary' });
-  const f = path.join(here, 'node_modules', u.pathname);
-  if (!f.startsWith(path.join(here, 'node_modules')) || !existsSync(f)) return route.fulfill({ status: 404, body: 'not found' });
+  const f = path.join(mods, u.pathname);
+  if (!f.startsWith(mods + path.sep) || !existsSync(f)) return route.fulfill({ status: 404, body: 'not found' });
   return route.fulfill({ body: readFileSync(f), contentType: MIME[path.extname(f)] || 'application/octet-stream' });
 });
 await page.goto('http://gc.local/');

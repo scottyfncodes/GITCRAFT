@@ -29,7 +29,7 @@ core() {
   fi
   echo "gitcraft-3d: Blender $("$GITCRAFT_HOME/meshcraft/venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null | tail -1) (shared with MeshCraft)"
   # the engine check (three@0.170 + Khronos validator) is MeshCraft's: installed with it by install.sh
-  [[ -d "$repo/meshcraft/engine_check/node_modules/three" ]] || echo "gitcraft-3d: MeshCraft's engine check is not installed (npm ci in meshcraft/engine_check)" >&2
+  gitcraft_engine_check_ready "$repo" || echo "gitcraft-3d: MeshCraft's engine check is not installed (scripts/install.sh meshcraft)" >&2
   echo "forgecraft $(cd "$repo" && git rev-parse --short HEAD 2>/dev/null) $(date -u +%F)" > "$GITCRAFT_BIN/forgecraft.version"
 }
 

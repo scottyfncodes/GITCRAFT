@@ -2,7 +2,12 @@
 // bridge). Uses the decoder that ships with three (no extra dependency). KHR_mesh_quantization stays: Blender reads it.
 //   node meshopt_decode.mjs <in.glb> <out.glb>
 import { readFileSync, writeFileSync } from 'node:fs';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+// three@0.170 from MESHCRAFT_NODE_MODULES (set by MeshCraft, meshcraft/engine/nodemods.py) or a local `npm ci`
+const lib = 'three/examples/jsm/libs/meshopt_decoder.module.js';
+const { MeshoptDecoder } = await import(process.env.MESHCRAFT_NODE_MODULES ? pathToFileURL(path.join(process.env.MESHCRAFT_NODE_MODULES, lib)).href : lib);
 
 const [src, dst] = process.argv.slice(2);
 const buf = readFileSync(src);

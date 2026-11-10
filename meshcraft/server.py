@@ -117,8 +117,10 @@ def _brief(args):
 def engine_check(glb, out=None, clip=None, time=None, contract=None, material="game-toon", size=640, all_clips=False):
     _need(glb)
     script = os.path.join(HERE, "engine_check", "three_check.mjs")
-    if not os.path.isdir(os.path.join(HERE, "engine_check", "node_modules", "three")):
-        raise RuntimeError("engine check needs `npm ci` in meshcraft/engine_check (three@0.170, gltf-validator)")
+    from engine import nodemods
+    mods = nodemods.find(("three",))
+    if not mods:
+        raise RuntimeError(f"engine check needs three@0.170 (none at {', '.join(nodemods.candidates())}): {nodemods.INSTALL_HINT}")
     cmd = ["node", script, "--glb", glb, "--material", material, "--size", str(size)]
     if out: cmd += ["--out", _need(out, write=True)]
     if clip: cmd += ["--clip", clip, "--time", str(time if time is not None else 99)]
@@ -127,7 +129,7 @@ def engine_check(glb, out=None, clip=None, time=None, contract=None, material="g
     if contract:
         cf = os.path.join(os.environ.get("TMPDIR", "/tmp"), "meshcraft_contract.json"); json.dump(contract, open(cf, "w"))
         cmd += ["--contract", cf]
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=180, env=nodemods.env(mods))
     if r.returncode != 0 and not r.stdout.strip():
         # lead with the browser's own reason (Chromium prints FATAL/Check failed before a long stack trace)
         plain = re.sub(r"\x1b\[[0-9;]*m", "", r.stderr)

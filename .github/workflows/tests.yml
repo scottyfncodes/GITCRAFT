@@ -52,6 +52,9 @@ jobs:
       - name: ForgeCraft (3D Department)
         run: python3 tests/test_forgecraft.py
 
+      - name: MeshCraft engine check packages + queued installs
+        run: python3 tests/test_engine_check_deps.py
+
       - name: Production Director (unit + a real production through the sandboxed server)
         run: python3 tests/test_production.py
 

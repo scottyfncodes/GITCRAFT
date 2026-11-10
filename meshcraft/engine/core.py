@@ -366,12 +366,13 @@ def validate_gltf(path, contract=None):
 def khronos_validate(path):
     """Run the official Khronos glTF-Validator (npm gltf-validator) when available."""
     import subprocess
+    from . import nodemods
     script = os.path.join(os.path.dirname(HERE), "engine_check", "validate.mjs")
-    nm = os.path.join(os.path.dirname(HERE), "engine_check", "node_modules", "gltf-validator")
-    if not os.path.isdir(nm):
-        return [{"check": "khronos_validator", "level": "info", "detail": "gltf-validator not installed (meshcraft/engine_check: npm ci)"}]
+    nm = nodemods.find(("gltf-validator",))
+    if not nm:
+        return [{"check": "khronos_validator", "level": "info", "detail": f"gltf-validator not installed ({nodemods.INSTALL_HINT})"}]
     try:
-        out = subprocess.run(["node", script, path], capture_output=True, text=True, timeout=120)
+        out = subprocess.run(["node", script, path], capture_output=True, text=True, timeout=120, env=nodemods.env(nm))
         rep = json.loads(out.stdout)
         iss = rep.get("issues", {})
         lvl = "pass" if iss.get("numErrors", 1) == 0 else "fail"

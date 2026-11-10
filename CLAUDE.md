@@ -178,6 +178,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   gate or substitute a mocked department result to make it pass.
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`
   (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
+- `tests/test_engine_check_deps.py` must pass after any change to `meshcraft/engine/nodemods.py`, the engine check scripts, the
+  MeshCraft engine-check install in `scripts/install.sh`/`tools.sh`/`session-start.sh`, or `scripts/install-later.sh`/`run-later.sh`:
+  the Node packages live in `$GITCRAFT_HOME/meshcraft/engine_check` (never only inside a runtime copy), only the pinned versions are
+  used, and only install-3d.sh / install-studio.sh can be queued.
 - Never commit model weights or Meshroom: they install into
   `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.

@@ -49,7 +49,11 @@ def _meshopt_plain(path):
     if "EXT_meshopt_compression" not in (j.get("extensionsUsed") or []): return path
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     out = os.path.join(tempfile.mkdtemp(prefix="audit_meshopt_"), os.path.basename(path))
-    r = subprocess.run(["node", os.path.join(here, "engine_check", "meshopt_decode.mjs"), path, out], capture_output=True, text=True, timeout=120)
+    from . import nodemods
+    mods = nodemods.find(("three",))
+    if not mods: raise RuntimeError(f"audit: decoding meshopt GLB {path} needs three@0.170: {nodemods.INSTALL_HINT}")
+    r = subprocess.run(["node", os.path.join(here, "engine_check", "meshopt_decode.mjs"), path, out], capture_output=True, text=True, timeout=120,
+                       env=nodemods.env(mods))
     if r.returncode != 0: raise RuntimeError(f"audit: couldn't decode meshopt GLB {path}: {r.stderr[-800:]}")
     return out
 

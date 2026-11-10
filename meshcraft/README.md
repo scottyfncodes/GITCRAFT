@@ -12,7 +12,7 @@ It is started by `scripts/mcp.sh meshcraft` like every other GITCRAFT tool, so i
 |---|---|---|
 | Blender 5.2.3 LTS | `bpy` wheel from PyPI into `~/.gitcraft/meshcraft/venv` (~400 MB) | needs Python 3.13 (or 3.11 with an older bpy); no GPU needed, renders with Cycles on CPU |
 | pygltflib, numpy, Pillow | same venv (`meshcraft/requirements.txt`, pinned) | glTF structure checks, contact sheets |
-| three@0.170.0, gltf-validator | `npm ci` in `meshcraft/engine_check` | optional: engine check + Khronos validator |
+| three@0.170.0, gltf-validator | `scripts/install.sh meshcraft` (into `~/.gitcraft/meshcraft/engine_check`), or `npm ci` in `meshcraft/engine_check` | optional: engine check + Khronos validator |
 | Chromium + Playwright | pre-installed in Claude Code cloud containers | optional: engine check |
 
 `GITCRAFT_MESHCRAFT` chooses when Blender is installed: `1` (default) during setup; `later` in the background at session start; `0` when you run `scripts/install.sh meshcraft`; `none` never. With every value but `none`, MeshCraft is registered with Claude Code right away. `scripts/doctor.sh` shows its state.

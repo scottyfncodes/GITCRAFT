@@ -10,6 +10,30 @@ curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts
 
 It clones GITCRAFT to `~/.gitcraft/repo`, installs every tool, copies the launcher and tool code to `~/.gitcraft/runtime`, registers all ten servers at user scope from that runtime, installs the GITCRAFT block in `~/.claude/CLAUDE.md` and the `gitcraft` skill (`scripts/install-global.sh`), installs a user-level SessionStart hook in `~/.claude/settings.json` that finishes anything setup deferred (`GITCRAFT_MESHCRAFT=later`) or didn't finish, in the background, in any project (`GITCRAFT_GLOBAL_HOOK=0` skips it), and prints `doctor.sh --brief`. Because this happens before Claude Code starts, the tools connect in the first turn of every session, **whichever repos are attached, including none**. See the README's "Use GITCRAFT in every project" for what each piece does, verification and troubleshooting; `tests/test_global.sh` proves it from a separate project in a fresh HOME.
 
+### Heavy optional runtimes: keep the setup script inside its time limit
+
+A cloud setup script that runs past its time limit is stopped mid-step, and everything after that step never runs.
+One fresh container was stopped about 17 minutes in, during the ACE-Step install. Put quick, important steps in the
+script and queue the slow optional ones for the session with `scripts/install-later.sh`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | GITCRAFT_MESHCRAFT=later bash
+~/.gitcraft/runtime/scripts/install-3d.sh meshroom || true                    # ~3 min: early, so it always lands
+~/.gitcraft/runtime/scripts/install-studio.sh mocap || true                   # ~1 min
+~/.gitcraft/runtime/scripts/install-later.sh install-3d.sh ai weights         # TripoSR (~8 min): queued
+~/.gitcraft/runtime/scripts/install-later.sh install-studio.sh music          # ACE-Step (very large): queued
+```
+
+The SessionStart hook runs the queue (`scripts/run-later.sh`) in the background inside the session, one job at a time
+and after any Blender build, so nothing is left running in a setup script that is about to be stopped. A job leaves
+the queue when it succeeds; a failed one is retried by the next sessions (at most 3 attempts). The log is
+`~/.gitcraft/logs/later.log`; `scripts/install-later.sh --list` shows the queue.
+
+MeshCraft's engine check packages (three@0.170, gltf-validator) are installed into
+`~/.gitcraft/meshcraft/engine_check`, not into the runtime: each runtime update is a fresh copy of a checkout, and
+packages installed inside it were lost on the next update. A developer checkout uses its own `npm ci` in
+`meshcraft/engine_check` when it has one, or that installed copy (`meshcraft/engine/nodemods.py`).
+
 ## Other ways
 
 | Situation | What happens | What to do |
