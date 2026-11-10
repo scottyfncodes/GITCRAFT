@@ -22,8 +22,9 @@ sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
 
 
 def check(label, ok, detail=""):
-    results.append(bool(ok)); report["checks"].append({"check": label, "ok": bool(ok), "detail": str(detail)[:400]})
-    print(("PASS " if ok else "FAIL ") + label + (f"  [{str(detail)[:300]}]" if detail and not ok else ""), flush=True)
+    # a failure keeps its whole detail (up to 4000 characters) so the cause is never cut off (#43)
+    results.append(bool(ok)); report["checks"].append({"check": label, "ok": bool(ok), "detail": str(detail)[:400 if ok else 4000]})
+    print(("PASS " if ok else "FAIL ") + label + (f"  [{str(detail)[:4000]}]" if detail and not ok else ""), flush=True)
 
 
 def start(name):

@@ -41,7 +41,7 @@ result: that is how ForgeCraft calls MeshCraft (same code path as MCP, no second
 run_pipeline, blockbench_import and mixamo_apply return what they always did, plus `job` and
 `library` keys. A brief with "library": false skips the library.
 """
-import io, json, os, subprocess, sys, traceback, contextlib, runpy
+import io, json, os, re, subprocess, sys, traceback, contextlib, runpy
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -128,7 +128,10 @@ def engine_check(glb, out=None, clip=None, time=None, contract=None, material="g
         cmd += ["--contract", cf]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
     if r.returncode != 0 and not r.stdout.strip():
-        raise RuntimeError(f"engine check failed: {r.stderr[-1500:]}")
+        # lead with the browser's own reason (Chromium prints FATAL/Check failed before a long stack trace)
+        plain = re.sub(r"\x1b\[[0-9;]*m", "", r.stderr)
+        cause = [re.sub(r"^[\s'\-]*(\[pid=\d+\]\[err\]\s*)?", "", ln).strip(" ',") for ln in plain.splitlines() if re.search(r"FATAL|Check failed|Error:", ln)][:4]
+        raise RuntimeError("engine check failed: " + (" | ".join(dict.fromkeys(cause)) + " ... " if cause else "") + plain[-1500:])
     return json.loads(r.stdout)
 
 

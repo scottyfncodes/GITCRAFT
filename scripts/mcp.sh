@@ -46,7 +46,20 @@ root="$GITCRAFT_ROOT"
 mkdir -p "$root" "$GITCRAFT_LOG"
 state="$GITCRAFT_STATE/$name"
 mkdir -p "$state/tmp" "$state/config" "$state/cache" "$state/data"
-export TMPDIR="$state/tmp" XDG_CONFIG_HOME="$state/config" XDG_CACHE_HOME="$state/cache" XDG_DATA_HOME="$state/data"
+# A Unix-domain socket path holds at most 107 bytes, and Chromium (every browser check) puts its SingletonSocket at
+# $TMPDIR/org.chromium.Chromium.XXXXXX/SingletonSocket (45 bytes more). Under a long HOME (a fresh-install test, a CI
+# work folder) $state/tmp made Chromium abort at start-up: "Socket path too long" (#43). When it is too long, the
+# tool's temp folder is a short private one instead: /tmp/gitcraft-<uid>/<tool>-<hash of its state folder>.
+tmp="$state/tmp"
+if (( ${#tmp} > 62 )); then
+  short="/tmp/gitcraft-$(id -u)"
+  mkdir -p -m 700 "$short" 2>/dev/null
+  [[ -d "$short" && -O "$short" && ! -L "$short" ]] || { echo "gitcraft: $short must be a private folder of this user (not a link)" >&2; exit 1; }
+  chmod 700 "$short"
+  tmp="$short/$name-$(printf %s "$state" | sha256sum | cut -c1-8)"
+  mkdir -p -m 700 "$tmp"
+fi
+export TMPDIR="$tmp" XDG_CONFIG_HOME="$state/config" XDG_CACHE_HOME="$state/cache" XDG_DATA_HOME="$state/data"
 # XDG_DATA_HOME moved, so point the tool's user-font folder back at the real one (read-only in the sandbox);
 # without this, tools silently fall back to default fonts.
 for fd in "$HOME/.local/share/fonts" "$HOME/.fonts"; do
@@ -98,6 +111,7 @@ esac
 cmd+=("$@")
 
 writable=("${roots[@]}" "$state")
+[[ "$tmp" == "$state/tmp" ]] || writable+=("$tmp")   # the short temp folder (see TMPDIR above)
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
 [[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")

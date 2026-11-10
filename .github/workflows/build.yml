@@ -153,7 +153,7 @@ jobs:
         if: always()
         run: |
           grep -E '^(PASS|FAIL|SKIP)|checks passed' "$RUNNER_TEMP/gate/test_global.out" 2>/dev/null || true
-          tail -n 60 "$RUNNER_TEMP/gate/global/home/.gitcraft/logs/install.log" 2>/dev/null || true
+          tail -n 60 "$RUNNER_TEMP"/gate/global/home-*/.gitcraft/logs/install.log 2>/dev/null || true
 
   publish:
     needs: gate   # runs only when the gate passed

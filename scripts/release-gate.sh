@@ -78,7 +78,7 @@ GITCRAFT_TEST_PROJECT="$work/gitcraft-xrepo-test" bash "$clone/tests/test_global
 rc=${PIPESTATUS[0]}
 
 step "4. evidence"
-installed="$work/global/home/.gitcraft/bin"
+installed="$work/global/home-of-a-user-with-a-long-path/.gitcraft/bin"
 for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
   want=$(sha256sum < "$stage/$pkg" | cut -d' ' -f1); have=$(sha256sum < "$installed/$pkg" 2>/dev/null | cut -d' ' -f1)
