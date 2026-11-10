@@ -18,6 +18,7 @@ META = {"id": "mesh_import", "title": "Imported mesh (scan, AI or external file)
         "params": {"path": {"type": "string", "default": "", "description": "mesh file inside a GITCRAFT root (glb, gltf, fbx, obj, stl, ply)"},
                    "crop": {"type": "number", "default": 0, "description": "scans: keep faces within crop × the scene half-width of the centre (0 = off)"},
                    "crop_floor": {"type": "boolean", "default": True, "description": "with crop: also drop the floor"},
+                   "min_scan_tris": {"type": "integer", "default": 200, "description": "with crop: refuse a scan whose crop keeps fewer triangles (it did not capture the subject)"},
                    "target_size": {"type": "number", "default": 0, "description": "rescale so the largest side is this many metres (0 = keep)"},
                    "max_tris": {"type": "integer", "default": 20000}, "recenter": {"type": "boolean", "default": True}},
         "roles": [], "budget_tris": 200000}
@@ -122,6 +123,13 @@ def build(ctx):
     stats["merged_vertices"] = merged
     meshes = [o for o in meshes if o.data.polygons]
     tris = sum(sum(len(f.vertices) - 2 for f in o.data.polygons) for o in meshes); budget = int(p.get("max_tris") or 20000)
+    # a scan whose crop to the subject keeps almost nothing did not capture the subject: refuse it before anything is
+    # recorded (a sparse CPU draft reconstruction kept 1 of 2471 triangles and was recorded as a "done" scan)
+    min_scan = int(p.get("min_scan_tris") or os.environ.get("MESHCRAFT_MIN_SCAN_TRIS") or 200)
+    if p.get("crop") and tris < min_scan:
+        raise ValueError(f"mesh_import: the crop to the subject kept {tris} of {stats['imported_triangles']} triangles (a usable scan keeps at least "
+                         f"{min_scan}): the reconstruction does not contain the subject at its centre, so nothing was recorded. Re-shoot with more, "
+                         "sharper photos of a textured subject filling the frame, or raise crop if the subject is off-centre.")
     if tris > budget:
         for o in meshes:
             m = o.modifiers.new("decimate", "DECIMATE"); m.ratio = budget / tris; m.use_collapse_triangulate = True
