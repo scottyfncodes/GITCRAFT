@@ -41,6 +41,11 @@ def check(label, cond, detail=""):
     return bool(cond)
 
 
+def code_path_open(T):
+    """The code path (design.direction → build) is waiting for the agent, not blocked by anything on the asset path."""
+    return T["design.direction"]["state"] == "awaiting_agent" and T["build"]["state"] == "pending" or T["build"]["state"] == "awaiting_agent"
+
+
 def server():
     return Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=env, log=os.path.join(ws, "studiocraft.log"))
 
@@ -312,7 +317,7 @@ def part_b(c):
     check("B2 failed department: retried once, then failed with its error", T["audio.broken"]["state"] == "failed" and len(T["audio.broken"]["attempts"]) == 2, T["audio.broken"].get("error"))
     check("B independent tasks still completed", T["audio.sfx.click"]["state"] == "passed" and T["audio.coin_a"]["state"] == "passed" and T["audio.coin_b"]["state"] == "passed")
     check("B2 integration of a failed asset does not start (blocked, nothing copied); the final integration is blocked, the code build is not",
-          T["integrate.audio.broken"]["state"] == "blocked" and T["integrate.final"]["state"] == "blocked" and T["build"]["state"] == "awaiting_agent"
+          T["integrate.audio.broken"]["state"] == "blocked" and T["integrate.final"]["state"] == "blocked" and code_path_open(T)
           and not os.path.exists(os.path.join(ws, "neg", "assets", "audio", "corrupt.wav")), {k: T[k]["state"] for k in ("integrate.audio.broken", "integrate.final", "build")})
     rep_ = call(c, "production_report", {"production": pid})
     check("B production status is honest: never passed while an asset failed (plan v2 keeps building, so it is awaiting the agent), and not READY",
@@ -330,7 +335,7 @@ def part_b(c):
           loser.get("failure") == "conflict" and "audio.coin_" in (loser.get("error") or "") and sorted(x["state"] for x in ab) == ["failed", "passed"]
           and json.load(open(os.path.join(ws, "neg2", "gitcraft.assets.json")))["assets"]["assets/audio/pickup.ogg"]["task"] in ("audio.coin_a", "audio.coin_b"),
           [(x["id"], x["state"], x.get("error")) for x in ab])
-    check("B3 conflict blocks the final integration and the release, not the code build", T["integrate.final"]["state"] == "blocked" and T["build"]["state"] == "awaiting_agent")
+    check("B3 conflict blocks the final integration and the release, not the code build", T["integrate.final"]["state"] == "blocked" and code_path_open(T))
     # an existing different asset is never overwritten without approval
     proj = os.path.join(ws, "neg3"); os.makedirs(os.path.join(proj, "assets", "fx"))
     tiny_png(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"))   # the project's own (different) art
