@@ -1,0 +1,37 @@
+name: GITCRAFT CI machine
+description: >-
+  Python 3.13, Node 22, ffmpeg/EGL, Playwright + Chromium under /opt/pw-browsers (where the sandbox lets tools execute)
+  and a Landlock check: what every GITCRAFT test job needs before installing GITCRAFT. Used by tests.yml, the
+  release gate in build.yml and nightly.yml, so the three stay identical.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"   # MeshCraft's bpy 5.2 wheel is published for 3.11 and 3.13
+
+    - uses: actions/setup-node@v7
+      with:
+        node-version: "22"
+
+    - name: System packages
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq ffmpeg libegl1 libgles2   # EGL/GLES: MediaPipe (AnimCraft mocap)
+        pip install -q uv
+
+    - name: Playwright + Chromium
+      shell: bash
+      run: |
+        sudo mkdir -p /opt/pw-browsers && sudo chown "$USER" /opt/pw-browsers
+        npm install -g playwright@1.56.1
+        npx -y playwright@1.56.1 install --with-deps chromium
+        ln -sfn "$(node -e "console.log(require('$(npm root -g)/playwright').chromium.executablePath())")" /opt/pw-browsers/chromium
+        /opt/pw-browsers/chromium --version
+        echo "NODE_PATH=$(npm root -g)" >> "$GITHUB_ENV"   # test drivers `require('playwright')`, as sessions resolve it
+
+    - name: Landlock
+      shell: bash
+      run: |
+        python3 -c 'import ctypes;l=ctypes.CDLL(None);l.syscall.restype=ctypes.c_long;print("Landlock ABI", l.syscall(444,None,0,1))'

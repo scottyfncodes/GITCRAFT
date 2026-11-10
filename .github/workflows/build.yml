@@ -1,22 +1,45 @@
 name: Build ArtCraft CLIs
 
-# Builds the seven ArtCraft CLIs (each one includes its MCP server) and
-# publishes them to the `bin` branch, so Claude Code sessions can grab them
-# with a quick git fetch instead of compiling for an hour.
+# Builds the seven ArtCraft CLIs (each one includes its MCP server), proves they work, and only then publishes them
+# to the `bin` branch, so Claude Code sessions can grab them with a quick git fetch instead of compiling for an hour.
+#
+#   build    all seven, on ubuntu-24.04, each binary refused above the glibc ceiling
+#   gate     scripts/release-gate.sh on exactly those binaries: all seven present, glibc ceiling re-checked, and a
+#            fresh install of THESE binaries (tests/test_global.sh, published builds made unreachable) with every check
+#            passing and the installed binaries byte-identical to the candidates
+#   publish  only after the gate passes, only from main, and only the gated files (checked against the gate's
+#            SHA256SUMS). Anything else (a failed build, a failed gate, a pull request, another branch) leaves the
+#            published `bin` branch exactly as it was; non-main runs end with a dry run that lists what would ship.
 on:
   push:
     branches: [main]
     paths: [".github/workflows/build.yml", "scripts/tools.sh"]
+  pull_request:   # validates the build and the gate; never publishes
+    paths: [".github/workflows/build.yml", ".github/actions/gitcraft-ci-setup/**", "scripts/release-gate.sh", "scripts/tools.sh",
+            "scripts/install.sh", "scripts/setup-env.sh", "tests/test_global.sh", "tests/global_project_check.py"]
   workflow_dispatch:
+    inputs:
+      gate_selftest:
+        description: "Inject a controlled fault into the gate's staging copy to prove publication is blocked (never publishes)"
+        type: choice
+        options: [none, glibc, broken-binary]
+        default: none
+      claude_session:
+        description: "Also run the gate's three headless Claude Code checks (uses the ANTHROPIC_API_KEY secret: billed per token)"
+        type: boolean
+        default: false
   schedule:
     - cron: "17 9 * * 1" # Mondays, picks up upstream changes
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: build-clis
-  cancel-in-progress: true
+  group: build-clis-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}   # never cancel a main run that may be publishing
+
+env:
+  GLIBC_CEILING: "2.39"   # Ubuntu 24.04: the Tests runner and Claude Code cloud sessions
 
 jobs:
   build:
@@ -61,13 +84,13 @@ jobs:
         working-directory: src
         run: cargo build --release --locked -p ${{ matrix.tool.pkg }}
 
-      - name: Check glibc compatibility (must run on glibc 2.39)
+      - name: Check glibc compatibility (must run on glibc ${{ env.GLIBC_CEILING }})
         run: |
           bin=src/target/release/${{ matrix.tool.pkg }}
           need=$(objdump -T "$bin" | grep -o 'GLIBC_[0-9][0-9.]*' | sed 's/GLIBC_//' | sort -uV | tail -1)
-          echo "${{ matrix.tool.pkg }} requires glibc $need (limit 2.39)"
-          [ "$(printf '%s\n' "$need" 2.39 | sort -V | tail -1)" = "2.39" ] \
-            || { echo "::error::${{ matrix.tool.pkg }} needs glibc $need, newer than 2.39: not publishing it"; exit 1; }
+          echo "${{ matrix.tool.pkg }} requires glibc $need (limit $GLIBC_CEILING)"
+          [ "$(printf '%s\n' "$need" "$GLIBC_CEILING" | sort -V | tail -1)" = "$GLIBC_CEILING" ] \
+            || { echo "::error::${{ matrix.tool.pkg }} needs glibc $need, newer than $GLIBC_CEILING: not publishing it"; exit 1; }
 
       - name: Package
         run: |
@@ -83,22 +106,75 @@ jobs:
           path: out/
           retention-days: 7
 
-  publish:
-    needs: build
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
+  gate:
+    name: release gate (fresh install of these binaries)
+    needs: build   # every build job must succeed: no partial release, no carry-over of an older binary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers
+      GITCRAFT_GATE_SELFTEST: ${{ (github.event_name == 'workflow_dispatch' && inputs.gate_selftest != 'none') && inputs.gate_selftest || '' }}
+      # paid API use is opt-in per run (docs/costs.md); otherwise the key is empty and the headless checks are skipped
+      ANTHROPIC_API_KEY: ${{ (github.event_name == 'workflow_dispatch' && inputs.claude_session) && secrets.ANTHROPIC_API_KEY || '' }}
     steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/gitcraft-ci-setup
+
+      - name: Claude Code CLI (for the 'claude mcp list' checks; no sign-in needed)
+        run: npm i -g @anthropic-ai/claude-code && claude --version
+
       - uses: actions/download-artifact@v8
         with:
           path: artifacts
 
-      - name: Keep last good builds for anything that failed
+      - name: Collect the candidates
         run: |
-          mkdir -p bin
-          git clone --depth 1 --branch bin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" prev 2>/dev/null \
-            && cp prev/*.gz prev/*.manifest bin/ 2>/dev/null || true
-          cp artifacts/*/* bin/ 2>/dev/null || true
-          ls bin/*.gz >/dev/null 2>&1 || { echo "nothing built"; exit 1; }
+          mkdir -p candidate
+          for t in photocraft vectorcraft filmcraft lightcraft pdfcraft effectcraft designcraft; do
+            [ -d "artifacts/$t" ] || { echo "::error::no build of $t in this run"; exit 1; }
+            cp "artifacts/$t"/* candidate/
+          done
+          ls -l candidate
+
+      - name: Release gate
+        shell: bash
+        run: |
+          git checkout -B "release-gate-${GITHUB_RUN_ID}"   # the fresh install clones a named branch of this checkout
+          GITCRAFT_GLIBC_CEILING="$GLIBC_CEILING" scripts/release-gate.sh "$PWD/candidate" "$RUNNER_TEMP/gate"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-candidate   # exactly what publish may push, with the gate's SHA256SUMS
+          path: candidate/
+          retention-days: 7
+
+      - name: Gate logs
+        if: always()
+        run: |
+          grep -E '^(PASS|FAIL|SKIP)|checks passed' "$RUNNER_TEMP/gate/test_global.out" 2>/dev/null || true
+          tail -n 60 "$RUNNER_TEMP"/gate/global/home-*/.gitcraft/logs/install.log 2>/dev/null || true
+
+  publish:
+    needs: gate   # runs only when the gate passed
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      PUBLISH: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-candidate
+          path: bin
+
+      - name: Verify the files are the ones the gate passed
+        working-directory: bin
+        run: |
+          [ -s SHA256SUMS ] || { echo "::error::no SHA256SUMS from the gate"; exit 1; }
+          sha256sum --check --strict SHA256SUMS
+          [ "$(ls *.gz | wc -l)" = 7 ] || { echo "::error::expected 7 binaries"; exit 1; }
+          rm SHA256SUMS
 
       - name: Push to bin branch
         working-directory: bin
@@ -107,8 +183,14 @@ jobs:
           cat > README.md <<'EOF'
           Prebuilt Linux x86_64 ArtCraft CLIs, generated by .github/workflows/build.yml.
           Don't edit by hand. MANIFEST.txt lists the upstream commit each one was built from.
+          Every release passed scripts/release-gate.sh (glibc ceiling and a fresh install of these exact binaries).
           EOF
           sed -i 's/^ *//' README.md
+          if [ "$PUBLISH" != true ]; then
+            echo "Dry run (${GITHUB_EVENT_NAME} on ${GITHUB_REF}): the gate passed; nothing is published from here." | tee -a "$GITHUB_STEP_SUMMARY"
+            cat MANIFEST.txt >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           git init -q -b bin
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

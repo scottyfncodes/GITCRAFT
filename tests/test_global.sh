@@ -28,7 +28,9 @@ check() { if eval "$2"; then echo "PASS $1"; pass=$((pass+1)); else echo "FAIL $
   || echo "note: uncommitted changes under scripts/ or global/ are NOT tested (the setup clones the committed branch $branch)"
 
 # --- 1. fresh environment + separate project
-export HOME="$work/home"
+# A long HOME on purpose: Unix-socket paths are capped at 107 bytes, and a launcher that put temp files under HOME
+# made Chromium abort under long HOMEs only (#43). This keeps the fresh install honest wherever the test runs.
+export HOME="$work/home-of-a-user-with-a-long-path"
 export PIP_CACHE_DIR="${PIP_CACHE_DIR:-$real_home/.cache/pip}" UV_CACHE_DIR="${UV_CACHE_DIR:-$real_home/.cache/uv}"
 export PATH="$real_home/.local/bin:$PATH"
 unset GITCRAFT_HOME GITCRAFT_ROOT GITCRAFT_ROOTS GITCRAFT_3D_LIBRARY GITCRAFT_MESHCRAFT_LIBRARY FORGECRAFT_LIBRARY FORGECRAFT_HOME \
