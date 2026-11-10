@@ -229,3 +229,10 @@ When this repo is the session's only repo, its SessionStart hook also installs a
 ## Credits
 
 All seven apps are by the ArtCraft team, MIT or Apache-2.0. This repo only builds and wires them up.
+
+## Licence
+
+The source code is MIT ([LICENSE](LICENSE), © 2026 scottyfncodes). The MIT licence does not cover the generated and
+captured asset files in this repository (acceptance outputs, run evidence and screenshots). Those were audited for
+provenance and are **not licensed for redistribution** until their rights holder records a licence; the audit and the
+per-file inventory are in [docs/licensing.md](docs/licensing.md). Third-party components keep their own licences.
