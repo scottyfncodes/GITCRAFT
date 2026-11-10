@@ -858,7 +858,10 @@ def c_production(D, ctx):
                     D["findings"].append(_finding("production", f"standard:{c['id']}", f"Engineering standard (advisory): {c['name']}", "info", "verified", str(c.get("detail") or "")[:240],
                                                   f"Non-blocking. To stop it being raised again, accept it in .gitcraft/accepted.json with fingerprint {c.get('fingerprint')}.", "docs/app-standards.md", theme="engineering", kind="advisory"))
                 elif c["status"] == "review":
-                    D["findings"].append(_finding("production", f"standard:{c['id']}", f"Engineering standard (review): {c['name']}", "minor", "inferred", str(c.get("detail") or "")[:200], None, "docs/app-standards.md", theme="engineering"))
+                    det = str(c.get("detail") or "")
+                    D["findings"].append(_finding("production", f"standard:{c['id']}", f"Engineering standard (review): {c['name']}", "minor", "inferred", det[:200],
+                                                  (det[:1].upper() + det[1:200] + " (docs/app-standards.md).") if re.match(r"^(add|use|set|move|remove|check|wrap|handle|declare|enable|serve)\b", det, re.I) else None,
+                                                  "docs/app-standards.md", theme="engineering", measured=f"review: {c['name']}" + (f" — {det[:160]}" if det else "")))
             D["notes"].append(f"Engineering standard: {len(ok)}/{len(rel)} applicable checks pass.")
         except Exception as e:
             D["notes"].append(f"Engineering standard not checked: {e}"[:200])
@@ -970,7 +973,8 @@ def plan(depts, rec):
                 it = seen[gk]; it["findings"].append(f["key"])
                 if f["department"] not in it["departments"]: it["departments"].append(f["department"])
                 continue
-            it = {"priority": pr, "theme": f["theme"], "title": f["title"] if f["theme"] == "other" else f"{theme_title(f['theme'])}: {f['title']}",
+            tt = theme_title(f["theme"])
+            it = {"priority": pr, "theme": f["theme"], "title": f["title"] if f["theme"] == "other" or f["title"].startswith(tt) else f"{tt}: {f['title']}",
                   "departments": [f["department"]], "findings": [f["key"]], "level": lvl, "why": f.get("evidence"), "do": f.get("recommendation"),
                   "measured": f.get("measured"), "stale": f.get("stale"), "environment": f.get("kind") == "unverified"}
             seen[gk] = it; items.append(it)
