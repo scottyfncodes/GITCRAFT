@@ -142,6 +142,13 @@ for name, fn in (("triposr", lambda: triposr.run(os.path.join(ws, "x.png"), ws, 
     except RuntimeError as e: check(f"{name}: unavailable here, refuses with the reason", "unavailable" in str(e), e)
 try: meshroom.run([os.path.join(ws, "a.jpg")], ws, os.path.join(ws, "l")); check("meshroom: rejects too few photos", False)
 except RuntimeError as e: check("meshroom: rejects too few photos with a reason", "at least 3" in str(e) or "not installed" in str(e), e)
+# a reconstruction too sparse to be the subject is refused, never recorded as a scan (a 36-photo chest gave 75 black shards, "done")
+sparse = os.path.join(ws, "sparse.obj"); open(sparse, "w").write("".join(f"v {i} 0 0\n" for i in range(3)) + "f 1 2 3\n" * 410)
+dense = os.path.join(ws, "dense.obj"); open(dense, "w").write("".join(f"v {i} 0 0\n" for i in range(3)) + "f 1 2 3\n" * 5000)
+why = meshroom.sparse_reason(meshroom.mesh_faces(sparse), 36, 36, "photogrammetryDraft")
+check("meshroom: a sparse reconstruction is refused with the reason and how to get a real scan",
+      meshroom.mesh_faces(sparse) == 410 and why and "too sparse" in why and "Nothing was added" in why and "CUDA" in why, why)
+check("meshroom: a dense reconstruction is accepted", meshroom.sparse_reason(meshroom.mesh_faces(dense), 36, 36, "photogrammetryDraft") is None)
 
 if "--slow" in sys.argv and probe["backends"]["meshroom"]["available"]:
     # synthetic capture rendered by MeshCraft, reconstructed by Meshroom, cleaned by MeshCraft
@@ -152,7 +159,12 @@ if "--slow" in sys.argv and probe["backends"]["meshroom"]["available"]:
     fc = Client([MCP, "forgecraft"], env=env)
     ok, r = fc.call("photogrammetry", {"images": [photos], "name": "Barrel Scan", "wait": True, "crop": 0.3, "target_size": 1.0,
                                         "meshroom_overrides": ["CameraInit:defaultFieldOfView=54.4"]}, timeout=7200); fc.close()
-    check("photogrammetry: Meshroom reconstruction → MeshCraft process_mesh → validated, recorded", ok and r["status"] == "done", r)
+    # CPU draft meshing of synthetic renders is often too sparse: the honest outcomes are a real scan or a refusal that says why
+    done = ok and r.get("status") == "done" and (r.get("asset") or {}).get("id")
+    refused = r.get("status") == "failed" and ("too sparse" in str(r.get("error")) or "crop to the subject kept" in str(r.get("error")))
+    check("photogrammetry: Meshroom → MeshCraft process_mesh gives a real scan, or refuses a sparse one with the reason (never a few shards as done)",
+          done or refused, r)
+    print(f"     outcome: {r.get('status')}: {(r.get('asset') or {}).get('id') or str(r.get('error'))[:200]}")
 
 failed = [x for x in results if not x[1]]
 print(f"\n{len(results) - len(failed)}/{len(results)} checks passed")

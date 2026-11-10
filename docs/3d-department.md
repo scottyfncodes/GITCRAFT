@@ -131,6 +131,15 @@ scripts/install-3d.sh ai                 # + TripoSR / Hunyuan3D runtimes (usefu
 scripts/doctor.sh                        # every 3D backend, why any is unavailable, the library path
 ```
 
+**Scans are gated, not trusted.** Without a CUDA GPU Meshroom runs the `photogrammetryDraft` pipeline, which meshes
+the sparse point cloud only; from plain or shiny subjects, or too few photos, that gives a handful of shards. Two gates
+refuse such a result before anything is recorded, and say how to get a real scan:
+- ForgeCraft (`forgecraft/backends/meshroom.py`): a reconstruction under 1,000 faces (`FORGECRAFT_PHOTOGRAMMETRY_MIN_FACES`),
+  or AliceVision's "No valid mesh was generated", fails as *too sparse to be the subject*.
+- MeshCraft (`mesh_import`, with `crop`): a crop to the subject that keeps fewer than 200 triangles (`min_scan_tris`)
+  fails: the reconstruction does not contain the subject at its centre.
+For a usable CPU scan: 40-60 sharp photos of a strongly textured, matte subject filling most of each frame.
+
 **From Claude Code:** `hardware_probe` or `route` first; `generate {"brief": …}` for anything; `compose_scene`, `photogrammetry`, `process_mesh`, `mixamo_*` for the specific paths; `library_export` to hand off. Use MeshCraft directly (`run_pipeline` with a brief) when you want full control of a template build, its profiles and the project manifest; the result lands in the same library.
 
 **From a terminal:** `python3 forgecraft/cli.py generate "small tropical island"`, `cli.py jobs`, `cli.py retry <job>`. In a browser: the GITCRAFT control room (`scripts/ui.sh`); ForgeCraft has no live web server.
