@@ -5,7 +5,9 @@ name: Nightly product suites
 # install today (build.yml's gate checks each new candidate before it is published).
 #
 # Deliberately not here: tests/test_ui.py (known environment-dependent failures, docs/tech-debt.md) and
-# tests/test_fresh_install.sh (the 3D-only fresh install, covered by tests/test_global.sh).
+# tests/test_fresh_install.sh (the 3D-only fresh install, covered by tests/test_global.sh) and
+# tests/test_mcp_deferred_session.py (drives real `claude -p` sessions: billed, so never on a schedule per docs/costs.md;
+# later-setup.yml covers the same deferred-Blender path with MCP clients for free).
 on:
   schedule:
     - cron: "23 4 * * *"
@@ -32,7 +34,7 @@ jobs:
           - { name: pixelcraft,   install: true,  suites: "tests/test_pixelcraft.py" }
           - { name: playcraft,    install: true,  suites: "tests/test_playcraft.py tests/test_playcraft_history.py" }
           - { name: designcraft,  install: true,  suites: "tests/test_designcraft.py" }
-          - { name: 3d,           install: true,  suites: "tests/test_meshcraft.py tests/test_meshcraft_structural.py tests/test_audit_and_copper.py tests/test_forgecraft_engine.py tests/test_forgecraft_web.py tests/test_mcp_deferred_session.py" }
+          - { name: 3d,           install: true,  suites: "tests/test_meshcraft.py tests/test_meshcraft_structural.py tests/test_audit_and_copper.py tests/test_forgecraft_engine.py tests/test_forgecraft_web.py" }
           - { name: netgate,      install: true,  suites: "tests/test_netgate.py" }
           - { name: fresh-install (published bin), install: false, suites: "tests/test_global.sh" }
     env:
