@@ -16,8 +16,12 @@ export async function launch() {
   if (!pwPath) throw new Error('Playwright module not found');
   const { chromium, devices } = require(pwPath);
   const exe = [process.env.CHROMIUM_PATH, '/opt/pw-browsers/chromium'].find((p) => p && existsSync(p));
+  // WebGL: software (SwiftShader) by default, so every machine renders the same; GITCRAFT_WEBGL=hardware uses the GPU
+  // when there is one (TestCraft perf records which renderer drew the frames and only a hardware run can fail a perf gate)
+  const gl = process.env.GITCRAFT_WEBGL === 'hardware' ? ['--use-gl=angle', '--ignore-gpu-blocklist', '--enable-gpu-rasterization']
+    : ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
   const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--no-proxy-server', '--disable-background-networking', '--disable-component-update', '--no-first-run',
-    '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
+    ...gl, '--autoplay-policy=no-user-gesture-required'] });
   return { browser, devices };
 }
 

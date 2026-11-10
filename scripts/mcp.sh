@@ -99,7 +99,8 @@ case "$name" in
   # The Studio departments (studio/): Python in the studio venv; spawns Blender (MeshCraft's), Node/Chromium,
   # FFmpeg and the voice venv as children, all inside this sandbox.
   studiocraft) mkdir -p "$GITCRAFT_3D_LIBRARY" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY" "$FORGECRAFT_HOME/hf-cache" \
-                        "$GITCRAFT_HOME/productions"   # evaluation output when every root is inside the evaluated project (production/artifacts.py)
+                        "$GITCRAFT_HOME/productions" "$GITCRAFT_HOME/reports"   # evaluation output when every root is inside the evaluated
+                        # project (production/artifacts.py) and Production Reports (production/project_report.py): never inside the project
                export GITCRAFT_HOME GITCRAFT_ROOTS GITCRAFT_ROOT GITCRAFT_STUDIO_HOME GITCRAFT_ASSET_CATALOG GITCRAFT_3D_LIBRARY GITCRAFT_PLAYCRAFT_HISTORY GITCRAFT_PIXELCRAFT_HISTORY \
                       FORGECRAFT_HOME HF_HOME="$FORGECRAFT_HOME/hf-cache" GITCRAFT_ALLOW_NET
                cmd=(env HOME="$state/data" "$bin" "$repo/studio/server.py") ;;
@@ -115,7 +116,7 @@ writable=("${roots[@]}" "$state")
 [[ "$name" == lightcraft ]] && writable+=("$lc_library")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
 [[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
-[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY" "$GITCRAFT_HOME/productions")
+[[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY" "$GITCRAFT_HOME/productions" "$GITCRAFT_HOME/reports")
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).

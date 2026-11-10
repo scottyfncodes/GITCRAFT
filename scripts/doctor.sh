@@ -118,6 +118,29 @@ print("skill:        " + (sk if os.path.exists(sk) else f"missing: {sk} (run scr
 PY
 )
 
+# The 3D servers start before Blender is built, wait, and announce their full tool list when the build finishes
+# (gitcraft3d/deferred.py). Say whether each registered one is actually running in this session, and how it started.
+bpy_at=$(stat -c %Y "$(ls -d "$GITCRAFT_HOME"/meshcraft/venv/lib/python*/site-packages/bpy-*.dist-info 2>/dev/null | head -1)" 2>/dev/null || echo 0)
+for t in meshcraft forgecraft; do
+  [[ " $registered " == *" $t "* ]] || continue
+  pid=""; started=0
+  for f in /proc/[0-9]*/cmdline; do
+    cmd="$(tr '\0' ' ' < "$f" 2>/dev/null)"
+    [[ "$cmd" == *"/scripts/guard.py --tool $t "* ]] || continue
+    pid="${f#/proc/}"; pid="${pid%/cmdline}"; started="$(stat -c %Y "${f%/cmdline}" 2>/dev/null || echo 0)"; break
+  done
+  if [[ -z "$pid" ]]; then
+    # only a problem inside a Claude Code session (outside one, no server is expected to run)
+    if [[ -n "${CLAUDECODE:-}${CLAUDE_CODE_SESSION_ID:-}" ]]; then
+      say "  $t server:  registered but NOT running in this session (it exited or the client dropped it). Run /mcp to reconnect it"
+      problems+=("$t is registered but its server is not running: run /mcp (reconnect)")
+    fi
+  elif ((bpy_at && started < bpy_at)); then
+    say "  $t server:  running (pid $pid), started before Blender was built; it announced its full tool list when the build finished"
+  elif ((bpy_at)); then say "  $t server:  running (pid $pid) with Blender"
+  else say "  $t server:  running (pid $pid), waiting for Blender (lists only its status tool until the build finishes)"; fi
+done
+
 if ((off_note)); then
   say ""
   say "  3D tools aren't installed. Run scripts/install.sh meshcraft forgecraft: the registered servers pick them up in the"

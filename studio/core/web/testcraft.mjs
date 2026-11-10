@@ -25,6 +25,11 @@ try {
     const R = { viewport: vp.name, size: ctxOpts.viewport, console_errors: [], console_error_sources: [], page_errors: [], blocked: [], missing: [], requests: 0, screenshots: [], steps: [], asserts: [], values: {} };
     page.on('console', (m) => { if (m.type() === 'error') { R.console_errors.push(m.text().slice(0, 300)); R.console_error_sources.push(String((m.location() || {}).url || '').slice(0, 300)); } });
     page.on('pageerror', (e) => R.page_errors.push(String(e).slice(0, 300)));
+    // every failed request with its URL, method and failure text (a console "Failed to load resource" names no URL),
+    // and every HTTP error response (≥ 400): the report can say which file failed and whether the sandbox blocked it
+    R.failed_requests = [];
+    page.on('requestfailed', (q) => { if (R.failed_requests.length < 50) R.failed_requests.push({ url: q.url().slice(0, 300), method: q.method(), type: q.resourceType(), failure: ((q.failure() || {}).errorText || 'failed').slice(0, 160) }); });
+    page.on('response', (r) => { if (r.status() >= 400 && R.failed_requests.length < 50) R.failed_requests.push({ url: r.url().slice(0, 300), method: r.request().method(), type: r.request().resourceType(), status: r.status() }); });
     await page.addInitScript(() => {   // frame timing for perf: every rAF tick
       window.__frames = []; let last = performance.now();
       const tick = (t) => { window.__frames.push(t - last); last = t; requestAnimationFrame(tick); }; requestAnimationFrame(tick);
@@ -72,6 +77,16 @@ try {
         const mem = performance.memory ? { used_mb: +(performance.memory.usedJSHeapSize / 1048576).toFixed(1), total_mb: +(performance.memory.totalJSHeapSize / 1048576).toFixed(1) } : null;
         return { frames: n, fps: n ? +(1000 * n / sum).toFixed(1) : 0, frame_ms_p50: q(0.5), frame_ms_p95: q(0.95), frame_ms_p99: q(0.99), frame_ms_max: n ? f[n - 1] : null,
           long_frames_over_50ms: f.filter((x) => x > 50).length, heap: mem, dom_nodes: document.getElementsByTagName('*').length };
+      });
+      // which GPU drew the frames: under a software rasteriser (SwiftShader, llvmpipe) FPS measures the sandbox, not the game
+      R.perf.gpu = await page.evaluate(() => {
+        try {
+          const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
+          if (!gl) return { renderer: null, vendor: null, webgl: false };
+          const ext = gl.getExtension('WEBGL_debug_renderer_info');
+          return { webgl: true, renderer: String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)),
+            vendor: String(ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR)) };
+        } catch (e) { return { renderer: null, vendor: null, error: String(e).slice(0, 120) }; }
       });
     }
     await shot('final');

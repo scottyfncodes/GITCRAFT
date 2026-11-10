@@ -6,6 +6,8 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 from core import media, runners, validate as V, webpages
 from core.contract import StudioError
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("gitcraft_testcraft_findings", os.path.join(HERE, "findings.py")); TF = _ilu.module_from_spec(_spec); _spec.loader.exec_module(TF)
 
 VIEWPORTS = {"desktop": {"name": "desktop", "width": 1280, "height": 720}, "laptop": {"name": "laptop", "width": 1440, "height": 900},
              "phone": {"name": "phone", "device": "iPhone 13"}, "phone_landscape": {"name": "phone_landscape", "device": "iPhone 13 landscape"},
@@ -63,14 +65,19 @@ def _console_checks(vp, r, p):
       * anything else fails the check, or with the deprecated allow_console_errors is an ADVISORY (still listed).
     Page exceptions and missing files are separate checks and are never excepted."""
     from core import netclass
-    cons = netclass.classify_console(r["console_errors"], r.get("console_error_sources"), r.get("blocked"), p.get("console_error_exceptions"))
+    # a request that failed for a network reason (proxy refusal, DNS, the harness's block) is the sandbox's, not the project's
+    net_failed = [q["url"] for q in r.get("failed_requests") or [] if q.get("status") is None and netclass.SANDBOX.search(str(q.get("failure") or ""))]
+    cons = netclass.classify_console(r["console_errors"], r.get("console_error_sources"), list(r.get("blocked") or []) + net_failed, p.get("console_error_exceptions"))
+    reqs = TF.console_requests({"results": [r]}, vp)
     out = []
     if cons["unexplained"] and p.get("allow_console_errors"):
         out.append({"name": f"{vp}: no console errors", "ok": True, "category": "advisory",
                     "detail": {"unexplained (allow_console_errors: reported, not ignored)": cons["unexplained"][:3]}})
     else:
         out.append({"name": f"{vp}: no console errors", "ok": not cons["unexplained"],
-                    "detail": cons["unexplained"][:3] or ({"explained": [e["text"][:120] for e in cons["sandbox"] + cons["excepted"]][:4]} if cons["sandbox"] or cons["excepted"] else [])})
+                    "detail": cons["unexplained"][:3] or ({"explained": [e["text"][:120] for e in cons["sandbox"] + cons["excepted"]][:4]} if cons["sandbox"] or cons["excepted"] else []),
+                    # the URL, method and failure of every request that failed (a console error alone names no URL)
+                    "requests": [{k: q.get(k) for k in ("url", "method", "type", "status", "failure", "environment") if q.get(k) is not None} for q in reqs][:10]})
     if cons["excepted"]:
         out.append({"name": f"{vp}: console errors covered by documented exceptions", "ok": True, "category": "advisory",
                     "detail": [f"{e['text'][:100]} — {e['reason']}" for e in cons["excepted"]][:5]})
@@ -139,13 +146,21 @@ def perf(ctx, p):
     res = _browser(ctx, p, steps=p.get("steps"), perf_ms=int(p["seconds"] * 1000)); checks, outs, sections = [], [], []
     for r in res:
         pf = r.get("perf") or {}; vp = r["viewport"]
-        checks += [{"name": f"{vp}: average FPS ≥ {p['min_fps']}", "ok": (pf.get("fps") or 0) >= p["min_fps"], "detail": pf.get("fps")},
-                   {"name": f"{vp}: p95 frame time ≤ {p['max_p95_ms']} ms", "ok": (pf.get("frame_ms_p95") or 1e9) <= p["max_p95_ms"], "detail": pf.get("frame_ms_p95")},
+        gpu = pf.get("gpu") or {}; soft = TF.software_renderer(gpu) is not False   # unknown counts as software: never a failure without a GPU
+        # under a software rasteriser the frame rate measures the sandbox: environment-limited, UNVERIFIED, never a failure
+        env = {"category": "unverified", "cause": "environment_limited", "renderer": gpu.get("renderer")} if soft else {"renderer": gpu.get("renderer")}
+        fps_ok, p95_ok = (pf.get("fps") or 0) >= p["min_fps"], (pf.get("frame_ms_p95") or 1e9) <= p["max_p95_ms"]
+        checks += [dict({"name": f"{vp}: average FPS ≥ {p['min_fps']}", "ok": fps_ok, "detail": pf.get("fps")}, **(env if not fps_ok else {"renderer": gpu.get("renderer")})),
+                   dict({"name": f"{vp}: p95 frame time ≤ {p['max_p95_ms']} ms", "ok": p95_ok, "detail": pf.get("frame_ms_p95")}, **(env if not p95_ok else {"renderer": gpu.get("renderer")})),
                    {"name": f"{vp}: no page errors", "ok": not r["page_errors"], "detail": r["page_errors"][:2]}]
         if p.get("max_heap_mb") and pf.get("heap"): checks.append({"name": f"{vp}: JS heap ≤ {p['max_heap_mb']} MB", "ok": pf["heap"]["used_mb"] <= p["max_heap_mb"], "detail": pf["heap"]})
         outs += [{"path": s, "role": f"screenshot:{vp}", "format": "png"} for s in r["screenshots"]]
         sections.append({"title": f"performance on {vp} ({p['seconds']} s)", "data": pf, "images": r["screenshots"][-1:]})
-    ctx.note("Headless Chromium renders WebGL in software (SwiftShader): absolute FPS is lower than on a real GPU; compare runs on the same machine.")
+    for r in res:
+        g = (r.get("perf") or {}).get("gpu") or {}
+        ctx.note(f"{r['viewport']}: WebGL renderer {g.get('renderer') or 'unknown'} — " + ("software rasterised: frame rate and frame time are environment-limited "
+                 "(UNVERIFIED), not failures; only a hardware-rendered run can fail a performance gate (GITCRAFT_WEBGL=hardware)." if TF.software_renderer(g) is not False
+                 else "hardware GPU: the frame rate is a real measurement."))
     jp = ctx.path(f"{p.get('name') or 'perf'}_report.json"); json.dump({"results": res, "checks": checks}, open(jp, "w"), indent=1, default=str)
     outs += [{"path": jp, "role": "report", "format": "json"}, {"path": _report(ctx, "Performance profile", sections, checks), "role": "report", "format": "html"}]
     return {"outputs": outs, "checks": checks, "perf": {r["viewport"]: r.get("perf") for r in res}}
@@ -161,8 +176,34 @@ def diff_images(a_path, b_path, out_path, threshold=0.1):
     d = yiq(A) - yiq(B); dist = np.sqrt(0.5053 * d[..., 0] ** 2 + 0.299 * d[..., 1] ** 2 + 0.1957 * d[..., 2] ** 2) / 0.35
     bad = dist > threshold
     out = (np.stack([A.mean(-1)] * 3, -1) * 0.3 + 0.7)
-    out[bad] = [1.0, 0.1, 0.3]; media.to_image(out).save(out_path)
-    return {"same_size": True, "mismatch": round(float(bad.mean()), 6), "pixels": int(bad.sum())}
+    out[bad] = [1.0, 0.1, 0.3]
+    regions = changed_regions(bad)
+    for x, y, w, h in regions:   # outline each changed region on the diff image
+        out[y:y + h, [x, min(x + w, out.shape[1]) - 1]] = [0.95, 0.75, 0.0]; out[[y, min(y + h, out.shape[0]) - 1], x:x + w] = [0.95, 0.75, 0.0]
+    media.to_image(out).save(out_path)
+    return {"same_size": True, "mismatch": round(float(bad.mean()), 6), "pixels": int(bad.sum()), "regions": regions, "diff": out_path}
+
+
+def changed_regions(bad, cell=16, n=8):
+    """Bounding boxes [x, y, w, h] (pixels) of the changed areas: the mask on a cell grid, 8-connected cells merged,
+    the n largest by changed pixels."""
+    H, W = bad.shape; gh, gw = -(-H // cell), -(-W // cell)
+    pad = np.zeros((gh * cell, gw * cell), bool); pad[:H, :W] = bad
+    cnt = pad.reshape(gh, cell, gw, cell).sum((1, 3)); hot = cnt > 0
+    seen = np.zeros_like(hot); boxes = []
+    for i0, j0 in zip(*np.nonzero(hot)):
+        if seen[i0, j0]: continue
+        stack = [(i0, j0)]; seen[i0, j0] = True; cells = []
+        while stack:
+            i, j = stack.pop(); cells.append((i, j))
+            for di in (-1, 0, 1):
+                for dj in (-1, 0, 1):
+                    a, b = i + di, j + dj
+                    if 0 <= a < gh and 0 <= b < gw and hot[a, b] and not seen[a, b]: seen[a, b] = True; stack.append((a, b))
+        ii, jj = [c[0] for c in cells], [c[1] for c in cells]
+        x, y = min(jj) * cell, min(ii) * cell
+        boxes.append((int(sum(cnt[c] for c in cells)), [int(x), int(y), int(min((max(jj) + 1) * cell, W) - x), int(min((max(ii) + 1) * cell, H) - y)]))
+    return [b for _, b in sorted(boxes, key=lambda t: -t[0])[:n]]
 
 
 def visual_diff(ctx, p):
@@ -181,7 +222,8 @@ def visual_diff(ctx, p):
     for b, c in pairs:
         dp = ctx.path(f"diff_{os.path.basename(c)}"); r = diff_images(b, c, dp, p["threshold"]); comps.append(dict(r, baseline=b, current=c, diff=dp))
         outs.append({"path": dp, "role": "diff", "format": "png"})
-        checks.append({"name": f"{os.path.basename(c)} matches baseline (≤ {p['max_mismatch'] * 100:.2f}% pixels differ)", "ok": r["same_size"] and r["mismatch"] <= p["max_mismatch"], "detail": r})
+        checks.append({"name": f"{os.path.basename(c)} matches baseline (≤ {p['max_mismatch'] * 100:.2f}% pixels differ)", "ok": r["same_size"] and r["mismatch"] <= p["max_mismatch"],
+                       "detail": dict(r, baseline=b, current=c)})   # the diff image, the changed regions and both images: a finding a person can open
     sections = [{"title": os.path.basename(x["current"]), "data": x, "images": [x["baseline"], x["current"], x["diff"]]} for x in comps]
     outs.append({"path": _report(ctx, "Visual regression", sections, checks), "role": "report", "format": "html"})
     return {"outputs": outs, "checks": checks, "comparisons": comps}

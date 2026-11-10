@@ -20,8 +20,53 @@ ASSET = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".wav", ".ogg", ".mp3
 DEPLOY = ["vercel.json", "netlify.toml", "CNAME", "firebase.json", "fly.toml", "render.yaml", "wrangler.toml", "Dockerfile", "app.yaml", ".github/workflows"]
 SENSITIVE = re.compile(r"(^|/)(\.env(\..+)?|.*\.pem|.*\.key|id_rsa.*|credentials.*\.json|secrets?\..*)$", re.I)
 GAME_WORDS = re.compile(r"\b(game|player|level|score|enemy|enemies|jump|platformer|sprite|highscore|high score|lives|boss|gameplay)\b", re.I)
-STUB = re.compile(r"(not implemented|coming soon|TODO: implement|throw new Error\(\s*['\"](?:todo|not implemented)|raise NotImplementedError|placeholder (?:screen|page|text)|lorem ipsum)", re.I)
-TODO = re.compile(r"(?://|#|<!--|/\*)\s*(TODO|FIXME|HACK|XXX)\b[:\s]*(.{0,90})", re.I)
+# Stubs come from code only, never from words inside a string literal or a document ("illustrative mockup: layout
+# concept, not implemented UI" in a manifest is prose, not a stub). Each pattern must START in code (scan below).
+STUB = re.compile(r"(raise\s+NotImplementedError\b|throw\s+new\s+Error\(\s*['\"`](?:todo|not (?:yet )?implemented|unimplemented)[^'\"`]*['\"`]\s*\)|"
+                  r"\btodo!\(\)|\bunimplemented!\(\))", re.I)
+TODO = re.compile(r"(?://+|#+|<!--|/\*+|^\s*\*)\s*(TODO|FIXME|HACK|XXX)\b[:\s]*(.{0,90})", re.I | re.M)
+PASS_BODY = re.compile(r"^([ \t]*)def\s+(\w+)\s*\([^)]*\)[^:\n]*:[ \t]*\n(?:[ \t]*\n)*([ \t]+)(?:pass|\.\.\.)[ \t]*$", re.M)
+
+
+_SPAN_JS = re.compile(r"//[^\n]*|/\*.*?\*/|<!--.*?-->|`(?:\\.|[^`\\])*`|\"(?:\\.|[^\"\\\n])*\"|'(?:\\.|[^'\\\n])*'", re.S)
+_SPAN_PY = re.compile(r"#[^\n]*|\"\"\"(?:\\.|.)*?\"\"\"|'\'\'(?:\\.|.)*?'\'\'|[rbfuRBFU]{0,2}\"(?:\\.|[^\"\\\n])*\"|[rbfuRBFU]{0,2}'(?:\\.|[^'\\\n])*'", re.S)
+
+
+def spans(path, text):
+    """[(start, end, 'string' | 'comment')] of a source file's string literals and comments (a light lexer: enough to
+    tell code from prose; regex literals in JS are read as code)."""
+    rx = _SPAN_PY if path.endswith((".py", ".gd")) else _SPAN_JS
+    out = []
+    for m in rx.finditer(text):
+        g = m.group(0)
+        out.append((m.start(), m.end(), "comment" if g.startswith(("#", "//", "/*", "<!--")) else "string"))
+    return out
+
+
+def _kind_at(sp, i):
+    import bisect
+    k = bisect.bisect_right([a for a, _, _ in sp], i) - 1
+    return sp[k][2] if k >= 0 and sp[k][0] <= i < sp[k][1] else "code"
+
+
+def code_signals(path, text):
+    """('todo' | 'stub', what) found in CODE: TODO/FIXME comments (the marker is in a comment, not a string), stubs that
+    start in code (raise NotImplementedError, throw new Error("not implemented")), and Python functions whose whole body
+    is `pass` or `...` (abstract methods excepted). Words inside string literals and documents never count."""
+    sp = spans(path, text); out = []
+    for m in TODO.finditer(text):
+        if _kind_at(sp, m.start(1)) == "comment": out.append(("todo", f"{m.group(1).upper()}: {m.group(2).strip().rstrip('*/->').strip()}"))
+    for m in STUB.finditer(text):
+        if _kind_at(sp, m.start()) == "code": out.append(("stub", f"stub: {m.group(0)[:60]}"))
+    if path.endswith(".py"):
+        for m in PASS_BODY.finditer(text):
+            if _kind_at(sp, m.start(2)) != "code" or len(m.group(3)) <= len(m.group(1)): continue
+            before = text[:m.start()].rstrip().rsplit("\n", 1)[-1]
+            if "abstract" in before or "overload" in before: continue
+            nxt = re.match(r"\n*([ \t]*)\S", text[m.end():])
+            if nxt and len(nxt.group(1)) > len(m.group(1)): continue   # more body follows: not a stub
+            out.append(("stub", f"stub: def {m.group(2)}(): pass"))
+    return out
 
 
 def _walk(root, limit=6000):
@@ -84,6 +129,57 @@ def _refs(html):
         if not re.match(r"^[a-z]+:|^//|^data:|^\{|^\$", u, re.I): out.append(u)
     for m in re.finditer(r"""(?:fetch|new Audio|loadImage|load\.(?:image|audio|json))\(\s*["']([^"'#?]+\.(?:json|png|jpg|ogg|wav|mp3|svg|webp))["']""", html):
         out.append(m.group(1))
+    return out
+
+
+VITE_CONFIG = re.compile(r"(^|/)vite(\.[\w-]+)*\.config\.(m?[jt]s|c[jt]s)$|(^|/)vite\.[\w-]+\.(m?[jt]s|c[jt]s)$")
+
+
+def _vite_roots(project, rel):
+    """Every Vite (or Vite-like) config in the project → the folder it serves: its `root:` option, resolved from the
+    config's own folder, else that folder. A page is served from the nearest of these roots that contains it."""
+    out = []
+    for r in rel:
+        if not VITE_CONFIG.search(r): continue
+        cdir = os.path.dirname(os.path.join(project, r))
+        m = re.search(r"""\broot\s*:\s*['"`]([^'"`]+)['"`]""", _read(os.path.join(project, r), 20000))
+        root = os.path.normpath(os.path.join(cdir, m.group(1))) if m else cdir
+        out.append(os.path.realpath(root))
+    return sorted(set(out), key=len, reverse=True)
+
+
+def _serve_roots(project, page, vite):
+    """The folders a root-absolute URL (/x) in `page` can be served from, nearest first: the Vite roots that contain
+    the page, the page's own folder, and the project root; each with its public/ folder (Vite serves both)."""
+    pdir = os.path.realpath(os.path.dirname(os.path.join(project, page)))
+    cands = [v for v in vite if pdir == v or pdir.startswith(v + os.sep)] + [pdir, os.path.realpath(project)]
+    out = []
+    for c in cands:
+        for x in (c, os.path.join(c, "public")):
+            if x not in out: out.append(x)
+    return out
+
+
+def _resolves(project, page, u, vite):
+    """A reference resolves when any plausible root has the file (flag it missing only when none does)."""
+    rel_u = u.split("?")[0]
+    if not rel_u.startswith("/"):
+        return os.path.exists(os.path.normpath(os.path.join(project, os.path.dirname(page), rel_u))) or \
+               os.path.exists(os.path.join(project, "public", rel_u))
+    parts = [x for x in rel_u.split("/") if x]
+    # the path as written, and without its first segment: a page built from a copy (a kit whose README copies it into
+    # src/) or for a sub-path (Vite base '/GAME/') asks for /src/x or /GAME/x; TestCraft serves builds the same way
+    tries = [parts] + ([parts[1:]] if len(parts) > 1 else [])
+    return any(os.path.exists(os.path.join(root, *t)) for root in _serve_roots(project, page, vite) for t in tries)
+
+
+def _shipped_pages(project, rel, entry):
+    """The pages the project ships: its entry page and the inputs of the main build config. Other pages (a test
+    harness, a verification page served by its own config) rank lower: a broken reference there does not reach players."""
+    out = {r for r in (entry, "index.html") if r and r.endswith(".html")}
+    for r in rel:
+        if VITE_CONFIG.search(r) and os.path.dirname(r) == "" :
+            for m in re.finditer(r"""['"`]([\w./-]+\.html)['"`]""", _read(os.path.join(project, r), 20000)): out.add(os.path.normpath(m.group(1)).lstrip("./"))
     return out
 
 
@@ -183,17 +279,19 @@ def assess(project):
     inv["unfinished"] += [{"what": t, "where": rname, "evidence": "unchecked in the README"} for t in todo_boxes]
     todos = []
     for r, t in src.items():
-        for m in TODO.finditer(t): todos.append({"what": f"{m.group(1).upper()}: {m.group(2).strip()}", "where": r})
-        for m in STUB.finditer(t): inv["unfinished"].append({"what": f"stub: {m.group(0)[:60]}", "where": r})
+        for kind_, what in code_signals(r, t):
+            (todos if kind_ == "todo" else inv["unfinished"]).append({"what": what, "where": r})
     inv["unfinished"] += todos[:40]
     # defects: references to files that are not there
+    vite = _vite_roots(project, rel)
+    shipped = _shipped_pages(project, rel, entry)
     for r, t in src.items():
         # template folders (a starter kit, fixtures, examples) hold placeholders a build fills in: not the project's own pages
         if not r.endswith(".html") or TEMPLATE_DIR.search(r): continue
         for u in _refs(t):
-            p = os.path.normpath(os.path.join(project, os.path.dirname(r), u.lstrip("/"))) if not u.startswith("/") else os.path.join(project, u.lstrip("/"))
-            if not (os.path.exists(p) or os.path.exists(os.path.join(project, "public", u.lstrip("/")))):
-                inv["defects"].append({"what": f"references a missing file: {u}", "where": r})
+            if not _resolves(project, r, u, vite):
+                inv["defects"].append({"what": f"references a missing file: {u}", "where": r, "entry": r in shipped,
+                                       "roots": [os.path.relpath(x, project) for x in _serve_roots(project, r, vite)][:6]})
     # tests, deploy, CI, git
     tests = [r for r in rel if re.search(r"(^|/)(tests?|__tests__|spec)/|\.(test|spec)\.[jt]sx?$|^test_.*\.py$", r)]
     deploy = [d for d in DEPLOY if os.path.exists(os.path.join(project, d))]

@@ -54,9 +54,11 @@ check("history-only: departments without results have no score and status no_dat
       {i: (d["status"], d["score"]) for i, d in dd.items()})
 from production import scoring as SC  # noqa: E402
 wp, wd = SC.RUBRICS["playcraft"]["weight"], SC.RUBRICS["designcraft"]["weight"]
-check("history-only: the overall score is the rubric-weighted mean of the evaluated scores only, with its basis and method",
+cw = lambda i, w: w * SC.CONFIDENCE_WEIGHT.get(str(dd[i]["quality"].get("confidence") or "medium").lower(), 0.75)   # weight scaled by the department's confidence
+ep, ed = cw("playcraft", wp), cw("designcraft", wd)
+check("history-only: the overall score is the confidence-weighted rubric mean of the evaluated scores only, with its basis and method",
       R["health"]["parts"] == {"playcraft": dd["playcraft"]["score"]["value"], "designcraft": dc_latest["overall"]} and R["health"]["method"] == SC.METHOD
-      and abs(R["health"]["score"] - (dd["playcraft"]["score"]["value"] * wp + dc_latest["overall"] * wd) / (wp + wd)) < 0.06 and "weighted mean" in R["health"]["basis"], R["health"])
+      and abs(R["health"]["score"] - (dd["playcraft"]["score"]["value"] * ep + dc_latest["overall"] * ed) / (ep + ed)) < 0.06 and "weighted mean" in R["health"]["basis"], R["health"])
 ne = [d for d in R["departments"] if d["quality"]["evaluation"] == "not_evaluated"]
 check("Not Evaluated: applicable departments without a measured result have no value and no weight in the overall score",
       ne and all(d["quality"]["value"] is None and d["id"] not in R["health"]["parts"] and d["quality"].get("why") for d in ne), [(d["id"], d["quality"]) for d in ne])
@@ -121,6 +123,9 @@ json.dump({"department": "testcraft", "action": "smoke", "status": "ok", "create
           open(os.path.join(game, "qa", "smoke.studio.json"), "w"))
 subprocess.run(["git", "init", "-q", game]); subprocess.run(["git", "-C", game, "add", "-A"]); subprocess.run(["git", "-C", game, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "init"])
 before = tree_hash(game)
+# refresh=quick smoke-tests an existing build (tests/test_report_trust.py covers it): here the Studio is stubbed as absent so
+# the records read are exactly the fixture's (deterministic with or without a browser)
+PR._studio_call = lambda action, args, timeout=3600, env=None: (None, "the Studio runtime is not installed (stubbed in this test)")
 R1 = PR.generate(game)
 check("read-only: the project is byte-identical after a report (no files, no folders)", tree_hash(game) == before)
 check("saved: report.json, report.md, report.html in a timestamped folder outside the project",
@@ -128,6 +133,9 @@ check("saved: report.json, report.md, report.html in a timestamped folder outsid
 t1 = {d["id"]: d for d in R1["departments"]}["testcraft"]
 check("records: TestCraft's own record is read (1/2 checks → score 50, failed check is a verified finding)",
       t1["score"]["value"] == 50.0 and any(f["level"] == "verified" and "horizontal" in f["title"] for f in t1["findings"]), t1)
+check("records: a record dated before the project's latest commit is Stale (low confidence, never P0/P1)",
+      t1["status"] == "stale" and t1["score"]["confidence"] == "low" and all(f.get("stale") for f in t1["findings"])
+      and all(a["priority"] not in ("P0", "P1") for a in R1["actions"] if set(a["findings"]) & {f["key"] for f in t1["findings"]}), (t1["status"], t1["score"]))
 p1 = {d["id"]: d for d in R1["departments"]}["production"]
 check("refresh: Discovery and the engineering standard re-ran (read-only)", p1["status"] == "refreshed" and any("Discovery" in n for n in p1["notes"]), p1["notes"])
 check("first report says so", R1["changes"]["first"] is True)
