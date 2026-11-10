@@ -69,6 +69,15 @@ READINGS = [
 ]
 ASKING = re.compile(r"^(?:so |and |hey |ok |okay )?(?:is|are|does|do|did|how|what|why|which|should|would|could|can|will)\b[^?]*\?\s*$", re.I)
 
+# one line per assignment, for the routing's `why` and the Decision Room
+SAY = {"redesign": "redesign how it looks: what it does stays exactly as it is, judged by a before/after comparison",
+       "gameplay": "improve how it plays: the look, the assets and saves stay, judged by a before/after play comparison",
+       "polish": "polish: the same product executed better; no new features, no redesign",
+       "integrate": "make the requested asset with its department and wire it in beside what exists",
+       "rebuild": "rebuild: replaces existing work, so nothing starts until you say what may go and what carries over",
+       "repair": "fix what is broken: the defect and a regression check; nothing else changes",
+       "audit": "review only: the project measured as it is; nothing is changed",
+       "feature": "one change to an existing project: only what was named and the fixes it needs"}
 DEFAULTS = {"partial": ("continue", "continue"), "nearly_complete": ("complete", "complete"), "finished": ("feature", "update")}
 REBUILD_Q = ("That replaces work that already exists here. What may be thrown away, and what must carry over (saved progress, content, "
              "art, the address it is deployed at)? Nothing is deleted until you answer.")
@@ -146,7 +155,7 @@ def model(request, assessment=None, reading=None, kind=None):
     kind = kind or a.get("kind")
     preserve = list(PRESERVE.get(asg, []))
     if a.get("existing"):
-        if a.get("save_keys"): preserve.append("saved data: " + ", ".join(a["save_keys"][:4]) + " keep their keys and formats")
+        if a.get("save_keys"): preserve.append("saved data (" + ", ".join(a["save_keys"][:4]) + "): the same keys and formats")
         if a.get("deploy"): preserve.append("the deployment and CI configuration (" + ", ".join(map(str, a["deploy"][:3])) + ")")
     return {"assignment": asg, "workflow": reading["workflow"], "focus": reading.get("focus"), "because": reading["because"],
             "product": {"kind": kind, "maturity": a.get("maturity") or "new", "confidence": a.get("confidence")},

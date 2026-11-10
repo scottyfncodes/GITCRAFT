@@ -96,7 +96,7 @@ PRODUCTION_TOOLS = [
     ("production_start", "RUN GITCRAFT: the one entry point. Give it whatever the person brought: an idea, a spec, a pasted master prompt, a GitHub URL, "
      "a local path, or just 'Run GITCRAFT' with the project folder. It finds the project (a URL needs a clone in the workspace: it says how), reads its "
      "state without changing it (new / partial / nearly complete / finished; game / app / site, with evidence and confidence), works out what was asked "
-     "(build / continue / complete / update / fix / review), and plans that workflow into the Decision Room. Existing work is preserved: no scaffolding, "
+     "(build / continue / complete / update / fix / review; the assignment: feature, repair, redesign, gameplay, polish, integrate, audit, rebuild; assets alone return status direct with the department steps), and plans that workflow into the Decision Room. Existing work is preserved: no scaffolding, "
      "rebranding, new icon or redesign unless approved. Then production_decide (the person approves) and production_run.",
      {"type": "object", "properties": {"text": {"type": "string", "description": "what the person said, verbatim (may be just 'Run GITCRAFT')"},
       "project": {"type": "string", "description": "the project folder, when known (e.g. the session's repository)"},

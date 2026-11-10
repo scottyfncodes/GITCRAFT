@@ -1,0 +1,82 @@
+{
+ "assignment": "gameplay",
+ "request": "Improve how it plays: it feels flat and unfair. Deaths come out of nowhere, there is no sound and no way to pause.",
+ "project": "a copy of tests/fixtures/playcraft/arcade_dodge (BLIP); the fixture itself is unchanged",
+ "verdict": "READY",
+ "playcraft": {
+  "overall": {
+   "before": 61,
+   "after": 71
+  },
+  "confidence": "medium",
+  "strong_evidence_share": {
+   "before": 0.32,
+   "after": 0.32
+  },
+  "categories": {
+   "core_gameplay": {
+    "before": 69,
+    "after": 80
+   },
+   "game_feel": {
+    "before": 44,
+    "after": 73
+   },
+   "controls": {
+    "before": 70,
+    "after": 70
+   },
+   "progression": {
+    "before": 58,
+    "after": 58
+   },
+   "difficulty": {
+    "before": 51,
+    "after": 51
+   },
+   "player_experience": {
+    "before": 55,
+    "after": 71
+   },
+   "replayability": {
+    "before": 62,
+    "after": 62
+   },
+   "technical": {
+    "before": 85,
+    "after": 85
+   },
+   "presentation": {
+    "before": 47,
+    "after": 65
+   },
+   "mobile": {
+    "before": 69,
+    "after": 90
+   }
+  },
+  "regressions": [],
+  "resolved": [
+   "Sound effects on actions (inferred \u2192 now passing)",
+   "Near-miss / close-call feedback (inferred \u2192 now passing)",
+   "Browser gestures do not fight the game (touch-action, no zoom) (verified \u2192 now passing)",
+   "Camera/screen shake for big impacts (inferred \u2192 now passing)",
+   "Motion is eased (tweens, lerps, springs), not linear (inferred \u2192 now passing)",
+   "Hit-stop / slow motion on key moments (inferred \u2192 now passing)",
+   "Pause works, and the game pauses when hidden (observed \u2192 now passing)",
+   "Meaningful decisions (choices with trade-offs) (inferred \u2192 now passing)",
+   "Auto-pause when the page is hidden (inferred \u2192 now passing)",
+   "Sound design and music (inferred \u2192 now passing)",
+   "Safe areas respected (notch, home bar) (inferred \u2192 now passing)",
+   "Anticipation, recoil, squash and stretch (inferred \u2192 now passing)",
+   "Touch targets \u2265 44 px (verified \u2192 now passing)",
+   "Transitions between screens and states (inferred \u2192 now passing)"
+  ],
+  "new_findings": []
+ },
+ "gates_that_failed_first": [
+  "qa.assets: the sounds were loaded through a built path, not literal references (fixed in fix.qa.assets.r1)",
+  "qa.playcraft: the work was on the default branch, against the work order (fixed in fix.qa.playcraft.r1)"
+ ],
+ "not_established": "whether it is more fun: the playtest questions in REPORT.md ('Needs a person') are open"
+}

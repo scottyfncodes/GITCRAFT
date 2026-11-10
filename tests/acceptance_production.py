@@ -134,7 +134,7 @@ def part_a(c):
     # ---- 5. dependency order
     pos = {t: i for i, g in enumerate(plan["parallel_groups"]) for t in g}
     check("5 order (plan v2): foundation → build (beside the assets) ; assets → integrate.<asset> → integrate.final → build.wire → QA → regression → release report → deploy",
-          load(pid).get("plan_version") == 2 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity"}
+          load(pid).get("plan_version") == 2 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity", "design.direction"}
           and all(pos[t] < pos[f"integrate.{t}"] < pos["integrate.final"] for t in T if t.startswith(("audio.", "levels.", "vfx.")))
           and max(pos["build"], pos["integrate.final"]) < pos["build.wire"] < min(pos[t] for t in T if t.startswith("qa."))
           <= max(pos[t] for t in T if t.startswith("qa.")) < pos["release.regression"] < pos["release.report"] < pos["release.deploy"])
@@ -151,6 +151,10 @@ def part_a(c):
 
     # ---- run: production departments, then the identity work order
     st = call(c, "production_run", {"production": pid})
+    check("direction first: the run stops at the creative direction, before the identity or any code",
+          st["status"] == "awaiting_agent" and tasks_in(st, "awaiting_agent") == ["design.direction"], tasks_in(st, "awaiting_agent"))
+    dorder = json.load(open(os.path.join(load(pid)["store"], "tasks", "design.direction", "work_order.json")))
+    st = call(c, "production_submit", {"production": pid, "task": "design.direction", "files": agent.direction(dorder), "notes": "Lantern Drift: look and play"})
     check("run stops at the agent's identity work order", st["status"] == "awaiting_agent" and "foundation.identity" in tasks_in(st, "awaiting_agent"), st["counts"])
     prod = load(pid)
     first_wave = [t for t in prod["tasks"] if t.startswith(("audio.", "levels.")) or t == "vfx.sparks"]

@@ -105,7 +105,12 @@ r = entry.start("Run GITCRAFT: I need a jump sound effect and a coin pickup soun
 check("start: assets alone go straight to their department (no production, nothing scaffolded)",
       r["status"] == "direct" and r["routing"]["assignment"] == "asset" and any(st["tool"] == "audiocraft_sfx" for st in r["steps"]) and not os.path.isdir(sd), (r["status"], r.get("steps")))
 r = entry.start("A 3D model of a wooden barrel for my game", store_dir=sd)
-check("start: a 3D asset is pointed at the 3D Department", r["status"] == "direct" and "forgecraft" in json.dumps(r["steps"]).lower(), r.get("steps"))
+check("start: one step per named asset, and no guesses (a department's keyword alone is not a route)",
+      [(st["tool"], st["params"]) for st in entry.start("I need a jump sound effect and a coin pickup sound", store_dir=sd)["steps"]]
+      == [("audiocraft_sfx", {"preset": "coin"}), ("audiocraft_sfx", {"preset": "jump"})])
+check("start: a 3D asset is the 3D Department's, and only its", r["status"] == "direct" and len(r["steps"]) == 1 and r["steps"][0]["tool"].startswith("forgecraft"), r.get("steps"))
+r = entry.start("Create a logo for my bakery called Crumb", store_dir=sd)
+check("start: a logo goes to VectorCraft (the 2D tools are routed too)", r["status"] == "direct" and [st["tool"] for st in r["steps"]] == ["vectorcraft"], r.get("steps"))
 
 # ---------------------------------------------------------------- an existing game: each assignment plans a different job
 game = repo("dodge", os.path.join(HERE, "fixtures", "playcraft", "arcade_dodge"))

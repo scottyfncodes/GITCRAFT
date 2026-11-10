@@ -1,0 +1,236 @@
+diff --git a/README.md b/README.md
+index 98c5b96..8a9c9fd 100644
+--- a/README.md
++++ b/README.md
+@@ -3,4 +3,4 @@
+ An endless one-button arcade game. Hold Space (or touch) to rise, let go to fall, and thread the gaps.
+ The speed ramps up the longer you survive; your high score is saved. Instant restart after a crash.
+ 
+-Made for phones first (touch anywhere to rise), and plays on desktop with the keyboard.
++Made for phones first (touch anywhere to rise), and plays on desktop with the keyboard. Escape or P pauses (so does leaving the tab); M mutes.
+diff --git a/game.js b/game.js
+index 83676e0..1ca79a6 100644
+--- a/game.js
++++ b/game.js
+@@ -1,39 +1,155 @@
+-// BLIP fixture: one-button arcade. Ramp, high score (saved), instant restart, near-miss bonus, particles.
+-// Deliberate gaps for PLAYCRAFT's tests: no pause, a 28 px mute button.
+-const cv = document.getElementById('c'), cx = cv.getContext('2d');
++// BLIP: one-button arcade. Hold to rise, release to fall, thread the gaps.
++// The numbers that decide how it feels live in FEEL; change them by playing.
++const FEEL = {
++  rise: 900, fall: 700, maxRise: 320, maxFall: 420,        // px/s² and px/s
++  startSpeed: 180, speedCap: 380, ramp: 6,                 // px/s, px/s, px/s per second
++  forgive: 4, nearMiss: 18, edgeWarn: 70,                  // px: hitbox kinder than the drawing; skim distance; edge glow distance
++  hitStop: 0.11, shake: 9, restartLock: 0.35,              // s, px, s
++  spawnEvery: 1.4, maxGapStep: 240,                        // s between walls; px the next gap may move, so it is always reachable
++};
++const R = 14, X = 80, WALL = 32, NIGHT = '#20163a', MINT = '#6ee7b7', AMBER = '#fbbf24', RED = '#ef4444';
++const cv = document.getElementById('c'), cx = cv.getContext('2d'), hud = document.getElementById('hud');
++const muteBtn = document.getElementById('mute'), pauseBtn = document.getElementById('pause');
+ let W, H; const resize = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; }; resize(); addEventListener('resize', resize);
+-const game = window.game = { score: 0, best: +(localStorage.getItem('blip.highScore') || 0), y: 0, vy: 0, speed: 180, alive: true, runs: 1 };
+-let held = false, walls = [], sparks = [], t0 = 0, paused = false;
+-const down = () => { held = true; if (!game.alive) restart(); }, up = () => { held = false; };
+-addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') down(); });
++
++// state: 'ready' (hovering until the first hold) → 'playing' ⇄ 'paused' → 'over'. `alive`, `score`, `best`, `speed` keep their old meaning.
++const game = window.game = window.__game = { state: 'ready', score: 0, best: +(localStorage.getItem('blip.highScore') || 0), y: 0, vy: 0, speed: FEEL.startSpeed,
++  alive: true, runs: 1, time: 0, streak: 0, nearMisses: 0, gapY: 0 };
++let held = false, walls = [], sparks = [], pops = [], since = 0, lastGap = 0, freeze = 0, shake = 0, overFor = 0, newBest = false, killer = null, stretch = 0, clock = 0;
++
++// ---- sound: the files the audio department made; nothing plays before the first input (autoplay policy)
++let muted = localStorage.getItem('blip.muted') === '1';
++const load = (path) => { const a = new Audio(path); a.preload = 'auto'; return a; };
++const SND = { tick: load('assets/audio/click.ogg'), near: load('assets/audio/coin.ogg'), crash: load('assets/audio/explosion.ogg'),
++  best: load('assets/audio/powerup.ogg'), thud: load('assets/audio/hit.ogg') }, music = load('assets/audio/music.ogg');
++music.loop = true; music.volume = 0.3;
++function play(name, rate = 1, vol = 0.7) {
++  if (muted) return;
++  const a = SND[name].cloneNode(); a.volume = vol; a.preservesPitch = false; a.playbackRate = rate; a.play().catch(() => {});
++}
++function syncMusic() { if (!muted && game.state === 'playing') music.play().catch(() => {}); else music.pause(); }
++function setMuted(m) { muted = m; localStorage.setItem('blip.muted', m ? '1' : '0'); muteBtn.classList.toggle('off', m); muteBtn.setAttribute('aria-pressed', String(m)); syncMusic(); }
++setMuted(muted);
++
++// ---- input
++function down() {
++  if (game.state === 'paused') return resume();
++  if (game.state === 'over') { if (overFor >= FEEL.restartLock) restart(); return; }
++  if (game.state === 'ready') { game.state = 'playing'; syncMusic(); }
++  held = true;
++}
++const up = () => { held = false; };
++function pause() { if (game.state === 'playing') { game.state = 'paused'; held = false; pauseBtn.textContent = '▶'; pauseBtn.setAttribute('aria-label', 'Resume'); syncMusic(); } }
++function resume() { if (game.state === 'paused') { game.state = 'playing'; last = performance.now(); pauseBtn.textContent = 'II'; pauseBtn.setAttribute('aria-label', 'Pause'); syncMusic(); } }
++addEventListener('keydown', (e) => {
++  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); if (!e.repeat) down(); }
++  else if (e.code === 'Escape' || e.code === 'KeyP') { if (game.state === 'paused') resume(); else pause(); }
++  else if (e.code === 'KeyM') setMuted(!muted);
++});
+ addEventListener('keyup', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') up(); });
+-cv.addEventListener('pointerdown', down); addEventListener('pointerup', up);
+-document.getElementById('mute').onclick = () => { document.getElementById('mute').classList.toggle('off'); };
+-function restart() { game.alive = true; game.score = 0; game.speed = 180; game.y = H / 2; game.vy = 0; walls = []; game.runs++; }
+-function spawn() { const gap = 170, gy = 80 + Math.random() * (H - 160 - gap); walls.push({ x: W + 40, gy, gap, passed: false }); }
+-game.y = H / 2; let last = performance.now(), since = 0;
+-function frame(t) {
+-  const dt = Math.min(0.05, (t - last) / 1000); last = t;
+-  if (game.alive && !paused) {
+-    game.speed += dt * 6;   // ramp
+-    game.vy += (held ? -900 : 700) * dt; game.vy = Math.max(-320, Math.min(420, game.vy)); game.y += game.vy * dt;
+-    since += dt; if (since > 1.4) { since = 0; spawn(); }
+-    for (const w of walls) {
+-      w.x -= game.speed * dt;
+-      if (!w.passed && w.x < 80) { w.passed = true; const near = Math.min(game.y - w.gy, w.gy + w.gap - game.y) < 18; game.score += near ? 3 : 1;
+-        for (let i = 0; i < (near ? 16 : 6); i++) sparks.push({ x: 90, y: game.y, vx: Math.random() * 200 - 100, vy: Math.random() * 200 - 100, t: 0.5 }); }
+-      if (w.x < 96 && w.x > 64 && (game.y < w.gy || game.y > w.gy + w.gap)) game.alive = false;
++cv.addEventListener('pointerdown', (e) => { e.preventDefault(); down(); }); addEventListener('pointerup', up); addEventListener('pointercancel', up);
++muteBtn.onclick = () => { setMuted(!muted); muteBtn.blur(); };
++pauseBtn.onclick = () => { if (game.state === 'paused') resume(); else pause(); pauseBtn.blur(); };
++document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
++
++function restart() {
++  Object.assign(game, { state: 'ready', alive: true, score: 0, speed: FEEL.startSpeed, y: H / 2, vy: 0, time: 0, streak: 0, runs: game.runs + 1 });
++  walls = []; pops = []; since = 0; lastGap = 0; newBest = false; killer = null; hud.classList.remove('best');
++}
++
++// ---- the curve: wide and central, then anywhere (always reachable), then narrower, then drifting
++const lerp = (a, b, t) => a + (b - a) * Math.max(0, Math.min(1, t));
++function spawn() {
++  const t = game.time, gap = t < 12 ? 190 : lerp(170, 150, (t - 30) / 20);
++  const lo = 60 + gap / 2, hi = H - 60 - gap / 2, mid = H / 2;
++  let c = t < 12 ? mid + (Math.random() - 0.5) * Math.min(H * 0.3, hi - lo) : lo + Math.random() * (hi - lo);
++  if (lastGap) c = Math.max(lastGap - FEEL.maxGapStep, Math.min(lastGap + FEEL.maxGapStep, c));
++  c = Math.max(lo, Math.min(hi, c)); lastGap = c;
++  walls.push({ x: W + 40, c, gap, passed: false, flash: 0, drift: t > 50 ? 26 : 0, phase: Math.random() * 6.28 });
++}
++const gapTop = (w) => w.c - w.gap / 2 + (w.drift ? Math.sin(clock * 2.6 + w.phase) * w.drift : 0);
++
++function pop(text, color) { pops.push({ x: X + 22, y: game.y - 18, text, color, t: 0.7 }); }
++function burst(n, color, speed) { for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, v = speed * (0.4 + Math.random() * 0.6); sparks.push({ x: X, y: game.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0.5, color }); } }
++
++function crash(by) {
++  game.alive = false; killer = by; freeze = FEEL.hitStop; shake = FEEL.shake; held = false;
++  play('thud', 1, 0.7); play('crash', 1, 0.6); burst(26, AMBER, 320);
++  if (game.score > game.best) { game.best = game.score; localStorage.setItem('blip.highScore', game.best); newBest = true; }
++}
++
++function step(dt) {
++  game.time += dt; clock += dt;
++  game.speed = Math.min(FEEL.speedCap, game.speed + dt * FEEL.ramp);
++  game.vy += (held ? -FEEL.rise : FEEL.fall) * dt; game.vy = Math.max(-FEEL.maxRise, Math.min(FEEL.maxFall, game.vy)); game.y += game.vy * dt;
++  since += dt; if (since > FEEL.spawnEvery) { since = 0; spawn(); }
++  const r = R - FEEL.forgive;
++  for (const w of walls) {
++    w.x -= game.speed * dt; w.flash = Math.max(0, w.flash - dt * 4);
++    const t = gapTop(w), b = t + w.gap;
++    if (!w.passed && w.x + WALL < X - R) {
++      w.passed = true; game.streak++;
++      const near = Math.min(game.y - R - t, b - (game.y + R)) < FEEL.nearMiss;
++      game.score += near ? 3 : 1;
++      if (near) { game.nearMisses++; w.flash = 1; play('near', 1, 0.7); pop('CLOSE +3', AMBER); burst(16, '#fff', 180); }
++      else { play('tick', Math.pow(2, Math.min(game.streak, 12) / 12), 0.5); pop('+1', '#fff'); burst(5, '#fff', 110); }
++      if (game.score > game.best && !hud.classList.contains('best') && game.best > 0) { hud.classList.add('best'); play('best', 1, 0.6); }
+     }
+-    if (game.y < 0 || game.y > H) game.alive = false;
+-    if (!game.alive && game.score > game.best) { game.best = game.score; localStorage.setItem('blip.highScore', game.best); }
+-    walls = walls.filter((w) => w.x > -60);
++    if (w.x < X + r && w.x + WALL > X - r && (game.y - r < t || game.y + r > b)) return crash(w);
++  }
++  if (game.y < r) return crash('top');
++  if (game.y > H - r) return crash('bottom');
++  walls = walls.filter((w) => w.x > -60);
++  const next = walls.find((w) => !w.passed); game.gapY = next ? gapTop(next) + next.gap / 2 : H / 2;   // where the next gap is (read by tests and probes)
++}
++
++let last = performance.now(); game.y = H / 2;
++function frame(now) {
++  const dt = Math.min(0.05, (now - last) / 1000); last = now;
++  if (game.state === 'paused') { draw(); return requestAnimationFrame(frame); }   // nothing moves while paused
++  if (freeze > 0) { freeze -= dt; if (freeze <= 0) { game.state = 'over'; overFor = 0; syncMusic(); } }
++  else if (game.state === 'playing') step(dt);
++  else if (game.state === 'ready') { clock += dt; game.y = H / 2 + Math.sin(clock * 3) * 8; }
++  else if (game.state === 'over') overFor += dt;
++  if (freeze <= 0) {
++    for (const s of sparks) { s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 500 * dt; s.t -= dt; } sparks = sparks.filter((s) => s.t > 0);
++    for (const p of pops) { p.y -= 46 * dt; p.t -= dt; } pops = pops.filter((p) => p.t > 0);
++    shake = Math.max(0, shake - dt * 40);
++    stretch += ((game.state === 'playing' ? game.vy / FEEL.maxFall : 0) - stretch) * Math.min(1, dt * 14);   // eased squash toward the current speed
++  }
++  draw(); requestAnimationFrame(frame);
++}
++
++function draw() {
++  cx.setTransform(1, 0, 0, 1, 0, 0); cx.fillStyle = NIGHT; cx.fillRect(0, 0, W, H);
++  if (shake > 0.2) cx.translate((Math.random() - 0.5) * shake * 2, (Math.random() - 0.5) * shake * 2);
++  // the edges kill, so they are drawn, and glow as the dot drifts toward them
++  for (const [edge, d] of [['top', game.y], ['bottom', H - game.y]]) {
++    const a = killer === edge ? 1 : game.state === 'playing' ? Math.max(0, 1 - d / FEEL.edgeWarn) : 0;
++    cx.fillStyle = `rgba(239, 68, 68, ${0.25 + a * 0.75})`; cx.fillRect(0, edge === 'top' ? 0 : H - 4 - a * 8, W, 4 + a * 8);
++  }
++  for (const w of walls) {
++    const t = gapTop(w);
++    cx.fillStyle = w === killer ? RED : w.flash > 0 ? '#fff' : MINT;
++    cx.fillRect(w.x, 0, WALL, t); cx.fillRect(w.x, t + w.gap, WALL, H);
++  }
++  if (game.alive) { cx.fillStyle = AMBER; cx.beginPath(); cx.ellipse(X, game.y, R * (1 - Math.abs(stretch) * 0.18), R * (1 + Math.abs(stretch) * 0.18), 0, 0, 7); cx.fill(); }
++  for (const s of sparks) { cx.globalAlpha = Math.min(1, s.t * 2); cx.fillStyle = s.color; cx.fillRect(s.x, s.y, 3, 3); } cx.globalAlpha = 1;
++  cx.font = '600 16px system-ui'; cx.textAlign = 'left';
++  for (const p of pops) { cx.globalAlpha = Math.min(1, p.t * 2.5); cx.fillStyle = p.color; cx.fillText(p.text, p.x, p.y); } cx.globalAlpha = 1;
++  cx.setTransform(1, 0, 0, 1, 0, 0); cx.textAlign = 'center'; cx.fillStyle = '#fff';
++  if (game.state === 'ready') { cx.font = '600 22px system-ui'; cx.fillText('Hold to rise, let go to fall', W / 2, H / 2 + 70); }
++  if (game.state === 'over') {
++    cx.fillStyle = 'rgba(32, 22, 58, 0.88)'; cx.fillRect(W / 2 - 170, H / 2 - 52, 340, 124);   // a plate: the result is readable over any wall
++    cx.font = '700 30px system-ui'; cx.fillStyle = newBest ? AMBER : '#fff'; cx.fillText(newBest ? 'NEW BEST ' + game.score : String(game.score), W / 2, H / 2 - 10);
++    cx.font = '16px system-ui'; cx.fillStyle = '#fff';
++    cx.fillText(killer === 'top' || killer === 'bottom' ? 'Touched the ' + killer + ' edge' : 'Clipped a wall', W / 2, H / 2 + 22);
++    if (overFor >= FEEL.restartLock) cx.fillText('Press to go again', W / 2, H / 2 + 50);
++  }
++  if (game.state === 'paused') {
++    cx.fillStyle = 'rgba(32, 22, 58, 0.72)'; cx.fillRect(0, 0, W, H); cx.fillStyle = '#fff';
++    cx.font = '700 30px system-ui'; cx.fillText('PAUSED', W / 2, H / 2 - 6); cx.font = '16px system-ui'; cx.fillText('Press or tap to resume', W / 2, H / 2 + 26);
+   }
+-  for (const s of sparks) { s.x += s.vx * dt; s.y += s.vy * dt; s.t -= dt; } sparks = sparks.filter((s) => s.t > 0);
+-  cx.fillStyle = '#20163a'; cx.fillRect(0, 0, W, H);
+-  cx.fillStyle = '#6ee7b7'; for (const w of walls) { cx.fillRect(w.x, 0, 32, w.gy); cx.fillRect(w.x, w.gy + w.gap, 32, H); }
+-  cx.fillStyle = game.alive ? '#fbbf24' : '#ef4444'; cx.beginPath(); cx.arc(80, game.y, 14, 0, 7); cx.fill();
+-  cx.fillStyle = '#fff'; for (const s of sparks) cx.fillRect(s.x, s.y, 3, 3);
+-  document.getElementById('hud').textContent = `${game.score}  ·  best ${game.best}` + (game.alive ? '' : '  ·  press to restart');
+-  requestAnimationFrame(frame);
++  hud.textContent = `${game.score}  ·  best ${game.best}`;
+ }
+ requestAnimationFrame(frame);
+diff --git a/index.html b/index.html
+index cb2918a..bb3e2d8 100644
+--- a/index.html
++++ b/index.html
+@@ -1,6 +1,7 @@
+ <!doctype html>
+-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
++<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+ <title>BLIP</title>
+ <link rel="stylesheet" href="style.css"></head>
+-<body><canvas id="c"></canvas><div id="hud"></div><button id="mute">♪</button>
++<body><canvas id="c"></canvas><div id="hud" aria-live="polite"></div>
++<button id="pause" type="button" aria-label="Pause">II</button><button id="mute" type="button" aria-label="Mute sound" aria-pressed="false">♪</button>
+ <script src="game.js"></script></body></html>
+diff --git a/style.css b/style.css
+index a5a7d59..3208715 100644
+--- a/style.css
++++ b/style.css
+@@ -1,5 +1,11 @@
+ html, body { margin: 0; height: 100%; background: #20163a; overflow: hidden; font: 16px system-ui; color: #fff; }
+-canvas { display: block; width: 100vw; height: 100vh; }
+-#hud { position: fixed; top: 10px; left: 12px; font-size: 20px; }
+-#mute { position: fixed; top: 8px; right: 8px; width: 28px; height: 28px; font-size: 14px; border: 0; border-radius: 6px; }
++canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; touch-action: none; }
++body { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
++#hud { position: fixed; top: calc(10px + env(safe-area-inset-top)); left: calc(12px + env(safe-area-inset-left)); font-size: 20px; font-variant-numeric: tabular-nums; pointer-events: none; transition: color .2s ease-out; }
++#hud.best { color: #fbbf24; }
++#pause, #mute { position: fixed; top: calc(8px + env(safe-area-inset-top)); width: 44px; height: 44px; font: 600 16px system-ui; color: #20163a; background: #fff; border: 0; border-radius: 6px; touch-action: manipulation; transition: opacity .15s ease-out, transform .08s ease-out; }
++#mute { right: calc(8px + env(safe-area-inset-right)); }
++#pause { right: calc(60px + env(safe-area-inset-right)); }
++#pause:active, #mute:active { transform: scale(.94); }
++#pause:focus-visible, #mute:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+ #mute.off { opacity: .5; }

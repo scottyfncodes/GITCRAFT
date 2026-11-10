@@ -22,15 +22,25 @@ It works out the rest; the person never needs to know these tools.
   builds, merges or deploys; never present a department with no data as measured. See `docs/report.md`.
 - **A GitHub URL**: if it returns `needs_checkout`, attach the repository to the session if needed (`add_repo`), clone it where
   the result says, and call `production_start` again with `project`. Never ask the person to clone it.
+- **Assets and nothing else** ("a jump sound and a coin sound", "a logo for my bakery", "a 3D model of a barrel for my game"):
+  `production_start` returns `status: "direct"` with one step per named asset (the department tool and its parameters). Call
+  each, look at or listen to the output, hand the files over. No production, scaffold, icon or credit is made around an asset.
 - **An existing project**: it is read without being changed: `maturity` (partial / nearly complete / finished),
-  `kind` (game / app / site), `confidence`, and the evidence. The workflow follows the maturity and what was asked:
-  | Project | Workflow |
-  |---|---|
-  | partially built | **continue**: finish the unfinished features (the inventory lists each with its file), most important first; never rebuild what works |
-  | nearly complete | **complete**: genuine blockers and completion criteria, then final verification |
-  | finished | **update**: only the requested change and the fixes it needs (with no change named, it asks one question: what should change) |
-  | anything | **fix** (a reported bug + a regression check), **review** (measure and report; nothing changes) |
-  | existing game | gameplay, mechanics, saves and progression, levels, assets, art direction and engine stay as they are unless approved |
+  `kind` (game / app / site / tool), `confidence`, and the evidence. `understanding` names the **assignment** (with the words
+  that decided it), what is preserved, what "done" means and how it is proven. Say that reading back to the person in a line:
+  | Assignment | Asked like | What happens |
+  |---|---|---|
+  | **continue** | "keep going", or nothing asked of a partial project | finish the unfinished features, most important first; never rebuild what works |
+  | **complete** | "finish it", or nothing asked of a nearly complete one | genuine blockers and completion criteria, then final verification |
+  | **feature** | "add dark mode" | only the named change and the fixes it needs (a finished project with nothing asked gets one question) |
+  | **repair** | "it's broken", "the player falls through the floor", "won't load" | the defect and a regression check; nothing else |
+  | **redesign** | "redesign it", "it looks dated" | the look only. PIXELCRAFT measures it before anything changes; `design.direction` decides the new look; the result must not regress against the baseline |
+  | **gameplay** | "it's boring", "the controls feel floaty", "too easy" | the play only. PLAYCRAFT plays it before the change; `design.direction` names the cause; verified with the same probe after |
+  | **polish** | "polish it", "make it better" | the same product executed better: both comparisons, no new features, no redesign |
+  | **integrate** | "make an explosion sound and put it in the game" | the department makes the asset, it is wired in beside what exists; nothing replaced |
+  | **audit** | "review it", or any question ("is this any good?") | measured and reported; nothing changes, no work order |
+  | **rebuild** | "start over", "rewrite it in Phaser" | nothing until the person answers what may be thrown away and what carries over |
+  An existing game's saves, levels, assets and engine stay as they are in every assignment unless the Decision Room approves otherwise.
 - Existing projects get **no** scaffolding, redesign, migration, rebranding, HaveAnApp credit or new icon unless the person
   approves it in the Decision Room. `qa.preserve` measures this after the build: nothing deleted, secrets/CI/deploy
   untouched, game assets unchanged and every save key still used. Approved exceptions go in with `production_revise {overrides: {mode: {allow: [paths]}}}`.
@@ -43,6 +53,13 @@ It works out the rest; the person never needs to know these tools.
   the live page loads; icons, Pulse, phone + desktop in Chromium). A login wall or an older deployment fails: fix the deployment,
   never the check. A host the sandbox cannot reach is UNVERIFIED, not a defect: report DEPLOYED · VERIFICATION INCOMPLETE, never
   READY and never NOT READY for it. Never say done or live without the report's evidence.
+- **Direction first.** A new game, app or site, and any redesign, gameplay or polish pass, starts with the `design.direction`
+  work order: write `direction.json` for this product before any code (`docs/direction.md`): one idea the look comes from, a
+  palette with jobs and measured contrast, and for a game the loop, the feel numbers, a response for every action, the curve and
+  the playtest questions. The gate refuses adjectives ("clean and modern"), placeholders and illegible palettes; it cannot judge
+  taste, so look at what you build against it. The release report lists its playtest questions under **Needs a person**: pass
+  them on, and never say a game is fun because its checks passed.
+- **A tool** (CLI, library, script) gets no icon, credit or interface audit: it is built to its brief and `qa.tests` runs its own tests.
 - New apps start from a starter (standards already wired in). Write `tests/gitcraft.features.json`: one check per planned
   feature, ending in what a person sees. `qa.features` runs them in Chromium.
 - A backend (hosted Postgres) is set up only after the person approves `backend.provision`. Use the connected Neon account

@@ -160,6 +160,7 @@ def start(text, project=None, store_dir=None, overrides=None, issues=None):
             "kind_evidence": [f"you called it {'an' if stated == 'app' else 'a'} {stated}"] if stated else a.get("kind_evidence"),
             "request": r["request"] if not _vague(r["request"]) else None, "question": question, "repository": r["repository"]}
     ov = {"mode": mode, "deliverable": kind or "app"}
+    if a.get("name"): ov["title"] = a["name"]   # an existing project is called what it calls itself
     if kind == "game" and a.get("engines"): ov["platform"] = {"engine": next((e for e in a["engines"] if e != "canvas"), a["engines"][0])}
     if overrides:
         from .intake import merge
@@ -167,7 +168,13 @@ def start(text, project=None, store_dir=None, overrides=None, issues=None):
     pr = engine.plan(prompt, proj, ov, store_dir=store_dir, assessment=a)
     return dict(engine.lifecycle_view(pr), understanding=u,
                 routing=dict(r, maturity=a["maturity"], kind=kind, confidence=a["confidence"], assignment=reading["assignment"], focus=reading.get("focus"),
-                             workflow=intent, because=because, why=maturity.WORKFLOW[intent], question=question))
+                             workflow=intent, because=because, why=understanding.SAY.get(reading["assignment"]) or maturity.WORKFLOW[intent], question=question))
+
+
+CRAFT = [(r"\b(logos?|icons?|wordmarks?|illustrations?|vector art|svg)\b", "vectorcraft", "draw it as vectors, export SVG and PNG, then look at the export"),
+         (r"\b(posters?|flyers?|brochures?|business cards?|menus?|layouts?)\b", "designcraft", "lay it out, export PDF and a page render, then look at it"),
+         (r"\b(photos?|retouch|image edit|composite|psd)\b", "photocraft", "edit the raster, export PNG, then look at it"),
+         (r"\b(animated titles?|motion graphics?|lower thirds?|title sequence)\b", "effectcraft", "animate it, render a preview, then watch it")]
 
 
 def direct(r, alone):
@@ -181,9 +188,23 @@ def direct(r, alone):
         res = routing.route(r["request"], limit=4)
     except Exception as e:   # the router is advice: without it the agent still knows what kind of job this is
         res = {"suggestions": [], "error": f"{type(e).__name__}: {e}"}
-    steps = [{"tool": f"{s['department']}_{s['action']}", "params": s.get("params") or {}, "why": s.get("why")} for s in res.get("suggestions", [])[:4]]
-    for k in ("three_d", "game_design"):
-        if res.get(k): steps.insert(0, {"tool": res[k].get("tool") or k, "note": res[k].get("note") or res[k]})
+    # only what the request actually names: an action matched by its own words or by a value it accepts (a department's
+    # keyword alone is a guess), and one step for each named value ("a jump sound and a coin sound" is two sounds)
+    steps = []
+    for sg in res.get("suggestions", []):
+        why, params = sg.get("why") or {}, sg.get("params") or {}
+        if not (why.get("action_words") or why.get("parameter_values")): continue
+        vals = why.get("parameter_values") or []
+        key = next((k for k, v in params.items() if v in vals), None)
+        for v in (vals if key and len(params) == 1 else [None]):
+            steps.append({"tool": f"{sg['department']}_{sg['action']}", "params": dict(params, **({key: v} if v else {})),
+                          "because": ", ".join((why.get("action_words") or []) + vals)})
+    if res.get("three_d"):   # a model is the 3D Department's: it routes, builds with MeshCraft, engine-checks and records the licence
+        steps = [{"tool": "forgecraft route, then forgecraft generate", "params": {"brief": r["request"]}, "because": ", ".join(res["three_d"].get("matched") or [])}]
+    for pat, tool, what in CRAFT:   # the 2D ArtCraft tools are not Studio departments, so the Studio's router does not know them
+        m = re.search(pat, r["request"], re.I)
+        if m and not any(st["tool"].startswith(tool.split()[0]) for st in steps):
+            steps.append({"tool": tool, "params": {}, "because": m.group(0), "note": what})
     return {"status": "direct", "assignment": "asset", "request": r["request"],
             "routing": dict(r, assignment="asset", workflow="direct", because=alone["because"],
                             why="a request for assets alone: the departments make them directly; nothing is scaffolded, branded or deployed around them"),

@@ -43,9 +43,8 @@ def scope(spec):
 def work_order(spec):
     parts, d, mode = scope(spec), spec["deliverable"], spec.get("mode") or {}
     existing = bool(mode.get("existing"))
-    mobile = spec["platform"].get("mobile_first")
     ins = ["Write direction.json for THIS product before any code. Every choice must follow from what the product is, who uses it and where; "
-           "a sentence that would fit any other product is not a decision. Read docs/direction.md for the format and a worked example."]
+           "a sentence that would fit any other product is not a decision. Every field is listed below (GITCRAFT's docs/direction.md has a worked example)."]
     if existing:
         ins.append("This project exists. Read it first (its screens or a play session, its tokens, art bible, README). State what is kept and what changes: "
                    "`keeps` lists what stays exactly as it is, and the direction changes only what was asked"
@@ -64,7 +63,7 @@ def work_order(spec):
         ins += ["play.pillars: two to four things this game is about; every mechanic must serve one, and a feature that serves none is cut.",
                 "play.loop: {verb, challenge, feedback, reward, seconds}: what the player does, what resists, what they see/hear/feel the instant they act, "
                 "what they earn, and how many seconds one turn of the loop takes (≤ 60; the first turn must be reachable within 10 s of loading).",
-                "play.controls: {desktop" + (", touch" if mobile or not existing else "") + "}: the inputs, sized for a thumb on a phone. play.feel: the numbers that make it feel "
+                "play.controls: {desktop, touch}: the inputs, sized for a thumb on a phone. play.feel: the numbers that make it feel "
                 "right (speeds, accelerations, jump height and time, input buffering, coyote time, hit-stop, shake) with units; tune them by playing, then record the values kept.",
                 "play.feedback: at least four {event, response} pairs: every player action and every outcome answers on screen and in sound within a frame. "
                 "play.curve: at least three {at_seconds, introduces} steps: what gets harder or new, and when. play.fail: why losing feels fair (telegraphed, readable) "
@@ -80,7 +79,10 @@ def work_order(spec):
     keys = ["product", "done_when"] + [p for p in ("art", "play", "interaction") if p in parts]
     return {"brief": ("The creative direction for " + spec["title"] + ": " + spec["prompt"][:400]) if not existing else
                      (f"The direction for this change to {spec['title']}: " + (mode.get("request") or spec["prompt"])[:400]),
-            "tools": ["the ui-design skill (Explore, references/games.md for a game's interface)", "vectorcraft / photocraft for look tests, when a sketch settles a choice"],
+            "tools": (["the ui-design skill (Explore; references/games.md for a game's interface)", "vectorcraft / photocraft for look tests, when a sketch settles a choice"]
+                      if "art" in parts else [])
+                     + (["the playcraft skill and docs/playcraft.md (what each category measures)"] if "play" in parts else [])
+                     + (["the baseline in the hand-off (PIXELCRAFT / PLAYCRAFT report and contact sheet): what was measured before any change"] if existing else []),
             "instructions": ins,
             "expected": [{"path": "direction.json", "format": "json", "keys": keys, "validate": "direction", "role": "direction"}],
             "license": "owned by the project"}

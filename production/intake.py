@@ -105,10 +105,11 @@ def parse(prompt, project=None, overrides=None):
                 if p not in presets and len(presets) < 6: presets.append(p)
         if feats["sound"] or not alone: assets["sfx"] = presets[:8]
         mood, mw = _first(t, RULES["music_moods"])
-        if feats["sound"] and not mood:
+        if feats["sound"] and not mood and not (alone or existing):
             mood = RULES["default_mood"].get(genres[0] if genres else "arcade", "playful")
             assumptions.append(f"music mood not named: {mood}")
-        if feats["music"] or not alone: assets["music"] = {"mood": mood or "playful", "bars": 16}
+        # music that nobody named is implied only for a new product: an existing one gets the sounds it asked for, not a soundtrack
+        if feats["music"] or not (alone or existing): assets["music"] = {"mood": mood or "playful", "bars": 16}
         amb = [k for k, words in RULES["ambience"].items() if _w(t, words)]
         if amb: assets["ambience"] = amb[:2]
     if feats["voice"]: assets["voice"] = True
