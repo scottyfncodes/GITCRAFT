@@ -147,6 +147,53 @@ def sha256(path):
     return h.hexdigest()
 
 
+SUBJECT_KEYS = ("target", "project", "folder", "current", "input", "baseline")
+
+
+def _git(cwd, *a):
+    import subprocess
+    try:
+        r = subprocess.run(["git", "-C", cwd, *a], capture_output=True, text=True, timeout=10, stdin=subprocess.DEVNULL)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def content_hash(path, max_files=5000, max_bytes=300 << 20):
+    """SHA-256 over a file, or over a folder's relative paths and contents (sorted; .git and node_modules skipped).
+    None when the folder is too large to hash quickly (the commit still identifies it)."""
+    h = hashlib.sha256(); n = size = 0
+    if os.path.isfile(path): return sha256(path)
+    for d, ds, fs in os.walk(path):
+        ds[:] = sorted(x for x in ds if x not in (".git", "node_modules", "__pycache__"))
+        for f in sorted(fs):
+            fp = os.path.join(d, f); n += 1
+            try: size += os.path.getsize(fp)
+            except OSError: continue
+            if n > max_files or size > max_bytes: return None
+            h.update(os.path.relpath(fp, path).encode() + b"\0")
+            with open(fp, "rb") as fh:
+                for b in iter(lambda: fh.read(1 << 20), b""): h.update(b)
+    return h.hexdigest()
+
+
+def measured_subject(params):
+    """What a run measured, so a later reader can tell whether the result still describes the project: the measured
+    path, its content hash, and the git commit (with its date and whether the tree had local changes) of the repository
+    that holds it. A report marks a result Stale when the project has moved on since (production/project_report.py)."""
+    for k in SUBJECT_KEYS:
+        v = params.get(k)
+        if isinstance(v, str) and v and os.path.exists(os.path.expanduser(v)):
+            p = os.path.realpath(os.path.expanduser(v)); d = p if os.path.isdir(p) else os.path.dirname(p)
+            top = _git(d, "rev-parse", "--show-toplevel")
+            out = {"param": k, "path": p, "content_sha256": content_hash(p), "repo": top}
+            if top:
+                out.update(commit=_git(top, "rev-parse", "HEAD"), committed_at=_git(top, "log", "-1", "--format=%cI"),
+                           dirty=bool(_git(top, "status", "--porcelain", "--untracked-files=no")))
+            return out
+    return None
+
+
 # ---------------------------------------------------------------- the entry point
 def run(dept, action, params=None, register=None):
     t0 = time.time()
@@ -204,6 +251,7 @@ def run(dept, action, params=None, register=None):
         # it ran and found nothing wrong; some checks could not be completed (e.g. no network here): incomplete, not a defect
         record["verification"] = "incomplete"
         record["error"] = "unverified checks (not failures): " + "; ".join(f"{c['name']} [{c.get('cause') or 'unverified'}]" for c in failed_checks)
+    record["measured"] = measured_subject(params)
     rec_path = os.path.join(out_dir, f"{slugify(params.get('name') or action)}.studio.json")
     json.dump(record, open(rec_path, "w"), indent=1, default=str)
     record["record"] = rec_path

@@ -5,8 +5,12 @@ Rules (tests/test_report.py holds them):
   * A department's 0–100 score is always a measured number taken from that department's own result (PLAYCRAFT's
     gameplay score, PIXELCRAFT's audit score, …) or a ratio of measured checks. Nothing here estimates a score.
   * A department that applies to the project but has no measured result is Not Evaluated: no score, no weight.
-  * The overall score is the weighted mean of the evaluated departments only. Its coverage (evaluated weight ÷
-    applicable weight) is shown next to it and never folded into it.
+  * The overall score is the weighted mean of the evaluated departments only, each weight scaled by that department's
+    own confidence (high ×1, medium ×0.75, low ×0.5): a low-confidence result cannot carry its full weight. Its coverage
+    (evaluated weight ÷ applicable weight, nominal weights) is part of the headline ("72.5 (57% measured)") and never
+    folded into the number; below 70 % coverage the band is at best "provisional".
+  * File validity is not quality. The production departments (AudioCraft, AnimCraft, FXCraft, …) are reported as
+    "Asset validity: N/N files valid" and never averaged with gameplay, UI or design quality.
   * Release gates (acceptance criteria, the Director's verdict) and approvals are pass/fail states. They are shown
     as gates and never averaged into a quality score.
   * Every rubric has a version. A previous score is compared (delta) only when the rubric version and the
@@ -14,7 +18,9 @@ Rules (tests/test_report.py holds them):
 """
 import json, os
 
-METHOD = "gitcraft-score/2"          # the overall weighted score; reports before it used "mean/1" (plain mean)
+METHOD = "gitcraft-score/3"          # confidence-weighted mean, makers excluded; /2 was the plain weighted mean, "mean/1" the plain mean
+CONFIDENCE_WEIGHT = {"high": 1.0, "medium": 0.75, "low": 0.5}
+PROVISIONAL_BELOW = 0.70             # coverage under which the band is at best "provisional"
 LEGACY_METHOD = "mean/1"
 
 # id → rubric. `version` changes whenever what the number means changes.
@@ -49,9 +55,11 @@ RUBRICS = {
            "source": "the 3D Department's job store",
            "criteria": ["score = succeeded jobs ÷ finished jobs × 100", "Only applies when the 3D Department worked on this project"]},
 }
-MAKER_RUBRIC = {"label": "Output checks passed", "weight": 5, "version": "outputs/1", "legacy": None,
-                "source": "the department's .studio.json records (every output validated and hashed)",
-                "criteria": ["score = output checks passed ÷ all output checks × 100", "Only applies when the department made outputs for this project"]}
+MAKER_RUBRIC = {"label": "Asset validity", "weight": 0, "version": "validity/1", "legacy": None, "scored": False,
+                "source": "the department's .studio.json records (every output validated by format and hashed)",
+                "criteria": ["Asset validity: files that open and validate ÷ all files the department made for this project",
+                             "Valid files are not a measure of quality: shown as a count, never averaged into the overall score",
+                             "Only applies when the department made outputs for this project"]}
 
 
 def rubric(did):
@@ -79,43 +87,57 @@ def evaluate(D):
         if fin: val = round(100 * j.get("succeeded", 0) / fin, 1); basis = f"{j.get('succeeded', 0)}/{fin} finished jobs succeeded"
     elif D["id"] in RUBRICS:
         val = sc.get("value")
-    else:
-        c = D.get("checks") or {}
-        if c.get("of"): val = round(100 * c["passed"] / c["of"], 1); basis = f"{c['passed']}/{c['of']} output checks passed"
+    else:   # a maker: asset validity, a count (never a quality score)
+        v = D.get("validity") or {}
+        if v.get("of"): basis = f"Asset validity: {v['valid']}/{v['of']} files valid"
     applicable = D.get("applicable", True) and D["status"] != "not_applicable"
     if D["id"] not in RUBRICS and D["id"] != "production" and D["status"] in ("no_data",):
         applicable = False   # a maker department only applies when it made something for this project
     if D["id"] == "3d" and D["status"] == "no_data": applicable = False
     if D["id"] == "assetcraft" and D["status"] == "unavailable" and not D.get("score"): pass
     ev = "not_applicable" if not applicable else ("evaluated" if val is not None and D["status"] not in ("failed",) else "not_evaluated")
+    if applicable and rb.get("scored") is False: ev = "validity" if D.get("validity", {}).get("of") and D["status"] != "failed" else "not_evaluated"
     if ev != "evaluated": val = None
-    D["quality"] = {"evaluation": ev, "value": val, "label": rb["label"], "weight": rb["weight"] if applicable else 0, "rubric": rb["version"],
+    D["quality"] = {"evaluation": ev, "value": val, "label": rb["label"], "weight": rb["weight"] if applicable else 0, "rubric": rb["version"], "validity": D.get("validity") if ev == "validity" else None,
                     "method": (D.get("run") or {}).get("method"), "source": rb["source"], "criteria": rb["criteria"], "basis": basis or (sc.get("label") if val is not None else None),
                     "confidence": sc.get("confidence") if D["id"] in RUBRICS else ("high" if val is not None else None), "coverage": sc.get("coverage")}
+    if ev == "not_evaluated" and rb.get("scored") is False: ev = D["quality"]["evaluation"] = "not_applicable"; D["quality"]["weight"] = 0
     if ev == "not_evaluated":
         D["quality"]["why"] = (D.get("next") or (D["notes"][-1] if D["notes"] else "no measured result for this project"))
     return D
 
 
 def overall(depts, p0=0, stale=()):
-    """The weighted overall score over evaluated departments only, with coverage and confidence."""
+    """The confidence-weighted overall score over evaluated departments only, with coverage, confidence and a headline
+    that carries the coverage ("72.5 (57% measured)"). Asset validity (the makers) is listed apart and never averaged."""
     ev = [d for d in depts if d["quality"]["evaluation"] == "evaluated"]
-    app = [d for d in depts if d["quality"]["evaluation"] != "not_applicable"]
+    app = [d for d in depts if d["quality"]["evaluation"] not in ("not_applicable", "validity")]
+    vd = [d for d in depts if d["quality"]["evaluation"] == "validity"]
+    validity = {"valid": sum(d["quality"]["validity"]["valid"] for d in vd), "of": sum(d["quality"]["validity"]["of"] for d in vd), "departments": [d["id"] for d in vd]}
     wa = sum(d["quality"]["weight"] for d in app)
     if not ev:
-        return {"score": None, "method": METHOD, "band": "insufficient data", "confidence": "none", "measured": 0, "of": len(app), "coverage": 0.0,
-                "stale": list(stale), "p0": p0, "parts": {}, "weights": {}, "basis": "No applicable department has a measured score yet, so there is no overall score."}
-    we = sum(d["quality"]["weight"] for d in ev)
-    v = round(sum(d["quality"]["value"] * d["quality"]["weight"] for d in ev) / we, 1)
-    cov = round(we / wa, 2) if wa else 0.0
+        return {"score": None, "headline": "—", "method": METHOD, "band": "insufficient data", "confidence": "none", "measured": 0, "of": len(app), "coverage": 0.0,
+                "stale": list(stale), "p0": p0, "parts": {}, "weights": {}, "validity": validity, "basis": "No applicable department has a measured score yet, so there is no overall score."}
+    eff = {d["id"]: round(d["quality"]["weight"] * CONFIDENCE_WEIGHT.get(str(d["quality"].get("confidence") or "medium").lower(), 0.75), 2) for d in ev}
+    we = sum(eff.values()) or 1
+    v = round(sum(d["quality"]["value"] * eff[d["id"]] for d in ev) / we, 1)
+    full = sum(d["quality"]["weight"] for d in ev)
+    unweighted = round(sum(d["quality"]["value"] * d["quality"]["weight"] for d in ev) / full, 1) if full else v
+    cov = round(full / wa, 2) if wa else 0.0
     conf = "high" if cov >= 0.75 and not stale else "medium" if cov >= 0.5 and len(stale) <= 1 else "low"
     band = "blocked" if p0 else "healthy" if v >= 80 else "needs attention" if v >= 60 else "at risk"
+    if cov < PROVISIONAL_BELOW and band in ("healthy", "needs attention"): band = "provisional"   # too little measured to call it better
     missing = [d["id"] for d in app if d["quality"]["evaluation"] == "not_evaluated"]
-    return {"score": v, "method": METHOD, "band": band, "confidence": conf, "measured": len(ev), "of": len(app), "coverage": cov, "stale": list(stale), "p0": p0,
-            "parts": {d["id"]: d["quality"]["value"] for d in ev}, "weights": {d["id"]: d["quality"]["weight"] for d in ev},
-            "basis": f"weighted mean of {len(ev)} evaluated department score(s) (" + ", ".join(f"{d['id']} ×{d['quality']['weight']}" for d in ev) + ")"
+    reduced = [f"{d['id']} {d['quality']['weight']}→{eff[d['id']]:g} ({d['quality'].get('confidence') or 'medium'} confidence)" for d in ev if eff[d["id"]] != d["quality"]["weight"]]
+    return {"score": v, "headline": f"{v} ({round(cov * 100)}% measured)", "method": METHOD, "band": band, "confidence": conf, "measured": len(ev), "of": len(app), "coverage": cov,
+            "stale": list(stale), "p0": p0, "parts": {d["id"]: d["quality"]["value"] for d in ev}, "weights": eff, "nominal_weights": {d["id"]: d["quality"]["weight"] for d in ev},
+            "at_full_weight": unweighted, "validity": validity,
+            "basis": f"confidence-weighted mean of {len(ev)} evaluated department score(s) (" + ", ".join(f"{d['id']} ×{eff[d['id']]:g}" for d in ev) + ")"
+                     + (f"; weight reduced by confidence: {', '.join(reduced)} (at full weight it would be {unweighted})" if reduced else "")
                      + (f"; {len(missing)} applicable department(s) not evaluated ({', '.join(missing)})" if missing else "")
-                     + f"; coverage {round(cov * 100)}% of the applicable weight" + (f"; {len(stale)} stale" if stale else "")}
+                     + f"; coverage {round(cov * 100)}% of the applicable weight" + (f" (under {round(PROVISIONAL_BELOW * 100)}%: band at best provisional)" if cov < PROVISIONAL_BELOW else "")
+                     + (f"; {len(stale)} stale" if stale else "")
+                     + (f"; asset validity {validity['valid']}/{validity['of']} files valid ({', '.join(validity['departments'])}), not part of the score" if vd else "")}
 
 
 def gates(depts):
@@ -227,14 +249,21 @@ def effort_label(raw):
 def top_actions(actions, findings_by_key, n=3):
     """The n highest-impact actions: improvement actions first (coverage gaps only to fill), with impact from the
     priority rule and effort from the departments' own estimates."""
-    real = [a for a in actions if a.get("theme") != "coverage"]
-    pick = (real + [a for a in actions if a.get("theme") == "coverage"])[:n]
+    # only distinct, current, measurable actions: a stale result (re-measure first) or an environment-limited one
+    # (UNVERIFIED) never fills the top three; coverage gaps only fill what is left
+    real = [a for a in actions if a.get("theme") != "coverage" and not a.get("stale") and not a.get("environment")]
+    pick, seen = [], set()
+    for a in real + [a for a in actions if a.get("theme") == "coverage"]:
+        k = (a["title"], a.get("do"))
+        if k in seen: continue
+        seen.add(k); pick.append(a)
+    pick = pick[:n]
     out = []
     for a in pick:
         efs = [effort_label((findings_by_key.get(k) or {}).get("effort")) for k in a.get("findings") or []]
         efs = [e for e in efs if e]
         eff = max(efs, key="SML".index) if efs else None
-        out.append({"n": a["n"], "priority": a["priority"], "title": a["title"], "do": a.get("do"), "why": a.get("why"), "departments": a["departments"], "level": a["level"],
+        out.append({"n": a["n"], "priority": a["priority"], "title": a["title"], "do": a.get("do"), "why": a.get("why"), "measured": a.get("measured"), "departments": a["departments"], "level": a["level"],
                     "impact": IMPACT[a["priority"]] + (" (corroborated by several departments)" if len(a["departments"]) > 1 else ""),
                     "impact_basis": f"{a['priority']}: " + {"P0": "a measured blocker", "P1": "a measured major finding or one several departments flag",
                                                            "P2": "an inferred major finding, a measured minor one or a gap", "P3": "a minor or inferred finding"}[a["priority"]],

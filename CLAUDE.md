@@ -202,6 +202,11 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   `_studio_call`, `_dept_env`, `_why`, report ordering): a department a full report measured is scored from that measurement (never "No data"), never
   recorded in its history; every refresh writes only into the report's run folder (never the project or the shared catalogue); the departments it runs
   get exactly the project and the run folder added to the roots (never the whole workspace: project isolation); a failed refresh gives its actual reason.
+- `tests/test_report_trust.py` must pass after any change to the report's store location, `maturity` missing-file/stub detection,
+  `c_records` (staleness, latest-run-per-check, de-duplication), the finding contract, `scoring.overall`, TestCraft's `findings.py`,
+  perf/console/visual-diff checks or `studio/core/contract.measured_subject`, `register.sh`, `doctor.sh`'s server lines or ForgeCraft's tool
+  list: a report never needs an env var to save outside the project; a stale or environment-limited result is never a failure, a P0/P1 or a
+  Top-3 item; every finding has a human title, the measured value, a Do line and its evidence path; file validity is never averaged with quality.
 - `tests/test_creative.py` must pass after any change to `production/creative.py`, `production/vision.py`, the Creative Review parts of
   `project_report.py`, the `production_vision`/`production_creative` tools or `global/skills/creative-review/`. A Creative Review is advisory
   judgement: it never changes a department score, the overall score or confidence, a release gate, the Director's verdict, P0–P3, the technical

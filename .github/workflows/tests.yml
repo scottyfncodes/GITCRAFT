@@ -72,6 +72,9 @@ jobs:
 
       - name: Report coverage (measured refreshes are scored, TestCraft/AssetCraft refreshed read-only, workspace roots, failure reasons)
         run: python3 tests/test_report_coverage.py
+
+      - name: Report trust (runs with no env var, stale/environment-limited evidence, deduplication, finding contract, scoring, quick smoke, 3D servers)
+        run: python3 tests/test_report_trust.py
       - name: Orchestration (plan v2 graph, transactional integration, ownership, consolidated approval, v1 compatibility)
         run: python3 tests/test_orchestration.py
       - name: Layered QA (department, integration and product QA; routing, retries, optional, unavailable, verdicts)

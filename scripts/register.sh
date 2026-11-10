@@ -40,6 +40,13 @@ for entry in "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}"; do
   # studiocraft likewise: registered before its runtime is in (it waits and announces its tools); GITCRAFT_STUDIO=0: not at all
   elif [[ "$name" == studiocraft ]]; then [[ "$GITCRAFT_STUDIO" != 0 ]] || continue
   else [[ -x "$GITCRAFT_BIN/$pkg" ]] || continue; fi
+  # Already registered with this launcher: leave it alone. The second install pass (after Blender lands, install.sh)
+  # used to remove and re-add every server in the middle of a live session; removing a server's entry is a config
+  # change the running session acts on, so the 3D servers that were waiting for that very build could be dropped (#12).
+  cur="$(claude mcp get "$name" 2>/dev/null)"
+  if grep -qE "^ *Scope: User" <<<"$cur" && grep -qxF "  Command: $here/mcp.sh" <<<"$cur" && grep -qxF "  Args: $name" <<<"$cur"; then
+    echo "gitcraft: registered $name (unchanged)"; continue
+  fi
   claude mcp remove -s user "$name" >/dev/null 2>&1
   if claude mcp add -s user "$name" -- "$here/mcp.sh" "$name" >/dev/null 2>&1; then
     echo "gitcraft: registered $name"

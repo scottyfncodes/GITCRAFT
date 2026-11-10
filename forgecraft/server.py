@@ -83,6 +83,7 @@ def _source(asset):
 
 def call(name, a):
     a = dict(a or {})
+    if name == "forgecraft_status": return dict(deferred.status("ForgeCraft"), state="ready" if deferred.ready() else "waiting for Blender")
     if name == "hardware_probe": return hardware.probe(_roots())
     if name == "route": return routing.route(a.get("brief", ""), routing.expand_images(a.get("images") or []), hardware.probe(_roots()),
                                              prefer=a.get("tool"), kind=a.get("kind"), params=a.get("params"), template=a.get("template"))
@@ -171,9 +172,11 @@ def main():
                   "serverInfo": {"name": "forgecraft", "version": VERSION},
                   "instructions": "GITCRAFT 3D Department orchestrator, and the router across the whole studio. Start with hardware_probe or route; generate runs the whole production pipeline (MeshCraft does the Blender work); library_export hands assets to other tools. For audio, animation, worlds, FX, materials, levels, cinematics, QA and asset management use departments / department_route / department_run (the GITCRAFT Studio departments)."}})
         elif method == "tools/list":
-            listed = ([{"name": "forgecraft_status", "description": "ForgeCraft status. " + deferred.install_hint("ForgeCraft"),
-                        "inputSchema": {"type": "object", "properties": {}}}] if waiting[0]
-                      else [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()])
+            # forgecraft_status stays listed after Blender lands: a tool that disappears from the list is reported by the
+            # client as the server disconnecting, though the server is alive and has just announced its full list (#12)
+            status_tool = {"name": "forgecraft_status", "description": "ForgeCraft status: whether MeshCraft's Blender is installed (the full tool list "
+                           "appears when it is). " + ("" if not waiting[0] else deferred.install_hint("ForgeCraft")), "inputSchema": {"type": "object", "properties": {}}}
+            listed = [status_tool] + ([] if waiting[0] else [{"name": n, "description": d, "inputSchema": s} for n, (d, s) in TOOLS.items()])
             send({"jsonrpc": "2.0", "id": mid, "result": {"tools": listed}})
         elif method == "tools/call":
             name, args = p.get("name"), p.get("arguments") or {}

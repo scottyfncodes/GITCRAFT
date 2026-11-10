@@ -115,7 +115,7 @@ check("PLAYCRAFT: no contradiction — the report never says 'No data' next to a
 # ---------------------------------------------------------------- 2. TestCraft and AssetCraft, read-only
 tc, ac = dd["testcraft"], dd["assetcraft"]
 check("TestCraft: refresh=full smoke-tests the existing build (output in the report's run folder) and is scored from its checks (1/2 → 50)",
-      tc["refresh"]["ok"] and tc["score"]["value"] == 50.0 and any("no console errors" in (f["evidence"] or "") and "TypeError" in f["evidence"] for f in tc["findings"])
+      tc["refresh"]["ok"] and tc["score"]["value"] == 50.0 and any("console errors" in f["title"] and "TypeError" in (f["measured"] or "") and f["recommendation"] for f in tc["findings"])
       and next(a for a in CALLS if a[0] == "testcraft_smoke")[1]["out_dir"].startswith(R["paths"]["dir"]), (tc["refresh"], tc["score"]))
 check("AssetCraft: refresh=full catalogues into a private catalogue in the run folder (the shared catalogue untouched) and scores licences (1/2 known → 50)",
       ac["score"]["value"] == 50.0 and ac["run"]["source"].startswith(R["paths"]["dir"]) and not os.path.exists(SHARED_CAT)
@@ -155,8 +155,14 @@ check("no runtime: every Studio refresh is Not Evaluated (no score, no weight) w
       all(dr[i]["score"] is None and "install-studio" in (dr[i]["refresh"]["detail"] or "") for i in ("pixelcraft", "testcraft", "assetcraft"))
       and dr["playcraft"]["score"] is None and not {"testcraft", "assetcraft", "pixelcraft"} & set(Rr["health"]["parts"]),
       {i: (dr[i]["score"], dr[i]["refresh"]["detail"]) for i in ("playcraft", "pixelcraft", "testcraft", "assetcraft")})
-check("quick refresh: TestCraft and AssetCraft are not run, and the report says how to measure them",
-      all("refresh=full" in ({d["id"]: d for d in PR.generate(game, refresh="quick", save="none")["departments"]}[i]["refresh"]["detail"] or "") for i in ("testcraft", "assetcraft")))
+CALLS.clear(); PR._studio_call = fake
+Rqk = {d["id"]: d for d in PR.generate(game, refresh="quick", save="none")["departments"]}
+check("quick refresh: TestCraft smoke-tests the existing build (phone only, the cheap check); AssetCraft is not run and the reason names the refresh=full call",
+      [a[0] for a in CALLS if a[0].startswith(("testcraft", "assetcraft", "playcraft", "pixelcraft"))] == ["testcraft_smoke"]
+      and next(a for a in CALLS if a[0] == "testcraft_smoke")[1].get("viewports") == ["phone"] and Rqk["testcraft"]["refresh"]["ok"]
+      and 'refresh: "full"' in (Rqk["assetcraft"]["refresh"]["detail"] or "") and 'refresh: "full"' in (Rqk["playcraft"]["refresh"]["detail"] or ""),
+      ([a[0] for a in CALLS], Rqk["assetcraft"]["refresh"], Rqk["playcraft"]["refresh"]))
+PR._studio_call = lambda action, args, timeout=3600, env=None: (None, f"the Studio runtime is not installed (/x/venv/bin/python); scripts/install-studio.sh")
 
 # a department measured for the first time: its findings are first findings, not regressions; the overall score is not compared
 PR._studio_call = lambda action, args, timeout=3600, env=None: (None, "the Studio runtime is not installed (/x); scripts/install-studio.sh")
