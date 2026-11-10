@@ -231,6 +231,20 @@ try:
 finally:
     srv.terminate()
 
+# ---------------------------------------------------------------- a page two links deep: its journey starts at the entry
+# (the journey to the Game Quality History's game page was replayed from the 3D home with only its last click, "Open its
+# history", and reported as a critical "journey cannot be completed")
+deep = os.path.join(ws, "deep_site"); os.makedirs(os.path.join(deep, "section"), exist_ok=True)
+page = lambda title, body: f"<!doctype html><html lang=en><head><meta name=viewport content='width=device-width, initial-scale=1'><title>{title}</title></head><body><main><h1>{title}</h1>{body}</main></body></html>"
+open(os.path.join(deep, "index.html"), "w").write(page("Home", "<p>Start here and pick a section to read.</p><a href='section/'>Section</a>"))
+open(os.path.join(deep, "section", "index.html"), "w").write(page("Section", "<p>This section lists one detail page.</p><a href='detail.html'>Open detail</a>"))
+open(os.path.join(deep, "section", "detail.html"), "w").write(page("Detail", "<p>The detail page, two links from the entry.</p>"))
+ok, r = c.call("pixelcraft_discover", {"target": deep, "viewports": ["iphone17", "iphone13", "desktop"], "out_dir": f"{ws}/deep"}, timeout=600)
+D = {s["name"]: s for s in (r.get("screens") or [])} if ok and isinstance(r, dict) else {}
+two = next((s for s in D.values() if s.get("depth") == 2), None)
+check("discover: a page two links deep keeps the whole path from the entry (both clicks), not only the last",
+      two is not None and [x.get("click") for x in two.get("link_steps", [])] == ["Section", "Open detail"], {k: (v.get("depth"), v.get("link_steps")) for k, v in D.items()} or r)
+
 # ---------------------------------------------------------------- a canvas game: measured as a game, not a form
 if not QUICK:
     game = os.path.join(ws, "arcade_dodge"); shutil.rmtree(game, ignore_errors=True); shutil.copytree(os.path.join(HERE, "fixtures", "playcraft", "arcade_dodge"), game)
