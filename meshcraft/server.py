@@ -58,6 +58,7 @@ import queue, threading
 from engine import blockbench, mixamo              # standard library only: usable before Blender loads
 import _gitcraft3d  # noqa: F401  (loads gitcraft3d by path; see _gitcraft3d.py)
 from gitcraft3d import hardware, library, jobs, routing, deferred
+from gitcraft3d import calls as calls_mod   # long calls answered with a call_id before the client's timeout
 bpy = core = kit = Palette = None
 _import_error = []
 
@@ -431,7 +432,17 @@ def run_tool(name, args):
 def tool_list():
     if MODE[0] == "waiting":
         return [{"name": "meshcraft_status", "description": "MeshCraft status. " + deferred.install_hint("MeshCraft"), "inputSchema": S({})}]
-    return [{"name": n, "description": d, "inputSchema": s} for n, (d, s, _) in TOOLS.items()]
+    return [{"name": n, "description": d, "inputSchema": s} for n, (d, s, _) in TOOLS.items()] + [calls_mod.TOOL]
+
+
+def _reply(res, e=None):
+    if e is not None:
+        tb = "".join(traceback.format_exception(type(e), e, e.__traceback__, limit=4))
+        return {"isError": True, "content": [{"type": "text", "text": f"{type(e).__name__}: {e}\n{tb[-1500:]}"}]}
+    return {"content": [{"type": "text", "text": json.dumps(res, default=str)}]}
+
+
+CALLS = calls_mod.Calls(send, _reply)
 
 
 def private_stdio():
@@ -463,7 +474,17 @@ def main():
     sys.__stdout__ = proto_out   # send() writes the protocol here
     inbox = queue.Queue()
     def reader():
-        for line in proto_in: inbox.put(line)
+        # Blender runs on the main thread, one tool at a time; call_result and ping are answered here, so a client
+        # can collect a long build's result (or check the server is alive) while it runs
+        for line in proto_in:
+            try: m = json.loads(line)
+            except Exception: m = None
+            if isinstance(m, dict) and m.get("method") == "ping" and m.get("id") is not None:
+                send({"jsonrpc": "2.0", "id": m["id"], "result": {}}); continue
+            if isinstance(m, dict) and m.get("method") == "tools/call" and (m.get("params") or {}).get("name") == "call_result" and m.get("id") is not None:
+                a = (m.get("params") or {}).get("arguments") or {}
+                threading.Thread(target=lambda mid=m["id"], a=a: send({"jsonrpc": "2.0", "id": mid, "result": CALLS.result(a)}), daemon=True).start(); continue
+            inbox.put(line)
         inbox.put(None)
     threading.Thread(target=reader, daemon=True).start()
     if MODE[0] == "waiting":
@@ -489,12 +510,13 @@ def main():
             send({"jsonrpc": "2.0", "id": mid, "result": {"tools": tool_list()}})
         elif method == "tools/call":
             p = msg.get("params", {}); name, args = p.get("name"), p.get("arguments") or {}
+            rec = CALLS.begin(mid, name)   # past the client's limit it is answered with a call_id; the result waits for call_result
             try:
                 res = run_tool(name, args)
-                send({"jsonrpc": "2.0", "id": mid, "result": {"content": [{"type": "text", "text": json.dumps(res, default=str)}]}})
             except Exception as e:
-                tb = traceback.format_exc(limit=4)
-                send({"jsonrpc": "2.0", "id": mid, "result": {"isError": True, "content": [{"type": "text", "text": f"{type(e).__name__}: {e}\n{tb[-1500:]}"}]}})
+                CALLS.finish(rec, error=e)
+            else:
+                CALLS.finish(rec, res)
         elif method == "ping":
             send({"jsonrpc": "2.0", "id": mid, "result": {}})
         elif mid is not None:

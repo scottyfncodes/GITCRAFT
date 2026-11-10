@@ -134,12 +134,16 @@ class Pool:
     def call(self, tool, name, args, timeout=3600):
         key = tool + ("#quick" if tool == "meshcraft" and name in QUICK else "")
         c = self.get(key)
+        end = time.time() + timeout
         with c.lock:
             r = c.req("tools/call", {"name": name, "arguments": args or {}}, timeout)
-        txt = "\n".join(x.get("text", "") for x in r.get("content", []) if x.get("type") == "text")
-        try: val = json.loads(txt)
-        except Exception: val = txt
-        return {"ok": not r.get("isError"), "result": val}
+            val = _text_value(r)
+            # a call longer than the server's inline budget is answered {status: running, call_id} and keeps running
+            # there (gitcraft3d/calls.py): collect it with call_result
+            while _running(val) and name != "call_result" and time.time() < end:
+                r = c.req("tools/call", {"name": "call_result", "arguments": {"call_id": val["call_id"]}}, max(30, end - time.time()))
+                val = _text_value(r)
+        return {"ok": not r.get("isError") and not _running(val), "result": val}
 
     def status(self):
         with self.lock:
@@ -149,6 +153,16 @@ class Pool:
         with self.lock:
             for c in self.clients.values(): c.close()
             self.clients.clear()
+
+
+def _text_value(r):
+    txt = "\n".join(x.get("text", "") for x in r.get("content", []) if x.get("type") == "text")
+    try: return json.loads(txt)
+    except Exception: return txt
+
+
+def _running(v):
+    return isinstance(v, dict) and v.get("status") == "running" and bool(v.get("call_id")) and "call_result" in str(v.get("next", ""))
 
 
 class Calls:

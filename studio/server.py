@@ -21,6 +21,17 @@ import glob, json, os, platform, subprocess, sys, threading, time, traceback
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from core import STUDIO_HOME, VERSION, contract, routing, roots
 
+
+def _load_calls():
+    """gitcraft3d/calls.py (long calls answered before the client's timeout), loaded by path: the sandbox lets this server read
+    gitcraft3d/ but not the repo root, so it is not importable through sys.path."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gitcraft_calls", os.path.join(os.path.dirname(HERE), "gitcraft3d", "calls.py"))
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); return mod
+
+
+calls_mod = _load_calls()
+
 VENV_PY = os.path.join(STUDIO_HOME, "venv", "bin", "python")
 # this process is the Studio venv's Python (the system Python may have numpy too, but not the pinned runtime)
 IN_VENV = os.path.realpath(sys.prefix) == os.path.realpath(os.path.dirname(os.path.dirname(VENV_PY)))
@@ -271,6 +282,14 @@ def main():
     def send(m):
         with lock: real_stdout.write(json.dumps(m, default=str) + "\n"); real_stdout.flush()
 
+    def reply(r, e=None):
+        if e is not None:
+            hint = getattr(e, "hint", None)
+            return {"isError": True, "content": [{"type": "text", "text": f"{type(e).__name__}: {e}" + (f"\nhint: {hint}" if hint else "")}]}
+        err = isinstance(r, dict) and r.get("status") in ("failed", "blocked")
+        return {"isError": err, "content": [{"type": "text", "text": json.dumps(r, indent=1, default=str)}]}
+    calls = calls_mod.Calls(send, reply)   # a call longer than the client waits is answered with a call_id (gitcraft3d/calls.py)
+
     if deferred():   # announce the department tools once the runtime lands
         def watch():
             while not runtime_ready(): time.sleep(3)
@@ -286,18 +305,13 @@ def main():
                   "serverInfo": {"name": "studiocraft", "version": VERSION},
                   "instructions": "GITCRAFT Studio departments (audio, animation, worlds, FX, materials, levels, cinematics, QA, assets, PLAYCRAFT, PIXELCRAFT) and the Production Director. For a whole deliverable from one master prompt (a game, app, site), start with production_plan then production_run: it picks the departments, orders and parallelises them, gates every result and issues work orders for what only the agent can do (code, the 2D ArtCraft tools). For a single asset, start with studio_status or route; each <department>_<action> tool validates its request, reports `blocked` with the reason when a dependency is missing, validates and hashes every output, writes a .studio.json provenance record and registers outputs in the AssetCraft catalogue."}})
         elif method == "tools/list":
-            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [{"name": n, "description": d, "inputSchema": s} for n, d, s in tools()]}})
+            send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [{"name": n, "description": d, "inputSchema": s} for n, d, s in tools()] + ([] if deferred() else [calls_mod.TOOL])}})
         elif method == "tools/call":
-            def work(mid=mid, name=p.get("name"), a=p.get("arguments") or {}):
-                try:
-                    r = call(name, a)
-                    err = isinstance(r, dict) and r.get("status") in ("failed", "blocked")
-                    send({"jsonrpc": "2.0", "id": mid, "result": {"isError": err, "content": [{"type": "text", "text": json.dumps(r, indent=1, default=str)}]}})
-                except Exception as e:
-                    traceback.print_exc(file=sys.stderr)
-                    hint = getattr(e, "hint", None)
-                    send({"jsonrpc": "2.0", "id": mid, "result": {"isError": True, "content": [{"type": "text", "text": f"{type(e).__name__}: {e}" + (f"\nhint: {hint}" if hint else "")}]}})
-            threading.Thread(target=work, daemon=True).start()
+            name, a = p.get("name"), p.get("arguments") or {}
+            if name == "call_result":   # waits on another call: its own thread, never the budget timer
+                threading.Thread(target=lambda mid=mid, a=a: send({"jsonrpc": "2.0", "id": mid, "result": calls.result(a)}), daemon=True).start()
+            else:
+                calls.run(mid, name, lambda name=name, a=a: call(name, a))
         elif method == "ping":
             send({"jsonrpc": "2.0", "id": mid, "result": {}})
         else:

@@ -43,6 +43,9 @@ jobs:
       - name: Server stdio isolation (the MCP protocol pipes are private to each server, #45)
         run: python3 tests/test_stdio_isolation.py
 
+      - name: Long tool calls answer before the client's timeout (call_id + call_result)
+        run: python3 tests/test_long_calls.py
+
       - name: Studio departments (quick)
         run: python3 tests/test_studio.py --quick
 
