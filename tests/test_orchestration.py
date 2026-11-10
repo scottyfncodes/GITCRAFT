@@ -55,7 +55,12 @@ check("v1: unchanged graph (build waits for integrate.assets and the icon set; Q
       set(T1["build"]["depends_on"]) >= {"integrate.assets", "icon.derivatives"} and T1["qa.smoke"]["depends_on"] == ["build"]
       and not any(t in T1 for t in ("integrate.final", "build.wire")) and p1["plan_version"] == 1, T1["build"]["depends_on"])
 check("v2: valid as built (no unknown dependency, no cycle, every request one its department accepts)", planner.validate(p2) == [], planner.validate(p2))
-check("v2: the code build waits only for the foundation (scaffold + identity)", T2["build"]["depends_on"] == ["foundation.scaffold", "foundation.identity"], T2["build"]["depends_on"])
+check("v2: the code build waits only for the foundation (scaffold + identity) and the creative direction it is held to",
+      T2["build"]["depends_on"] == ["foundation.scaffold", "foundation.identity", "design.direction"], T2["build"]["depends_on"])
+check("v2: the direction is decided before the identity and the build, and is an agent work order with a validated file",
+      T2["design.direction"]["depends_on"] == ["foundation.scaffold"] and "design.direction" in T2["foundation.identity"]["depends_on"]
+      and T2["design.direction"]["work_order"]["expected"][0]["validate"] == "direction", T2["design.direction"]["depends_on"])
+check("v1: no direction task (v1 stays exactly what it was)", "design.direction" not in T1)
 up = upstream_of(T2, "build")
 check("v2: no asset, no icon step and no integration is upstream of the code build", not any(t.startswith(("audio.", "levels.", "icon.", "integrate.")) for t in up), sorted(up))
 ship = [t for t in T2 if T2[t].get("ship")]
@@ -171,7 +176,7 @@ P = store.load(pr.get("id") or pr.get("production"))
 check("engine: a new production is plan_version 2", P["plan_version"] == 2 and "build.wire" in P["tasks"])
 legacy = store.load(P["id"]); legacy.pop("plan_version"); engine._discover_and_plan(legacy)
 check("engine: a record without plan_version (v1) is re-planned as v1, never silently converted", "integrate.assets" in legacy["tasks"] and "build.wire" not in legacy["tasks"])
-for tid in ("foundation.scaffold", "foundation.identity"): engine._set(P, P["tasks"][tid], PASSED)
+for tid in ("foundation.scaffold", "design.direction", "foundation.identity"): engine._set(P, P["tasks"][tid], PASSED)
 engine._set(P, P["tasks"]["icon.concepts"], PASSED); engine._set(P, P["tasks"]["icon.select"], NEEDS_APPROVAL, reason="a person chooses")
 ready = [t["id"] for t in engine._ready_tasks(P)]
 check("scheduling: the code build is ready while the icon choice waits for a person; unrelated assets run too",

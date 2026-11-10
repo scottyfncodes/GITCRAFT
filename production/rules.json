@@ -18,6 +18,20 @@
    "web site",
    "homepage"
   ],
+  "tool": [
+   "cli",
+   "command-line",
+   "command line",
+   "library",
+   "sdk",
+   "script",
+   "utility",
+   "npm package",
+   "python package",
+   "mcp server",
+   "browser extension script",
+   "github action"
+  ],
   "app": [
    "app",
    "application",
@@ -237,7 +251,9 @@
   "materials": [
    "textures",
    "materials",
-   "pbr"
+   "pbr",
+   "texture",
+   "material"
   ],
   "world": [
    "terrain",
@@ -295,9 +311,12 @@
   "high quality",
   "high-quality",
   "premium",
-  "ship",
   "release-ready",
-  "release ready"
+  "release ready",
+  "ship it",
+  "ready to ship",
+  "shippable",
+  "store-ready"
  ],
  "deploy_words": [
   "deploy",

@@ -130,8 +130,8 @@ def check_expected(expected, base, project, roots_ok):
             except ValueError as ex: ok, v = False, {"ok": False, "error": str(ex)}
         res.append({"name": f"{e['path']} exists and opens as {e.get('format') or v.get('format')}", "ok": ok, "detail": v.get("error") or v.get("note")})
         if ok and e.get("validate"):   # a content check beyond the format (e.g. the icon concepts, the 1024 master)
-            from . import icons
-            extra = icons.VALIDATORS[e["validate"]](p, base)
+            from . import icons, direction
+            extra = {**icons.VALIDATORS, **direction.VALIDATORS}[e["validate"]](p, base)
             res += extra; ok = all(c["ok"] for c in extra)
         if ok: outs.append({"path": p, "role": e.get("role") or os.path.splitext(os.path.basename(p))[0], "format": v.get("format"), "ok": True})
     return res, outs

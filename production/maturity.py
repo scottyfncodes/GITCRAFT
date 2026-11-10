@@ -387,22 +387,11 @@ def save_keys(src):
 
 
 # ---------------------------------------------------------------- what the person asked for
-INTENTS = [
-    ("review", r"\b(review|audit|assess|evaluate|what state|how complete|inspect)\b(?!.*\b(fix|add|build|implement|finish)\b)"),
-    ("fix", r"\b(fix|bug|broken|crash|error|doesn'?t work|not working|repair|regression)\b"),
-    ("complete", r"\b(finish|complete|ship|launch|release|get it (?:done|live)|ready for (?:release|launch)|polish (?:it )?for release)\b"),
-    ("continue", r"\b(continue|keep (?:building|going|working)|pick up where|carry on|next steps?|remaining features)\b"),
-    ("update", r"\b(add|change|update|improve|tweak|adjust|replace|remove|rename|redesign|support|make it|implement|upgrade|migrate)\b"),
-]
-
-
 def intent(text, maturity):
-    t = " ".join((text or "").lower().split())
-    if maturity == "new": return "build", "a new project"
-    for name, pat in INTENTS:
-        m = re.search(pat, t)
-        if m: return name, f"'{m.group(0)}'"
-    return {"partial": "continue", "nearly_complete": "complete", "finished": "update"}.get(maturity, "update"), f"no request named: the {maturity.replace('_', ' ')} default"
+    """(workflow, because). The reading itself (assignment, focus, question) is understanding.classify."""
+    from . import understanding
+    r = understanding.classify(text, maturity)
+    return r["workflow"], r["because"]
 
 
 WORKFLOW = {

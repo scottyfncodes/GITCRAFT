@@ -719,6 +719,11 @@ def _prepare(prod, t):
     except TargetMissing as e:   # cannot be evaluated here: an explicit, reasoned blocked state (never the source instead)
         return None, {"status": "blocked", "reason": str(e), "install": [c for c in [(prod.get("evaluation") or {}).get("build_command")] if c]}
     except (HandoffError, OSError, ValueError) as e:
+        # a comparison whose "before" could not be measured here was not run: unavailable, never a defect in the project
+        src = [eff(prod, v["$from"]) for v in (t["params"] or {}).values() if isinstance(v, dict) and v.get("$from", "").startswith("baseline.")]
+        lost = next((x for x in src if x["state"] in (BLOCKED, FAILED, SKIPPED)), None)
+        if lost: return None, {"status": "blocked", "reason": f"no before/after comparison: {lost['id']} could not measure the project before the change "
+                                                               f"({lost.get('reason') or lost.get('error') or lost['state']})"}
         return None, {"status": "failed", "failure": "handoff", "error": f"hand-off: {e}"}
     _handoff(prod, t, params)
     if "$target" in json.dumps(t["params"]): t["evaluated_target"] = eval_target(prod)

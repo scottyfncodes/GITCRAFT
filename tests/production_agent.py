@@ -14,6 +14,48 @@ sys.path.insert(0, HERE)
 PALETTE = {"background": "#14122B", "primary": "#F2A541", "accent": "#3FC1C9", "text": "#F5F0E6"}
 
 
+DIRECTION_ART = {"concept": "A paper lantern carried through a flooded night market: warm light on dark water, everything else in shadow",
+                 "palette": {"background": PALETTE["background"], "surface": "#1F1C3D", "primary": PALETTE["primary"], "accent": PALETTE["accent"], "text": PALETTE["text"]},
+                 "type": {"display": "a condensed slab, set in capitals", "body": "the system UI face", "why": "stamped market signage for names; nothing to download for reading"},
+                 "shape": "soft-cornered blocks with a 4 px light outline; silhouettes readable at 24 px",
+                 "motion": "the lantern bobs on a 2 s sine; UI panels slide 160 ms ease-out; nothing moves while paused",
+                 "avoid": ["neon cyberpunk glow on everything", "flat grey SaaS cards", "pixel-art retro pastiche"]}
+DIRECTION_PLAY = {"pillars": ["keep the light alive", "read the water ahead", "one more run"],
+                  "loop": {"verb": "steer and hop the lantern", "challenge": "gaps and gusts that arrive faster", "feedback": "a splash, a dust puff and a chime on every landing",
+                           "reward": "coins that extend the flame and a best distance", "seconds": 8},
+                  "controls": {"desktop": "arrow keys to steer, Space to hop", "touch": "left and right thumb zones, tap to hop"},
+                  "feel": {"run_speed_px_s": 220, "jump_height_px": 96, "jump_time_s": 0.42, "coyote_ms": 90, "input_buffer_ms": 110},
+                  "feedback": [{"event": "jump", "response": "squash, jump sound, dust at the feet"}, {"event": "land", "response": "stretch back, soft thud, dust"},
+                               {"event": "coin", "response": "chime rising in pitch with the streak, +1 pops from the coin"},
+                               {"event": "hit", "response": "120 ms freeze, shake, the flame dims"}, {"event": "new best", "response": "the counter flashes the accent colour"}],
+                  "curve": [{"at_seconds": 0, "introduces": "flat ground and single coins"}, {"at_seconds": 20, "introduces": "gaps that need a hop"},
+                            {"at_seconds": 45, "introduces": "gusts that push sideways"}],
+                  "fail": "the flame dims for a full second before it goes out, and the gap that did it is always visible two tiles ahead; retry is one tap",
+                  "mastery": "chains hops across gaps without landing between coins, keeping the streak pitch climbing",
+                  "playtest": ["Did you start a second run without being asked?", "Could you say why you failed each time?", "Did the hop feel like it obeyed you?"]}
+DIRECTION_APP = {"primary_task": "see when the next high tide is at my beach", "taps_to_value": 0,
+                 "screens": [{"name": "Today", "job": "the next high and low tide, large enough to read at arm's length"}, {"name": "Week", "job": "seven days of tides to plan around"}],
+                 "states": {"empty": "no beach chosen yet: one field and the three nearest beaches", "loading": "the last known times, dimmed, with a tide line drawing in",
+                            "error": "the last saved table with its date, and a retry that says what failed", "success": "the saved beach's name briefly underlined"},
+                 "feedback": [{"event": "choose a beach", "response": "the table swaps in place within 100 ms"}, {"event": "pull to refresh", "response": "the tide line redraws"},
+                              {"event": "tap a day", "response": "the day expands where it is, no navigation"}]}
+
+
+def direction(order, game=True, **over):
+    """design.direction: a real, complete creative direction (what Claude writes before any code)."""
+    d = {"product": {"promise": "A calm run through a night market that asks for one more go" if game else "The next tide at my beach, before I have finished asking",
+                     "audience": "someone with five minutes on a phone" if game else "a family deciding when to walk down to the beach",
+                     "context": "one-handed, on a train or a sofa, sound often off" if game else "glanced at on a phone in a hallway, sandals in the other hand"},
+         "art": DIRECTION_ART, **({"play": DIRECTION_PLAY} if game else {"interaction": DIRECTION_APP}),
+         "done_when": ["a first-time player lands their first hop within five seconds" if game else "the next high tide is readable without touching the screen",
+                       "every action in the feedback table answers on screen" if game else "every state in the states table has been seen on a phone",
+                       "it is recognisably this product in a thumbnail"]}
+    d.update(over)
+    p = os.path.join(order["out_dir"], "direction.json")
+    json.dump(d, open(p, "w"), indent=1)
+    return [p]
+
+
 def identity(order, env):
     """VectorCraft: a wordmark logo (SVG) in an original palette (the app icon is the App Icon Studio's work)."""
     from mcp_client import Client

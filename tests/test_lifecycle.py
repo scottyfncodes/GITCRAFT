@@ -245,7 +245,19 @@ if executors.studio_python():
           "qa.attribution", "qa.standards"} <= set(pr["tasks"]) and "app_icon" in room, sorted(pr["tasks"]))
     engine.decide(pr["id"], approve=True)
     st = engine.run(pr["id"])
+    waiting = [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"]
+    check("direction first: the run stops at the creative direction, before the identity or any code", waiting == ["design.direction"], st.get("refused") or waiting)
+    import production_agent
+    dorder = json.load(open(os.path.join(pr["store"], "tasks", "design.direction", "work_order.json")))
+    check("direction: an app's direction covers the look and the interaction (no gameplay section)", dorder["expected"][0]["keys"] == ["product", "done_when", "art", "interaction"], dorder["expected"])
+    vague = production_agent.direction(dorder, game=False, art=dict(production_agent.DIRECTION_ART, concept="Clean, modern and minimal design"))
+    bad = engine.submit(pr["id"], "design.direction", vague, "adjectives")
+    check("direction: 'clean and modern' is refused (it describes any product), the work order stays owed", not bad["submission"]["accepted"]
+          and any("art.concept" in c["name"] and not c["ok"] for c in bad["submission"]["checks"]), bad["submission"])
+    st = engine.submit(pr["id"], "design.direction", production_agent.direction(dorder, game=False), "tide table direction", run_after=True)
     check("app: the run stops at the identity work order (the blueprint approved)", "foundation.identity" in [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"], st.get("refused") or st["counts"])
+    iorder = json.load(open(os.path.join(pr["store"], "tasks", "foundation.identity", "work_order.json")))
+    check("direction: the identity is drawn from it (direction.json is in the identity's hand-off)", "direction.json" in json.dumps(iorder.get("handoff")), list(iorder.get("handoff") or {}))
     order = json.load(open(os.path.join(pr["store"], "tasks", "foundation.identity", "work_order.json")))
     check("work orders carry the settled blueprint", order.get("blueprint", {}).get("decisions") and "settled" in order["blueprint"]["rule"])
     od = order["out_dir"]; json.dump({"background": "#0E2A3B", "primary": "#4FB3BF", "accent": "#F4D35E", "text": "#F7F7F2"}, open(os.path.join(od, "palette.json"), "w"))

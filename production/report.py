@@ -3,7 +3,7 @@
 A criterion is `passed` only when every task that measures it passed (on its re-verification chain's latest
 run); `failed`, `blocked`, `needs_approval` and `pending` say why not. Nothing is reported as done because a
 tool returned: the report shows the measured values (scores, checks) next to each verdict."""
-import os
+import json, os
 from . import store
 
 
@@ -153,6 +153,7 @@ def markdown(prod, release=False):
     miss = [x for x in acc if x["status"] == "optional_missing"]
     if miss: L += ["## Optional, not delivered", "", "Made optional by a person in the Decision Room; the release does not wait for them, and they are never hidden:", ""] + \
                   [f"- {x['id']}: {'; '.join(map(str, x.get('why') or []))[:300]}" for x in miss] + [""]
+    L += needs_a_person(prod)
     from . import qa
     L += qa.markdown(prod)
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]
@@ -186,6 +187,28 @@ def markdown(prod, release=False):
     L += ["", "## Provenance", "", "Every department output has a `.studio.json` record (request, tools and licences, SHA-256 of each file);",
           f"hand-offs are in `{os.path.join(prod['store'], 'handoffs')}`; the full event log is `events.jsonl`.", ""]
     return "\n".join(L) + "\n"
+
+
+def needs_a_person(prod):
+    """What no automated check here can establish (is it fun, does it look like its direction): the questions the
+    creative direction set, handed to a person. Listed with every report; never counted as passed, never a gate."""
+    t = prod["tasks"].get("design.direction")
+    if not t: return []
+    t = _eff(prod, "design.direction")
+    path = next((o["path"] for o in t.get("outputs") or [] if o.get("role") == "direction"), None)
+    if not path or not os.path.isfile(path): return []
+    try:
+        from . import direction
+        qs = direction.human_checks(json.load(open(path)))
+    except (OSError, ValueError): return []
+    if not qs: return []
+    head = {"playtest": "Play it", "look": "Look at it", "done": "Check it does what was promised"}
+    L = ["## Needs a person", "", "Automated checks measured what is in the criteria below. They cannot tell whether it is fun or whether it looks right; "
+         "these questions come from the approved direction and are not answered by this report:", ""]
+    for k in ("playtest", "look", "done"):
+        rows = [q["question"] for q in qs if q["kind"] == k]
+        if rows: L += [f"**{head[k]}**", ""] + [f"- [ ] {r}" for r in rows] + [""]
+    return L
 
 
 def write(prod):

@@ -6,13 +6,13 @@ change what gets built *and* that have no safe default are `essential`. The agen
 spec, may correct any field with `overrides`, and the planner works from the corrected spec.
 
 Spec fields:
-  title, prompt, deliverable (game | app | site | asset_pack | media), dimension (2d | 3d),
+  title, prompt, deliverable (game | app | site | tool | asset_pack | media), dimension (2d | 3d),
   platform {mobile_first, viewports, engine}, genres (PLAYCRAFT profiles), features {...},
   assets {sfx, music, ambience, voice, levels, vfx, materials, world, models, identity, trailer},
   quality {level, gates...}, project {path, exists}, authorisations, acceptance [...],
   assumptions [...], questions [...]"""
 import copy, json, os, re
-from . import standards, maturity
+from . import standards, maturity, understanding
 
 RULES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "rules.json")))
 
@@ -56,6 +56,12 @@ def parse(prompt, project=None, overrides=None):
     if deliverable is None:
         deliverable = "app"; assumptions.append("no deliverable type named: treated as a web app")
     else: because["deliverable"] = w
+    # assets and nothing else ("a jump sound and a coin sound", "a 3D model of a barrel for my game"): the pack of exactly
+    # those assets, never a game or an app scaffolded around them
+    alone = None if existing or deliverable == "media" else understanding.standalone(prompt)
+    if alone:
+        deliverable = "asset_pack"; because["deliverable"] = alone["because"]
+        assumptions.append("a request for assets alone: only what is named is made; nothing is scaffolded, branded or deployed around it")
     dimension = "3d" if _w(t, RULES["three_d_words"]) else "2d"
     if dimension == "3d": because["dimension"] = _w(t, RULES["three_d_words"])
     elif deliverable == "game": assumptions.append("2D: the prompt names no 3D look or engine")
@@ -97,12 +103,12 @@ def parse(prompt, project=None, overrides=None):
         for g in genres:
             for p in RULES["default_sfx"].get(g, []):
                 if p not in presets and len(presets) < 6: presets.append(p)
-        assets["sfx"] = presets[:8]
+        if feats["sound"] or not alone: assets["sfx"] = presets[:8]
         mood, mw = _first(t, RULES["music_moods"])
         if feats["sound"] and not mood:
             mood = RULES["default_mood"].get(genres[0] if genres else "arcade", "playful")
             assumptions.append(f"music mood not named: {mood}")
-        if feats["sound"] or feats["music"]: assets["music"] = {"mood": mood or "playful", "bars": 16}
+        if feats["music"] or not alone: assets["music"] = {"mood": mood or "playful", "bars": 16}
         amb = [k for k, words in RULES["ambience"].items() if _w(t, words)]
         if amb: assets["ambience"] = amb[:2]
     if feats["voice"]: assets["voice"] = True
@@ -120,9 +126,11 @@ def parse(prompt, project=None, overrides=None):
     vfx = [e for e, words in RULES["vfx"].items() if _w(t, words)]
     if vfx or (feats["effects"] and deliverable == "game"):
         assets["vfx"] = vfx[:4] or RULES["default_vfx"]
+    if alone and feats["materials"]:   # "a stone texture": a material, whatever the dimension of the game it is for
+        assets["materials"] = [m for m, words in RULES["materials"].items() if _w(t, words)][:4] or ["stone"]
     if dimension == "3d":
         mats = [m for m, words in RULES["materials"].items() if _w(t, words)]
-        if mats or feats["materials"]: assets["materials"] = mats[:4] or ["stone", "wood"]
+        if (mats or feats["materials"]) and not alone: assets["materials"] = mats[:4] or ["stone", "wood"]
         terr, tw = _first(t, RULES["terrain"])
         if terr or feats["world"]: assets["world"] = {"terrain": terr or "island", "sky": _first(t, RULES["sky"])[0] or "morning", "ocean": bool(_w(t, ["ocean", "sea", "waves"]))}
         models = re.findall(r"(?:3d model|model) of (?:an? |the )?([a-z][a-z \-]{2,30}?)(?:[,.;]| and |$)", t)
@@ -153,7 +161,7 @@ def parse(prompt, project=None, overrides=None):
 
     # ---- the project
     proj = {"path": os.path.abspath(project) if project else None}
-    if not project and deliverable in ("game", "app", "site"):
+    if not project and deliverable in ("game", "app", "site", "tool"):
         assumptions.append("no project folder given: a new one is created in the workspace")
     # ---- what may be done without asking
     auth = {"write_project": True, "replace_assets": False, "deploy": False, "merge": False, "spend": False, "network": False}
@@ -225,8 +233,16 @@ def acceptance(spec):
     if d in ("game", "app", "site"):
         add("loads_everywhere", f"Loads with no page errors, console errors or missing files on {', '.join(q['viewports'])}", "qa.smoke")
     if q.get("perf"): add("performance", f"Holds ≥ {q['min_fps']} fps (p95 frame ≤ {q['max_p95_ms']} ms) in headless Chromium (relative: SwiftShader)", "qa.perf")
-    if q.get("playcraft"): add("gameplay_quality", f"PLAYCRAFT overall ≥ {q['playcraft_min']} with the game actually played", "qa.playcraft")
-    if q.get("pixelcraft"): add("interface_quality", f"PIXELCRAFT overall ≥ {q['pixelcraft_min']} at iPhone 17, iPhone 13 and desktop", "qa.pixelcraft")
+    m0 = spec.get("mode") or {}
+    focus = m0.get("focus") if m0.get("existing") and m0.get("workflow") == "update" else None
+    if q.get("playcraft"):
+        add("gameplay_quality", "PLAYCRAFT plays the game before and after the change with the same probe: no gameplay regression (score change reported)"
+            if focus in ("gameplay", "polish") else f"PLAYCRAFT overall ≥ {q['playcraft_min']} with the game actually played", "qa.playcraft")
+    if q.get("pixelcraft"):
+        add("interface_quality", "PIXELCRAFT measures the same screens before and after the change at iPhone 17, iPhone 13 and desktop: no regression (score change reported)"
+            if focus in ("visual", "polish") else f"PIXELCRAFT overall ≥ {q['pixelcraft_min']} at iPhone 17, iPhone 13 and desktop", "qa.pixelcraft")
+    if d == "tool" and m0.get("workflow") != "review":
+        add("tests_pass", "The tool's own tests pass, run the way the project runs them" + ("" if m0.get("existing") else " (a new tool ships with tests)"), "qa.tests")
     if q.get("designcraft"): add("design_review", "DESIGNCRAFT assessment recorded (structural design findings reviewed)", "qa.designcraft")
     web = d in ("game", "app", "site")
     for kind in ("sfx", "music", "ambience", "voice", "levels", "vfx", "materials", "world", "models", "identity"):
@@ -252,7 +268,7 @@ def acceptance(spec):
         add("features_work", "Every planned feature works in a browser (tests/gitcraft.features.json, run on a phone)", "qa.features")
     if (spec.get("backend") or {}).get("provider") == "postgres":
         add("backend", "Hosted Postgres set up for development and production (approved), with no secret in the repository", "backend.provision")
-    if web and mode.get("existing") and mode.get("workflow") != "review":
+    if (web or d == "tool") and mode.get("existing") and mode.get("workflow") != "review":
         add("preservation", "Existing work preserved: no file deleted, secrets, CI and deployment untouched"
             + (", game art/audio/levels and saved progress intact" if d == "game" else "") + " (unless approved)", "qa.preserve")
     if spec["features"].get("deploy"): add("deployment", "Deployed and the live URL verified (needs approval)", "release.deploy")
