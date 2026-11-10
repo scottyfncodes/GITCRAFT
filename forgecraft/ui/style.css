@@ -21,7 +21,7 @@ pre { background: #051427; border: 1px solid var(--line); border-radius: 10px; p
 .brand b { display: block; letter-spacing: .14em; }
 .brand small { color: var(--gold); font-weight: 600; }
 .cube { width: 30px; height: 30px; background: linear-gradient(135deg, var(--teal), #0e7c96); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
-.tabs { display: flex; gap: 8px; margin-left: 12px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.tabs { display: flex; gap: 12px; margin-left: 12px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .top > * { min-width: 0; }
 .tabs a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; color: var(--mute); text-decoration: none; font-weight: 600; }
 .tabs a i { font-style: normal; color: var(--teal); }
@@ -71,6 +71,7 @@ input[type=checkbox] { width: 24px; height: 24px; flex: none; margin: 0; accent-
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.primary:active:not([disabled]) { filter: brightness(.9); }
 .btn[aria-pressed="true"] { background: rgba(31,181,176,.18); color: var(--aqua); border-color: var(--teal); }
+.btn[aria-pressed="true"]:hover { background: rgba(31,181,176,.3); color: var(--ink); }
 .btn.small { padding: 4px 12px; font-size: 14px; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
@@ -175,6 +176,7 @@ dialog menu { padding: 0; margin: 16px 0 0; display: flex; justify-content: flex
   .tabs a span { max-width: 100%; line-height: 1.15; white-space: nowrap; }
   .tabs a i { font-size: 17px; }
   main { padding-bottom: 100px; }
+  html { scroll-padding-bottom: 96px; }   /* a control scrolled or tabbed into view never stops under the tab bar (WCAG 2.4.11) */
   .mode { display: none; }
 }
 @media (max-width: 720px) {
