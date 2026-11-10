@@ -37,8 +37,6 @@ jobs:
           - { name: fresh-install (published bin), install: false, suites: "tests/test_global.sh" }
     env:
       PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers
-      GITCRAFT_GLOBAL_INSTRUCTIONS: "0"
-      GITCRAFT_GLOBAL_HOOK: "0"
       GITCRAFT_STUDIO_VOICE: "0"
     steps:
       - uses: actions/checkout@v7
@@ -47,6 +45,9 @@ jobs:
 
       - name: Install GITCRAFT
         if: matrix.group.install
+        env:   # only here: the fresh-install test must see the user-level instructions and skills being installed
+          GITCRAFT_GLOBAL_INSTRUCTIONS: "0"
+          GITCRAFT_GLOBAL_HOOK: "0"
         run: scripts/install.sh
 
       - name: Claude Code CLI (for the fresh-install 'claude mcp list' checks; no sign-in needed)
