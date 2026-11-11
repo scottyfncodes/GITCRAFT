@@ -1,0 +1,61 @@
+{
+ "product": {
+  "promise": "Thirty seconds of threading a glowing dot through gaps, where every death is one you saw coming and the next run is one touch away",
+  "audience": "Someone filling a short wait on their phone, one thumb free, who will also open it on a laptop",
+  "context": "Standing on a platform or in a queue, portrait, sound usually off, attention split; a run has to make sense at a glance and survive being interrupted"
+ },
+ "keeps": [
+  "The one-button rule: hold to rise, release to fall, nothing else to learn",
+  "The look: the #20163a night, mint walls, amber dot, white sparks; no new art",
+  "The saved best score in localStorage under blip.highScore, read and written exactly as before",
+  "Scoring: 1 per wall, 3 for a near miss"
+ ],
+ "play": {
+  "pillars": ["You always see what will kill you", "Flying close is the brave, paid choice", "Dead to flying again in under a second"],
+  "loop": {
+   "verb": "hold and release to float the dot through the next gap",
+   "challenge": "gaps that arrive faster, sit further apart vertically and start to drift",
+   "feedback": "a rising tick and a +1 at the dot for each wall; a brighter chime, CLOSE +3 and a burst when you skim an edge",
+   "reward": "score, a streak that raises the pitch of each tick, and a saved best that flashes when beaten",
+   "seconds": 2
+  },
+  "controls": {
+   "desktop": "Space or Up held to rise; Escape or P to pause; M to mute",
+   "touch": "hold anywhere on the play field to rise; 44 px pause and mute buttons in the top corners, inside the safe area"
+  },
+  "feel": {
+   "rise_accel_px_s2": 900, "fall_accel_px_s2": 700, "max_rise_px_s": 320, "max_fall_px_s": 420,
+   "start_speed_px_s": 180, "speed_cap_px_s": 380, "hit_forgiveness_px": 4, "edge_warning_px": 70,
+   "hit_stop_ms": 110, "shake_px": 9, "restart_lock_ms": 350, "near_miss_px": 18
+  },
+  "feedback": [
+   {"event": "first input", "response": "the hint fades, the dot lifts, the music starts under it"},
+   {"event": "pass a wall", "response": "tick that climbs a semitone per wall in the streak, +1 rises from the dot"},
+   {"event": "near miss", "response": "chime, CLOSE +3 in amber, sixteen sparks, the wall edge flashes white"},
+   {"event": "drifting toward the top or bottom edge", "response": "that edge glows red, brighter the closer the dot gets"},
+   {"event": "crash", "response": "110 ms freeze, shake, the dot bursts, an explosion, and the wall or edge that did it stays lit red"},
+   {"event": "new best", "response": "the score turns amber, a rising chime, NEW BEST over the retry prompt"},
+   {"event": "pause", "response": "everything stops, the field dims, PAUSED with how to resume"}
+  ],
+  "curve": [
+   {"at_seconds": 0, "introduces": "a ready screen: the dot hovers until the first hold, then wide 190 px gaps near the middle"},
+   {"at_seconds": 12, "introduces": "gaps anywhere on the field, always reachable from the last one at the current speed"},
+   {"at_seconds": 30, "introduces": "gaps narrow toward 150 px while speed climbs to its cap"},
+   {"at_seconds": 50, "introduces": "gaps that drift slowly up and down as they approach"}
+  ],
+  "fail": "Only a wall or a lit edge kills, the hitbox is 4 px kinder than the drawing, no gap is ever out of reach, and what killed you stays red during the freeze. Retry is one press after a 350 ms lock so a held thumb does not skip the result.",
+  "mastery": "Hugs the edge of every gap on purpose for +3, feathering the hold in short taps to hover instead of swinging",
+  "playtest": [
+   "After your first three deaths, could you say what killed you each time?",
+   "Did you go for a near miss on purpose at least once?",
+   "Did you start another run without thinking about it?",
+   "With the sound off on a phone, did you still know when you scored?"
+  ]
+ },
+ "done_when": [
+  "A new player is flying within three seconds of the page loading and is never killed before their first input",
+  "Every death shows its cause in red for the length of the freeze",
+  "Escape, P, the pause button and switching tabs all stop the game, and it resumes exactly where it was",
+  "A best score saved by the old version is still shown as the best"
+ ]
+}

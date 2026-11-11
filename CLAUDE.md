@@ -155,6 +155,12 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - `tests/test_entry.py` must pass after any change to `production/entry.py`, `maturity.py`, the existing-project paths of the
   planner/intake/lifecycle, or the "Run GITCRAFT" wording in `global/`; Discovery stays read-only, and an existing project never gets
   scaffolding, rebranding, a new icon or a redesign without the Decision Room's approval.
+- `tests/test_understanding.py` must pass after any change to `production/understanding.py`, `production/direction.py`, the assignment/focus
+  parts of `entry.py`, `intake.py`, `lifecycle.py` or `planner.py` (briefs, `design.direction`, `baseline.*`, the tool build path) or
+  `builtins.check_tests`. A question is an audit and never issues a work order; a rebuild is never approved before its question is answered;
+  assets alone never get a production; the direction gate checks only what it can measure and never names a style; a release never claims
+  fun (the direction's playtest questions are listed as open, under "Needs a person"); v1 plans get no direction or baseline task
+  (`docs/direction.md`, `acceptance/assignments/`).
 - `tests/test_gaps.py` must pass after any change to `production/live.py`, `production/web/`, the starters (`production/kit/starters`),
   feature checks, backend/analytics/native decisions or the native icon sets; `verify-live` never records a deployment live
   without measuring this exact build at the URL, and never disables TLS verification.

@@ -111,6 +111,16 @@ def _readme(project):
     return None, ""
 
 
+def _name(project, readme):
+    """What the project calls itself: its README's first heading, else its page title, else its folder."""
+    m = re.search(r"^#\s+(.{2,60}?)\s*$", readme or "", re.M)
+    if m: return re.sub(r"[`*_\[\]]", "", m.group(1)).strip()
+    for n in ("index.html", "public/index.html"):
+        t = re.search(r"<title>\s*([^<]{2,60}?)\s*</title>", _read(os.path.join(project, n), 20000), re.I) if os.path.isfile(os.path.join(project, n)) else None
+        if t: return t.group(1)
+    return os.path.basename(os.path.realpath(project))
+
+
 def _features(readme):
     """Feature bullets under a Features/Roadmap/TODO heading, and every checkbox anywhere."""
     done, todo, listed = [], [], []
@@ -363,7 +373,7 @@ def assess(project):
     confidence = "high" if agree >= 2 and agree == total else "medium" if agree >= max(1, total - agree) else "low"
     if not votes: ev.append("no strong signal either way: read as nearly complete (low confidence)"); confidence = "low"
     ev += [f"{m}: {why}" for m, why in votes]
-    return {"existing": True, "maturity": maturity, "kind": kind, "kind_confidence": kind_conf, "kind_evidence": kind_ev, "engines": engines,
+    return {"existing": True, "name": _name(project, readme), "maturity": maturity, "kind": kind, "kind_confidence": kind_conf, "kind_evidence": kind_ev, "engines": engines,
             "confidence": confidence, "evidence": ev, "inventory": inv,
             "entry": entry, "tests": tests[:20], "deploy": deploy, "test_script": scripts.get("test"), "readme": rname,
             "analytics": _analytics(project), "save_keys": save_keys(src), "git": {"commits": commits, "last": last, "branch": _git(project, "rev-parse", "--abbrev-ref", "HEAD"),
@@ -387,22 +397,11 @@ def save_keys(src):
 
 
 # ---------------------------------------------------------------- what the person asked for
-INTENTS = [
-    ("review", r"\b(review|audit|assess|evaluate|what state|how complete|inspect)\b(?!.*\b(fix|add|build|implement|finish)\b)"),
-    ("fix", r"\b(fix|bug|broken|crash|error|doesn'?t work|not working|repair|regression)\b"),
-    ("complete", r"\b(finish|complete|ship|launch|release|get it (?:done|live)|ready for (?:release|launch)|polish (?:it )?for release)\b"),
-    ("continue", r"\b(continue|keep (?:building|going|working)|pick up where|carry on|next steps?|remaining features)\b"),
-    ("update", r"\b(add|change|update|improve|tweak|adjust|replace|remove|rename|redesign|support|make it|implement|upgrade|migrate)\b"),
-]
-
-
 def intent(text, maturity):
-    t = " ".join((text or "").lower().split())
-    if maturity == "new": return "build", "a new project"
-    for name, pat in INTENTS:
-        m = re.search(pat, t)
-        if m: return name, f"'{m.group(0)}'"
-    return {"partial": "continue", "nearly_complete": "complete", "finished": "update"}.get(maturity, "update"), f"no request named: the {maturity.replace('_', ' ')} default"
+    """(workflow, because). The reading itself (assignment, focus, question) is understanding.classify."""
+    from . import understanding
+    r = understanding.classify(text, maturity)
+    return r["workflow"], r["because"]
 
 
 WORKFLOW = {

@@ -7,7 +7,7 @@
              existing different file in the project is never overwritten without `replace_assets` (needs approval)
   licences   AssetCraft scan of the shipped folder, then its licence report (unknown / NC / ND licences fail)
 """
-import hashlib, json, os, re, shutil
+import hashlib, json, os, re, shutil, sys
 from . import executors
 
 PREVIEW_ROLES = {"preview", "source", "manifest", "engine_screenshot", "blockout", "blockout_render", "ldtk_project", "render", "contact_sheet", "waveform"}
@@ -249,6 +249,54 @@ def check_standards(ctx):
     return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app",
                                              analytics=p.get("analytics"), backend=p.get("backend"), analytics_decided=p.get("analytics_decided", True),
                                              accepted=(ctx.get("spec") or {}).get("accepted")), "standards.json")
+
+
+def _test_command(proj):
+    """How this project runs its own tests → (argv, why) or (None, reason). Detection only reads files."""
+    pkg = os.path.join(proj, "package.json")
+    if os.path.isfile(pkg):
+        try: script = (json.load(open(pkg)).get("scripts") or {}).get("test") or ""
+        except (OSError, ValueError): script = ""
+        if script and "no test specified" not in script:
+            return ["npm", "test", "--silent"], f"package.json scripts.test: {script[:80]}"
+    py = []
+    for d, dirs, files in os.walk(proj):
+        dirs[:] = [x for x in dirs if x not in ("node_modules", ".git", ".venv", "venv", "__pycache__")]
+        py += [os.path.join(d, f) for f in files if f.endswith(".py") and (f.startswith("test_") or f.endswith("_test.py"))]
+    if py:
+        import importlib.util
+        toml = os.path.join(proj, "pyproject.toml")
+        cfg = any(os.path.isfile(os.path.join(proj, f)) for f in ("pytest.ini", "conftest.py", "tox.ini")) or (os.path.isfile(toml) and "pytest" in open(toml).read())
+        if importlib.util.find_spec("pytest") and (cfg or any("import pytest" in open(f, errors="ignore").read(20000) for f in py[:40])):
+            return [sys.executable, "-m", "pytest", "-q"], "pytest (the tests import it or the project configures it)"
+        start = os.path.relpath(os.path.commonpath([os.path.dirname(f) for f in py]), proj)
+        return [sys.executable, "-m", "unittest", "discover", "-s", start, "-p", "*test*.py"], f"unittest discovery in {start}"
+    return None, "no test command found (package.json scripts.test, or Python test_*.py files)"
+
+
+def check_tests(ctx):
+    """A tool is proven by its own tests: run them the way the project does and report exactly what happened.
+    A project with no tests is `unverified` when tests were optional (an existing tool) and a failure when the work order required them."""
+    import subprocess, time
+    proj, required = ctx["project"], ctx["params"].get("required", True)
+    cmd, why = _test_command(proj)
+    if not cmd:
+        r = {"status": "failed" if required else "ok", "checks": [{"name": "the project has tests to run", "ok": not required, "detail": why,
+                                                                    **({} if required else {"category": "unverified", "cause": "no tests"})}]}
+        return _with_report(ctx, r, "tests.json")
+    if cmd[0] == "npm" and not os.path.isdir(os.path.join(proj, "node_modules")) and os.path.isfile(os.path.join(proj, "package-lock.json")):
+        return {"status": "blocked", "reason": "the project's dependencies are not installed (node_modules missing)", "install": ["npm ci"], "outputs": []}
+    t0 = time.time()
+    try:
+        pr = subprocess.run(cmd, cwd=proj, capture_output=True, text=True, timeout=ctx["task"].get("timeout", 900) - 30, stdin=subprocess.DEVNULL)
+        code, tail = pr.returncode, (pr.stdout + "\n" + pr.stderr).strip()[-3000:]
+    except subprocess.TimeoutExpired:
+        code, tail = None, "timed out"
+    except OSError as e:
+        return {"status": "blocked", "reason": f"cannot run {cmd[0]}: {e}", "outputs": []}
+    r = {"status": "ok" if code == 0 else "failed", "command": " ".join(cmd), "detected": why, "exit_code": code, "seconds": round(time.time() - t0, 1), "output_tail": tail,
+         "checks": [{"name": f"the project's tests pass ({' '.join(cmd[-3:])})", "ok": code == 0, "detail": None if code == 0 else tail[-600:]}]}
+    return _with_report(ctx, r, "tests.json")
 
 
 def check_preserve(ctx):

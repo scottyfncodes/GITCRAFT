@@ -64,6 +64,9 @@ jobs:
       - name: Run GITCRAFT (universal entry, maturity-aware workflows, preservation)
         run: python3 tests/test_entry.py
 
+      - name: Understanding the assignment, creative direction first, before/after comparisons, tools
+        run: python3 tests/test_understanding.py
+
       - name: Starters, feature checks, backend, native icons, Pulse, verify-live
         run: python3 tests/test_gaps.py
 

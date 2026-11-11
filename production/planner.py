@@ -20,10 +20,14 @@ Plan versions (stored on the production record as `plan_version`; a revision kee
      each asset is integrated as soon as it passes (integrate.<task>, transactional), integrate.final checks the
      ledger and the asset manifest, build.wire wires every integrated asset and the approved icon into the app,
      and QA measures that final wired build. The icon choice is off the code path and on the release path.
-     The v2 graph is built from the v1 graph (_graph_v2), so v1 stays exactly what it was."""
+     The v2 graph is built from the v1 graph (_graph_v2), so v1 stays exactly what it was.
+     v2 also decides before it builds: design.direction (production/direction.py) is the creative direction the build
+     is held to, and a redesign, gameplay or polish pass of an existing project measures the project BEFORE the change
+     (baseline.pixelcraft / baseline.playcraft) so its QA is a before/after comparison, not an absolute score."""
 import copy, os, sys
 from . import REPO
 from . import discovery as _disc
+from . import direction as _direction
 
 STUDIO_DIR = os.path.join(REPO, "studio")
 PLAN_VERSION = 2   # new productions; records without plan_version are 1
@@ -73,7 +77,16 @@ def build(spec, disc, version=1):
     # an update or a fix to an existing project is not a quality overhaul: the evaluators' scores are measured and
     # reported, and the gates that hold are the ones about the change (loads, regression, preservation)
     small_change = existing and workflow in ("update", "fix")
-    if small_change: decisions.append(f"{workflow} of an existing project: PLAYCRAFT/PIXELCRAFT scores are reported (advisory), not imposed")
+    focus = pmode.get("focus") if existing and workflow == "update" else None
+    has_page = bool(proj.get("entry") or proj.get("build_dir"))
+    # a redesign, a gameplay pass or a polish pass is judged by what it changed: the evaluator that owns the focus measures
+    # the project before the work and compares after it (verify), and that comparison is a gate. Everything else stays advisory.
+    before = {}
+    if version >= 2 and web and has_page and focus in ("visual", "polish") and q.get("pixelcraft"): before["pixelcraft"] = "baseline.pixelcraft"
+    if version >= 2 and web and has_page and focus in ("gameplay", "polish") and q.get("playcraft"): before["playcraft"] = "baseline.playcraft"
+    if small_change:
+        decisions.append(f"{workflow} of an existing project: PLAYCRAFT/PIXELCRAFT scores are reported (advisory), not imposed"
+                         + (f"; except the {' and '.join(sorted(before))} before/after comparison, which this {pmode.get('assignment') or focus} is judged by" if before else ""))
 
     # ---------------------------------------------------------------- foundation
     # a new project gets its folders; an existing one gets nothing it did not ask for (integration makes a folder
@@ -82,6 +95,20 @@ def build(spec, disc, version=1):
           action="scaffold", params={"dirs": [] if existing else [f"{asset_dir}/{s}" for s in ("audio", "levels", "fx", "brand", "materials", "models", "icons")],
                                      "starter": starter, "title": spec["title"]}))
     if starter: decisions.append(f"starter: {starter} (production/kit/starters) copied into the new, empty project: the standards are wired in from the first file")
+    direct = None
+    if version >= 2 and _direction.scope(spec):
+        direct = "design.direction"
+        add(T(direct, "Creative direction: " + " and ".join({"art": "the look", "play": "the play", "interaction": "the interaction"}[x] for x in _direction.scope(spec))
+              + ", decided before the build", "design", "agent", deps=["foundation.scaffold"] + list(before.values()), work_order=_direction.work_order(spec)))
+        decisions.append("direction first: the build is held to design.direction (" + ", ".join(_direction.scope(spec)) + "); its playtest and look questions go to a person at release")
+    if "pixelcraft" in before:
+        add(T(before["pixelcraft"], "PIXELCRAFT baseline: the interface as it is, before the change", "design", "studio", department="pixelcraft", action="audit",
+              params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft_before"},
+              deps=["foundation.scaffold"], resources=["browser"], timeout=1200, advisory=True))
+    if "playcraft" in before:
+        add(T(before["playcraft"], "PLAYCRAFT baseline: the game as it plays, before the change", "design", "studio", department="playcraft", action="pass",
+              params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft_before"},
+              deps=["foundation.scaffold"], resources=["browser"], timeout=1200, advisory=True))
     if spec.get("backend", {}).get("provider") == "postgres":
         add(T("backend.provision", "Hosted Postgres for development and production (needs your approval)", "foundation", "agent", deps=["foundation.scaffold"],
               criterion="backend", work_order={"approval": "infrastructure", "tools": ["Neon (connected): create_project / create_branch / get_connection_string", "Vercel (connected): create_project_env"],
@@ -93,10 +120,12 @@ def build(spec, disc, version=1):
     identity = None
     if a.get("identity"):
         identity = "foundation.identity"
-        add(T(identity, "Original visual identity: palette and logo", "foundation", "agent", deps=["foundation.scaffold"],
+        add(T(identity, "Original visual identity: palette and logo", "foundation", "agent", deps=["foundation.scaffold"] + ([direct] if direct else []),
               work_order={"tools": ["vectorcraft (draw_shape, draw_path, add_text, export SVG/PNG)"],
                           "brief": f"An original visual identity for {spec['title']}: {spec['prompt'][:300]}",
-                          "instructions": ["Derive the palette from the prompt's mood and setting; keep it original (no existing brand).",
+                          "instructions": [("Take the palette from the approved direction (direction.json in the hand-off: art.palette), and draw the logo from its art.concept and "
+                                            "shape language; keep it original (no existing brand)." if direct else
+                                            "Derive the palette from the prompt's mood and setting; keep it original (no existing brand)."),
                                            "Write palette.json as {\"background\": \"#rrggbb\", \"primary\": \"#rrggbb\", \"accent\": \"#rrggbb\", \"text\": \"#rrggbb\"}.",
                                            "Make logo.svg (wordmark + mark) with VectorCraft; export, then look at it. The app icon is the App Icon Studio's job (icon.concepts)."],
                           "expected": [{"path": "palette.json", "format": "json", "keys": ["background", "primary", "accent", "text"]},
@@ -209,8 +238,20 @@ def build(spec, disc, version=1):
                                       + ([{"path": "$project/tests/gitcraft.features.json", "format": "json", "keys": ["features"], "validate": "features"}] if _features_required(spec) else []),
                           "inputs": "the integrated-assets manifest (handoff) lists every asset path with its role",
                           "license": "owned by the project"}))
+    if d == "tool":   # no page to open: the tool is built (or changed) to its brief and proven by its own tests
+        add(T("build", f"{'Change' if existing else 'Build'} the tool: {spec['title']}", "integration", "agent", deps=["foundation.scaffold"],
+              work_order={"brief": spec["prompt"], "instructions": _tool_instructions(spec), "expected": [{"path": "$project/README.md", "format": "text"}],
+                          "license": "owned by the project"}))
     # ---------------------------------------------------------------- quality assurance (parallel; each failure spawns a fix + re-verification)
     qa = []
+    if d == "tool":
+        qa.append("qa.tests")
+        add(T("qa.tests", "The tool's own tests pass (run as the project runs them)", "qa", "builtin", action="check_tests", deps=["build"],
+              params={"required": not existing}, criterion="tests_pass", gate=[{"type": "status_ok"}], timeout=900))
+        if existing and workflow != "review":
+            qa.append("qa.preserve")
+            add(T("qa.preserve", "Preservation: existing files, secrets and CI/deploy intact", "qa", "builtin", action="check_preserve",
+                  params={"kind": d, "allow": pmode.get("allow") or []}, deps=["build"], criterion="preservation", gate=[{"type": "status_ok"}]))
     if web:
         tgt = "$target"   # the evaluation target: one folder for every browser check (production/artifacts.py)
         qa.append("qa.smoke")
@@ -223,16 +264,28 @@ def build(spec, disc, version=1):
                   criterion="performance"))
         if q.get("playcraft"):
             qa.append("qa.playcraft")
-            add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
-                  params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
-                  deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
-                  gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
+            if "playcraft" in before:
+                add(T("qa.playcraft", "PLAYCRAFT before / after: the same probe on the changed game, no gameplay regression", "qa", "studio", department="playcraft",
+                      action="verify", params={"baseline": {"$from": before["playcraft"], "role": "report", "format": "json"}, "project": "$project", "target": "$target",
+                                               **_playcraft_hints(spec), "name": "playcraft"},
+                      deps=["build", before["playcraft"]], resources=["browser"], timeout=1500, criterion="gameplay_quality", gate=[{"type": "status_ok"}]))
+            else:
+                add(T("qa.playcraft", "PLAYCRAFT: play the build and score gameplay quality", "qa", "studio", department="playcraft", action="pass",
+                      params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
+                      deps=["build"], resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=small_change,
+                      gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["playcraft_min"], "label": "PLAYCRAFT overall"}]))
         if q.get("pixelcraft"):
             qa.append("qa.pixelcraft")
-            add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability at iPhone 17, iPhone 13, desktop", "qa", "studio", department="pixelcraft", action="audit",
-                  params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
-                  deps=["build"], resources=["browser"], timeout=1200, criterion="interface_quality", advisory=small_change,
-                  gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["pixelcraft_min"], "label": "PIXELCRAFT overall"}]))
+            if "pixelcraft" in before:
+                add(T("qa.pixelcraft", "PIXELCRAFT before / after: the same screens and viewports on the changed interface, no regression", "qa", "studio",
+                      department="pixelcraft", action="verify",
+                      params={"baseline": {"$from": before["pixelcraft"], "role": "audit", "format": "json"}, "project": "$project", "target": "$target", "name": "pixelcraft"},
+                      deps=["build", before["pixelcraft"]], resources=["browser"], timeout=1500, criterion="interface_quality", gate=[{"type": "status_ok"}]))
+            else:
+                add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability at iPhone 17, iPhone 13, desktop", "qa", "studio", department="pixelcraft", action="audit",
+                      params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
+                      deps=["build"], resources=["browser"], timeout=1200, criterion="interface_quality", advisory=small_change,
+                      gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["pixelcraft_min"], "label": "PIXELCRAFT overall"}]))
         if q.get("designcraft"):
             qa.append("qa.designcraft")
             add(T("qa.designcraft", "DESIGNCRAFT: structural game-design review (advisory)", "qa", "designcraft", action="assess", params={"project": "$project"},
@@ -293,7 +346,7 @@ def build(spec, disc, version=1):
               criterion="loads_everywhere"))
         rel_deps = qa + ["release.regression"]
     else:
-        rel_deps = prod
+        rel_deps = prod + qa
     add(T("release.report", "Release report: every acceptance criterion with its evidence", "release", "builtin", action="release", deps=rel_deps,
           criterion="release_ready", gate=[{"type": "status_ok"}]))
     if spec["features"].get("deploy"):
@@ -409,21 +462,60 @@ WORKFLOW_BRIEF = {
 }
 
 
+# the assignment (production/understanding.py) says what kind of change an "update" is; each is a different job
+ASSIGNMENT_BRIEF = {
+    "redesign": "Redesign how this {kind} looks{req}. What it does stays exactly as it is: every feature, mechanic, control, piece of content and saved value "
+                "behaves as before. Change presentation only (layout, type, colour, spacing, motion, art), to the approved direction.",
+    "gameplay": "Improve how this {kind} plays{req}. Find the cause in play before changing code: play it, name what is wrong in the terms of the direction "
+                "(loop, feel numbers, feedback, curve), change that, and play again. The look, the assets and a player's save stay as they are.",
+    "polish": "Polish this {kind}{req}: the same product, executed better. Work down the baseline's findings (PIXELCRAFT, and PLAYCRAFT for a game), most "
+              "noticeable first. No new features, no redesign, no restructuring.",
+    "integrate": "Make the requested asset{req} with its department and wire it into this {kind} where the request says. Add it beside what exists; replace "
+                 "nothing without approval. The code changes only where the asset is loaded and used.",
+    "rebuild": "A rebuild was asked for{req}. The Decision Room's answer says what may be replaced and what carries over: replace only that, and migrate "
+               "everything named as carried over (saved data, content, the deployed address). Anything not covered by the answer stays.",
+}
+
+
 def _existing_instructions(spec):
     mode, d = spec.get("mode") or {}, spec["deliverable"]
     req = f" ({mode['request']})" if mode.get("request") else ""
-    ins = [WORKFLOW_BRIEF.get(mode.get("workflow"), WORKFLOW_BRIEF["update"]).format(kind=d, req=req),
+    brief = ASSIGNMENT_BRIEF.get(mode.get("assignment")) if mode.get("workflow") == "update" else None
+    ins = [(brief or WORKFLOW_BRIEF.get(mode.get("workflow"), WORKFLOW_BRIEF["update"])).format(kind=d, req=req),
            f"Work in the existing architecture and conventions ({spec['platform'].get('engine') or 'as found'}): same framework, file layout, style and naming; "
            "no migrations, new frameworks, scaffolding, rebranding, new icon or redesign unless the blueprint approved them.",
            "Never touch secrets or .env files, production data or user-created content. Keep the CI, deployment and environment configuration as they are "
            "unless the change cannot work without editing them (then say so in the submission notes).",
            "Commit on a feature branch in the project, following its own PR conventions."]
+    if mode.get("carry_over"): ins.append(f"Carries over (the person's answer): {mode['carry_over']}")
     if d == "game":
         ins.append("This is an existing game: preserve its gameplay, mechanics, controls, levels, art direction, audio and assets, and its saved data and "
-                   "progression (the same storage keys and formats; a player's existing save must still load). Change them only where the blueprint says.")
+                   "progression (the same storage keys and formats; a player's existing save must still load). Change them only where the blueprint says"
+                   + {"redesign": " (this redesign changes the presentation, never the play).", "gameplay": " (this pass changes the play, never the look).",
+                      "polish": "."}.get(mode.get("assignment"), "."))
     ins.append("qa.preserve checks this: no deleted files, untouched secrets/CI/deploy" + (", unchanged game assets and every save key still used" if d == "game" else "")
                + ". An approved exception goes in through production_revise (mode.allow).")
     return ins
+
+
+def mode_focus(spec):
+    m = spec.get("mode") or {}
+    return m.get("focus") if m.get("existing") and m.get("workflow") == "update" else None
+
+
+def _tool_instructions(spec):
+    mode = spec.get("mode") or {}
+    if mode.get("existing"):
+        return _existing_instructions(spec) + ["A tool is proven by its tests: add or extend a test for the change, and run the project's own test command before submitting. "
+                                               "Update the README where the behaviour a person sees changed.", "Submit the files you changed."]
+    return ["Build the tool in the project folder, in the language and packaging the brief names (otherwise the one its users already have: Python standard library "
+            "or Node without a build step). One job, done well: no web UI, icon, branding or deployment unless the brief asks.",
+            "Interface: a --help that shows a real example; errors that say what was wrong and what to do, on stderr with a non-zero exit; nothing destructive "
+            "without an explicit flag, and a --dry-run where it changes files.",
+            "Tests that run with one standard command and no network (python3 -m unittest / pytest, or npm test): the main path, the edge cases the brief implies "
+            "and at least one failure path. qa.tests runs them; a tool without passing tests is not done.",
+            "README.md: what it does in one sentence, install, the example from --help, every option.",
+            "Run it yourself on real input before submitting, and submit the files you changed."]
 
 
 def _review_plan(spec, proj, decisions):
@@ -501,6 +593,10 @@ def _build_instructions(spec, v2=False):
         from . import standards as _std
         ins += _std.instructions(spec.get("engineering", {}).get("profile", "personal"), spec["deliverable"])[1:2]
         if a.get("sfx") or a.get("music"): ins.append("Wire the new sounds in where the request says; existing sounds stay.")
+        if v2: ins += _direction.build_lines(spec)
+        if v2 and mode_focus(spec) in ("visual", "gameplay", "polish"):
+            ins.append("The project was measured before your change (the baseline in the hand-off) and is measured again after it with the same screens and probe. "
+                       "Read the baseline's findings first; a regression against it fails this work.")
         ins.append("Submit the files you changed.")
         return ins
     ins = [f"Implement a complete {spec['deliverable']} in the project folder (entry index.html), original in name, art and mechanics.",
@@ -513,6 +609,7 @@ def _build_instructions(spec, v2=False):
     if spec["deliverable"] == "game":
         ins += ["A full loop: start screen → play → fail/win → retry in one tap; clear objective; difficulty that ramps.",
                 "Progression that is saved (localStorage), a best score or unlocks; pause; mute."]
+    if v2: ins += _direction.build_lines(spec)
     if a.get("levels"): ins.append(f"Load the {a['levels']['count']} level files (level_data JSON) in order; reaching the exit advances.")
     if a.get("sfx") or a.get("music"): ins.append("Play the sound effects on their events and loop the music after the first input (autoplay policy).")
     from . import standards as _std

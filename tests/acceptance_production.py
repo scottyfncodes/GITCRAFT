@@ -41,6 +41,11 @@ def check(label, cond, detail=""):
     return bool(cond)
 
 
+def code_path_open(T):
+    """The code path (design.direction → build) is waiting for the agent, not blocked by anything on the asset path."""
+    return T["design.direction"]["state"] == "awaiting_agent" and T["build"]["state"] == "pending" or T["build"]["state"] == "awaiting_agent"
+
+
 def server():
     return Client([os.path.join(REPO, "scripts", "mcp.sh"), "studiocraft"], env=env, log=os.path.join(ws, "studiocraft.log"))
 
@@ -134,7 +139,7 @@ def part_a(c):
     # ---- 5. dependency order
     pos = {t: i for i, g in enumerate(plan["parallel_groups"]) for t in g}
     check("5 order (plan v2): foundation → build (beside the assets) ; assets → integrate.<asset> → integrate.final → build.wire → QA → regression → release report → deploy",
-          load(pid).get("plan_version") == 2 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity"}
+          load(pid).get("plan_version") == 2 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity", "design.direction"}
           and all(pos[t] < pos[f"integrate.{t}"] < pos["integrate.final"] for t in T if t.startswith(("audio.", "levels.", "vfx.")))
           and max(pos["build"], pos["integrate.final"]) < pos["build.wire"] < min(pos[t] for t in T if t.startswith("qa."))
           <= max(pos[t] for t in T if t.startswith("qa.")) < pos["release.regression"] < pos["release.report"] < pos["release.deploy"])
@@ -151,6 +156,10 @@ def part_a(c):
 
     # ---- run: production departments, then the identity work order
     st = call(c, "production_run", {"production": pid})
+    check("direction first: the run stops at the creative direction, before the identity or any code",
+          st["status"] == "awaiting_agent" and tasks_in(st, "awaiting_agent") == ["design.direction"], tasks_in(st, "awaiting_agent"))
+    dorder = json.load(open(os.path.join(load(pid)["store"], "tasks", "design.direction", "work_order.json")))
+    st = call(c, "production_submit", {"production": pid, "task": "design.direction", "files": agent.direction(dorder), "notes": "Lantern Drift: look and play"})
     check("run stops at the agent's identity work order", st["status"] == "awaiting_agent" and "foundation.identity" in tasks_in(st, "awaiting_agent"), st["counts"])
     prod = load(pid)
     first_wave = [t for t in prod["tasks"] if t.startswith(("audio.", "levels.")) or t == "vfx.sparks"]
@@ -308,7 +317,7 @@ def part_b(c):
     check("B2 failed department: retried once, then failed with its error", T["audio.broken"]["state"] == "failed" and len(T["audio.broken"]["attempts"]) == 2, T["audio.broken"].get("error"))
     check("B independent tasks still completed", T["audio.sfx.click"]["state"] == "passed" and T["audio.coin_a"]["state"] == "passed" and T["audio.coin_b"]["state"] == "passed")
     check("B2 integration of a failed asset does not start (blocked, nothing copied); the final integration is blocked, the code build is not",
-          T["integrate.audio.broken"]["state"] == "blocked" and T["integrate.final"]["state"] == "blocked" and T["build"]["state"] == "awaiting_agent"
+          T["integrate.audio.broken"]["state"] == "blocked" and T["integrate.final"]["state"] == "blocked" and code_path_open(T)
           and not os.path.exists(os.path.join(ws, "neg", "assets", "audio", "corrupt.wav")), {k: T[k]["state"] for k in ("integrate.audio.broken", "integrate.final", "build")})
     rep_ = call(c, "production_report", {"production": pid})
     check("B production status is honest: never passed while an asset failed (plan v2 keeps building, so it is awaiting the agent), and not READY",
@@ -326,7 +335,7 @@ def part_b(c):
           loser.get("failure") == "conflict" and "audio.coin_" in (loser.get("error") or "") and sorted(x["state"] for x in ab) == ["failed", "passed"]
           and json.load(open(os.path.join(ws, "neg2", "gitcraft.assets.json")))["assets"]["assets/audio/pickup.ogg"]["task"] in ("audio.coin_a", "audio.coin_b"),
           [(x["id"], x["state"], x.get("error")) for x in ab])
-    check("B3 conflict blocks the final integration and the release, not the code build", T["integrate.final"]["state"] == "blocked" and T["build"]["state"] == "awaiting_agent")
+    check("B3 conflict blocks the final integration and the release, not the code build", T["integrate.final"]["state"] == "blocked" and code_path_open(T))
     # an existing different asset is never overwritten without approval
     proj = os.path.join(ws, "neg3"); os.makedirs(os.path.join(proj, "assets", "fx"))
     tiny_png(os.path.join(proj, "assets", "fx", "sparks_flipbook.png"))   # the project's own (different) art

@@ -1,0 +1,403 @@
+[
+ {
+  "case": "A new game",
+  "request": "A cozy lighthouse keeper game where you guide ships through fog at night, mobile-first",
+  "project": null,
+  "status": "planned",
+  "assignment": "build",
+  "workflow": "build",
+  "focus": null,
+  "because": null,
+  "deliverable": "game",
+  "tasks": 22,
+  "decides_first": [
+   "design.direction"
+  ],
+  "agent_work": [
+   "design.direction",
+   "icon.concepts",
+   "icon.master",
+   "build.wire",
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.playcraft",
+   "qa.pixelcraft",
+   "qa.icons",
+   "qa.attribution",
+   "qa.standards",
+   "qa.assets",
+   "qa.licences",
+   "qa.request"
+  ],
+  "advisory": [
+   "qa.designcraft"
+  ],
+  "essential_questions": [],
+  "preserve": null,
+  "done_when": null
+ },
+ {
+  "case": "D new app",
+  "request": "Build a habit tracker for my phone",
+  "project": null,
+  "status": "planned",
+  "assignment": "build",
+  "workflow": "build",
+  "focus": null,
+  "because": null,
+  "deliverable": "app",
+  "tasks": 21,
+  "decides_first": [
+   "design.direction"
+  ],
+  "agent_work": [
+   "design.direction",
+   "icon.concepts",
+   "icon.master",
+   "build.wire",
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.pixelcraft",
+   "qa.features",
+   "qa.icons",
+   "qa.attribution",
+   "qa.standards",
+   "qa.assets",
+   "qa.licences",
+   "qa.request"
+  ],
+  "advisory": [],
+  "essential_questions": [],
+  "preserve": null,
+  "done_when": null
+ },
+ {
+  "case": "new tool",
+  "request": "Make a CLI utility that renames photos by EXIF date",
+  "project": null,
+  "status": "planned",
+  "assignment": "build",
+  "workflow": "build",
+  "focus": null,
+  "because": null,
+  "deliverable": "tool",
+  "tasks": 4,
+  "decides_first": [],
+  "agent_work": [
+   "build"
+  ],
+  "gates": [
+   "qa.tests"
+  ],
+  "advisory": [],
+  "essential_questions": [],
+  "preserve": null,
+  "done_when": null
+ },
+ {
+  "case": "F assets alone",
+  "request": "I need a jump sound effect and a coin pickup sound",
+  "project": null,
+  "status": "direct",
+  "assignment": "asset",
+  "workflow": "direct",
+  "focus": null,
+  "because": "asks for sound effect only",
+  "steps": [
+   [
+    "audiocraft_sfx",
+    {
+     "preset": "coin"
+    }
+   ],
+   [
+    "audiocraft_sfx",
+    {
+     "preset": "jump"
+    }
+   ]
+  ]
+ },
+ {
+  "case": "B continue a partial game",
+  "request": "keep going",
+  "project": "blip",
+  "status": "planned",
+  "assignment": "continue",
+  "workflow": "continue",
+  "focus": null,
+  "because": "'keep going'",
+  "deliverable": "game",
+  "tasks": 13,
+  "decides_first": [],
+  "agent_work": [
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.playcraft",
+   "qa.pixelcraft",
+   "qa.preserve"
+  ],
+  "advisory": [
+   "qa.designcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "everything that already works: it is built on, not rebuilt, renamed or restructured",
+   "saved data (blip.highScore): the same keys and formats"
+  ],
+  "done_when": "the unfinished items in the Discovery inventory are built, most important first, and what worked before still works"
+ },
+ {
+  "case": "C improve gameplay",
+  "request": "The game feels boring, make it more fun",
+  "project": "blip",
+  "status": "planned",
+  "assignment": "gameplay",
+  "workflow": "update",
+  "focus": "gameplay",
+  "because": "'feels boring'",
+  "deliverable": "game",
+  "tasks": 15,
+  "decides_first": [
+   "design.direction",
+   "baseline.playcraft"
+  ],
+  "agent_work": [
+   "design.direction",
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.playcraft",
+   "qa.preserve"
+  ],
+  "advisory": [
+   "qa.pixelcraft",
+   "qa.designcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "how it looks: the art direction, assets and audio stay",
+   "saved progress: an existing save still loads",
+   "the mechanics you did not name",
+   "saved data (blip.highScore): the same keys and formats"
+  ],
+  "done_when": "PLAYCRAFT plays the game before and after with the same probe: no regression, the named problem measurably addressed, and a person has played both"
+ },
+ {
+  "case": "C redesign visuals",
+  "request": "Redesign the visuals, it looks dated",
+  "project": "blip",
+  "status": "planned",
+  "assignment": "redesign",
+  "workflow": "update",
+  "focus": "visual",
+  "because": "'redesign'",
+  "deliverable": "game",
+  "tasks": 15,
+  "decides_first": [
+   "design.direction",
+   "baseline.pixelcraft"
+  ],
+  "agent_work": [
+   "design.direction",
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.pixelcraft",
+   "qa.preserve"
+  ],
+  "advisory": [
+   "qa.playcraft",
+   "qa.designcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "what it does: features, mechanics, controls, content and saved data behave exactly as before",
+   "the project's identity where it has one (name, logo, icon), unless you asked to change it",
+   "saved data (blip.highScore): the same keys and formats"
+  ],
+  "done_when": "PIXELCRAFT measures the interface before and after on the same screens: better or equal on every score, no regression, and a person has looked at both"
+ },
+ {
+  "case": "repair",
+  "request": "The player falls through the floor sometimes",
+  "project": "blip",
+  "status": "planned",
+  "assignment": "repair",
+  "workflow": "fix",
+  "focus": null,
+  "because": "'falls through'",
+  "deliverable": "game",
+  "tasks": 13,
+  "decides_first": [],
+  "agent_work": [
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.preserve"
+  ],
+  "advisory": [
+   "qa.playcraft",
+   "qa.pixelcraft",
+   "qa.designcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "everything except the defect: no redesign, no refactor, no new feature",
+   "saved data (blip.highScore): the same keys and formats"
+  ],
+  "done_when": "the defect is reproduced, fixed and covered by a regression check; nothing else changed"
+ },
+ {
+  "case": "F integrate an asset",
+  "request": "Make an explosion sound and put it in the game",
+  "project": "blip",
+  "status": "planned",
+  "assignment": "integrate",
+  "workflow": "update",
+  "focus": "asset",
+  "because": "'make an explosion sound'",
+  "deliverable": "game",
+  "tasks": 28,
+  "decides_first": [],
+  "agent_work": [
+   "build.wire",
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.preserve",
+   "qa.assets",
+   "qa.licences"
+  ],
+  "advisory": [
+   "qa.playcraft",
+   "qa.pixelcraft",
+   "qa.designcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "every existing asset: the new one is added, nothing is replaced without your approval",
+   "the code around the place it is wired in",
+   "saved data (blip.highScore): the same keys and formats"
+  ],
+  "done_when": "the asset opens as its format, is referenced by the build, has a recorded licence, and the build still loads clean"
+ },
+ {
+  "case": "rebuild",
+  "request": "Rebuild this from scratch in Phaser",
+  "project": "blip",
+  "status": "planned",
+  "assignment": "rebuild",
+  "workflow": "update",
+  "focus": null,
+  "because": "'rebuild'",
+  "deliverable": "game",
+  "tasks": 13,
+  "decides_first": [],
+  "agent_work": [
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.preserve"
+  ],
+  "advisory": [
+   "qa.playcraft",
+   "qa.pixelcraft",
+   "qa.designcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [
+   "carry_over"
+  ],
+  "preserve": [
+   "whatever you say must carry over (asked first)",
+   "saved data (blip.highScore): the same keys and formats"
+  ],
+  "done_when": "decided with you once you have said what carries over"
+ },
+ {
+  "case": "E targeted app change",
+  "request": "Add dark mode",
+  "project": "taskboard",
+  "status": "planned",
+  "assignment": "feature",
+  "workflow": "update",
+  "focus": null,
+  "because": "'add'",
+  "deliverable": "app",
+  "tasks": 11,
+  "decides_first": [],
+  "agent_work": [
+   "build"
+  ],
+  "gates": [
+   "qa.smoke",
+   "qa.preserve"
+  ],
+  "advisory": [
+   "qa.pixelcraft",
+   "qa.features",
+   "qa.standards",
+   "qa.request"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "everything the request does not name"
+  ],
+  "done_when": "the named change works and is checked in a browser, and nothing else changed"
+ },
+ {
+  "case": "audit",
+  "request": "Is this ready to launch?",
+  "project": "taskboard",
+  "status": "planned",
+  "assignment": "audit",
+  "workflow": "review",
+  "focus": null,
+  "because": "a question about the project, not a change",
+  "deliverable": "app",
+  "tasks": 4,
+  "decides_first": [],
+  "agent_work": [],
+  "gates": [
+   "qa.smoke"
+  ],
+  "advisory": [
+   "qa.pixelcraft",
+   "qa.standards"
+  ],
+  "essential_questions": [],
+  "preserve": [
+   "everything: a review measures and reports, it changes nothing"
+  ],
+  "done_when": "a report of the project as it is, every claim measured or marked as not evaluated"
+ }
+]

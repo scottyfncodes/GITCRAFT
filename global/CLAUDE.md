@@ -14,7 +14,9 @@ gameplay quality, and PIXELCRAFT: visual quality and UI/UX). The `gitcraft` skil
 project): follow the `produce` skill and call studiocraft `production_start` with
 the person's words verbatim and the project folder. It detects new vs existing
 and the project's maturity (partial, nearly complete, finished; game/app/site),
-picks the workflow, preserves existing work, and opens the Decision Room. A
+picks the workflow, names the assignment (a repair, a redesign, a gameplay pass,
+an audit and a rebuild are different jobs), preserves existing work, and opens the
+Decision Room. Assets alone come back as `direct` steps for the departments. A
 repository URL that isn't cloned yet returns the clone command to run first.
 
 "Run GITCRAFT report": call `production_start` the same way (or studiocraft

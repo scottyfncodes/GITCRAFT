@@ -65,7 +65,11 @@ def decisions(spec, disc, icon_state=None):
         wf = mode.get("workflow") or "update"
         opts = [{"value": w, "label": WORKFLOW[w].split(":")[0], "tradeoff": WORKFLOW[w].split(":", 1)[1].strip()} for w in ("continue", "complete", "update", "fix", "review")]
         opts.sort(key=lambda o: o["value"] != wf)
-        if mode.get("question") and not mode.get("request"):
+        if mode.get("assignment") == "rebuild":   # replacing existing work is never a default: the person says what may go, first
+            out.append(_d("carry_over", "What a rebuild may replace", mode.get("question") or "What may be replaced, and what must carry over?", None, [],
+                          {"$answer": {"mode": {"carry_over": "$answer"}}},
+                          "essential: a rebuild replaces work that exists; nothing is thrown away on a guess", kind="question"))
+        elif mode.get("question") and not mode.get("request"):
             out.append(_d("request", "What should change", mode["question"], None, [], {"$answer": {"mode": {"request": "$answer"}}},
                           "essential: the project looks finished, so GITCRAFT changes only what you name", kind="question"))
         # what kind of project it is decides which departments judge it (PLAYCRAFT and DESIGNCRAFT only judge games):
@@ -85,10 +89,17 @@ def decisions(spec, disc, icon_state=None):
                           {o["value"]: {"deliverable": o["value"], "mode": {"kind": o["value"], "kind_confidence": "stated"}} for o in kopts},
                           ("essential: the reading is uncertain, and a wrong one scores the project with the wrong departments" if weak
                            else "decides which departments judge it; the Discovery Report shows the evidence"), kind="question" if weak else "choice"))
+        asg = mode.get("assignment")
+        what = {"redesign": "Redesign how it looks; what it does stays exactly as it is", "gameplay": "Improve how it plays; the look, the assets and saves stay",
+                "polish": "Polish it: the same product, executed better; no new features and no redesign",
+                "integrate": "Make the requested asset and wire it in beside what exists; nothing is replaced",
+                "rebuild": "Rebuild it, replacing only what you say may go"}.get(asg) or WORKFLOW[wf].split(':', 1)[1].strip().capitalize()
+        keep = "; ".join((mode.get("preserve") or [])[:3])
         out.append(_d("scope", "What GITCRAFT will do", f"This looks like a {mat} {mode.get('kind') or spec['deliverable']} ({mode.get('confidence')} confidence). "
-                      f"{WORKFLOW[wf].split(':', 1)[1].strip().capitalize()}" + (f": {mode['request']}" if mode.get("request") else "") + "?",
-                      wf, opts, {o["value"]: {"mode": {"workflow": o["value"]}} for o in opts},
-                      f"read as '{wf}' because of {mode.get('because')}; the Discovery Report shows the evidence. Existing work is preserved (qa.preserve)."))
+                      f"{what}" + (f": {mode['request']}" if mode.get("request") else "") + "?",
+                      wf, opts, {o["value"]: {"mode": {"workflow": o["value"]} if o["value"] == wf else {"workflow": o["value"], "assignment": None, "focus": None}} for o in opts},
+                      f"read as '{asg or wf}' because of {mode.get('because')}; the Discovery Report shows the evidence. Existing work is preserved (qa.preserve)"
+                      + (f": {keep}." if keep else ".") + (f" Done when: {mode['done_when']}." if mode.get("done_when") else "")))
     else:
         out.append(_d("scope", "What gets built", f"Build {spec['title']} as a {spec['dimension'].upper()} {d}"
                       + (f" ({', '.join(spec['genres'])})" if spec.get("genres") else "") + f" with {', '.join(feats + assets) or 'the core features'}?",
@@ -109,8 +120,10 @@ def decisions(spec, disc, icon_state=None):
                       "Existing code is reused, never rewritten." if found else "The lightest stack that does the job is the default."))
         keep_design = existing or bool(proj.get("assets", {}).get("vector"))
         ident = bool(spec["assets"].get("identity"))
+        redesign = existing and mode.get("focus") in ("visual", "polish") and mode.get("workflow") == "update"
         out.append(_d("design", "Design direction", "Give it an original visual identity (palette, logo) derived from the idea?" if not keep_design
-                      else "Keep the project's existing look and brand (no redesign)?",
+                      else ("Keep the project's name, logo and icon while its look is reworked (design.direction decides the new look before anything changes)?" if redesign
+                            else "Keep the project's existing look and brand (no redesign)?"),
                       ("original" if ident else "keep") if not keep_design else "keep",
                       [{"value": "original", "label": "Original identity", "tradeoff": "a palette and logo made for this app with VectorCraft"},
                        {"value": "keep", "label": "Keep it simple" if not keep_design else "Keep what the project has",

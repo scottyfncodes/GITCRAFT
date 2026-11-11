@@ -20,7 +20,7 @@
 
 Returns the lifecycle view (stage, summary, Decision Room, Discovery Report) plus the routing it chose and why."""
 import os, re
-from . import roots, inside_roots, engine, maturity, store
+from . import roots, inside_roots, engine, maturity, store, understanding
 
 REPO = re.compile(r"(?:https?://)?(?:www\.)?github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git)?(?=[/#?\s]|$)", re.I)
 PATH = re.compile(r"(?<![\w:/])(/[\w.@~+-]+(?:/[\w.@~+-]+)+)")
@@ -136,25 +136,81 @@ def start(text, project=None, store_dir=None, overrides=None, issues=None):
         if len((r["request"] or "").strip()) < 12:
             return {"status": "needs_input", "routing": r, "question": "What would you like to make? A sentence is enough: who it is for and what it should do.",
                     "why": "a new project needs an idea to plan from"}
+        alone = understanding.standalone(r["request"])
+        if alone and not (overrides or {}).get("deliverable"):   # assets and nothing else: the departments make them, no production around them
+            return direct(r, alone)
         pr = engine.plan(r["request"], proj, overrides, store_dir=store_dir)
-        return dict(engine.lifecycle_view(pr), routing=dict(r, maturity="new", workflow="build", why=maturity.WORKFLOW["build"]))
-    intent, because = maturity.intent(r["request"], a["maturity"])
-    question = None
+        u = understanding.model(r["request"], a, {"assignment": "build", "workflow": "build", "focus": None, "because": "a new project"}, kind=pr["spec"]["deliverable"])
+        return dict(engine.lifecycle_view(pr), understanding=u, routing=dict(r, maturity="new", assignment="build", workflow="build", why=maturity.WORKFLOW["build"]))
+    reading = understanding.classify(r["request"], a["maturity"])
+    intent, because = reading["workflow"], reading["because"]
+    question = reading.get("question")
     if intent == "update" and _vague(r["request"]) and a["maturity"] == "finished":
         question = "This project looks finished. What should change? (GITCRAFT changes only what you name, plus the fixes it needs.)"
     stated = _stated_kind(r["request"])   # the person's own words beat the heuristic
     kind = stated or a["kind"]
+    if reading.get("focus") == "gameplay" and kind != "game":   # "the controls feel sluggish" in an app is about the interface
+        reading = dict(reading, assignment="polish" if reading["assignment"] == "gameplay" else reading["assignment"], focus="visual")
     prompt =(r["request"] if len(r["request"]) >= 12 else "") or f"{maturity.WORKFLOW[intent].split(':')[0].capitalize()} this existing {kind}"
     if kind and not re.search(r"\b(game|app|application|site|website|tool|toolkit|dashboard|library|cli)\b", prompt, re.I): prompt += f" (an existing {kind})"
+    u = understanding.model(r["request"], a, reading, kind=kind)
     mode = {"existing": True, "maturity": a["maturity"], "kind": kind, "workflow": intent, "because": because, "confidence": a["confidence"],
+            "assignment": reading["assignment"], "focus": reading.get("focus"), "preserve": u["preserve"], "done_when": u["done_when"],
             "kind_confidence": "stated" if stated else a.get("kind_confidence"),
             "kind_evidence": [f"you called it {'an' if stated == 'app' else 'a'} {stated}"] if stated else a.get("kind_evidence"),
             "request": r["request"] if not _vague(r["request"]) else None, "question": question, "repository": r["repository"]}
     ov = {"mode": mode, "deliverable": kind or "app"}
+    if a.get("name"): ov["title"] = a["name"]   # an existing project is called what it calls itself
     if kind == "game" and a.get("engines"): ov["platform"] = {"engine": next((e for e in a["engines"] if e != "canvas"), a["engines"][0])}
     if overrides:
         from .intake import merge
         ov = merge(ov, overrides)
     pr = engine.plan(prompt, proj, ov, store_dir=store_dir, assessment=a)
-    return dict(engine.lifecycle_view(pr), routing=dict(r, maturity=a["maturity"], kind=kind, confidence=a["confidence"], workflow=intent,
-                                                       because=because, why=maturity.WORKFLOW[intent], question=question))
+    return dict(engine.lifecycle_view(pr), understanding=u,
+                routing=dict(r, maturity=a["maturity"], kind=kind, confidence=a["confidence"], assignment=reading["assignment"], focus=reading.get("focus"),
+                             workflow=intent, because=because, why=understanding.SAY.get(reading["assignment"]) or maturity.WORKFLOW[intent], question=question))
+
+
+CRAFT = [(r"\b(logos?|icons?|wordmarks?|illustrations?|vector art|svg)\b", "vectorcraft", "draw it as vectors, export SVG and PNG, then look at the export"),
+         (r"\b(posters?|flyers?|brochures?|business cards?|menus?|layouts?)\b", "designcraft", "lay it out, export PDF and a page render, then look at it"),
+         (r"\b(photos?|retouch|image edit|composite|psd)\b", "photocraft", "edit the raster, export PNG, then look at it"),
+         (r"\b(animated titles?|motion graphics?|lower thirds?|title sequence)\b", "effectcraft", "animate it, render a preview, then watch it")]
+
+
+def direct(r, alone):
+    """Assets and nothing else: no production, no scaffold, no icon. The Studio's router names the department and action
+    for each; the agent calls them, looks at the result, and stops."""
+    import sys
+    from . import REPO
+    if os.path.join(REPO, "studio") not in sys.path: sys.path.insert(0, os.path.join(REPO, "studio"))
+    try:
+        from core import routing
+        res = routing.route(r["request"], limit=4)
+    except Exception as e:   # the router is advice: without it the agent still knows what kind of job this is
+        res = {"suggestions": [], "error": f"{type(e).__name__}: {e}"}
+    # only what the request actually names: an action matched by its own words or by a value it accepts (a department's
+    # keyword alone is a guess), and one step for each named value ("a jump sound and a coin sound" is two sounds)
+    steps = []
+    for sg in res.get("suggestions", []):
+        why, params = sg.get("why") or {}, sg.get("params") or {}
+        if not (why.get("action_words") or why.get("parameter_values")): continue
+        vals = why.get("parameter_values") or []
+        key = next((k for k, v in params.items() if v in vals), None)
+        for v in (vals if key and len(params) == 1 else [None]):
+            steps.append({"tool": f"{sg['department']}_{sg['action']}", "params": dict(params, **({key: v} if v else {})),
+                          "because": ", ".join((why.get("action_words") or []) + vals)})
+    if res.get("three_d"):   # a model is the 3D Department's: it routes, builds with MeshCraft, engine-checks and records the licence
+        steps = [{"tool": "forgecraft route, then forgecraft generate", "params": {"brief": r["request"]}, "because": ", ".join(res["three_d"].get("matched") or [])}]
+    for pat, tool, what in CRAFT:   # the 2D ArtCraft tools are not Studio departments, so the Studio's router does not know them
+        m = re.search(pat, r["request"], re.I)
+        if m and not any(st["tool"].startswith(tool.split()[0]) for st in steps):
+            steps.append({"tool": tool, "params": {}, "because": m.group(0), "note": what})
+    return {"status": "direct", "assignment": "asset", "request": r["request"],
+            "routing": dict(r, assignment="asset", workflow="direct", because=alone["because"],
+                            why="a request for assets alone: the departments make them directly; nothing is scaffolded, branded or deployed around them"),
+            "understanding": {"assignment": "asset", "workflow": "direct", "focus": "asset", "because": alone["because"], "desired": r["request"], "preserve": [],
+                              "done_when": "each asset opens as its format, has been looked at or listened to, and has its provenance record (.studio.json)",
+                              "proof": "the department's own validation plus the exported file, inspected"},
+            "steps": steps,
+            "next": "Call the suggested department tool for each asset (studiocraft; ForgeCraft for 3D), check the output yourself, and hand the files over. "
+                    "To build a product around them instead, say what the product is."}

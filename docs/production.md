@@ -34,8 +34,11 @@ Say "Run GITCRAFT", with whatever you have:
 Run GITCRAFT: a calm breathing timer for my phone, just for me
 Run GITCRAFT on https://github.com/you/recipe-box — finish it
 Run GITCRAFT: add a dark mode toggle                (in a session on an existing project)
-Run GITCRAFT: the save button is broken             (a fix)
-Run GITCRAFT: review this game                      (measure and report; nothing changes)
+Run GITCRAFT: the save button is broken             (a repair)
+Run GITCRAFT: it looks dated, redesign it           (a redesign: the look only, compared before and after)
+Run GITCRAFT: it's boring after a minute            (a gameplay pass: the play only, compared before and after)
+Run GITCRAFT: a jump sound and a coin sound         (assets alone: straight to the department)
+Run GITCRAFT: is this ready to launch?              (a question is an audit: measured and reported; nothing changes)
 Run GITCRAFT                                         (in an existing project: it picks up where the project is)
 ```
 
@@ -54,8 +57,28 @@ Claude calls `production_start` with your words and the project folder. You neve
 
    The inventory separates **working** features (kept as they are), **unfinished** ones, **defects** and **optional improvements**,
    each with the file it was found in. A stub is unfinished work, never a reason to rebuild.
-3. **What you asked for**: build, continue, complete, update, fix or review. With no request, the maturity decides:
-   partial → continue, nearly complete → complete, finished → one question ("what should change?").
+3. **What you asked for** (`production/understanding.py`). The request is read as an **assignment**, and the reading
+   quotes the words that decided it:
+
+   | Assignment | Runs as | What is different about it |
+   |---|---|---|
+   | continue, complete | continue, complete | the maturity's default when nothing is asked |
+   | feature | update | one named change; scores are reported, not imposed |
+   | repair | fix | a defect described in any words ("falls through the floor", "won't load"), plus a regression check |
+   | redesign | update | the look only. PIXELCRAFT audits the project **before** the change (`baseline.pixelcraft`), `design.direction` decides the new look, and `qa.pixelcraft` is a before/after `verify` that gates |
+   | gameplay | update | the play only, games only. `baseline.playcraft` plays it first; `qa.playcraft` is a `verify` with the same probe |
+   | polish | update | both comparisons; no new features, no redesign |
+   | integrate | update | the department makes the named asset; it is wired in beside what exists |
+   | audit | review | "review it", or any question about the project; no work order is ever issued |
+   | rebuild | update | one essential question first: what may be thrown away, what carries over. Approval is refused until it is answered |
+
+   With no request, the maturity decides: partial → continue, nearly complete → complete, finished → one question
+   ("what should change?"). The `understanding` in the result carries the current state, the desired state, what is
+   preserved, what "done" means and how it is proven; the same lines are in the Decision Room and every work order.
+
+   A request for **assets and nothing else** is not a production: `production_start` returns `status: "direct"` with one
+   step per named asset. A **tool** (CLI, library, script) is a deliverable of its own: no icon, credit or interface
+   audit; `qa.tests` runs the project's own tests.
 4. **The workflow:**
 
 | Project | Workflow | Gates |
@@ -468,7 +491,18 @@ python3 -m production list | contracts
   - **Part A:** the Lantern Drift prompt, end to end. Interpretation, discovery, the Decision Room (refused before approval, then approved), the App Icon Studio (three VectorCraft concepts, a person's choice, the master, the icon set), the HaveAnApp credit and the engineering standard measured, department selection, ordering, measured parallelism, the palette → effects hand-off, integration of 27 assets, a real defect caught by TestCraft and a real PLAYCRAFT shortfall (54 against a bar of 55, then 63 after the fix work order), re-verification, stale evidence re-measured, release on the exact build, deployment refused without evidence, and resume.
   - **Part B:** a refused plan, a missing runtime (blocked and propagated), a failed department (retried, then failed), an invalid agent output, an integration conflict, overwrite protection, a run killed mid-production and resumed, and a quality gate exhausted (NOT READY).
 
+## Direction first
+
+Plan v2 decides before it builds. A new game, app or site, and any redesign, gameplay or polish pass, starts with the
+`design.direction` work order: `direction.json`, written for this product, gated on what can be measured, and the
+specification the build is held to. The release report hands its playtest questions to a person under **Needs a
+person**; they are never counted as passed. Format, gate and a worked example: [direction.md](direction.md).
+
 ## Limits
+
+- **The assignment reading is rule-based too.** It quotes its reason and the Decision Room's scope decision corrects it. A request that mixes jobs ("fix the crash and redesign the menu") is read as one job, the first that matches in the table's order (a repair before a redesign before a gameplay pass); say so in the Decision Room if that is wrong.
+- **The direction gate measures completeness, not taste.** A direction can pass and still be a poor idea. Only looking at the build, PIXELCRAFT, PLAYCRAFT and a person can say.
+- **The direction steers the build and the identity, not yet the departments.** Sound, level and effect tasks take their parameters from the prompt at planning time and run in parallel with the direction.
 
 - **Intake is rule-based** (`rules.json`) and deterministic. It records why it chose each value, but it can misread an unusual prompt. Claude is expected to read the spec and correct it with `overrides`.
 - **Code is the agent's job.** The engine can't write a game. It hands Claude a work order with every input and verifies the result by measuring the build.
