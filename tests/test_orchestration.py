@@ -201,6 +201,30 @@ check("ownership: an edited earlier manifest is refused", any(planner.MANIFEST i
 old_record = copy.deepcopy(E); del old_record["inherited_assets"]
 check("an older record whose manifest no longer matches the baseline recovers nothing: it stays strict",
       any(planner.MANIFEST in v for v in engine._scope_violations(old_record, [])) and "inherited_assets" not in old_record)
+# Tornado Hunter's state: integrate.final failed without measuring anything, everything below it was blocked, down to the
+# agent's deploy two steps under the release report. Retrying the check must release the whole chain, the agent's task too
+builtins._atomic_json(os.path.join(projy, planner.MANIFEST), {"schema": "gitcraft-assets/1", "owner": "integration", "assets": dict(was)})
+R = engine.plan("Add a pause menu to this existing game and deploy it", projy); engine.decide(R["id"], approve=True); R = store.load(R["id"])
+check("retry: the plan has the chain (integrate.final → QA → release.report → the agent's release.deploy)",
+      R["tasks"]["release.deploy"]["kind"] == "agent" and R["tasks"]["release.deploy"]["depends_on"] == ["release.report"] and "integrate.final" in R["tasks"]["qa.smoke"]["depends_on"])
+engine._set(R, R["tasks"]["foundation.scaffold"], PASSED)
+fi = R["tasks"]["integrate.final"]; fi["attempts"] = [{"n": 1, "status": "failed", "outcome": "execution"}]; engine._set(R, fi, "failed", failure="execution")
+for _ in range(6): engine._ready_tasks(R)
+check("retry: reproduced: the failed check blocks everything below it, the deploy included",
+      R["tasks"]["release.deploy"]["state"] == BLOCKED and R["tasks"]["release.deploy"]["blocked_by"] == ["release.report"] and R["tasks"]["qa.smoke"]["state"] == BLOCKED)
+store.save(R); engine.retry(R["id"], ["integrate.final"], "GITCRAFT fix: an earlier manifest is inherited"); R = store.load(R["id"])
+left = sorted(k for k, t in R["tasks"].items() if t["state"] == BLOCKED)
+check("retry: the whole chain waits again, the agent's deploy too: nothing is left blocked",
+      R["tasks"]["integrate.final"]["state"] == PENDING and R["tasks"]["release.deploy"]["state"] == PENDING and left == [], left)
+own = R["tasks"]["release.deploy"]; engine._set(R, own, BLOCKED, reason="verification incomplete (not an application failure)")   # blocked for its own reason: no blocked_by
+check("release: a task blocked for its own reason (no upstream named) is not released", engine._release_blocked(R) == 0 and own["state"] == BLOCKED)
+engine._set(R, own, PENDING); engine._set(R, R["tasks"]["integrate.final"], "failed", failure="execution")
+for _ in range(6): engine._ready_tasks(R)
+check("release: a task whose upstream is still dead stays blocked", R["tasks"]["release.deploy"]["state"] == BLOCKED and R["tasks"]["qa.smoke"]["state"] == BLOCKED)
+engine._set(R, R["tasks"]["integrate.final"], PASSED)
+for _ in range(6): engine._ready_tasks(R)
+check("release: once the upstream has passed, what it blocked waits again (a record left blocked heals on the next run)",
+      not [k for k, t in R["tasks"].items() if t["state"] == BLOCKED], [k for k, t in R["tasks"].items() if t["state"] == BLOCKED])
 
 # ---------------------------------------------------------------- 3. strict references: real loads, not filenames in comments or the manifest
 rp = os.path.join(ws, "refs"); os.makedirs(rp)

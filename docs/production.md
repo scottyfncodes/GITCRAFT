@@ -444,7 +444,9 @@ out of the product checks of the engineering standard; a secret found there is a
   runs a failed check again. Only a check that failed without measuring the project (an `execution` or `request` failure,
   e.g. one GITCRAFT itself refused before a framework fix) can be retried; a gate (quality) failure is refused, because it is
   fixed in the project by its fix work order. The earlier attempts stay in the task's history, the retry and its reason
-  are recorded, and what failed or was blocked because of it runs again.
+  are recorded, and what failed or was blocked because of it runs again: the whole chain below it, including an agent's task
+  (the deploy) several steps down. A task blocked only by a dead upstream waits again as soon as none of its dependencies is
+  dead, so a record left blocked by an earlier version heals on its next run; a task blocked for its own reason is not touched.
 
 Request parameters can reference upstream results:
 

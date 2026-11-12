@@ -534,9 +534,26 @@ def retry(pid, tasks, reason, store_dir=None):
                     _set(prod, t, PENDING, reason="upstream is running again: " + ", ".join(sorted(set(t["depends_on"]) & reopened or set(t.get("blocked_by") or []) & reopened)),
                          outputs=[], result=None, gate_results=None)
                     reopened.add(t["id"]); changed = True
+        _release_blocked(prod)   # ...and whatever was blocked further down the chain (an agent's task is never invalidated, only released)
         prod["status"] = "planned" if not any(t.get("attempts") for t in prod["tasks"].values()) else "running"
         store.save(prod)
     return status(prod)
+
+
+def _release_blocked(prod):
+    """A task blocked only because an upstream task was dead waits again once none of its dependencies is dead (the upstream
+    is being redone, or has since passed). Without this an agent's task two steps below a retried check stayed blocked for
+    good: _invalidate leaves agent tasks alone, and retry() reopened only the direct dependants of what it reset. A task
+    blocked for its own reasons (no blocked_by: a missing runtime, an unverified deployment) is not touched."""
+    changed, n = True, 0
+    while changed:
+        changed = False
+        for t in prod["tasks"].values():
+            if t["state"] != BLOCKED or not t.get("blocked_by"): continue
+            if any(_dep_state(prod, d) == "dead" for d in t["depends_on"]): continue
+            _set(prod, t, PENDING, reason="upstream is no longer blocked: " + ", ".join(t["blocked_by"]), outputs=[], result=None, gate_results=None)
+            changed = True; n += 1
+    return n
 
 
 def _invalidate(prod, t, why):
@@ -551,6 +568,7 @@ def _invalidate(prod, t, why):
 
 def _ready_tasks(prod):
     ready = []
+    _release_blocked(prod)
     for tid in prod["order"]:
         t = prod["tasks"][tid]
         if t["state"] != PENDING: continue
