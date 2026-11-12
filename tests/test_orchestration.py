@@ -155,6 +155,77 @@ m = builtins.read_manifest(proj); m["assets"]["assets/audio/ghost.ogg"] = {"task
 f = builtins.integrate_final({"project": proj, "integrated": led})
 check("integrate_final: a manifest entry with no committed file fails it", f["status"] == "failed" and "ghost" in str(f["checks"][1]["detail"]))
 
+# an existing project an earlier production made: the manifest it already carries is the project's, not this production's
+projx = os.path.join(ws, "made-before"); os.makedirs(os.path.join(projx, "assets", "audio"))
+open(os.path.join(projx, "index.html"), "w").write("<!doctype html><title>made before</title><script>new Audio('assets/audio/old.ogg')</script>")
+open(os.path.join(projx, "assets/audio/old.ogg"), "wb").write(b"OggS-old")
+was = {"assets/audio/old.ogg": {"task": "audio.sfx.old", "role": "sfx", "format": "ogg", "sha256": builtins.sha256(os.path.join(projx, "assets/audio/old.ogg"))}}
+builtins._atomic_json(os.path.join(projx, planner.MANIFEST), {"schema": "gitcraft-assets/1", "owner": "integration", "assets": dict(was)})
+inh = {k: {"task": v["task"], "sha256": v["sha256"]} for k, v in was.items()}
+f = builtins.integrate_final({"project": projx, "integrated": [], "inherited": inh})
+check("integrate_final: a project's earlier manifest, unchanged, passes a production that integrated nothing", f["status"] == "ok", f["checks"])
+f = builtins.integrate_final({"project": projx, "integrated": []})
+check("integrate_final: with no record of what was inherited it stays strict", f["status"] == "failed" and "old.ogg" in str(f["checks"][1]["detail"]))
+r = builtins.integrate(ctx(up("audio.sfx.coin", ["coin.ogg"]), os.path.join(ws, "tx1"), project=projx)); ledx = json.load(open(os.path.join(ws, "tx1", "integrated.json")))
+f = builtins.integrate_final({"project": projx, "integrated": ledx, "inherited": inh})
+check("integrate_final: new assets beside inherited ones: the manifest lists both, and passes", r["status"] == "ok" and f["status"] == "ok"
+      and set(builtins.read_manifest(projx)["assets"]) == {"assets/audio/old.ogg", "assets/audio/coin.ogg"}, f["checks"])
+m = builtins.read_manifest(projx); keep = copy.deepcopy(m); m["assets"]["assets/audio/old.ogg"]["sha256"] = "0" * 64; json.dump(m, open(os.path.join(projx, planner.MANIFEST), "w"))
+f = builtins.integrate_final({"project": projx, "integrated": ledx, "inherited": inh})
+check("integrate_final: an inherited entry that was edited fails it", f["status"] == "failed" and f["checks"][1]["detail"] == ["assets/audio/old.ogg"])
+m = copy.deepcopy(keep); del m["assets"]["assets/audio/old.ogg"]; json.dump(m, open(os.path.join(projx, planner.MANIFEST), "w"))
+f = builtins.integrate_final({"project": projx, "integrated": ledx, "inherited": inh})
+check("integrate_final: an inherited entry that was removed fails it", f["status"] == "failed" and f["checks"][1]["detail"] == ["assets/audio/old.ogg"])
+json.dump(keep, open(os.path.join(projx, planner.MANIFEST), "w"))
+check("expected manifest: a task integrated again replaces its inherited entries as a set (as integrate() does)",
+      builtins.expected_manifest([{"dest_rel": "assets/audio/new.ogg", "sha256": "n", "task": "audio.sfx.old"}], inh) == {"assets/audio/new.ogg": "n"}
+      and builtins.expected_manifest([], inh) == {"assets/audio/old.ogg": was["assets/audio/old.ogg"]["sha256"]} and builtins.expected_manifest([], None) == {})
+# the same through the engine: planning records what the project carried, and the agent's submission is judged against it
+projy = os.path.join(ws, "made-before-2"); shutil.copytree(projx, projy); os.remove(os.path.join(projy, "assets/audio/coin.ogg"))
+builtins._atomic_json(os.path.join(projy, planner.MANIFEST), {"schema": "gitcraft-assets/1", "owner": "integration", "assets": dict(was)})
+for extra in ("coin.ogg.license.json",):
+    if os.path.exists(os.path.join(projy, "assets/audio", extra)): os.remove(os.path.join(projy, "assets/audio", extra))
+fpy = engine.fingerprint(projy)
+E = engine.plan("Add a pause menu to this existing game", projy); E = store.load(E["id"])
+check("planning an existing project records the manifest it already carries, and writes nothing to it",
+      E.get("inherited_assets") == inh and engine.fingerprint(projy) == fpy, E.get("inherited_assets"))
+check("ownership: an untouched earlier manifest is no violation for a production that integrated nothing",
+      engine._scope_violations(E, [os.path.join(projy, "index.html")]) == [], engine._scope_violations(E, [os.path.join(projy, "index.html")]))
+check("ownership: submitting the earlier manifest is still refused", engine._scope_violations(E, [os.path.join(projy, planner.MANIFEST)]))
+old_record = copy.deepcopy(E); del old_record["inherited_assets"]
+check("a record planned before this was recorded recovers it from the Discovery baseline while the manifest is untouched",
+      os.path.isfile(os.path.join(E["store"], "baseline.json")) and engine._scope_violations(old_record, []) == [] and old_record.get("inherited_assets") == inh,
+      engine._scope_violations(copy.deepcopy({k: v for k, v in E.items() if k != "inherited_assets"}), []))
+m = builtins.read_manifest(projy); m["assets"]["assets/audio/ghost.ogg"] = {"task": "x", "sha256": "1"}; json.dump(m, open(os.path.join(projy, planner.MANIFEST), "w"))
+check("ownership: an edited earlier manifest is refused", any(planner.MANIFEST in v for v in engine._scope_violations(E, [])))
+old_record = copy.deepcopy(E); del old_record["inherited_assets"]
+check("an older record whose manifest no longer matches the baseline recovers nothing: it stays strict",
+      any(planner.MANIFEST in v for v in engine._scope_violations(old_record, [])) and "inherited_assets" not in old_record)
+# Tornado Hunter's state: integrate.final failed without measuring anything, everything below it was blocked, down to the
+# agent's deploy two steps under the release report. Retrying the check must release the whole chain, the agent's task too
+builtins._atomic_json(os.path.join(projy, planner.MANIFEST), {"schema": "gitcraft-assets/1", "owner": "integration", "assets": dict(was)})
+R = engine.plan("Add a pause menu to this existing game and deploy it", projy); engine.decide(R["id"], approve=True); R = store.load(R["id"])
+check("retry: the plan has the chain (integrate.final → QA → release.report → the agent's release.deploy)",
+      R["tasks"]["release.deploy"]["kind"] == "agent" and R["tasks"]["release.deploy"]["depends_on"] == ["release.report"] and "integrate.final" in R["tasks"]["qa.smoke"]["depends_on"])
+engine._set(R, R["tasks"]["foundation.scaffold"], PASSED)
+fi = R["tasks"]["integrate.final"]; fi["attempts"] = [{"n": 1, "status": "failed", "outcome": "execution"}]; engine._set(R, fi, "failed", failure="execution")
+for _ in range(6): engine._ready_tasks(R)
+check("retry: reproduced: the failed check blocks everything below it, the deploy included",
+      R["tasks"]["release.deploy"]["state"] == BLOCKED and R["tasks"]["release.deploy"]["blocked_by"] == ["release.report"] and R["tasks"]["qa.smoke"]["state"] == BLOCKED)
+store.save(R); engine.retry(R["id"], ["integrate.final"], "GITCRAFT fix: an earlier manifest is inherited"); R = store.load(R["id"])
+left = sorted(k for k, t in R["tasks"].items() if t["state"] == BLOCKED)
+check("retry: the whole chain waits again, the agent's deploy too: nothing is left blocked",
+      R["tasks"]["integrate.final"]["state"] == PENDING and R["tasks"]["release.deploy"]["state"] == PENDING and left == [], left)
+own = R["tasks"]["release.deploy"]; engine._set(R, own, BLOCKED, reason="verification incomplete (not an application failure)")   # blocked for its own reason: no blocked_by
+check("release: a task blocked for its own reason (no upstream named) is not released", engine._release_blocked(R) == 0 and own["state"] == BLOCKED)
+engine._set(R, own, PENDING); engine._set(R, R["tasks"]["integrate.final"], "failed", failure="execution")
+for _ in range(6): engine._ready_tasks(R)
+check("release: a task whose upstream is still dead stays blocked", R["tasks"]["release.deploy"]["state"] == BLOCKED and R["tasks"]["qa.smoke"]["state"] == BLOCKED)
+engine._set(R, R["tasks"]["integrate.final"], PASSED)
+for _ in range(6): engine._ready_tasks(R)
+check("release: once the upstream has passed, what it blocked waits again (a record left blocked heals on the next run)",
+      not [k for k, t in R["tasks"].items() if t["state"] == BLOCKED], [k for k, t in R["tasks"].items() if t["state"] == BLOCKED])
+
 # ---------------------------------------------------------------- 3. strict references: real loads, not filenames in comments or the manifest
 rp = os.path.join(ws, "refs"); os.makedirs(rp)
 integ = [{"dest_rel": "assets/audio/jump.ogg", "role": "sfx"}]

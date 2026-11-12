@@ -231,6 +231,9 @@ def _discover_and_plan(prod):
     unmeasured = [c["id"] for c in spec["acceptance"] if c["id"] not in measured and c["id"] != "release_ready"]
     problems = planner.validate(pl, disc) + [f"optional_criteria: {c} was named in the prompt or is a GITCRAFT release standard, so it stays required "
                                              "(only extras GITCRAFT added can be made optional)" for c in spec.get("optional_refused") or []]
+    # an existing project may already carry an asset manifest from the production that made it: those entries are the project's,
+    # not this production's. Recorded once, before anything is integrated, so the manifest checks expect them unchanged
+    if "inherited_assets" not in prod: prod["inherited_assets"] = _manifest_now(p)
     if "qa.preserve" in pl["tasks"]:   # the baseline lives in the production store; the project is only read
         bp = os.path.join(prod["store"], "baseline.json")
         if not os.path.exists(bp): store.write_json(bp, maturity.baseline(p))
@@ -531,9 +534,26 @@ def retry(pid, tasks, reason, store_dir=None):
                     _set(prod, t, PENDING, reason="upstream is running again: " + ", ".join(sorted(set(t["depends_on"]) & reopened or set(t.get("blocked_by") or []) & reopened)),
                          outputs=[], result=None, gate_results=None)
                     reopened.add(t["id"]); changed = True
+        _release_blocked(prod)   # ...and whatever was blocked further down the chain (an agent's task is never invalidated, only released)
         prod["status"] = "planned" if not any(t.get("attempts") for t in prod["tasks"].values()) else "running"
         store.save(prod)
     return status(prod)
+
+
+def _release_blocked(prod):
+    """A task blocked only because an upstream task was dead waits again once none of its dependencies is dead (the upstream
+    is being redone, or has since passed). Without this an agent's task two steps below a retried check stayed blocked for
+    good: _invalidate leaves agent tasks alone, and retry() reopened only the direct dependants of what it reset. A task
+    blocked for its own reasons (no blocked_by: a missing runtime, an unverified deployment) is not touched."""
+    changed, n = True, 0
+    while changed:
+        changed = False
+        for t in prod["tasks"].values():
+            if t["state"] != BLOCKED or not t.get("blocked_by"): continue
+            if any(_dep_state(prod, d) == "dead" for d in t["depends_on"]): continue
+            _set(prod, t, PENDING, reason="upstream is no longer blocked: " + ", ".join(t["blocked_by"]), outputs=[], result=None, gate_results=None)
+            changed = True; n += 1
+    return n
 
 
 def _invalidate(prod, t, why):
@@ -548,6 +568,7 @@ def _invalidate(prod, t, why):
 
 def _ready_tasks(prod):
     ready = []
+    _release_blocked(prod)
     for tid in prod["order"]:
         t = prod["tasks"][tid]
         if t["state"] != PENDING: continue
@@ -748,7 +769,8 @@ def _prepare(prod, t):
                "spec": copy.deepcopy(prod["spec"]), "choice": t.get("choice"), "approval_note": t.get("approval_note"),
                "tasks": {k: {"state": eff(prod, k)["state"], "approved": eff(prod, k).get("approved")} for k in prod["tasks"]},
                "inside_roots": inside_roots, "previous_manifest": copy.deepcopy((t.get("last_result") or {}).get("integrated")),
-               "replace_auth": dict((prod.get("replace_assets") or {}).get("authorized") or {}), "integrated": copy.deepcopy(_integrated(prod))}
+               "replace_auth": dict((prod.get("replace_assets") or {}).get("authorized") or {}), "integrated": copy.deepcopy(_integrated(prod)),
+               "inherited": copy.deepcopy(_inherited(prod))}
         return (lambda: getattr(builtins, action)(ctx)), None
     return None, {"status": "failed", "failure": "request", "error": f"unknown executor {kind}"}
 
@@ -793,6 +815,29 @@ def _finish(prod, t, res):
              + "; ".join(f"{u['check']} [{u['cause']}]" for u in unv)[:1200]); return
     _set(prod, t, FAILED, failure="quality", error="; ".join(f"{g['condition']}: {g.get('detail') or g.get('measured')}" for g in gr if not g["ok"])[:1500])
     _remediate(prod, t, res, gr)
+
+
+def _manifest_now(project):
+    """The project's asset manifest entries as they stand, {path: {task, sha256}} ({} when it has none)."""
+    if not project or not os.path.isfile(os.path.join(project, planner.MANIFEST)): return {}
+    return {k: {"task": v.get("task"), "sha256": v.get("sha256")} for k, v in builtins.read_manifest(project)["assets"].items()}
+
+
+def _inherited(prod):
+    """The manifest entries the project carried before this production integrated anything (recorded at planning).
+    A record planned before that was recorded recovers them when it safely can: nothing integrated yet, and the manifest
+    file still has the hash the preservation baseline took at Discovery, so what it lists now is what it listed then."""
+    if "inherited_assets" not in prod:
+        proj, got = _project(prod), None
+        mp, bp = os.path.join(proj or "", planner.MANIFEST), os.path.join(prod.get("store") or "", "baseline.json")
+        if proj and os.path.isfile(mp) and os.path.isfile(bp) and not _integrated(prod):
+            try:
+                with open(bp) as f: was = (json.load(f).get("files") or {}).get(planner.MANIFEST)
+            except (OSError, ValueError): was = None
+            if was and was == builtins.sha256(mp): got = _manifest_now(proj)
+        if got is None: return {}   # unknown: the checks stay as strict as they were
+        prod["inherited_assets"] = got
+    return prod["inherited_assets"]
 
 
 def _integrated(prod):
@@ -984,13 +1029,14 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
 
 def _scope_violations(prod, files):
     """Integration-owned paths the agent changed or submitted: every integrated file must still have its committed hash, and the
-    asset manifest must list exactly the ledger. A submission naming an owned path is refused too."""
+    asset manifest must list exactly the ledger plus what the project carried before this production (_inherited), unchanged.
+    A submission naming an owned path is refused too."""
     proj = _project(prod)
     led = {m["dest_rel"]: m for m in _integrated(prod)}
     out = [f"{r} (changed after integration)" for r, m in led.items() if not os.path.isfile(m["dest"]) or builtins.sha256(m["dest"]) != m["sha256"]]
     man = builtins.read_manifest(proj)["assets"] if os.path.exists(os.path.join(proj, planner.MANIFEST)) else {}
     if os.path.exists(os.path.join(proj, planner.MANIFEST)) or led:
-        if {k: v.get("sha256") for k, v in man.items()} != {k: m["sha256"] for k, m in led.items()}:
+        if {k: v.get("sha256") for k, v in man.items()} != builtins.expected_manifest(list(led.values()), _inherited(prod)):
             out.append(f"{planner.MANIFEST} (does not match what integration committed)")
     owned = set(led) | {planner.MANIFEST}
     for f in files:
