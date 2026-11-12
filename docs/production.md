@@ -238,6 +238,12 @@ v2  scaffold → identity (→ design-stage tasks, PR 4 hook) → build         
   the destinations and their backups, commits with `os.replace`, then rewrites `gitcraft.assets.json` atomically. A failure
   during the commit restores the previous valid state; after a crash, the engine's recovery rolls the journal back before the
   task runs again. `integrate.final` checks that the ledger, the files and the manifest agree and nothing staged is left.
+- **An earlier production's manifest.** A project GITCRAFT made before already carries `gitcraft.assets.json`. Those entries are
+  the project's, not this production's: planning records them (`inherited_assets`, read-only, before anything is integrated),
+  and `integrate.final` and the ownership check expect the manifest to list them unchanged beside this production's ledger. A
+  task integrated again replaces its inherited entries as a set, as `integrate` does. An inherited entry edited or removed
+  still fails. A record planned before this was recorded recovers the entries from the Discovery baseline while the manifest
+  is byte-identical to it and nothing has been integrated; otherwise the checks stay as strict as they were.
 - **Disjoint ownership.** Integration exclusively owns `gitcraft.assets.json` and every file it committed. An agent submission
   that names one, or that changed one, is rejected and its work order stays open. Two tasks shipping different files to one path
   is an integration conflict: the second fails, naming both, and nothing of it is copied. In v2 the first file stays (v1 copied

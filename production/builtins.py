@@ -502,15 +502,26 @@ def integrate_recover(out_dir):
     return done
 
 
+def expected_manifest(ledger, inherited=None):
+    """What the asset manifest must list, {path: sha256}: this production's ledger, plus the entries the project already
+    carried when the production began (`inherited`: an earlier production's assets, still the project's), less any of those
+    whose task this production has integrated again (integrate() replaces a task's entries as a set)."""
+    again = {m.get("task") for m in ledger}
+    exp = {k: v.get("sha256") for k, v in (inherited or {}).items() if v.get("task") not in again}
+    exp.update({m["dest_rel"]: m["sha256"] for m in ledger})
+    return exp
+
+
 def integrate_final(ctx):
     """The final integration check: every artifact in the ledger (ctx["integrated"]) is in the project with its hash, the
-    asset manifest lists exactly those files with those hashes, and no staged or journalled integration is left behind."""
+    asset manifest lists exactly those files with those hashes (and, unchanged, whatever it listed before this production:
+    ctx["inherited"]), and no staged or journalled integration is left behind."""
     proj, ledger = ctx["project"], ctx.get("integrated") or []
     checks = []
     bad = [m["dest_rel"] for m in ledger if not os.path.isfile(m["dest"]) or sha256(m["dest"]) != m["sha256"]]
     checks.append({"name": "every integrated file is in the project with its committed hash", "ok": not bad, "detail": bad[:20] or None})
     man = read_manifest(proj)["assets"]
-    led = {m["dest_rel"]: m["sha256"] for m in ledger}
+    led = expected_manifest(ledger, ctx.get("inherited"))
     diff = sorted(k for k in set(man) | set(led) if man.get(k, {}).get("sha256") != led.get(k))
     checks.append({"name": f"{MANIFEST} lists exactly the integrated files and hashes", "ok": not diff, "detail": diff[:20] or None})
     left = []
