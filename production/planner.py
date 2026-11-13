@@ -763,10 +763,33 @@ def _skip_and_replace(spec, tasks, decisions):
                 d = replaced.get(d, d)
                 if d not in gone and d != t["id"] and d not in deps: deps.append(d)
             t["depends_on"] = deps
+            if replaced:   # ...and so does a hand-off from it: a before/after check reads the baseline that actually ran
+                t["params"] = _refer(t.get("params"), replaced)
+                for k in ("consumes", "settles"):
+                    if t.get(k): t[k] = [replaced.get(c, c) for c in t[k]]
         plain = sorted(skip - set(unknown) - set(replaced))
         if plain or unknown:
             decisions.append(f"skipped at the agent's request: {', '.join(plain) or 'nothing'}" + (f" (not in the plan: {', '.join(unknown)})" if unknown else ""))
     return rproblems
+
+
+def _refer(v, replaced):
+    """Params with every {"$from": <replaced id>} pointed at the replacement. Without this the dependency moved but the
+    hand-off still named a task that no longer existed, and the run died resolving it."""
+    if isinstance(v, dict):
+        out = {k: _refer(x, replaced) for k, x in v.items()}
+        if isinstance(out.get("$from"), str): out["$from"] = replaced.get(out["$from"], out["$from"])
+        return out
+    if isinstance(v, list): return [_refer(x, replaced) for x in v]
+    return v
+
+
+def _from_refs(v):
+    if isinstance(v, dict):
+        if isinstance(v.get("$from"), str): yield v["$from"]
+        for x in v.values(): yield from _from_refs(x)
+    elif isinstance(v, list):
+        for x in v: yield from _from_refs(x)
 
 
 REPLACE_INHERIT = ("criterion", "stage", "advisory", "gate", "resources")
@@ -812,6 +835,8 @@ def validate(plan, disc=None):
     for t in tasks.values():
         for dep in t["depends_on"]:
             if dep not in tasks: problems.append(f"{t['id']}: unknown dependency {dep}")
+        for ref in sorted(set(_from_refs(t.get("params")))):
+            if ref not in tasks: problems.append(f"{t['id']}: hands on from {ref}, which is not in the plan")
         for dep in t.get("consumes") or []:
             if dep not in tasks: problems.append(f"{t['id']}: consumes an unknown task {dep}")
         for dep in t.get("settles") or []:

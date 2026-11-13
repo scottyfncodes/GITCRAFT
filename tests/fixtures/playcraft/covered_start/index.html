@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meadow Walk</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #10231f; color: #f4ecd8; font: 16px Georgia, serif; overflow: hidden; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+  /* The HUD is in the page from the start, live but out of sight under the title: the case the probe used to trip on. */
+  .hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+  .hud button { pointer-events: auto; position: absolute; border: 1px solid #5fc9b8; background: #0e1e1c; color: inherit; }
+  .hud .icon { top: 12px; width: 44px; height: 44px; border-radius: 12px; }
+  .hud .action { right: 22px; bottom: 22px; width: 80px; height: 80px; border-radius: 50%; }
+  .title { position: fixed; inset: 0; z-index: 50; background: #0d2420; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; }
+  .title button { min-width: 220px; padding: 14px 44px; font: inherit; border-radius: 12px; border: 0; background: #2d7a6f; color: #fff; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+  <button class="icon" style="right: 12px" aria-label="Basket">B</button>
+  <button class="icon" style="right: 64px" aria-label="Journal">J</button>
+  <button class="action">SNIP</button>
+</div>
+<div class="title" id="title">
+  <h1>MEADOW WALK</h1>
+  <p>A quiet walk through the long grass.</p>
+  <!-- The way in says what it does in the game's own words: no "play" or "start" for a word list to find. -->
+  <button id="go">Step Outside</button>
+  <a href="#credits">credits</a>
+</div>
+<script>
+  // A tiny game: after the title, the arrow keys (or a drag anywhere) move a dot; steps are counted.
+  const c = document.getElementById('c'), x = c.getContext('2d');
+  const game = window.__game = { state: 'title', steps: 0, px: 0.5, py: 0.5 };
+  function size() { c.width = innerWidth; c.height = innerHeight; }
+  addEventListener('resize', size); size();
+  document.getElementById('go').addEventListener('click', () => { document.getElementById('title').remove(); game.state = 'playing'; });
+  const keys = new Set();
+  addEventListener('keydown', (e) => keys.add(e.key));
+  addEventListener('keyup', (e) => keys.delete(e.key));
+  c.addEventListener('pointermove', (e) => { if (game.state === 'playing' && e.buttons) { game.px = e.clientX / innerWidth; game.py = e.clientY / innerHeight; game.steps++; } });
+  let t = 0;
+  (function frame() {
+    t++;
+    if (game.state === 'playing') {
+      const dx = (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0), dy = (keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0);
+      if (dx || dy) { game.px = Math.min(1, Math.max(0, game.px + dx * 0.01)); game.py = Math.min(1, Math.max(0, game.py + dy * 0.01)); game.steps++; }
+    }
+    x.fillStyle = '#2f5a3a'; x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = '#3d7048'; for (let i = 0; i < 40; i++) x.fillRect((i * 97 + t * 0.3) % c.width, (i * 53) % c.height, 3, 12);
+    x.fillStyle = '#f4ecd8'; x.beginPath(); x.arc(game.px * c.width, game.py * c.height, 12, 0, 7); x.fill();
+    requestAnimationFrame(frame);
+  })();
+</script>
+</body>
+</html>

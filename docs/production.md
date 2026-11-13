@@ -325,7 +325,7 @@ neither `qa.request` nor the `deliverables` gate.
 | `complete` | The tool finished and its outputs validated. Only the gate decides what happens next (`complete` never means done) |
 | `passed` | The gate held: dependent work may start |
 | `failed` | The gate or the department failed. `failure` says which: `quality` (measured problem → remediation), `execution` (crash/timeout, retried first), `request` (bad request, never retried), `handoff`, `conflict` |
-| `blocked` | It cannot run here (missing runtime, with the install command), or an upstream task failed (`blocked_by`) |
+| `blocked` | It cannot run here (missing runtime, with the install command; or the app is not built, with the build command: it runs on the next `production_run` once it is), or an upstream task failed (`blocked_by`) |
 | `needs_approval` | A person must decide (deploy, replacing assets) |
 | `skipped` | Declined by a person, or superseded |
 
@@ -433,7 +433,8 @@ out of the product checks of the engineering standard; a secret found there is a
   stands an equivalent check in for a planned one that cannot run as planned. It must be the same check (same kind,
   department and action). It measures what the original measured (criterion, stage, advisory flag, gate and resources are
   inherited; a different criterion is refused), the original is skipped, and whatever depended on the original depends on
-  the replacement. Nothing is inferred: an extra task without `replaces` measures only the criterion it names. Work and
+  the replacement and reads its hand-offs (`{"$from": …}`) from it. A hand-off that names a task that is not in the plan is
+  a plan problem, shown before approval. Nothing is inferred: an extra task without `replaces` measures only the criterion it names. Work and
   build plans and review plans both honour `extra_tasks`, `skip_tasks` and `replaces`.
 - After approval, a revision that changes tasks is material and pauses the build. The pending revision shows its effect
   on the acceptance criteria before anyone approves it: `would_lose` (criteria no task would measure: NOT PLANNED),
@@ -447,6 +448,17 @@ out of the product checks of the engineering standard; a secret found there is a
   are recorded, and what failed or was blocked because of it runs again: the whole chain below it, including an agent's task
   (the deploy) several steps down. A task blocked only by a dead upstream waits again as soon as none of its dependencies is
   dead, so a record left blocked by an earlier version heals on its next run; a task blocked for its own reason is not touched.
+- A check that was blocked because the app was not built (`reason`: no `index.html` in the build folder, `install`: the build
+  command) needs no retry and no revision: build the app and `production_run` again. It runs, and whatever was blocked behind
+  it is released (`target_built` in the event log). Still unbuilt, it stays blocked. A check blocked for any other reason
+  (a missing runtime) is not touched.
+- A run never dies quietly. One task whose hand-off crashes fails by itself (`execution`, so it is retried and can be
+  retried) and the run goes on. If a background run itself hits an error in GITCRAFT, the production stops reading
+  `running`: its tasks are put back as an interrupted run leaves them, the error is in `crash` on the record and in
+  `production_status` (first in `next`), and `run_crashed` is in the event log. The next `production_run` resumes and clears it.
+- A work order's task files go in the production's own task folder (the path the work order gives). That folder is
+  accepted on submit even when it is outside the workspace roots, which is the case whenever the project is the only root
+  and the store lives in GITCRAFT's isolated home. Any other path outside the roots is refused.
 
 Request parameters can reference upstream results:
 

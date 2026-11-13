@@ -122,14 +122,21 @@ try {
         const hit = await page.evaluate((first) => {
           const re = first ? /^\s*(▶\s*)?(play|start|new game|new run|continue|tap to (play|start)|press start|begin|go!?|let['’`]?s go|start game|play now|start run|launch|set sail)\b/i
                            : /^\s*(▶\s*)?(play|start|continue|tap to (play|start)|begin|go!?|let['’`]?s go|ok|okay|got it|next|start game|play now)\b/i;
+          // A control a tap cannot reach is not a way to start: a HUD button lying under the title overlay, or anything inert.
+          // (Its ancestor counts: a "tap to start" label with pointer-events: none hands the tap to the element that listens.)
+          const reachable = (el) => {
+            const r = el.getBoundingClientRect();
+            const top = document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, r.x + r.width / 2)), Math.min(innerHeight - 1, Math.max(0, r.y + r.height / 2)));
+            return !!top && (top === el || el.contains(top) || top.contains(el));
+          };
           const cands = [...document.querySelectorAll('button, [role=button], a, div, span')].filter((el) => {
             const r = el.getBoundingClientRect(); const cs = getComputedStyle(el);
-            return r.width > 10 && r.height > 10 && r.bottom > 0 && r.top < innerHeight && cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity > 0.05 && re.test(el.innerText || '') && (el.innerText || '').length < 40;
+            return r.width > 10 && r.height > 10 && r.bottom > 0 && r.top < innerHeight && cs.visibility !== 'hidden' && cs.display !== 'none' && +cs.opacity > 0.05 && re.test(el.innerText || '') && (el.innerText || '').length < 40 && reachable(el);
           });
           cands.sort((a, b) => (a.tagName === 'BUTTON' ? -1 : 0) - (b.tagName === 'BUTTON' ? -1 : 0) || a.innerText.length - b.innerText.length);
           let el = cands[0];
           if (!el && first) {   // no start wording: the dominant button on the title screen (at least twice the area of any other)
-            const bs = [...document.querySelectorAll('button, [role=button]')].map((b) => [b, b.getBoundingClientRect()]).filter(([b, r]) => r.width > 40 && r.height > 24 && getComputedStyle(b).visibility !== 'hidden' && (b.innerText || '').trim().length < 24).sort((a, b) => b[1].width * b[1].height - a[1].width * a[1].height);
+            const bs = [...document.querySelectorAll('button, [role=button]')].map((b) => [b, b.getBoundingClientRect()]).filter(([b, r]) => r.width > 40 && r.height > 24 && getComputedStyle(b).visibility !== 'hidden' && (b.innerText || '').trim().length < 24 && reachable(b)).sort((a, b) => b[1].width * b[1].height - a[1].width * a[1].height);
             if (bs.length && (bs.length === 1 || bs[0][1].width * bs[0][1].height >= 2 * bs[1][1].width * bs[1][1].height)) el = bs[0][0];
           }
           if (!el) return null; const r = el.getBoundingClientRect(); return { text: el.innerText.trim().slice(0, 40), x: r.x + r.width / 2, y: r.y + r.height / 2 };

@@ -100,6 +100,9 @@ jobs:
       - name: Evaluation follow-ups (task output isolated for every production, replacement checks keep their criterion)
         run: python3 tests/test_evaluation_followups.py
 
+      - name: Resuming a stopped production (FOXTAIL - blocked on an unbuilt app, the task folder, replaced hand-offs, a run that dies)
+        run: python3 tests/test_resume.py
+
       - name: Source-change fingerprints (a check's output never invalidates another check)
         run: python3 tests/test_fingerprint.py
 

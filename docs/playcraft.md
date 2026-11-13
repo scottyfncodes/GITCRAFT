@@ -179,7 +179,9 @@ deployments only with evidence. Portfolio questions, the Games page and the stor
   measured 10.4 and 26.1 fps back to back), so verify reports an FPS drop as "check on a real device", never as a regression.
 - Some controls respond only intermittently to a generic probe (a short drag on Fart Flight: 1/12 and 3/12 trials on
   identical builds); verify lists them as intermittent and does not use them for regressions.
-- The probe plays generically. It gets past a title screen with a start button (or `start_steps`), but it does
+- The probe plays generically. It gets past a title screen with a start button (or `start_steps`): one worded like a
+  start ("play", "start", "continue", …), or else the dominant button on the screen. Only controls a tap can reach
+  count, so a HUD button lying under the title overlay is never mistaken for a rival or for the way in. It does
   not play to win: level completion, balance and progression pacing need exposed state, the project's own
   scripted playtests/solvers (`evidence`), or recorded `judgements`.
 - Latency is measured from the screen against an idle baseline: frame-accurate for games that wait for input,
