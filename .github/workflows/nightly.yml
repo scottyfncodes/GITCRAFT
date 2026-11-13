@@ -32,7 +32,7 @@ jobs:
       matrix:
         group:
           - { name: pixelcraft,   install: true,  suites: "tests/test_pixelcraft.py" }
-          - { name: playcraft,    install: true,  suites: "tests/test_playcraft.py tests/test_playcraft_history.py" }
+          - { name: playcraft,    install: true,  suites: "tests/test_playcraft.py tests/test_playcraft_history.py tests/test_playprobe_start.py" }
           - { name: designcraft,  install: true,  suites: "tests/test_designcraft.py" }
           - { name: 3d,           install: true,  suites: "tests/test_meshcraft.py tests/test_meshcraft_structural.py tests/test_audit_and_copper.py tests/test_forgecraft_engine.py tests/test_forgecraft_web.py" }
           - { name: netgate,      install: true,  suites: "tests/test_netgate.py" }

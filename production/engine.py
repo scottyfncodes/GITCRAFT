@@ -17,7 +17,7 @@ Evaluation never feeds itself (production/artifacts.py): the store is kept outsi
 fingerprint skips every evaluation artifact, every browser check measures one target chosen by the
 source-vs-build policy, re-measurement is bounded (STALE_ROUNDS), and every run ends with a verdict:
 READY, NOT READY, or INCOMPLETE with the reasons the evaluation could not finish."""
-import concurrent.futures as cf, copy, hashlib, json, os, threading, time, traceback
+import concurrent.futures as cf, copy, hashlib, json, os, sys, threading, time, traceback
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
 from . import inside_roots, roots, store_root, store_root_for
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
@@ -108,6 +108,8 @@ def resolve(prod, v):
     if v == "$target": return eval_target(prod)
     if isinstance(v, str) and v.startswith("$project"): return _project(prod) + v[len("$project"):]
     if isinstance(v, dict) and "$from" in v:
+        if v["$from"] not in prod["tasks"]:   # a stale reference (e.g. to a replaced check): a hand-off error, never a crash
+            raise HandoffError(f"{v['$from']} is not a task in this plan, so it has nothing to hand on")
         src = eff(prod, v["$from"])
         outs = builtins.select(src.get("outputs", []), [v.get("role", "*")], [v["format"]] if v.get("format") else None)
         if not outs: raise HandoffError(f"{v['$from']} produced no {v.get('role', '*')} output to hand on")
@@ -486,6 +488,7 @@ def _recover(prod):
             if t["attempts"] and not t["attempts"][-1].get("finished"):
                 t["attempts"][-1].update(finished=store.now(), status="interrupted")
             _set(prod, t, PENDING, reason="interrupted: the run stopped while this task was running; it runs again")
+    _release_built(prod)
     # department artifacts live in the production store and must still be what passed; files in the project
     # (the build, integrated copies) legitimately change under remediation: their freshness is the release's
     # fingerprint check, not this one
@@ -495,6 +498,32 @@ def _recover(prod):
         bad = [o["path"] for o in t.get("outputs", []) if o.get("sha256") and os.path.realpath(o["path"]).startswith(owned)
                and (not os.path.isfile(o["path"]) or builtins.sha256(o["path"]) != o["sha256"])]
         if bad: _invalidate(prod, t, f"outputs missing or changed since they passed: {', '.join(os.path.basename(b) for b in bad[:4])}")
+
+
+def _blocked_on_target(prod, t):
+    """Blocked only because the evaluation target was missing (the app was not built). Productions recorded before
+    the reason was kept are recognised by what they were told to run: the build command and nothing else."""
+    if t["state"] != BLOCKED or t.get("blocked_by"): return False
+    if t.get("blocked_on") == "target": return True
+    cmd = (prod.get("evaluation") or {}).get("build_command")
+    return bool(cmd) and t.get("blocked_on") is None and t.get("install") == [cmd]
+
+
+def _release_built(prod):
+    """A check that was blocked because the app was not built runs again once it is. Its message says "run the build,
+    then run again", so running again has to do it: nothing was measured, so there is nothing to protect, and without
+    this the only way forward was a plan revision that swapped the check for a copy of itself. Whatever was blocked
+    behind it is released too. Still unbuilt: it stays blocked, with the same reason."""
+    waiting = [t for t in prod["tasks"].values() if _blocked_on_target(prod, t)]
+    if not waiting: return 0
+    try: eval_target(prod)
+    except TargetMissing: return 0
+    for t in waiting:
+        _set(prod, t, PENDING, reason="the app is built now: this check runs again", outputs=[], result=None, gate_results=None)
+        for k in ("install", "alternatives", "blocked_on", "unavailable"): t.pop(k, None)
+    store.event(prod, "target_built", tasks=[t["id"] for t in waiting])
+    _release_blocked(prod)
+    return len(waiting)
 
 
 RETRYABLE = ("execution", "request")   # the check could not run: nothing about the project was measured
@@ -620,7 +649,7 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
     if gate: return dict(status(prod), refused=gate)
     with store.lock(prod):
         prod = store.load(pid, store_dir)
-        _recover(prod); prod["status"] = "running"; store.save(prod)
+        _recover(prod); prod["status"] = "running"; prod.pop("crash", None); store.save(prod)
         store.event(prod, "run_started", workers=max_workers)
         t0, running, in_use = time.time(), {}, {k: 0 for k in RESOURCES}
         lock = threading.Lock()
@@ -634,7 +663,10 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
                         if any(in_use[r] >= RESOURCES[r] for r in t["resources"]): continue
                         if in_use["exclusive"] or ("exclusive" in t["resources"] and running): continue
                         if len(running) >= max_workers: break
-                        work, early = _prepare(prod, t)
+                        try: work, early = _prepare(prod, t)
+                        except Exception as e:   # one task's hand-off can never take the whole run (and its record) down with it
+                            work, early = None, {"status": "failed", "failure": "crash", "error": f"{type(e).__name__}: {e}",
+                                                 "trace": traceback.format_exc(limit=4)}
                         if early is not None: _finish(prod, t, early); continue
                         for r in t["resources"]: in_use[r] += 1
                         running[t["id"]] = pool.submit(_timed, work)
@@ -661,6 +693,25 @@ def run(pid, max_workers=4, max_seconds=None, store_dir=None, on_event=None):
         production_report(prod)
         _report.write(prod)
         return status(prod)
+
+
+def run_recorded(pid, **kw):
+    """run() for a background thread. If the run itself dies, the production says so: its tasks are put back as an
+    interrupted run leaves them, its status stops reading "running", and the error is in the record, the event log and
+    production_status. Before this a background run that hit an unexpected error ended with its thread: nothing was
+    written, and the production read "running" for good."""
+    try: return run(pid, **kw)
+    except Exception as e:
+        err, trace = f"{type(e).__name__}: {e}", traceback.format_exc(limit=6)
+        try:
+            prod = store.load(pid, kw.get("store_dir"))
+            _recover(prod)
+            prod["status"] = overall(prod); prod["crash"] = {"at": store.now(), "error": err, "trace": trace}
+            store.event(prod, "run_crashed", error=err)
+            store.save(prod)
+        except Exception: pass   # the record cannot be written either: the error below still reaches the caller's log
+        print(f"gitcraft: production {pid} run crashed: {err}\n{trace}", file=sys.stderr, flush=True)
+        return {"production": pid, "status": "crashed", "error": err}
 
 
 def production_report(prod):
@@ -738,10 +789,12 @@ def _prepare(prod, t):
     try:
         params = resolve(prod, copy.deepcopy(t["params"]))
     except TargetMissing as e:   # cannot be evaluated here: an explicit, reasoned blocked state (never the source instead)
-        return None, {"status": "blocked", "reason": str(e), "install": [c for c in [(prod.get("evaluation") or {}).get("build_command")] if c]}
+        return None, {"status": "blocked", "reason": str(e), "blocked_on": "target",
+                      "install": [c for c in [(prod.get("evaluation") or {}).get("build_command")] if c]}
     except (HandoffError, OSError, ValueError) as e:
         # a comparison whose "before" could not be measured here was not run: unavailable, never a defect in the project
-        src = [eff(prod, v["$from"]) for v in (t["params"] or {}).values() if isinstance(v, dict) and v.get("$from", "").startswith("baseline.")]
+        src = [eff(prod, v["$from"]) for v in (t["params"] or {}).values()
+               if isinstance(v, dict) and v.get("$from", "").startswith("baseline.") and v["$from"] in prod["tasks"]]
         lost = next((x for x in src if x["state"] in (BLOCKED, FAILED, SKIPPED)), None)
         if lost: return None, {"status": "blocked", "reason": f"no before/after comparison: {lost['id']} could not measure the project before the change "
                                                                f"({lost.get('reason') or lost.get('error') or lost['state']})"}
@@ -795,7 +848,7 @@ def _finish(prod, t, res):
         _set(prod, t, NEEDS_APPROVAL, reason=res.get("reason"), approval=res.get("approval")); return
     if cls == "blocked":   # a department that reports blocked lacks a runtime or capability here: unavailable, never a defect
         _set(prod, t, BLOCKED, reason=res.get("reason"), install=res.get("install"), alternatives=res.get("alternatives"),
-             unavailable=t["kind"] in ("studio", "forgecraft", "designcraft") or bool(res.get("install"))); return
+             blocked_on=res.get("blocked_on"), unavailable=t["kind"] in ("studio", "forgecraft", "designcraft") or bool(res.get("install"))); return
     if cls in ("execution",) and len([a for a in t["attempts"] if a.get("outcome") == "execution"]) <= t["retries"]:
         _set(prod, t, PENDING, reason=f"retrying after an execution failure: {att['error']}"); return
     if cls in ("execution", "request") or res.get("failure") in ("handoff", "conflict"):
@@ -986,10 +1039,15 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
         wo, d, proj = t["work_order"] or {}, _task_dir(prod, task), _project(prod)
         att = {"n": len(t["attempts"]) + 1, "started": store.now(), "finished": store.now(), "notes": notes, "files": files or []}
         t["attempts"].append(att)
-        checks, outs = gates.check_expected(wo.get("expected", []), d, proj, inside_roots)
+        # A work order tells the agent to write its task files in the production's own task folder. When the project is
+        # the only workspace root that folder is in GITCRAFT's isolated home, outside the roots: it is still GITCRAFT's
+        # own, the same exception store.create makes. Anything else outside the roots is refused as before.
+        own = {os.path.realpath(prod["store"]), os.path.realpath(store.output_root(prod, create=False))}
+        allowed = lambda p: inside_roots(p) or any(artifacts.inside(p, r) for r in own)
+        checks, outs = gates.check_expected(wo.get("expected", []), d, proj, allowed)
         for f in files or []:
             p = f if os.path.isabs(f) else next((c for c in (os.path.join(d, f), os.path.join(proj or d, f)) if os.path.exists(c)), os.path.join(proj or d, f))
-            if not inside_roots(p): checks.append({"name": f"{f} is inside the workspace roots", "ok": False, "detail": p}); continue
+            if not allowed(p): checks.append({"name": f"{f} is inside the workspace roots", "ok": False, "detail": p}); continue
             if not os.path.exists(p): checks.append({"name": f"{f} exists", "ok": False, "detail": "the submission names a file that is not there"}); continue
             if os.path.isfile(p) and not any(o["path"] == p for o in outs):
                 v = executors.validate_file(p)
@@ -1219,7 +1277,9 @@ def status(prod_or_id, store_dir=None):
     v = _report.final(prod)
     from . import verification
     rs = verification.release_summary(prod)
-    return {"production": prod["id"], "title": prod["spec"]["title"], "status": prod.get("status"), "stage": lv["stage"], "summary": lv["summary"],
+    crash = prod.get("crash")
+    if crash: nxt.insert(0, f"the last run stopped on an error in GITCRAFT itself ({crash['error']}): production_run resumes it; report it if it repeats")
+    return {**({"crash": crash} if crash else {}), "production": prod["id"], "title": prod["spec"]["title"], "status": prod.get("status"), "stage": lv["stage"], "summary": lv["summary"],
             "verdict": v["verdict"], "verdict_reasons": v["reasons"] or None, "release_status": rs["release_status"],
             "release": {k: rs[k] for k in ("deployment", "functional", "security", "visual", "blockers", "unverified", "advisories", "verification_complete")}, "evaluation_target": (prod.get("evaluation") or {}).get("why"),
             "store": prod["store"], "project": _project(prod), "counts": counts, "next": nxt, "problems": prod.get("problems") or None, "tasks": tasks,

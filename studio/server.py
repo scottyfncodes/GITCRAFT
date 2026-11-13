@@ -200,7 +200,7 @@ def _production(name, a):
         if a.get("wait") is False:
             pid = a["production"]
             if _bg.get(pid) and _bg[pid].is_alive(): return {"production": pid, "status": "already running in the background"}
-            _bg[pid] = threading.Thread(target=engine.run, args=(pid,), kwargs={"max_workers": a.get("workers") or 4}, daemon=True); _bg[pid].start()
+            _bg[pid] = threading.Thread(target=engine.run_recorded, args=(pid,), kwargs={"max_workers": a.get("workers") or 4}, daemon=True); _bg[pid].start()
             return {"production": pid, "status": "started", "poll": "production_status"}
         return engine.run(a["production"], max_workers=a.get("workers") or 4)
     if name == "production_status": return engine.status(a["production"])
