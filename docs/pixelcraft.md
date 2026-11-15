@@ -88,7 +88,7 @@ nothing is clicked) and disabled styles on one control per visual variant, and r
 | Area | Measured on the rendered page |
 |---|---|
 | Spacing and rhythm | spacing values on a 4-px scale, evenness of gaps between related siblings, text cramped against its box, unexplained empty bands |
-| Layout and composition | horizontal overflow (and the culprit element), truncated text, near-miss alignment (1-6 px off a shared edge), controls covered by other elements (re-checked after scrolling them to centre), use of width (desktop phone-column, stretched controls), layout shift, nesting |
+| Layout and composition | horizontal overflow (and the culprit element), truncated text, near-miss alignment (1-6 px off a shared edge), controls covered by other elements (re-checked after scrolling them to centre; an `aria-hidden` full-screen intro splash is waited out for up to 5 s first, and one that never leaves is reported), use of width (desktop phone-column, stretched controls), layout shift, nesting |
 | Typography and hierarchy | text under 12 px on phones, number of font sizes, heading/body ratio, inverted heading levels, line height and line length of paragraphs |
 | Buttons and controls | target size (44 px phones / 24 px WCAG floor; inline text links exempt; label hit areas count), neighbouring targets under 8 px apart (worse next to destructive actions), label/icon centring, equal heights in a row, competing primary actions |
 | Visual consistency | radii and fills of controls, font families |
@@ -97,7 +97,7 @@ nothing is clicked) and disabled styles on one control per visual variant, and r
 | Mobile ergonomics | viewport meta, iOS input zoom (fields under 16 px), safe areas (fixed bars and their controls), thumb reach of main actions, fixed chrome height, toolbar shortening |
 | Feedback and interaction states | hover, pressed, disabled look-alikes, feedback after each journey tap (DOM mutation or navigation) and its time |
 | Accessibility | axe-core violations weighted by impact, focus visible on Tab, controls reachable by Tab, clickable non-controls |
-| Cross-screen / component / responsive / design system / state consistency | header and heading sizes across screens, primary button variants, number of button and input variants, content parity and overflow across viewports, spacing grid, palette size, type scale, radii, hover/pressed/focus applied consistently |
+| Cross-screen / component / responsive / design system / state consistency | header and heading sizes across screens, primary button variants, number of button and input variants (a `<button>` over 96 px tall is a tappable content card, not a button variant), content parity and overflow across viewports, spacing grid, palette size, type scale, radii, hover/pressed/focus applied consistently |
 
 **Design principles.** Nothing rewards minimalism for its own sake: bold colour, large type, playful or dense
 layouts are not penalised; only measurable problems are (unreadable, untappable, inconsistent, overflowing,
