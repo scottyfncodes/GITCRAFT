@@ -120,6 +120,9 @@ jobs:
       - name: Resuming a stopped production (FOXTAIL - blocked on an unbuilt app, the task folder, replaced hand-offs, a run that dies)
         run: python3 tests/test_resume.py
 
+      - name: Server-rendered apps (VINO NOTA - a declared running app as the target, served icon/request/standards checks, verifier exclusions)
+        run: python3 tests/test_served_target.py
+
       - name: Source-change fingerprints (a check's output never invalidates another check)
         run: python3 tests/test_fingerprint.py
 

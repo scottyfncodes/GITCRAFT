@@ -130,7 +130,9 @@ def spacing(cap, C):
         gaps = []
         for a, b in zip(stacked, stacked[1:]):
             if b["r"][1] >= a["r"][1] + a["r"][3] - 1 and min(a["r"][0] + a["r"][2], b["r"][0] + b["r"][2]) - max(a["r"][0], b["r"][0]) > 0:
-                g = b["r"][1] - (a["r"][1] + a["r"][3]); gaps.append(g)
+                # rectangles are rounded to whole pixels, so touching siblings can read as 1 px overlapped (the same
+                # tolerance as the stacking test above): that is a gap of 0, not a group to drop from the measurement
+                g = max(0, b["r"][1] - (a["r"][1] + a["r"][3])); gaps.append(g)
                 if 0 < g < 160: vals.append(g)
         # related siblings: the same tag + class signature, three or more stacked → the gaps should match
         sigs = Counter((k["tag"], (k.get("sel") or "").split(">")[-1].split(":")[0]) for k in stacked)

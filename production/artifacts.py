@@ -16,8 +16,13 @@ Three rules, the same for every game, app and site:
        build   the built app (dist/ or the bundler's configured outDir); missing build → blocked, never source
        source  the project folder as it is (a static site with index.html at its root)
        auto    build when package.json has a build script and a bundler, else source (the default)
+       server  a server-rendered app that has no static entry page (Next.js with a server, an app behind sign-in):
+               the running app at a local URL. Only a project that declares it in `.gitcraft/evaluation.json` gets it;
+               nothing is inferred, so every other project is evaluated exactly as before. The Director never starts
+               the app: when nothing answers at the URL the checks are blocked with the project's own start command,
+               the same way an unbuilt app is blocked with its build command.
      Structural review (DESIGNCRAFT, standards, preservation, asset folders) reads the source by design."""
-import hashlib, json, os, re
+import hashlib, json, os, re, socket, urllib.parse
 
 MARKER = ".gitcraft-artifacts"
 NAMES = {"gitcraft-out", ".gitcraft-work"}
@@ -33,7 +38,9 @@ VCS_AND_CACHE = {
     "coverage", ".nyc_output", "test-results", "playwright-report",            # test-run reports
 }
 BUNDLERS = ("vite", "webpack", "parcel", "esbuild", "rollup", "next", "@sveltejs/kit", "astro", "react-scripts")
-POLICIES = ("auto", "build", "source")
+POLICIES = ("auto", "build", "source", "server")
+DECLARATION = os.path.join(".gitcraft", "evaluation.json")   # the project's own statement of how it is evaluated (committed with it)
+LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1")
 
 
 def _real(p): return os.path.realpath(p)
@@ -156,11 +163,53 @@ def build_info(project):
     return {"bundler": bundler, "needs_build": needs_build, "build_dir": out, "build_command": f"{pm} run build" if "build" in scripts else None}
 
 
+def declared(project):
+    """The project's `.gitcraft/evaluation.json`, validated: {} when there is none, else the declaration with a
+    `problems` list (empty when it can be used). Read-only; a malformed file is reported, never guessed around.
+
+      {"target": "server",                     the only target a project declares (build/source need no file)
+       "url": "http://localhost:3100",         where the running app answers: a local address, never a deployment
+       "entry": "src/app/layout.tsx",          the source file that is the app's entry (what a build work order hands back)
+       "page": "/sign-in",                     the page a signed-out visitor lands on (smoke, icons); default "/"
+       "start": "npm run build && npm run start -- -p 3100",     how a person starts it (shown when nothing answers)
+       "prepare": "npm run evaluation:seed",   optional: what makes its screens worth measuring (shown with start)
+       "pixelcraft": {"screens": [...], "journeys": [...], "accept_tells": [...], "exclusions": [...]}}   passed to PIXELCRAFT"""
+    if not project: return {}
+    p = os.path.join(project, DECLARATION)
+    if not os.path.isfile(p): return {}
+    try: d = json.load(open(p))
+    except (OSError, ValueError) as e: return {"problems": [f"{DECLARATION} does not read as JSON: {e}"]}
+    if not isinstance(d, dict): return {"problems": [f"{DECLARATION} must be an object"]}
+    probs = []
+    if d.get("target") != "server": probs.append(f"{DECLARATION}: target must be \"server\" (the only target a project declares), not {d.get('target')!r}")
+    u = urllib.parse.urlparse(str(d.get("url") or ""))
+    if u.scheme not in ("http", "https") or u.hostname not in LOCAL_HOSTS:
+        probs.append(f"{DECLARATION}: url must be a local address (http://localhost:<port>): a deployment is checked by verify-live, never here")
+    entry = d.get("entry")
+    if not isinstance(entry, str) or os.path.isabs(entry) or ".." in entry.split("/") or not os.path.isfile(os.path.join(project, entry)):
+        probs.append(f"{DECLARATION}: entry must name an existing source file inside the project (the app's entry, e.g. src/app/layout.tsx)")
+    page = d.get("page", "/")
+    if not isinstance(page, str) or not page.startswith("/"): probs.append(f"{DECLARATION}: page must be a path beginning with /")
+    for k in ("start", "prepare"):
+        if d.get(k) is not None and not isinstance(d[k], str): probs.append(f"{DECLARATION}: {k} must be a command, as text")
+    if not d.get("start"): probs.append(f"{DECLARATION}: start is required (the command a person runs to serve the app at url)")
+    px = d.get("pixelcraft")
+    if px is not None and not isinstance(px, dict): probs.append(f"{DECLARATION}: pixelcraft must be an object")
+    return {**d, "page": page, "problems": probs}
+
+
 def target_policy(spec, project):
     """The source-vs-build decision for this production: {policy, chosen, dir, why, build_command}."""
     want = ((spec.get("evaluation") or {}).get("target") or "auto").lower()
     if want not in POLICIES: raise ValueError(f"evaluation.target must be one of {POLICIES}, not {want!r}")
     info = build_info(project) if project and os.path.isdir(project) else {"bundler": None, "needs_build": False, "build_dir": None, "build_command": None}
+    decl = declared(project) if project and os.path.isdir(project) else {}
+    if want == "server" or (want == "auto" and decl):
+        if not decl: raise ValueError(f"evaluation.target=server needs the project to declare its running app in {DECLARATION}")
+        if decl["problems"]: raise ValueError("; ".join(decl["problems"]))
+        url = decl["url"].rstrip("/")
+        return {**info, "policy": want, "chosen": "server", "dir": None, "url": url, "page": decl["page"], "start": decl["start"], "prepare": decl.get("prepare"),
+                "why": f"{DECLARATION} declares a server-rendered app: every check measures the running app at {url}"}
     if want == "source":
         return {"policy": want, "chosen": "source", "dir": ".", "why": "evaluation.target=source: the project folder is served as it is", **info}
     if want == "build" or info["needs_build"]:
@@ -170,8 +219,26 @@ def target_policy(spec, project):
     return {"policy": want, "chosen": "source", "dir": ".", "why": "no bundler build: the project folder is the app (static)", **info}
 
 
+def answers(url, timeout=3):
+    """None when something accepts connections at the URL's host and port, else why not (the sandbox, or nothing running)."""
+    u = urllib.parse.urlparse(url); port = u.port or (443 if u.scheme == "https" else 80)
+    s = socket.socket(socket.AF_INET6 if u.hostname == "::1" else socket.AF_INET); s.settimeout(timeout)
+    try: s.connect((u.hostname, port)); return None
+    except PermissionError:
+        return (f"the GITCRAFT sandbox blocks TCP to port {port}: export GITCRAFT_ALLOW_LOCAL_PORTS={port} before starting Claude Code (then /mcp), "
+                "or run the production from a shell (python3 -m production run <id>)")
+    except OSError as e: return f"nothing answers at {url} ({e.strerror or e})"
+    finally: s.close()
+
+
 def resolve_target(project, pol):
-    """(absolute folder, None) or (None, why it cannot be evaluated)."""
+    """(absolute folder or the running app's URL, None) or (None, why it cannot be evaluated)."""
+    if pol["chosen"] == "server":
+        why = answers(pol["url"])
+        if not why: return pol["url"], None
+        return None, (f"the evaluation target is the running app and {why}. Start it with `{pol['start']}`"
+                      + (f" (and `{pol['prepare']}` for its screens)" if pol.get("prepare") else "") + ", then run again "
+                      "(the policy is server: checks never fall back to a folder)")
     d = os.path.normpath(os.path.join(project, pol["dir"]))
     if os.path.isfile(os.path.join(d, "index.html")): return d, None
     if pol["chosen"] == "build":

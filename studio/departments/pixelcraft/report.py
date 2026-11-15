@@ -151,6 +151,8 @@ def comparison_md(cmp):
     L = ["## Before / after", "", f"Comparable: **{'yes' if cmp['comparable'] else 'no'}** ({cmp['why']})", "", "| | Before | After | Δ (same metrics) |", "|---|---|---|---|"]
     for k, v in cmp["scores"].items(): L.append(f"| {v['title']} | {_fmt(v['before'])} | {_fmt(v['after'])} | {('+' if (v['delta'] or 0) > 0 else '') + _fmt(v['delta'])} |")
     L += ["", f"Resolved: {len(cmp['resolved'])} · persisting: {len(cmp['persisting'])} · new: {len(cmp['new'])} · regressions: {len(cmp['regressions'])} · coverage lost: {', '.join(cmp['coverage_lost']) or 'none'}", ""]
+    for x in cmp.get("coverage_excluded") or []: L.append(f"- excluded (documented): {x['check']}: {x['reason']}")
+    for x in cmp.get("exclusions_stale") or []: L.append(f"- stale exclusion (the metric is measured again; remove it): {x}")
     for r in cmp["resolved"]: L.append(f"- ✅ resolved: {r['title']} ({r['was']}× before)")
     for r in cmp["regressions"]: L.append(f"- ❌ regression: {r}")
     for r in cmp["new"]: L.append(f"- ⚠️ new: {r['title']} ({r['severity']}, {r['count']}×)")

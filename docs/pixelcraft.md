@@ -169,6 +169,17 @@ the pass. The design workflow that acts on them is the `ui-design` skill (`docs/
 `pixelcraft_verify` replays the baseline's `replay` block: the same screens with their steps, the same viewports,
 the same journeys, the same state sampling and method. It then:
 
+**Lost coverage and documented exclusions.** A metric the baseline measured and the new run does not is *lost coverage* and
+fails the verify: a check must not disappear quietly. Sometimes a deliberate change leaves a metric with nothing to sample
+(a form now taller than the first screen has no filled action in the first viewport for `controls.primary`). That is said
+out loud, not waved through: `exclusions: [{metric, screen, viewport, reason}]` names exactly one metric on one screen at
+one viewport with a reason of at least a sentence. It is then reported as *excluded (documented)* with its reason. There
+are no wildcards; a vague or malformed entry is refused and excuses nothing; and an exclusion whose metric is measured
+again is *stale* and fails the check until it is removed. Restore the measurement where you can: an exclusion is for a
+metric that genuinely no longer applies. Sibling gaps are measured from whole-pixel rectangles, so rows that touch can read
+as 1 px overlapped; that counts as a gap of 0 and the group stays measured.
+
+
 - compares category scores **on the metrics measured in both runs only**, so a removed or weakened check can
   never raise a score; any metric the baseline had and the re-run lacks is listed as **coverage lost** and fails
   the run;

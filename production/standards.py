@@ -235,16 +235,29 @@ def _cors_in_context(project, server, src, cors):
                         "(add Cache-Control s-maxage or a rate limit)" if exposed else ""))
 
 
-def check(project, profile="personal", deliverable="app", analytics=None, backend=None, analytics_decided=True, accepted=None):
+def _pulse_served(page):
+    """Pulse on a served page whose framework injects the tag after load (Next.js <Script>): the page then carries the
+    script's URL, its attributes in the render payload, and no literal <script src> tag. → the missing attributes
+    ([] when complete), or None when Pulse is not on the page at all."""
+    if PULSE_SRC not in page: return None
+    q = r"""\\?["']"""   # a quote, escaped or not (the payload is JSON inside a script)
+    miss = []
+    if not re.search(r"\bdefer\b|strategy" + q + r"\s*[:=]\s*" + q + r"(afterInteractive|lazyOnload)", page): miss.append("defer")
+    if not re.search(r"data-app" + q + r"?\s*[:=]\s*" + q + r"[\w.-]+", page): miss.append("data-app=")
+    return miss
+
+
+def check(project, profile="personal", deliverable="app", analytics=None, backend=None, analytics_decided=True, accepted=None, page=None):
     """→ {status, checks, review, advisories, profile}. A failed check required by the profile fails the gate; `review`
     items never pass silently; `advisory` items are reported and never fail. analytics_decided=False when nobody chose
     analytics for this project (an existing project, a review): analytics already in it are recognised, not failed.
-    accepted: extra accepted decisions (beside the project's .gitcraft/accepted.json)."""
+    accepted: extra accepted decisions (beside the project's .gitcraft/accepted.json).
+    page: the HTML a server-rendered app serves for its entry page (evaluation target `server`); default: the static entry file."""
     out = []; allfiles = list(_files(project)); every = {p: _read(p) for p in allfiles}
     # the product's own code: tests, fixtures, starters, examples and vendored code hold deliberate samples (a fake key, a
     # wildcard CORS route under test) that are not the product's behaviour. Secrets are still looked for everywhere.
     codefiles = [p for p in allfiles if not NOT_OWN.search(os.path.relpath(p, project))]; src = {p: every[p] for p in codefiles}
-    entry = _entry(project); etext = _read(entry) if entry else ""
+    entry = _entry(project); etext = page if page is not None else _read(entry) if entry else ""
     pkg = os.path.join(project, "package.json"); pj = {}
     if os.path.isfile(pkg):
         try: pj = json.load(open(pkg))
@@ -325,7 +338,11 @@ def check(project, profile="personal", deliverable="app", analytics=None, backen
     found = [] if tool and analytics is None else discover_analytics(project, src, deps)   # a tool ships no page to measure: its code names analytics, it does not run them
     if analytics == "pulse":   # chosen in the Decision Room (or found by Discovery): the counter is on the entry page, deferred, with this app's name
         m = re.search(r"""<script\b[^>]*src=["']""" + re.escape(PULSE_SRC) + r"""["'][^>]*>""", etext)
-        if not m:
+        served = _pulse_served(etext) if page is not None and not m else None
+        if served is not None:   # injected after load by the framework: present, with what its render payload declares
+            out.append(_check("analytics", "HaveAnApp Pulse is on the entry page (deferred, with data-app)", "advisory" if served else "ok",
+                              f"the Pulse tag lacks {' and '.join(x.rstrip('=') for x in served)}: " + pulse_snippet(os.path.basename(project.rstrip("/"))) if served else None))
+        elif not m:
             out.append(_check("analytics", "HaveAnApp Pulse is on the entry page (deferred, with data-app)", "failed", "add " + pulse_snippet(os.path.basename(project.rstrip("/")))))
         else:   # the integration is there; a missing attribute is configuration metadata, not a broken integration
             miss = [a for a in ("defer", "data-app=") if a not in m.group(0)]

@@ -1,17 +1,35 @@
 """TestCraft: automated QA for web games and assets. Browser work is Playwright + Chromium
 (core/web/testcraft.mjs); image comparison, asset integrity and reports are Python. Every run writes
 a JSON report and a self-contained HTML report next to its screenshots."""
-import html, json, os, subprocess, sys, base64
+import html, json, os, re, socket, subprocess, sys, base64, urllib.parse
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 from core import media, runners, validate as V, webpages
-from core.contract import StudioError
+from core.contract import StudioError, Blocked
 import importlib.util as _ilu
 _spec = _ilu.spec_from_file_location("gitcraft_testcraft_findings", os.path.join(HERE, "findings.py")); TF = _ilu.module_from_spec(_spec); _spec.loader.exec_module(TF)
 
 VIEWPORTS = {"desktop": {"name": "desktop", "width": 1280, "height": 720}, "laptop": {"name": "laptop", "width": 1440, "height": 900},
              "phone": {"name": "phone", "device": "iPhone 13"}, "phone_landscape": {"name": "phone_landscape", "device": "iPhone 13 landscape"},
              "android": {"name": "android", "device": "Pixel 7"}, "tablet": {"name": "tablet", "device": "iPad (gen 7)"}}
+
+
+def _is_url(t): return isinstance(t, str) and bool(re.match(r"^https?://", t))
+
+
+def _running(t):
+    """A running app (a server-rendered app has no folder to serve): a local address that answers, or a reasoned refusal."""
+    u = urllib.parse.urlparse(t); port = u.port or (443 if u.scheme == "https" else 80)
+    if u.hostname not in ("localhost", "127.0.0.1", "::1"):
+        raise StudioError(f"{u.hostname} is not a local address", hint="TestCraft tests a folder or a locally running app; a deployment is checked by verify-live")
+    s = socket.socket(socket.AF_INET6 if u.hostname == "::1" else socket.AF_INET); s.settimeout(3)
+    try: s.connect((u.hostname, port))
+    except PermissionError:
+        raise Blocked(f"the GITCRAFT sandbox blocks TCP to port {port} (no network by default)",
+                      install=f"export GITCRAFT_ALLOW_LOCAL_PORTS={port} before starting Claude Code (then /mcp)", alternatives=["run studio/cli.py outside the sandbox"])
+    except OSError as e: raise StudioError(f"nothing answers at {u.hostname}:{port} ({e.strerror or e})", hint="start the app and retry")
+    finally: s.close()
+    return t.rstrip("/")
 
 
 def _target(ctx, p):
@@ -27,9 +45,12 @@ def _img_stats(path):
 
 
 def _browser(ctx, p, steps=None, perf_ms=0, record=False):
-    root, entry = _target(ctx, p); ctx.used("playwright", "chromium")
+    if _is_url(p["target"]): where = {"url": _running(p["target"]), "entry": (p.get("entry") or "/")}
+    else:
+        root, entry = _target(ctx, p); where = {"root": root, "entry": entry}
+    ctx.used("playwright", "chromium")
     vps = [VIEWPORTS[v] if isinstance(v, str) else v for v in p["viewports"]]
-    return runners.node("testcraft.mjs", {"root": root, "entry": entry, "out_dir": ctx.out_dir, "viewports": vps, "wait_ms": p["wait_ms"],
+    return runners.node("testcraft.mjs", {**where, "out_dir": ctx.out_dir, "viewports": vps, "wait_ms": p["wait_ms"],
                                           "steps": steps or [], "perf_ms": perf_ms, "record_video": record}, timeout=120 + len(vps) * (60 + perf_ms / 1000))["results"]
 
 

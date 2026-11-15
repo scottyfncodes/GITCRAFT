@@ -370,6 +370,27 @@ The rules live in `production/artifacts.py` and hold for every game, app and sit
   A missing build blocks those checks with the build command; they never fall back to the unbuilt source. The policy is in the
   plan's decisions and the report, and the release checks that every browser check measured the same folder. Structural
   review (DESIGNCRAFT, standards, preservation, asset folders) reads the source.
+- **A server-rendered app declares itself.** An app with no static entry page (Next.js with a server, anything behind
+  sign-in) has no folder to serve and no `index.html` to hand back. It says so in its own repository, in
+  `.gitcraft/evaluation.json`, and only then is the target `server`: the running app at a local URL. Nothing is inferred, so
+  a project without the file is evaluated exactly as before.
+
+  ```json
+  {"target": "server", "url": "http://localhost:3100", "entry": "src/app/layout.tsx", "page": "/sign-in",
+   "start": "npm run build && npm run start -- -p 3100", "prepare": "npm run evaluation:seed",
+   "pixelcraft": {"screens": [{"name": "Sign in", "path": "/sign-in"}, {"name": "Journal", "path": "/journal"}],
+                  "accept_tells": [], "exclusions": []}}
+  ```
+
+  `url` must be a local address (a deployment is `verify-live`'s job). `entry` is the source file a build work order hands
+  back instead of `index.html`. `page` is where a signed-out visitor lands: smoke, the final regression, the icon check and
+  the request and standards checks read that page as the app serves it (a framework that generates its icon routes has no
+  icon files at those paths). `pixelcraft` is passed to the audit and the before/after verify: screens behind sign-in cannot
+  be discovered, so they are listed with their steps. The Director never starts the app: when nothing answers at `url` the
+  checks are blocked with `start` (and `prepare`), the same way an unbuilt app is blocked with its build command, and they
+  run once it answers. The departments run sandboxed with no network, so allow the port
+  (`GITCRAFT_ALLOW_LOCAL_PORTS=3100` before starting Claude Code) or run the production from a shell
+  (`python3 -m production run <id>`). A malformed or non-local declaration is refused with its reason.
 - **Every run ends with a verdict**, in `production_run`/`production_status` (`verdict`, `verdict_reasons`), `production.json` and
   `REPORT.md` (a "Why …" section). **READY**: every criterion measured and passed. **NOT READY**: a criterion was measured and
   failed, or is NOT PLANNED. **INCOMPLETE**: nothing failed, but a check could not run (blocked, for example not built), could not be
