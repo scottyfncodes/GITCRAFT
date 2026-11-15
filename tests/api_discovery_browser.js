@@ -20,7 +20,8 @@ try { ({ chromium } = require('playwright')); } catch (e) { console.log(JSON.str
   const metrics = (p) => p.evaluate(() => ({
     overflow: document.documentElement.scrollWidth - innerWidth,
     small: [...document.querySelectorAll('button, a.btn, select, input[type=search], summary, label.check, .seg span, .chip, .api header a')]
-      .filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.height < 44 || r.width < 44); }).map((e) => e.tagName + ' ' + e.textContent.trim().slice(0, 20) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height)),
+      .filter((e) => e.offsetWidth > 0 && e.offsetHeight > 0 && (e.offsetHeight < 44 || e.offsetWidth < 44))   // layout size: the pressed state scales a button briefly
+      .map((e) => e.tagName + ' ' + e.textContent.trim().slice(0, 20) + ' ' + e.offsetWidth + 'x' + e.offsetHeight),
     inputFont: Math.min(...[...document.querySelectorAll('input[type=search], select')].map((e) => parseFloat(getComputedStyle(e).fontSize))),
   }));
 
