@@ -147,6 +147,22 @@ def _same_commit(a, b):
     return len(a) >= 7 and len(b) >= 7 and (a.startswith(b) or b.startswith(a))
 
 
+def _git_tree(project, commit):
+    """The tree a commit records (its exact files), or None when the commit is not in this clone."""
+    if not re.fullmatch(r"[0-9a-f]{7,40}", commit or ""): return None
+    try:
+        r = subprocess.run(["git", "-C", project, "rev-parse", "--verify", "--quiet", commit + "^{tree}"], capture_output=True, text=True, timeout=10, stdin=subprocess.DEVNULL)
+        return r.stdout.strip() if r.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", r.stdout.strip()) else None
+    except (OSError, subprocess.SubprocessError): return None
+
+
+def same_tree(project, a, b):
+    """True: both commits record the same files (a squash or rebase merge of the release: a new hash, identical
+    content). False: both are here and their files differ. None: one of them is not in this clone, so nothing is proven."""
+    ta, tb = _git_tree(project, a), _git_tree(project, b)
+    return None if not ta or not tb else ta == tb
+
+
 def _title(b):
     t = re.search(rb"<title>(.*?)</title>", b or b"", re.I | re.S)
     return t.group(1).decode(errors="ignore").strip()[:80] if t else ""
@@ -211,11 +227,24 @@ def _provenance(proj, entry, body, title, deployed_commit, add, dep):
     commit_ok = None
     if head and live_commit:
         commit_ok = _same_commit(head, live_commit)
-        add(V.make("build provenance: the deployment was built from this release's commit", V.PASS if commit_ok else V.BLOCKER,
-                   f"deployed {live_commit[:12]}, release {head[:12]}" + ("" if commit_ok else ": an older or different deployment"),
-                   measured=live_commit[:12]))
         dep["commit"] = {"deployed": live_commit[:40], "release": head, "source": "--commit" if deployed_commit else "page meta"}
-        if not commit_ok: dep["serving"] = False; return
+        name = "build provenance: the deployment was built from this release's commit"
+        if not commit_ok:
+            # A squash or rebase merge gives the release a new hash and the same files. Hashes differing proves
+            # nothing on its own; the trees decide. Only trees proven identical pass: different trees, or a
+            # deployed commit this clone does not have (nothing to compare), stay a blocker.
+            trees = same_tree(proj, head, live_commit)
+            if trees:
+                commit_ok = True; dep["commit"]["equivalent"] = "tree"
+                add(V.make(name, V.PASS, f"deployed {live_commit[:12]}, release {head[:12]}: different commits recording identical files "
+                           "(a squash or rebase merge of this release)", measured=live_commit[:12]))
+            else:
+                why = ": an older or different deployment" if trees is False else \
+                      ": an older or different deployment, or a merge commit this clone has not fetched (fetch the deployed branch and verify again)"
+                add(V.make(name, V.BLOCKER, f"deployed {live_commit[:12]}, release {head[:12]}" + why, measured=live_commit[:12]))
+                dep["serving"] = False; return
+        else:
+            add(V.make(name, V.PASS, f"deployed {live_commit[:12]}, release {head[:12]}", measured=live_commit[:12]))
     if not entry:
         if commit_ok: dep.update(serving=True, evidence=f"commit {live_commit[:12]}")
         else: add(V.make("a released entry page or commit provenance identifies this release", V.UNVERIFIED,
@@ -313,6 +342,11 @@ def _browser(prod, spec, url, out_dir, policy, add, hosts_ok):
             cause = "sandbox_network" if netclass.SANDBOX.search(v["error"]) else None
             add(V.make(f"{vp}: loads with no page errors or failed required requests", V.UNVERIFIED if cause else V.BLOCKER, v["error"], cause=cause)); continue
         req = [netclass.classify_request(*netclass.parse_failed(f), origin_host=origin) for f in v.get("failed") or []]
+        # A host the sandbox demonstrably blocked in this run is blocked for all of its requests: the ones the browser
+        # gave up on without an error string are the same blockage, not a second, unexplained failure of that host.
+        walled = {r["host"] for r in req if r["cause"] == "sandbox_network"}
+        for r in req:
+            if r["cause"] == "no_answer" and r["host"] in walled and r["party"] == "third": r["cause"] = "sandbox_network"
         bad = [r for r in req if r["category"] == V.BLOCKER]
         unv = [r for r in req if r["category"] == V.UNVERIFIED]
         ok_load = v.get("status") == 200 and not v["page_errors"] and not bad

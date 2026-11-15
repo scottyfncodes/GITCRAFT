@@ -646,6 +646,17 @@ def navigation(caps_by_vp, screens, C):
 
 
 # ------------------------------------------------------------------ CONSISTENCY
+# A <button> taller than this is a tappable card (a list row wrapping a title, figures and a description), not a
+# button: its height is its content's, so two cards with different text are not two button styles. Real buttons,
+# large call-to-action bars included, sit well under it; one that does not is still judged by the touch-target,
+# spacing and layout checks, only not counted as a button variant.
+CARD_MIN_HEIGHT = 96
+
+
+def _is_card(e):
+    return e["r"][3] > CARD_MIN_HEIGHT
+
+
 def _btn_variant(e):
     return (round(e["r"][3] / 4) * 4, round(e.get("rad", 0) / 2) * 2 if e.get("rad", 0) < 100 else 99, round(e.get("fs") or 0), tuple((e.get("bg") or [0, 0, 0, 0])[:3]) if e.get("bg") else None, bool(e.get("bw")))
 
@@ -681,7 +692,7 @@ def consistency(caps, C):
             pv = {v[:3] for _, v, _ in prims}
             if prims: C.metric("cross_screen", "cross.primary", "primary buttons look the same on every screen", _clamp(1 - (len(pv) - 1) * 0.25), len(prims), viewport=vp, detail={"variants": len(pv)})
         # component consistency: how many visual variants of buttons and inputs exist
-        btns = [(c, e) for c in cs for e in c.controls if e.get("st") and e.get("k") in ("button",) and not e.get("dis")]
+        btns = [(c, e) for c in cs for e in c.controls if e.get("st") and e.get("k") in ("button",) and not e.get("dis") and not _is_card(e)]
         if len(btns) >= 3:
             variants = Counter(_btn_variant(e)[:3] for _, e in btns)
             heights = sorted({v[0] for v in variants})

@@ -109,6 +109,21 @@ check("1. build provenance: the deployment's commit equals the release commit â†
 rec = live.verify(P1, u1, browser=False, deployed_commit="0123456789abcdef0123456789abcdef01234567")
 check("5. a deployment built from another commit is a BLOCKER (older deployment)", rec["status"] == "failed"
       and any(n.startswith("build provenance") and c == V.BLOCKER for n, c in cats(rec).items()), cats(rec))
+# a squash merge: the deployment's commit has a different hash and exactly the release's files (POW NOW PR #41:
+# main's squash commit d97f740 vs the release branch's e610c6f, one tree)
+_git = lambda *x: subprocess.run(["git", "-C", pow_, "-c", "user.email=t@t", "-c", "user.name=t", *x], capture_output=True, text=True).stdout.strip()
+_squash = _git("commit-tree", HEAD + "^{tree}", "-m", "squash merge of the release")
+rec = live.verify(P1, u1, browser=False, deployed_commit=_squash)
+check("8. a squash-merge commit with the release's exact tree is this release (PASS, recorded as tree-equivalent)", _squash and _squash != HEAD
+      and any(n.startswith("build provenance") and c == V.PASS for n, c in cats(rec).items()) and rec["deployment"]["commit"].get("equivalent") == "tree"
+      and rec["deployment"]["serving"] is True, cats(rec))
+_other = _git("commit-tree", _git("hash-object", "-t", "tree", "/dev/null"), "-m", "a different tree")
+rec = live.verify(P1, u1, browser=False, deployed_commit=_other)
+check("8. ...and a commit in the clone whose files differ is still a BLOCKER", _other and rec["status"] == "failed"
+      and any(n.startswith("build provenance") and c == V.BLOCKER for n, c in cats(rec).items()) and rec["deployment"]["serving"] is False, cats(rec))
+check("8. same_tree: identical trees True, different trees False, a commit not in the clone None (nothing proven)",
+      live.same_tree(pow_, HEAD, _squash) is True and live.same_tree(pow_, HEAD, _other) is False
+      and live.same_tree(pow_, HEAD, "0123456789abcdef0123456789abcdef01234567") is None)
 broken = os.path.join(ws, "broken-deploy"); shutil.copytree(vercel, broken); os.remove(os.path.join(broken, "assets", "index-Vx91LmQe.js"))
 s2, u2 = serve(broken); servers.append(s2)
 rec = live.verify(P1, u2, browser=False)
@@ -132,6 +147,9 @@ rec = live.verify(P1, u4, browser=False, deployed_commit=HEAD)
 check("6. ...and with the deployment's commit given it is this release (the difference is an ADVISORY)", rec["status"] == "ok" and by(rec, V.ADVISORY), rec["checks"])
 
 # ---------------------------------------------------------------- 2. sandbox network vs production failure (classification)
+# a first-party endpoint that answers 502 is a confirmed failure, however unreachable the third-party feeds are
+c_ = netclass.classify_request(*netclass.parse_failed("502 https://snownow.vercel.app/api/travel-curve"), origin_host="snownow.vercel.app")
+check("2. a 502 from the app's own API is a confirmed failure (BLOCKER), not an unreachable feed", c_["category"] == V.BLOCKER and c_["cause"] == "application" and c_["party"] == "first", c_)
 c_ = netclass.classify_request(*netclass.parse_failed("failed https://api.weather.gov/points/39.6,-106.4 (net::ERR_TUNNEL_CONNECTION_FAILED)"), origin_host="snownow.vercel.app")
 check("2. a third-party request the proxy/sandbox refused is UNVERIFIED (sandbox_network), not a defect", c_["category"] == V.UNVERIFIED and c_["cause"] == "sandbox_network", c_)
 c_ = netclass.classify_request(*netclass.parse_failed("failed https://api.open-meteo.com/v1/forecast (net::ERR_NAME_NOT_RESOLVED)"), origin_host="snownow.vercel.app")
