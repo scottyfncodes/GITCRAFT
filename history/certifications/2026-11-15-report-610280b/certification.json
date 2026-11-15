@@ -1,0 +1,861 @@
+{
+ "certification": "Run GITCRAFT report: scoring integrity, end to end",
+ "verdict": "PASS",
+ "at": "2026-11-15T21:08:47Z",
+ "commit": "610280b96827c59d4cb7c6b22617e471c53f9097",
+ "uncommitted_changes": false,
+ "machine": {
+  "evaluators": {
+   "ok": true,
+   "checks": [
+    {
+     "id": "studio-runtime",
+     "title": "Studio runtime (the departments' Python environment)",
+     "ok": true,
+     "needed_by": [
+      "playcraft",
+      "pixelcraft",
+      "testcraft",
+      "assetcraft"
+     ],
+     "detail": "/root/.gitcraft/studio/venv/bin/python"
+    },
+    {
+     "id": "studio-answers",
+     "title": "Studio departments answer",
+     "ok": true,
+     "needed_by": [
+      "playcraft",
+      "pixelcraft",
+      "testcraft",
+      "assetcraft"
+     ],
+     "detail": "studio_status answered"
+    },
+    {
+     "id": "browser",
+     "title": "Browser (Chromium through Playwright) launches, renders a page and runs its script",
+     "ok": true,
+     "needed_by": [
+      "playcraft",
+      "pixelcraft",
+      "testcraft"
+     ],
+     "detail": "launched, rendered and ran a script"
+    }
+   ]
+  }
+ },
+ "workspace": "/tmp/gc-cert-pprdyjxm",
+ "scenarios": [
+  {
+   "scenario": "healthy",
+   "required": "complete, evidence-backed evaluation",
+   "result": "PASS",
+   "blocker": null,
+   "command": "scripts/mcp.sh studiocraft \u2192 tools/call production_project_report {project: reference, refresh: full}",
+   "seconds": 114,
+   "error": null,
+   "checks": [
+    {
+     "check": "the report was produced through the sandboxed launcher",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "evaluation VALID, with an overall score",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "every mandatory evaluator measured this build (a score each, none stale)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "PLAYCRAFT really played the build (desktop and phone), not source reading",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "evidence exists on disk for each measurement (PLAYCRAFT, PIXELCRAFT, TestCraft result files in the report's folder)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "no evaluator failed, and the dependency probe ran green",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "a department with no evidence (DESIGNCRAFT: 0% of its rubric) is Not Evaluated, never a 0 in the score",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the report changed nothing in the project",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports/local--reference-c09f15bd/20261115T210309Z",
+    "state": "VALID",
+    "overall_score": 81.0,
+    "headline": "81.0 (83% measured)",
+    "band": "blocked",
+    "first_summary_line": "Evaluation **VALID**: BLIP scores **81.0/100 (83% measured)** (blocked, medium confidence).",
+    "reasons": [],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 1
+     },
+     "playcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 61,
+      "reason": null,
+      "findings": 35
+     },
+     "pixelcraft": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 82.7,
+      "reason": null,
+      "findings": 6
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 100.0,
+      "reason": null,
+      "findings": 0
+     }
+    },
+    "evaluator_failures": [],
+    "dependencies": [
+     [
+      "studio-runtime",
+      true
+     ],
+     [
+      "studio-answers",
+      true
+     ],
+     [
+      "browser",
+      true
+     ]
+    ],
+    "P0_P1": [
+     "P0 Touch targets and mobile ergonomics: Browser gestures do not fight the game (touch-action, no zoom)",
+     "P1 Touch targets and mobile ergonomics: Touch targets \u2265 44 px (+1 related, playcraft, pixelcraft)",
+     "P1 Feedback and game feel: No pressed (active) state",
+     "P1 Onboarding and first-time experience: Pause works, and the game pauses when hidden",
+     "P1 Performance and loading: Playable quickly (load + start \u2264 3 s)"
+    ]
+   }
+  },
+  {
+   "scenario": "broken evaluator",
+   "required": "identify the evaluator failure, not an application failure",
+   "result": "PASS",
+   "blocker": null,
+   "command": "scripts/mcp.sh studiocraft \u2192 tools/call production_project_report {project: reference, refresh: full}  [env CHROMIUM_PATH=/tmp/gc-cert-pprdyjxm/bin/chromium]",
+   "seconds": 3,
+   "error": null,
+   "checks": [
+    {
+     "check": "the report was produced",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "evaluation INVALID",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "NO overall score anywhere (health record, tool summary, summary lines, Markdown)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "each browser evaluator is reported as an evaluator failure with the real launch error",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "nothing is held against the game: no finding, P0 or P1 from the broken evaluators; the band is not 'at risk'",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the report says so in words (failure of the evaluator, not a finding about the project)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the dependency probe independently found the broken browser",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "what could still be measured is kept and identical to the healthy run (engineering standard)",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports/local--reference-c09f15bd/20261115T210503Z",
+    "state": "INVALID",
+    "overall_score": null,
+    "headline": "No overall score (INVALID evaluation)",
+    "band": "not scored",
+    "first_summary_line": "Evaluation **INVALID**: BLIP has **no overall score**. A required evaluator failed, so the project could not be evaluated: there is no overall score, and nothing here says the project is defective.",
+    "reasons": [
+     "PLAYCRAFT failed to evaluate (mandatory): playcraft_assess failed: browser (/home/user/GITCRAFT/studio/departments/playcraft/playprobe.mjs): browserType.launch: Failed to launch: Error: spawn /tmp/gc-cert-pprdyjxm/bin/chromium EACCES. This is a failure of the evaluator, not a finding about the project.",
+     "PIXELCRAFT failed to evaluate (mandatory): pixelcraft_audit failed: browser (/home/user/GITCRAFT/studio/departments/pixelcraft/probe.mjs): browserType.launch: Failed to launch: Error: spawn /tmp/gc-cert-pprdyjxm/bin/chromium EACCES. This is a failure of the evaluator, not a finding about the project.",
+     "TestCraft failed to evaluate (mandatory): testcraft_smoke failed: browser (testcraft.mjs): browserType.launch: Failed to launch: Error: spawn /tmp/gc-cert-pprdyjxm/bin/chromium EACCES. This is a failure of the evaluator, not a finding about the project."
+    ],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 1
+     },
+     "playcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     },
+     "pixelcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     }
+    },
+    "evaluator_failures": [
+     {
+      "id": "playcraft",
+      "title": "PLAYCRAFT",
+      "mandatory": true,
+      "why": "playcraft_assess failed: browser (/home/user/GITCRAFT/studio/departments/playcraft/playprobe.mjs): browserType.launch: Failed to launch: Error: spawn /tmp/gc-cert-pprdyjxm/bin/chromium EACCES"
+     },
+     {
+      "id": "pixelcraft",
+      "title": "PIXELCRAFT",
+      "mandatory": true,
+      "why": "pixelcraft_audit failed: browser (/home/user/GITCRAFT/studio/departments/pixelcraft/probe.mjs): browserType.launch: Failed to launch: Error: spawn /tmp/gc-cert-pprdyjxm/bin/chromium EACCES"
+     },
+     {
+      "id": "testcraft",
+      "title": "TestCraft",
+      "mandatory": true,
+      "why": "testcraft_smoke failed: browser (testcraft.mjs): browserType.launch: Failed to launch: Error: spawn /tmp/gc-cert-pprdyjxm/bin/chromium EACCES"
+     }
+    ],
+    "dependencies": [
+     [
+      "studio-runtime",
+      true
+     ],
+     [
+      "studio-answers",
+      true
+     ],
+     [
+      "browser",
+      false
+     ]
+    ],
+    "P0_P1": []
+   }
+  },
+  {
+   "scenario": "repeat",
+   "required": "consistent results under equivalent conditions",
+   "result": "PASS",
+   "blocker": null,
+   "command": "scripts/mcp.sh studiocraft \u2192 tools/call production_project_report {project: reference, refresh: full}",
+   "seconds": 109,
+   "error": null,
+   "checks": [
+    {
+     "check": "the second run was produced",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "same evaluation state",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "identical department scores (production, PLAYCRAFT, PIXELCRAFT, TestCraft) and identical overall score",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "identical findings",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports/local--reference-c09f15bd/20261115T210506Z",
+    "state": "VALID",
+    "overall_score": 81.0,
+    "headline": "81.0 (83% measured)",
+    "band": "blocked",
+    "first_summary_line": "Evaluation **VALID**: BLIP scores **81.0/100 (83% measured)** (blocked, medium confidence).",
+    "reasons": [],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 1
+     },
+     "playcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 61,
+      "reason": null,
+      "findings": 35
+     },
+     "pixelcraft": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 82.7,
+      "reason": null,
+      "findings": 6
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 100.0,
+      "reason": null,
+      "findings": 0
+     }
+    },
+    "evaluator_failures": [],
+    "dependencies": [
+     [
+      "studio-runtime",
+      true
+     ],
+     [
+      "studio-answers",
+      true
+     ],
+     [
+      "browser",
+      true
+     ]
+    ],
+    "P0_P1": [
+     "P0 Touch targets and mobile ergonomics: Browser gestures do not fight the game (touch-action, no zoom)",
+     "P1 Touch targets and mobile ergonomics: Touch targets \u2265 44 px (+1 related, playcraft, pixelcraft)",
+     "P1 Feedback and game feel: No pressed (active) state",
+     "P1 Onboarding and first-time experience: Pause works, and the game pauses when hidden",
+     "P1 Performance and loading: Playable quickly (load + start \u2264 3 s)"
+    ]
+   }
+  },
+  {
+   "scenario": "recovery",
+   "required": "normal evaluation after the dependency is restored",
+   "result": "PASS",
+   "blocker": null,
+   "command": "the repeat run above, made after the broken-evaluator run",
+   "seconds": null,
+   "error": null,
+   "checks": [
+    {
+     "check": "the run after the broken one (same project, same report store) is VALID again",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "with the score it had before the failure",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the failure left no trace in it: no evaluator failure, no change claimed against the INVALID report",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports/local--reference-c09f15bd/20261115T210506Z",
+    "state": "VALID",
+    "overall_score": 81.0,
+    "headline": "81.0 (83% measured)",
+    "band": "blocked",
+    "first_summary_line": "Evaluation **VALID**: BLIP scores **81.0/100 (83% measured)** (blocked, medium confidence).",
+    "reasons": [],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 1
+     },
+     "playcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 61,
+      "reason": null,
+      "findings": 35
+     },
+     "pixelcraft": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 82.7,
+      "reason": null,
+      "findings": 6
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 100.0,
+      "reason": null,
+      "findings": 0
+     }
+    },
+    "evaluator_failures": [],
+    "dependencies": [
+     [
+      "studio-runtime",
+      true
+     ],
+     [
+      "studio-answers",
+      true
+     ],
+     [
+      "browser",
+      true
+     ]
+    ],
+    "P0_P1": [
+     "P0 Touch targets and mobile ergonomics: Browser gestures do not fight the game (touch-action, no zoom)",
+     "P1 Touch targets and mobile ergonomics: Touch targets \u2265 44 px (+1 related, playcraft, pixelcraft)",
+     "P1 Feedback and game feel: No pressed (active) state",
+     "P1 Onboarding and first-time experience: Pause works, and the game pauses when hidden",
+     "P1 Performance and loading: Playable quickly (load + start \u2264 3 s)"
+    ]
+   }
+  },
+  {
+   "scenario": "known application defect",
+   "required": "detect the defect and attribute it to the application",
+   "result": "PASS",
+   "blocker": null,
+   "command": "scripts/mcp.sh studiocraft \u2192 tools/call production_project_report {project: reference-defect, refresh: full}",
+   "seconds": 107,
+   "error": null,
+   "checks": [
+    {
+     "check": "the report was produced",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "evaluation VALID: the evaluators worked, so the result is about the game",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the overall score is clearly lower than the healthy game's (at least 10 points)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the missing file is found by measurement and named (sprites/hero.png), by more than one department",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the start-up crash is found by playing: the game does not react to input (a measured PLAYCRAFT finding)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "PLAYCRAFT's and TestCraft's scores fell against the healthy game",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the defects are blockers or P1 for the project",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports/local--reference-defect-fad12357/20261115T210654Z",
+    "state": "VALID",
+    "overall_score": 63.7,
+    "headline": "63.7 (83% measured)",
+    "band": "blocked",
+    "first_summary_line": "Evaluation **VALID**: BLIP scores **63.7/100 (83% measured)** (blocked, medium confidence).",
+    "reasons": [],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 2
+     },
+     "playcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 47,
+      "reason": null,
+      "findings": 40
+     },
+     "pixelcraft": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 82.7,
+      "reason": null,
+      "findings": 6
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 50.0,
+      "reason": null,
+      "findings": 9
+     }
+    },
+    "evaluator_failures": [],
+    "dependencies": [
+     [
+      "studio-runtime",
+      true
+     ],
+     [
+      "studio-answers",
+      true
+     ],
+     [
+      "browser",
+      true
+     ]
+    ],
+    "P0_P1": [
+     "P0 Feedback and game feel: Each probed control produces a visible response",
+     "P0 Performance and loading: No missing files",
+     "P0 Touch targets and mobile ergonomics: Browser gestures do not fight the game (touch-action, no zoom)",
+     "P1 Feedback and game feel: Actions are acknowledged on screen within ~100 ms (+1 related, playcraft, pixelcraft)",
+     "P1 Touch targets and mobile ergonomics: Touch targets \u2265 44 px (+1 related, playcraft, pixelcraft)",
+     "P1 Assets and licences: Missing file referenced: sprites/hero.png",
+     "P1 Automated QA (load, errors, files): Desktop: console errors on load",
+     "P1 Core gameplay: Playing changes the game (inputs move the game state)"
+    ]
+   }
+  },
+  {
+   "scenario": "partial evaluation",
+   "required": "keep the valid findings, mark coverage incomplete, no overall score",
+   "result": "PASS",
+   "blocker": null,
+   "command": "scripts/mcp.sh studiocraft \u2192 tools/call production_project_report {project: reference-quick, refresh: quick}",
+   "seconds": 5,
+   "error": null,
+   "checks": [
+    {
+     "check": "the report was produced",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "evaluation PARTIAL",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "NO overall score anywhere",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "what was measured is kept with its own score (engineering standard and TestCraft's smoke test)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "the evaluators that did not run are named as not run (not failed, not 0), with how to run them",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "coverage is stated",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports/local--reference-quick-cb1dc6f0/20261115T210841Z",
+    "state": "PARTIAL",
+    "overall_score": null,
+    "headline": "No overall score (PARTIAL evaluation)",
+    "band": "not scored",
+    "first_summary_line": "Evaluation **PARTIAL**: BLIP has **no overall score**. Coverage is incomplete: the department scores and findings below are real measurements, but there is no overall score.",
+    "reasons": [
+     "PLAYCRAFT (mandatory): not run \u2014 Run PLAYCRAFT on this game (studiocraft playcraft_pass) to measure how it plays..",
+     "PIXELCRAFT (mandatory): not run \u2014 Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability.."
+    ],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 1
+     },
+     "playcraft": {
+      "status": "no_data",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "not_run",
+      "findings": 0
+     },
+     "pixelcraft": {
+      "status": "no_data",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "not_run",
+      "findings": 0
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "current",
+      "evaluation": "evaluated",
+      "score": 100.0,
+      "reason": null,
+      "findings": 0
+     },
+     "assetcraft": {
+      "status": "no_data",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "not_run",
+      "findings": 0
+     }
+    },
+    "evaluator_failures": [],
+    "dependencies": [],
+    "P0_P1": []
+   }
+  },
+  {
+   "scenario": "unavailable evaluator runtime",
+   "required": "report an invalid evaluation, with no misleading score",
+   "result": "PASS",
+   "blocker": null,
+   "command": "GITCRAFT_STUDIO_HOME=no-studio-runtime python3 -m production project-report reference --refresh full --json --require-valid",
+   "seconds": 0,
+   "error": null,
+   "checks": [
+    {
+     "check": "the report was produced",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "evaluation INVALID, and the gate refuses it (exit code 3)",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "NO overall score anywhere",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "every Studio evaluator is an evaluator failure that names the missing runtime and its install command",
+     "ok": true,
+     "detail": null
+    },
+    {
+     "check": "nothing is held against the game",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": {
+    "report": "/tmp/gc-cert-pprdyjxm/reports-unavailable",
+    "state": "INVALID",
+    "overall_score": null,
+    "headline": "No overall score (INVALID evaluation)",
+    "band": "not scored",
+    "first_summary_line": "Evaluation **INVALID**: BLIP has **no overall score**. A required evaluator failed, so the project could not be evaluated: there is no overall score, and nothing here says the project is defective.",
+    "reasons": [
+     "PLAYCRAFT failed to evaluate (mandatory): the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh. This is a failure of the evaluator, not a finding about the project.",
+     "PIXELCRAFT failed to evaluate (mandatory): the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh. This is a failure of the evaluator, not a finding about the project.",
+     "TestCraft failed to evaluate (mandatory): the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh. This is a failure of the evaluator, not a finding about the project.",
+     "AssetCraft failed to evaluate: the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh. This is a failure of the evaluator, not a finding about the project."
+    ],
+    "departments": {
+     "production": {
+      "status": "refreshed",
+      "evaluation": "evaluated",
+      "score": 85.7,
+      "reason": null,
+      "findings": 1
+     },
+     "playcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     },
+     "pixelcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     },
+     "designcraft": {
+      "status": "refreshed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "insufficient_evidence",
+      "findings": 0
+     },
+     "testcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     },
+     "assetcraft": {
+      "status": "evaluator_failed",
+      "evaluation": "not_evaluated",
+      "score": null,
+      "reason": "evaluator_failed",
+      "findings": 0
+     }
+    },
+    "evaluator_failures": [
+     {
+      "id": "playcraft",
+      "title": "PLAYCRAFT",
+      "mandatory": true,
+      "why": "the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh"
+     },
+     {
+      "id": "pixelcraft",
+      "title": "PIXELCRAFT",
+      "mandatory": true,
+      "why": "the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh"
+     },
+     {
+      "id": "testcraft",
+      "title": "TestCraft",
+      "mandatory": true,
+      "why": "the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh"
+     },
+     {
+      "id": "assetcraft",
+      "title": "AssetCraft",
+      "mandatory": false,
+      "why": "the Studio runtime is not installed (/tmp/gc-cert-pprdyjxm/no-studio-runtime/venv/bin/python); scripts/install-studio.sh"
+     }
+    ],
+    "dependencies": [
+     [
+      "studio-runtime",
+      false
+     ]
+    ],
+    "P0_P1": []
+   }
+  },
+  {
+   "scenario": "unavailable evaluator runtime (through the launcher)",
+   "required": "no score: the tool refuses, or reports INVALID",
+   "result": "PASS",
+   "blocker": null,
+   "command": "scripts/mcp.sh studiocraft \u2192 tools/call production_project_report {project: reference, refresh: full}  [env GITCRAFT_STUDIO_HOME=/tmp/gc-cert-pprdyjxm/no-studio-runtime]",
+   "seconds": 0,
+   "error": "RuntimeError: The Studio runtime (~/.gitcraft/studio: numpy, Pillow, Node packages) isn't installed yet, so only this status tool is listed. Install it with `~/.gitcraft/runtime/scripts/install.sh studiocraft` (about a minute; the SessionStart hook also does it in the background). When it finishes, this server announces its full tool list (tools/list_changed) and this session sees the department tools without /mcp.",
+   "checks": [
+    {
+     "check": "the tool either refuses with the install instruction or returns an INVALID report with no score",
+     "ok": true,
+     "detail": null
+    }
+   ],
+   "evidence": null
+  }
+ ]
+}

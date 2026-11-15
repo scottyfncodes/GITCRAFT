@@ -10,6 +10,7 @@ A scenario that could not be run is **NOT VERIFIED**, and so is the verdict: not
 | Run | What | Verdict |
 |---|---|---|
 | `2026-11-15-report-56bdb69` | "Run GITCRAFT report": scoring integrity (`python3 tests/certify_report.py`) | PASS, 8 of 8 scenarios |
+| `2026-11-15-report-610280b` | the same, on the code as merged (after `main`'s #83 and #84, which changed PIXELCRAFT, TestCraft and the engineering standard) | PASS, 8 of 8 scenarios, identical scores |
 
 ## 2026-11-15: why the report was certified
 
