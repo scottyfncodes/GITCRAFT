@@ -91,7 +91,8 @@ def evaluate_request(project, p, integrated=()):
     """[categorised check] for the request matrix (pure: the builtin and the tests call this)."""
     checks = []
     entry = os.path.join(project, p.get("entry") or "index.html")
-    html = _read(entry)
+    # a server-rendered app's entry page is what it serves (check_request fetches it): there is no entry file to read
+    html = p["html"] if p.get("html") is not None else _read(entry)
     checks.append(V.make("request: the entry page exists", V.PASS if html is not None else V.BLOCKER, None if html is not None else f"no {p.get('entry') or 'index.html'}",
                          kind="objective", feature="deliverable"))
     if html is None: return checks
@@ -143,7 +144,9 @@ def evaluate_request(project, p, integrated=()):
 def check_request(ctx):
     """Builtin (qa.request): the request matrix as a measured check with its evidence file."""
     from . import builtins
-    checks = evaluate_request(ctx["project"], ctx["params"], ctx.get("integrated") or [])
+    page, why = builtins.served_page(ctx["params"])
+    if why: return {"status": "blocked", "reason": f"the running app's entry page did not answer: {why}", "outputs": []}
+    checks = evaluate_request(ctx["project"], dict(ctx["params"], **({"html": page} if page is not None else {})), ctx.get("integrated") or [])
     st = V.status_of(checks)
     r = {"status": "ok" if st == "ok" else "failed", "checks": checks, "requested": ctx["params"].get("requested") or [],
          "summary": V.summary(checks)}

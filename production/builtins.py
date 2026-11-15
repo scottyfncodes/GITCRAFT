@@ -208,20 +208,31 @@ def icon_derivatives(ctx):
 def check_icons(ctx):
     from . import icons
     proj, mode = ctx["project"], ctx["params"].get("mode") or "new"
-    r = icons.verify(proj, require_manifest=True, decision=mode)
+    # a server-rendered app (evaluation target `server`) has no entry file: its icons are measured on the page it serves
+    tgt = ctx["params"].get("target")
+    served = icons.Served(tgt, ctx["params"].get("page") or "/") if isinstance(tgt, str) and re.match(r"^https?://", tgt) else None
+    r = icons.verify(proj, require_manifest=True, decision=mode, served=served)
+    r.pop("served", None)
     tasks = ctx.get("tasks") or {}
     if mode in ("new", "refine"):
         sel = tasks.get("icon.select") or {}
         r["checks"].append({"name": "the icon was chosen by a person (icon.select approved)", "ok": sel.get("state") == "passed" and bool(sel.get("approved")),
                             "detail": sel.get("state")})
         made = {os.path.basename(o["path"]): o.get("sha256") for up in ctx["upstream"] if up["id"].startswith("icon.derivatives") for o in up.get("outputs", [])}
-        ed = os.path.dirname(icons._entry(proj) or proj)
-        linked = [h for rels, h, _ in icons._links(open(icons._entry(proj), errors="ignore").read()) if "icon" in " ".join(rels)] if icons._entry(proj) else []
-        mism = []
-        for h in linked:
-            f = icons._resolve(proj, ed, h)
-            if f and os.path.isfile(f) and os.path.basename(f) in made and sha256(f) != made[os.path.basename(f)]: mism.append(h)
-        ours = [h for h in linked if os.path.basename(re.sub(r"[?#].*$", "", h)) in made]
+        if served:   # served files are compared by content: a framework serves the approved bytes under its own route names
+            page, _ = served.text()
+            linked = [h for rels, h, _ in icons._links(page or "") if "icon" in " ".join(rels)]
+            got = {h: served.fetch(h) for h in linked}
+            ours = [h for h, f in got.items() if f and sha256(f) in set(made.values())]
+            mism = [h for h, f in got.items() if not f]
+        else:
+            ed = os.path.dirname(icons._entry(proj) or proj)
+            linked = [h for rels, h, _ in icons._links(open(icons._entry(proj), errors="ignore").read()) if "icon" in " ".join(rels)] if icons._entry(proj) else []
+            mism = []
+            for h in linked:
+                f = icons._resolve(proj, ed, h)
+                if f and os.path.isfile(f) and os.path.basename(f) in made and sha256(f) != made[os.path.basename(f)]: mism.append(h)
+            ours = [h for h in linked if os.path.basename(re.sub(r"[?#].*$", "", h)) in made]
         r["checks"].append({"name": "the linked icons are the approved set (same bytes as icon.derivatives made)", "ok": bool(ours) and not mism,
                             "detail": (mism or None) if ours else "the page links none of the approved icon files"})
     else:
@@ -243,12 +254,23 @@ def check_attribution(ctx):
     return _with_report(ctx, standards.attribution(ctx["project"]), "attribution.json")
 
 
+def served_page(params):
+    """The entry page a server-rendered app serves (evaluation target `server`): (html, None), (None, why), or (None, None)
+    for every other project, whose entry page is a file."""
+    from . import icons
+    tgt = params.get("target")
+    if not (isinstance(tgt, str) and re.match(r"^https?://", tgt)): return None, None
+    return icons.Served(tgt, params.get("page") or "/").text()
+
+
 def check_standards(ctx):
     from . import standards
     p = ctx["params"]
+    page, why = served_page(p)
+    if why: return {"status": "blocked", "reason": f"the running app's entry page did not answer: {why}", "outputs": []}
     return _with_report(ctx, standards.check(ctx["project"], p.get("profile") or "personal", p.get("deliverable") or "app",
                                              analytics=p.get("analytics"), backend=p.get("backend"), analytics_decided=p.get("analytics_decided", True),
-                                             accepted=(ctx.get("spec") or {}).get("accepted")), "standards.json")
+                                             accepted=(ctx.get("spec") or {}).get("accepted"), page=page), "standards.json")
 
 
 def _test_command(proj):

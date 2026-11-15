@@ -3,6 +3,9 @@
 //            steps?: [...], perf_ms?, record_video?, _result }
 // The game folder `root` is served at http://game.local/ through request interception (no sockets,
 // works inside the GITCRAFT sandbox); any other host is blocked and reported.
+// A running app is given as `url` instead of `root` (a server-rendered app has no folder to serve): the page is
+// opened at url + entry, its own origin is let through and every other host is blocked and reported the same way;
+// a file its own server answers 404 for counts as missing.
 // Steps: {press: key} {hold: key, ms} {down: key} {up: key} {click: [x, y] | "css selector"} {tap: [x, y]} {wait: ms}
 //        {fill: "css selector", value} {expect: "css selector", text?, name?}   (apps: selectors; games: coordinates)
 //        {screenshot: name} {eval: "js expr", as: name} {assert: "js expr", name} {type: text}
@@ -14,7 +17,16 @@ const req = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const done = (o) => { writeFileSync(req._result, JSON.stringify(o)); process.exit(0); };
 try {
   const { browser, devices } = await launch();
-  const root = path.resolve(req.root);
+  const root = req.url ? null : path.resolve(req.root);
+  const origin = req.url ? new URL(req.url).origin : null;
+  const serveApp = async (page, R) => {
+    await page.route('**/*', async (route) => {
+      const u = new URL(route.request().url());
+      if (u.origin === origin || u.protocol === 'data:' || u.protocol === 'blob:') { R.requests++; return route.continue(); }
+      R.blocked.push(u.href.slice(0, 200)); (R.blocked_types ||= []).push(route.request().resourceType()); return route.abort();
+    });
+    page.on('response', (r) => { if (r.status() === 404 && new URL(r.url()).origin === origin && R.missing.length < 50) R.missing.push(new URL(r.url()).pathname.slice(0, 200)); });
+  };
   mkdirSync(req.out_dir, { recursive: true });
   const results = [];
   for (const vp of req.viewports) {
@@ -34,9 +46,10 @@ try {
       window.__frames = []; let last = performance.now();
       const tick = (t) => { window.__frames.push(t - last); last = t; requestAnimationFrame(tick); }; requestAnimationFrame(tick);
     });
-    await serveGame(page, root, R);
+    if (origin) await serveApp(page, R); else await serveGame(page, root, R);
     const t0 = Date.now();
-    try { await page.goto('http://game.local/' + (req.entry || 'index.html'), { waitUntil: 'load', timeout: 30000 }); R.load_ms = Date.now() - t0; }
+    const start = origin ? new URL(req.entry || '/', req.url.replace(/\/?$/, '/')).href : 'http://game.local/' + (req.entry || 'index.html');
+    try { await page.goto(start, { waitUntil: 'load', timeout: 30000 }); R.load_ms = Date.now() - t0; }
     catch (e) { R.page_errors.push('navigation: ' + String(e).slice(0, 200)); }
     await page.waitForTimeout(req.wait_ms || 1500);
     const shot = async (name) => { const p = path.join(req.out_dir, `${vp.name}_${name}.png`); await page.screenshot({ path: p }); R.screenshots.push(p); return p; };

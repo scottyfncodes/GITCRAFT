@@ -241,7 +241,7 @@ def _discover_and_plan(prod):
         if not os.path.exists(bp): store.write_json(bp, maturity.baseline(p))
         pl["tasks"]["qa.preserve"]["params"]["baseline"] = bp
     pol = artifacts.target_policy(spec, p)
-    pl["decisions"].append(f"evaluation target: {'the built app ' + pol['dir'] + '/' if pol['chosen'] == 'build' else 'the project source'} ({pol['why']})")
+    pl["decisions"].append(f"evaluation target: {'the built app ' + pol['dir'] + '/' if pol['chosen'] == 'build' else 'the running app at ' + pol['url'] if pol['chosen'] == 'server' else 'the project source'} ({pol['why']})")
     prod.update({"evaluation": pol, "spec": spec, "discovery": disc, "icon_state": icon_state, "tasks": pl["tasks"], "order": pl["order"],
                  "decisions": pl["decisions"], "parallel_groups": pl["parallel_groups"], "problems": problems,
                  "readiness": planner.readiness(pl, disc), "unmeasured_criteria": unmeasured,
