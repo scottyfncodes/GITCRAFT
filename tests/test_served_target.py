@@ -27,7 +27,7 @@ ws = os.path.realpath(tempfile.mkdtemp(prefix="gitcraft-served-"))
 os.environ.update(GITCRAFT_ROOT=ws, GITCRAFT_ROOTS=ws, GITCRAFT_PRODUCTION_ISOLATED=os.path.join(ws, "isolated-home"),
                   GITCRAFT_ASSET_CATALOG=os.path.join(ws, "catalog.sqlite"))
 os.environ.pop("GITCRAFT_PRODUCTION_HOME", None)
-from production import artifacts, builtins, discovery, executors, icons, maturity, planner, qa, standards
+from production import artifacts, builtins, discovery, executors, icons, live, maturity, planner, qa, standards
 results = []
 
 
@@ -150,6 +150,18 @@ check("the standards check reads the served page: Pulse is found on it, where th
 rq = qa.evaluate_request(served, {"html": PAGE})
 check("the request check reads the served page (no index.html asked for)", rq[0]["name"] == "request: the entry page exists" and rq[0].get("category", rq[0].get("status")) != "blocker" and all("no index.html" not in str(c.get("detail")) for c in rq), rq[:2])
 check("without a served page it still reads the project's entry file", "no index.html" in str(qa.evaluate_request(served, {})[0].get("detail")))
+# verify-live: the app's own sign-in page is the app; a host's authentication wall is still a wall
+check("live: a declared app's own sign-in page is not a login wall", live.own_sign_in(served, "https://app.example/", "https://app.example/sign-in", PAGE))
+check("live: a redirect to the host's authentication is still a wall", not live.own_sign_in(served, "https://app.example/", "https://vercel.com/sso-api?url=x", "<title>Login</title>"))
+check("live: the host's authentication page on the same address is still a wall", not live.own_sign_in(served, "https://app.example/", "https://app.example/", "<title>Authentication Required</title>Vercel Authentication"))
+check("live: a project with no declaration keeps the old reading (a sign-in title is a wall)", not live.own_sign_in(plain, "https://app.example/", "https://app.example/sign-in", PAGE))
+found = []
+live._get, real_get = (lambda u, *a, **k: (200, b"/* pulse */", u)), live._get
+live._analytics({"analytics": {"provider": "pulse"}}, PAGE, found.append)
+live._analytics({"analytics": {"provider": "pulse"}}, "<html><title>x</title></html>", found.append)
+live._get = real_get
+check("live: Pulse injected after load is found on the live page", found[0]["category"] == "pass" and "injected" in str(found[0].get("measured")), found[:1])
+check("live: a page with no Pulse at all is still a blocker", found[-1]["category"] == "blocker", found[-1:])
 
 # ---------------------------------------------------------------- 5. a real browser on a running app
 if executors.studio_python():

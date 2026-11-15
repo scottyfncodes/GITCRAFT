@@ -35,7 +35,7 @@ The record (tasks/release.deploy/live-check.json) has the shape production_submi
 {department, action, status, request: {url}, checks, deployment, hosts_ok}. A deployment is recorded live only when it
 passes."""
 import hashlib, json, os, re, shutil, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request
-from . import HERE, store, icons, verification as V
+from . import HERE, artifacts, standards, store, icons, verification as V
 
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "studio")) if os.path.join(os.path.dirname(HERE), "studio") not in sys.path else None
 from core import netclass  # noqa: E402  (studio/core/netclass.py: standard library only)
@@ -160,6 +160,15 @@ def _unreachable(status, body, url, what):
     return V.make(what, V.BLOCKER, f"HTTP {status}" if status is not None else (body[:160].decode(errors="ignore") if isinstance(body, bytes) else str(body)))
 
 
+def own_sign_in(proj, url, final, html):
+    """A declared server-rendered app (.gitcraft/evaluation.json) may greet a signed-out visitor with its own sign-in page:
+    that is the app, not a wall. A wall is the host's: the request left the site, or the page is the host's own
+    authentication page. Only a project with a valid declaration is given this reading."""
+    decl = artifacts.declared(proj) if proj else {}
+    return bool(decl and not decl["problems"]) and netclass.host(final) == netclass.host(url) \
+        and not re.search(r"vercel\.com/sso|_vercel_sso|Vercel Authentication|Authentication Required", html or "", re.I)
+
+
 def verify(prod, url, browser=True, deployed_commit=None):
     spec = prod["spec"]; proj = spec["project"]["path"]
     out_dir = store.task_dir(prod, "release.deploy")
@@ -179,7 +188,8 @@ def verify(prod, url, browser=True, deployed_commit=None):
     live_html = body.decode(errors="ignore") if status == 200 else ""
     if status == 200:
         title = _title(body)
-        if re.search(r"log ?in|sign ?in|authenticat", title, re.I) and not (entry and _title(open(entry, "rb").read()) == title):
+        own = own_sign_in(proj, url, final, live_html)
+        if re.search(r"log ?in|sign ?in|authenticat", title, re.I) and not own and not (entry and _title(open(entry, "rb").read()) == title):
             add(V.make("the live page is the app, not a login wall", V.BLOCKER,
                        f"the live page is a login wall ('{title}'): deployment protection is on, so visitors don't get the app"))
             dep["serving"] = False
@@ -292,6 +302,13 @@ def _manifest(final, live_html, add):
 def _analytics(spec, live_html, add):
     if (spec.get("analytics") or {}).get("provider") != "pulse" or not live_html: return
     tag = re.search(r"""<script\b[^>]*src=["']([^"']*haveanapp-pulse[^"']*)["'][^>]*>""", live_html)
+    injected = standards._pulse_served(live_html) if not tag else None
+    if injected is not None:   # a framework's script component: the tag is injected after load, the page carries its URL and attributes
+        st, data, _ = _get(standards.PULSE_SRC)
+        if st == 200: add(V.make("HaveAnApp Pulse is on the live page and its script answers", V.PASS, measured="HTTP 200 (injected after load by the framework)"))
+        else: add(_unreachable(st, data, standards.PULSE_SRC, "HaveAnApp Pulse is on the live page and its script answers"))
+        if "data-app=" in injected: add(V.make("the Pulse tag names the app (data-app)", V.ADVISORY, "configuration metadata: counts arrive unlabelled; add data-app"))
+        return
     if not tag:
         add(V.make("HaveAnApp Pulse is on the live page and its script answers", V.BLOCKER, "no Pulse script tag (the declared analytics integration is missing)")); return
     st, data, _ = _get(tag.group(1))
