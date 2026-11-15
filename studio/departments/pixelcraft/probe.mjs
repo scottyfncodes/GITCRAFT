@@ -302,10 +302,34 @@ const FOCUS_INFO = () => {
 };
 
 // ------------------------------------------------------------------ helpers
+// An intro splash is a full-screen, fixed layer the app marks aria-hidden and takes away by itself. While it is
+// up, every control under it measures as covered and has no hover or pressed state, which describes the splash and
+// not the interface. So the measurement waits for it to leave, for a bounded time. A layer that is still there
+// after SPLASH_WAIT is not a splash: the audit goes ahead and reports what it covers. A dialog or sheet is never
+// waited for (it is not aria-hidden), and nothing is dismissed or clicked.
+const SPLASH_WAIT = req.splash_wait_ms ?? 5000;
+const splashUp = () => {
+  for (let n = document.elementFromPoint(innerWidth / 2, innerHeight / 2); n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+    if (n.getAttribute('aria-hidden') !== 'true' || getComputedStyle(n).position !== 'fixed') continue;
+    const b = n.getBoundingClientRect();
+    if (b.width >= innerWidth * 0.95 && b.height >= innerHeight * 0.95) return true;
+  }
+  return false;
+};
+async function splashGone(page) {
+  for (let waited = 0; waited < SPLASH_WAIT; waited += 100) {
+    let up = false;
+    try { up = await page.evaluate(splashUp); } catch { return; }
+    if (!up) { if (waited) await page.waitForTimeout(150); return; }
+    await page.waitForTimeout(100);
+  }
+}
+
 async function settle(page, ms = WAIT) {
   try { await page.waitForLoadState('load', { timeout: 15000 }); } catch {}
   try { await page.evaluate(() => document.fonts && document.fonts.ready); } catch {}
   await page.waitForTimeout(ms);
+  await splashGone(page);
 }
 
 function resolveUrl(p) { return new URL(p || '', BASE).href; }

@@ -90,6 +90,21 @@ els = [{"i": 0, "p": None, "tag": "p", "sel": "p", "r": [0, 0, 300, 40], "d": 2,
 caps, C = M.analyse({"captures": [{"screen": "s", "viewport": "iphone17", "dom": {"els": els, "vw": 402, "vh": 874, "sw": 402, "cw": 402}}], "screens": [], "journeys": []},
                     [{"name": "iphone17", "width": 402, "height": 874, "mobile": True}])
 check("measure: an inline text link is exempt from the 44-px target rule (WCAG 2.5.8)", "controls.small_target" not in C.findings, list(C.findings))
+# tappable cards are not button variants: a list of mountain cards whose heights follow their text (POW NOW's All
+# mountains: 248 to 344 px) was counted as eight extra button styles and failed a redesign as a consistency regression
+_btn = lambda i, h, name, w=120: {"i": i, "p": None, "tag": "button", "sel": f"button.b{i}", "r": [20, 10 + i * 400, w, h], "d": 2, "inter": 1, "k": "button", "st": 1,
+                                  "name": name, "t": name, "tl": len(name), "fs": 14, "rad": 8, "bg": [20, 20, 20, 1], "bw": 1}
+_vp = [{"name": "iphone17", "width": 402, "height": 874, "mobile": True}]
+_run = lambda els: M.analyse({"captures": [{"screen": "s", "viewport": "iphone17", "dom": {"els": els, "vw": 402, "vh": 874, "sw": 402, "cw": 402}}], "screens": [], "journeys": []}, _vp)[1]
+_real = [_btn(0, 44, "Save"), _btn(1, 44, "Cancel"), _btn(2, 44, "Share")]
+_cards = [_btn(10 + n, h, f"Mountain card {n}", w=350) for n, h in enumerate([248, 252, 268, 288, 292, 296, 304, 312])]
+C = _run(_real + _cards)
+_m = next((m for m in C.metrics if m["id"] == "component.buttons"), None)
+check("measure: content cards of differing heights are not button variants (three real buttons, one variant, no finding)",
+      _m is not None and _m["detail"]["variants"] == 1 and _m["samples"] == 3 and "component.button_variants" not in C.findings, (_m, list(C.findings)))
+C = _run([_btn(n, h, f"Action {n}") for n, h in enumerate([28, 32, 36, 40, 44, 48, 52, 56, 60, 64])])
+check("measure: ...and ten real buttons of ten heights are still 'Too many button variants' (major)",
+      C.findings.get("component.button_variants", {}).get("severity") == "major", list(C.findings))
 D = load("dept")
 before = {"method": R.METHOD, "metrics": [mk("accessibility", "a11y.axe", 0.4, "accessibility", screen="home", viewport="iphone17"), mk("layout", "layout.overflow", 1.0, screen="home", viewport="iphone17")], "findings": [], "gallery": []}
 after = {"method": R.METHOD, "metrics": [mk("layout", "layout.overflow", 1.0, screen="home", viewport="iphone17")], "findings": [], "gallery": []}
@@ -257,6 +272,35 @@ D = {s["name"]: s for s in (r.get("screens") or [])} if ok and isinstance(r, dic
 two = next((s for s in D.values() if s.get("depth") == 2), None)
 check("discover: a page two links deep keeps the whole path from the entry (both clicks), not only the last",
       two is not None and [x.get("click") for x in two.get("link_steps", [])] == ["Section", "Open detail"], {k: (v.get("depth"), v.get("link_steps")) for k, v in D.items()} or r)
+
+# ---------------------------------------------------------------- an intro splash is waited out, a stuck overlay is not
+# (POW NOW opens on its name for 1.2 to 2.2 s over the app; the probe measured 0.6 s after load, so on one viewport every
+# header control read as "covered" and lost its hover and pressed states: a regression that was the splash's timing)
+def overlay_app(name, removal_js):
+    d = os.path.join(ws, name); os.makedirs(d, exist_ok=True)
+    open(os.path.join(d, "index.html"), "w").write(
+        "<!doctype html><html lang=en><head><meta name=viewport content='width=device-width, initial-scale=1'><title>Board</title>"
+        "<style>body{margin:0;font:16px system-ui}main{padding:24px}button{min-height:48px;padding:0 20px;margin:8px 8px 8px 0;font:inherit}"
+        "#intro{position:fixed;inset:0;display:grid;place-items:center;background:#04060a;color:#fff;z-index:100}</style></head>"
+        "<body><main><h1>Board</h1><p>Pick what to do with the board you have open.</p><button>Save board</button><button>Share board</button></main>"
+        f"<div id=intro aria-hidden=true>BOARD</div><script>{removal_js}</script></body></html>")
+    return d
+
+
+def obscured(out):
+    try: A = json.load(open(os.path.join(out, "audit.json")))
+    except (OSError, ValueError): return None
+    return [o for f in A.get("findings", []) if f["id"] == "controls.obscured" for o in f.get("occurrences", [])]
+
+
+sp = overlay_app("splash_app", "setTimeout(()=>document.getElementById('intro').remove(),2200)")
+ok, r = c.call("pixelcraft_audit", {"target": sp, "viewports": ["iphone17", "iphone13", "desktop"], "out_dir": f"{ws}/splash"}, timeout=900)
+check("probe: an aria-hidden intro splash that leaves on its own is waited out (no control reported covered by it)",
+      ok and isinstance(r, dict) and r.get("status") == "ok" and obscured(f"{ws}/splash") == [], (r.get("error") if isinstance(r, dict) else r, obscured(f"{ws}/splash")))
+st = overlay_app("stuck_app", "")
+ok, r = c.call("pixelcraft_audit", {"target": st, "viewports": ["iphone17", "iphone13", "desktop"], "out_dir": f"{ws}/stuck"}, timeout=900)
+check("probe: ...and the same layer that never leaves is still reported: its controls are covered",
+      ok and isinstance(r, dict) and any("intro" in str(o.get("measured", {}).get("covered_by")) for o in (obscured(f"{ws}/stuck") or [])), (r.get("error") if isinstance(r, dict) else r, obscured(f"{ws}/stuck")))
 
 # ---------------------------------------------------------------- a canvas game: measured as a game, not a form
 if not QUICK:
