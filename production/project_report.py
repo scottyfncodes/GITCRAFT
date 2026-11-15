@@ -35,7 +35,7 @@ VERSION = "2.0.0"
 STALE_DAYS = 14
 SEVERITIES = ("critical", "major", "minor", "info")
 LEVEL_LABEL = {"verified": "Verified", "observed": "Observed", "inferred": "Inferred (assumption)", "unavailable": "Unavailable"}
-STATUS_LABEL = {"current": "Current", "refreshed": "Refreshed now", "stale": "Stale", "unverified": "Unverified (commit not compared)", "no_data": "No data", "not_applicable": "Not applicable",
+STATUS_LABEL = {"evaluator_failed": "Evaluator failed (not a project result)", "current": "Current", "refreshed": "Refreshed now", "stale": "Stale", "unverified": "Unverified (commit not compared)", "no_data": "No data", "not_applicable": "Not applicable",
                 "unavailable": "Unavailable", "failed": "Failed"}
 MAKERS = ("audiocraft", "animcraft", "worldcraft", "fxcraft", "materialcraft", "levelcraft", "cinematiccraft")
 SKIP = {".git", "node_modules", "__pycache__", ".venv", "venv", ".next", ".cache", ".vercel", "target", "gitcraft-out"}
@@ -297,6 +297,15 @@ def full_cmd(P):
     return f"production_project_report {{project: \"{P.get('path') or P.get('repo') or P.get('id')}\", refresh: \"full\"}} (CLI: python3 -m production project-report {P.get('path') or P.get('id')} --refresh full)"
 
 
+def _refresh_failed(D, detail, kind="evaluator"):
+    """A refresh that produced no measurement. kind "evaluator": the department itself broke (its runtime is missing, the
+    browser would not start, it crashed or timed out): never a result about the project. kind "prerequisite": there was
+    nothing to measure (no build folder): not a failure of either."""
+    if kind == "evaluator": detail = " ".join(str(detail).split("\n")[0].split())[:400]   # the error itself, not the browser's launch log
+    D["refresh"].update(ok=False, detail=detail, kind=kind)
+    if kind == "evaluator": D["evaluator_failure"] = detail
+
+
 def _no_build(ctx):
     cmd = ctx.get("build_cmd")
     return ("not refreshed: no build folder with index.html. GITCRAFT never builds while reporting: run `" + (cmd or "npm run build") + "` in the project, then report again")
@@ -373,13 +382,13 @@ def c_playcraft(D, ctx):
     measured = None
     if ctx["refresh"] == "full" and P["path"] and ctx["kind"] == "game":
         b = _build_dir(P["path"]); D["refresh"]["attempted"] = True
-        if not b: D["refresh"].update(ok=False, detail=_no_build(ctx))
+        if not b: _refresh_failed(D, _no_build(ctx), "prerequisite")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "playcraft")
             res, err = _studio_call("playcraft_assess", {"project": P["path"], "target": b, "out_dir": out, "record_history": False}, env=_dept_env(ctx))
             ok = bool(res and res.get("status") == "ok" and os.path.isfile(os.path.join(out, "playcraft.json")))
-            D["refresh"].update(ok=ok, detail="ok" if ok else _why("playcraft_assess", res, err))
-            if ok: measured = _json(os.path.join(out, "playcraft.json"))
+            if ok: D["refresh"].update(ok=True, detail="ok"); measured = _json(os.path.join(out, "playcraft.json"))
+            else: _refresh_failed(D, _why("playcraft_assess", res, err))
     if measured and (measured.get("overall") or {}).get("score") is not None:
         return _playcraft_measured(D, ctx, measured, os.path.join(ctx["run_dir"], "refresh", "playcraft", "playcraft.json"))
     if not best:
@@ -392,7 +401,7 @@ def c_playcraft(D, ctx):
     D.update(status="current", age_days=G["age_days"],
              run={"id": G["latest"], "at": latest.get("assessed_at"), "commit": ((latest.get("commit") or {}).get("head") or "")[:12] or None,
                   "method": latest.get("method"), "runs": G["runs"], "source": os.path.relpath(root, REPO) if root.startswith(REPO) else root},
-             score={"value": ov.get("score"), "label": "Gameplay quality", "confidence": ov.get("confidence"), "coverage": ov.get("coverage"),
+             score={"value": ov.get("score"), "label": "Gameplay quality", "confidence": ov.get("confidence"), "coverage": ov.get("coverage"), "played": bool(ls.get("played")),
                     "verified_only": (ls.get("verified") or {}).get("overall"),
                     "categories": {k: v.get("score") for k, v in (latest.get("categories") or {}).items()}})
     ev = ls.get("evidence") or {}
@@ -429,7 +438,7 @@ def _playcraft_measured(D, ctx, A, path):
     D.update(status="current", age_days=0,
              run={"id": "this report", "at": A.get("created"), "commit": (git.get("head") or "")[:12] or None, "method": A.get("method"), "runs": 1,
                   "source": "measured for this report, not recorded in the Game Quality History"},
-             score={"value": ov.get("score"), "label": "Gameplay quality", "confidence": ov.get("confidence"), "coverage": ov.get("coverage"),
+             score={"value": ov.get("score"), "label": "Gameplay quality", "confidence": ov.get("confidence"), "coverage": ov.get("coverage"), "played": bool((A.get("played") or {}).get("played")),
                     "categories": {k: v.get("score") for k, v in (A.get("categories") or {}).items()}})
     played = (A.get("played") or {}).get("played")
     D["notes"].append("PLAYCRAFT played the existing build for this report" + (f" on {', '.join((A.get('played') or {}).get('viewports') or [])}" if played else " (it could NOT play it: source evidence only)")
@@ -470,13 +479,13 @@ def c_pixelcraft(D, ctx):
     runs = _pixel_runs(P)
     if ctx["refresh"] == "full" and P["path"]:
         b = _build_dir(P["path"]); D["refresh"]["attempted"] = True
-        if not b: D["refresh"].update(ok=False, detail=_no_build(ctx))
+        if not b: _refresh_failed(D, _no_build(ctx), "prerequisite")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "pixelcraft")
             res, err = _studio_call("pixelcraft_audit", {"project": P["path"], "target": b, "out_dir": out, "record": False}, env=_dept_env(ctx))
             ok = bool(res and res.get("status") == "ok" and os.path.isfile(os.path.join(out, "audit.json")))
-            D["refresh"].update(ok=ok, detail="ok" if ok else _why("pixelcraft_audit", res, err))
-            if ok: runs[("refresh", "now")] = os.path.join(out, "audit.json")
+            if ok: D["refresh"].update(ok=True, detail="ok"); runs[("refresh", "now")] = os.path.join(out, "audit.json")
+            else: _refresh_failed(D, _why("pixelcraft_audit", res, err))
     if not runs:
         D["next"] = "Run PIXELCRAFT on the built app (studiocraft pixelcraft_audit) to measure its visual quality and usability."
         return D
@@ -526,17 +535,25 @@ def c_designcraft(D, ctx):
             if not same: A = fresh
             else: fresh = None
         except Exception as e:   # a game DESIGNCRAFT cannot read is reported, never papered over
-            D["refresh"].update(ok=False, detail=f"DESIGNCRAFT could not analyse the project: {e}"[:300])
+            _refresh_failed(D, f"DESIGNCRAFT could not analyse the project: {type(e).__name__}: {e}"[:300])
     if not A:
         if D["applicable"]: D["next"] = "Run DESIGNCRAFT (python3 -m gamedesign assess <repo> --record) to analyse the game's design."
         else: D["status"] = "not_applicable"
         return D
     S = A["score"]
+    # DESIGNCRAFT's own number counts every criterion its data could not test as 0. That is missing evidence, not a
+    # measured weakness, so the report scores the tested part: points earned ÷ points tested (coverage beside it).
+    tested = sum((v.get("max") or 0) * (v.get("coverage") or 0) for v in S["categories"].values())
+    earned = sum(v.get("score") or 0 for v in S["categories"].values())
     D.update(status="refreshed" if fresh else "current", age_days=_age(A["assessed_at"]),
              run={"id": A.get("run_id") or "this report", "at": A["assessed_at"], "commit": (A["game"].get("commit") or "")[:12] or None, "method": A.get("method"),
                   "runs": len(runs), "source": f"history/designcraft/{P['id']}" if not fresh else "refreshed for this report"},
-             score={"value": S["overall"], "label": "Game design", "confidence": S.get("confidence"), "coverage": S.get("coverage"), "ceiling": S.get("ceiling"),
-                    "categories": {k: round(100 * v["score"] / v["max"], 1) if v.get("max") else v.get("score") for k, v in S["categories"].items()}})
+             score={"value": round(100 * earned / tested, 1) if tested else None, "label": "Game design (of the criteria its data could test)", "confidence": S.get("confidence"),
+                    "coverage": S.get("coverage"), "ceiling": S.get("ceiling"), "earned": S["overall"],
+                    "raw_label": f"DESIGNCRAFT's own count: {S['overall']} of 100 points earned, ceiling {S.get('ceiling')}, with untested criteria counted as 0",
+                    "categories": {k: round(100 * v["score"] / (v["max"] * v["coverage"]), 1) for k, v in S["categories"].items() if v.get("max") and v.get("coverage")}})
+    D["notes"].append(f"DESIGNCRAFT could test {round(100 * (S.get('coverage') or 0))}% of its rubric from the game's data ({S['overall']} of 100 points earned, ceiling {S.get('ceiling')}); "
+                      "criteria it could not test are missing evidence and are not scored as 0.")
     props = {}
     for pr in A.get("proposals") or []:
         if pr.get("finding") and pr.get("variant") in (None, "conservative"): props.setdefault(pr["finding"], pr)
@@ -642,10 +659,11 @@ def c_records(D, ctx):
         st = stale[id(r)]
         checks = r.get("checks") or []
         if r.get("status") != "ok" and not any(not c.get("ok") for c in checks):   # did not complete: the department's error is the evidence
-            f = _finding(D["id"], f"{r.get('action')}:error", f"{D['title'].split(' — ')[0]} {str(r.get('action')).replace('_', ' ')} did not complete", "major", "verified",
-                         str(r.get("error") or "no error recorded")[:240], r.get("hint") or f"Fix the reported error and re-run {D['id']}_{r.get('action')}.", r["_path"],
-                         measured=str(r.get("error") or "no result")[:200], check=f"{r.get('action')}:error")
-            seen[f["check"]] = (f, st)
+            # the department's own run broke: UNVERIFIED (nothing was measured), never a finding against the project
+            f = _finding(D["id"], f"{r.get('action')}:error", f"{D['title'].split(' — ')[0]} {str(r.get('action')).replace('_', ' ')} did not complete (evaluator error: nothing was measured)", "info", "observed",
+                         str(r.get("error") or "no error recorded")[:240], r.get("hint") or f"Fix the reported error and re-run {D['id']}_{r.get('action')}; this is not evidence of a defect in the project.", r["_path"],
+                         kind="unverified", measured=str(r.get("error") or "no result")[:200], check=f"{r.get('action')}:error")
+            seen[f["check"]] = (f, st); env += 1
         for c in checks:
             if c.get("ok"):
                 if c.get("category") not in ("advisory",): scored += 1; passed += 1
@@ -702,15 +720,18 @@ def c_testcraft(D, ctx):
     P = ctx["project"]
     if ctx["refresh"] in ("quick", "full") and P["path"] and ctx["kind"] in ("game", "app", "site"):
         b = _build_dir(P["path"]); D["refresh"]["attempted"] = True
-        if not b: D["refresh"].update(ok=False, detail=_no_build(ctx))
+        if not b: _refresh_failed(D, _no_build(ctx), "prerequisite")
         else:
             out = os.path.join(ctx["run_dir"], "refresh", "testcraft")
             args = {"target": b, "expect_canvas": ctx["kind"] == "game", "out_dir": out, "name": "smoke", "register": False}
             if ctx["refresh"] == "quick": args["viewports"] = ["phone"]
             res, err = _studio_call("testcraft_smoke", args, timeout=600, env=_dept_env(ctx))
             rec = next(iter(sorted(glob.glob(os.path.join(out, "*.studio.json")))), None)
-            measured = bool(res and res.get("status") in ("ok", "failed") and rec and not err)   # a failed smoke is a measurement (its checks failed)
-            D["refresh"].update(ok=measured, detail="ok" if measured else _why("testcraft_smoke", res, err))
+            # a failed smoke is a measurement only when its own checks failed; one that stopped on an error measured nothing
+            rj = (_json(rec) if rec else None) or {}
+            measured = bool(res and rec and not err and (res.get("status") == "ok" or (res.get("status") == "failed" and any(not c.get("ok") for c in (rj.get("checks") or res.get("checks") or [])))))
+            if measured: D["refresh"].update(ok=True, detail="ok")
+            else: _refresh_failed(D, _why("testcraft_smoke", res, err))
             if measured:
                 r = _json(rec)
                 if isinstance(r, dict) and r.get("department"):
@@ -749,11 +770,16 @@ def _asset_refresh(D, ctx):
     out = os.path.join(ctx["run_dir"], "refresh", "assetcraft"); os.makedirs(out, exist_ok=True)
     cat = os.path.join(out, "catalog.sqlite"); env = _dept_env(ctx, GITCRAFT_ASSET_CATALOG=cat)
     res, err = _studio_call("assetcraft_scan", {"folder": P["path"], "project": P["path"], "out_dir": os.path.join(out, "scan"), "name": "scan", "register": False}, env=env)
+    if not err and res and res.get("status") in ("ok", "failed") and res.get("catalogued") == 0:
+        # the scan ran and found no asset files: licensing has nothing to apply to (its "assets catalogued" check is not a failure here)
+        D["refresh"].update(ok=True, detail="scanned: the project has no asset files (images, audio, models, fonts) to catalogue")
+        D["applicable"] = False; D["notes"].append("AssetCraft scanned the project for this report and found no asset files, so asset licensing does not apply.")
+        return None
     if err or not res or res.get("status") not in ("ok", "failed") or not os.path.isfile(cat):
-        D["refresh"].update(ok=False, detail=_why("assetcraft_scan", res, err)); return None
+        _refresh_failed(D, _why("assetcraft_scan", res, err)); return None
     res2, err2 = _studio_call("assetcraft_license_report", {"project": P["path"], "out_dir": os.path.join(out, "licences"), "name": "licences", "register": False}, env=env)
     if err2 or not res2 or res2.get("status") not in ("ok", "failed"):
-        D["refresh"].update(ok=False, detail=_why("assetcraft_license_report", res2, err2)); return None
+        _refresh_failed(D, _why("assetcraft_license_report", res2, err2)); return None
     D["refresh"].update(ok=True, detail="ok")
     D["notes"].append(f"AssetCraft catalogued the project's assets for this report ({res.get('catalogued', 0)} files) in a private catalogue "
                       "(the shared catalogue and the project were not written).")
@@ -768,6 +794,7 @@ def c_assetcraft(D, ctx):
         D["status"] = "unavailable"; return D
     if ctx["refresh"] == "full":
         cat = _asset_refresh(D, ctx) or cat
+        if not D["applicable"]: D["status"] = "not_applicable"; return D
     if not os.path.isfile(cat):
         D["next"] = "Catalogue the project's assets (studiocraft assetcraft_scan) for licences, duplicates and unused files."; return D
     try:
@@ -953,7 +980,9 @@ def reconcile(depts, ctx):
     for d in depts:
         if d["applicable"] and d["status"] == "no_data" and d["next"]:
             out["gaps"].append({"department": d["id"], "title": d["title"], "detail": d["next"]})
-    if not any(d["status"] in ("current", "refreshed", "stale", "unverified") for d in depts if d["id"] == "testcraft"):
+        elif d["applicable"] and d["status"] == "evaluator_failed":
+            out["gaps"].append({"department": d["id"], "title": d["title"], "detail": d["next"], "evaluator_failed": d.get("evaluator_failure")})
+    if not any(d["status"] in ("current", "refreshed", "stale", "unverified", "evaluator_failed") for d in depts if d["id"] == "testcraft"):
         if not any(g["department"] == "testcraft" for g in out["gaps"]):
             out["gaps"].append({"department": "testcraft", "title": "TestCraft — automated QA", "detail": "No automated QA evidence for this project."})
     return out
@@ -984,6 +1013,10 @@ def plan(depts, rec):
         if len(it["departments"]) > 1: it["title"] += f" (+{len(it['findings']) - 1} related, {', '.join(it['departments'])})"
         if len(it["departments"]) > 1 and it["priority"] in ("P2", "P3"): it["priority"] = {"P2": "P1", "P3": "P2"}[it["priority"]]; it["raised"] = "corroborated by several departments"
     for g in rec["gaps"]:
+        if g.get("evaluator_failed"):   # the evaluation's own fault: said as that, never as work on the project
+            items.append({"priority": "P2", "theme": "coverage", "title": f"Evaluator failed (not a project defect): {g['title']}", "departments": [g["department"]], "findings": [], "level": "unavailable",
+                          "why": g["evaluator_failed"], "do": g["detail"], "environment": True})
+            continue
         items.append({"priority": "P2", "theme": "coverage", "title": f"No data: {g['title']}", "departments": [g["department"]], "findings": [], "level": "unavailable", "why": "this department has never analysed the project", "do": g["detail"]})
     for dp in rec["dependencies"]:
         if "stale" in dp["title"]:
@@ -998,13 +1031,13 @@ def plan(depts, rec):
     return items
 
 
-def health(depts, actions):
+def health(depts, actions, evaluation=None):
     """The overall quality score: the weighted mean of the evaluated departments' rubric scores (scoring.overall).
     Release gates and approvals are kept apart (scoring.gates)."""
     for d in depts:
         if "quality" not in d: scoring.evaluate(d)
     stale = [d["id"] for d in depts if d["status"] in ("stale", "unverified") and d["quality"]["evaluation"] == "evaluated"]
-    return scoring.overall(depts, p0=sum(1 for a in actions if a["priority"] == "P0"), stale=stale)
+    return scoring.overall(depts, p0=sum(1 for a in actions if a["priority"] == "P0"), stale=stale, evaluation=evaluation)
 
 
 # ---------------------------------------------------------------- store + comparison
@@ -1121,6 +1154,15 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
         try: fn(D, ctx)
         except Exception as e:   # one department's failure never hides the others, and is never reported as data
             D["status"] = "failed"; D["notes"].append(f"Could not read this department's results: {type(e).__name__}: {e}"[:300])
+            D["evaluator_failure"] = D["notes"][-1]
+        # attribution: an evaluator that broke and measured nothing is an evaluator failure (never "no data", never a
+        # result about the project); a missing prerequisite (no build) is neither a failure nor a measurement
+        if D.get("evaluator_failure") and D["status"] in ("no_data", "failed") and D["applicable"]:
+            D["status"] = "evaluator_failed"; D["outcome"] = "evaluator_failed"
+            D["next"] = f"Repair the evaluator, then report again ({full_cmd(P)}). It failed with: {D['evaluator_failure']}"
+            D["notes"].append("This department's evaluator failed, so it measured nothing. That is a fault in the evaluation, not a finding about the project.")
+        elif D["refresh"].get("kind") == "prerequisite" and D["status"] == "no_data":
+            D["outcome"] = "prerequisite_missing"; D["next"] = D["refresh"]["detail"][:1].upper() + D["refresh"]["detail"][1:] + "."
         if D["refresh"]["attempted"] is False and refresh != "none" and spec["id"] in ("playcraft", "pixelcraft", "testcraft", "assetcraft") and D["status"] != "not_applicable":
             if not P["path"]: D["refresh"]["detail"] = "not refreshed: the project is not checked out here"
             elif spec["id"] == "assetcraft": D["refresh"]["detail"] = f"not refreshed: refresh=quick does not catalogue assets; {full_cmd(P)} catalogues them, or run assetcraft_scan"
@@ -1141,7 +1183,13 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
     if ctx.get("kind_note"): next(d for d in depts if d["id"] == "production")["notes"].append(ctx["kind_note"] + ".")
     rec = reconcile(depts, ctx)
     actions = plan(depts, rec)
-    H = health(depts, actions)
+    for d in depts: scoring.evaluate(d)
+    E = scoring.validity(depts, ctx["kind"], checked_out=bool(P["path"]))
+    if refresh != "none" and P["path"] and (E["evaluator_failures"] or refresh == "full"):
+        from . import evalhealth   # what the evaluators need, checked by doing it: said beside any failure
+        try: E["dependencies"] = evalhealth.check()
+        except Exception as e: E["dependencies"] = {"ok": None, "checks": [], "error": f"{type(e).__name__}: {e}"[:200]}
+    H = health(depts, actions, E)
     earlier = history(P["id"])
     prev = earlier[-1] if earlier else None
     scoring.deltas(prev, depts)
@@ -1149,9 +1197,9 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
     R = {"gitcraft_report": VERSION, "report_id": f"{P['id']}/{stamp}", "generated": now(), "refresh": refresh, "read_only": True,
          "project": {k: P.get(k) for k in ("id", "repo", "url", "name", "path", "head", "branch", "dirty")} | {
              "kind": ctx["kind"], "maturity": (assessment or {}).get("maturity")},
-         "health": H, "departments": depts, "reconciliation": rec, "actions": actions,
+         "evaluation": E, "health": H, "departments": depts, "reconciliation": rec, "actions": actions,
          "levels": {lv: sum(1 for d in depts for f in d["findings"] if f["level"] == lv) for lv in ("verified", "observed", "inferred")},
-         "unavailable": [{"department": d["id"], "status": d["status"], "why": (d["notes"] or [d.get("next") or ""])[-1]} for d in depts if d["status"] in ("unavailable", "failed")],
+         "unavailable": [{"department": d["id"], "status": d["status"], "why": d.get("evaluator_failure") or (d["notes"] or [d.get("next") or ""])[-1]} for d in depts if d["status"] in ("unavailable", "failed", "evaluator_failed")],
          "not_refreshed": [{"department": d["id"], "why": d["refresh"]["detail"]} for d in depts if d["refresh"].get("detail") and not d["refresh"].get("ok")]}
     R["build_cmd"] = ctx.get("build_cmd")
     R["title"] = _title(R, ctx)
@@ -1175,7 +1223,7 @@ def generate(project, refresh="quick", save="store", out_dir=None, store=None):
         with open(R["paths"]["json"], "w") as f: json.dump(R, f, indent=1, default=str)
         with open(R["paths"]["markdown"], "w") as f: f.write(markdown(R))
         with open(R["paths"]["html"], "w") as f: f.write(render_html(R))
-        line = {"report_id": R["report_id"], "generated": R["generated"], "project": P["id"], "title": R["title"], "health": H.get("score"), "method": H.get("method"), "band": H.get("band"),
+        line = {"report_id": R["report_id"], "generated": R["generated"], "project": P["id"], "title": R["title"], "health": H.get("score"), "evaluation": E["state"], "method": H.get("method"), "band": H.get("band"),
                 "verdict": R["gates"].get("verdict"),
                 "confidence": H.get("confidence"), "p": {p: sum(1 for a in actions if a["priority"] == p) for p in ("P0", "P1", "P2", "P3")},
                 "departments": {d["id"]: {"status": d["status"], "score": d["quality"]["value"], "evaluation": d["quality"]["evaluation"], "rubric": d["quality"]["rubric"]} for d in depts},
@@ -1269,24 +1317,30 @@ def executive(R):
     H = R["health"]; ds = R["departments"]; G = R["gates"]
     ev = [d for d in ds if d["quality"]["evaluation"] == "evaluated"]; ne = [d for d in ds if d["quality"]["evaluation"] == "not_evaluated"]
     s = []
-    if H["score"] is None: s.append(f"{R['title']} has no overall score yet: no applicable department has a measured result.")
+    E = R.get("evaluation") or {}
+    if E.get("state") in ("PARTIAL", "INVALID"):
+        s.append(f"Evaluation **{E['state']}**: {R['title']} has **no overall score**. {E['meaning']}")
+        s += [x for x in E.get("reasons") or []][:6]
+        if H.get("parts"): s.append("Measured department scores (each stands on its own, not combined): " + ", ".join(f"{k} {v}" for k, v in H["parts"].items()) + ".")
+    elif H["score"] is None: s.append(f"{R['title']} has no overall score yet: no applicable department has a measured result.")
     else:
         vp = H.get("vs_previous") or {}
         tail = (f", {vp['delta']:+} since the previous report" if vp.get("delta") is not None else
                 f"; not compared with the previous report's {vp['previous']}: " + (vp.get("compare") or "").replace("not comparable: ", "") + ", so no change is claimed" if vp.get("previous") is not None and "not comparable" in (vp.get("compare") or "") else "")
-        s.append(f"{R['title']} scores **{H['score']}/100 ({round(100 * H['coverage'])}% measured)** ({H['band']}, {H['confidence']} confidence{tail}).")
+        s.append(f"Evaluation **VALID**: {R['title']} scores **{H['score']}/100 ({round(100 * H['coverage'])}% measured)** ({H['band']}, {H['confidence']} confidence{tail}).")
         if H.get("at_full_weight") not in (None, H["score"]): s.append(f"Low- and medium-confidence results carry reduced weight; at full weight the score would be {H['at_full_weight']}.")
     V = H.get("validity") or {}
     if V.get("of"): s.append(f"Asset validity: {V['valid']}/{V['of']} files valid ({', '.join(V['departments'])}): files that open and validate, not a quality score.")
     if G.get("verdict"): s.append(f"Director verdict: **{G['verdict']}** for production `{G['production']}` ({G.get('status')})" + (f"; release {G['release_status']}" if G.get("release_status") else "") + ".")
     else: s.append("No production has run for this project, so there is no Director verdict or release gate.")
-    s.append(f"{len(ev)} department(s) scored" + (f", {len(ne)} applicable but not evaluated ({', '.join(d['id'] for d in ne)})" if ne else "") + ".")
+    s.append(f"{len(ev)} department(s) scored" + (f", {len(ne)} applicable but not evaluated (" + ", ".join(f"{d['id']}: {scoring.REASON_LABEL.get(d['quality'].get('reason'), 'not run')}" for d in ne) + ")" if ne else "") + ".")
     st = [d for d in ds if d["status"] == "stale" and d["quality"]["evaluation"] in ("evaluated", "validity")]
     if st: s.append("Stale (measured on an older build, kept out of the top actions and P0/P1 until re-measured): " + ", ".join(d["title"].split(" — ")[0] for d in st) + ".")
     envl = sum(1 for d in ds for f in d["findings"] if f.get("kind") == "unverified" and f["department"] == "testcraft")
     if envl: s.append(f"{envl} TestCraft result(s) are environment-limited (software WebGL or a sandbox-blocked request): UNVERIFIED, not failures, not scored.")
     nr = [x for x in R.get("not_refreshed") or [] if "npm run build" in str(x.get("why")) or "build first" in str(x.get("why"))]
-    if nr and R["project"].get("path"): s.append(f"No build to measure: run `{R.get('build_cmd') or 'npm run build'}` in the project, then report with refresh=full ({full_cmd(R['project'])}).")
+    if E.get("evaluator_failures"): pass   # the repair is the next step, already said above
+    elif nr and R["project"].get("path"): s.append(f"No build to measure: run `{R.get('build_cmd') or 'npm run build'}` in the project, then report with refresh=full ({full_cmd(R['project'])}).")
     elif R["refresh"] != "full" and R["project"].get("path"): s.append(f"For PLAYCRAFT, PIXELCRAFT and AssetCraft measurements, report with refresh=full: {full_cmd(R['project'])}.")
     if R["blockers"]: s.append(f"{len(R['blockers'])} unresolved blocker(s): resolve them before anything else.")
     if R["regressions"]: s.append(f"{len(R['regressions'])} measured regression(s) since the previous report.")
@@ -1307,13 +1361,49 @@ def next_actions(R):
     return out
 
 
+# ---------------------------------------------------------------- evaluation validity (VALID / PARTIAL / INVALID)
+def _validity_rows(R):
+    """One row per applicable scored department: evaluator, whether it is mandatory, what happened, and why."""
+    return [(r["title"], "mandatory" if r["mandatory"] else "optional", r["label"], r.get("why") or ("—" if not r.get("evaluator_failure") else f"re-measurement failed: {r['evaluator_failure']}"))
+            for r in (R.get("evaluation") or {}).get("departments") or []]
+
+
+def _validity_md(R):
+    E = R.get("evaluation")
+    if not E: return []
+    L = ["## Evaluation validity", "", f"**{E['state']}** — {E['meaning']}", ""]
+    L += [f"- {x}" for x in E.get("reasons") or []] + ([""] if E.get("reasons") else [])
+    L += ["| Evaluator | Required | Result | Why |", "|---|---|---|---|"] + [f"| {t} | {m} | {lab} | {str(w).replace('|', '/')[:300]} |" for t, m, lab, w in _validity_rows(R)] + [""]
+    dep = E.get("dependencies")
+    if dep and dep.get("checks"):
+        L += ["Evaluator dependency health (checked by running them): " + ("all working." if dep["ok"] else "**a dependency is broken.**"), ""]
+        L += [f"- {'ok' if c['ok'] else '**FAILED**'} — {c['title']}: {c['detail']}" for c in dep["checks"]] + [""]
+    return L
+
+
+def _validity_html(R):
+    E = R.get("evaluation")
+    if not E: return ""
+    cls = {"VALID": "ok", "PARTIAL": "warn", "INVALID": "bad"}[E["state"]]
+    if E.get("archived") and E["state"] == "VALID": cls = "warn"
+    o = [f"<div class='card' id='validity'><div class='k'>Evaluation validity</div><div class='chips'><span class='chip {cls}'>{_e(E.get('label') or E['state'])}</span></div><p>{_e(E['meaning'])}</p>"]
+    if E.get("reasons"): o.append("<ul class='sum'>" + "".join(f"<li>{_e(x)}</li>" for x in E["reasons"]) + "</ul>")
+    o.append("<div class='tbl' tabindex='0' role='region' aria-label='Scrollable table'><table><tr><th>Evaluator</th><th>Required</th><th>Result</th><th>Why</th></tr>"
+             + "".join(f"<tr><td>{_e(t)}</td><td>{_e(m)}</td><td>{_e(lab)}</td><td class='small'>{_e(str(w)[:400])}</td></tr>" for t, m, lab, w in _validity_rows(R)) + "</table></div>")
+    dep = E.get("dependencies")
+    if dep and dep.get("checks"):
+        o.append("<p class='small'>Evaluator dependency health, checked by running them:</p><ul class='sum'>"
+                 + "".join(f"<li><span class='chip {'ok' if c['ok'] else 'bad'}'>{'ok' if c['ok'] else 'failed'}</span> {_e(c['title'])}: {_e(c['detail'])}</li>" for c in dep["checks"]) + "</ul>")
+    return "".join(o) + "</div>"
+
+
 # ---------------------------------------------------------------- Markdown
 def markdown(R):
     H = R["health"]; P = R["project"]
     L = [f"# GITCRAFT report — {R['title']}", "", "_Production Report_", "",
          f"`{R['report_id']}` · generated {R['generated']} · refresh **{R['refresh']}** · read-only" +
          (f" · commit `{(P.get('head') or '')[:7]}`" if P.get("head") else "") + (f" · [{P['repo']}]({P['url']})" if P.get("url") else ""), "",
-         "## Executive summary", ""] + [f"- {s}" for s in R["summary"]] + [""]
+         "## Executive summary", ""] + [f"- {s}" for s in R["summary"]] + [""] + _validity_md(R)
     I = R.get("identity") or {}; G = R.get("gates") or {}; vp = H.get("vs_previous") or {}
     L += ["## Production identity", "", "| Project | Run date | Release / version | Commit | Production | Director verdict |", "|---|---|---|---|---|---|",
           f"| {I.get('repo') or I.get('name') or '—'} | {R['generated'][:16].replace('T', ' ')} UTC | {I.get('version') or 'not recorded'} | {(I.get('commit') or '—')[:7]} | "
@@ -1328,7 +1418,7 @@ def markdown(R):
     for d in R["departments"]:
         q = d["quality"]
         if q["evaluation"] == "not_applicable": continue
-        L.append(f"| {d['title']} | {q['value'] if q['evaluation'] == 'evaluated' else (q.get('basis') or 'Asset validity') if q['evaluation'] == 'validity' else 'Not Evaluated'} ({q['label']}) | {q['previous'] if q.get('previous') is not None else '—'} | "
+        L.append(f"| {d['title']} | {q['value'] if q['evaluation'] == 'evaluated' else (q.get('basis') or 'Asset validity') if q['evaluation'] == 'validity' else 'Not Evaluated: ' + scoring.REASON_LABEL.get(q.get('reason'), 'not run')} ({q['label']}) | {q['previous'] if q.get('previous') is not None else '—'} | "
                  f"{format(q['delta'], '+') if q.get('delta') is not None else (q.get('compare') or '—')} | {q['weight']} | `{q['rubric']}` | {STATUS_LABEL[d['status']]} | {len(d['findings'])} |")
     L.append("")
     L += ["## Release gates and approvals", ""] + ([f"- {c['title']}: **{c['status'].replace('_', ' ')}**" for c in G.get("criteria") or []] or [f"- {G.get('note') or 'None recorded.'}"]) + \
@@ -1401,7 +1491,7 @@ CSS = """
 :root[data-theme=dark]{--bg:#0e1211;--card:#161b1a;--ink:#e6ebe9;--mute:#9ba6a2;--line:#27302e;--accent:#5cc2b5;--accent-2:#2c5d57;--chip:#1f2725;
 --ok:#6ad19a;--ok-bg:#16301f;--warn:#e5b062;--warn-bg:#33291a;--bad:#f08a80;--bad-bg:#3a1f1d;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-text-size-adjust:100%;font-variant-numeric:tabular-nums}
-main{max-width:960px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+main{overflow-wrap:anywhere;max-width:960px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 a{color:var(--accent)}a:hover{color:var(--ink)}a:active{opacity:.7}code{font:12px/1.45 var(--mono);overflow-wrap:anywhere}
 a.back{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;margin-left:-8px;border-radius:8px;text-decoration:none;font-weight:600}a.back:hover{background:var(--chip)}
 a.rl{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;border-radius:8px}a.rl:hover{background:var(--chip)}
@@ -1529,16 +1619,20 @@ def render_html(R, back=None, downloads=True, evidence_base=None):
                  ("Production", _e(I.get("production") or "none run") + (f" · {_e(I.get('production_status'))}" if I.get("production_status") else "")),
                  ("Report", f"<code>{_e(R['report_id'].split('/')[-1])}</code>" + (" · <a href='report.json'>JSON</a> · <a href='report.md'>Markdown</a>" if downloads else ""))))
              + "</dl></header>")
-    o.append("<nav class='jump' aria-label='Sections'>" + "".join(f"<a href='#{i}'>{t}</a>" for i, t in (("health", "Summary"), ("top", "Next 3"), ("depts", "Departments"), ("trends", "Trends"),
+    o.append("<nav class='jump' aria-label='Sections'>" + "".join(f"<a href='#{i}'>{t}</a>" for i, t in (("health", "Summary"), ("validity", "Validity"), ("top", "Next 3"), ("depts", "Departments"), ("trends", "Trends"),
              ("gates", "Release gates"), ("findings", "Findings"), ("p0", "Blockers"), ("plan", "Action plan"), ("method", "Scoring"), ("limits", "Evidence")) + ((("creative", "Creative (advisory)"),) if R.get("creative") else ())) + "</nav>")
     # hero: the quality score and, apart from it, the Director's verdict (a gate)
     vp = H.get("vs_previous") or {}
-    sc = H["score"]
+    sc = H["score"]; EV = R.get("evaluation") or {}
+    ecls = {"VALID": "ok", "PARTIAL": "warn", "INVALID": "bad"}.get(EV.get("state"), "")
     o.append("<section id='health' class='hero'><div class='card'><div class='k'>Overall quality score</div>"
-             f"<div class='big'><b>{_e(sc if sc is not None else '—')}</b><span>/ 100</span>"
+             + (f"<div class='big'><b>No score</b>" if sc is None and EV.get("state") else
+                f"<div class='big'><b>{_e(sc if sc is not None else '—')}</b><span>/ 100</span>")
              + (f"<b class='cov'>{round(100 * (H.get('coverage') or 0))}% measured</b>" if sc is not None else "") + "</div>"
              + (f"<div class='bar'><i style='width:{max(0, min(100, sc))}%'></i>" + (f"<s style='left:calc({vp['previous']}% - 1px)' title='previous {vp['previous']}'></s>" if vp.get("delta") is not None else "") + "</div>" if sc is not None else "")
-             + f"<div class='chips'><span class='chip {bcls}'>{_e(H['band'].capitalize())}</span><span class='chip'>{_e(H['confidence'])} confidence</span>"
+             + (f"<p class='small' style='margin:8px 0 10px'>" + (f"{_e(EV.get('state'))} evaluation: the measured department scores below are not combined into one number." if not EV.get("archived") else
+                   f"This archived report recorded {_e(H.get('recorded_score'))} under an earlier method. It is kept as recorded and is not a score under today's rule.") + "</p>" if sc is None and EV.get("state") else "")
+             + f"<div class='chips'>" + (f"<span class='chip {'warn' if EV.get('archived') and EV['state'] == 'VALID' else ecls}'>{_e(EV.get('label') or 'Evaluation ' + EV['state'])}</span>" if EV.get("state") else "") + f"<span class='chip {bcls}'>{_e(H['band'].capitalize())}</span>" + (f"<span class='chip'>{_e(H['confidence'])} confidence</span>" if sc is not None else "") +
              f"<span class='chip'>{H['measured']} of {H['of']} departments evaluated · {round(100 * (H.get('coverage') or 0))}% weight</span></div>"
              f"<p class='small' style='margin:10px 0 0'>{_delta_html({'delta': vp.get('delta'), 'previous': vp.get('previous'), 'compare': vp.get('compare')})}</p></div>")
     vc = _verdict_cls(G.get("verdict"))
@@ -1552,6 +1646,7 @@ def render_html(R, back=None, downloads=True, evidence_base=None):
     else:
         o.append(f"<div class='card verdict'><div class='k'>Director verdict · release gate</div><div class='v' style='color:var(--mute)'>No verdict</div><div class='small'>{_e(G.get('note'))}</div></div>")
     o.append("</section><div class='card'><div class='k'>Executive summary</div><ul class='sum'>" + "".join(f"<li>{md(s)}</li>" for s in R["summary"]) + "</ul></div>")
+    o.append(_validity_html(R))
     if R.get("creative"): o.append(_creative_card(R["creative"]))
     # the three highest-impact next actions
     o.append("<h2 id='top'>Three highest-impact next actions</h2>")
@@ -1581,7 +1676,7 @@ def render_html(R, back=None, downloads=True, evidence_base=None):
             v = q.get("validity") or {}
             o.append(f"<div class='val'><b>{v.get('valid')}/{v.get('of')}</b><div class='small'>files valid · not scored</div></div><div class='meta'>")
         else:
-            o.append(f"<div class='val'><span class='ne'>Not Evaluated</span></div><div class='meta'><div class='small'>{_e(q.get('why'))}</div>")
+            o.append(f"<div class='val'><span class='ne'>Not Evaluated</span></div><div class='meta'><div class='small'><b>{_e(scoring.REASON_LABEL.get(q.get('reason'), 'not run').capitalize())}.</b> {_e(q.get('why'))}</div>")
         bits = [f"<span class='chip {'ok' if d['status'] in ('current', 'refreshed') else 'warn' if d['status'] in ('stale', 'unverified') else ''}'>{_e(STATUS_LABEL[d['status']])}</span>"]
         if d.get("run") and d["run"].get("at"): bits.append(f"<span class='small'>measured {_e(str(d['run']['at'])[:10])}</span>")
         if q.get("confidence") and q["evaluation"] == "evaluated": bits.append(f"<span class='small'>{_e(q['confidence'])} confidence</span>")
@@ -1801,7 +1896,7 @@ def _act(a):
 def upgrade(R):
     """A report saved before the Production Report (v1: plain-mean health, no rubrics) → the fields the current
     layout reads. Scores are kept as recorded; nothing is re-measured and nothing is filled in."""
-    if all(d.get("quality") for d in R.get("departments") or []) and "gates" in R: return R
+    if all(d.get("quality") for d in R.get("departments") or []) and "gates" in R: return _archived_validity(R)
     R = json.loads(json.dumps(R))
     for d in R["departments"]:
         d.setdefault("notes", []); d.setdefault("findings", []); d.setdefault("refresh", {})
@@ -1815,6 +1910,40 @@ def upgrade(R):
     R.setdefault("major_findings", major_findings(R["departments"])); R.setdefault("regressions", [])
     R.setdefault("blockers", [{"title": a["title"], "departments": a["departments"], "level": a["level"], "open_since": R["generated"]} for a in R.get("actions") or [] if a["priority"] == "P0"])
     R["summary"] = list(R.get("summary") or []) + [f"Made with GITCRAFT report {R.get('gitcraft_report', '1')}: the overall number is the earlier plain mean ({scoring.LEGACY_METHOD}), not the weighted score."]
+    return _archived_validity(R)
+
+
+def _archived_validity(R):
+    """A report archived before evaluation validity existed (no `evaluation`): shown under today's rule. The archived
+    file is never rewritten; this is the reading of it when it is rendered. Its departments are judged as recorded: when
+    they do not amount to a VALID evaluation, the number it recorded is shown as a recorded figure, not as a score."""
+    if R.get("evaluation"): return R
+    R = json.loads(json.dumps(R))
+    P = R.get("project") or {}; H = R["health"]
+    E = scoring.validity(R["departments"], P.get("kind"), checked_out=bool(P.get("path")))
+    rec = H.get("score")
+    E["archived"] = True
+    E["reasons"] = [f"Archived report, made before evaluation validity existed (method {H.get('method') or scoring.LEGACY_METHOD}). Its file is unchanged; this is how it reads under today's rule."] + E["reasons"]
+    thin = [d for d in R["departments"] if (d.get("quality") or {}).get("evaluation") == "evaluated" and isinstance((d.get("score") or {}).get("coverage"), (int, float))
+            and d["score"]["coverage"] < scoring.MIN_COVERAGE]
+    if rec is not None:
+        # the method that made this number averaged whatever had a figure, including departments with too little evidence:
+        # the figure is kept as recorded, and is not presented as a score under today's rule
+        E["label"] = "Archived · earlier scoring method" if E["state"] == scoring.VALID else f"Archived · {E['state']} evaluation"
+        if E["state"] == scoring.VALID:
+            E["meaning"] = ("Every mandatory evaluator had measured this build, but the overall number was computed by an earlier method that is no longer used. "
+                            "Report again for a score under today's method.")
+            E["score_shown"] = False
+        for d in thin:
+            E["reasons"].append(f"{d['title'].split(' — ')[0]}'s {d['score'].get('value')} came from {round(100 * d['score']['coverage'])}% of its rubric and was averaged in at full value; "
+                                f"today that is too little evidence to score (at least {round(100 * scoring.MIN_COVERAGE)}% is needed).")
+        E["reasons"].append(f"It recorded {rec} from {H.get('measured')} of {H.get('of')} applicable departments. That figure is kept here as recorded; it is not an overall score under today's rule.")
+        H.update(score=None, recorded_score=rec, state=E["state"], headline=f"No overall score under today's rule (recorded then: {rec})", band="blocked" if H.get("p0") else "not scored", confidence="none")
+        R["summary"] = [f"Archived report, read under today's rule" + (f" (evaluation **{E['state']}**)" if E["state"] != scoring.VALID else "") + f": **no overall score**. {E['meaning']}"] + \
+                       [x for x in R.get("summary") or [] if not re.search(r"scores \*\*[\d.]+/100|health[: ]+\**[\d.]+", x)]
+    else:
+        H.setdefault("state", E["state"])
+    R["evaluation"] = E
     return R
 
 
@@ -1853,9 +1982,10 @@ def publish_site(archive, dist):
         T = R.get("trend") or []
         rows.append(f"<article class='card'><div class='small'>{_e(R['project'].get('repo') or pid)}</div>"
                     f"<h2 style='font:600 19px/1.25 var(--serif);margin:4px 0 8px'><a class='ct' href='{_e(pid)}/{_e(stamp)}/'>{_e(R['title'])}</a></h2>"
-                    f"<div class='big'><b style='font-size:44px'>{_e(H['score'])}</b>" + (f"<b class='cov' style='font-size:30px'>({round(100 * H['coverage'])}% measured)</b>" if H.get("coverage") is not None and H.get("score") is not None else "") + f"<span>/ 100 · {_e(H.get('method'))}</span></div>"
-                    + (chart_svg(T, w=320, h=60, label=False) if len(T) > 1 else "")
-                    + f"<div class='chips' style='margin-top:8px'><span class='chip {bcls}'>{_e(H['band'])}</span><span class='chip {_verdict_cls(G.get('verdict'))}'>{_e(G.get('verdict') or 'no verdict')}</span>"
+                    + (f"<div class='big'><b style='font-size:32px'>No score</b></div><div class='small' style='margin-top:4px'>" + (f"Recorded {_e(H['recorded_score'])} under an earlier method" if H.get("recorded_score") is not None else f"{_e(H.get('state') or 'Not a valid')} evaluation") + "</div>" if H.get("score") is None else
+                       f"<div class='big'><b style='font-size:44px'>{_e(H['score'])}</b>" + (f"<b class='cov' style='font-size:30px'>({round(100 * H['coverage'])}% measured)</b>" if H.get("coverage") is not None else "") + f"<span>/ 100 · {_e(H.get('method'))}</span></div>")
+                    + (chart_svg(T, w=320, h=60, label=False) if sum(1 for t in T if t.get("overall") is not None) > 1 and H.get("score") is not None else "")
+                    + f"<div class='chips' style='margin-top:8px'>" + (f"<span class='chip {'warn' if (R.get('evaluation') or {}).get('archived') and H['state'] == 'VALID' else dict(VALID='ok', PARTIAL='warn', INVALID='bad').get(H.get('state'), '')}'>{_e((R.get('evaluation') or {}).get('label') or 'Evaluation ' + H['state'])}</span>" if H.get("state") else "") + f"<span class='chip {bcls}'>{_e(H['band'])}</span><span class='chip {_verdict_cls(G.get('verdict'))}'>{_e(G.get('verdict') or 'no verdict')}</span>"
                     f"<span class='chip'>{len(rs)} report(s)</span></div>"
                     "<div class='small' style='margin-top:8px'>Reports (UTC): " + " · ".join(f"<a class='rl' href='{_e(pid)}/{_e(s)}/'>{_e(when(s))}</a>" for _, s, _ in reversed(rs[-5:])) + "</div></article>")
     page = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><title>GITCRAFT Production Reports</title>"

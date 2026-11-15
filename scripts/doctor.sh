@@ -187,6 +187,18 @@ PY
 )
 fi
 
+# The evaluators the Production Report depends on, checked by running them (the Studio runtime answers, the shared
+# browser launches and renders a page). A Chromium that exists but cannot start shows up here, not as a low score.
+if gitcraft_studio_ready; then
+  say ""
+  if eh=$(cd "$here/.." && GITCRAFT_STUDIO_HOME="$GITCRAFT_STUDIO_HOME" python3 -m production evaluators 2>&1); then
+    while IFS= read -r line; do say "  $line"; done <<<"$eh"
+  else
+    while IFS= read -r line; do say "  $line"; done <<<"$eh"
+    problems+=("report evaluators: a dependency is broken, so reports will be INVALID until it is repaired (python3 -m production evaluators)")
+  fi
+fi
+
 audit="$GITCRAFT_LOG/audit.jsonl"
 if [[ -f "$audit" ]]; then
   read -r calls fails refused < <(python3 - "$audit" <<'PY'

@@ -51,6 +51,8 @@ def main(argv=None):
     gr.add_argument("--refresh", default="quick", choices=["none", "quick", "full"])
     gr.add_argument("--save", default="store", choices=["store", "archive", "none"], help="archive: history/reports (committed, published at /reports/)")
     gr.add_argument("--out", help="write this report into this folder instead"); gr.add_argument("--json", action="store_true", help="print the JSON instead of Markdown")
+    gr.add_argument("--require-valid", action="store_true", help="exit 3 unless the evaluation is VALID (every mandatory evaluator measured the current build)")
+    eh = sp.add_parser("evaluators", help="evaluator dependency health, checked by running them (exit 1 when one is broken)"); eh.add_argument("--json", action="store_true")
     vi = sp.add_parser("vision", help="the product vision contract (a reference for the Creative Review)")
     vi.add_argument("action", choices=["draft", "approve", "show"]); vi.add_argument("project"); vi.add_argument("--fields", help="JSON object or file of vision fields (draft)")
     vi.add_argument("--version", type=int, help="the draft version to approve"); vi.add_argument("--by", help="who approved it (approve) or drafted it")
@@ -95,9 +97,14 @@ def main(argv=None):
     elif o.cmd == "project-report":
         from . import project_report
         R = project_report.generate(o.project, refresh=o.refresh, save=o.save, out_dir=o.out)
+        rc = 0 if not o.require_valid or R["evaluation"]["state"] == "VALID" else 3   # a gate can refuse anything but a VALID evaluation
         if not o.json:
-            print(project_report.markdown(R)); print(f"\nSaved: {R['paths'].get('html') or 'not saved (--save none)'}", file=sys.stderr); return 0
-        out = R
+            print(project_report.markdown(R)); print(f"\nSaved: {R['paths'].get('html') or 'not saved (--save none)'}\nEvaluation: {R['evaluation']['state']}", file=sys.stderr); return rc
+        print(json.dumps(R, indent=1, default=str)); return rc
+    elif o.cmd == "evaluators":
+        from . import evalhealth
+        H = evalhealth.check()
+        print(json.dumps(H, indent=1) if o.json else evalhealth.text(H)); return 0 if H["ok"] else 1
     elif o.cmd == "vision":
         from . import vision
         if o.action == "draft":

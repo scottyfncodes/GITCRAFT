@@ -24,6 +24,8 @@ repository URL that isn't cloned yet returns the clone command to run first.
 for the project, refreshes the read-only analyses, reconciles them, and saves a
 timestamped report (health, scorecards, blockers, P0–P3 plan, changes since the
 last report). It is read-only: never edit code, merge or deploy as part of it.
+Its evaluation is VALID, PARTIAL or INVALID: only VALID has an overall score, so
+never quote one otherwise, and never call an evaluator's failure a project defect.
 
 For a WHOLE deliverable from one master prompt (a game, app, site or asset
 pack: "build a polished mobile-first game with sound, levels and deployment"),

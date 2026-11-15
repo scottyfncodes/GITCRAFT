@@ -1,0 +1,72 @@
+$ python3 -m production evaluators
+   [ok] Studio runtime (the departments' Python environment): /root/.gitcraft/studio/venv/bin/python
+   [ok] Studio departments answer: studio_status answered
+   [ok] Browser (Chromium through Playwright) launches, renders a page and runs its script: launched, rendered and ran a script
+
+$ scripts/mcp.sh studiocraft → tools/call production_project_report {project: reference, refresh: full}
+== healthy: PASS · 114 s
+   PASS the report was produced through the sandboxed launcher
+   PASS evaluation VALID, with an overall score
+   PASS every mandatory evaluator measured this build (a score each, none stale)
+   PASS PLAYCRAFT really played the build (desktop and phone), not source reading
+   PASS evidence exists on disk for each measurement (PLAYCRAFT, PIXELCRAFT, TestCraft result files in the report's folder)
+   PASS no evaluator failed, and the dependency probe ran green
+   PASS a department with no evidence (DESIGNCRAFT: 0% of its rubric) is Not Evaluated, never a 0 in the score
+   PASS the report changed nothing in the project
+
+$ scripts/mcp.sh studiocraft → tools/call production_project_report {project: reference, refresh: full}  [env CHROMIUM_PATH=/tmp/gc-cert-pprdyjxm/bin/chromium]
+== broken evaluator: PASS · 3 s
+   PASS the report was produced
+   PASS evaluation INVALID
+   PASS NO overall score anywhere (health record, tool summary, summary lines, Markdown)
+   PASS each browser evaluator is reported as an evaluator failure with the real launch error
+   PASS nothing is held against the game: no finding, P0 or P1 from the broken evaluators; the band is not 'at risk'
+   PASS the report says so in words (failure of the evaluator, not a finding about the project)
+   PASS the dependency probe independently found the broken browser
+   PASS what could still be measured is kept and identical to the healthy run (engineering standard)
+
+$ scripts/mcp.sh studiocraft → tools/call production_project_report {project: reference, refresh: full}
+== repeat: PASS · 109 s
+   PASS the second run was produced
+   PASS same evaluation state
+   PASS identical department scores (production, PLAYCRAFT, PIXELCRAFT, TestCraft) and identical overall score
+   PASS identical findings
+== recovery: PASS
+   PASS the run after the broken one (same project, same report store) is VALID again
+   PASS with the score it had before the failure
+   PASS the failure left no trace in it: no evaluator failure, no change claimed against the INVALID report
+
+$ scripts/mcp.sh studiocraft → tools/call production_project_report {project: reference-defect, refresh: full}
+== known application defect: PASS · 107 s
+   PASS the report was produced
+   PASS evaluation VALID: the evaluators worked, so the result is about the game
+   PASS the overall score is clearly lower than the healthy game's (at least 10 points)
+   PASS the missing file is found by measurement and named (sprites/hero.png), by more than one department
+   PASS the start-up crash is found by playing: the game does not react to input (a measured PLAYCRAFT finding)
+   PASS PLAYCRAFT's and TestCraft's scores fell against the healthy game
+   PASS the defects are blockers or P1 for the project
+
+$ scripts/mcp.sh studiocraft → tools/call production_project_report {project: reference-quick, refresh: quick}
+== partial evaluation: PASS · 5 s
+   PASS the report was produced
+   PASS evaluation PARTIAL
+   PASS NO overall score anywhere
+   PASS what was measured is kept with its own score (engineering standard and TestCraft's smoke test)
+   PASS the evaluators that did not run are named as not run (not failed, not 0), with how to run them
+   PASS coverage is stated
+
+$ GITCRAFT_STUDIO_HOME=no-studio-runtime python3 -m production project-report reference --refresh full --json --require-valid
+== unavailable evaluator runtime: PASS · 0 s
+   PASS the report was produced
+   PASS evaluation INVALID, and the gate refuses it (exit code 3)
+   PASS NO overall score anywhere
+   PASS every Studio evaluator is an evaluator failure that names the missing runtime and its install command
+   PASS nothing is held against the game
+
+$ scripts/mcp.sh studiocraft → tools/call production_project_report {project: reference, refresh: full}  [env GITCRAFT_STUDIO_HOME=/tmp/gc-cert-pprdyjxm/no-studio-runtime]
+== unavailable evaluator runtime (through the launcher): PASS · 0 s
+   PASS the tool either refuses with the install instruction or returns an INVALID report with no score
+
+CERTIFICATION: PASS  (8 passed, 0 failed, 0 not verified)
+Evidence: /tmp/claude-0/-home-user-GITCRAFT/79449236-1a3f-5036-a9f2-942337d22bf5/scratchpad/cert3/certification.md
+rc=0

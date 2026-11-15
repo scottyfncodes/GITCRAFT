@@ -102,8 +102,8 @@ def report(r, refresh="quick"):
 
 
 def summary(R):
-    return {"report_id": R["report_id"], "title": R["title"], "health": R["health"], "summary": R["summary"],
-            "departments": [{"id": d["id"], "status": d["status"], "score": (d.get("score") or {}).get("value"), "findings": len(d["findings"])} for d in R["departments"]],
+    return {"report_id": R["report_id"], "title": R["title"], "evaluation": {k: (R.get("evaluation") or {}).get(k) for k in ("state", "meaning", "reasons", "evaluator_failures", "mandatory")}, "health": R["health"], "summary": R["summary"],
+            "departments": [{"id": d["id"], "status": d["status"], "score": d["quality"]["value"], "evaluation": d["quality"]["evaluation"], "reason": d["quality"].get("reason"), "findings": len(d["findings"])} for d in R["departments"]],
             "actions": {p: [a["title"] for a in R["actions"] if a["priority"] == p][:8] for p in ("P0", "P1", "P2", "P3")},
             "next_actions": R["next_actions"], "changes": R["changes"], "paths": R["paths"]}
 

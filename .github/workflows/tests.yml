@@ -84,6 +84,23 @@ jobs:
 
       - name: Report trust (runs with no env var, stale/environment-limited evidence, deduplication, finding contract, scoring, quick smoke, 3D servers)
         run: python3 tests/test_report_trust.py
+      - name: Evaluator dependency health (the Studio runtime answers, the browser launches and renders; fails when an evaluator cannot run)
+        run: python3 -m production evaluators
+
+      - name: Scoring integrity (VALID / PARTIAL / INVALID - an evaluator failure is never a score or a finding about the project)
+        run: python3 tests/test_scoring_integrity.py
+
+      - name: Report certification (the REAL evaluators through the sandboxed launcher - healthy, defect, broken evaluator, unavailable, partial, repeat, recovery)
+        run: python3 tests/certify_report.py --out "$RUNNER_TEMP/certification"
+
+      - name: Certification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: report-certification
+          path: ${{ runner.temp }}/certification
+          if-no-files-found: ignore
+
       - name: Orchestration (plan v2 graph, transactional integration, ownership, consolidated approval, v1 compatibility)
         run: python3 tests/test_orchestration.py
       - name: Layered QA (department, integration and product QA; routing, retries, optional, unavailable, verdicts)
