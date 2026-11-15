@@ -122,8 +122,9 @@ def publish(lib_root, dist, source=""):
     games = _publish_games(dist)
     audits = _publish_pixelcraft(dist)
     reports = _publish_reports(dist)
+    apis = _publish_apis(dist)
     total = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dist) for f in fs)
-    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + (f", {audits} PIXELCRAFT audits" if audits else "") + (f", {reports} GITCRAFT reports" if reports else "") + f" to {dist} ({total / 2**20:.1f} MB)")
+    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + (f", {audits} PIXELCRAFT audits" if audits else "") + (f", {reports} GITCRAFT reports" if reports else "") + (f", {apis} APIs (API Discovery)" if apis else "") + f" to {dist} ({total / 2**20:.1f} MB)")
 
 
 def _publish_games(dist):
@@ -158,6 +159,19 @@ def _publish_reports(dist):
     sys.path.insert(0, repo)
     from production import project_report
     return project_report.publish_site(archive, os.path.join(dist, "reports"))
+
+
+def _publish_apis(dist):
+    """The API Discovery page (dist/apis/), from the committed catalogue apidiscovery/data (stdlib only). A catalogue that
+    cannot be read still publishes the page (it shows its own error state): this never fails the site build."""
+    repo = os.path.dirname(HERE)
+    if not os.path.isdir(os.path.join(repo, "apidiscovery")): return 0
+    sys.path.insert(0, repo)
+    try:
+        from apidiscovery import site
+        return site.publish(os.path.join(dist, "apis"))
+    except Exception as e:
+        print(f"API Discovery page not published: {type(e).__name__}: {e}", file=sys.stderr); return 0
 
 
 NO_LIVE = """ForgeCraft's live web server was removed (it ran jobs outside GITCRAFT's sandbox and accepted

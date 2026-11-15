@@ -136,6 +136,8 @@ if [[ "$GITCRAFT_SANDBOX" != off ]]; then
   # (ForgeCraft → MeshCraft, as ForgeCraft's own sandbox allows) and DESIGNCRAFT (gamedesign/, read-only analysis)
   [[ "$name" == studiocraft ]] && policy+=(--rx "$repo/production" --rx "$repo/forgecraft" --rx "$repo/gitcraft3d" --rx "$repo/meshcraft"
                                            --rx "$repo/gamedesign" --rx "$FORGECRAFT_HOME")
+  # ...and API Discovery (apidiscovery/): its code and its committed catalogue, read-only; it has no network and writes nothing
+  [[ "$name" == studiocraft && -d "$repo/apidiscovery" ]] && policy+=(--ro "$repo/apidiscovery")
   # the committed Game Quality History (PLAYCRAFT imports it into its store): read-only, runs never write it
   [[ ( "$name" == studiocraft || "$name" == forgecraft ) && -d "$repo/history" ]] && policy+=(--ro "$repo/history")
   for d in /etc /proc /sys /var/cache/fontconfig /usr/share/fonts "$HOME/.local/share/fonts" "$HOME/.fonts"; do policy+=(--ro "$d"); done

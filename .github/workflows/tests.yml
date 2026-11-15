@@ -101,6 +101,9 @@ jobs:
           path: ${{ runner.temp }}/certification
           if-no-files-found: ignore
 
+      - name: API Discovery (catalogue parsing, search, unknowns, upstream failure, guide security, the page in a browser)
+        run: python3 tests/test_api_discovery.py
+
       - name: Orchestration (plan v2 graph, transactional integration, ownership, consolidated approval, v1 compatibility)
         run: python3 tests/test_orchestration.py
       - name: Layered QA (department, integration and product QA; routing, retries, optional, unavailable, verdicts)

@@ -93,6 +93,13 @@ product against its vision (studiocraft `production_vision`, then
 and PIXELCRAFT captures. It never scores and never changes a department score,
 gate, verdict or plan; fun is only ever a playtest hypothesis.
 
+To find, compare or integrate an external API, use API Discovery (studiocraft
+`api_discovery_search`, `_compare`, `_guide`, `_recommend`): candidates from the
+public-apis catalogue. Auth, HTTPS and CORS are the catalogue's claims; pricing,
+limits, reliability and licence terms are unknown there, so never state them as
+facts. Keep API keys on the server, and never sign up, buy or add a dependency
+for the person. It is a research aid, not a department: it scores nothing.
+
 Project isolation:
 - The active project is whatever repo you are working in. Never assume it is
   GITCRAFT, and never write generated assets into GITCRAFT or any other repo.
