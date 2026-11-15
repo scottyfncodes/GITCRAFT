@@ -14,7 +14,7 @@ PhotoCraft); this module never draws an icon, it only measures, resizes and chec
 
 The planner turns these into tasks (icon.concepts → icon.select (a person picks) → icon.master →
 icon.derivatives → integrate → qa.icons); docs/app-standards.md describes the whole workflow."""
-import hashlib, html, json, os, re, struct, zlib
+import hashlib, html, json, os, re, struct, tempfile, urllib.error, urllib.parse, urllib.request, zlib
 
 SIG = b"\x89PNG\r\n\x1a\n"
 # icon files a framework scaffold ships: never acceptable as an app's final icon
@@ -431,16 +431,57 @@ def _entry(project):
     return None
 
 
-def verify(project, require_manifest=True, decision=None):
-    """→ {status, checks, findings}. Measures the build's icon references; reports what it could not check."""
+class Served:
+    """The entry page of a running, server-rendered app (artifacts: evaluation target `server`). The page and every file
+    it links are fetched from the local server exactly as a browser would get them and kept in a scratch folder, so the
+    same measurements run on the bytes the app really serves (a framework that generates its icon routes has no icon
+    files at those paths in the project). Local addresses only; no proxy is used."""
+    def __init__(self, base, page="/"):
+        self.page_url = urllib.parse.urljoin(base.rstrip("/") + "/", page.lstrip("/")); self.dir = tempfile.mkdtemp(prefix="gitcraft-icons-")
+        self._open = urllib.request.build_opener(urllib.request.ProxyHandler({})).open; self.files = {}
+
+    def get(self, url):
+        """(bytes, content type) or (None, why)."""
+        if urllib.parse.urlparse(url).hostname not in ("localhost", "127.0.0.1", "::1"): return None, "not a local address"
+        try:
+            with self._open(url, timeout=20) as r: return r.read(), r.headers.get("content-type", "")
+        except (urllib.error.URLError, OSError, ValueError) as e: return None, str(getattr(e, "reason", e))
+
+    def text(self):
+        b, why = self.get(self.page_url)
+        return (b.decode("utf-8", "ignore"), None) if b is not None else (None, why)
+
+    def fetch(self, href, base=None):
+        """A linked URL → a local copy of what the server sent (None when it is remote or the server refused it)."""
+        url = urllib.parse.urljoin(base or self.page_url, href)
+        if url in self.files: return self.files[url]
+        b, ctype = self.get(url); path = None
+        if b is not None:
+            name = os.path.basename(urllib.parse.urlparse(url).path) or "index"
+            if "." not in name: name += {"image/png": ".png", "image/svg+xml": ".svg", "image/x-icon": ".ico", "application/manifest+json": ".webmanifest"}.get(ctype.split(";")[0].strip(), "")
+            path = os.path.join(self.dir, f"{len(self.files)}-{name}")
+            with open(path, "wb") as f: f.write(b)
+        self.files[url] = path
+        return path
+
+
+def verify(project, require_manifest=True, decision=None, served=None):
+    """→ {status, checks, findings}. Measures the build's icon references; reports what it could not check.
+    served: a Served entry page (a server-rendered app); default: the project's static entry index.html."""
     checks, info = [], {}
-    entry = _entry(project)
-    if not entry: return {"status": "failed", "checks": [{"name": "an entry index.html exists", "ok": False}], "outputs": []}
-    ed = os.path.dirname(entry); text = open(entry, errors="ignore").read()
-    links = _links(text); info["entry"] = os.path.relpath(entry, project)
+    if served:
+        text, why = served.text()
+        if text is None: return {"status": "failed", "checks": [{"name": f"the entry page {served.page_url} answers", "ok": False, "detail": why}], "outputs": []}
+        entry, ed = None, None; info["entry"] = served.page_url
+    else:
+        entry = _entry(project)
+        if not entry: return {"status": "failed", "checks": [{"name": "an entry index.html exists", "ok": False}], "outputs": []}
+        ed = os.path.dirname(entry); text = open(entry, errors="ignore").read(); info["entry"] = os.path.relpath(entry, project)
+    links = _links(text)
+    resolve = (lambda href: served.fetch(href)) if served else (lambda href: _resolve(project, ed, href))
 
     def png_check(label, href, size=None, need_opaque=False):
-        p = _resolve(project, ed, href)
+        p = resolve(href)
         if not p or not os.path.isfile(p):
             checks.append({"name": f"{label}: {href} exists", "ok": False, "detail": "missing (broken icon reference)"}); return None
         if os.path.basename(p).lower() in GENERIC:
@@ -468,24 +509,28 @@ def verify(project, require_manifest=True, decision=None):
     if require_manifest or man:
         checks.append({"name": "a web app manifest is linked", "ok": bool(man)})
         if man:
-            mp = _resolve(project, ed, man[0][1])
+            mp = resolve(man[0][1])
+            # a served manifest's icon URLs are fetched relative to the manifest's own URL, as a browser resolves them
+            murl = urllib.parse.urljoin(served.page_url, man[0][1]) if served else None
+            rel_to = (lambda src: urllib.parse.urljoin(murl, src)) if served else (lambda src: _rel_to(src, mp, ed))
             try:
                 mj = json.load(open(mp)); ms = mj.get("icons") or []
                 checks.append({"name": "the manifest names the app", "ok": bool(mj.get("name") or mj.get("short_name"))})
                 for want in (192, 512):
                     e = next((i for i in ms if f"{want}x{want}" in str(i.get("sizes")) and "maskable" not in str(i.get("purpose", "any"))), None)
                     checks.append({"name": f"the manifest lists a {want}x{want} icon", "ok": bool(e)})
-                    if e: png_check(f"manifest {want}", _rel_to(e["src"], mp, ed), want)
+                    if e: png_check(f"manifest {want}", rel_to(e["src"]), want)
                 mk = next((i for i in ms if "maskable" in str(i.get("purpose"))), None)
                 info["maskable"] = bool(mk)
-                if mk: png_check("manifest maskable", _rel_to(mk["src"], mp, ed), None, need_opaque=True)
+                if mk: png_check("manifest maskable", rel_to(mk["src"]), None, need_opaque=True)
             except (OSError, ValueError, TypeError) as e:
                 checks.append({"name": "the manifest reads as JSON", "ok": False, "detail": f"{man[0][1]}: {e}"})
     title = re.search(r"apple-mobile-web-app-title", text, re.I)
     info["metadata"] = {"apple_title": bool(title), "theme_color": bool(re.search(r'name=["\']theme-color', text, re.I))}
     if decision: info["decision"] = decision
     return {"status": "ok" if all(c["ok"] for c in checks) else "failed", "checks": checks, "info": info, "outputs": [],
-            "not_checked": ["the deployed URLs serve these files (checked by the deployment evidence against the live URL)"]}
+            "not_checked": ["the deployed URLs serve these files (checked by the deployment evidence against the live URL)"],
+            **({"served": served} if served else {})}
 
 
 def _rel_to(src, manifest_path, entry_dir):

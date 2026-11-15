@@ -316,11 +316,34 @@ def _diff(a, b, out):
 def _key(m): return (m["area"], m["id"], m.get("screen"), m.get("viewport"), m.get("journey"))
 
 
-def compare(before, after, out_dir):
+def _exclusions(raw):
+    """Documented exclusions: metrics that no longer apply after a deliberate change, each with its reason.
+    [{metric, screen, viewport, reason}] — screen and viewport are required (never a wildcard) and the reason must say
+    something. Returns (usable, refused): a refused entry is reported and fails the check, it is never ignored."""
+    ok, bad = [], []
+    for x in raw or []:
+        why = None
+        if not isinstance(x, dict): why = "must be an object {metric, screen, viewport, reason}"
+        elif not all(isinstance(x.get(k), str) and x[k].strip() for k in ("metric", "screen", "viewport")): why = "metric, screen and viewport are all required (no wildcards)"
+        elif len(str(x.get("reason") or "").strip()) < 20: why = "a reason of at least a sentence is required"
+        (bad if why else ok).append({**x, "why": why} if why else x) if isinstance(x, dict) else bad.append({"exclusion": x, "why": why})
+    return ok, bad
+
+
+def compare(before, after, out_dir, exclusions=None):
     same = before.get("method") == after.get("method")
     bk = {_key(m): m for m in before["metrics"]}; ak = {_key(m): m for m in after["metrics"]}
     common = set(bk) & set(ak)
-    lost = sorted({f"{k[1]}" + (f" ({k[2]} @ {k[3]})" if k[2] else "") for k in set(bk) - set(ak)})
+    label = lambda k: f"{k[1]}" + (f" ({k[2]} @ {k[3]})" if k[2] else "")
+    gone = set(bk) - set(ak)
+    # a documented exclusion covers exactly one metric on one screen at one viewport, and only while it is really gone:
+    # one that matches nothing (the metric is measured again, or was mistyped) is stale and is reported
+    excl, refused = _exclusions(exclusions)
+    hit = lambda x: next((k for k in gone if (k[1], k[2], k[3]) == (x["metric"], x["screen"], x["viewport"])), None)
+    excluded = [{"check": label(hit(x)), "reason": x["reason"].strip()} for x in excl if hit(x)]
+    stale = [f"{x['metric']} ({x['screen']} @ {x['viewport']})" for x in excl if not hit(x)]
+    covered = {hit(x) for x in excl if hit(x)}
+    lost = sorted({label(k) for k in gone - covered})
     bs = rubric.area_scores([bk[k] for k in common]); as_ = rubric.area_scores([ak[k] for k in common])
     bc, _ = rubric.categories(bs, {}); ac, _ = rubric.categories(as_, {})
     scores = {}
@@ -352,7 +375,8 @@ def compare(before, after, out_dir):
         shots.append({"screen": g["screen"], "viewport": g["viewport"], "changed_pct": pct, "diff": os.path.join("diff", name)})
     why = "same method, same screens, viewports and journeys; deltas use only metrics measured in both runs" if same else f"method changed ({before.get('method')} → {after.get('method')}): scores are not comparable"
     return {"comparable": same, "why": why, "scores": scores, "resolved": resolved, "persisting": persisting, "new": new, "regressions": regressions,
-            "coverage_lost": lost, "screens": sorted(shots, key=lambda s: -s["changed_pct"]), "metrics_compared": len(common)}
+            "coverage_lost": lost, "coverage_excluded": excluded, "exclusions_stale": stale, "exclusions_refused": refused,
+            "screens": sorted(shots, key=lambda s: -s["changed_pct"]), "metrics_compared": len(common)}
 
 
 def verify(ctx, p):
@@ -379,7 +403,7 @@ def verify(ctx, p):
     A, caps, sheet = _assemble(ctx, app, vps, req, res, params, judgements, _physical(ctx, p))
     A["replay"]["journeys"] = rp.get("journeys") or []
     A["_dir"] = ctx.out_dir
-    cmp = compare(before, A, ctx.out_dir); A.pop("_dir", None)
+    cmp = compare(before, A, ctx.out_dir, p.get("exclusions")); A.pop("_dir", None)
     if A.get("tells"): cmp["tells"] = tells.compare(before.get("tells"), A["tells"])   # informational: a tell is never a regression
     A["comparison"] = cmp; A["baseline"] = {"path": bpath, "created": before.get("created"), "git": (before["app"].get("git") or {}).get("head"), "overall": before["overall"]["score"]}
     if p.get("changes"): A["changes"] = p["changes"]
@@ -389,7 +413,11 @@ def verify(ctx, p):
     checks = [{"name": "same PIXELCRAFT method as the baseline", "ok": cmp["comparable"], "detail": cmp["why"]},
               {"name": "no coverage lost (no check removed or weakened)", "ok": not cmp["coverage_lost"], "detail": cmp["coverage_lost"][:10]},
               {"name": "no regressions", "ok": not cmp["regressions"], "detail": cmp["regressions"][:10]}]
-    return {"outputs": outs, "checks": checks, "summary": _summary(A), "comparison": {k: cmp[k] for k in ("scores", "resolved", "new", "regressions", "coverage_lost", "comparable")},
+    if p.get("exclusions"):   # only when exclusions were declared: each one is shown with its reason, and must still be needed and well-formed
+        checks.append({"name": "documented exclusions are specific, reasoned and still needed", "ok": not cmp["exclusions_stale"] and not cmp["exclusions_refused"],
+                       "detail": {"excluded": cmp["coverage_excluded"], "stale (the metric is measured again: remove the exclusion)": cmp["exclusions_stale"],
+                                  "refused": cmp["exclusions_refused"]}})
+    return {"outputs": outs, "checks": checks, "summary": _summary(A), "comparison": {k: cmp[k] for k in ("scores", "resolved", "new", "regressions", "coverage_lost", "coverage_excluded", "comparable")},
             "history": hist, "report": os.path.join(ctx.out_dir, "report.html")}
 
 

@@ -69,6 +69,8 @@ def build(spec, disc, version=1):
     starter = _starter(spec, proj)
     asset_dir = spec["project"].get("asset_dir") or proj.get("asset_dir") or ("public/assets" if starter == "vite-react" else "assets")
     spec["project"]["asset_dir"] = asset_dir
+    if _served(proj):   # a declared server-rendered app: the checks planned from the spec alone (build.wire, qa.request) need it too
+        spec["project"]["served"] = proj["served"]; spec["project"].setdefault("entry", proj.get("entry"))
     adir = lambda sub: f"$project/{asset_dir}/{sub}"
     web = d in ("game", "app", "site")
     pmode = spec.get("mode") or {}
@@ -103,7 +105,8 @@ def build(spec, disc, version=1):
         decisions.append("direction first: the build is held to design.direction (" + ", ".join(_direction.scope(spec)) + "); its playtest and look questions go to a person at release")
     if "pixelcraft" in before:
         add(T(before["pixelcraft"], "PIXELCRAFT baseline: the interface as it is, before the change", "design", "studio", department="pixelcraft", action="audit",
-              params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft_before"},
+              params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft_before",
+                      **_px(proj, "screens", "journeys", "accept_tells", "viewports", "wait_ms")},
               deps=["foundation.scaffold"], resources=["browser"], timeout=1200, advisory=True))
     if "playcraft" in before:
         add(T(before["playcraft"], "PLAYCRAFT baseline: the game as it plays, before the change", "design", "studio", department="playcraft", action="pass",
@@ -234,7 +237,7 @@ def build(spec, disc, version=1):
         add(T("build", f"Build the {kind}: {spec['title']}", "integration", "agent", deps=build_deps,
               work_order={"brief": spec["prompt"],
                           "instructions": _build_instructions(spec),
-                          "expected": [{"path": "$project/" + (proj.get("entry") or "index.html"), "format": "html"}]
+                          "expected": [_entry_expected(proj)]
                                       + ([{"path": "$project/tests/gitcraft.features.json", "format": "json", "keys": ["features"], "validate": "features"}] if _features_required(spec) else []),
                           "inputs": "the integrated-assets manifest (handoff) lists every asset path with its role",
                           "license": "owned by the project"}))
@@ -256,7 +259,7 @@ def build(spec, disc, version=1):
         tgt = "$target"   # the evaluation target: one folder for every browser check (production/artifacts.py)
         qa.append("qa.smoke")
         add(T("qa.smoke", "TestCraft smoke: loads on every viewport, no errors, no missing files", "qa", "studio", department="testcraft", action="smoke",
-              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, deps=["build"], resources=["browser"], criterion="loads_everywhere"))
+              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke", **_page(proj)}, deps=["build"], resources=["browser"], criterion="loads_everywhere"))
         if q.get("perf"):
             qa.append("qa.perf")
             add(T("qa.perf", "TestCraft performance profile", "qa", "studio", department="testcraft", action="perf",
@@ -279,11 +282,13 @@ def build(spec, disc, version=1):
             if "pixelcraft" in before:
                 add(T("qa.pixelcraft", "PIXELCRAFT before / after: the same screens and viewports on the changed interface, no regression", "qa", "studio",
                       department="pixelcraft", action="verify",
-                      params={"baseline": {"$from": before["pixelcraft"], "role": "audit", "format": "json"}, "project": "$project", "target": "$target", "name": "pixelcraft"},
+                      params={"baseline": {"$from": before["pixelcraft"], "role": "audit", "format": "json"}, "project": "$project", "target": "$target", "name": "pixelcraft",
+                              **_px(proj, "exclusions")},
                       deps=["build", before["pixelcraft"]], resources=["browser"], timeout=1500, criterion="interface_quality", gate=[{"type": "status_ok"}]))
             else:
                 add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability at iPhone 17, iPhone 13, desktop", "qa", "studio", department="pixelcraft", action="audit",
-                      params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
+                      params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft",
+                              **_px(proj, "screens", "journeys", "accept_tells", "viewports", "wait_ms")},
                       deps=["build"], resources=["browser"], timeout=1200, criterion="interface_quality", advisory=small_change,
                       gate=[{"type": "status_ok"}, {"type": "min", "path": "summary.overall.score", "min": q["pixelcraft_min"], "label": "PIXELCRAFT overall"}]))
         if q.get("designcraft"):
@@ -299,7 +304,8 @@ def build(spec, disc, version=1):
         if spec.get("icon", {}).get("required"):
             qa.append("qa.icons")
             add(T("qa.icons", "App icon: approved, wired in, right sizes and formats, readable small", "qa", "builtin", action="check_icons",
-                  params={"mode": mode}, deps=["build"] + (["icon.derivatives"] if "icon.derivatives" in {t["id"] for t in tasks} else []),
+                  params={"mode": mode, **_served_page(proj)},
+                  deps=["build"] + (["icon.derivatives"] if "icon.derivatives" in {t["id"] for t in tasks} else []),
                   criterion="app_icon", gate=[{"type": "status_ok"}]))
         if spec.get("attribution", {}).get("required"):
             qa.append("qa.attribution")
@@ -323,7 +329,7 @@ def build(spec, disc, version=1):
               + (" (advisory: findings in existing code are reported, not imposed)" if existing else ""), "qa", "builtin", action="check_standards",
               params={"profile": spec.get("engineering", {}).get("profile", "personal"), "deliverable": d, "analytics": (spec.get("analytics") or {}).get("provider"),
                       "analytics_decided": not existing or (spec.get("analytics") or {}).get("source") == "decision_room",
-                      "backend": (spec.get("backend") or {}).get("provider")}, deps=["build"], criterion="engineering_standards",
+                      "backend": (spec.get("backend") or {}).get("provider"), **_served_page(proj)}, deps=["build"], criterion="engineering_standards",
               gate=[{"type": "status_ok"}], advisory=existing))
         if existing:
             qa.append("qa.preserve")
@@ -342,7 +348,7 @@ def build(spec, disc, version=1):
     # ---------------------------------------------------------------- release
     if web:
         add(T("release.regression", "Final regression: smoke-test the exact build being released", "release", "studio", department="testcraft", action="smoke",
-              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "regression"}, deps=qa, resources=["browser"],
+              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "regression", **_page(proj)}, deps=qa, resources=["browser"],
               criterion="loads_everywhere"))
         rel_deps = qa + ["release.regression"]
     else:
@@ -404,7 +410,7 @@ def _graph_v2(spec, tasks, decisions):
                   deps=after_build + ["integrate.final"],
                   work_order={"brief": "Every asset is integrated (integrated_assets in the hand-off). Replace the placeholders with them in the real application.",
                               "instructions": _wire_instructions(spec, "icon.derivatives" in ids),
-                              "expected": [{"path": "$project/" + ((spec.get("project") or {}).get("entry") or "index.html"), "format": "html"}],
+                              "expected": [_entry_expected(spec.get("project") or {})],
                               "inputs": "integrated_assets in the hand-off: every integrated file with its role and producing task"})
         tasks.insert(tasks.index(final) + 1, bwire)
     ready = "build.wire" if wires else after_build[-1]
@@ -435,7 +441,7 @@ def _layered_qa(spec, tasks, ids, ready, wires):
     deps = [ready] + ([] if wires else ["integrate.final"])
     rq = T("qa.request", "Product QA: the finished product against the request (requested features, unrequested additions, coherence)"
            + (" (advisory: an existing project's code is reported, not imposed)" if existing else ""), "qa", "builtin", action="check_request",
-           params=qa.params_for(spec), deps=deps, criterion="request_fulfilled", gate=[{"type": "status_ok"}], advisory=existing)
+           params={**qa.params_for(spec), **_served_page(spec.get("project") or {})}, deps=deps, criterion="request_fulfilled", gate=[{"type": "status_ok"}], advisory=existing)
     reg = next((t for t in tasks if t["id"] == "release.regression"), None)
     tasks.insert(tasks.index(reg) if reg else len(tasks), rq)
     for t in tasks:   # the final regression and the release wait for it like every other QA check
@@ -518,6 +524,32 @@ def _tool_instructions(spec):
             "Run it yourself on real input before submitting, and submit the files you changed."]
 
 
+def _served(proj):
+    """The project's declared running app ({url, page, pixelcraft}) or {}: discovery reads .gitcraft/evaluation.json."""
+    return (proj or {}).get("served") or {}
+
+
+def _page(proj):
+    """Smoke opens the declared landing page of a served app; a folder target keeps its own entry."""
+    return {"entry": _served(proj)["page"]} if _served(proj) else {}
+
+
+def _served_page(proj):
+    """Source-reading checks of the entry page (request, standards, icons) read what a served app serves instead of a file."""
+    return {"target": "$target", "page": _served(proj)["page"]} if _served(proj) else {}
+
+
+def _px(proj, *keys):
+    """The PIXELCRAFT parameters a served app declares (its screens sit behind sign-in, so they cannot be discovered)."""
+    px = _served(proj).get("pixelcraft") or {}
+    return {k: px[k] for k in keys if px.get(k)}
+
+
+def _entry_expected(proj):
+    e = proj.get("entry") or "index.html"
+    return {"path": "$project/" + e, "format": "html" if e.endswith((".html", ".htm")) else "text"}
+
+
 def _review_plan(spec, proj, decisions):
     """Review only: measure the project as it is (read-only evaluators), change nothing, report."""
     q, d = spec["quality"], spec["deliverable"]
@@ -525,14 +557,15 @@ def _review_plan(spec, proj, decisions):
     add = tasks.append
     if proj.get("entry") or proj.get("build_dir"):
         add(T("qa.smoke", "TestCraft smoke: loads on every viewport, no errors, no missing files", "qa", "studio", department="testcraft", action="smoke",
-              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke"}, resources=["browser"], criterion="loads_everywhere"))
+              params={"target": "$target", "viewports": q["viewports"], "expect_canvas": d == "game", "name": "smoke", **_page(proj)}, resources=["browser"], criterion="loads_everywhere"))
         if q.get("playcraft"):
             add(T("qa.playcraft", "PLAYCRAFT: play the game and score it", "qa", "studio", department="playcraft", action="pass",
                   params={"project": "$project", "target": "$target", **_playcraft_hints(spec), "name": "playcraft"},
                   resources=["browser"], timeout=1200, criterion="gameplay_quality", advisory=True))
         if q.get("pixelcraft"):
             add(T("qa.pixelcraft", "PIXELCRAFT: visual quality and usability", "qa", "studio", department="pixelcraft", action="audit",
-                  params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft"},
+                  params={"project": "$project", "target": "$target", "viewports": ["iphone17", "iphone13", "desktop"], "name": "pixelcraft",
+                          **_px(proj, "screens", "journeys", "accept_tells", "viewports", "wait_ms")},
                   resources=["browser"], timeout=1200, criterion="interface_quality", advisory=True))
         if q.get("designcraft"):
             add(T("qa.designcraft", "DESIGNCRAFT: structural game-design review (advisory)", "qa", "designcraft", action="assess", params={"project": "$project"},

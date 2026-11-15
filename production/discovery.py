@@ -6,7 +6,7 @@ machine (studio_status through the Studio executor; ForgeCraft's hardware probe 
 reuses what exists (an existing `jump.wav` means no new jump sound) and plans honest `blocked` tasks for
 what cannot run, instead of discovering it halfway through production."""
 import json, os, re, subprocess
-from . import executors
+from . import artifacts, executors
 
 SKIP = {".git", "node_modules", "dist", "build", ".next", "out", "__pycache__", ".venv", "venv", "gitcraft-out", ".cache"}
 KIND = {".wav": "audio", ".ogg": "audio", ".mp3": "audio", ".flac": "audio", ".png": "image", ".jpg": "image", ".jpeg": "image", ".webp": "image",
@@ -56,6 +56,11 @@ def project(path):
     info["engines"] = engines
     info["entry"] = next((r for r in ("index.html", "public/index.html", "src/index.html") if r in rel), None)
     info["build_dir"] = next((d for d in ("dist", "build", "out") if os.path.isfile(os.path.join(path, d, "index.html"))), None)
+    decl = artifacts.declared(path)   # a server-rendered app says so itself (.gitcraft/evaluation.json); nothing is inferred
+    if decl and not decl["problems"]:
+        info["entry"] = info["entry"] or decl["entry"]
+        info["served"] = {"url": decl["url"].rstrip("/"), "page": decl["page"], "pixelcraft": decl.get("pixelcraft") or {}}
+    elif decl: info["evaluation_problems"] = decl["problems"]
     assets = {}
     for r in rel:
         k = KIND.get(os.path.splitext(r)[1].lower())

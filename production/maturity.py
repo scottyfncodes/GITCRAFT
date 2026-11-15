@@ -313,6 +313,10 @@ def assess(project):
     ev, inv = [], {"working": [], "unfinished": [], "defects": [], "improvements": []}
     # entry and build
     entry = next((r for r in ("index.html", "public/index.html", "src/index.html", "src/main.tsx", "src/main.ts", "src/main.js", "app/page.tsx", "pages/index.tsx", "main.py") if r in rel), None)
+    if not entry:   # a server-rendered app names its own entry (.gitcraft/evaluation.json: production/artifacts.py)
+        from .artifacts import declared
+        decl = declared(project)
+        if decl and not decl["problems"]: entry = decl["entry"]
     pkg = {}
     if "package.json" in rel:
         try: pkg = json.load(open(os.path.join(project, "package.json")))

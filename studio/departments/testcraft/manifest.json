@@ -127,7 +127,7 @@
     "properties": {
      "target": {
       "type": "string",
-      "description": "the game folder (served as http://game.local/) or its HTML file"
+      "description": "the game folder (served as http://game.local/) or its HTML file; or a locally running app (http://localhost:<port>) for a server-rendered app, opened at `entry` (a path, default /)"
      },
      "entry": {
       "type": "string"

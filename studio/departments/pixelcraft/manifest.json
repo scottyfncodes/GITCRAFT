@@ -356,6 +356,13 @@
      "accept_tells": {
       "type": "array",
       "description": "generic design tells the project chose on purpose (its art direction): [{id: 'glow_shadow', reason: 'neon arcade HUD'}] or ids; listed as accepted instead of raised. Tells are advisory and never scored (ids: gradient_text, violet_gradient, glow_shadow, accent_stripe, nested_cards, emoji_icons, eyebrow, default_type); default: the baseline's"
+     },
+     "exclusions": {
+      "type": "array",
+      "items": {
+       "type": "object"
+      },
+      "description": "documented exclusions: baseline metrics that no longer apply after a deliberate change, [{metric: 'controls.primary', screen, viewport, reason}]. Each names one metric on one screen at one viewport (no wildcards) with its reason; it is listed in the report as excluded instead of lost. One that matches nothing is stale and fails the check. Never use it for a metric that can be measured again"
      }
     }
    }
