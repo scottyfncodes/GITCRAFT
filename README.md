@@ -105,6 +105,13 @@ Reports are saved with a timestamp so later runs measure progress. Archived repo
 
 DESIGNCRAFT (`gamedesign/`, a standalone product) reads a game repository read-only and assesses its *design*: levels, missions, story, progression and the combined player experience. Five departments do the analysis: LEVELCRAFT, MISSIONCRAFT, STORYCRAFT, PROGRESSIONCRAFT and EXPERIENCECRAFT. For every significant weakness DESIGNCRAFT writes three alternatives (conservative, ambitious, wild card), each grounded in the game's own content. It scores the design out of 100 with evidence levels, coverage and confidence, reuses PLAYCRAFT's play evidence, and keeps an append-only history. The web app, including a Design Lab, is at `/designcraft/`. `python3 -m gamedesign assess <repo> --record`. Docs: [docs/designcraft.md](docs/designcraft.md). Test: `tests/test_designcraft.py`.
 
+## API Discovery
+
+Describe a need, discover APIs, compare what is actually known about them, and get integration guidance: on the site at
+`/apis/`, in Claude Code as studiocraft's `api_discovery_*` tools, or `python3 -m apidiscovery search "a free weather API for a mobile hiking app"`.
+Built on the [public-apis](https://github.com/public-apis/public-apis) catalogue (MIT). Catalogue claims, checked facts and
+unknowns (pricing, limits, reliability, licence) are kept apart, and there are no scores. See `docs/api-discovery.md`.
+
 ## Control room
 
 `scripts/ui.sh` opens a local, phone-friendly web UI for every tool: health, discovery, MeshCraft pipelines, jobs with their retries, the versioned 3D library with fingerprints and verified exports, and routing advice. It listens on 127.0.0.1 only, needs its one-time link, and acts only through `scripts/mcp.sh`, so the sandbox and guard apply. See [docs/ui.md](docs/ui.md).

@@ -100,6 +100,14 @@ project without this repo attached. Sources: `global/`.
   `forgecraft/cli.py call`, DESIGNCRAFT through `gamedesign`, the agent through work orders. Standard library only.
 - A tool returning `ok` makes a task `complete`; only its gate makes it `passed`. Never mark a gate passed without a measurement.
 
+## API Discovery (apidiscovery/)
+
+- A toolbox utility, not a department: find, compare and integrate external APIs from the public-apis catalogue (MIT). Tools:
+  studiocraft `api_discovery_search` / `_compare` / `_guide` / `_recommend` / `_status`; CLI `python3 -m apidiscovery`; page `/apis/`.
+  Guide: `docs/api-discovery.md`. Standard library only; the tools use the committed snapshot (`apidiscovery/data/catalog.json`) and no network.
+- Three bases, never mixed: `catalogue` (public-apis' claim, unverified), `checked` (our own documentation-link check, dated),
+  `unknown` (pricing, limits, reliability, licence: never guessed). No scores.
+
 ## Control room (local web UI)
 
 `scripts/ui.sh` serves a phone-friendly UI for every GITCRAFT tool on 127.0.0.1
@@ -218,6 +226,14 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   measured the current build, none failed) has an overall score; PARTIAL and INVALID never do. An evaluator failure is never a score, a
   finding, a P0/P1 or a regression of the project; missing evidence (an untested rubric, an unplayed game) is never a number; never make a
   report VALID by removing an evaluator from `MANDATORY`, and never certify a scenario that was not run (it is NOT VERIFIED).
+- `tests/test_api_discovery.py` must pass after any change under `apidiscovery/`, its tools in `studio/server.py`, its sandbox grant in `scripts/mcp.sh`,
+  `forgecraft/ui_server._publish_apis` or `.github/workflows/api-catalog.yml`. API Discovery never states pricing, limits, reliability or licence
+  terms as facts and never shows a numeric score; a link check is "answered on this date", never reliability, and a refusal is never "down"; a failed
+  or implausible upstream fetch never replaces the working catalogue, and a missing catalogue never fails a tool or the site build; generated guidance
+  keeps credentials in server-side environment variables (never client code, never a client-exposed name), states no endpoint the catalogue does
+  not have, and lets catalogue text reach code only as letters, digits and `. _ -`; it reads projects read-only and never reads secret files; the page's
+  search, statements and guides stay identical to the Python ones (the parity checks). It is never a department: no manifest, rubric, finding, P0/P1,
+  score or readiness effect, and it never changes the scoring-integrity rules.
 - `tests/test_report_coverage.py` must pass after any change to the report's refresh (`project_report.c_playcraft`/`c_testcraft`/`c_assetcraft`,
   `_studio_call`, `_dept_env`, `_why`, report ordering): a department a full report measured is scored from that measurement (never "No data"), never
   recorded in its history; every refresh writes only into the report's run folder (never the project or the shared catalogue); the departments it runs

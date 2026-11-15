@@ -80,6 +80,7 @@ def tools():
          {"type": "object", "required": ["department", "action"], "properties": {"department": {"type": "string", "enum": contract.departments()}, "action": {"type": "string"}, "params": {"type": "object"}}}),
     ]
     out += PRODUCTION_TOOLS
+    out += _api_discovery().TOOLS
     for d in contract.departments():
         m = contract.manifest(d)
         for a, spec in m["actions"].items():
@@ -167,6 +168,18 @@ PRODUCTION_TOOLS = [
 _bg = {}
 
 
+def _api_discovery():
+    """apidiscovery/ (API Discovery: a toolbox utility over the public-apis catalogue, not a department) by its path,
+    for the same reason as production/. It needs no runtime, no network and writes nothing."""
+    if "apidiscovery" not in sys.modules:
+        import importlib.util
+        p = os.path.join(os.path.dirname(HERE), "apidiscovery")
+        spec = importlib.util.spec_from_file_location("apidiscovery", os.path.join(p, "__init__.py"), submodule_search_locations=[p])
+        mod = importlib.util.module_from_spec(spec); sys.modules["apidiscovery"] = mod; spec.loader.exec_module(mod)
+    import importlib
+    return importlib.import_module("apidiscovery.tools")
+
+
 def _load_production():
     """production/ by its path: inside the sandbox the repo root is not listable, so sys.path cannot find it
     (the same reason ForgeCraft loads gitcraft3d by path)."""
@@ -250,6 +263,13 @@ def call(name, args):
     if name.startswith("production_"):
         if not IN_VENV and args.get("wait") is False: args = dict(args, wait=True)   # one process per call here: no background thread survives it
         return _production(name, args)
+    if name.startswith("api_discovery_"):
+        if args.get("project"):
+            from core import inside_roots
+            if not inside_roots(args["project"]):   # the project it reads must be inside the workspace roots
+                raise RuntimeError(f"GITCRAFT policy: {args['project']} is outside the workspace roots ({':'.join(roots())})")
+            _load_production()      # so the project's kind comes from the Director's own Discovery
+        return _api_discovery().call(name, args)
     if name == "department_describe": return contract.describe(args["department"])
     if name == "route": return routing.route(args.get("brief", ""))
     if name == "run": return contract.run(args["department"], args["action"], args.get("params") or {})
