@@ -271,13 +271,15 @@ O = SC.overall([dept("production", 86.7, "high", 15), dept("designcraft", 31, "l
 check("10 · a low-confidence department carries half its weight (DESIGNCRAFT 31 at low confidence no longer counts as 15)",
       O["weights"]["designcraft"] == 7.5 and O["score"] == round((86.7 * 15 + 31 * 7.5 + 63.2 * 15) / 37.5, 1) and O["at_full_weight"] == round((86.7 + 31 + 63.2) / 3, 1), O)
 check("10 · the headline carries the coverage at the same prominence ('72.5 (57% measured)') and the band is provisional under 70% coverage",
-      O["headline"] == f"{O['score']} (50% measured)" and O["band"] == "provisional" and f"({round(100 * Hh['coverage'])}% measured)" in R["summary"][0]
-      and "% measured)</b>" in H, (O["headline"], O["band"], R["summary"][0]))
+      O["headline"] == f"{O['score']} (50% measured)" and O["band"] == "provisional", (O["headline"], O["band"]))
+check("10 · a report whose mandatory evaluators did not all measure the current build is PARTIAL: no overall number anywhere (summary, Markdown, HTML), department scores kept",
+      R["evaluation"]["state"] == "PARTIAL" and Hh["score"] is None and "no overall score" in R["summary"][0] and "/100" not in R["summary"][0]
+      and "<b>No score</b>" in H and "Evaluation PARTIAL" in H and "## Evaluation validity" in M and "**PARTIAL**" in M and Hh["parts"], (R["evaluation"]["state"], R["summary"][0], Hh))
 check("10 · a high, fully covered score keeps its band; an at-risk score is not softened to provisional",
       SC.overall([dept("production", 90, "high", 15)])["band"] == "healthy"
       and SC.overall([dept("production", 40, "high", 15), {"id": "p", "status": "no_data", "quality": {"evaluation": "not_evaluated", "value": None, "weight": 25}}])["band"] == "at risk")
-check("10 · the overall method changed, so no delta is claimed against a report scored the old way", SC.METHOD == "gitcraft-score/3"
-      and SC.overall_delta({"health": {"score": 72.5, "method": "gitcraft-score/2"}}, O)["delta"] is None)
+check("10 · the overall method changed, so no delta is claimed against a report scored the old way", SC.METHOD == "gitcraft-score/4"
+      and SC.overall_delta({"health": {"score": 72.5, "method": "gitcraft-score/3"}}, O)["delta"] is None)
 
 # ---------------------------------------------------------------- 11. refresh=quick
 check("11 · no build: TestCraft says to run the project's build command (`npm run build`), never 'no data'",

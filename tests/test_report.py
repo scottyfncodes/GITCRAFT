@@ -45,7 +45,11 @@ R = PR.generate("scottyfncodes--rockslide", save="none")
 dd = {d["id"]: d for d in R["departments"]}
 idx = [json.loads(l) for l in open(os.path.join(REPO, "history", "designcraft", "index.jsonl")) if l.strip()]
 dc_latest = [x for x in idx if x["game"] == "scottyfncodes--rockslide"][-1]
-check("history-only: DESIGNCRAFT score is the recorded latest run's", dd["designcraft"]["score"]["value"] == dc_latest["overall"], (dd["designcraft"]["score"], dc_latest["overall"]))
+dc_run = json.load(open(sorted(glob.glob(os.path.join(REPO, "history", "designcraft", "scottyfncodes--rockslide", "*.json")))[-1]))["score"]
+dc_tested = sum(c["max"] * c["coverage"] for c in dc_run["categories"].values()); dc_value = round(100 * sum(c["score"] for c in dc_run["categories"].values()) / dc_tested, 1)
+check("history-only: DESIGNCRAFT's recorded points are kept (earned), and its score is points earned ÷ points its data could test (an untested criterion is never a 0)",
+      dd["designcraft"]["score"]["earned"] == dc_latest["overall"] and dd["designcraft"]["score"]["value"] == dc_value and dc_value >= dc_latest["overall"]
+      and dd["designcraft"]["quality"]["rubric"] == "designcraft/2", (dd["designcraft"]["score"], dc_latest["overall"], dc_value))
 pc_runs = sorted(glob.glob(os.path.join(REPO, "history", "playcraft", "games", "scottyfncodes--rockslide", "runs", "*.json")))
 pc_scores = {json.load(open(p))["run_id"]: json.load(open(p))["overall"]["score"] for p in pc_runs}
 check("history-only: PLAYCRAFT score is a recorded run's, with its run id", pc_scores.get(dd["playcraft"]["run"]["id"]) == dd["playcraft"]["score"]["value"], dd["playcraft"]["run"])
@@ -56,9 +60,14 @@ from production import scoring as SC  # noqa: E402
 wp, wd = SC.RUBRICS["playcraft"]["weight"], SC.RUBRICS["designcraft"]["weight"]
 cw = lambda i, w: w * SC.CONFIDENCE_WEIGHT.get(str(dd[i]["quality"].get("confidence") or "medium").lower(), 0.75)   # weight scaled by the department's confidence
 ep, ed = cw("playcraft", wp), cw("designcraft", wd)
-check("history-only: the overall score is the confidence-weighted rubric mean of the evaluated scores only, with its basis and method",
-      R["health"]["parts"] == {"playcraft": dd["playcraft"]["score"]["value"], "designcraft": dc_latest["overall"]} and R["health"]["method"] == SC.METHOD
-      and abs(R["health"]["score"] - (dd["playcraft"]["score"]["value"] * ep + dc_latest["overall"] * ed) / (ep + ed)) < 0.06 and "weighted mean" in R["health"]["basis"], R["health"])
+check("history-only: PARTIAL, so there is NO overall score: the measured department scores are listed apart and nothing is combined",
+      R["evaluation"]["state"] == "PARTIAL" and R["health"]["score"] is None and R["health"]["state"] == "PARTIAL" and "No overall score" in R["health"]["headline"]
+      and R["health"]["parts"] == {"playcraft": dd["playcraft"]["score"]["value"], "designcraft": dc_value} and R["health"]["method"] == SC.METHOD
+      and "no overall score" in R["summary"][0] and "/100" not in R["summary"][0], (R["evaluation"], R["health"]))
+HV = SC.overall(R["departments"], evaluation={"state": "VALID"})   # the arithmetic itself, as a VALID evaluation would combine these two
+RV = dict(R, health=HV)
+check("overall arithmetic (a VALID evaluation): the confidence-weighted rubric mean of the evaluated scores only, with its basis and method",
+      abs(HV["score"] - (dd["playcraft"]["score"]["value"] * ep + dc_value * ed) / (ep + ed)) < 0.06 and "weighted mean" in HV["basis"] and HV["state"] == "VALID", HV)
 ne = [d for d in R["departments"] if d["quality"]["evaluation"] == "not_evaluated"]
 check("Not Evaluated: applicable departments without a measured result have no value and no weight in the overall score",
       ne and all(d["quality"]["value"] is None and d["id"] not in R["health"]["parts"] and d["quality"].get("why") for d in ne), [(d["id"], d["quality"]) for d in ne])
@@ -68,12 +77,12 @@ check("every department has a rubric (label, weight, version, source, criteria)"
 # method change, against the archived reports made before the rubrics (plain mean, report 1.0.0)
 legacy_rs = sorted((json.load(open(p)) for p in glob.glob(os.path.join(REPO, "history", "reports", "scottyfncodes--rockslide", "*", "report.json"))), key=lambda x: x["generated"])
 legacy_rs = [x for x in legacy_rs if not (x.get("health") or {}).get("method")]
-vp = SC.overall_delta(legacy_rs[-1], R["health"])
+vp = SC.overall_delta(legacy_rs[-1], HV)
 check("method change: an archived plain-mean report is never compared as if it were the same method", legacy_rs and vp["delta"] is None and "method changed" in vp["compare"], vp)
 cp = json.loads(json.dumps(R["departments"])); SC.deltas(legacy_rs[-1], cp); cq = {d["id"]: d["quality"] for d in cp}
 check("method change: a department whose rubric is unchanged keeps its previous score; one whose rubric changed is not compared",
       cq["playcraft"]["previous"] is not None and cq["production"].get("delta") is None, (cq["playcraft"], cq["production"]))
-T = SC.series(legacy_rs, R)
+T = SC.series(legacy_rs, RV)
 check("trend: every earlier report of the project, the method recorded per point", len(T) == len(legacy_rs) + 1 and T[-1]["method"] == SC.METHOD
       and all(p["method"] == SC.LEGACY_METHOD for p in T[:-1]), [(p["report_id"], p["method"]) for p in T])
 check("trend chart: points from different methods are not joined (the plain-mean points and the weighted point are separate)",
@@ -95,13 +104,13 @@ check("identity: project, commit (from the department run, labelled), run date",
       and R["identity"]["commit_source"] == "latest department run", R["identity"])
 # an older recorded measurement read after a re-analysed one is not a regression
 prev_fake = {"report_id": "x/1", "generated": "2026-11-09T00:00:00+00:00", "health": {"score": 60, "method": SC.METHOD},
-             "departments": [{"id": "designcraft", "quality": {"value": 99, "rubric": "designcraft/1", "method": dd["designcraft"]["quality"]["method"]}, "run": {"id": "other", "at": "2099-01-01T00:00:00"}}]}
+             "departments": [{"id": "designcraft", "quality": {"value": 99, "rubric": "designcraft/2", "method": dd["designcraft"]["quality"]["method"]}, "run": {"id": "other", "at": "2099-01-01T00:00:00"}}]}
 cp = json.loads(json.dumps(R["departments"])); SC.deltas(prev_fake, cp)
 q = {d["id"]: d for d in cp}["designcraft"]["quality"]
 check("delta: a previous re-analysis newer than today's recorded run is not compared (no false regression)", q["delta"] is None and "older measurement" in q["compare"], q)
 prev_fake["departments"][0]["run"]["at"] = "2000-01-01T00:00:00"; cp = json.loads(json.dumps(R["departments"])); SC.deltas(prev_fake, cp)
 q = {d["id"]: d for d in cp}["designcraft"]["quality"]
-check("delta: same rubric and method, newer measurement → a signed delta against the previous score", q["delta"] == round(dc_latest["overall"] - 99, 1) and q["compare"] == "new measurement", q)
+check("delta: same rubric and method, newer measurement → a signed delta against the previous score", q["delta"] == round(dc_value - 99, 1) and q["compare"] == "new measurement", q)
 check("history-only: what could not be refreshed is listed with the reason", any(x["department"] == "playcraft" and "not checked out" in x["why"] for x in R["not_refreshed"]), R["not_refreshed"])
 check("every finding keeps an evidence level and a department", all(f["level"] in ("verified", "observed", "inferred") and f["department"] for d in R["departments"] for f in d["findings"]))
 check("plan: P0–P3 only, numbered, each with its departments", R["actions"] and all(a["priority"] in ("P0", "P1", "P2", "P3") and a["departments"] for a in R["actions"])
@@ -147,7 +156,10 @@ check("production rubric: the engineering standard is the Production Director's 
       q1["production"]["quality"]["label"] == "Engineering standard" and (q1["production"]["quality"]["value"] is None) == (not (q1["production"].get("standard") or {}).get("checks")), q1["production"]["quality"])
 check("delta: the second report compares each evaluated department under the same rubric (testcraft 50 → 50, same measurement)",
       q2["testcraft"]["quality"]["previous"] == 50.0 and q2["testcraft"]["quality"]["delta"] == 0 and "same measurement" in q2["testcraft"]["quality"]["compare"]
-      and R2["health"]["vs_previous"]["delta"] is not None, (q2["testcraft"]["quality"], R2["health"]["vs_previous"]))
+      and R2["health"]["score"] is None and R2["health"]["vs_previous"]["delta"] is None, (q2["testcraft"]["quality"], R2["health"]["vs_previous"]))
+check("attribution: with the Studio runtime absent, the smoke refresh is an evaluator failure (said, with its reason), and the report is not VALID",
+      t1.get("evaluator_failure") and "not installed" in t1["evaluator_failure"] and R1["evaluation"]["state"] != "VALID" and R1["health"]["score"] is None
+      and any(x["id"] == "testcraft" for x in R1["evaluation"]["evaluator_failures"]), (t1.get("evaluator_failure"), R1["evaluation"]))
 check("regressions: none claimed without a measured drop", R2["regressions"] == [], R2["regressions"])
 check("refresh none: nothing is re-analysed", all(not d["refresh"].get("ok") or d["id"] == "production" for d in R2["departments"]))
 lines = [json.loads(l) for l in open(os.path.join(os.environ["GITCRAFT_REPORTS"], "index.jsonl"))]
@@ -198,8 +210,14 @@ Hn = PR.render_html(R)
 check("html: a Not Evaluated department shows 'Not Evaluated', never a number", Hn.count("Not Evaluated</span>") == len(ne), (Hn.count("Not Evaluated</span>"), len(ne)))
 legacy = json.load(open(sorted(glob.glob(os.path.join(REPO, "history", "reports", "scottyfncodes--rockslide", "*", "report.json")))[0]))
 Lr = PR.upgrade(legacy)
-check("legacy reports (plain mean) render under the new layout with their recorded number, labelled as the old method",
-      Lr["health"]["score"] == legacy["health"]["score"] and Lr["health"]["method"] == SC.LEGACY_METHOD and "id='gates'" in PR.render_html(Lr) and "gitcraft_report" in legacy)
+Lh = PR.render_html(Lr)
+check("legacy reports (plain mean) render under the new layout: the number they recorded is kept and shown as recorded under the old method, "
+      "never as a score under today's rule (the archived file itself is not changed)",
+      Lr["health"]["score"] is None and Lr["health"]["recorded_score"] == legacy["health"]["score"] and legacy["health"]["score"] is not None and "evaluation" not in legacy
+      and Lr["evaluation"]["archived"] and Lr["health"]["method"] == SC.LEGACY_METHOD and "id='gates'" in Lh and "<b>No score</b>" in Lh
+      and f"recorded {legacy['health']['score']} under an earlier method" in Lh and "gitcraft_report" in legacy, (Lr["health"], Lr["evaluation"]["reasons"]))
+cur = PR.upgrade(json.loads(json.dumps(R0 := PR.generate(game, refresh="none", save="none"))))
+check("a report made under today's method is rendered as it was made (never re-read as archived)", cur["evaluation"] == R0["evaluation"] and not cur["evaluation"].get("archived") and cur["health"] == R0["health"])
 check("html: self-contained, mobile viewport, every section", "width=device-width" in H and not re.search(r"<(script|link)[^>]+(src|href)=['\"]https?:", H)
       and all(f"id='{s}'" in H for s in ("health", "depts", "p0", "cross", "plan", "changes", "next", "limits")))
 M = open(R1["paths"]["markdown"]).read()

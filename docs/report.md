@@ -122,9 +122,35 @@ then the existing reconciliation, P0–P3 plan, changes, scoring method and evid
 | 3D Department | 3D jobs succeeded | 5 | succeeded ÷ finished jobs (only when it worked on the project) |
 | Maker departments | Asset validity (not scored) | 0 | files that open and validate ÷ files made, shown as *N/N files valid* (only when they made something) |
 
-- **Not Evaluated**: the department applies but has no measured result. No score, no weight, the reason and the command
-  that would produce one. Nothing is ever estimated.
-- **Overall** (`gitcraft-score/3`): the weighted mean of the evaluated departments only, each weight scaled by that
+- **Not Evaluated**: the department applies but has no measured result. No score, no weight, and one of four reasons:
+  *the evaluator failed* (it crashed, could not start, timed out or its runtime is missing: a fault in the evaluation,
+  never a result about the project), *nothing to measure yet* (no build), *too little evidence to score* (under 50 % of
+  its own rubric tested, or a gameplay score made without playing) or *not run*. Nothing is ever estimated.
+- **Evaluation validity** (`scoring.validity`, `gitcraft-score/4`). Every report states one of three states, and only the
+  first has an overall score:
+
+  | State | When | Overall score |
+  |---|---|---|
+  | **VALID** | every mandatory evaluator measured the current build, and no evaluator failed | shown |
+  | **PARTIAL** | a mandatory evaluator did not run, had nothing to measure, had too little evidence, or is stale; or an optional evaluator failed | **none**: department scores and findings stand on their own |
+  | **INVALID** | a mandatory evaluator failed, or nothing was measured | **none**: the failure is named as the evaluator's, with its error |
+
+  Mandatory evaluators (`scoring.MANDATORY`): a game needs the engineering standard, PLAYCRAFT, PIXELCRAFT and TestCraft;
+  an app or site the engineering standard, PIXELCRAFT and TestCraft; a tool the engineering standard. DESIGNCRAFT,
+  AssetCraft and the 3D Department are optional: scored when they measured, absent (never 0) when they did not.
+  An evaluator failure leaves no finding, P0 or P1 against the project: it is planned as *Evaluator failed (not a project
+  defect)* with the repair. `project-report --require-valid` exits 3 unless the state is VALID.
+  `python3 -m production evaluators` checks the evaluators' dependencies by running them (the Studio runtime answers, the
+  shared browser launches and renders a page) and exits 1 when one is broken; a full report records the same check.
+- **DESIGNCRAFT in the report** (`designcraft/2`): points earned ÷ points its data could test. DESIGNCRAFT's own
+  100-point count scores every criterion it could not test as 0; the report shows that count beside the score and does
+  not average missing evidence in as a weakness.
+- **Archived reports** made before `gitcraft-score/4` are never rewritten. When rendered (the `/reports/` site) each is
+  read under today's rule: the number it recorded is shown as *recorded under an earlier method*, not as a score.
+- **Proof**: `tests/test_scoring_integrity.py` (the rules, fast) and `tests/certify_report.py` (the real evaluators on a
+  reference game through the sandboxed launcher: healthy, defect, broken evaluator, unavailable runtime, partial, repeat,
+  recovery). The latest run is recorded in `history/certifications/`.
+- **Overall** (`gitcraft-score/4`, a VALID evaluation only): the weighted mean of the evaluated departments only, each weight scaled by that
   department's own confidence (high ×1, medium ×0.75, low ×0.5), so a low-confidence result (DESIGNCRAFT 31 at low
   confidence) cannot carry its full weight; the basis gives the score at full weight too. **Coverage** (evaluated nominal
   weight ÷ applicable weight) is part of the headline at the same prominence, e.g. **72.5 (57% measured)**, and is never

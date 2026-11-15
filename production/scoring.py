@@ -5,6 +5,12 @@ Rules (tests/test_report.py holds them):
   * A department's 0–100 score is always a measured number taken from that department's own result (PLAYCRAFT's
     gameplay score, PIXELCRAFT's audit score, …) or a ratio of measured checks. Nothing here estimates a score.
   * A department that applies to the project but has no measured result is Not Evaluated: no score, no weight.
+  * An overall score exists only for a VALID evaluation (validity()): every evaluator that is mandatory for this kind
+    of project measured the current build and none failed. PARTIAL (incomplete coverage) and INVALID (a mandatory
+    evaluator failed) reports show the department scores and findings they have and no overall number.
+  * An evaluator that failed is the evaluator's defect, never the project's: it has no score, no weight, and no
+    finding against the project. A department that tested under MIN_COVERAGE of its own rubric, or a gameplay score
+    made without playing, is "too little evidence": Not Evaluated, never a low score.
   * The overall score is the weighted mean of the evaluated departments only, each weight scaled by that department's
     own confidence (high ×1, medium ×0.75, low ×0.5): a low-confidence result cannot carry its full weight. Its coverage
     (evaluated weight ÷ applicable weight, nominal weights) is part of the headline ("72.5 (57% measured)") and never
@@ -18,7 +24,14 @@ Rules (tests/test_report.py holds them):
 """
 import json, os
 
-METHOD = "gitcraft-score/3"          # confidence-weighted mean, makers excluded; /2 was the plain weighted mean, "mean/1" the plain mean
+METHOD = "gitcraft-score/4"          # /4: an overall score only for a VALID evaluation (validity()); /3 scored whatever was measured
+MIN_COVERAGE = 0.5                   # a department that tested under half of its own rubric has not evaluated the project
+# The evaluators a project of each kind must have measured, on its current build, for an overall score to be defensible.
+MANDATORY = {"game": ("production", "playcraft", "pixelcraft", "testcraft"), "app": ("production", "pixelcraft", "testcraft"),
+             "site": ("production", "pixelcraft", "testcraft"), "tool": ("production",)}
+VALID, PARTIAL, INVALID = "VALID", "PARTIAL", "INVALID"
+REASON_LABEL = {"evaluator_failed": "the evaluator failed (not a result about the project)", "prerequisite_missing": "nothing to measure yet (a prerequisite is missing)",
+                "insufficient_evidence": "too little evidence to score", "not_run": "not run", "stale": "measured on an older build"}
 CONFIDENCE_WEIGHT = {"high": 1.0, "medium": 0.75, "low": 0.5}
 PROVISIONAL_BELOW = 0.70             # coverage under which the band is at best "provisional"
 LEGACY_METHOD = "mean/1"
@@ -37,10 +50,11 @@ RUBRICS = {
                    "criteria": ["Visual Quality, Usability and Consistency, 100 points each, measured in Chromium at iPhone 17, iPhone 13 and desktop",
                                 "Each metric scored 0.6 × mean + 0.4 × worst screen, so one bad screen counts",
                                 "Areas without evidence are not tested and are excluded (coverage shown beside the score)"]},
-    "designcraft": {"label": "Game design", "weight": 15, "version": "designcraft/1", "legacy": "designcraft/1",
-                    "source": "DESIGNCRAFT's 100-point design score",
+    "designcraft": {"label": "Game design", "weight": 15, "version": "designcraft/2", "legacy": "designcraft/1",
+                    "source": "DESIGNCRAFT's design points earned ÷ the points its data could test (designcraft/1 counted every untested criterion as 0)",
                     "criteria": ["Level 15 · Mission 15 · Narrative 15 · Progression 15 · Agency 10 · Difficulty 10 · Worldbuilding 10 · Variety 10",
-                                 "Untested criteria score 0 and raise the ceiling; having code earns nothing"]},
+                                 "score = points earned ÷ points of the criteria the game's data let DESIGNCRAFT test × 100; an untested criterion is missing evidence, never a 0",
+                                 "Under 50% of the rubric tested: Not Evaluated (DESIGNCRAFT's own earned/ceiling points are still shown); having code earns nothing"]},
     "testcraft": {"label": "Automated QA", "weight": 15, "version": "testcraft/1", "legacy": "testcraft/1",
                   "source": "share of TestCraft output checks that passed",
                   "criteria": ["Every check recorded in TestCraft's .studio.json records for this project", "score = passed checks ÷ all checks × 100"]},
@@ -95,7 +109,19 @@ def evaluate(D):
         applicable = False   # a maker department only applies when it made something for this project
     if D["id"] == "3d" and D["status"] == "no_data": applicable = False
     if D["id"] == "assetcraft" and D["status"] == "unavailable" and not D.get("score"): pass
-    ev = "not_applicable" if not applicable else ("evaluated" if val is not None and D["status"] not in ("failed",) else "not_evaluated")
+    ev = "not_applicable" if not applicable else ("evaluated" if val is not None and D["status"] not in ("failed", "evaluator_failed") else "not_evaluated")
+    # why an applicable department has no score. An evaluator that broke and a rubric it could barely test are not results
+    # about the project: neither is ever turned into a number.
+    reason = None
+    cov = sc.get("coverage")
+    thin = D["id"] in RUBRICS and bool(sc) and D["status"] not in ("failed", "evaluator_failed") and (sc.get("played") is False or (isinstance(cov, (int, float)) and cov < MIN_COVERAGE))
+    if applicable and thin:
+        ev, reason = "not_evaluated", "insufficient_evidence"
+        D["insufficient"] = ("the build was not played: the number rests on source reading alone" if sc.get("played") is False else
+                             f"only {round(100 * cov)}% of its rubric had evidence (at least {round(100 * MIN_COVERAGE)}% is needed for a score)") + \
+                            (f"; its own figure was {val}" + (f" ({sc['raw_label']})" if sc.get("raw_label") else "") if val is not None else "")
+    elif ev == "not_evaluated":
+        reason = D.get("outcome") or ("evaluator_failed" if D["status"] in ("failed", "evaluator_failed") else "not_run")
     if applicable and rb.get("scored") is False: ev = "validity" if D.get("validity", {}).get("of") and D["status"] != "failed" else "not_evaluated"
     if ev != "evaluated": val = None
     D["quality"] = {"evaluation": ev, "value": val, "label": rb["label"], "weight": rb["weight"] if applicable else 0, "rubric": rb["version"], "validity": D.get("validity") if ev == "validity" else None,
@@ -103,11 +129,67 @@ def evaluate(D):
                     "confidence": sc.get("confidence") if D["id"] in RUBRICS else ("high" if val is not None else None), "coverage": sc.get("coverage")}
     if ev == "not_evaluated" and rb.get("scored") is False: ev = D["quality"]["evaluation"] = "not_applicable"; D["quality"]["weight"] = 0
     if ev == "not_evaluated":
-        D["quality"]["why"] = (D.get("next") or (D["notes"][-1] if D["notes"] else "no measured result for this project"))
+        D["quality"]["reason"] = reason
+        D["quality"]["why"] = (D.get("insufficient") if reason == "insufficient_evidence" else None) or D.get("evaluator_failure") or \
+                              (D.get("next") or (D["notes"][-1] if D["notes"] else "no measured result for this project"))
     return D
 
 
-def overall(depts, p0=0, stale=()):
+def validity(depts, kind, checked_out=True):
+    """Whether this evaluation supports an overall score: VALID, PARTIAL or INVALID, with the exact reasons.
+
+      VALID    every mandatory evaluator for this kind of project measured the current build, and no evaluator failed.
+      PARTIAL  some evaluators measured, but a mandatory one did not run, had nothing to measure, had too little evidence
+               or describes an older build. Department scores and findings stand; there is no overall score.
+      INVALID  a mandatory evaluator failed (crashed, could not start, its runtime is missing), or nothing was measured.
+               There is no overall score, and the failure is the evaluator's: it is never read as a defect in the project.
+
+    A department must have run `scoring.evaluate` first."""
+    by = {d["id"]: d for d in depts}
+    mand = [m for m in MANDATORY.get(kind or "", ()) if m in by]
+    rows, failed, missing = [], [], []
+    for d in depts:
+        q = d["quality"]
+        if q["evaluation"] in ("not_applicable", "validity"): continue
+        m = d["id"] in mand
+        state = "evaluated" if q["evaluation"] == "evaluated" else q.get("reason") or "not_run"
+        if state == "evaluated" and d["status"] in ("stale", "unverified"): state = "stale"
+        why = None if state == "evaluated" else next((n for n in d["notes"] if n.startswith(("Stale:", "Unverified:"))), None) if state == "stale" else q.get("why")
+        # an evaluator that failed while an earlier measurement of this commit stands: the score is that measurement's,
+        # and the failure is still said
+        broke = d.get("evaluator_failure") if state != "evaluator_failed" else None
+        rows.append({"id": d["id"], "title": d["title"].split(" — ")[0], "mandatory": m, "state": state, "label": "evaluated" if state == "evaluated" else REASON_LABEL.get(state, state),
+                     "why": why, "evaluator_failure": d.get("evaluator_failure")})
+        if state == "evaluator_failed" or broke: failed.append(rows[-1])
+        if m and state != "evaluated": missing.append(rows[-1])
+    n_eval = sum(1 for r in rows if r["state"] in ("evaluated", "stale"))
+    reasons = []
+    if not n_eval:
+        st = INVALID; reasons.append("No applicable department produced a measured result.")
+    elif any(r["state"] == "evaluator_failed" and r["mandatory"] for r in rows):
+        st = INVALID
+    elif missing or failed or not mand or not checked_out:
+        st = PARTIAL
+    else:
+        st = VALID
+    for r in rows:
+        if r["state"] == "evaluator_failed":
+            reasons.append(f"{r['title']} failed to evaluate{' (mandatory)' if r['mandatory'] else ''}: {r['why']}. This is a failure of the evaluator, not a finding about the project.")
+        elif r["evaluator_failure"]:
+            reasons.append(f"{r['title']} could not be re-measured for this report ({r['evaluator_failure']}); its score is an earlier measurement.")
+    for r in missing:
+        if r["state"] != "evaluator_failed": reasons.append(f"{r['title']} (mandatory): {r['label']}" + (f" — {r['why']}" if r.get("why") else "") + ".")
+    if st == PARTIAL and not checked_out: reasons.append("The project is not checked out here, so no result can be tied to its current build.")
+    if st == PARTIAL and checked_out and not mand: reasons.append("This kind of project has no defined set of mandatory evaluators, so no overall score is claimed.")
+    return {"state": st, "kind": kind, "mandatory": mand, "departments": rows, "reasons": reasons,
+            "evaluator_failures": [{"id": r["id"], "title": r["title"], "mandatory": r["mandatory"], "why": r["evaluator_failure"] or r["why"]} for r in failed],
+            "score_shown": st == VALID,
+            "meaning": {VALID: "Every mandatory evaluator measured the current build: the overall score is supported by its evidence.",
+                        PARTIAL: "Coverage is incomplete: the department scores and findings below are real measurements, but there is no overall score.",
+                        INVALID: "A required evaluator failed, so the project could not be evaluated: there is no overall score, and nothing here says the project is defective."}[st]}
+
+
+def overall(depts, p0=0, stale=(), evaluation=None):
     """The confidence-weighted overall score over evaluated departments only, with coverage, confidence and a headline
     that carries the coverage ("72.5 (57% measured)"). Asset validity (the makers) is listed apart and never averaged."""
     ev = [d for d in depts if d["quality"]["evaluation"] == "evaluated"]
@@ -116,7 +198,7 @@ def overall(depts, p0=0, stale=()):
     validity = {"valid": sum(d["quality"]["validity"]["valid"] for d in vd), "of": sum(d["quality"]["validity"]["of"] for d in vd), "departments": [d["id"] for d in vd]}
     wa = sum(d["quality"]["weight"] for d in app)
     if not ev:
-        return {"score": None, "headline": "—", "method": METHOD, "band": "insufficient data", "confidence": "none", "measured": 0, "of": len(app), "coverage": 0.0,
+        return {"score": None, "headline": "—", "method": METHOD, "state": (evaluation or {}).get("state") or INVALID, "band": "insufficient data", "confidence": "none", "measured": 0, "of": len(app), "coverage": 0.0,
                 "stale": list(stale), "p0": p0, "parts": {}, "weights": {}, "validity": validity, "basis": "No applicable department has a measured score yet, so there is no overall score."}
     eff = {d["id"]: round(d["quality"]["weight"] * CONFIDENCE_WEIGHT.get(str(d["quality"].get("confidence") or "medium").lower(), 0.75), 2) for d in ev}
     we = sum(eff.values()) or 1
@@ -125,11 +207,19 @@ def overall(depts, p0=0, stale=()):
     unweighted = round(sum(d["quality"]["value"] * d["quality"]["weight"] for d in ev) / full, 1) if full else v
     cov = round(full / wa, 2) if wa else 0.0
     conf = "high" if cov >= 0.75 and not stale else "medium" if cov >= 0.5 and len(stale) <= 1 else "low"
+    if conf == "high" and full and we / full < 0.85: conf = "medium"   # mostly low/medium-confidence department results cannot add up to a high-confidence total
     band = "blocked" if p0 else "healthy" if v >= 80 else "needs attention" if v >= 60 else "at risk"
     if cov < PROVISIONAL_BELOW and band in ("healthy", "needs attention"): band = "provisional"   # too little measured to call it better
     missing = [d["id"] for d in app if d["quality"]["evaluation"] == "not_evaluated"]
     reduced = [f"{d['id']} {d['quality']['weight']}→{eff[d['id']]:g} ({d['quality'].get('confidence') or 'medium'} confidence)" for d in ev if eff[d["id"]] != d["quality"]["weight"]]
-    return {"score": v, "headline": f"{v} ({round(cov * 100)}% measured)", "method": METHOD, "band": band, "confidence": conf, "measured": len(ev), "of": len(app), "coverage": cov,
+    state = (evaluation or {}).get("state") or VALID
+    if state != VALID:
+        # PARTIAL or INVALID: the measured department scores stand on their own (parts); no number is combined from them
+        return {"score": None, "headline": f"No overall score ({state} evaluation)", "method": METHOD, "state": state, "band": "blocked" if p0 else "not scored", "confidence": "none",
+                "measured": len(ev), "of": len(app), "coverage": cov, "stale": list(stale), "p0": p0, "parts": {d["id"]: d["quality"]["value"] for d in ev}, "weights": {}, "validity": validity,
+                "basis": f"{state} evaluation: " + " ".join(evaluation.get("reasons") or []) + f" {len(ev)} of {len(app)} applicable department(s) measured ({round(cov * 100)}% of the applicable weight); "
+                         "their scores are shown per department and are not combined into an overall score"}
+    return {"score": v, "headline": f"{v} ({round(cov * 100)}% measured)", "method": METHOD, "state": state, "band": band, "confidence": conf, "measured": len(ev), "of": len(app), "coverage": cov,
             "stale": list(stale), "p0": p0, "parts": {d["id"]: d["quality"]["value"] for d in ev}, "weights": eff, "nominal_weights": {d["id"]: d["quality"]["weight"] for d in ev},
             "at_full_weight": unweighted, "validity": validity,
             "basis": f"confidence-weighted mean of {len(ev)} evaluated department score(s) (" + ", ".join(f"{d['id']} ×{eff[d['id']]:g}" for d in ev) + ")"

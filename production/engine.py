@@ -728,7 +728,7 @@ def production_report(prod):
             from . import project_report
             R = project_report.generate(path, refresh="none", save="store")
             info.update(status="ok", report_id=R["report_id"], html=R["paths"].get("html"), json=R["paths"].get("json"), markdown=R["paths"].get("markdown"),
-                        overall=R["health"].get("score"), method=R["health"].get("method"), verdict=R["gates"].get("verdict"))
+                        evaluation=R["evaluation"]["state"], overall=R["health"].get("score"), method=R["health"].get("method"), verdict=R["gates"].get("verdict"))
     except Exception as e:   # the report never fails the run it describes
         info.update(status="failed", why=f"{type(e).__name__}: {e}"[:300])
     prod["production_report"] = info; store.save(prod)

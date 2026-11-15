@@ -19,7 +19,11 @@ It works out the rest; the person never needs to know these tools.
   analysis of every department (health, scorecards, blockers, cross-department findings, P0–P3 plan, changes since the
   last report, next actions), saved timestamped as report.json/.md/.html. Direct tool: `production_project_report
   {project, refresh: quick|full|none}`. Show the person the summary and the report.html path. Reporting never edits code,
-  builds, merges or deploys; never present a department with no data as measured. See `docs/report.md`.
+  builds, merges or deploys; never present a department with no data as measured. Lead with the report's
+  `evaluation.state`: **VALID** has an overall score; **PARTIAL** and **INVALID** have none, so quote none (not a mean of
+  the department scores, not an earlier report's number) and say what was not evaluated and why. An evaluator that failed
+  (`evaluation.evaluator_failures`) is a fault in GITCRAFT's tooling: say so, give its repair, and never describe it as
+  a problem with the project. See `docs/report.md`.
 - **A GitHub URL**: if it returns `needs_checkout`, attach the repository to the session if needed (`add_repo`), clone it where
   the result says, and call `production_start` again with `project`. Never ask the person to clone it.
 - **Assets and nothing else** ("a jump sound and a coin sound", "a logo for my bakery", "a 3D model of a barrel for my game"):

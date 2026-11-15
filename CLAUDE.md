@@ -211,6 +211,13 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   reports a department result that was not recorded or measured, and never rewrites archived reports in `history/reports/` (`docs/report.md`).
   A Not Evaluated department never gets a score or weight, release gates never enter a quality score, and a delta is shown only under the same
   rubric and method; every production run ends with a Production Report that never fails the run.
+- `tests/test_scoring_integrity.py` must pass after any change to `production/scoring.py` (`validity`, `MANDATORY`, `MIN_COVERAGE`, `overall`),
+  `production/evalhealth.py`, or how `project_report.py` classifies a refresh (`_refresh_failed`, `outcome`, `evaluator_failure`); and
+  `tests/certify_report.py` (the real evaluators through the sandboxed launcher: healthy, defect, broken evaluator, unavailable runtime, partial,
+  repeat, recovery) after any change to the report, the scoring or an evaluator it runs. Only a VALID evaluation (every mandatory evaluator
+  measured the current build, none failed) has an overall score; PARTIAL and INVALID never do. An evaluator failure is never a score, a
+  finding, a P0/P1 or a regression of the project; missing evidence (an untested rubric, an unplayed game) is never a number; never make a
+  report VALID by removing an evaluator from `MANDATORY`, and never certify a scenario that was not run (it is NOT VERIFIED).
 - `tests/test_report_coverage.py` must pass after any change to the report's refresh (`project_report.c_playcraft`/`c_testcraft`/`c_assetcraft`,
   `_studio_call`, `_dept_env`, `_why`, report ordering): a department a full report measured is scored from that measurement (never "No data"), never
   recorded in its history; every refresh writes only into the report's run folder (never the project or the shared catalogue); the departments it runs
