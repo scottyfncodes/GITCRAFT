@@ -93,6 +93,8 @@ It works out the rest; the person never needs to know these tools.
      runs again with `production_run {retry: [task], retry_reason}`; a quality failure is never retried, it is fixed.
      A check left "verification incomplete" (blocked, e.g. a frame rate under a software rasteriser) is retried the same
      way once the build changed or the machine can verify it.
+     A quality failure caused by GITCRAFT's own evaluator runs again the same way once the evaluator has been corrected
+     (it is refused while the evaluator is unchanged); the new measurement decides, never the retry.
    - **Decision Room:** show the person the decisions in plain words: the question, your recommendation and the trade-off.
      These are the scope, the architecture, the design direction, the app icon (new, refine or keep), the engineering standard
      (personal, public or sensitive), the cost, the deployment, and the HaveAnApp credit for an existing app. Record their answers with

@@ -190,6 +190,10 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - `tests/test_production.py` must pass after any change under `production/` (and `tests/acceptance_production.py`, the
   master-prompt acceptance run, after any change to the engine, planner, gates or the `production_*` tools); never weaken a
   gate or substitute a mocked department result to make it pass.
+- `tests/test_evaluator_correction.py` must pass after any change to `production/evaluator.py`, `engine.retry`, `_reevaluable`,
+  `_close_for_reevaluation` or the remediation ids: a quality failure runs again only when the evaluator that measured it has changed
+  (never the same evaluator on the same project), a retry never sets a result, and the earlier result, attempts and closed fix chain stay
+  on the record. Add a module to `evaluator.BUILTIN` when a built-in check starts reading the project through it.
 - `tests/test_forgecraft.py` must pass after any change under `forgecraft/` or `gitcraft3d/`
   (and `tests/test_meshcraft.py` after any change under `meshcraft/`).
 - `tests/test_engine_check_deps.py` must pass after any change to `meshcraft/engine/nodemods.py`, the engine check scripts, the

@@ -251,7 +251,8 @@ g7q = game("quality-game")
 st, pidq = review(g7q)
 prq = store.load(pidq)
 t = next(iter(prq["tasks"].values()))
-t["state"] = "failed"; t["failure"] = "quality"; t["attempts"] = [{"outcome": "quality", "status": "ok"}]; store.save(prq)
+from production import evaluator as _evaluator   # a real attempt records the evaluator that measured it (tests/test_evaluator_correction.py)
+t["state"] = "failed"; t["failure"] = "quality"; t["attempts"] = [{"outcome": "quality", "status": "ok", "evaluator": _evaluator.identity(t)}]; store.save(prq)
 check("recover: a measured (quality) failure is refused: retry cannot turn a measured failure into a pass",
       raises(lambda: engine.retry(pidq, [t["id"]], "try again"), "never retried"))
 

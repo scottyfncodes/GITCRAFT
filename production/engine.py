@@ -18,6 +18,7 @@ fingerprint skips every evaluation artifact, every browser check measures one ta
 source-vs-build policy, re-measurement is bounded (STALE_ROUNDS), and every run ends with a verdict:
 READY, NOT READY, or INCOMPLETE with the reasons the evaluation could not finish."""
 import concurrent.futures as cf, copy, hashlib, json, os, sys, threading, time, traceback
+from . import evaluator
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
 from . import inside_roots, roots, store_root, store_root_for
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
@@ -538,11 +539,15 @@ def retry(pid, tasks, reason, store_dir=None):
     itself refused, e.g. DESIGNCRAFT's output path before task output was isolated). Explicit and recorded: the earlier
     attempts stay in the task's history, an event names who asked and why, and dependants that were failed or blocked
     on it run again. A check that ran and failed its gate (quality) cannot be retried: that is remediation's job,
-    so a retry can never turn a measured failure into a pass."""
+    so a retry can never turn a measured failure into a pass. One exception, decided by evidence and not by the caller:
+    when the evaluator that measured the failure has changed since (production/evaluator.py), the check is measured
+    again by the evaluator installed now. Its earlier result stays in `reevaluations`, the chain it opened is closed,
+    and the new measurement passes or fails by itself."""
     if not reason: raise ValueError("say why the check should run again (reason)")
     prod = store.load(pid, store_dir)
     with store.lock(prod):
         prod = store.load(pid, store_dir)
+        corrected = {}
         for tid in tasks:
             t = prod["tasks"].get(tid)
             if not t: raise ValueError(f"{tid}: no such task in {pid}")
@@ -555,14 +560,15 @@ def retry(pid, tasks, reason, store_dir=None):
                                  + (f" (it waits on {', '.join(t['blocked_by'])}: retry that)" if t.get("blocked_by") else ""))
             last = (t["attempts"] or [{}])[-1]
             if t.get("failure") == "quality" or last.get("outcome") not in RETRYABLE:
-                raise ValueError(f"{tid} ran and failed its gate ({t.get('failure') or last.get('outcome')}): a measured failure is fixed in the "
-                                 "project (its fix work order), never retried")
+                why = _reevaluable(prod, t)   # raises unless the evaluator that measured the failure has changed since
+                corrected[tid] = why
         reopened = set()
         for tid in tasks:
             t = prod["tasks"][tid]
             if not t.get("attempts"): t["attempts"] = [{}]
             t["attempts"][-1]["retry_requested"] = {"at": store.now(), "reason": reason}
             t.pop("unverified", None)
+            if tid in corrected: _close_for_reevaluation(prod, t, reason, corrected[tid])
             _invalidate(prod, t, f"retry requested: {reason} (previous: {t.get('error') or t.get('failure')})")
             store.event(prod, "retry_requested", task=tid, reason=reason, previous=t.get("error"))
             reopened.add(tid)
@@ -595,6 +601,49 @@ def _release_blocked(prod):
             _set(prod, t, PENDING, reason="upstream is no longer blocked: " + ", ".join(t["blocked_by"]), outputs=[], result=None, gate_results=None)
             changed = True; n += 1
     return n
+
+
+def _reevaluable(prod, t):
+    """A measured (quality) failure may run again only when the evaluator that measured it has changed since
+    (production/evaluator.py). Returns {"from", "to", "why"}; raises ValueError otherwise. Narrow on purpose:
+      - a QA or release check only (a department's own output failing its gate is reworked by that department);
+      - the latest measured check of its chain (an older result describes an older project state);
+      - the same evaluator on the same project is always refused: that is a retry of a measured failure."""
+    tid = t["id"]
+    refuse = lambda why: ValueError(f"{tid} ran and failed its gate ({t.get('failure') or 'quality'}): a measured failure is fixed in the "
+                                     f"project (its fix work order), never retried; {why}")
+    if t.get("failure") != "quality": raise refuse("it did not fail on a measurement")
+    if t.get("stage") not in ("qa", "release") or (t.get("routed") or {}).get("producers") or t.get("rework_of"):
+        raise refuse("only a QA or release check can be measured again after an evaluator correction")
+    root = t.get("chain") or tid
+    later = [x for x in prod["tasks"].values() if (x.get("chain") or x["id"]) == root and x["id"] != tid and x.get("reverifies")
+             and (x.get("round") or 0) > (t.get("round") or 0) and any(a.get("outcome") for a in x.get("attempts") or [])]
+    if later:
+        newest = max(later, key=lambda x: x.get("round") or 0)
+        raise refuse(f"{newest['id']} measured the project after it: that is the result to act on")
+    measured = next((a for a in reversed(t.get("attempts") or []) if a.get("outcome")), {})
+    yes, now, why = evaluator.changed(measured.get("evaluator"), t)
+    if not yes: raise refuse(why + ", so it would measure the same thing again")
+    return {"from": measured.get("evaluator"), "to": now, "why": why}
+
+
+def _close_for_reevaluation(prod, t, reason, change):
+    """The failed result stays on the record (its attempt, error, gate results and what it measured); the fix work order and
+    re-verification it opened are closed, because they answer a result the corrected evaluator may no longer give."""
+    n = (t.get("reevaluated") or 0) + 1
+    closed = []
+    for x in prod["tasks"].values():
+        if x.get("chain") == (t.get("chain") or t["id"]) and (x.get("round") or 0) > (t.get("round") or 0) and x["state"] in (PENDING, AWAITING_AGENT, NEEDS_APPROVAL, BLOCKED):
+            _set(prod, x, SKIPPED, reason=f"closed: {t['id']} is measured again after an evaluator correction ({change['why']})"); closed.append(x["id"])
+    t.setdefault("reevaluations", []).append({
+        "n": n, "at": store.now(), "reason": reason, "why": change["why"], "evaluator_before": change["from"], "evaluator_after": change["to"],
+        "previous": {"state": t["state"], "failure": t.get("failure"), "error": t.get("error"), "gate_results": copy.deepcopy(t.get("gate_results")),
+                     "measured_fingerprint": t.get("measured_fingerprint"), "attempt": len(t.get("attempts") or [])},
+        "closed": closed})
+    t["reevaluated"] = n
+    t.pop("superseded_by", None); t.pop("exhausted", None)
+    store.event(prod, "evaluator_correction", task=t["id"], reason=reason, why=change["why"], before=(change["from"] or {}).get("fingerprint"),
+                after=(change["to"] or {}).get("fingerprint"), closed=closed)
 
 
 def _invalidate(prod, t, why):
@@ -849,6 +898,8 @@ def _finish(prod, t, res):
     att = t["attempts"][-1]; att["finished"] = store.now(); att["t1"] = round(time.time(), 3); att["seconds"] = res.pop("_seconds", None)
     cls = gates.classify(res) if res.get("status") != "needs_approval" else "approval"
     att.update(status=res.get("status"), outcome=cls, error=(res.get("error") or res.get("reason") or None) and str(res.get("error") or res.get("reason"))[:1500])
+    ev = evaluator.identity(t)   # what measured this: lets a later evaluator correction be told from a plain retry
+    if ev: att["evaluator"] = ev
     t["outputs"] = _norm_outputs(res)
     t["result"] = _slim(res)
     if cls == "approval" and res.get("consolidated"):   # plan v2: one replace_assets approval for the whole production
@@ -933,7 +984,8 @@ def _remediate(prod, t, res, gr):
     if rnd > maxr:
         t["exhausted"] = True
         store.event(prod, "quality_gate_exhausted", task=t["id"], rounds=rnd - 1); return
-    fix_id, rv_id = f"fix.{root}.r{rnd}", f"{root}.r{rnd}"
+    era = f".e{t['reevaluated']}" if t.get("reevaluated") else ""   # after an evaluator correction the earlier chain is kept: new ids, never overwritten
+    fix_id, rv_id = f"fix.{root}{era}.r{rnd}", f"{root}{era}.r{rnd}"
     design = None   # DESIGNCRAFT runs beside PLAYCRAFT (static, seconds) and is nearly always done when a gameplay fix is written
     if t.get("department") == "playcraft" and "qa.designcraft" in prod["tasks"]:
         design = (eff(prod, "qa.designcraft").get("result") or {}).get("proposals")
@@ -949,6 +1001,7 @@ def _remediate(prod, t, res, gr):
                    params=copy.deepcopy(t["params"]), deps=[fix_id], gate=copy.deepcopy(t["gate"]), resources=t["resources"], retries=t["retries"],
                    timeout=t["timeout"], criterion=t.get("criterion"))
     rv.update(chain=root, round=rnd, reverifies=t["id"])
+    if t.get("reevaluated"): rv["reevaluated"] = t["reevaluated"]
     prod["tasks"][fix_id] = fix; prod["tasks"][rv_id] = rv
     i = prod["order"].index(t["id"]) + 1
     prod["order"][i:i] = [fix_id, rv_id]

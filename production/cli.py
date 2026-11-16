@@ -38,7 +38,7 @@ def main(argv=None):
     de.add_argument("--decline", action="store_true", help="decline a pending revision"); de.add_argument("--note")
     rv = sp.add_parser("revise"); rv.add_argument("id"); rv.add_argument("--overrides", required=True); rv.add_argument("--reason", required=True)
     r = sp.add_parser("run"); r.add_argument("id"); r.add_argument("--workers", type=int, default=4)
-    r.add_argument("--retry", action="append", default=[], help="a failed check to run again first (execution/request failures only)")
+    r.add_argument("--retry", action="append", default=[], help="a check to run again first: one that failed without measuring, was left verification-incomplete, or failed under an evaluator that has changed since")
     r.add_argument("--retry-reason", help="why it runs again (required with --retry)")
     s = sp.add_parser("status"); s.add_argument("id")
     sb = sp.add_parser("submit"); sb.add_argument("id"); sb.add_argument("task"); sb.add_argument("--files", nargs="*"); sb.add_argument("--notes")
