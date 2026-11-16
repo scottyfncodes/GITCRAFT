@@ -25,6 +25,32 @@ def _w(text, words):
     return out
 
 
+NEGATIONS = ("not", "no", "never", "isn't", "isnt", "aren't", "arent", "without", "nor", "avoid", "less")
+MUSIC_WORDS = ("music", "soundtrack", "score", "song", "theme tune", "audio direction")
+
+
+def _mood(prompt):
+    """(mood, word) for the music. What the brief says about the music wins over a mood word used for something else
+    ("a dark dungeon... the soundtrack should be calm"), and a negated word is not a choice ("the player is not a heroic
+    human", "never tense"). No usable word: (None, None), and the genre default is listed as an assumption."""
+    def scan(text):
+        best = None
+        for key, words in RULES["music_moods"].items():
+            for w in words:
+                for m in re.finditer(r"(?<![a-z0-9])" + re.escape(w.lower()) + r"(?:s|es|ed|ing)?(?![a-z0-9])", text):
+                    before = re.findall(r"[a-z']+", text[max(0, m.start() - 40):m.start()])[-4:]
+                    if any(b in NEGATIONS for b in before): continue
+                    if best is None or m.start() < best[0]: best = (m.start(), key, w)
+                    break
+        return (best[1], best[2]) if best else (None, None)
+    sentences = [" ".join(x.lower().split()) for x in re.split(r"(?<=[.!?])\s+|\n+", prompt) if x.strip()]
+    about_music = " . ".join(x for x in sentences if any(re.search(r"(?<![a-z])" + re.escape(w) + r"(?![a-z])", x) for w in MUSIC_WORDS))
+    if about_music:
+        got = scan(about_music)
+        if got[0]: return got
+    return scan(" . ".join(sentences))
+
+
 def _first(text, table):
     """The table key whose words appear earliest in the text."""
     best = None
@@ -43,13 +69,16 @@ def _title(prompt, t):
     return None
 
 
-def parse(prompt, project=None, overrides=None):
+def parse(prompt, project=None, overrides=None, existing=None):
+    """`existing`: None reads the folder (a folder with files of its own is an existing project). A production that is being
+    re-planned passes what it decided the first time: by then a new build's folder holds its own scaffold and assets, and
+    reading it again would turn the build into a "continue" of itself (and drop its asset, icon and deployment work)."""
     if not prompt or len(prompt.strip()) < 12:
         raise ValueError("the master prompt is empty or too short to plan from: describe the deliverable")
     t = " ".join(prompt.lower().split())
     because, assumptions, questions = {}, [], []
     # an existing project gets only what was asked for: no implied sounds, identity, icon or branding
-    existing = bool((overrides or {}).get("mode", {}).get("existing")) or maturity.is_existing(project)
+    existing = bool((overrides or {}).get("mode", {}).get("existing")) or (maturity.is_existing(project) if existing is None else bool(existing))
 
     # ---- deliverable
     deliverable, w = _first(t, RULES["deliverables"])
@@ -104,7 +133,7 @@ def parse(prompt, project=None, overrides=None):
             for p in RULES["default_sfx"].get(g, []):
                 if p not in presets and len(presets) < 6: presets.append(p)
         if feats["sound"] or not alone: assets["sfx"] = presets[:8]
-        mood, mw = _first(t, RULES["music_moods"])
+        mood, mw = _mood(prompt)
         if feats["sound"] and not mood and not (alone or existing):
             mood = RULES["default_mood"].get(genres[0] if genres else "arcade", "playful")
             assumptions.append(f"music mood not named: {mood}")
@@ -247,6 +276,9 @@ def acceptance(spec):
     if q.get("designcraft"): add("design_review", "DESIGNCRAFT assessment recorded (structural design findings reviewed)", "qa.designcraft")
     web = d in ("game", "app", "site")
     for kind in ("sfx", "music", "ambience", "voice", "levels", "vfx", "materials", "world", "models", "identity"):
+        # levels that no LevelCraft kind fits are designed by the build task as data: there is no department asset to
+        # integrate, so a criterion "produced by its department" would have no task to measure it (NOT PLANNED, never READY)
+        if kind == "levels" and not (a.get("levels") or {}).get("by_levelcraft"): continue
         if a.get(kind): add(f"asset_{kind}", f"{kind} produced by its department, validated" + (", and integrated into the project" if web else ""), "integrate" if web else "production")
     if a.get("animate"):
         add("asset_animation", "Every animated character is rigged and animated by AnimCraft, and TestCraft shows each clip really moves", "animation")

@@ -203,7 +203,11 @@ def plan(prompt, project=None, overrides=None, store_dir=None, recon=None, asses
 
 def _discover_and_plan(prod):
     """Read-only Discovery and planning into an existing record. Never writes to the project."""
-    spec = intake.parse(prod["spec"]["prompt"], prod["spec"]["project"]["path"] if prod["spec"]["project"].get("path") else None, prod.get("overrides") or None)
+    # new or existing is decided once, by the first plan. A re-plan (a revision, a changed decision) of a new build finds
+    # its own scaffold and integrated assets in the folder: read again, the build would become a "continue" of itself
+    prev = (prod.get("spec") or {}).get("mode") if prod.get("tasks") else None
+    spec = intake.parse(prod["spec"]["prompt"], prod["spec"]["project"]["path"] if prod["spec"]["project"].get("path") else None, prod.get("overrides") or None,
+                        existing=None if prev is None else bool(prev.get("existing")))
     if not spec["project"]["path"]: spec["project"]["path"] = prod["spec"]["project"]["path"]
     p = spec["project"]["path"]
     spec["project"]["exists"] = bool(p and os.path.isdir(p))
@@ -542,7 +546,13 @@ def retry(pid, tasks, reason, store_dir=None):
         for tid in tasks:
             t = prod["tasks"].get(tid)
             if not t: raise ValueError(f"{tid}: no such task in {pid}")
-            if t["state"] != FAILED: raise ValueError(f"{tid} is {t['state']}: only a failed check can be retried")
+            # "verification incomplete" (blocked with `unverified`, e.g. a frame rate under a software rasteriser) measured
+            # nothing conclusive about the project: it may run again, on the current build. A task blocked by an upstream
+            # task is released by retrying that task, never directly
+            if t["state"] == BLOCKED and t.get("unverified") and not t.get("blocked_by"): continue
+            if t["state"] != FAILED:
+                raise ValueError(f"{tid} is {t['state']}: only a failed check, or one whose verification was incomplete, can be retried"
+                                 + (f" (it waits on {', '.join(t['blocked_by'])}: retry that)" if t.get("blocked_by") else ""))
             last = (t["attempts"] or [{}])[-1]
             if t.get("failure") == "quality" or last.get("outcome") not in RETRYABLE:
                 raise ValueError(f"{tid} ran and failed its gate ({t.get('failure') or last.get('outcome')}): a measured failure is fixed in the "
@@ -550,7 +560,9 @@ def retry(pid, tasks, reason, store_dir=None):
         reopened = set()
         for tid in tasks:
             t = prod["tasks"][tid]
+            if not t.get("attempts"): t["attempts"] = [{}]
             t["attempts"][-1]["retry_requested"] = {"at": store.now(), "reason": reason}
+            t.pop("unverified", None)
             _invalidate(prod, t, f"retry requested: {reason} (previous: {t.get('error') or t.get('failure')})")
             store.event(prod, "retry_requested", task=tid, reason=reason, previous=t.get("error"))
             reopened.add(tid)
@@ -1028,6 +1040,16 @@ def _escalate(prod, p, src, why, origin=None):
 
 
 # ---------------------------------------------------------------- agent hand-back and approvals
+def _submit_allowed(prod, path):
+    """Where an agent's submitted files may live: the workspace roots, the production's own store and output folder (in
+    GITCRAFT's isolated home when the project is the only root), and the production's project. The project was fixed when
+    the blueprint was approved; naming it here lets the CLI submit from a shell whose roots were never set to it."""
+    own = {os.path.realpath(prod["store"]), os.path.realpath(store.output_root(prod, create=False))}
+    proj = _project(prod)
+    if proj: own.add(os.path.realpath(proj))
+    return inside_roots(path) or any(artifacts.inside(path, r) for r in own)
+
+
 def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=None, store_dir=None, run_after=False, max_workers=4):
     prod = store.load(pid, store_dir)
     with store.lock(prod):
@@ -1042,8 +1064,7 @@ def submit(pid, task, files=None, notes=None, url=None, evidence=None, license=N
         # A work order tells the agent to write its task files in the production's own task folder. When the project is
         # the only workspace root that folder is in GITCRAFT's isolated home, outside the roots: it is still GITCRAFT's
         # own, the same exception store.create makes. Anything else outside the roots is refused as before.
-        own = {os.path.realpath(prod["store"]), os.path.realpath(store.output_root(prod, create=False))}
-        allowed = lambda p: inside_roots(p) or any(artifacts.inside(p, r) for r in own)
+        allowed = lambda p: _submit_allowed(prod, p)
         checks, outs = gates.check_expected(wo.get("expected", []), d, proj, allowed)
         for f in files or []:
             p = f if os.path.isabs(f) else next((c for c in (os.path.join(d, f), os.path.join(proj or d, f)) if os.path.exists(c)), os.path.join(proj or d, f))

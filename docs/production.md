@@ -469,6 +469,13 @@ out of the product checks of the engineering standard; a secret found there is a
   are recorded, and what failed or was blocked because of it runs again: the whole chain below it, including an agent's task
   (the deploy) several steps down. A task blocked only by a dead upstream waits again as soon as none of its dependencies is
   dead, so a record left blocked by an earlier version heals on its next run; a task blocked for its own reason is not touched.
+- A check that ended **verification incomplete** (blocked with `unverified`: for example a frame rate measured under a
+  software rasteriser) measured nothing conclusive, so it can be retried the same way, on the current build: after the
+  project was optimised, or on a machine that can verify it. It passes, fails or stays incomplete on what it measures then.
+  A task that is blocked only because an upstream task is: retry the upstream one (the refusal names it).
+- New or existing is decided once, by the first plan. A revision re-plans a new build as a new build even though its folder
+  now holds the scaffold and the integrated assets, so adding or replacing a task never drops the asset, icon, licensing or
+  deployment work.
 - A check that was blocked because the app was not built (`reason`: no `index.html` in the build folder, `install`: the build
   command) needs no retry and no revision: build the app and `production_run` again. It runs, and whatever was blocked behind
   it is released (`target_built` in the event log). Still unbuilt, it stays blocked. A check blocked for any other reason
