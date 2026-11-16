@@ -73,8 +73,12 @@ check("plan: the new game plans asset, licensing and deployment work", {"audio.m
 engine.decide(pid, answers={k["id"]: k["recommended"] for k in prod["decision_room"] if k.get("recommended")})
 engine.decide(pid, approve=True)
 os.makedirs(os.path.join(proj, "assets", "audio"), exist_ok=True)   # what the scaffold and the first integrations leave behind
-for rel, body in (("index.html", "<!doctype html><html lang=en><title>Verge</title>"), ("game.js", "// build"), ("assets/audio/music.ogg", "x")):
+os.makedirs(os.path.join(proj, "assets", "icons"), exist_ok=True)
+own = [("index.html", "<!doctype html><html lang=en><title>Verge</title>"), ("game.js", "// build"), ("assets/audio/music.ogg", "x"), ("assets/icons/icon-192.png", "x"),
+       ("assets/icons/favicon.ico", "x")] + [(f"assets/audio/{s}.ogg", "x") for s in prod["spec"]["assets"]["sfx"]]   # every planned sound, integrated
+for rel, body in own:
     with open(os.path.join(proj, rel), "w") as f: f.write(body)
+before_defs = {k: json.dumps({d: v.get(d) for d in engine.TASK_DEF}, sort_keys=True) for k, v in prod["tasks"].items()}
 extra = {"extra_tasks": [{"id": "audio.ambience.night", "department": "audiocraft", "action": "ambience", "params": {"kind": "night", "name": "ambience_night"},
                           "ship": {"dest": "$project/assets/audio", "roles": ["*"], "formats": ["ogg"]}}]}
 r = engine.revise(pid, extra, "the brief asks for insects at night")
@@ -84,6 +88,12 @@ engine.decide(pid, approve=True)
 prod = store.load(pid)
 check("revise: applied: still a new build", not prod["spec"]["mode"].get("existing"), prod["spec"]["mode"])
 check("revise: applied: every earlier task is still planned, plus the new one", before_tasks | {"audio.ambience.night"} <= set(prod["tasks"]), sorted(before_tasks - set(prod["tasks"])))
+check("revise: applied: the production's own integrated sounds are not 'reused' (their tasks stay)", {f"audio.sfx.{x}" for x in prod["spec"]["assets"]["sfx"]} <= set(prod["tasks"]),
+      sorted(k for k in before_tasks if k.startswith("audio.sfx") and k not in prod["tasks"]))
+redefined = sorted(k for k, v in before_defs.items() if k in prod["tasks"] and json.dumps({d: prod["tasks"][k].get(d) for d in engine.TASK_DEF}, sort_keys=True) != v)
+check("revise: applied: adding one task redefines only what now waits for it (integrate.final); the scaffold keeps its starter, nothing else is redone",
+      set(redefined) <= {"integrate.final"}, redefined)
+check("revise: applied: the project reading is the first one (no files of its own, no asset stems)", not prod["discovery"]["project"].get("asset_stems"), prod["discovery"]["project"].get("asset_stems"))
 check("revise: applied: nothing newly unmeasured", set(prod.get("unmeasured_criteria") or []) <= before_unmeasured, prod.get("unmeasured_criteria"))
 ex = os.path.join(ws, "existing"); os.makedirs(ex)
 with open(os.path.join(ex, "index.html"), "w") as f: f.write("<!doctype html><title>Old</title>")

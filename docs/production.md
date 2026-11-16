@@ -488,6 +488,9 @@ out of the product checks of the engineering standard; a secret found there is a
 - New or existing is decided once, by the first plan. A revision re-plans a new build as a new build even though its folder
   now holds the scaffold and the integrated assets, so adding or replacing a task never drops the asset, icon, licensing or
   deployment work.
+  The project folder is read once too: a re-plan uses the first Discovery of the project (and the icon found then), so
+  the production's own integrated sounds are never taken for assets "the project already has" and the starter it copied
+  is not un-planned. What can run on this machine is read fresh every time.
 - A check that was blocked because the app was not built (`reason`: no `index.html` in the build folder, `install`: the build
   command) needs no retry and no revision: build the app and `production_run` again. It runs, and whatever was blocked behind
   it is released (`target_built` in the event log). Still unbuilt, it stays blocked. A check blocked for any other reason
