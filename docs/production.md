@@ -473,6 +473,18 @@ out of the product checks of the engineering standard; a secret found there is a
   software rasteriser) measured nothing conclusive, so it can be retried the same way, on the current build: after the
   project was optimised, or on a machine that can verify it. It passes, fails or stays incomplete on what it measures then.
   A task that is blocked only because an upstream task is: retry the upstream one (the refusal names it).
+- **Evaluator corrections.** Every finished attempt of a check records the evaluator that measured it: a name and a
+  fingerprint of that evaluator's source files (`production/evaluator.py`: the department's folder and the Studio core for
+  a Studio check, `gamedesign/` for DESIGNCRAFT, the production modules that read the project for a built-in check, each
+  with the gate that reads the result). A quality failure may be retried only when that fingerprint differs from the
+  evaluator installed now: GITCRAFT was wrong and has been corrected, so there is nothing in the project to fix. The
+  retry measures again and decides nothing by itself: the check passes, fails (a new fix work order, ids `…e1.r1`) or is
+  incomplete on the new measurement. The earlier result (error, gate results, what it measured, both evaluator
+  identities, the reason) is kept in the task's `reevaluations`, its attempts stay, the fix work order and re-verification
+  it opened are closed as `skipped`, and an `evaluator_correction` event is logged. Refused, as before: the same evaluator
+  on the same project, an older result of a chain when a later check measured the project after it, and a department's
+  own output failing its gate (that is reworked by the department). A failure recorded before identity was tracked has
+  no fingerprint: it was measured by an older GITCRAFT, so it may be measured again once.
 - New or existing is decided once, by the first plan. A revision re-plans a new build as a new build even though its folder
   now holds the scaffold and the integrated assets, so adding or replacing a task never drops the asset, icon, licensing or
   deployment work.

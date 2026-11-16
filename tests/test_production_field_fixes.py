@@ -110,7 +110,8 @@ check("retry: what was blocked behind it waits again too", prod["tasks"][dep["id
 check("retry: the request is on the record", any((a.get("retry_requested") or {}).get("reason") for a in prod["tasks"][CHK]["attempts"]))
 OTHER = "qa.assets"
 with store.lock(prod):
-    t = prod["tasks"][OTHER]; t.update(state=FAILED, failure="quality", blocked_by=None); t["attempts"] = [{"n": 1, "outcome": "quality"}]; store.save(prod)
+    from production import evaluator   # a real attempt records the evaluator that measured it (tests/test_evaluator_correction.py)
+    t = prod["tasks"][OTHER]; t.update(state=FAILED, failure="quality", blocked_by=None); t["attempts"] = [{"n": 1, "outcome": "quality", "evaluator": evaluator.identity(t)}]; store.save(prod)
 check("retry: a measured quality failure is still refused", raises(lambda: engine.retry(pid, [OTHER], "please"), ValueError))
 
 # ---- 7. GITCRAFT's own output folder inside the project is not the product's source

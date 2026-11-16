@@ -61,6 +61,9 @@ jobs:
       - name: Production Director regressions from a real production (re-plan, retry, intake readings)
         run: python3 tests/test_production_field_fixes.py
 
+      - name: Evaluator corrections (a measured failure runs again only when its evaluator changed)
+        run: python3 tests/test_evaluator_correction.py
+
       - name: Lifecycle, App Icon Studio, HaveAnApp attribution, engineering standards
         run: python3 tests/test_lifecycle.py
 
