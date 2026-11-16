@@ -215,9 +215,15 @@ def _discover_and_plan(prod):
     if prod.get("recon"): spec["recon"] = {k: prod["recon"].get(k) for k in ("depth", "at")} | {"verdict": (prod["recon"].get("recommendation") or {}).get("verdict")}
     lifecycle.move(prod, "discovery")
     disc = discovery.run(spec)
+    # ...and the project is read once. On a re-plan the folder holds what this production put there (the scaffold, integrated
+    # sounds, the icon set): read again, the planner would "reuse" its own sounds and drop their tasks, and skip the starter
+    # it already copied. What can run here (runtimes) is read fresh every time
+    first = (prod.get("discovery") or {}).get("project") if prev is not None else None
+    if first: disc["project"] = copy.deepcopy(first)
     existing = bool(spec.get("mode", {}).get("existing"))
     if existing and not prod.get("maturity"): prod["maturity"] = maturity.assess(p)
-    icon_state = icons.inspect(p) if (spec.get("icon", {}).get("required") or existing) else {"status": "n/a"}
+    icon_state = (copy.deepcopy(prod["icon_state"]) if prev is not None and prod.get("icon_state")   # the icon found before this production made one
+                  else icons.inspect(p) if (spec.get("icon", {}).get("required") or existing) else {"status": "n/a"})
     if spec.get("icon", {}).get("required") and not spec["icon"].get("mode"):
         spec["icon"]["mode"] = "keep" if icon_state["status"] == "candidate" else "new"
         spec["icon"]["existing"] = icon_state.get("best")
