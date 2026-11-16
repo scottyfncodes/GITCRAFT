@@ -7,7 +7,8 @@
   3. "ecosystem health" in a game brief selected the *sensitive data* engineering standard;
   4. "the player is not a heroic human ... music should be atmospheric, understated" planned heroic music;
   5. levels the build designs itself left an `asset_levels` criterion that no task measures (never READY);
-  6. submitting project files from a shell whose roots do not include the project was refused.
+  6. submitting project files from a shell whose roots do not include the project was refused;
+  7. product QA read GITCRAFT's own reports under <project>/gitcraft-out as the product's source.
 
     python3 tests/test_production_field_fixes.py"""
 import json, os, sys, tempfile
@@ -111,6 +112,18 @@ OTHER = "qa.assets"
 with store.lock(prod):
     t = prod["tasks"][OTHER]; t.update(state=FAILED, failure="quality", blocked_by=None); t["attempts"] = [{"n": 1, "outcome": "quality"}]; store.save(prod)
 check("retry: a measured quality failure is still refused", raises(lambda: engine.retry(pid, [OTHER], "please"), ValueError))
+
+# ---- 7. GITCRAFT's own output folder inside the project is not the product's source
+from production import gates, qa, artifacts as _art
+check("gates: the output-folder names match production/artifacts.py", set(gates.OWN_OUTPUT_DIRS) == set(_art.NAMES), (gates.OWN_OUTPUT_DIRS, _art.NAMES))
+site = os.path.join(ws, "site"); os.makedirs(os.path.join(site, "gitcraft-out", "testcraft", "perf"))
+with open(os.path.join(site, "index.html"), "w") as f: f.write('<!doctype html><html lang="en"><title>Site</title><img src="a.png" alt="a">')
+with open(os.path.join(site, "gitcraft-out", "testcraft", "perf", "perf_report.html"), "w") as f: f.write("<html><img src='data:image/jpeg;base64,AAAA'><script>new Audio('x')</script>")
+alt = lambda: next(c for c in qa.evaluate_request(site, {"requested": ["accessibility"], "deliverable": "site"}) if "alt text" in c["name"])
+check("qa.request: a report under gitcraft-out/ is not read as the product (no alt-text blocker from it)", alt()["category"] == "pass", alt())
+check("gates: ...and its scripts are not the build's source", "new Audio" not in gates._source_text(site, strict=True))
+with open(os.path.join(site, "about.html"), "w") as f: f.write("<img src='b.png'>")
+check("qa.request: an image without alt text in the product itself is still a blocker", alt()["category"] == "blocker", alt())
 
 # ---- 6. the production's own project is always a valid place for the agent's files
 from production import artifacts

@@ -97,10 +97,15 @@ def _strip_comments(text):
     return text
 
 
+OWN_OUTPUT_DIRS = ("gitcraft-out", ".gitcraft-work")   # production/artifacts.py NAMES
+
+
 def _source_text(project, strict=False):
     code, data = [], {}
     for d, dirs, files in os.walk(project):
-        dirs[:] = [x for x in dirs if x not in (".git", "node_modules")]
+        # GITCRAFT's own output folders (department results, reports) are never the product's source: a perf report's
+        # embedded screenshot is not an <img> the build forgot to describe
+        dirs[:] = [x for x in dirs if x not in (".git", "node_modules") and x not in OWN_OUTPUT_DIRS]
         for f in files:
             if f == MANIFEST and os.path.normpath(d) == os.path.normpath(project): continue
             if f.endswith(CODE + (".json",)) and "assets" not in os.path.relpath(d, project).split(os.sep)[:2]:
