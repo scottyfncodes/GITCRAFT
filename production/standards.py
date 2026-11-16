@@ -33,8 +33,11 @@ CODE = (".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".vue", ".svelte"
 PROFILES = ["personal", "public", "sensitive"]
 
 # words in the prompt → profile (the strongest match wins; the Decision Room shows why)
+# Bare "health" is not here on purpose: games have health bars, player health and ecosystem health. Health *data* is named
+# by the phrases below (and by "medical", "patient", "hipaa").
 PROFILE_WORDS = {
-    "sensitive": ["payment", "payments", "credit card", "stripe", "checkout", "health", "medical", "patient", "financial", "bank", "banking",
+    "sensitive": ["payment", "payments", "credit card", "stripe", "checkout", "health data", "health record", "health records", "health information",
+                  "health app", "health tracker", "health journal", "mental health", "healthcare", "health care", "medical", "patient", "financial", "bank", "banking",
                   "personal data", "pii", "passwords", "children", "kids' data", "insurance records", "hipaa", "gdpr", "ssn"],
     "public": ["login", "log in", "sign in", "sign-in", "sign up", "signup", "accounts", "user accounts", "users", "customers", "public",
                "multiplayer", "leaderboard", "community", "social", "marketplace", "saas", "clients", "subscribers", "database", "backend", "api"],

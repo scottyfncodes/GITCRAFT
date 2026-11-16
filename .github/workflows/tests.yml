@@ -58,6 +58,9 @@ jobs:
       - name: Production Director (unit + a real production through the sandboxed server)
         run: python3 tests/test_production.py
 
+      - name: Production Director regressions from a real production (re-plan, retry, intake readings)
+        run: python3 tests/test_production_field_fixes.py
+
       - name: Lifecycle, App Icon Studio, HaveAnApp attribution, engineering standards
         run: python3 tests/test_lifecycle.py
 
