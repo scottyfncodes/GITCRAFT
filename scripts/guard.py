@@ -277,7 +277,7 @@ def main():
         proc.stdin.write(line); proc.stdin.flush()
     proc.stdin.close()
     proc.wait()
-    reader.join(timeout=5)   # let the last responses reach the client before exiting
+    reader.join(timeout=120)   # let the last responses reach the client and the last audit records (which hash files) finish: a cut-off record is a lost one
 
 
 if __name__ == "__main__":
