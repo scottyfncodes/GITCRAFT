@@ -151,11 +151,14 @@ Before this, the two 3D servers were only registered once Blender was installed,
 | `GITCRAFT_STUDIO_VOICE=later` | voice model (~115 MB + onnxruntime) installed in the background at the first session; `audiocraft_voice` sees it on its next call |
 | `GITCRAFT_STUDIO_VOICE=0` | no voice model (`audiocraft_voice` reports blocked) |
 
-**Staying current.** Cloud environments cache the setup script's result, so a new session can start from an older
-GITCRAFT. The user-level SessionStart hook therefore pulls `~/.gitcraft/repo` in the background at every session
-start; when `main` has moved it refreshes the runtime and registration (the servers use the new code from the next
-session; `~/.gitcraft/logs/update.log`). It also finishes a mocap install that stopped part-way.
-`GITCRAFT_AUTO_UPDATE=0` turns the update off.
+**Staying current, deliberately.** New code never runs on its own. At session start the user-level hook only
+*fetches* `~/.gitcraft/repo` in the background and, when `main` has moved, says so ("an update is available");
+nothing is checked out or run. A person applies it with `~/.gitcraft/repo/scripts/update.sh`, which lists the new
+commits and the security-relevant files they change and installs only with `--yes` (only commits on `main`;
+`--rollback --yes` goes back; `~/.gitcraft/logs/update.log`). For a fixed version in a cloud environment, put
+`GITCRAFT_REF=<tag or commit>` in front of `bash` in the setup line. `GITCRAFT_AUTO_UPDATE=1` restores the old
+unreviewed pull-and-run at session start (not recommended: docs/security.md, "Updates and binaries"). The hook
+also finishes a mocap install that stopped part-way.
 
 Motion capture (`animcraft_mocap`, ~440 MB) is not part of the default setup. To have it in every session, add a
 second line to the setup script; `|| true` keeps a failed download from stopping the session:

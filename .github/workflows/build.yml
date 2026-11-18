@@ -1,22 +1,25 @@
 name: Build ArtCraft CLIs
 
-# Builds the seven ArtCraft CLIs (each one includes its MCP server), proves they work, and only then publishes them
-# to the `bin` branch, so Claude Code sessions can grab them with a quick git fetch instead of compiling for an hour.
+# Builds the seven ArtCraft CLIs (each one includes its MCP server) from the upstream commits pinned in
+# scripts/tools.sh, and proves they work. It never publishes: it produces a release candidate.
 #
-#   build    all seven, on ubuntu-24.04, each binary refused above the glibc ceiling
+#   build    all seven, on ubuntu-24.04, from the pinned upstream commit (verified), each binary refused above the
+#            glibc ceiling
 #   gate     scripts/release-gate.sh on exactly those binaries: all seven present, glibc ceiling re-checked, and a
 #            fresh install of THESE binaries (tests/test_global.sh, published builds made unreachable) with every check
 #            passing and the installed binaries byte-identical to the candidates
-#   publish  only after the gate passes, only from main, and only the gated files (checked against the gate's
-#            SHA256SUMS). Anything else (a failed build, a failed gate, a pull request, another branch) leaves the
-#            published `bin` branch exactly as it was; non-main runs end with a dry run that lists what would ship.
+#   pin      the `bin.sha256` artifact: the candidate's checksums in the format of scripts/bin.sha256, naming this run
+#
+# Publishing is a separate, reviewed step (.github/workflows/publish-bin.yml): a pull request copies `bin.sha256` into
+# scripts/bin.sha256; merging it publishes exactly those files from this run, and install.sh installs only binaries
+# whose checksums are pinned there. Nothing here can change the `bin` branch.
 on:
   push:
     branches: [main]
-    paths: [".github/workflows/build.yml", "scripts/tools.sh"]
+    paths: [".github/workflows/build.yml", "scripts/tools.sh", "scripts/release-gate.sh"]
   pull_request:   # validates the build and the gate; never publishes
     paths: [".github/workflows/build.yml", ".github/actions/gitcraft-ci-setup/**", "scripts/release-gate.sh", "scripts/tools.sh",
-            "scripts/install.sh", "scripts/setup-env.sh", "tests/test_global.sh", "tests/global_project_check.py"]
+            "scripts/install.sh", "scripts/setup-env.sh", "scripts/bin.sha256", "tests/test_global.sh", "tests/global_project_check.py"]
   workflow_dispatch:
     inputs:
       gate_selftest:
@@ -59,6 +62,21 @@ jobs:
           - { name: effectcraft, repo: effectcraft, pkg: effectcraft-cli }
           - { name: designcraft, repo: designcraft, pkg: designcraft-cli }
     steps:
+      - name: Check out this repository's scripts/tools.sh (the pins)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: self
+          sparse-checkout: scripts/tools.sh
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: The pinned upstream commit (scripts/tools.sh)
+        id: pin
+        run: |
+          sha=$(bash -c 'source self/scripts/tools.sh >/dev/null 2>&1; gitcraft_upstream_sha "$1"' _ "${{ matrix.tool.name }}")
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::no pinned upstream commit for ${{ matrix.tool.name }} in scripts/tools.sh"; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"; echo "storytold/${{ matrix.tool.repo }} @ $sha"
+
       - name: System packages
         run: |
           sudo apt-get update -qq
@@ -67,15 +85,22 @@ jobs:
             libxi-dev libgl1-mesa-dev libfontconfig1-dev libfreetype-dev
 
       - name: Check out storytold/${{ matrix.tool.repo }}
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: storytold/${{ matrix.tool.repo }}
+          ref: ${{ steps.pin.outputs.sha }}
           path: src
           lfs: false
+          persist-credentials: false
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify the checkout is the pinned commit
+        run: '[ "$(git -C src rev-parse HEAD)" = "${{ steps.pin.outputs.sha }}" ] || { echo "::error::storytold/${{ matrix.tool.repo }} is not at the pinned commit"; exit 1; }'
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable branch, 2026-11 (toolchain version pinned below)
+        with:
+          toolchain: "1.100.0"
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: src
           key: ${{ matrix.tool.pkg }}
@@ -100,7 +125,7 @@ jobs:
           echo "${{ matrix.tool.name }} ${{ matrix.tool.pkg }} $(git -C src rev-parse --short HEAD) $(date -u +%F)" > out/${{ matrix.tool.name }}.manifest
           ls -lh out
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.tool.name }}
           path: out/
@@ -117,14 +142,14 @@ jobs:
       # paid API use is opt-in per run (docs/costs.md); otherwise the key is empty and the headless checks are skipped
       ANTHROPIC_API_KEY: ${{ (github.event_name == 'workflow_dispatch' && inputs.claude_session) && secrets.ANTHROPIC_API_KEY || '' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: ./.github/actions/gitcraft-ci-setup
 
       - name: Claude Code CLI (for the 'claude mcp list' checks; no sign-in needed)
-        run: npm i -g @anthropic-ai/claude-code && claude --version
+        run: npm i -g @anthropic-ai/claude-code@2.1.327 && claude --version
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: artifacts
 
@@ -143,7 +168,7 @@ jobs:
           git checkout -B "release-gate-${GITHUB_RUN_ID}"   # the fresh install clones a named branch of this checkout
           GITCRAFT_GLIBC_CEILING="$GLIBC_CEILING" scripts/release-gate.sh "$PWD/candidate" "$RUNNER_TEMP/gate"
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-candidate   # exactly what publish may push, with the gate's SHA256SUMS
           path: candidate/
@@ -155,46 +180,24 @@ jobs:
           grep -E '^(PASS|FAIL|SKIP)|checks passed' "$RUNNER_TEMP/gate/test_global.out" 2>/dev/null || true
           tail -n 60 "$RUNNER_TEMP"/gate/global/home-*/.gitcraft/logs/install.log 2>/dev/null || true
 
-  publish:
-    needs: gate   # runs only when the gate passed
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    env:
-      PUBLISH: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
-    steps:
-      - uses: actions/download-artifact@v8
+      - name: The release pin (bin.sha256), for a pull request that publishes this candidate
+        run: |
+          {
+            echo "# Trusted prebuilt ArtCraft CLIs: the SHA-256 of every <pkg>.gz that install.sh may install from the \`bin\` branch."
+            echo "# install.sh refuses a prebuilt whose checksum is not listed here (checked before it is decompressed or run), and"
+            echo "# .github/workflows/publish-bin.yml publishes to \`bin\` only the release candidate whose files match this list exactly."
+            echo "#"
+            echo "# Change it only by pull request: copy the \`bin.sha256\` artifact of a green \"Build ArtCraft CLIs\" run on main"
+            echo "# (it names the run below), review it, merge. Merging publishes those exact binaries (docs/install.md, \"Releases\")."
+            echo "# run: ${GITHUB_RUN_ID}"
+            (cd candidate && sha256sum *.gz | sort -k2)
+          } > bin.sha256
+          { echo "### Release candidate (not published)"; echo; echo "Built from: ${GITHUB_REF} @ ${GITHUB_SHA::7}, run ${GITHUB_RUN_ID}."
+            echo "To publish it: on a branch, replace scripts/bin.sha256 with the \`bin.sha256\` artifact of this run (main runs only), open a pull request, review, merge."
+            echo; echo '```'; cat bin.sha256; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: release-candidate
-          path: bin
-
-      - name: Verify the files are the ones the gate passed
-        working-directory: bin
-        run: |
-          [ -s SHA256SUMS ] || { echo "::error::no SHA256SUMS from the gate"; exit 1; }
-          sha256sum --check --strict SHA256SUMS
-          [ "$(ls *.gz | wc -l)" = 7 ] || { echo "::error::expected 7 binaries"; exit 1; }
-          rm SHA256SUMS
-
-      - name: Push to bin branch
-        working-directory: bin
-        run: |
-          cat *.manifest | sort > MANIFEST.txt
-          cat > README.md <<'EOF'
-          Prebuilt Linux x86_64 ArtCraft CLIs, generated by .github/workflows/build.yml.
-          Don't edit by hand. MANIFEST.txt lists the upstream commit each one was built from.
-          Every release passed scripts/release-gate.sh (glibc ceiling and a fresh install of these exact binaries).
-          EOF
-          sed -i 's/^ *//' README.md
-          if [ "$PUBLISH" != true ]; then
-            echo "Dry run (${GITHUB_EVENT_NAME} on ${GITHUB_REF}): the gate passed; nothing is published from here." | tee -a "$GITHUB_STEP_SUMMARY"
-            cat MANIFEST.txt >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          git init -q -b bin
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -qm "Prebuilt CLIs $(date -u +%F)"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" bin
-          cat MANIFEST.txt >> "$GITHUB_STEP_SUMMARY"
+          name: bin.sha256
+          path: bin.sha256
+          retention-days: 7

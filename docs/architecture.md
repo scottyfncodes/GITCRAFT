@@ -31,7 +31,9 @@ GITCRAFT is a creative production department for Claude Code: specialised apps r
 | Path | Role |
 |---|---|
 | `scripts/tools.sh` | The tool list (also drives the CI build matrix), roots, sandbox policy, per-tool deny list |
-| `scripts/install.sh` | Installs prebuilt binaries from the `bin` branch (source fallback), registers servers, writes `~/.gitcraft/status.json` |
+| `scripts/install.sh` | Installs prebuilt binaries from the `bin` branch, each only if its SHA-256 is pinned in `scripts/bin.sha256` (source fallback at the pinned upstream commit), registers servers, writes `~/.gitcraft/status.json` |
+| `scripts/update.sh` | The only way a new GITCRAFT version is installed: shows the commits and changed files, applies with `--yes`, rolls back |
+| `gitcraft3d/policy.py` | Which roots may be granted and which control files no tool may touch (shared by `mcp.sh`, `guard.py` and MeshCraft) |
 | `scripts/setup-env.sh` | Pre-session installer for environment setup scripts; stable clone at `~/.gitcraft/repo` |
 | `scripts/register.sh` | Registers every installed tool at user scope (`claude mcp add -s user`, or `~/.claude.json` directly when the CLI isn't on PATH) |
 | `scripts/session-start.sh` | SessionStart hook for single-repo sessions: background install of anything missing, health line |

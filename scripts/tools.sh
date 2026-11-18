@@ -11,6 +11,30 @@ GITCRAFT_TOOLS=(
   designcraft:designcraft:designcraft-cli
 )
 
+# The upstream commit each ArtCraft CLI is built from (CI and `install.sh --source`). Reviewed pins, never a moving
+# branch: a change upstream reaches GITCRAFT only through a pull request that bumps one of these (review the upstream
+# diff first). The prebuilt binaries those builds produce are pinned by checksum in scripts/bin.sha256.
+gitcraft_upstream_sha() {
+  case "$1" in
+    photocraft)  echo 02e9907f683bcda0e8a3de4865a914f6aa9280c1 ;;
+    vectorcraft) echo 1cb78a0ccf26d81584b876af2db520f308eb31a0 ;;
+    filmcraft)   echo 3f137a7ed420cac79b32145f5243b7f98b31f71c ;;
+    lightcraft)  echo aa08a77060c0cca737dcc29b5db814cbc07ae611 ;;
+    pdfcraft)    echo efd265563edfe1b5a3261b184fbc4c83f67f4364 ;;
+    effectcraft) echo 60e2cbbbe3d73c0a9074c25a1a615ccfec18721c ;;
+    designcraft) echo 47ef1ec411d53e98a31c576d80a1d0e20ef5eb04 ;;
+    *) return 1 ;;
+  esac
+}
+
+# The SHA-256 a prebuilt <pkg>.gz must have (scripts/bin.sha256, reviewed in main). Empty when it is not pinned:
+# an unpinned prebuilt is never installed. gitcraft_expected_sha256 <pkg> [pin file]
+gitcraft_expected_sha256() {
+  local f="${2:-$(dirname "${BASH_SOURCE[0]}")/bin.sha256}"
+  [[ -f "$f" ]] || return 0
+  awk -v want="$1.gz" '$1 ~ /^[0-9a-f]{64}$/ && $2 == want {print $1; exit}' "$f"
+}
+
 # Tools GITCRAFT builds itself (not ArtCraft binaries): the 3D Department.
 #   meshcraft   modelling specialist: Blender (bpy) MCP server in meshcraft/, venv in ~/.gitcraft/meshcraft
 #               (the department's only Blender)
@@ -57,17 +81,17 @@ if [[ -z "${GITCRAFT_3D_LIBRARY:-}" ]]; then
   fi
 fi
 
-# Folder the tools may read from and write to. Defaults to the session home, or
-# to the workspace when it lives outside home (cloud sessions check repos out to
-# /home/user while HOME is /root, which would otherwise fence every repo out).
+# Folder the tools may read from and write to: the workspace (the project Claude Code opened, else the current
+# folder), never the home folder. A workspace that is $HOME, contains it, or is / falls back to ~/gitcraft-work.
+# (Until November 2026 the default was $HOME, which made ~/.claude, ~/.ssh and shell start-up files writable from
+# inside the sandbox.) scripts/mcp.sh refuses any root that would expose such control files (gitcraft3d/policy.py).
 if [[ -z "${GITCRAFT_ROOT:-}" ]]; then
-  GITCRAFT_ROOT="$HOME"
-  _gc_ws="${CLAUDE_PROJECT_DIR:-$PWD}"
-  case "$_gc_ws/" in
-    "$HOME"/*) ;;
-    /?*) [[ -d "$_gc_ws" && "$_gc_ws" != / ]] && GITCRAFT_ROOT="$_gc_ws" ;;
-  esac
-  unset _gc_ws
+  _gc_ws="$(cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null && pwd -P)"
+  _gc_h="$(cd "$HOME" 2>/dev/null && pwd -P)"
+  case "$_gc_h/" in "$_gc_ws"/*) _gc_ws="" ;; esac   # the workspace is $HOME, or a folder that contains it
+  [[ "$_gc_ws" == / ]] && _gc_ws=""
+  GITCRAFT_ROOT="${_gc_ws:-$HOME/gitcraft-work}"
+  unset _gc_ws _gc_h
 fi
 # Extra authorized folders, colon-separated (e.g. one per repo). The sandbox
 # allows every root; tools with a single native root flag get GITCRAFT_ROOT.

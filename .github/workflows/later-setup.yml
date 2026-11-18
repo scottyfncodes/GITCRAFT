@@ -36,18 +36,18 @@ jobs:
       # paid API use is opt-in per run (see the header); otherwise the key is empty and the run is free
       ANTHROPIC_API_KEY: ${{ (github.event_name == 'workflow_dispatch' && inputs.claude_session) && secrets.ANTHROPIC_API_KEY || '' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13" # bpy publishes wheels for 3.11 and 3.13
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
       - name: Claude Code (only when started by hand with claude_session)
         if: ${{ env.ANTHROPIC_API_KEY != '' }}
-        run: npm i -g @anthropic-ai/claude-code
+        run: npm i -g @anthropic-ai/claude-code@2.1.327
       - name: Setup with GITCRAFT_MESHCRAFT=later, then the background Blender build
         shell: bash # -eo pipefail: the test's exit code survives the tee
         run: |

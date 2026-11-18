@@ -43,6 +43,12 @@ fi
 
 IFS=: read -r -a roots <<<"$GITCRAFT_ROOTS"
 root="$GITCRAFT_ROOT"
+# Fail closed on a root that would make control files writable from inside the sandbox ($HOME, /, ~/.claude,
+# GITCRAFT's runtime ...): Landlock can only allow whole folders, so such a root cannot be fenced afterwards.
+if ! why="$(python3 -I "$repo/gitcraft3d/policy.py" check-roots "$root" "${roots[@]}")"; then
+  echo "gitcraft: $name not started: $why. Set GITCRAFT_ROOTS to your project folder(s) (docs/security.md, \"Choosing the roots\")." >&2
+  exit 1
+fi
 mkdir -p "$root" "$GITCRAFT_LOG"
 state="$GITCRAFT_STATE/$name"
 mkdir -p "$state/tmp" "$state/config" "$state/cache" "$state/data"

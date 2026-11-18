@@ -15,9 +15,12 @@ samples="${3:-48}"; scale="${4:-1.0}"
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 gc="${GITCRAFT_HOME:-$HOME/.gitcraft}"
 launcher="$gc/runtime/scripts/mcp.sh"; [[ -x "$launcher" ]] || launcher="$(cd "$here/../../../.." && pwd)/scripts/mcp.sh"
-# MeshCraft may read and write only its roots: the script, the scene and the output folder
-roots=$(printf '%s\n' "$here" "$(dirname "$scene")" "$out" | sort -u | paste -sd: -)
-argf="$(mktemp "$out/.lp3d-args.XXXXXX.json")"; trap 'rm -f "$argf"' EXIT
+# MeshCraft may read and write only its roots: the scene's folder and the output folder. The script is copied into
+# the output folder rather than granting its own folder: that is GITCRAFT's code (often ~/.gitcraft/runtime), which
+# must never be a writable root (gitcraft3d/policy.py)
+roots=$(printf '%s\n' "$(dirname "$scene")" "$out" | sort -u | paste -sd: -)
+argf="$(mktemp "$out/.lp3d-args.XXXXXX.json")"; script="$(mktemp "$out/.lp3d-script.XXXXXX.py")"; trap 'rm -f "$argf" "$script"' EXIT
+cp "$here/low-poly-3d.py" "$script"
 printf '{"path": "%s", "args": {"scene": "%s", "out": "%s", "samples": %d, "scale": %s}}\n' \
-  "$here/low-poly-3d.py" "$scene" "$out" "$samples" "$scale" > "$argf"
+  "$script" "$scene" "$out" "$samples" "$scale" > "$argf"
 GITCRAFT_ROOTS="$roots" GITCRAFT_ROOT="${roots%%:*}" "$launcher" meshcraft --call run_script "@$argf" </dev/null | tail -n 1

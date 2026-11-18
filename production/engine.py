@@ -22,7 +22,7 @@ from . import evaluator
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
 from . import inside_roots, roots, store_root, store_root_for
 from . import intake, discovery, planner, executors, builtins, gates, store, report as _report
-from . import lifecycle, recon, icons, maturity, artifacts
+from . import lifecycle, recon, icons, maturity, artifacts, approvals
 
 RESOURCES = {"browser": 2, "blender": 1, "exclusive": 1, "integration": 1}   # integration: one writer of the asset manifest at a time (plan v2)
 # "exclusive": a timing measurement (frame rate) is only valid with the machine to itself, so such a task starts
@@ -821,7 +821,10 @@ def _build_authorised(prod):
 
 def _issue(prod, t):
     wo = t["work_order"] or {}
-    if wo.get("approval") and not prod["spec"]["authorisations"].get(wo["approval"]) and not t.get("approved"):
+    if approvals.external(t):   # deploy / infrastructure: never pre-authorised, never the agent's word (production/approvals.py)
+        if not (t.get("approved") and t.get("external_approval")):
+            _set(prod, t, NEEDS_APPROVAL, reason=approvals.how(prod, t)); return
+    elif wo.get("approval") and not prod["spec"]["authorisations"].get(wo["approval"]) and not t.get("approved"):
         _set(prod, t, NEEDS_APPROVAL, reason=f"{wo['approval']} needs a person's approval (production_approve)"); return
     d = _task_dir(prod, t["id"])
     h = _handoff(prod, t, {})
@@ -1265,6 +1268,8 @@ def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
         prod = store.load(pid, store_dir)
         t = prod["tasks"].get(task)
         if not t or t["state"] != NEEDS_APPROVAL: raise ValueError(f"{task} is not waiting for approval")
+        if approved and approvals.external(t):
+            raise approvals.NotApproved(approvals.REFUSAL.format(kind=approvals.kind(t)) + " " + approvals.how(prod, t))
         options = [c.get("id") for c in (t.get("result") or {}).get("concepts") or []]
         if approved and choice is not None and options and choice not in options:
             raise ValueError(f"{choice!r} is not one of the concepts {options}")
@@ -1287,6 +1292,27 @@ def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
             _set(prod, t, SKIPPED, reason=f"declined by a person{': ' + note if note else ''}")
         store.save(prod)
     return status(prod)
+
+
+def approve_external(pid, task, run_url, store_dir=None, fetch=None):
+    """A deployment or infrastructure approval a person gave in GitHub (production/approvals.py). Verified against
+    GitHub's API before anything changes; an unverifiable approval is refused (NotApproved), never recorded."""
+    prod = store.load(pid, store_dir)
+    t = prod["tasks"].get(task)
+    if not t or t["state"] != NEEDS_APPROVAL: raise ValueError(f"{task} is not waiting for approval")
+    if not approvals.external(t): raise ValueError(f"{task} is not a deployment or infrastructure approval: use production_approve")
+    repo = approvals.project_repo((prod["spec"].get("project") or {}).get("path"))
+    evidence = approvals.verify(run_url, pid, task, approvals.kind(t), repo=repo, fetch=fetch)
+    with store.lock(prod):
+        prod = store.load(pid, store_dir)
+        t = prod["tasks"][task]
+        if t["state"] != NEEDS_APPROVAL: raise ValueError(f"{task} is not waiting for approval")
+        t["approved"] = True; t["external_approval"] = evidence; t["approval_note"] = f"approved in GitHub by {', '.join(evidence['approved_by'])}"
+        store.event(prod, "approval", task=task, approved=True, external=evidence)
+        prod.setdefault("decisions", []).append(f"approved in GitHub: {task} by {', '.join(evidence['approved_by'])} ({run_url})")
+        _set(prod, t, PENDING, reason=f"approved in GitHub ({evidence['environment']} environment) by {', '.join(evidence['approved_by'])}")
+        store.save(prod)
+    return dict(status(prod), external_approval=evidence)
 
 
 def _approve_escalation(pid, task, approved, note, store_dir):

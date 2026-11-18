@@ -287,8 +287,18 @@ def part_a(c):
     check("11 every acceptance criterion passed except deployment (needs approval)", all(v == "passed" for k, v in acc.items() if k != "deployment") and acc["deployment"] == "needs_approval", acc)
     check("11 the report shows measured evidence (scores) and says READY — deployment needs approval", "READY — deployment needs approval" in rep["markdown"] and "PLAYCRAFT overall" in rep["markdown"])
     # the deployment: approved by "the person" here, but never recorded live without evidence
-    st = call(c, "production_approve", {"production": pid, "task": "release.deploy", "approved": True, "note": "acceptance test"})
-    check("approved deployment becomes an agent work order", "release.deploy" in tasks_in(st, "awaiting_agent") or call(c, "production_run", {"production": pid})["status"] == "awaiting_agent")
+    ok, r = c.call("production_approve", {"production": pid, "task": "release.deploy", "approved": True, "note": "acceptance test"}, timeout=120)
+    check("the agent cannot approve the deployment (production_approve refuses it)", not ok and "approve-external" in str(r) and load(pid)["tasks"]["release.deploy"]["state"] == "needs_approval", r)
+    # a person's approval in GitHub (the environment-protected gitcraft-approval.yml run), verified through GitHub's API
+    # (stood in for by recorded API answers here; tests/test_security_hardening.py covers the refusals)
+    import security_fixtures as sf
+    sf.add_origin(load(pid)["spec"]["project"]["path"], "haveanapp-test/lantern-drift")
+    sys.path.insert(0, REPO); os.environ.update(env)
+    from production import engine as _engine
+    st = _engine.approve_external(pid, "release.deploy", sf.RUN_URL.format(repo="haveanapp-test/lantern-drift"),
+                                  store_dir=os.path.join(ws, "gitcraft-out", "production"), fetch=sf.github(pid, "release.deploy", repo="haveanapp-test/lantern-drift"))
+    check("a deployment a person approved in GitHub becomes an agent work order", "release.deploy" in tasks_in(call(c, "production_run", {"production": pid}), "awaiting_agent")
+          or load(pid)["tasks"]["release.deploy"]["state"] == "awaiting_agent", load(pid)["tasks"]["release.deploy"].get("reason"))
     r = call(c, "production_submit", {"production": pid, "task": "release.deploy", "url": "https://lantern-drift.example.invalid", "notes": "claimed deployed"})
     check("a deployment claimed without a check against the live URL is refused", not r["submission"]["accepted"], r["submission"])
     # ---- 12. persistence, idempotent resume

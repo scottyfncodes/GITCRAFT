@@ -41,7 +41,7 @@ jobs:
       PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers
       GITCRAFT_STUDIO_VOICE: "0"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: ./.github/actions/gitcraft-ci-setup
 
@@ -54,7 +54,7 @@ jobs:
 
       - name: Claude Code CLI (for the fresh-install 'claude mcp list' checks; no sign-in needed)
         if: ${{ !matrix.group.install }}
-        run: npm i -g @anthropic-ai/claude-code && claude --version
+        run: npm i -g @anthropic-ai/claude-code@2.1.327 && claude --version
 
       - name: Suites
         shell: bash

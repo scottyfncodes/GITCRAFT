@@ -25,7 +25,7 @@ jobs:
       GITCRAFT_GLOBAL_INSTRUCTIONS: "0"            # CI has no ~/.claude to manage
       GITCRAFT_GLOBAL_HOOK: "0"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: ./.github/actions/gitcraft-ci-setup
 
@@ -79,6 +79,9 @@ jobs:
       - name: Hardening (guard + control room regressions from docs/tech-debt.md)
         run: python3 tests/test_hardening.py
 
+      - name: Security hardening (pinned binaries, reviewed updates, refused roots, control-file guard + tripwire, run_script writes, GitHub-verified approvals, pinned CI)
+        run: python3 tests/test_security_hardening.py
+
       - name: Department linkage (project kind, hand-offs, gates, findings into work orders, registration race)
         run: python3 tests/test_linkage.py
 
@@ -101,7 +104,7 @@ jobs:
 
       - name: Certification evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: report-certification
           path: ${{ runner.temp }}/certification

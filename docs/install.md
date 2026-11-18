@@ -45,13 +45,33 @@ packages installed inside it were lost on the next update. A developer checkout 
 ## Commands
 
 ```
-scripts/install.sh            install anything missing (prebuilt from the `bin` branch, source as fallback)
+scripts/install.sh            install anything missing (prebuilt from the `bin` branch, each checked against
+                              scripts/bin.sha256 before it is unpacked; --source builds the pinned upstream commit)
 scripts/install.sh --update   refresh everything
+scripts/update.sh [--yes]     review, then apply, a GITCRAFT update from main (--to <commit>, --rollback)
 scripts/doctor.sh             what's installed, registered (from the runtime?), sandboxed and failing
 scripts/install-global.sh     refresh ~/.gitcraft/runtime, user-scope registration, ~/.claude/CLAUDE.md block and skill
 scripts/mcp.sh <tool>         start one server by hand (behind the guard and sandbox)
 tests/test_policy.py          end-to-end security check of every installed tool
 ```
+
+## Releases of the prebuilt tools
+
+The seven ArtCraft CLIs are compiled from the upstream commits pinned in `scripts/tools.sh` (`gitcraft_upstream_sha`)
+and installed only when their SHA-256 is pinned in `scripts/bin.sha256`. Both files change only by pull request.
+
+1. **Bump (optional).** Change a pin in `scripts/tools.sh` after reviewing the upstream diff; open a pull request. CI
+   builds it and runs the release gate; nothing is published.
+2. **Build on main.** After merging (or with "Run workflow" on *Build ArtCraft CLIs*), the main build passes the gate
+   and uploads `bin.sha256`: the candidate's checksums, naming its run. Its summary shows them.
+3. **Pin it.** On a branch, replace `scripts/bin.sha256` with that file, open a pull request, review, merge (within 7
+   days: the run's artifacts expire).
+4. **Published.** The merge starts *Publish ArtCraft CLIs* (`publish-bin.yml`): it checks that the run is a successful
+   main build, downloads its gated files, checks every checksum against the pins, and only then replaces `bin`.
+
+A modified or unpinned binary is never installed: `install.sh` refuses it before unpacking, keeps the binary already
+installed, and records `integrity: mismatch` in `~/.gitcraft/status.json`. Rolling back a release is the same pull
+request with the previous `scripts/bin.sha256` (its run must still have its artifacts; otherwise rebuild that commit).
 
 ## Requirements
 

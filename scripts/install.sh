@@ -27,6 +27,7 @@ done
 
 mkdir -p "$GITCRAFT_BIN" "$GITCRAFT_SRC" "$GITCRAFT_LOG"
 
+failed=() integrity=()
 todo=()
 for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
@@ -48,11 +49,25 @@ if ((${#todo[@]})) && ((source_only == 0)); then
     left=()
     for entry in "${todo[@]}"; do
       IFS=: read -r name _ pkg <<<"$entry"
+      # Integrity first: the .gz must match the checksum pinned in this checkout's scripts/bin.sha256 (reviewed in
+      # main), checked before it is decompressed or run. A missing pin or a mismatch refuses the prebuilt, keeps any
+      # binary already installed, and is NOT papered over with a source build (install.sh --source <tool> does that).
+      if [[ -f "$stage/$pkg.gz" ]]; then
+        want="$(gitcraft_expected_sha256 "$pkg")"
+        have="$(sha256sum "$stage/$pkg.gz" | cut -d' ' -f1)"
+        if [[ -z "$want" ]]; then
+          echo "gitcraft: $name prebuilt REFUSED: no checksum pinned for $pkg.gz in scripts/bin.sha256" >&2
+          failed+=("$name"); integrity+=("$name:unpinned"); continue
+        elif [[ "$have" != "$want" ]]; then
+          echo "gitcraft: $name prebuilt REFUSED: $pkg.gz has SHA-256 $have, scripts/bin.sha256 pins $want (tampered, corrupt, or a release not yet pinned); nothing was installed" >&2
+          failed+=("$name"); integrity+=("$name:mismatch"); continue
+        fi
+      fi
       if [[ -f "$stage/$pkg.gz" ]] && gunzip -c "$stage/$pkg.gz" > "$GITCRAFT_BIN/$pkg.tmp"; then
         chmod 755 "$GITCRAFT_BIN/$pkg.tmp" && mv "$GITCRAFT_BIN/$pkg.tmp" "$GITCRAFT_BIN/$pkg"
         ver="$(grep "^$name " "$stage/MANIFEST.txt" 2>/dev/null | cut -d' ' -f3-)"
-        echo "prebuilt ${ver:-unknown}" > "$GITCRAFT_BIN/$name.version"
-        echo "gitcraft: $name installed (prebuilt $ver)"
+        echo "prebuilt ${ver:-unknown} sha256:${have:0:12}" > "$GITCRAFT_BIN/$name.version"
+        echo "gitcraft: $name installed (prebuilt $ver, sha256 verified)"
       else
         rm -f "$GITCRAFT_BIN/$pkg.tmp"
         left+=("$entry")
@@ -65,8 +80,7 @@ if ((${#todo[@]})) && ((source_only == 0)); then
   rm -rf "$stage"
 fi
 
-# 2) Anything still missing gets compiled.
-failed=()
+# 2) Anything still missing gets compiled, from the reviewed upstream commit (gitcraft_upstream_sha), never a branch head.
 if ((${#todo[@]})); then
   if ! command -v cargo >/dev/null; then
     echo "gitcraft: cargo not found, can't build: ${todo[*]%%:*}" >&2
@@ -78,11 +92,13 @@ fi
 for entry in "${todo[@]}"; do
   IFS=: read -r name repo pkg <<<"$entry"
   src="$GITCRAFT_SRC/$repo"
-  if [[ -d "$src/.git" ]]; then
-    git -C "$src" pull -q --ff-only
-  else
-    echo "gitcraft: cloning storytold/$repo"
-    GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 "https://github.com/storytold/$repo" "$src" || { failed+=("$name"); continue; }
+  pin="$(gitcraft_upstream_sha "$name")" || { echo "gitcraft: $name has no pinned upstream commit in scripts/tools.sh" >&2; failed+=("$name"); continue; }
+  echo "gitcraft: fetching storytold/$repo at the pinned commit ${pin:0:12}"
+  mkdir -p "$src"; [[ -d "$src/.git" ]] || git -C "$src" init -q
+  if ! { GIT_LFS_SKIP_SMUDGE=1 git -C "$src" fetch -q --depth 1 "https://github.com/storytold/$repo" "$pin" &&
+         git -C "$src" -c advice.detachedHead=false checkout -q --force --detach FETCH_HEAD &&
+         [[ "$(git -C "$src" rev-parse HEAD)" == "$pin" ]]; }; then
+    echo "gitcraft: $name: could not check out storytold/$repo at $pin" >&2; failed+=("$name"); continue
   fi
   echo "gitcraft: building $pkg from source (log: $GITCRAFT_LOG/$name.log)"
   start=$SECONDS
@@ -101,7 +117,7 @@ done
 # cut off during a download says so); "skipped" (not part of this run) keeps the previous record.
 status_before=$(cat "$GITCRAFT_HOME/status.json" 2>/dev/null)   # what earlier runs recorded (kept for tools this run skips)
 write_status() {
-python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "$studio_state" "$voice_state" "$status_before" "${GITCRAFT_TOOLS[@]}" <<'PY'
+GITCRAFT_INTEGRITY="${integrity[*]:-}" python3 - "$GITCRAFT_HOME/status.json" "$GITCRAFT_BIN" "${failed[*]:-}" "$mesh_state" "$forge_state" "$studio_state" "$voice_state" "$status_before" "${GITCRAFT_TOOLS[@]}" <<'PY'
 import json, os, sys, time
 out, bindir, failed, mesh, forge, studio, voice, before, tools = sys.argv[1], sys.argv[2], set(sys.argv[3].split()), sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9:]
 try: prev = json.loads(before).get("tools", {})
@@ -112,6 +128,8 @@ for e in tools:
     ok = os.access(os.path.join(bindir, pkg), os.X_OK) and name not in failed
     ver = open(os.path.join(bindir, name + ".version")).read().strip() if os.path.exists(os.path.join(bindir, name + ".version")) else None
     st["tools"][name] = {"state": "ok" if ok else "failed", "version": ver}
+    bad = dict(x.split(":", 1) for x in os.environ.get("GITCRAFT_INTEGRITY", "").split() if ":" in x)
+    if name in bad: st["tools"][name]["integrity"] = bad[name]   # prebuilt refused: unpinned or checksum mismatch
 for name, state in (("meshcraft", mesh), ("forgecraft", forge), ("studiocraft", studio), ("studiocraft-voice", voice)):
     if state == "skipped":   # not part of this run: keep what an earlier run recorded
         if name in prev: st["tools"][name] = prev[name]

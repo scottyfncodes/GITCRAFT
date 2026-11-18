@@ -1,0 +1,11 @@
+# Keeps the pinned GitHub Actions current: every `uses:` is pinned to a full commit SHA (with its version in a
+# comment), and Dependabot opens a pull request when a newer release exists, so updates stay reviewed and immutable.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories: ["/", "/.github/actions/gitcraft-ci-setup"]
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

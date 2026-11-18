@@ -1,0 +1,104 @@
+name: Publish ArtCraft CLIs
+
+# Publishes the prebuilt CLIs to the `bin` branch, and nothing else can. It runs when a reviewed change to
+# scripts/bin.sha256 lands on main (or by hand on main), and publishes exactly the files that file pins:
+#
+#   1. scripts/bin.sha256 names a "Build ArtCraft CLIs" run (`# run: <id>`); that run must be of build.yml, on main,
+#      from a push / schedule / manual run (never a pull request), successful, and of a commit contained in main
+#   2. its `release-candidate` artifact (the gated files) is downloaded and every .gz must match the pins exactly,
+#      seven of them and nothing extra
+#   3. only then is `bin` replaced (README, MANIFEST.txt, the manifests, the .gz files and the pins as SHA256SUMS)
+#
+# If `bin` already holds exactly the pinned files, nothing is published. A failure at any step leaves `bin` as it was;
+# install.sh would refuse unpinned binaries anyway. Artifacts are kept 7 days: pin a run within a week of building it.
+on:
+  push:
+    branches: [main]
+    paths: ["scripts/bin.sha256"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-bin
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # push the bin branch (never main)
+      actions: read     # read the pinned build run and download its artifact
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Already published?
+        id: current
+        run: |
+          grep -E '^[0-9a-f]{64}  [a-z0-9-]+\.gz$' scripts/bin.sha256 | sort -k2 > pins.txt
+          [ "$(wc -l < pins.txt)" = 7 ] || { echo "::error::scripts/bin.sha256 must pin exactly 7 binaries"; exit 1; }
+          run=$(sed -nE 's/^# run: ([0-9]+)$/\1/p' scripts/bin.sha256 | head -1)
+          [ -n "$run" ] || { echo "::error::scripts/bin.sha256 names no build run (# run: <id>)"; exit 1; }
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          if git fetch -q --depth 1 origin bin 2>/dev/null; then
+            mkdir -p current && git archive FETCH_HEAD | tar -x -C current
+            if (cd current && sha256sum *.gz 2>/dev/null | sort -k2) | diff -q - pins.txt >/dev/null; then
+              echo "same=true" >> "$GITHUB_OUTPUT"
+              echo "bin already holds exactly the pinned binaries: nothing to publish." | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+      - name: Verify the pinned build run
+        if: steps.current.outputs.same != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ steps.current.outputs.run }}
+        run: |
+          read -r path branch event conclusion sha < <(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN}" \
+            --jq '[.path, .head_branch, .event, .conclusion, .head_sha] | @tsv')
+          echo "run ${RUN}: ${path} on ${branch} (${event}) ${conclusion} @ ${sha}"
+          [ "$path" = ".github/workflows/build.yml" ] || { echo "::error::run ${RUN} is not a Build ArtCraft CLIs run"; exit 1; }
+          [ "$branch" = "main" ] || { echo "::error::run ${RUN} did not build main"; exit 1; }
+          case "$event" in push|schedule|workflow_dispatch) ;; *) echo "::error::run ${RUN} was triggered by ${event}, not a main build"; exit 1 ;; esac
+          [ "$conclusion" = "success" ] || { echo "::error::run ${RUN} did not pass (gate included)"; exit 1; }
+          git fetch -q --unshallow origin main 2>/dev/null || git fetch -q origin main
+          git merge-base --is-ancestor "$sha" FETCH_HEAD || { echo "::error::run ${RUN} built ${sha}, which is not in main"; exit 1; }
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: steps.current.outputs.same != 'true'
+        with:
+          name: release-candidate
+          path: bin
+          run-id: ${{ steps.current.outputs.run }}
+          github-token: ${{ github.token }}
+
+      - name: The candidate must match the pins exactly
+        if: steps.current.outputs.same != 'true'
+        working-directory: bin
+        run: |
+          [ "$(ls *.gz | wc -l)" = 7 ] || { echo "::error::the candidate does not hold exactly 7 binaries"; exit 1; }
+          sha256sum --check --strict ../pins.txt
+          (sha256sum *.gz | sort -k2) | diff - ../pins.txt || { echo "::error::the candidate's files differ from the pins"; exit 1; }
+          rm -f SHA256SUMS
+
+      - name: Push to the bin branch
+        if: steps.current.outputs.same != 'true'
+        working-directory: bin
+        run: |
+          cat *.manifest | sort > MANIFEST.txt
+          cp ../pins.txt SHA256SUMS
+          printf '%s\n' "Prebuilt Linux x86_64 ArtCraft CLIs, published by .github/workflows/publish-bin.yml." \
+            "Don't edit by hand. MANIFEST.txt lists the upstream commit each one was built from; SHA256SUMS repeats the pins" \
+            "in scripts/bin.sha256 on main, which is what install.sh checks every binary against before installing it." \
+            "Every release passed scripts/release-gate.sh in build run ${{ steps.current.outputs.run }}." > README.md
+          git init -q -b bin
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Prebuilt CLIs from build run ${{ steps.current.outputs.run }} ($(date -u +%F))"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" bin
+          { echo "Published build run ${{ steps.current.outputs.run }} to bin:"; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
