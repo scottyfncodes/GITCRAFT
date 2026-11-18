@@ -106,6 +106,8 @@ real_pins = [l.split() for l in open(os.path.join(REPO, "scripts", "bin.sha256")
 check("integrity: scripts/bin.sha256 pins all seven published binaries", sorted(p[1] for p in real_pins) ==
       sorted(f"{x}-cli.gz" for x in ("photocraft", "vectorcraft", "filmcraft", "lightcraft", "pdfcraft", "effectcraft", "designcraft")), real_pins)
 inst = open(os.path.join(REPO, "scripts", "install.sh")).read()
+check("integrity: the checksum code does not clobber install.sh's list of requested tools (a regression that skipped MeshCraft and Studio)",
+      re.findall(r"^\s*want=.*$", inst, re.M) == ["want=()"], re.findall(r"^\s*want=.*$", inst, re.M))
 check("integrity: a source build checks out the pinned commit (never a branch head) and verifies it",
       'gitcraft_upstream_sha "$name"' in inst and 'rev-parse HEAD)" == "$pin"' in inst and "pull -q --ff-only" not in inst)
 

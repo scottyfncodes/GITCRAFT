@@ -53,13 +53,13 @@ if ((${#todo[@]})) && ((source_only == 0)); then
       # main), checked before it is decompressed or run. A missing pin or a mismatch refuses the prebuilt, keeps any
       # binary already installed, and is NOT papered over with a source build (install.sh --source <tool> does that).
       if [[ -f "$stage/$pkg.gz" ]]; then
-        want="$(gitcraft_expected_sha256 "$pkg")"
+        pinned="$(gitcraft_expected_sha256 "$pkg")"   # (not "want": that array holds the requested tools)
         have="$(sha256sum "$stage/$pkg.gz" | cut -d' ' -f1)"
-        if [[ -z "$want" ]]; then
+        if [[ -z "$pinned" ]]; then
           echo "gitcraft: $name prebuilt REFUSED: no checksum pinned for $pkg.gz in scripts/bin.sha256" >&2
           failed+=("$name"); integrity+=("$name:unpinned"); continue
-        elif [[ "$have" != "$want" ]]; then
-          echo "gitcraft: $name prebuilt REFUSED: $pkg.gz has SHA-256 $have, scripts/bin.sha256 pins $want (tampered, corrupt, or a release not yet pinned); nothing was installed" >&2
+        elif [[ "$have" != "$pinned" ]]; then
+          echo "gitcraft: $name prebuilt REFUSED: $pkg.gz has SHA-256 $have, scripts/bin.sha256 pins $pinned (tampered, corrupt, or a release not yet pinned); nothing was installed" >&2
           failed+=("$name"); integrity+=("$name:mismatch"); continue
         fi
       fi
