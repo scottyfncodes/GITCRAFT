@@ -1,0 +1,91 @@
+{
+ "title": "Kite Line",
+ "about": "A tiny original one-button game run through the whole picture-first path by the real Production Director: seven styles, a pick, three designs, a pick, three signature moments, a shot list, two automatic review rounds, then QA and release (READY).",
+ "production": "20261118T044353Z-kite-line-1a0d",
+ "plan_version": 3,
+ "status": "passed",
+ "verdict": "READY",
+ "style": {
+  "styles": [
+   "notebook"
+  ],
+  "how": "picked",
+  "note": "acceptance stand-in for the person: the recommended notebook; it feels like my kid's school book",
+  "recommended": "notebook",
+  "wildcard": "terminal",
+  "images": {
+   "notebook": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/design.styles/styles/notebook/game.png"
+  },
+  "scene": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/design.styles/scene.json",
+  "references": [],
+  "approved_by": "a person (production_approve)"
+ },
+ "design": {
+  "design": "a",
+  "style": "notebook",
+  "look_name": "Notebook Sketch",
+  "liked_in_others": "acceptance stand-in for the person: A. I liked the dark night page of C; use it for the end of a flight",
+  "approved_by": "a person (production_approve)"
+ },
+ "moments": [
+  "build.moment.title-reveal",
+  "build.moment.first-ribbon",
+  "build.moment.results"
+ ],
+ "visual_rounds": [
+  "fix.visual.r1",
+  "fix.visual.r2"
+ ],
+ "review_gaps": [
+  3,
+  1,
+  1
+ ],
+ "remaining": [
+  "star-on-heading"
+ ],
+ "tasks": {
+  "foundation.scaffold": "passed",
+  "design.styles": "passed",
+  "design.style_pick": "passed",
+  "design.designs": "passed",
+  "design.design_pick": "passed",
+  "design.direction": "passed",
+  "design.moments": "passed",
+  "build.moment.title-reveal": "passed",
+  "build.moment.first-ribbon": "passed",
+  "build.moment.results": "passed",
+  "integrate.final": "passed",
+  "build": "passed",
+  "capture.shots": "passed",
+  "review.pack": "passed",
+  "review.creative": "passed",
+  "review.gaps": "passed",
+  "fix.visual.r1": "passed",
+  "capture.shots.r1": "passed",
+  "review.pack.r1": "passed",
+  "review.creative.r1": "passed",
+  "review.gaps.r1": "passed",
+  "fix.visual.r2": "passed",
+  "capture.shots.r2": "passed",
+  "review.pack.r2": "passed",
+  "review.creative.r2": "passed",
+  "review.gaps.r2": "passed",
+  "qa.smoke": "passed",
+  "qa.playcraft": "passed",
+  "qa.pixelcraft": "passed",
+  "qa.designcraft": "passed",
+  "qa.attribution": "passed",
+  "qa.standards": "passed",
+  "qa.request": "passed",
+  "release.regression": "passed",
+  "release.report": "passed",
+  "release.shots": "passed",
+  "release.look": "passed"
+ },
+ "pages": {
+  "style-pick": "the shortlist, rendered as this game's scene",
+  "design-pick": "three designs of the real title screen",
+  "look": "the chosen frame beside the shipped screens"
+ }
+}

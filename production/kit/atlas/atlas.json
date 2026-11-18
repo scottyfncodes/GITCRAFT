@@ -1,0 +1,517 @@
+{
+ "version": 1,
+ "about": "The GITCRAFT style atlas: looks GITCRAFT can produce well with its own tools. A menu of what is possible, never a house style: a production's style shortlist is drawn from it to suit the product, and the person picks. Every look is rendered as the same two samples (scenes/atlas.json).",
+ "families": {
+  "vector": "2D vector shapes (VectorCraft, SVG, canvas paths)",
+  "raster": "raster treatment: pixels, grain, print textures (PhotoCraft, canvas)",
+  "type": "typography leads: the look is mostly type, grid and rules",
+  "3d": "real 3D models and renders (MeshCraft / Blender, Three.js)",
+  "shader": "procedural canvas and shader work (light, glow, generated pattern)"
+ },
+ "looks": [
+  {
+   "id": "flat-geometric",
+   "n": 1,
+   "name": "Flat Geometric",
+   "family": "vector",
+   "keywords": [
+    "flat",
+    "geometric",
+    "shapes",
+    "cut paper",
+    "long shadow"
+   ],
+   "suits": "Bright casual games and friendly consumer apps that must read instantly at thumbnail size.",
+   "hard": "It goes bland fast: without one bold colour idea and a strong silhouette it looks like a template.",
+   "tools": [
+    "vectorcraft",
+    "canvas"
+   ],
+   "fonts": [
+    "Outfit"
+   ],
+   "tells": [],
+   "named_by": [
+    "flat geometric",
+    "flat vector",
+    "flat design",
+    "cut paper",
+    "paper cut",
+    "long shadow"
+   ]
+  },
+  {
+   "id": "neon-vector",
+   "n": 2,
+   "name": "Neon Vector",
+   "family": "shader",
+   "keywords": [
+    "neon",
+    "vector",
+    "arcade",
+    "glow",
+    "synth",
+    "outline",
+    "retro arcade"
+   ],
+   "suits": "Fast arcade games, rhythm games and night-time music or nightlife apps.",
+   "hard": "Glow everywhere flattens hierarchy and costs legibility; small text needs a solid fill, and it fails in daylight.",
+   "tools": [
+    "canvas (additive blending, blur)"
+   ],
+   "fonts": [
+    "Audiowide",
+    "Chakra Petch"
+   ],
+   "tells": [
+    {
+     "id": "glow_shadow",
+     "reason": "in a neon look the light is the material: lines emit their own glow"
+    },
+    {
+     "id": "violet_gradient",
+     "reason": "violet and magenta are the look's own inks, chosen with it"
+    }
+   ],
+   "named_by": [
+    "neon vector",
+    "vector arcade",
+    "neon arcade",
+    "neon",
+    "synthwave",
+    "vector monitor"
+   ]
+  },
+  {
+   "id": "pixel-art",
+   "n": 3,
+   "name": "Pixel Art",
+   "family": "raster",
+   "keywords": [
+    "pixel",
+    "8-bit",
+    "16-bit",
+    "retro",
+    "sprite",
+    "low-res"
+   ],
+   "suits": "Retro action, platformers, roguelikes and cosy games; playful utilities with a game wink.",
+   "hard": "Every sprite is hand-placed; animation frames and detailed characters take real pixel artistry we only approximate.",
+   "tools": [
+    "canvas (low resolution, nearest-neighbour upscale)",
+    "photocraft (palette, indexed export)"
+   ],
+   "fonts": [
+    "Press Start 2P",
+    "Pixelify Sans"
+   ],
+   "tells": [],
+   "named_by": [
+    "pixel art",
+    "pixel-art",
+    "pixelated",
+    "8-bit",
+    "16-bit",
+    "8 bit",
+    "16 bit"
+   ]
+  },
+  {
+   "id": "risograph",
+   "n": 4,
+   "name": "Risograph Print",
+   "family": "raster",
+   "keywords": [
+    "riso",
+    "risograph",
+    "print",
+    "zine",
+    "grain",
+    "misregistration",
+    "spot colour"
+   ],
+   "suits": "Indie games with a handmade feel, culture and events apps, small publishers and shops.",
+   "hard": "Overprints and grain must stay off the text; two or three inks limit what states and errors can use.",
+   "tools": [
+    "canvas (multiply inks, offset plates)",
+    "photocraft (grain, halftone)"
+   ],
+   "fonts": [
+    "Bricolage Grotesque"
+   ],
+   "tells": [],
+   "named_by": [
+    "risograph",
+    "riso",
+    "riso print",
+    "zine style"
+   ]
+  },
+  {
+   "id": "swiss-grid",
+   "n": 5,
+   "name": "Swiss Grid",
+   "family": "type",
+   "keywords": [
+    "swiss",
+    "grid",
+    "international",
+    "typographic",
+    "helvetica",
+    "modernist"
+   ],
+   "suits": "Transit, data and reference apps; puzzle games where clarity is the pleasure.",
+   "hard": "It relies on perfect spacing and a strict grid; one sloppy margin shows, and it can feel cold.",
+   "tools": [
+    "designcraft (grid)",
+    "css"
+   ],
+   "fonts": [
+    "Archivo",
+    "Archivo Black"
+   ],
+   "tells": [
+    {
+     "id": "default_type",
+     "reason": "one neutral grotesque throughout is the Swiss rule, chosen on purpose"
+    }
+   ],
+   "named_by": [
+    "swiss grid",
+    "swiss style",
+    "swiss design",
+    "international typographic",
+    "international style"
+   ]
+  },
+  {
+   "id": "terminal",
+   "n": 6,
+   "name": "Terminal Phosphor",
+   "family": "type",
+   "keywords": [
+    "terminal",
+    "ascii",
+    "monospace",
+    "phosphor",
+    "crt",
+    "hacker",
+    "command line",
+    "text mode"
+   ],
+   "suits": "Developer tools, hacking or text-adventure games, and anything that wants to feel like a machine talking.",
+   "hard": "Characters are the only pixels: images, curves and fine motion are almost impossible, and density tires the eye.",
+   "tools": [
+    "canvas (character grid)",
+    "css"
+   ],
+   "fonts": [
+    "VT323",
+    "IBM Plex Mono"
+   ],
+   "tells": [
+    {
+     "id": "default_type",
+     "reason": "one monospace face for everything is the terminal look itself"
+    },
+    {
+     "id": "glow_shadow",
+     "reason": "phosphor bloom is how a CRT draws text"
+    }
+   ],
+   "named_by": [
+    "terminal phosphor",
+    "terminal look",
+    "terminal style",
+    "ascii",
+    "command line look",
+    "crt terminal",
+    "green screen",
+    "text mode"
+   ]
+  },
+  {
+   "id": "blueprint",
+   "n": 7,
+   "name": "Blueprint",
+   "family": "vector",
+   "keywords": [
+    "blueprint",
+    "technical",
+    "drawing",
+    "engineering",
+    "line art",
+    "schematic",
+    "draughting"
+   ],
+   "suits": "Building, engineering and physics games; planning, measuring and maker tools.",
+   "hard": "Everything is a thin line: hierarchy needs care, and fills, photos or colourful states break it.",
+   "tools": [
+    "vectorcraft (line work)",
+    "canvas"
+   ],
+   "fonts": [
+    "Barlow Condensed",
+    "IBM Plex Mono"
+   ],
+   "tells": [],
+   "named_by": [
+    "blueprint",
+    "technical drawing",
+    "schematic style",
+    "cyanotype"
+   ]
+  },
+  {
+   "id": "low-poly-3d",
+   "n": 8,
+   "name": "Low-Poly 3D",
+   "family": "3d",
+   "keywords": [
+    "3d",
+    "low poly",
+    "low-poly",
+    "faceted",
+    "toy",
+    "blender"
+   ],
+   "suits": "3D games and playful scenes that need depth and light without detailed models.",
+   "hard": "Characters need modelling and rigging; we build blocky ones well and organic ones poorly, and the web build must stay light.",
+   "tools": [
+    "meshcraft (Blender: model, light, render)",
+    "three.js"
+   ],
+   "fonts": [
+    "Fredoka"
+   ],
+   "tells": [],
+   "named_by": [
+    "low-poly",
+    "low poly",
+    "lowpoly",
+    "faceted 3d"
+   ]
+  },
+  {
+   "id": "linocut",
+   "n": 9,
+   "name": "Linocut Ink",
+   "family": "vector",
+   "keywords": [
+    "linocut",
+    "woodcut",
+    "ink",
+    "block print",
+    "carved",
+    "folk",
+    "engraving"
+   ],
+   "suits": "Folk tales, nature and craft games; recipe, garden and bookish apps.",
+   "hard": "Carved texture is generated, not cut by hand; at small sizes it turns to noise, so the UI must stay plain.",
+   "tools": [
+    "vectorcraft (shapes)",
+    "canvas (carving hatches)",
+    "photocraft (paper)"
+   ],
+   "fonts": [
+    "Alfa Slab One",
+    "Crimson Pro"
+   ],
+   "tells": [],
+   "named_by": [
+    "linocut",
+    "lino cut",
+    "woodcut",
+    "block print",
+    "relief print"
+   ]
+  },
+  {
+   "id": "isometric",
+   "n": 10,
+   "name": "Isometric Diorama",
+   "family": "vector",
+   "keywords": [
+    "isometric",
+    "diorama",
+    "iso",
+    "blocks",
+    "city builder",
+    "tiles"
+   ],
+   "suits": "Builders, puzzle and strategy games, and dashboards that show a place or a system.",
+   "hard": "Characters and text at an angle are awkward; it needs a strict 2:1 grid and careful draw order.",
+   "tools": [
+    "vectorcraft",
+    "canvas (2:1 projection)"
+   ],
+   "fonts": [
+    "Lexend"
+   ],
+   "tells": [],
+   "named_by": [
+    "isometric",
+    "iso diorama",
+    "diorama"
+   ]
+  },
+  {
+   "id": "halftone-comic",
+   "n": 11,
+   "name": "Halftone Comic",
+   "family": "raster",
+   "keywords": [
+    "comic",
+    "halftone",
+    "manga",
+    "screentone",
+    "pop art",
+    "ben day",
+    "speech bubble"
+   ],
+   "suits": "Action, story and party games; social apps with a loud voice.",
+   "hard": "Busy dots fight small text, and drawing expressive characters is beyond us; it works with simple bold shapes.",
+   "tools": [
+    "canvas (halftone screens, ink)",
+    "photocraft"
+   ],
+   "fonts": [
+    "Bangers",
+    "Comic Neue"
+   ],
+   "tells": [],
+   "named_by": [
+    "halftone",
+    "comic book",
+    "comic style",
+    "pop art",
+    "ben-day",
+    "ben day",
+    "manga style",
+    "screentone"
+   ]
+  },
+  {
+   "id": "editorial-serif",
+   "n": 12,
+   "name": "Editorial Serif",
+   "family": "type",
+   "keywords": [
+    "editorial",
+    "serif",
+    "magazine",
+    "print",
+    "literary",
+    "elegant serif",
+    "newspaper"
+   ],
+   "suits": "Story and word games, reading, food and travel apps that want to feel considered.",
+   "hard": "Needs real hierarchy and generous space; on small phones the big serif crowds the content.",
+   "tools": [
+    "designcraft (type)",
+    "css"
+   ],
+   "fonts": [
+    "Fraunces",
+    "Newsreader"
+   ],
+   "tells": [],
+   "named_by": [
+    "editorial serif",
+    "editorial style",
+    "magazine style",
+    "editorial look"
+   ]
+  },
+  {
+   "id": "topographic",
+   "n": 13,
+   "name": "Topographic Map",
+   "family": "shader",
+   "keywords": [
+    "topographic",
+    "map",
+    "contour",
+    "cartographic",
+    "terrain",
+    "orienteering",
+    "atlas"
+   ],
+   "suits": "Exploration and outdoor games; maps, hiking, weather and sailing apps.",
+   "hard": "Generated contours read as texture, not place, unless they follow real terrain; labels must never sit on lines.",
+   "tools": [
+    "canvas (marching squares on a height field)",
+    "vectorcraft"
+   ],
+   "fonts": [
+    "Big Shoulders Display",
+    "Overpass"
+   ],
+   "tells": [],
+   "named_by": [
+    "topographic",
+    "contour lines",
+    "topo map",
+    "cartographic"
+   ]
+  },
+  {
+   "id": "notebook",
+   "n": 14,
+   "name": "Notebook Sketch",
+   "family": "vector",
+   "keywords": [
+    "sketch",
+    "hand-drawn",
+    "hand drawn",
+    "doodle",
+    "notebook",
+    "pencil",
+    "marker",
+    "scribble"
+   ],
+   "suits": "Casual and puzzle games, journals, study and planning apps.",
+   "hard": "The wobble is generated, not a real hand: a whole screen of it looks mechanical, and it can read as unfinished.",
+   "tools": [
+    "canvas (jittered strokes)",
+    "vectorcraft"
+   ],
+   "fonts": [
+    "Caveat",
+    "Patrick Hand"
+   ],
+   "tells": [],
+   "named_by": [
+    "notebook sketch",
+    "hand-drawn",
+    "hand drawn",
+    "sketchy",
+    "doodle style",
+    "notebook style",
+    "pencil sketch"
+   ]
+  }
+ ],
+ "cannot": [
+  {
+   "name": "Painterly",
+   "why": "Brush strokes with intent (where the light falls, what to leave out) need a painter or an image model; GITCRAFT has neither, and filters over shapes look like filters."
+  },
+  {
+   "name": "Photoreal",
+   "why": "Believable materials, faces and light need scanned assets or a GPU render farm; MeshCraft renders stylised scenes, and photographs the person supplies can only be used, not made."
+  },
+  {
+   "name": "Detailed characters",
+   "why": "Faces, hands and expressive poses need an artist or a modelled and rigged character; we build simple silhouettes and blocky models well and anatomy badly."
+  },
+  {
+   "name": "Frame-by-frame animation",
+   "why": "Hand-drawn in-betweens (the bounce of a cartoon run cycle) are many drawings per second; we animate with transforms, tweens and procedural motion, and 3D clips through AnimCraft."
+  },
+  {
+   "name": "Anime / cel-shaded illustration",
+   "why": "It is a drawing tradition: line confidence, faces and hair. Toon shaders on simple models are possible; the illustration style is not."
+  }
+ ]
+}

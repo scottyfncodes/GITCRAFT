@@ -288,11 +288,37 @@ def discover(ctx, p):
             "checks": [{"name": "the app opened and at least one screen was captured", "ok": any(c.get("dom") for c in res["captures"]), "detail": [c.get("error") for c in res["captures"] if c.get("error")][:3]}]}
 
 
+def _shot_screens(ctx, target, vps, p):
+    """The product's shot list as the screens to audit (instead of discovering them): its title, screen and results shots whose
+    steps PIXELCRAFT can replay. Each is first reached once (core/web/shots.mjs) on the first viewport: a shot that is never
+    reached is listed as NOT SEEN and is not audited (never judged). Game-play shots (keys held, scripted state) are left to
+    PLAYCRAFT. The scoring method is unchanged; only which screens are measured comes from the shot list."""
+    if not p.get("shots") or p.get("screens"): return None, None
+    from core import shots as SH
+    spec, all_shots = SH.load(ctx.need(p["shots"], "shot list"))
+    cands = [s for s in all_shots if s.get("kind") in ("title", "screen", "results") and all(set(st) <= SH.PROBE_STEPS for st in s.get("steps") or [])]
+    info = {"file": os.path.abspath(p["shots"]), "audited": [], "not_seen": [], "left_to_playcraft": [s["id"] for s in all_shots if s not in cands]}
+    if not cands: return None, info
+    where = {"url": target["url"], "entry": "/"} if target["kind"] == "url" else {"root": target["root"], "entry": target.get("entry") or "index.html"}
+    res = SH.capture(where, cands, [vps[0]], ctx.path("shot_check"))
+    screens = []
+    for s, r in zip(cands, res):
+        c = (r.get("captures") or [{}])[0]
+        if c.get("reached"):
+            screens.append({"name": s.get("name") or s["id"], "path": s.get("path") or "/", "steps": list(s.get("steps") or []) + [{"wait_for": s.get("wait_for") or {}}]})
+            info["audited"].append(s["id"])
+        else: info["not_seen"].append({"shot": s["id"], "reason": c.get("reason")})
+    if info["not_seen"]: ctx.note("shot list: not seen (not audited, never judged): " + "; ".join(f"{x['shot']}: {x['reason']}" for x in info["not_seen"])[:600])
+    return screens or None, info
+
+
 def audit(ctx, p):
     target, app = resolve_target(ctx, p)
     vps = _viewports(p); judgements = _judgements(p); physical = _physical(ctx, p)
-    req, res = _probe(ctx, target, vps, p)
+    shot_screens, shot_info = _shot_screens(ctx, target, vps, p)
+    req, res = _probe(ctx, target, vps, p, screens=shot_screens)
     A, caps, sheet = _assemble(ctx, app, vps, req, res, p, judgements, physical)
+    if shot_info: A["shot_list"] = shot_info   # which shots were audited and which were not seen: information, never a metric
     outs = _write(ctx, A, sheet)
     hist = record(ctx, A) if p.get("record", True) else {"recorded": None}
     ctx.stage("report", findings=len(A["findings"]), overall=A["overall"]["score"])

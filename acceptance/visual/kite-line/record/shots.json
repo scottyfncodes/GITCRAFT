@@ -1,0 +1,115 @@
+{
+ "version": 1,
+ "product": "game",
+ "viewports": [
+  "phone",
+  "desktop"
+ ],
+ "shots": [
+  {
+   "id": "title",
+   "name": "Title, fully loaded (the kite has landed beside the wordmark)",
+   "kind": "title",
+   "moment": "title-reveal",
+   "steps": [],
+   "wait_for": {
+    "selector": "#title[data-ready]",
+    "timeout_ms": 8000
+   }
+  },
+  {
+   "id": "mid-play",
+   "name": "Mid-play, ribbons and the first gulls",
+   "kind": "play",
+   "steps": [
+    {
+     "press": "Space"
+    },
+    {
+     "hold": {
+      "key": "Space",
+      "ms": 260
+     }
+    },
+    {
+     "wait": 500
+    },
+    {
+     "hold": {
+      "key": "Space",
+      "ms": 220
+     }
+    }
+   ],
+   "wait_for": {
+    "js": "window.__game.state === 'playing' && window.__game.time > 1.6",
+    "timeout_ms": 8000
+   }
+  },
+  {
+   "id": "first-ribbon",
+   "name": "First ribbon: the bow and the margin note",
+   "kind": "moment",
+   "moment": "first-ribbon",
+   "steps": [
+    {
+     "press": "Space"
+    }
+   ],
+   "wait_for": {
+    "js": "window.__game.first_ribbon_at !== null && window.__game.note",
+    "timeout_ms": 8000
+   }
+  },
+  {
+   "id": "fail",
+   "name": "Grounded: the moment the flight ends",
+   "kind": "fail",
+   "steps": [
+    {
+     "press": "Space"
+    }
+   ],
+   "wait_for": {
+    "js": "window.__game.state === 'over'",
+    "timeout_ms": 15000
+   },
+   "settle_ms": 80
+  },
+  {
+   "id": "results",
+   "name": "The flight log at night, fully drawn",
+   "kind": "results",
+   "moment": "results",
+   "steps": [
+    {
+     "press": "Space"
+    }
+   ],
+   "wait_for": {
+    "js": "window.__game.state === 'over' && window.__game.results_drawn === true",
+    "timeout_ms": 18000
+   }
+  },
+  {
+   "id": "paused",
+   "name": "Paused",
+   "kind": "screen",
+   "steps": [
+    {
+     "press": "Space"
+    },
+    {
+     "wait": 700
+    },
+    {
+     "press": "KeyP"
+    }
+   ],
+   "wait_for": {
+    "selector": "#paused:not([hidden])",
+    "timeout_ms": 5000
+   }
+  }
+ ]
+}

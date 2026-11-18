@@ -7,7 +7,7 @@
              existing different file in the project is never overwritten without `replace_assets` (needs approval)
   licences   AssetCraft scan of the shipped folder, then its licence report (unknown / NC / ND licences fail)
 """
-import hashlib, json, os, re, shutil, sys
+import hashlib, html, json, os, re, shutil, sys
 from . import executors
 
 PREVIEW_ROLES = {"preview", "source", "manifest", "engine_screenshot", "blockout", "blockout_render", "ldtk_project", "render", "contact_sheet", "waveform"}
@@ -553,3 +553,200 @@ def integrate_final(ctx):
     checks.append({"name": "no staged integration left in the project", "ok": not left, "detail": left[:20] or None})
     return {"status": "ok" if all(c["ok"] for c in checks) else "failed", "checks": checks, "outputs": [],
             "integrated_count": len(ledger)}
+
+
+# ---------------------------------------------------------------- visual direction (plan v3, production/visual.py)
+def _up_file(ctx, name=None, role=None):
+    """The newest upstream output with this file name or role (the chain end: eff() already resolved re-runs)."""
+    for up in reversed(ctx["upstream"]):
+        for o in up.get("outputs", []):
+            if (name and os.path.basename(o["path"]) == name) or (role and o.get("role") == role): return o["path"]
+    return None
+
+
+def style_pick(ctx):
+    """The style pick. A style the request already names is recorded without a question; otherwise the person sees the
+    shortlist (each look rendered as this product's scene) and picks one, two to compare, or 'surprise me'. Never chosen silently."""
+    from . import visual
+    p, out, title = ctx["params"], ctx["out_dir"], ctx["spec"]["title"]
+    sp = os.path.join(out, "style_selection.json")
+    if p.get("named"):
+        n = p["named"]
+        sel = {"styles": [n["look"]], "how": "named in the request", "named": n, "modifier": n.get("modifier"), "approved_by": "the request (no style pick needed)"}
+        json.dump(sel, open(sp, "w"), indent=1)
+        return {"status": "ok", "selection": sel, "outputs": [{"path": sp, "role": "style_selection", "format": "json"}],
+                "checks": [{"name": f"the request names a style: {n['name']} ('{n['matched']}')", "ok": True}]}
+    sf = _up_file(ctx, "styles.json")
+    if not sf: return {"status": "failed", "failure": "handoff", "error": "design.styles handed on no styles.json", "outputs": []}
+    styles = json.load(open(sf)); base = os.path.dirname(sf)
+    page_dir = os.path.join(out, "style-pick")
+    ids = [s["look"] for s in styles.get("styles") or []]
+    if not ctx.get("approved"):
+        page = visual.style_page(styles, base, page_dir, title)
+        return {"status": "needs_approval", "approval": "style", "styles": styles, "options": ids + ["surprise"], "sheet": page,
+                "recommended": styles.get("recommended"),
+                "reason": f"pick a style: open {page} and approve with a choice (one look, two looks to compare as 'a,b', or 'surprise'; "
+                          f"recommended: {styles.get('recommended')}), or decline with a note to get a new shortlist",
+                "outputs": [{"path": page, "role": "style_page", "format": "html"}], "checks": []}
+    try: chosen, how = visual.parse_choice(ctx.get("choice"), styles)
+    except ValueError as e: return {"status": "failed", "failure": "request", "error": str(e), "outputs": []}
+    page = visual.style_page(styles, base, page_dir, title, chosen=chosen, how=how)
+    imgs = {s["look"]: (s["image"] if os.path.isabs(s["image"]) else os.path.join(base, s["image"])) for s in styles["styles"]}
+    sel = {"styles": chosen, "how": how, "note": ctx.get("approval_note"), "recommended": styles.get("recommended"), "wildcard": styles.get("wildcard"),
+           "images": {c: imgs[c] for c in chosen}, "scene": os.path.join(base, styles.get("scene") or "scene.json"), "references": styles.get("references") or [],
+           "approved_by": "a person (production_approve)"}
+    json.dump(sel, open(sp, "w"), indent=1)
+    return {"status": "ok", "selection": sel, "outputs": [{"path": sp, "role": "style_selection", "format": "json"}, {"path": page, "role": "style_page", "format": "html"}]
+            + [{"path": imgs[c], "role": "style_sample", "format": "png"} for c in chosen],
+            "checks": [{"name": f"a person picked the style: {', '.join(chosen)} ({how})", "ok": True}]}
+
+
+def design_pick(ctx):
+    """The design pick, and the approval the build waits for: three designs of the real first screen; the person picks one and
+    may say what they liked in the others. The chosen frame is saved in the project as the target."""
+    from . import visual
+    out, title, proj = ctx["out_dir"], ctx["spec"]["title"], ctx["project"]
+    df, sf = _up_file(ctx, "designs.json"), _up_file(ctx, "style_selection.json")
+    if not df: return {"status": "failed", "failure": "handoff", "error": "design.designs handed on no designs.json", "outputs": []}
+    designs = json.load(open(df)); base = os.path.dirname(df)
+    ssel = json.load(open(sf)) if sf else {}
+    picked = set(ssel.get("styles") or [])
+    wrong = [d["id"] for d in designs.get("designs") or [] if picked and (d.get("style") or designs.get("style")) not in picked]
+    if wrong: return {"status": "failed", "failure": "request", "error": f"designs {wrong} are not in the picked style ({sorted(picked)})", "outputs": []}
+    ids = [d["id"] for d in designs.get("designs") or []]
+    page_dir = os.path.join(out, "design-pick")
+    if not ctx.get("approved"):
+        page = visual.design_page(designs, base, page_dir, title)
+        return {"status": "needs_approval", "approval": "design", "options": ids, "sheet": page, "recommended": designs.get("recommended"),
+                "reason": f"pick a design: open {page} and approve with a choice ({', '.join(ids)}; recommended: {designs.get('recommended')}) and a note on what "
+                          "you liked in the others; this is the approval the build starts from. Decline with a note to get three new designs",
+                "outputs": [{"path": page, "role": "design_page", "format": "html"}], "checks": []}
+    choice = ctx.get("choice") or designs.get("recommended")
+    d = next((x for x in designs.get("designs") or [] if x["id"] == choice), None)
+    if not d: return {"status": "failed", "failure": "request", "error": f"no design {choice!r} (designs: {ids})", "outputs": []}
+    style = d.get("style") or designs.get("style")
+    L = visual.look(style) or {}
+    art_rel = ctx["params"].get("art_dir") or visual.art_dir(proj)
+    paths, replaced = visual.save_target(proj, art_rel, d, base, {"style": style, "look_name": L.get("name"), "style_how": ssel.get("how"),
+                                                                 "liked_in_others": ctx.get("approval_note"), "approved_by": "a person (production_approve)"})
+    page = visual.design_page(designs, base, page_dir, title, chosen=choice, note=ctx.get("approval_note"))
+    sel = {"design": choice, "style": style, "look_name": L.get("name"), "style_how": ssel.get("how"), "modifier": (ssel.get("named") or {}).get("modifier"),
+           "liked_in_others": ctx.get("approval_note"), "recommended": designs.get("recommended"), "design_record": d,
+           "target": {k: os.path.relpath(v, proj) for k, v in paths.items()}, "replaced": replaced, "approved_by": "a person (production_approve)"}
+    sp = os.path.join(out, "design_selection.json"); json.dump(sel, open(sp, "w"), indent=1)
+    return {"status": "ok", "selection": sel, "outputs": [{"path": sp, "role": "design_selection", "format": "json"}, {"path": page, "role": "design_page", "format": "html"}]
+            + [{"path": v, "role": f"target_{k}", "format": "json" if k == "json" else "png"} for k, v in paths.items()],
+            "checks": [{"name": f"a person picked design {choice} ({L.get('name') or style})", "ok": True},
+                       {"name": f"the chosen frame is saved in the project ({art_rel}/target/)", "ok": all(os.path.isfile(v) for v in paths.values()),
+                        "detail": ("earlier target kept in " + ", ".join(replaced[:3])) if replaced else None}]}
+
+
+def visual_moments(ctx):
+    """Each signature moment in the direction becomes its own work order (added to the plan by the engine) and its own shot."""
+    from . import visual
+    df = _up_file(ctx, role="direction") or _up_file(ctx, "direction.json")
+    if not df: return {"status": "failed", "failure": "handoff", "error": "design.direction handed on no direction.json", "outputs": []}
+    D = json.load(open(df)); A = D.get("art") or {}
+    shots = (json.load(open(os.path.join(ctx["project"], A.get("shots") or os.path.join(visual.art_dir(ctx["project"]), "shots.json")))) or {}).get("shots") or []
+    ms = [m for m in A.get("moments") or [] if isinstance(m, dict) and m.get("id")]
+    tasks = []
+    for m in ms:
+        shot = next((s["id"] for s in shots if s.get("moment") == m["id"]), None)
+        tasks.append({"id": f"build.moment.{m['id']}", "title": f"Signature moment: {m.get('name')}", "stage": "integration", "kind": "agent",
+                      "deps": list(ctx["params"].get("after") or []), "work_order": visual.moment_work_order(ctx["spec"], m, shot), "moment": m["id"]})
+    mp = os.path.join(ctx["out_dir"], "moments.json"); json.dump({"moments": ms}, open(mp, "w"), indent=1)
+    return {"status": "ok", "moments": ms, "expand": {"tasks": tasks, "feeds": list(ctx["params"].get("feeds") or [])},
+            "outputs": [{"path": mp, "role": "moments", "format": "json"}], "checks": [{"name": f"{len(ms)} signature moment(s) planned, each its own work order", "ok": len(ms) > 0}]}
+
+
+def visual_pack(ctx):
+    """The evidence for the visual review: the chosen frame, the style sample, references and every reached shot."""
+    from . import visual
+    proj = ctx["project"]
+    rp = _up_file(ctx, role="shots_report")
+    if not rp: return {"status": "failed", "failure": "handoff", "error": "the shot capture handed on no shots report", "outputs": []}
+    rep = json.load(open(rp))
+    df = _up_file(ctx, role="direction") or _up_file(ctx, "direction.json")
+    D = json.load(open(df)) if df else {}
+    tdir = os.path.join(proj, ctx["params"].get("art_dir") or visual.art_dir(proj), "target")
+    target = {k: os.path.join(tdir, f) for f in (os.listdir(tdir) if os.path.isdir(tdir) else []) for k in ("phone", "desktop", "play") if f.startswith(k + ".")}
+    style_img = _up_file(ctx, role="style_sample")
+    K = visual.review_pack(proj, rep, ctx["out_dir"], target=target, style_image=style_img, refs=visual.references(proj),
+                           moments=(D.get("art") or {}).get("moments"), direction=D)
+    return {"status": "ok", "pack": K["paths"]["pack"], "outputs": [{"path": K["paths"]["pack"], "role": "pack", "format": "json"},
+                                                                    {"path": K["paths"]["brief"], "role": "brief", "format": "text"}],
+            "checks": [{"name": f"{sum(1 for i in K['items'] if i['kind'] == 'screenshot')} reached shot(s) packed; {len(K['not_seen'])} not seen (never judged)",
+                        "ok": any(i["kind"] == "screenshot" for i in K["items"])}]}
+
+
+def visual_gaps(ctx):
+    """The review's gaps become work orders: a fix, a fresh capture and a fresh review, at most visual.ROUNDS rounds (added to
+    the plan by the engine, superseding this step). After the last round, what remains is listed for the person with the
+    screenshots. Advisory: never a score, a release gate or the verdict."""
+    from . import visual
+    rv = _up_file(ctx, role="review") or _up_file(ctx, "review.json")
+    if not rv: return {"status": "failed", "failure": "handoff", "error": "the visual review handed on no review.json", "outputs": []}
+    R = json.load(open(rv)); gaps = visual.gaps_of(R)
+    rnd = int(ctx["params"].get("round") or 0)
+    K = json.load(open(os.path.join(os.path.dirname(rv), "pack.json"))) if os.path.isfile(os.path.join(os.path.dirname(rv), "pack.json")) else visual._json(R.get("pack") or "", {})
+    imgs = {i["id"]: i["path"] for i in (K or {}).get("items") or []}
+    gp = os.path.join(ctx["out_dir"], "gaps.json")
+    json.dump({"round": rnd, "gaps": [dict(g, images=[imgs[e] for e in g.get("evidence") or [] if e in imgs]) for g in gaps]}, open(gp, "w"), indent=1)
+    outs = [{"path": gp, "role": "visual_gaps", "format": "json"}]
+    if gaps and rnd < visual.ROUNDS:
+        n = rnd + 1; P = ctx["params"]
+        chain = [{"id": f"fix.visual.r{n}", "title": f"Close the visual gaps (round {n})", "stage": "integration", "kind": "agent", "deps": [],
+                  "work_order": visual.fix_work_order(gaps, n, P.get("art_dir") or "art-direction")},
+                 {"id": f"capture.shots.r{n}", "title": f"Shot list capture after round {n}", "stage": "review", "kind": "studio", "department": "testcraft", "action": "shots",
+                  "params": dict(P["capture"], name=f"shots_r{n}"), "deps": [f"fix.visual.r{n}"], "resources": ["browser"], "advisory": True},
+                 {"id": f"review.pack.r{n}", "title": f"Visual review evidence (round {n})", "stage": "review", "kind": "builtin", "action": "visual_pack",
+                  "params": {"art_dir": P.get("art_dir")}, "deps": [f"capture.shots.r{n}"] + list(P.get("pack_deps") or []), "advisory": True},
+                 {"id": f"review.creative.r{n}", "title": f"Visual review (round {n})", "stage": "review", "kind": "agent", "deps": [f"review.pack.r{n}"],
+                  "work_order": visual.review_work_order(ctx["spec"], n), "advisory": True},
+                 {"id": f"review.gaps.r{n}", "title": f"Visual gaps → work orders (after round {n})", "stage": "review", "kind": "builtin", "action": "visual_gaps",
+                  "params": dict(P, round=n), "deps": [f"review.creative.r{n}"], "advisory": True}]
+        chain[0]["deps"] = [u["id"] for u in ctx["upstream"] if u.get("id")]   # the review it answers (never this step: it is superseded by the chain)
+        return {"status": "ok", "gaps": len(gaps), "round": rnd, "expand": {"tasks": chain, "supersede": True}, "outputs": outs,
+                "checks": [{"name": f"{len(gaps)} visual gap(s) → work order (round {n} of {visual.ROUNDS})", "ok": True}]}
+    page = None
+    if gaps:   # the rounds are spent: what remains is the person's, with the screenshots
+        d = os.path.join(ctx["out_dir"], "remaining"); os.makedirs(d, exist_ok=True)
+        rows = []
+        for g in gaps:
+            figs = []
+            for e in g.get("evidence") or []:
+                if e not in imgs: continue
+                name = _safe(e) + os.path.splitext(imgs[e])[1]
+                shutil.copyfile(imgs[e], os.path.join(d, name))
+                figs.append(f"<figure><img src='{html.escape(name)}' alt='{html.escape(e)}'><figcaption>{html.escape(e)}</figcaption></figure>")
+            fig = "".join(figs)
+            rows.append(f"<section class=design><h2>{html.escape(g.get('shot') or '')} vs {html.escape(g.get('against') or '')} ({html.escape(g.get('severity') or '')})</h2>"
+                        f"<p>{html.escape(g.get('gap') or '')}</p><p class=meta>Suggested fix: {html.escape(g.get('fix') or '')}</p><div class=compare>{fig}</div></section>")
+        page = os.path.join(d, "index.html")
+        with open(page, "w") as f:
+            f.write(visual._page(f"{ctx['spec']['title']} open visual gaps", f"<h1>Still open after {visual.ROUNDS} review rounds</h1><p class=lede>Advisory: these never change "
+                                 "a score, a release gate or the verdict. Each is shown with the screenshots it was seen in.</p>" + "".join(rows)))
+        outs.append({"path": page, "role": "remaining_page", "format": "html"})
+    return {"status": "ok", "gaps": len(gaps), "round": rnd, "remaining": gaps if rnd >= visual.ROUNDS else [], "outputs": outs,
+            "checks": [{"name": "no visual gap left" if not gaps else f"{len(gaps)} visual gap(s) listed for the person after {visual.ROUNDS} rounds", "ok": True}]}
+
+
+def _safe(s): return re.sub(r"[^A-Za-z0-9_.@-]+", "_", s)
+
+
+def visual_look(ctx):
+    """The look page: the chosen frame beside the shipped shots (and the live link once deployed)."""
+    from . import visual
+    proj = ctx["project"]
+    rp = _up_file(ctx, role="shots_report")
+    rep = json.load(open(rp)) if rp else {"shots": []}
+    tdir = os.path.join(proj, ctx["params"].get("art_dir") or visual.art_dir(proj), "target")
+    target = {k: os.path.join(tdir, f) for f in (os.listdir(tdir) if os.path.isdir(tdir) else []) for k in ("phone", "desktop", "play") if f.startswith(k + ".")}
+    tj = visual._json(os.path.join(tdir, "target.json"), {}) or {}
+    gp = _up_file(ctx, role="visual_gaps")
+    G = visual._json(gp, {}) if gp else {}
+    remaining = G.get("gaps") if G.get("round", 0) >= visual.ROUNDS else []
+    url = (ctx.get("deployment") or {}).get("url") if (ctx.get("deployment") or {}).get("verified") else None
+    page = visual.look_page(target, rep, os.path.join(ctx["out_dir"], "look"), ctx["spec"]["title"], style=tj.get("look_name"), live_url=url, remaining=remaining)
+    return {"status": "ok", "page": page, "outputs": [{"path": page, "role": "look_page", "format": "html"}],
+            "checks": [{"name": "the look page shows the chosen frame beside the shipped shots", "ok": bool(target) and bool(rep.get("shots"))}]}

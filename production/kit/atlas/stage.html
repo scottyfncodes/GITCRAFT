@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas stage</title>
+<link rel="stylesheet" href="fonts.css">
+<style>html,body{margin:0;padding:0;background:#000}canvas{display:block}#app{width:100vw;height:100vh;overflow:hidden;position:relative}</style>
+<style id="lookcss"></style>
+</head><body>
+<script type="module">
+// stage.html?look=<id>&sample=game|app&scene=<scene json path>
+// Paints one sample of one look, then sets window.__ready (render.mjs screenshots it).
+import * as L from './lib.js';
+const q = new URLSearchParams(location.search);
+const look = q.get('look'), sample = q.get('sample') || 'game', sceneUrl = q.get('scene') || 'scenes/atlas.json';
+try {
+  // canvas text never triggers a font load: load every atlas face first
+  await Promise.all([...document.fonts].map((f) => f.load().catch(() => null)));
+  const [mod, scene] = await Promise.all([import(`./looks/${look}.js`), fetch(sceneUrl).then((r) => r.json())]);
+  if (sample === 'game') {
+    const S = scene.game, [W, H] = S.world, pixel = mod.meta && mod.meta.pixel;
+    const scale = pixel ? (mod.meta.res || 0.25) : 2;
+    const c = document.createElement('canvas'); c.width = Math.round(W * scale); c.height = Math.round(H * scale);
+    c.style.width = W + 'px'; c.style.height = H + 'px'; if (pixel) c.style.imageRendering = 'pixelated';
+    document.body.appendChild(c);
+    const ctx = c.getContext('2d'); ctx.scale(scale, scale); if (pixel) ctx.imageSmoothingEnabled = false;
+    await document.fonts.ready;
+    await mod.game(ctx, S, L, W, H);
+  } else {
+    const A = scene.app;
+    document.getElementById('lookcss').textContent = mod.appCss || '';
+    const root = document.createElement('div'); root.id = 'app'; root.className = 'app'; root.dataset.look = look;
+    root.innerHTML = `
+      <header class="top"><div class="brand">${A.name}</div><div class="place">${A.place}</div></header>
+      <section class="hero"><div class="label">${A.hero_label}</div><div class="value">${A.hero_value}</div>
+        <div class="sub">${A.hero_sub}</div><span class="status" data-state="ok">${A.status}</span></section>
+      <h2 class="rows-title">${A.rows_title}</h2>
+      <ol class="rows">${A.rows.map((r) => `<li data-state="${r.state}"><span class="t">${r.t}</span><span class="d">${r.d}</span><span class="s">${r.s}</span></li>`).join('')}</ol>
+      <button class="cta">${A.cta}</button>
+      <nav class="tabs">${A.tabs.map((t, i) => `<a class="${i === 0 ? 'on' : ''}">${L.icon(t)}<span>${t}</span></a>`).join('')}</nav>`;
+    document.body.appendChild(root);
+    if (mod.appDecor) await mod.appDecor(root, A, L);
+    await document.fonts.ready;
+  }
+  window.__ready = true;
+} catch (e) { window.__error = String(e && e.stack || e); window.__ready = true; }
+</script>
+</body></html>

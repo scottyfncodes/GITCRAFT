@@ -1,0 +1,23 @@
+{
+ "about": "A test scene unlike the atlas one: no buildings, no spikes, a string trail, path hazards, custom pickups, wind lines, no eye. Every look must paint it well too.",
+ "game": {
+  "title": "Kite Line", "world": [960, 540], "mood": "day",
+  "sun": {"x": 150, "y": 110, "r": 40},
+  "far": [[0, 400], [140, 360], [300, 392], [470, 340], [640, 380], [800, 350], [960, 372]],
+  "ground_y": 470,
+  "platforms": [[0, 470, 960, 70]],
+  "hazards": [{"kind": "path", "x": 640, "y": 150, "w": 60, "h": 24, "box": [40, 16], "path": "M0 10Q10 0 20 10Q30 0 40 10Q30 6 20 14Q10 6 0 10Z"},
+              {"kind": "path", "x": 760, "y": 230, "w": 48, "h": 19, "box": [40, 16], "path": "M0 10Q10 0 20 10Q30 0 40 10Q30 6 20 14Q10 6 0 10Z"},
+              {"kind": "block", "x": 880, "y": 300, "w": 14, "h": 170}],
+  "hero": {"x": 420, "y": 150, "size": 84, "facing": 1, "path": "M32 2 58 26 32 62 6 26Z", "eye": null, "accent": "M30 2h4v60h-4Z M6 24h52v4H6Z"},
+  "trail": [[452, 210], [380, 300], [290, 380], [200, 470]], "trail_kind": "string",
+  "pickups": [{"x": 560, "y": 190, "r": 13}, {"x": 610, "y": 250, "r": 13}, {"x": 520, "y": 300, "r": 13}],
+  "pickup_path": "M3 8C8 3 16 13 21 8V16C16 21 8 11 3 16Z",
+  "lines": [[[40, 200], [120, 194], [200, 202]], [[520, 110], [600, 104], [690, 112]], [[700, 330], [790, 324], [860, 330]]],
+  "hud": {"score": "12", "score_label": "RIBBONS", "lives": 2, "best": "BEST 31", "pause": true}
+ },
+ "app": {"name": "Kite Line", "screen": "Today", "place": "Hollin Down", "hero_label": "Wind now", "hero_value": "18 mph", "hero_sub": "south-west, gusting 24 · good for flying",
+  "status": "Fly now", "rows_title": "Later today",
+  "rows": [{"t": "13:00", "d": "Steady breeze", "s": "Good", "state": "ok"}, {"t": "15:00", "d": "Gusts to 30", "s": "Too gusty", "state": "late"}, {"t": "17:00", "d": "Dropping wind", "s": "Light", "state": "few"}],
+  "cta": "Log a flight", "tabs": ["Today", "Routes", "Tickets", "Me"]}
+}

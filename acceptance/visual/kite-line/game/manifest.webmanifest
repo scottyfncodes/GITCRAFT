@@ -1,0 +1,11 @@
+{
+ "name": "Kite Line",
+ "short_name": "Kite Line",
+ "description": "Kite Line by HaveAnApp",
+ "start_url": ".",
+ "display": "standalone",
+ "background_color": "#fbf8ef",
+ "theme_color": "#fbf8ef",
+ "icons": [],
+ "orientation": "any"
+}

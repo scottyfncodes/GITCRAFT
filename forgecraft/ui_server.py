@@ -123,8 +123,9 @@ def publish(lib_root, dist, source=""):
     audits = _publish_pixelcraft(dist)
     reports = _publish_reports(dist)
     apis = _publish_apis(dist)
+    atlas = _publish_atlas(dist)
     total = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dist) for f in fs)
-    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + (f", {audits} PIXELCRAFT audits" if audits else "") + (f", {reports} GITCRAFT reports" if reports else "") + (f", {apis} APIs (API Discovery)" if apis else "") + f" to {dist} ({total / 2**20:.1f} MB)")
+    print(f"published {len(st['assets'])} assets, {len(st['jobs'])} jobs" + (f", {games} games (Game Quality History)" if games else "") + (f", {audits} PIXELCRAFT audits" if audits else "") + (f", {reports} GITCRAFT reports" if reports else "") + (f", {apis} APIs (API Discovery)" if apis else "") + (f", the style atlas ({atlas} looks)" if atlas else "") + f" to {dist} ({total / 2**20:.1f} MB)")
 
 
 def _publish_games(dist):
@@ -172,6 +173,19 @@ def _publish_apis(dist):
         return site.publish(os.path.join(dist, "apis"))
     except Exception as e:
         print(f"API Discovery page not published: {type(e).__name__}: {e}", file=sys.stderr); return 0
+
+
+def _publish_atlas(dist):
+    """The style atlas page (dist/atlas/), from the committed samples and the visual proof productions (stdlib only). It never
+    fails the site build: a problem is printed and the page is left out."""
+    repo = os.path.dirname(HERE)
+    if not os.path.isdir(os.path.join(repo, "production", "kit", "atlas")): return 0
+    sys.path.insert(0, repo)
+    try:
+        from production import atlas
+        return atlas.publish(os.path.join(dist, "atlas"))[0]
+    except Exception as e:
+        print(f"style atlas not published: {type(e).__name__}: {e}", file=sys.stderr); return 0
 
 
 NO_LIVE = """ForgeCraft's live web server was removed (it ran jobs outside GITCRAFT's sandbox and accepted

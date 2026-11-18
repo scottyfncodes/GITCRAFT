@@ -1,0 +1,29 @@
+{
+ "style": "notebook",
+ "look_name": "Notebook Sketch",
+ "style_how": "picked",
+ "liked_in_others": "acceptance stand-in for the person: A. I liked the dark night page of C; use it for the end of a flight",
+ "approved_by": "a person (production_approve)",
+ "design": "a",
+ "name": "Margin doodle",
+ "idea": "The back page of a school exercise book where someone has lettered KITE LINE and drawn a kite flying off it.",
+ "palette": {
+  "background": "#fbf8ef",
+  "surface": "#fffdf6",
+  "primary": "#2346a8",
+  "accent": "#ffd23f",
+  "text": "#22252b"
+ },
+ "type": {
+  "display": "Caveat",
+  "body": "Patrick Hand"
+ },
+ "composition": "huge hand-lettered wordmark stacked on the left, tilted, the kite tied to it flying to the top right; the button circled in pen underneath",
+ "flavor": "cheeky, personal, scribbled in a lesson",
+ "files": {
+  "phone": "art-direction/target/phone.png",
+  "desktop": "art-direction/target/desktop.png",
+  "play": "art-direction/target/play.png"
+ },
+ "saved": "2026-11-18T04:45:36+00:00"
+}

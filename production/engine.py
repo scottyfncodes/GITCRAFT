@@ -17,7 +17,7 @@ Evaluation never feeds itself (production/artifacts.py): the store is kept outsi
 fingerprint skips every evaluation artifact, every browser check measures one target chosen by the
 source-vs-build policy, re-measurement is bounded (STALE_ROUNDS), and every run ends with a verdict:
 READY, NOT READY, or INCOMPLETE with the reasons the evaluation could not finish."""
-import concurrent.futures as cf, copy, hashlib, json, os, sys, threading, time, traceback
+import concurrent.futures as cf, copy, hashlib, json, os, shutil, sys, threading, time, traceback
 from . import evaluator
 from . import PENDING, IN_PROGRESS, AWAITING_AGENT, COMPLETE, PASSED, FAILED, BLOCKED, NEEDS_APPROVAL, SKIPPED, TERMINAL, VERSION
 from . import inside_roots, roots, store_root, store_root_for
@@ -117,7 +117,13 @@ def resolve(prod, v):
         if v.get("json"):
             data = json.load(open(outs[0]["path"]))
             val = data.get(v["json"])
+            if val is None and "." in v["json"]:   # a dotted path into the JSON (e.g. art.accept_tells)
+                val = data
+                for k in v["json"].split("."): val = val.get(k) if isinstance(val, dict) else None
+            if val is None and "default" in v: val = copy.deepcopy(v["default"])
             if val is None: raise HandoffError(f"{outs[0]['path']} has no {v['json']!r}")
+            if v.get("extend") and isinstance(val, list):   # the project's own entries first, then the handed-on ones
+                val = list(v["extend"]) + [x for x in val if x not in v["extend"]]
             return _hex_rgb(val) if v.get("as") == "rgb" else val
         return [o["path"] for o in outs] if v.get("all") else outs[0]["path"]
     if isinstance(v, dict): return {k: x for k, x in ((k, resolve(prod, x)) for k, x in v.items()) if x is not None}
@@ -828,6 +834,14 @@ def _issue(prod, t):
         h["manifest"] = os.path.join(_project(prod), planner.MANIFEST)
     if t["id"] == "build.wire" and "icon.derivatives" in prod["tasks"]:   # v2: the icon set is not upstream of the wiring step, so name it
         h["icon_snippet"] = next((o["path"] for o in eff(prod, "icon.derivatives").get("outputs") or [] if o.get("role") == "icon_snippet"), None)
+    if t.get("visual"):   # plan v3: the art direction's folder, the person's references, the atlas
+        from . import visual
+        h["visual"] = {"art_dir": visual.art_dir(_project(prod)), "references": visual.references(_project(prod)), "atlas": visual.ATLAS_DIR,
+                       "references_folder": os.path.join(_project(prod), visual.art_dir(_project(prod)), "references")}
+        for u in h["upstream"]:   # the picks so far, beside the work (the designs' validator reads the style selection there)
+            for o in u["outputs"]:
+                if os.path.basename(o["path"] or "") in ("style_selection.json", "design_selection.json") and os.path.isfile(o["path"]):
+                    shutil.copyfile(o["path"], os.path.join(d, os.path.basename(o["path"])))
     if prod.get("plan_version", 1) >= 2 and t["kind"] == "agent":   # what the agent must not write (checked on submit)
         h["integration_owned"] = [planner.MANIFEST] + [m["dest_rel"] for m in _integrated(prod)]
     order = {"production": prod["id"], "task": t["id"], "title": t["title"], "owner": t["owner"], "out_dir": d, "project": _project(prod),
@@ -890,7 +904,8 @@ def _prepare(prod, t):
                "tasks": {k: {"state": eff(prod, k)["state"], "approved": eff(prod, k).get("approved")} for k in prod["tasks"]},
                "inside_roots": inside_roots, "previous_manifest": copy.deepcopy((t.get("last_result") or {}).get("integrated")),
                "replace_auth": dict((prod.get("replace_assets") or {}).get("authorized") or {}), "integrated": copy.deepcopy(_integrated(prod)),
-               "inherited": copy.deepcopy(_inherited(prod))}
+               "inherited": copy.deepcopy(_inherited(prod)),
+               "deployment": copy.deepcopy((prod["tasks"].get("release.deploy") or {}).get("deployment"))}
         return (lambda: getattr(builtins, action)(ctx)), None
     return None, {"status": "failed", "failure": "request", "error": f"unknown executor {kind}"}
 
@@ -901,6 +916,37 @@ def _timed(work):
 
 
 def _finish(prod, t, res):
+    ex = res.pop("expand", None) if isinstance(res, dict) else None
+    _finish_result(prod, t, res)
+    if ex and t["state"] == PASSED: _expand(prod, t, ex)
+
+
+def _expand(prod, t, ex):
+    """Plan v3: a step that decides work the plan could not know in advance (the direction's signature moments; a visual
+    review's gaps) adds it to the graph. `feeds`: tasks that must now also wait for the new ones; `supersede`: the new
+    chain's last task becomes this step's effective version, so everything that waited for this step waits for the chain.
+    Idempotent: a task id that already exists is never replaced."""
+    new = []
+    for x in ex.get("tasks") or []:
+        if x["id"] in prod["tasks"]: continue
+        nt = planner.T(x["id"], x["title"], x.get("stage", "integration"), x["kind"], department=x.get("department"), action=x.get("action"),
+                       params=x.get("params"), deps=x.get("deps") or [], resources=x.get("resources") or (), work_order=x.get("work_order"),
+                       advisory=bool(x.get("advisory")), gate=x.get("gate"))
+        for k in ("moment", "visual"):
+            if x.get(k): nt[k] = x[k]
+        nt["expanded_from"] = t["id"]
+        prod["tasks"][nt["id"]] = nt; new.append(nt["id"])
+    if not new: return
+    i = prod["order"].index(t["id"]) + 1
+    prod["order"][i:i] = new
+    for f in ex.get("feeds") or []:
+        ft = prod["tasks"].get(f)
+        if ft and ft["state"] == PENDING: ft["depends_on"] = ft["depends_on"] + [n for n in new if n not in ft["depends_on"]]
+    if ex.get("supersede"): t["superseded_by"] = new[-1]
+    store.event(prod, "expanded", task=t["id"], added=new)
+
+
+def _finish_result(prod, t, res):
     att = t["attempts"][-1]; att["finished"] = store.now(); att["t1"] = round(time.time(), 3); att["seconds"] = res.pop("_seconds", None)
     cls = gates.classify(res) if res.get("status") != "needs_approval" else "approval"
     att.update(status=res.get("status"), outcome=cls, error=(res.get("error") or res.get("reason") or None) and str(res.get("error") or res.get("reason"))[:1500])
@@ -1222,13 +1268,18 @@ def approve(pid, task, approved=True, note=None, store_dir=None, choice=None):
         options = [c.get("id") for c in (t.get("result") or {}).get("concepts") or []]
         if approved and choice is not None and options and choice not in options:
             raise ValueError(f"{choice!r} is not one of the concepts {options}")
+        if approved and (t.get("result") or {}).get("approval") in ("style", "design"):
+            from . import visual
+            visual.valid_choice(t["result"], choice)
         store.event(prod, "approval", task=task, approved=approved, note=note, choice=choice)
         prod.setdefault("decisions", []).append(f"{'approved' if approved else 'declined'}: {task}" + (f" ({choice})" if choice else "") + (f" — {note}" if note else ""))
         if approved:
             t["approved"] = True; t["last_result"] = t.get("result"); t["choice"] = choice; t["approval_note"] = note
             _set(prod, t, PENDING, reason="approved" + (f": {choice}" if choice else ""))
-        elif task == "icon.select":   # not these: new concepts with the person's feedback, then the choice again
-            c = prod["tasks"]["icon.concepts"]
+        elif task in ("icon.select", "design.style_pick", "design.design_pick") and \
+                {"icon.select": "icon.concepts", "design.style_pick": "design.styles", "design.design_pick": "design.designs"}[task] in prod["tasks"]:
+            # not these: new options with the person's feedback, then the choice again (never more questions than the one pick)
+            c = prod["tasks"][{"icon.select": "icon.concepts", "design.style_pick": "design.styles", "design.design_pick": "design.designs"}[task]]
             c["work_order"] = dict(c["work_order"] or {}, feedback=(c["work_order"] or {}).get("feedback", []) + [note or "make different concepts"])
             _set(prod, c, PENDING, reason="the person asked for new concepts" + (f": {note}" if note else ""), outputs=[], result=None)
             _set(prod, t, PENDING, reason="waiting for the new concepts", outputs=[], result=None)

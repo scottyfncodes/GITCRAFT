@@ -70,6 +70,7 @@ def _slug(s):
 def _capture_kind(d):
     """Which department wrote a capture folder, from the files it always writes."""
     if os.path.isfile(os.path.join(d, "audit.json")): return "pixelcraft"
+    if glob.glob(os.path.join(d, "*shots_report.json")) and not glob.glob(os.path.join(d, "playcraft*.json")): return "shots"
     if glob.glob(os.path.join(d, "playcraft*.json")) or os.path.isfile(os.path.join(d, "play", "play.json")) or os.path.isfile(os.path.join(d, "play.json")): return "playcraft"
     return None
 
@@ -108,7 +109,16 @@ def pack(project, captures, out_dir=None, max_images=60):
     for d in captures or []:
         d = os.path.realpath(d)
         kind = _capture_kind(d)
-        if not kind: warnings.append(f"{d}: not a PLAYCRAFT or PIXELCRAFT output folder (skipped)"); continue
+        if not kind: warnings.append(f"{d}: not a PLAYCRAFT, PIXELCRAFT or shot list output folder (skipped)"); continue
+        if kind == "shots":   # the product's shot list (TestCraft shots): only reached shots are evidence; the rest are not seen
+            for rp in sorted(glob.glob(os.path.join(d, "*shots_report.json"))):
+                for s in (_json(rp, {}) or {}).get("shots") or []:
+                    for c in s.get("captures") or []:
+                        if c.get("reached") and c.get("image") and os.path.isfile(c["image"]):
+                            items.append({"id": f"shot:shots/{s['id']}@{c['viewport']}", "kind": "screenshot", "department": "shots", "path": c["image"],
+                                          "sha256": _sha(c["image"]), "bytes": os.path.getsize(c["image"]), "commit": None, "shot": s["id"], "shot_kind": s.get("kind")})
+                        else: warnings.append(f"shot {s['id']}@{c.get('viewport')} was not seen ({c.get('reason')}): it cannot be cited or judged")
+            continue
         commit = _capture_commit(d, kind)
         if P.get("head") and commit and not P["head"].startswith(commit[:7]) and not str(commit).startswith(P["head"][:7]):
             warnings.append(f"{kind} capture was made on {str(commit)[:7]}, the project is at {P['head'][:7]}: a review on it is stale from the start")

@@ -807,6 +807,10 @@
       "type": "boolean",
       "default": false,
       "description": "score it as a game even though it reads as an app or a site (PLAYCRAFT otherwise refuses: genre detection always finds some genre)"
+     },
+     "shots": {
+      "type": "string",
+      "description": "the product's shot list (shots.json, docs/visual-direction.md): captured beside the play frames as evidence for a person and the visual review; never scored; a shot that cannot be reached is listed as not seen"
      }
     }
    },

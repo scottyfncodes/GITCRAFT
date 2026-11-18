@@ -4,3 +4,4 @@ __pycache__/
 node_modules/
 forgecraft/ui/dist/
 gitcraft-out/
+production/kit/atlas/looks/_renders/

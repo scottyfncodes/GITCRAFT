@@ -356,6 +356,12 @@ async function act(page, step, touch) {
     else if (step.press) { await page.keyboard.press(step.press); rec.kind = 'key'; }
     else if (step.fill) { const l = await findTarget(page, { selector: step.fill.selector, text: step.fill.label }); if (!l) throw new Error('field not found'); await l.fill(String(step.fill.value ?? '')); rec.kind = 'type'; rec.chars = String(step.fill.value ?? '').length; rec.rect = await l.boundingBox(); }
     else if (step.wait) { await page.waitForTimeout(step.wait); rec.kind = 'wait'; }
+    else if (step.wait_for) {   // a shot list's wait for real content (docs/visual-direction.md): a selector, text or JS condition
+      const w = step.wait_for, to = Math.min(w.timeout_ms || 8000, 30000); rec.kind = 'wait';
+      if (w.selector) await page.locator(w.selector).first().waitFor({ state: 'visible', timeout: to });
+      if (w.text) await page.getByText(w.text, { exact: false }).first().waitFor({ state: 'visible', timeout: to });
+      if (w.js) await page.waitForFunction(w.js, null, { timeout: to, polling: 100 });
+    }
     else if (step.expect != null) { rec.kind = 'expect'; rec.ok = (await page.getByText(step.expect).count()) > 0; }
     else {
       const l = await findTarget(page, step); if (!l) throw new Error(`control not found: ${step.selector || step.click || step.tap}`);

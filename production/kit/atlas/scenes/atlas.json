@@ -1,0 +1,242 @@
+{
+ "about": "The atlas's two canonical samples. Every look renders exactly this content, so the looks can be compared like for like. A production renders its own scene in the same format (production/visual.py: SCENE).",
+ "game": {
+  "title": "Rooftop Run",
+  "world": [
+   960,
+   540
+  ],
+  "mood": "dusk",
+  "sun": {
+   "x": 742,
+   "y": 128,
+   "r": 50
+  },
+  "far": [
+   [
+    0,
+    360
+   ],
+   [
+    90,
+    318
+   ],
+   [
+    190,
+    342
+   ],
+   [
+    300,
+    286
+   ],
+   [
+    420,
+    330
+   ],
+   [
+    520,
+    300
+   ],
+   [
+    640,
+    338
+   ],
+   [
+    760,
+    292
+   ],
+   [
+    880,
+    324
+   ],
+   [
+    960,
+    306
+   ]
+  ],
+  "mid": [
+   [
+    18,
+    62,
+    128
+   ],
+   [
+    96,
+    48,
+    176
+   ],
+   [
+    160,
+    70,
+    112
+   ],
+   [
+    262,
+    40,
+    150
+   ],
+   [
+    318,
+    84,
+    96
+   ],
+   [
+    600,
+    56,
+    140
+   ],
+   [
+    672,
+    44,
+    196
+   ],
+   [
+    730,
+    80,
+    118
+   ],
+   [
+    826,
+    52,
+    168
+   ],
+   [
+    892,
+    60,
+    120
+   ]
+  ],
+  "ground_y": 430,
+  "platforms": [
+   [
+    0,
+    412,
+    372,
+    128
+   ],
+   [
+    574,
+    380,
+    386,
+    160
+   ],
+   [
+    430,
+    268,
+    96,
+    20
+   ]
+  ],
+  "hazards": [
+   {
+    "kind": "spikes",
+    "x": 372,
+    "y": 500,
+    "w": 202,
+    "h": 40
+   }
+  ],
+  "hero": {
+   "x": 446,
+   "y": 176,
+   "size": 72,
+   "facing": 1,
+   "path": "M12 40a20 20 0 1 0 40 0a20 20 0 1 0-40 0Z M18 27 21 6 31 22Z M46 27 43 6 33 22Z M22 57h8v7h-8Z M35 57h8v7h-8Z M14 45C4 43-3 51-9 47-4 56 8 54 16 51Z",
+   "eye": [
+    41,
+    38,
+    3.6
+   ],
+   "accent": "M16 45C26 50 38 50 48 45L48 51C38 56 26 56 16 51Z"
+  },
+  "trail": [
+   [
+    248,
+    404
+   ],
+   [
+    300,
+    316
+   ],
+   [
+    356,
+    252
+   ],
+   [
+    410,
+    218
+   ],
+   [
+    446,
+    210
+   ]
+  ],
+  "pickups": [
+   {
+    "x": 560,
+    "y": 232,
+    "r": 11
+   },
+   {
+    "x": 608,
+    "y": 224,
+    "r": 11
+   },
+   {
+    "x": 656,
+    "y": 232,
+    "r": 11
+   },
+   {
+    "x": 704,
+    "y": 252,
+    "r": 11
+   }
+  ],
+  "pickup_shape": "circle",
+  "hud": {
+   "score": "0420",
+   "score_label": "SCORE",
+   "lives": 3,
+   "best": "BEST 1180",
+   "pause": true
+  }
+ },
+ "app": {
+  "name": "Harbour",
+  "screen": "Today",
+  "place": "Northgate Pier",
+  "hero_label": "Next sailing",
+  "hero_value": "14:35",
+  "hero_sub": "to Isle of Marr · leaves in 12 min",
+  "status": "On time",
+  "rows_title": "Later today",
+  "rows": [
+   {
+    "t": "15:10",
+    "d": "Isle of Marr",
+    "s": "On time",
+    "state": "ok"
+   },
+   {
+    "t": "15:45",
+    "d": "Kell Point",
+    "s": "Delayed 10 min",
+    "state": "late"
+   },
+   {
+    "t": "16:20",
+    "d": "Isle of Marr",
+    "s": "Few seats",
+    "state": "few"
+   }
+  ],
+  "cta": "Buy ticket",
+  "tabs": [
+   "Today",
+   "Routes",
+   "Tickets",
+   "Me"
+  ]
+ }
+}

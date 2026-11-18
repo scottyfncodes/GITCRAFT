@@ -1,0 +1,96 @@
+{
+ "reviewer": "Claude Code session (model judgement), acting as GITCRAFT's agent",
+ "pack": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/review.pack/pack.json",
+ "coverage": {
+  "viewed": [
+   "target:phone",
+   "target:desktop",
+   "target:play",
+   "style:sample",
+   "shot:title@phone",
+   "shot:title@desktop",
+   "shot:mid-play@phone",
+   "shot:mid-play@desktop",
+   "shot:first-ribbon@phone",
+   "shot:first-ribbon@desktop",
+   "shot:fail@phone",
+   "shot:fail@desktop",
+   "shot:results@phone",
+   "shot:results@desktop",
+   "shot:paused@phone",
+   "shot:paused@desktop"
+  ],
+  "not_seen": []
+ },
+ "summary": "An assessment against design A and the notebook style: the build reads as the chosen frame on desktop and during play (paper, pen, highlighter, boiling strokes), and the first-ribbon and results moments are there. Three places drift from what was chosen: the phone title, the results composition on a phone, and the HUD over play.",
+ "matches": [
+  {
+   "against": "target",
+   "claim": "the desktop title keeps design A's composition: the tilted wordmark stacked left, the highlighter behind Line, the kite tied off to the top right",
+   "evidence": [
+    "shot:title@desktop",
+    "target:desktop"
+   ],
+   "basis": "observed_render"
+  },
+  {
+   "against": "moment:first-ribbon",
+   "claim": "the bow on the tail and the scribbled 'first ribbon!' with its highlighter swipe are both visible",
+   "evidence": [
+    "shot:first-ribbon@phone",
+    "shot:first-ribbon@desktop"
+   ],
+   "basis": "observed_render"
+  },
+  {
+   "against": "style",
+   "claim": "every line is pen or pencil on ruled paper with scribble hatching, as in the notebook sample; no app chrome",
+   "evidence": [
+    "shot:mid-play@desktop",
+    "style:sample"
+   ],
+   "basis": "observed_render"
+  }
+ ],
+ "gaps": [
+  {
+   "id": "title-string",
+   "shot": "title",
+   "against": "target",
+   "severity": "major",
+   "basis": "observed_render",
+   "evidence": [
+    "shot:title@phone",
+    "target:phone"
+   ],
+   "gap": "on the phone the string runs from the flyer at the far left diagonally through 'Hold to fly' and the byline, and the far hill line passes under the button; in the chosen frame the button and byline sit on clean paper",
+   "fix": "on the title, stand the flyer to the right of the text column so the string climbs up the right side to the kite, and leave the far hill line out of the title page"
+  },
+  {
+   "id": "results-line",
+   "shot": "results",
+   "against": "moment:results",
+   "severity": "major",
+   "basis": "observed_render",
+   "evidence": [
+    "shot:results@phone",
+    "shot:results@desktop"
+   ],
+   "gap": "on the phone the chalk flight line cuts through 'Flight log' and 'Grounded'; the moment should read as a drawing above the log, as it does on desktop",
+   "fix": "draw the flight line in the band between the top of the page and the top of the results text, measured from the DOM, on every screen size"
+  },
+  {
+   "id": "hud-backing",
+   "shot": "mid-play",
+   "against": "style",
+   "severity": "minor",
+   "basis": "observed_render",
+   "evidence": [
+    "shot:mid-play@phone",
+    "shot:mid-play@desktop"
+   ],
+   "gap": "the dotted trail and the kite pass straight through the ribbon count and the lives, so the HUD reads as scribbles over scribbles",
+   "fix": "give the HUD a paper knock-out (the page colour behind its text, like correction tape) so play never draws over the numbers"
+  }
+ ]
+}
