@@ -42,8 +42,9 @@ def check(label, cond, detail=""):
 
 
 def code_path_open(T):
-    """The code path (design.direction → build) is waiting for the agent, not blocked by anything on the asset path."""
-    return T["design.direction"]["state"] == "awaiting_agent" and T["build"]["state"] == "pending" or T["build"]["state"] == "awaiting_agent"
+    """The code path (the picks → design.direction → build) is waiting for the agent or a person, not blocked by anything on the asset path."""
+    first = next((t for t in ("design.styles", "design.direction") if t in T), "design.direction")
+    return T[first]["state"] in ("awaiting_agent", "needs_approval") and T["build"]["state"] == "pending" or T["build"]["state"] == "awaiting_agent"
 
 
 def server():
@@ -138,8 +139,10 @@ def part_a(c):
     check("3 every acceptance criterion is measured by a planned task", plan["unmeasured_criteria"] == [], plan["unmeasured_criteria"])
     # ---- 5. dependency order
     pos = {t: i for i, g in enumerate(plan["parallel_groups"]) for t in g}
-    check("5 order (plan v2): foundation → build (beside the assets) ; assets → integrate.<asset> → integrate.final → build.wire → QA → regression → release report → deploy",
-          load(pid).get("plan_version") == 2 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity", "design.direction"}
+    check("5 order (plan v3): the picks → direction → foundation → build (beside the assets) ; assets → integrate.<asset> → integrate.final → build.wire → visual review → QA → regression → release report → deploy",
+          load(pid).get("plan_version") == 3 and pos["foundation.identity"] < pos["build"] and set(T["build"]["depends_on"]) == {"foundation.scaffold", "foundation.identity", "design.direction",
+                                                                                                                         "design.styles", "design.style_pick", "design.designs", "design.design_pick", "design.moments"}
+          and pos["design.design_pick"] < pos["design.direction"] < pos["build"] and pos["build.wire"] < pos["capture.shots"] < pos["review.gaps"] < min(pos[t] for t in T if t.startswith("qa."))
           and all(pos[t] < pos[f"integrate.{t}"] < pos["integrate.final"] for t in T if t.startswith(("audio.", "levels.", "vfx.")))
           and max(pos["build"], pos["integrate.final"]) < pos["build.wire"] < min(pos[t] for t in T if t.startswith("qa."))
           <= max(pos[t] for t in T if t.startswith("qa.")) < pos["release.regression"] < pos["release.report"] < pos["release.deploy"])
@@ -156,10 +159,21 @@ def part_a(c):
 
     # ---- run: production departments, then the identity work order
     st = call(c, "production_run", {"production": pid})
-    check("direction first: the run stops at the creative direction, before the identity or any code",
-          st["status"] == "awaiting_agent" and tasks_in(st, "awaiting_agent") == ["design.direction"], tasks_in(st, "awaiting_agent"))
-    dorder = json.load(open(os.path.join(load(pid)["store"], "tasks", "design.direction", "work_order.json")))
-    st = call(c, "production_submit", {"production": pid, "task": "design.direction", "files": agent.direction(dorder), "notes": "Lantern Drift: look and play"})
+    check("pictures first: the run stops at the style shortlist, before the direction, the identity or any code",
+          st["status"] == "awaiting_agent" and tasks_in(st, "awaiting_agent") == ["design.styles"], tasks_in(st, "awaiting_agent"))
+    wo_ = lambda t: json.load(open(os.path.join(load(pid)["store"], "tasks", t, "work_order.json")))
+    st = call(c, "production_submit", {"production": pid, "task": "design.styles", "files": agent.styles(wo_("design.styles")), "notes": "six atlas looks as Lantern Drift"})
+    check("style pick: six looks rendered as this game's scene; the pick waits for a person", "design.style_pick" in tasks_in(st, "needs_approval"), st["counts"])
+    call(c, "production_approve", {"production": pid, "task": "design.style_pick", "approved": True, "choice": "risograph", "note": "acceptance test: the person picks the recommendation"})
+    st = call(c, "production_run", {"production": pid})
+    st = call(c, "production_submit", {"production": pid, "task": "design.designs", "files": agent.designs(wo_("design.designs")), "notes": "three title screens"})
+    check("design pick: three designs; the pick waits for a person and nothing is built", "design.design_pick" in tasks_in(st, "needs_approval") and load(pid)["tasks"]["build"]["state"] == "pending", st["counts"])
+    call(c, "production_approve", {"production": pid, "task": "design.design_pick", "approved": True, "choice": "a", "note": "acceptance test: A, with the calm of B"})
+    st = call(c, "production_run", {"production": pid})
+    proj0 = load(pid)["spec"]["project"]["path"]
+    check("design pick: the chosen frame is saved in the project as the target", os.path.isfile(os.path.join(proj0, "art-direction", "target", "phone.png")))
+    dorder = wo_("design.direction")
+    st = call(c, "production_submit", {"production": pid, "task": "design.direction", "files": agent.visual_direction(dorder, proj0), "notes": "Lantern Drift: look and play, from design A"})
     check("run stops at the agent's identity work order", st["status"] == "awaiting_agent" and "foundation.identity" in tasks_in(st, "awaiting_agent"), st["counts"])
     prod = load(pid)
     first_wave = [t for t in prod["tasks"] if t.startswith(("audio.", "levels.")) or t == "vfx.sparks"]
@@ -218,7 +232,16 @@ def part_a(c):
     check("build.wire work order lists every integrated asset and the approved icon set", len(wo["handoff"]["integrated_assets"]) == len(man) and wo["handoff"].get("icon_snippet"))
     changed = agent.wire(wo, defect=True); git_commit(proj, "Lantern Drift: assets and icon wired")
     st = call(c, "production_submit", {"production": pid, "task": "build.wire", "files": [os.path.join(proj, f) for f in changed], "notes": "wired"}, timeout=2400)
+    moments = [t for t in tasks_in(st, "awaiting_agent") if t.startswith("build.moment.")]
+    check("moments: each signature moment is its own work order once the build is wired", sorted(moments) == ["build.moment.first-ember", "build.moment.lantern-out"], tasks_in(st, "awaiting_agent"))
+    for m in moments: st = call(c, "production_submit", {"production": pid, "task": m, "files": [os.path.join(proj, "js", "game.js")], "notes": "the moment is in the game loop"}, timeout=2400)
     prod = load(pid)
+    rep_ = json.load(open(next(o["path"] for o in prod["tasks"]["capture.shots"]["outputs"] if o["role"] == "shots_report")))
+    check("shot list: title, play, fail and results reached in the real build (phone and desktop)", rep_["reached"] == 8, rep_["not_seen"])
+    pack = next(o["path"] for o in prod["tasks"]["review.pack"]["outputs"] if o["role"] == "pack")
+    st = call(c, "production_submit", {"production": pid, "task": "review.creative", "files": agent.review(wo_("review.creative"), pack), "notes": "no visual gap"}, timeout=2400)
+    prod = load(pid)
+    check("visual review: no gap, so no round; QA starts on the reviewed build", prod["tasks"]["review.gaps"]["state"] == "passed" and "fix.visual.r1" not in prod["tasks"])
     sm = prod["tasks"]["qa.smoke"]
     check("9 real testing: TestCraft found the missing script on load (gate failed)", sm["state"] == "failed" and sm.get("failure") == "quality"
           and "missing-boot.js" in json.dumps(sm.get("gate_results")), sm.get("error"))
@@ -283,6 +306,8 @@ def part_a(c):
     ev = open(os.path.join(prod["store"], "events.jsonl")).read().splitlines()
     check("12 persistent history: event log, report, handoffs, work orders on disk", len(ev) > 50 and os.path.exists(os.path.join(prod["store"], "REPORT.md"))
           and len(os.listdir(os.path.join(prod["store"], "handoffs"))) >= 20)
+    check("look page: the chosen frame beside the shipped screens waits for the deployment decision (it settles first)",
+          prod["tasks"]["release.look"]["state"] == "pending" and "release.deploy" in prod["tasks"]["release.look"].get("settles", []))
     check("12 production_list shows it", any(p["id"] == pid for p in call(c, "production_list", {})["productions"]))
     print(f"   production: {prod['store']}\n   project: {proj}", flush=True)
     return pid

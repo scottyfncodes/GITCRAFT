@@ -86,6 +86,7 @@
  "pages": {
   "style-pick": "the shortlist, rendered as this game's scene",
   "design-pick": "three designs of the real title screen",
-  "look": "the chosen frame beside the shipped screens"
+  "look": "the chosen frame beside the shipped screens",
+  "game": "the shipped game (phone or desktop: hold to climb)"
  }
 }

@@ -244,10 +244,11 @@ check("strict: a JSON file the code loads counts; one nothing loads does not",
 # ---------------------------------------------------------------- 4. the engine: plan version, scheduling around approvals, ownership, recovery
 pr = engine.plan(GAME, os.path.join(ws, "ember"))
 P = store.load(pr.get("id") or pr.get("production"))
-check("engine: a new production is plan_version 2", P["plan_version"] == 2 and "build.wire" in P["tasks"])
+check("engine: a new production is plan_version 3 (v2's graph plus the visual stage)", P["plan_version"] == 3 and "build.wire" in P["tasks"] and "design.design_pick" in P["tasks"])
 legacy = store.load(P["id"]); legacy.pop("plan_version"); engine._discover_and_plan(legacy)
 check("engine: a record without plan_version (v1) is re-planned as v1, never silently converted", "integrate.assets" in legacy["tasks"] and "build.wire" not in legacy["tasks"])
-for tid in ("foundation.scaffold", "design.direction", "foundation.identity"): engine._set(P, P["tasks"][tid], PASSED)
+for tid in ("foundation.scaffold", "design.styles", "design.style_pick", "design.designs", "design.design_pick", "design.direction", "design.moments", "foundation.identity"):
+    engine._set(P, P["tasks"][tid], PASSED)
 engine._set(P, P["tasks"]["icon.concepts"], PASSED); engine._set(P, P["tasks"]["icon.select"], NEEDS_APPROVAL, reason="a person chooses")
 ready = [t["id"] for t in engine._ready_tasks(P)]
 check("scheduling: the code build is ready while the icon choice waits for a person; unrelated assets run too",

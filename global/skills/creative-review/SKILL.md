@@ -1,13 +1,15 @@
 ---
 name: creative-review
-description: Run a GITCRAFT Creative Review, only when the person explicitly asks for one ("Run Creative Review", "creative review of this game/app", "is this product actually good / distinctive / delivering its vision"). An advisory, evidence-cited judgement of the rendered product against its vision contract, with opportunities (including proposals beyond the vision), earned strengths and, for games, observed play vs source analysis vs playtest hypotheses. It never scores, never changes department scores, the overall score, release gates, the Director's verdict, P0–P3 or the technical plan, and is never run as part of a normal Production Report.
+description: Run a GITCRAFT Creative Review when the person explicitly asks for one (the automatic visual review inside a plan v3 production is driven by its own work orders, not this skill) ("Run Creative Review", "creative review of this game/app", "is this product actually good / distinctive / delivering its vision"). An advisory, evidence-cited judgement of the rendered product against its vision contract, with opportunities (including proposals beyond the vision), earned strengths and, for games, observed play vs source analysis vs playtest hypotheses. It never scores, never changes department scores, the overall score, release gates, the Director's verdict, P0–P3 or the technical plan, and is never run as part of a normal Production Report.
 ---
 
 # Creative Review
 
 A model's judgement, done by you in this session, written to a strict schema and validated by GITCRAFT
 (`production/creative.py`). Run it **only when the person asks**. A Production Report reads the latest review; it
-never starts one.
+never starts one. (A production with an art direction also reviews its own build automatically, against the chosen frame,
+through `review.creative` work orders whose gaps become fix work orders: that is docs/visual-direction.md, not this skill.)
+A pack can include a shot list capture folder (TestCraft `shots`): only reached shots are evidence.
 
 ## 1. The vision (a reference, not a constraint)
 

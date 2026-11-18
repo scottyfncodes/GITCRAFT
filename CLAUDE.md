@@ -247,8 +247,17 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   perf/console/visual-diff checks or `studio/core/contract.measured_subject`, `register.sh`, `doctor.sh`'s server lines or ForgeCraft's tool
   list: a report never needs an env var to save outside the project; a stale or environment-limited result is never a failure, a P0/P1 or a
   Top-3 item; every finding has a human title, the measured value, a Do line and its evidence path; file validity is never averaged with quality.
+- `tests/test_visual.py` must pass after any change to `production/visual.py`, `production/atlas.py`, `production/kit/atlas/`, the
+  plan v3 graph (`planner._visual_v3`), the visual builtins (`style_pick`, `design_pick`, `visual_moments`, `visual_pack`, `visual_gaps`,
+  `visual_look`), `engine._expand`, the shot list (`studio/core/shots.py`, `studio/core/web/shots.mjs`, TestCraft `shots`, PIXELCRAFT and
+  PLAYCRAFT `shots`) or `acceptance/visual/` (docs/visual-direction.md). The person makes exactly two visual picks (style, design) and the
+  build waits for the design pick; a pick is never made silently; the atlas is a menu, never a house style; a shot that was not reached is
+  never judged or cited; the automatic visual review runs in every production with an art direction and its gaps become work orders (at most
+  two rounds, then listed for the person with the screenshots), but no visual task ever carries a criterion, a release gate or a score, and
+  no existing score's method changes; v1 and v2 records keep their graphs.
 - `tests/test_creative.py` must pass after any change to `production/creative.py`, `production/vision.py`, the Creative Review parts of
   `project_report.py`, the `production_vision`/`production_creative` tools or `global/skills/creative-review/`. A Creative Review is advisory
   judgement: it never changes a department score, the overall score or confidence, a release gate, the Director's verdict, P0–P3, the technical
-  top three or a trend; it is run only when a person asks; "observed" needs a cited capture; fun or engagement is only ever a playtest hypothesis;
+  top three or a trend; the person-asked review is run only when a person asks (the automatic in-production visual review of plan v3 runs by
+  itself and turns gaps into work orders: tests/test_visual.py); "observed" needs a cited capture; fun or engagement is only ever a playtest hypothesis;
   a review is current only for its commit, vision version and evidence fingerprints; never rewrite `history/vision/` or `history/creative/` (`docs/creative-review.md`).

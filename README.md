@@ -16,6 +16,7 @@ GITCRAFT publishes from the committed archives:
 | [/games/](https://meshcraft-vert.vercel.app/games/) | PLAYCRAFT Game Quality History (`history/playcraft`) |
 | [/pixelcraft/](https://meshcraft-vert.vercel.app/pixelcraft/) | PIXELCRAFT audits (`history/pixelcraft`) |
 | [/designcraft/](https://meshcraft-vert.vercel.app/designcraft/) | DESIGNCRAFT and the Design Lab (`history/designcraft`) |
+| [/atlas/](https://meshcraft-vert.vercel.app/atlas/) | Style atlas: the looks GITCRAFT can produce, each as the same game scene and phone screen, and a production that went picture-first (KITE LINE: style pick, design pick, look page) (`production/kit/atlas`, `acceptance/visual`; docs/visual-direction.md) |
 
 Changes to the toolchain itself (installer, sandbox, MCP servers, the Production Director) do not appear on this site. Check
 them on the project they were made for: re-run GITCRAFT there and look at that project's live URL and its new report (see the

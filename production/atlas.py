@@ -111,7 +111,7 @@ def publish(dist):
         proof_html = "<h2 style='margin-top:40px'>The atlas in a production</h2><p class=lede>A real production that went through the picture-first path: its style pick, its design pick and the shipped look.</p>" + "".join(
             f"<p class=meta style='margin:14px 0 6px'><b>{e(m.get('title', n))}</b>: {e(m.get('about', ''))}</p><div class=proof>"
             + "".join(f"<a href='{e(n)}/{e(page)}/'><b>{e(label)}</b><span class=meta>{e(m.get('pages', {}).get(page, ''))}</span></a>"
-                      for page, label in (("style-pick", "Style pick"), ("design-pick", "Design pick"), ("look", "Look page")) if os.path.isdir(os.path.join(dist, n, page)))
+                      for page, label in (("style-pick", "Style pick"), ("design-pick", "Design pick"), ("look", "Look page"), ("game", "Play it")) if os.path.isdir(os.path.join(dist, n, page)))
             + "</div>" for n, m in proofs)
     cannot = "".join(f"<div><b>{e(c['name'])}</b><p class=meta style='margin:6px 0 0'>{e(c['why'])}</p></div>" for c in A["cannot"])
     body = f"""<p class=crumbs><a href="../">GITCRAFT</a> / Style atlas</p>

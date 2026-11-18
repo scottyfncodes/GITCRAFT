@@ -1,6 +1,8 @@
 # Explore: distinct directions, chosen by a person
 
-Only when there is no direction to follow (§0 of SKILL.md). For an existing identity, skip to Build.
+Only when there is no direction to follow (§0 of SKILL.md). For an existing identity, skip to Build. In a GITCRAFT
+production this is the visual stage (the style pick from the style atlas, then the design pick: docs/visual-direction.md);
+its designs follow the same rules as below (differ on all but one axis, the same real screen, one recommendation).
 
 ## 1. Read the product before the screen
 

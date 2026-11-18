@@ -89,7 +89,7 @@ def main(pid, name, about):
               "remaining": [g["id"] for g in G["gaps"]] if G.get("round", 0) >= visual.ROUNDS else [],
               "tasks": {k: P["tasks"][k]["state"] for k in P["order"]},
               "pages": {"style-pick": "the shortlist, rendered as this game's scene", "design-pick": "three designs of the real title screen",
-                        "look": "the chosen frame beside the shipped screens"}}
+                        "look": "the chosen frame beside the shipped screens", "game": "the shipped game (phone or desktop: hold to climb)"}}
     json.dump(record, open(os.path.join(dest, "proof.json"), "w"), indent=1)
     return record
 

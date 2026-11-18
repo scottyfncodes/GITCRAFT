@@ -57,6 +57,16 @@ It works out the rest; the person never needs to know these tools.
   the live page loads; icons, Pulse, phone + desktop in Chromium). A login wall or an older deployment fails: fix the deployment,
   never the check. A host the sandbox cannot reach is UNVERIFIED, not a defect: report DEPLOYED · VERIFICATION INCOMPLETE, never
   READY and never NOT READY for it. Never say done or live without the report's evidence.
+- **Pictures first (plan v3, docs/visual-direction.md).** A new product, a redesign or a "new look" starts with the style pick:
+  do `design.styles` (six to eight atlas looks rendered as THIS product's key scene, `production/kit/atlas/render.mjs`), then
+  show the person the style pick page (an iPad-friendly page, never a local path: publish it or attach the images) and record
+  their choice with `production_approve {task: "design.style_pick", choice}` (one look, two as "a,b", or "surprise"). Then
+  `design.designs` (three designs of the real first screen at phone and desktop size, plus a play frame for a game) and the
+  design pick the same way (`choice` + `note`: what they liked in the others): the build waits for it. Never pick for them,
+  and never add a third visual question. A style named in the request skips the style pick; an existing identity with no new
+  look asked for skips both. After the build: each signature moment's work order, then `review.creative` (compare the captured
+  shot list with the chosen frame; open every image you cite; gaps become work orders, at most two rounds). End by giving the
+  live link and the look page.
 - **Direction first.** A new game, app or site, and any redesign, gameplay or polish pass, starts with the `design.direction`
   work order: write `direction.json` for this product before any code (`docs/direction.md`): one idea the look comes from, a
   palette with jobs and measured contrast, and for a game the loop, the feel numbers, a response for every action, the curve and
