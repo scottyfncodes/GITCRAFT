@@ -23,16 +23,26 @@ Live: the atlas is `/atlas/` on the GITCRAFT site; KITE LINE's style pick, desig
    that names the product. The person picks one, two to compare (`choice: "a,b"`), or "surprise me" (`choice: "surprise"`,
    which takes the shortlist's `wildcard`, never the recommendation).
 2. **Design pick.** Three designs of the real first screen inside the chosen style (two in each style when two are
-   compared), at phone and desktop size, plus a play frame for a game. They differ in composition, type, palette and
-   flavour, not just colour. The person picks one and may say what they liked in the others. **That is the approval:**
-   the build depends on it. The chosen frame is saved in the project as the target.
+   compared), each with a plain name and a one-line idea, drawn **at the real phone size** (390×664: an iPhone browser with
+   its toolbars up) as well as full screen and desktop, plus a play frame for a game, plus **the app icon options drawn
+   from that design**. The person picks the look and the icon together (`choice: "a:kite"`) and may say what they liked in
+   the others. **That is the approval:** the build depends on it. The chosen frame and icon are saved in the project as the
+   target. There is no separate icon approval: still two picks in total.
+
+   **Range is gated.** Three colourways of one layout are one design. Any two designs must differ in composition AND type AND
+   palette, and each title and each play frame is shrunk to 120 px wide in grayscale and compared: `same_picture` measures
+   where the ink sits whatever the colours (a light and a dark colourway of one layout correlate near 1); two frames at or
+   above 0.6 read as the same picture and are refused. `python3 -m production same-picture a.png b.png` runs the same check.
+   The measure sees layout, not meaning: it cannot tell that three different arrangements of the same objects are one idea,
+   so the agent still looks at the thumbnails and replaces a design that is not its own.
 3. A request that already names a style ("neon vector arcade", "like atlas look 7 but warmer") skips step 1: the style is
    recorded from the request with its modifier. An existing project with an established identity and no new look asked
    for skips both: its current best screen is the target.
 4. When it ships: the live link plus the **look page**, the chosen frame beside the shipped screens.
 
 Two picks, no more. Declining a pick (with a note) asks for new options with that note; it never adds a question. The app
-icon keeps its own existing approval (App Icon Studio).
+icon is chosen on the design pick page (App Icon Studio's master, derivatives and `qa.icons` follow from it unchanged; v2
+records and productions without a design pick keep `icon.concepts → icon.select`).
 
 ## The atlas
 
@@ -73,6 +83,11 @@ release.report → release.shots → release.look (the look page)
 
 ## References
 
+**Pasted in chat:** when the person pastes or attaches images during a run, the agent saves them itself
+(`python3 -m production reference <project> <image> [--note "…"]`: never overwrites another picture, keeps the same picture
+once) and tells the person it did and where. If a pasted image reaches the agent only as pixels, with no file to copy, it
+says so and asks for the file instead of pretending.
+
 Drop images in `<art-direction folder>/references/` (the project's existing `docs/art-direction/` if it has one, otherwise
 `art-direction/references/`); an optional `references/notes.json` ({file: note}) says what each is. Images pasted in chat
 are saved there by the agent. They shape the shortlist and the designs; the direction records what it takes from each and
@@ -94,6 +109,10 @@ what it leaves. A reference's layout or assets are never copied wholesale. No re
 - Steps use PIXELCRAFT's journey vocabulary (click, tap, selector, fill, press, goto, back, wait, expect) plus `hold` and
   `eval` for games. Every shot needs a `wait_for` (a selector, text or JS condition): a fixed delay over a loading screen is
   refused by the gate.
+- **A moment is a sequence, not a still.** A shot with `moment` (or `sequence`) is captured as three frames: *before* (the
+  instant its steps end, or once `sequence.before` holds), *peak* (`wait_for`) and *after* (`sequence.after_ms`, default 900).
+- **The fail shot is the instant of failing.** Its `wait_for` must differ from every results shot's (the gate refuses a list
+  where they match), and a fail capture that shows the same picture as the results screen must be raised as a gap.
 - A shot whose content never appears is **not seen**, with the reason; only a diagnostic image is kept, and nothing ever
   judges it. TestCraft `shots` captures the list; PIXELCRAFT audits its title, screen and results shots as its screens
   (its scoring method is unchanged; a shot it cannot reach is listed and not audited); PLAYCRAFT captures the list beside
@@ -107,6 +126,18 @@ sample, the references and the moments (each item hashed), and reviewed by the a
 Gaps become a fix work order, then a fresh capture and a fresh review; at most two rounds. What remains after the second
 round is listed for the person on a page with the screenshots it was seen in, and on the look page.
 
+**The bar, every shot, every round** (the review is refused unless it does all of this):
+
+- every capture of every reached shot is opened (`coverage.viewed`), and four checks are answered per shot (`checks`), each
+  `{ok, note}`: text is readable where it sits (text on textured or hatched ground has the contrast or backing it needs);
+  nothing is rotated, clipped or tiny without a reason from the style; the thing the player controls is never hidden by the
+  HUD; credits and bylines sit somewhere deliberate. A failed check must have a gap on that shot.
+- each signature moment is judged from its sequence as an event at phone size (`moments`: `reads_as_event`, `why`, the three
+  frames cited and opened). A small label appearing is not a moment; one that does not land must have a gap against
+  `moment:<id>`, which is a work order.
+- after a round of fixes every shot is shot again, and the review answers every earlier gap (`previous`: closed or not; one
+  still open must be a gap again) and looks at every shot for new gaps the fixes caused.
+
 The rules it keeps from Creative Review: no score, rating or points anywhere; it never produces or changes a score, a
 release gate, an acceptance criterion or the verdict; "observed" needs a capture it cites and listed as viewed; fun and
 engagement are playtest hypotheses only; "assessment", never "verdict". The two rules it changes on purpose: it runs
@@ -116,9 +147,12 @@ automatically in productions with an art direction, and its gaps become work ord
 ## Proof
 
 `acceptance/visual/kite-line/`: KITE LINE, a tiny original one-button game, through the real Production Director: seven
-looks rendered as its scene, a recorded style pick, three designs of its title screen, a recorded design pick (with a note
-on what was liked in another design, which became the night results page), three signature moments as work orders, a shot
-list that reaches real play in Chromium, an automatic review that issued work orders in two rounds (three gaps, then one,
-then one left for the person), real QA (TestCraft, PLAYCRAFT, PIXELCRAFT, DESIGNCRAFT, attribution, standards, request) and a
-READY release, and the look page. The picks were recorded by the acceptance run standing in for the person, and say so.
+looks rendered as its scene, a recorded style pick, three designs that pass the range gate (Margin doodle: a pen-lettered
+school-book page; Logbook cover: a green cloth cover with a typed label and play as a plotted chart; Night sketchbook: a
+chalk kite filling a black page with the count as a giant numeral), each with its icon options, one recorded pick of look
+and icon (with a note on what was liked in another design, which became the night results page), three signature moments
+as work orders and as before/peak/after sequences, a fail shot that is the instant of failing, a shot list that reaches
+real play in Chromium, an automatic review at the bar above that issued work orders in two rounds (three gaps, then one,
+then none), real QA (TestCraft, PLAYCRAFT, PIXELCRAFT, DESIGNCRAFT, icons, attribution, standards, request) and a READY
+release, and the look page (chosen frame and shipped screen at the same phone size). The picks were recorded by the acceptance run standing in for the person, and say so.
 `publish_proof.py` regenerates the published pages from the production record.

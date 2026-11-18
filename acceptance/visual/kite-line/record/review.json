@@ -1,96 +1,239 @@
 {
  "reviewer": "Claude Code session (model judgement), acting as GITCRAFT's agent",
- "pack": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/review.pack/pack.json",
+ "pack": "/home/user/gitcraft-out/production/20261118T055651Z-kite-line-f44d/tasks/review.pack/pack.json",
  "coverage": {
   "viewed": [
+   "target:icon",
    "target:phone",
    "target:desktop",
+   "target:browser",
    "target:play",
    "style:sample",
    "shot:title@phone",
+   "shot:title@phone#before",
+   "shot:title@phone#after",
    "shot:title@desktop",
+   "shot:title@desktop#before",
+   "shot:title@desktop#after",
    "shot:mid-play@phone",
    "shot:mid-play@desktop",
    "shot:first-ribbon@phone",
+   "shot:first-ribbon@phone#before",
+   "shot:first-ribbon@phone#after",
    "shot:first-ribbon@desktop",
+   "shot:first-ribbon@desktop#before",
+   "shot:first-ribbon@desktop#after",
    "shot:fail@phone",
    "shot:fail@desktop",
    "shot:results@phone",
+   "shot:results@phone#before",
+   "shot:results@phone#after",
    "shot:results@desktop",
+   "shot:results@desktop#before",
+   "shot:results@desktop#after",
    "shot:paused@phone",
    "shot:paused@desktop"
   ],
   "not_seen": []
  },
- "summary": "An assessment against design A and the notebook style: the build reads as the chosen frame on desktop and during play (paper, pen, highlighter, boiling strokes), and the first-ribbon and results moments are there. Three places drift from what was chosen: the phone title, the results composition on a phone, and the HUD over play.",
+ "summary": "An assessment of all six shots (phone and desktop, with the three moment sequences) against design A and the notebook style: the title matches the chosen frame, the first-ribbon and fail beats now read as events, and the earlier problems (kite under the count, hint on hatching, sideways best line, floating credit) are gone. Three gaps remain.",
+ "checks": [
+  {
+   "shot": "title",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "the wordmark is tilted by hand on purpose; 'best: 0 ribbons' is now horizontal under the button"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "'Kite Line by HaveAnApp' is written top right like the name line of a school page, clear of the button"
+   }
+  },
+  {
+   "shot": "mid-play",
+   "text_readable": {
+    "ok": true,
+    "note": "the count is on correction tape; the hint has gone by now"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is well below the count's tape and left of the buttons"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "first-ribbon",
+   "text_readable": {
+    "ok": true,
+    "note": "the banner is ink on a solid highlighter swipe; the hint sits on tape over the hatching"
+   },
+   "geometry_deliberate": {
+    "ok": false,
+    "note": "on the phone the banner's lettering runs to the right edge: the '!' touches the screen edge"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "fail",
+   "text_readable": {
+    "ok": true,
+    "note": "'thud!' is red pen on plain ruled paper above the ground"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "results",
+   "text_readable": {
+    "ok": true,
+    "note": "chalk lettering on plain night paper; no star touches a letter on phone or desktop"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "paused",
+   "text_readable": {
+    "ok": true,
+    "note": "'Holding the string' and 'Keep flying' read on the washed-out page"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": false,
+    "note": "the hint tape is still on screen while paused and sits where the maker's line belongs; the credit cannot be seen"
+   }
+  }
+ ],
+ "moments": [
+  {
+   "id": "title-reveal",
+   "reads_as_event": true,
+   "why": "before: the kite is at the flyer's hand on the hill; peak: it has climbed the whole page on its string to beside the wordmark; after: it holds there. The kite crosses most of the phone screen",
+   "evidence": [
+    "shot:title@phone#before",
+    "shot:title@phone",
+    "shot:title@phone#after"
+   ]
+  },
+  {
+   "id": "first-ribbon",
+   "reads_as_event": true,
+   "why": "before: a plain page with the ribbon ahead; peak: a yellow swipe the full width with 'first ribbon!' across it, rays around the kite and the count circled in red, about a third of the phone screen changes; but the after frame is already the results page",
+   "evidence": [
+    "shot:first-ribbon@phone#before",
+    "shot:first-ribbon@phone",
+    "shot:first-ribbon@phone#after"
+   ]
+  },
+  {
+   "id": "results",
+   "reads_as_event": true,
+   "why": "before: the kite nose-down with a red burst and 'thud!'; peak and after: the whole page has turned to night paper with the flight drawn as one line above the log",
+   "evidence": [
+    "shot:results@phone#before",
+    "shot:results@phone",
+    "shot:results@phone#after"
+   ]
+  }
+ ],
+ "previous": [],
  "matches": [
   {
    "against": "target",
-   "claim": "the desktop title keeps design A's composition: the tilted wordmark stacked left, the highlighter behind Line, the kite tied off to the top right",
+   "claim": "the phone title has the chosen frame's composition: the tilted wordmark on the left, the highlighter under Line, the kite on its string up the right edge from the flyer on the hatched hill",
    "evidence": [
-    "shot:title@desktop",
-    "target:desktop"
-   ],
-   "basis": "observed_render"
-  },
-  {
-   "against": "moment:first-ribbon",
-   "claim": "the bow on the tail and the scribbled 'first ribbon!' with its highlighter swipe are both visible",
-   "evidence": [
-    "shot:first-ribbon@phone",
-    "shot:first-ribbon@desktop"
-   ],
-   "basis": "observed_render"
-  },
-  {
-   "against": "style",
-   "claim": "every line is pen or pencil on ruled paper with scribble hatching, as in the notebook sample; no app chrome",
-   "evidence": [
-    "shot:mid-play@desktop",
-    "style:sample"
+    "shot:title@phone",
+    "target:browser"
    ],
    "basis": "observed_render"
   }
  ],
  "gaps": [
   {
-   "id": "title-string",
-   "shot": "title",
-   "against": "target",
+   "id": "moment-cut-short",
+   "shot": "first-ribbon",
+   "against": "moment:first-ribbon",
    "severity": "major",
-   "basis": "observed_render",
    "evidence": [
-    "shot:title@phone",
-    "target:phone"
+    "shot:first-ribbon@phone#after",
+    "shot:first-ribbon@phone"
    ],
-   "gap": "on the phone the string runs from the flyer at the far left diagonally through 'Hold to fly' and the byline, and the far hill line passes under the button; in the chosen frame the button and byline sit on clean paper",
-   "fix": "on the title, stand the flyer to the right of the text column so the string climbs up the right side to the kite, and leave the far hill line out of the title page"
+   "gap": "1.7 s after the first catch the after frame is already the results page: with nothing held the kite hits the ground before the celebration has finished, so the moment has no aftermath",
+   "fix": "let the kite float longer after the first ribbon (full weight returning over about 3 s, not 1.5) so the banner finishes, the bow is seen on the tail and the count stands at 1 before the ground can come up",
+   "basis": "observed_render"
   },
   {
-   "id": "results-line",
-   "shot": "results",
-   "against": "moment:results",
-   "severity": "major",
-   "basis": "observed_render",
-   "evidence": [
-    "shot:results@phone",
-    "shot:results@desktop"
-   ],
-   "gap": "on the phone the chalk flight line cuts through 'Flight log' and 'Grounded'; the moment should read as a drawing above the log, as it does on desktop",
-   "fix": "draw the flight line in the band between the top of the page and the top of the results text, measured from the DOM, on every screen size"
-  },
-  {
-   "id": "hud-backing",
-   "shot": "mid-play",
+   "id": "banner-edge",
+   "shot": "first-ribbon",
    "against": "style",
    "severity": "minor",
+   "gap": "on the phone the 'first ribbon!' lettering reaches the right edge of the screen and the exclamation mark touches it",
+   "fix": "size the lettering to at most 80 % of the screen width so it sits inside the swipe with air on both sides",
    "basis": "observed_render",
    "evidence": [
-    "shot:mid-play@phone",
-    "shot:mid-play@desktop"
-   ],
-   "gap": "the dotted trail and the kite pass straight through the ribbon count and the lives, so the HUD reads as scribbles over scribbles",
-   "fix": "give the HUD a paper knock-out (the page colour behind its text, like correction tape) so play never draws over the numbers"
+    "shot:first-ribbon@phone"
+   ]
+  },
+  {
+   "id": "paused-hint",
+   "shot": "paused",
+   "against": "target",
+   "severity": "minor",
+   "gap": "the 'hold to climb' tape stays on screen over the pause sheet, in the place where the maker's line is meant to sit, and the credit is not visible",
+   "fix": "hide the hint while paused so the maker's line reads at the bottom of the pause page",
+   "basis": "observed_render",
+   "evidence": [
+    "shot:paused@phone"
+   ]
   }
  ]
 }

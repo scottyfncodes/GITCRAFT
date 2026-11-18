@@ -24,6 +24,7 @@ from . import REPO
 ATLAS_DIR = os.path.join(REPO, "production", "kit", "atlas")
 IMG = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 SHORTLIST = (6, 8)            # styles shown at the style pick
+BROWSER = (390, 664)          # an iPhone 13 browser with its toolbars up: the real size a web product's first screen is seen at
 DESIGNS = 3                   # designs shown at the design pick (two per style when two styles are compared)
 MOMENTS = (2, 3)              # signature moments
 ROUNDS = 2                    # visual review → work order rounds before the rest is listed for the person
@@ -124,6 +125,25 @@ def references(project):
     return out
 
 
+def add_reference(project, image, note=None):
+    """Save one reference image (pasted in chat, or any file) into <art_dir>/references/, never overwriting another picture:
+    the same bytes are kept once, a different picture with the same name gets a numbered name. → the project-relative path."""
+    if not os.path.isfile(image) or not image.lower().endswith(IMG) or not _img_size(image) and not image.lower().endswith(".gif"):
+        raise ValueError(f"{image} is not an image file GITCRAFT can read (png, jpg, webp, gif)")
+    d = os.path.join(project, art_dir(project), "references"); os.makedirs(d, exist_ok=True)
+    h = sha(image)
+    for f in os.listdir(d):
+        if os.path.isfile(os.path.join(d, f)) and sha(os.path.join(d, f)) == h: dest = os.path.join(d, f); break
+    else:
+        stem, ext = os.path.splitext(os.path.basename(image)); dest, n = os.path.join(d, stem + ext.lower()), 1
+        while os.path.exists(dest): n += 1; dest = os.path.join(d, f"{stem}-{n}{ext.lower()}")
+        shutil.copyfile(image, dest)
+    if note:
+        notes = _json(os.path.join(d, "notes.json"), {}) or {}; notes[os.path.basename(dest)] = note
+        with open(os.path.join(d, "notes.json"), "w") as f: json.dump(notes, f, indent=1)
+    return os.path.relpath(dest, project)
+
+
 # ---------------------------------------------------------------- scope
 def scope(spec):
     """→ None (no visual stage), or {mode: pick|named|keep, pick_style, designs, named, art_dir}.
@@ -191,15 +211,23 @@ def designs_work_order(spec, vs):
             "Make three designs (two in each style when two styles are being compared) of the REAL first screen with real content: its real name, real "
             "text, real controls. They must differ in composition, type, palette and flavour, not just colour: any two share at most one of those four.",
             "Each design is one self-contained HTML file (inline CSS; fonts as files beside it, e.g. copied from production/kit/atlas/fonts with their notice) "
-            "rendered at phone 390x844 and desktop 1440x900: `node production/kit/atlas/shoot.mjs <design>/index.html <design>`, which writes phone.png and desktop.png."
+            "rendered as a phone really shows it (browser.png: 390x664, an iPhone browser with its toolbars up; design for THIS size first), full screen (phone.png, 390x844) and "
+            "desktop (1440x900): `node production/kit/atlas/shoot.mjs <design>/index.html <design>` writes all three."
             + (" Also a play frame: the same design during play (play.png, at least 960x540), e.g. the atlas painter with this design's palette, or the HTML in a play state." if game else ""),
             "Follow the craft floor (ui-design references/craft.md): one type scale, one spacing scale, 44 px targets, safe areas, text contrast 4.5:1.",
-            "Look at every render at full size. If one design is clearly weaker, replace it rather than padding the choice. Recommend one, with a reason.",
+            "Range is the point: three colourways of one layout are one design. Before you show them, shrink each title and each play frame to about 120 px wide in "
+            "grayscale and compare (python3 -m production same-picture <a.png> <b.png>): if two read as the same picture, replace one. The gate measures this (layout "
+            f"correlation below {SAME_PICTURE}) and also requires any two designs to differ in composition AND type AND palette.",
+            "Give each design a plain name (two or three words a person would say) and a one-line idea; both are shown on the page.",
+            "Look at every render at full size. If one design is clearly weaker, replace it rather than padding the choice. Recommend one, with a reason."]
+            + (["App icon: draw one to three icon options FROM each design (its palette, its shapes, its idea), each a square PNG of at least 512 px (1024 preferred) that reads "
+                "at 32 px: no tiny text, no screenshot. They are shown beside the design, and the person picks the look and the icon together (choice \"a:<icon id>\"). "
+                'Add "icons": [{"id": "kite", "file": "a/icon-kite.png", "idea": "…"}] to each design and "icons_required": true to designs.json.'] if (spec.get("icon") or {}).get("required") and (spec.get("icon") or {}).get("mode") != "keep" else []) + [
             'Write designs.json: {"product": "' + ("game" if game else "app") + '", "style": "<look id>" (or one per design when comparing two), '
             '"recommended": "a", "reason": "…", "designs": [{"id": "a", "style": "<look id>", "name": "…", "idea": "one sentence from this product\'s world", '
             '"composition": "what leads, where the eye lands, the grid", "type": {"display": "…", "body": "…"}, '
             '"palette": {"background": "#rrggbb", "surface": "#rrggbb", "primary": "#rrggbb", "accent": "#rrggbb", "text": "#rrggbb"}, "flavor": "the feeling, in this product\'s words", '
-            '"html": "a/index.html", "phone": "a/phone.png", "desktop": "a/desktop.png"' + (', "play": "a/play.png"' if game else "") + "}]}."],
+            '"html": "a/index.html", "browser": "a/browser.png", "phone": "a/phone.png", "desktop": "a/desktop.png"' + (', "play": "a/play.png"' if game else "") + "}]}."],
         "expected": [{"path": "designs.json", "format": "json", "keys": ["designs", "recommended"], "validate": "visual_designs", "role": "designs"}],
         "license": "owned by the project"}
 
@@ -255,12 +283,17 @@ def review_work_order(spec, rnd):
                 "Read BRIEF.md. Open the chosen frame, the style sample, the references and every reached shot, and compare the shots against them: the "
                 "chosen frame first, then the style, the references and each signature moment.",
                 "A shot that was not reached is listed as not seen: never judge it, and never cite its image.",
+                "Open EVERY reached shot, every round, at full size, and answer the four checks for each (`checks`): text readable on textured or hatched ground; nothing "
+                "rotated, clipped or tiny without a reason from the style; the thing the player controls never hidden by the HUD; credits and bylines somewhere deliberate.",
+                "Judge each signature moment from its sequence (before, peak, after), as an event at phone size (`moments`): a small label appearing is not a moment. "
+                "If it does not land, that is a gap against moment:<id>.",
+                "After a round of fixes every shot has been shot again: say for each earlier gap whether it is closed (`previous`), and look for new gaps the fixes caused.",
                 "List what matches (with evidence) and every visible gap as {id, shot, against, gap, fix, evidence, basis: observed_render, severity: major|minor}. "
                 "A gap is something a person would see in the screenshot (a colour that is not the palette, type that is not the chosen face, a composition "
                 "that lost its focal point, a moment that does not read). The fix says what to change in the project.",
                 "No scores, ratings or points. Fun, engaging and similar are playtest hypotheses, never observations. Say 'assessment', never 'verdict'.",
                 "Write review.json and submit it."],
-            "expected": [{"path": "review.json", "format": "json", "keys": ["reviewer", "coverage", "summary", "matches", "gaps"], "validate": "visual_review", "role": "review"}],
+            "expected": [{"path": "review.json", "format": "json", "keys": ["reviewer", "coverage", "summary", "checks", "matches", "gaps"], "validate": "visual_review", "role": "review"}],
             "license": "advisory judgement (no score)"}
 
 
@@ -370,6 +403,33 @@ def _thumb_diff(pa, pb):
     except Exception: return None
 
 
+SAME_PICTURE = 0.6   # ink-layout correlation at 120 px grayscale above which two frames read as the same picture
+
+
+def ink_layout(p, w=120, cell=10):
+    """Where the ink is, whatever the colours: the frame shrunk to 120 px wide in grayscale, each pixel's distance from the
+    frame's own median grey (so a light and a dark colourway of one layout give the same map), averaged over 10 px cells."""
+    from . import icons
+    W, H, px = icons.decode(p); h = max(cell, round(H * w / W)); r = icons.resize(W, H, px, w, h)
+    g = [(0.299 * r[i] + 0.587 * r[i + 1] + 0.114 * r[i + 2]) / 255 for i in range(0, len(r), 4)]
+    med = sorted(g)[len(g) // 2]
+    d = [abs(x - med) for x in g]
+    return [sum(d[(cy * cell + y) * w + cx * cell + x] for y in range(cell) for x in range(cell)) / (cell * cell)
+            for cy in range(h // cell) for cx in range(w // cell)]
+
+
+def same_picture(pa, pb):
+    """Correlation (−1..1) of two frames' ink layouts, or None when a frame cannot be read. ≥ SAME_PICTURE: one picture, recoloured."""
+    try: A, B = ink_layout(pa), ink_layout(pb)
+    except Exception: return None
+    n = min(len(A), len(B)); A, B = A[:n], B[:n]
+    if not n: return None
+    ma, mb = sum(A) / n, sum(B) / n
+    va, vb = sum((x - ma) ** 2 for x in A) / n, sum((x - mb) ** 2 for x in B) / n
+    if va < 1e-9 or vb < 1e-9: return 1.0 if va < 1e-9 and vb < 1e-9 else 0.0
+    return round(sum((x - ma) * (y - mb) for x, y in zip(A, B)) / n / (va * vb) ** 0.5, 2)
+
+
 def validate_designs(path, base=None):
     out = []
     D = _json(path)
@@ -383,14 +443,18 @@ def validate_designs(path, base=None):
     _check(out, "every design names its atlas style", all(look(d.get("style") or D.get("style")) for d in X), None)
     miss = []
     for d in X:
-        for k in ("phone", "desktop") + (("play",) if game else ()):
+        for k in ("phone", "browser", "desktop") + (("play",) if game else ()):
             p = _abs(base, str(d.get(k) or ""))
             sz = _img_size(p) if d.get(k) and os.path.isfile(p) else None
             if not sz: miss.append(f"{d.get('id')}.{k}"); continue
-            if k == "phone" and not sz[1] > sz[0]: miss.append(f"{d.get('id')}.phone is not portrait {sz}")
+            if k in ("phone", "browser") and not sz[1] > sz[0]: miss.append(f"{d.get('id')}.{k} is not portrait {sz}")
+            if k == "browser" and abs(sz[1] / sz[0] - BROWSER[1] / BROWSER[0]) > 0.03: miss.append(f"{d.get('id')}.browser is not {BROWSER[0]}x{BROWSER[1]} {sz}")
             if k in ("desktop", "play") and not sz[0] > sz[1]: miss.append(f"{d.get('id')}.{k} is not landscape {sz}")
         if not os.path.isfile(_abs(base, str(d.get("html") or ""))): miss.append(f"{d.get('id')}.html")
-    _check(out, "every design: its HTML, a phone render and a desktop render" + (", and a play frame" if game else ""), not miss, miss or None)
+    _check(out, f"every design: its HTML, a full-screen phone render, the same screen in a real phone browser ({BROWSER[0]}x{BROWSER[1]}, toolbars up) and a desktop render"
+           + (", and a play frame" if game else ""), not miss, miss or None)
+    _check(out, "every design has a plain name and a one-line idea", all(_said(d.get("name"), 3) and _said(d.get("idea"), 12) and len(str(d.get("idea"))) <= 160 for d in X),
+           [d.get("id") for d in X if not (_said(d.get("name"), 3) and _said(d.get("idea"), 12) and len(str(d.get("idea"))) <= 160)] or None)
     _check(out, "every design states its idea, composition, type, palette and flavour",
            all(_said(d.get("idea"), 12) and _said(d.get("composition"), 12) and (d.get("type") or {}).get("display") and _said(d.get("flavor"), 6)
                and all(re.fullmatch(r"#[0-9a-f]{6}", v) for v in _palette(d).values()) for d in X), None)
@@ -399,16 +463,34 @@ def validate_designs(path, base=None):
         for j in range(i + 1, len(X)):
             if (X[i].get("style") or D.get("style")) != (X[j].get("style") or D.get("style")): continue   # two styles compared: different by construction
             ax = _differs(X[i], X[j])
-            if sum(ax.values()) < 3: weak.append(f"{ids[i]}/{ids[j]} differ only in {[k for k, v in ax.items() if v] or 'nothing'}")
-    _check(out, "the designs differ in composition, type, palette and flavour (any two share at most one)", not weak, weak or None)
-    same = []
-    phones = [(d.get("id"), _abs(base, str(d.get("phone") or ""))) for d in X]
-    for i in range(len(phones)):
-        for j in range(i + 1, len(phones)):
-            if os.path.isfile(phones[i][1]) and os.path.isfile(phones[j][1]):
-                v = _thumb_diff(phones[i][1], phones[j][1])
-                if v is not None and v < 0.06: same.append(f"{phones[i][0]}/{phones[j][0]} renders differ by {v}")
-    _check(out, "the phone renders are visibly different pictures", not same, same or None)
+            if not (ax["composition"] and ax["type"] and ax["palette"]): weak.append(f"{ids[i]}/{ids[j]} share {[k for k in ('composition', 'type', 'palette') if not ax[k]]}")
+    _check(out, "any two designs differ in composition AND type AND palette (a colourway is not a design)", not weak, weak or None)
+    for k, label in (("phone", "title"),) + ((("play", "play frame"),) if game else ()):   # shrunk to 120 px, in grayscale: do two read as one picture?
+        same = []
+        fr = [(d.get("id"), _abs(base, str(d.get(k) or ""))) for d in X]
+        for i in range(len(fr)):
+            for j in range(i + 1, len(fr)):
+                if os.path.isfile(fr[i][1]) and os.path.isfile(fr[j][1]):
+                    v = same_picture(fr[i][1], fr[j][1]); t = _thumb_diff(fr[i][1], fr[j][1])
+                    if (v is not None and v >= SAME_PICTURE) or (t is not None and t < 0.06): same.append(f"{fr[i][0]}/{fr[j][0]}: layout correlation {v}")
+        _check(out, f"at 120 px in grayscale no two {label}s read as the same picture (below {SAME_PICTURE})", not same, same or None)
+    ic = [(d.get("id"), i) for d in X for i in d.get("icons") or []]
+    need_icons = bool(D.get("icons_required")) or bool(ic)
+    if need_icons:
+        bad = []
+        for d in X:
+            opts = d.get("icons") or []
+            if not 1 <= len(opts) <= 3: bad.append(f"{d.get('id')}: {len(opts)} icon option(s)")
+            for o in opts:
+                ip = _abs(base, str((o or {}).get("file") or "")); sz = _img_size(ip) if os.path.isfile(ip) else None
+                if not sz or sz[0] != sz[1] or sz[0] < 512 or not (o.get("id") and _said(o.get("idea"), 6)): bad.append(f"{d.get('id')}/{(o or {}).get('id')}: {sz or 'missing'}")
+        _check(out, "every design brings one to three app icon options drawn from it (square, at least 512 px, each with an id and its idea)", not bad, bad or None)
+        hs = {}
+        for d in X:
+            for o in d.get("icons") or []:
+                ip = _abs(base, str((o or {}).get("file") or ""))
+                if os.path.isfile(ip): hs.setdefault(sha(ip), []).append(f"{d.get('id')}/{o.get('id')}")
+        _check(out, "every icon option is its own picture", not [v for v in hs.values() if len(v) > 1], [v for v in hs.values() if len(v) > 1] or None)
     _check(out, "one recommendation with a reason", D.get("recommended") in ids and _said(D.get("reason"), 12), D.get("recommended"))
     sel = _json(os.path.join(base, "style_selection.json"))
     if sel and sel.get("styles"):   # the person's pick, handed on beside the work
@@ -435,6 +517,10 @@ def validate_shots(path, base=None):
     kinds = {s.get("kind") for s in S}
     need = {"title", "play", "fail", "results"} if D.get("product") == "game" else {"screen"}
     _check(out, "the shots a " + ("game" if D.get("product") == "game" else "product") + " needs: " + ", ".join(sorted(need)), need <= kinds, sorted(need - kinds) or None)
+    fl, rs = [s for s in S if s.get("kind") == "fail"], [s for s in S if s.get("kind") == "results"]
+    if fl and rs:
+        _check(out, "the fail shot waits for the instant of failing, not for the results screen (its wait_for differs from every results shot's)",
+               all(f.get("wait_for") != r.get("wait_for") for f in fl for r in rs), [f.get("id") for f in fl if any(f.get("wait_for") == r.get("wait_for") for r in rs)] or None)
     return out
 
 
@@ -508,6 +594,13 @@ a{color:inherit}.crumbs{font-size:14px;color:var(--muted);margin-bottom:14px}.cr
 .pair{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);align-items:start}
 .pair figure{margin:0}.pair img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}
 figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.frames{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,2.1fr);align-items:start;margin-top:12px}.frames figure{margin:0}
+.frames img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}.idea{font-size:18px;margin:2px 0 6px}
+.sub{font-size:14px;margin:18px 0 8px;color:var(--muted);font-weight:650}.icons{display:flex;flex-wrap:wrap;gap:18px}
+.icon{margin:0;display:grid;grid-template-columns:96px 32px;gap:10px;align-items:end;max-width:260px}.icon img{width:96px;height:96px;border-radius:22%;border:1px solid var(--line)}
+.icon img.small{width:32px;height:32px}.icon figcaption{grid-column:1/-1}
+@media (max-width:700px){.frames{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.frames>div{grid-column:1/-1}}
+.seq{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:640px}.seq figure{margin:0}
 .design{border-top:1px solid var(--line);padding:26px 0}.design:first-of-type{border-top:0}
 .compare{display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;margin:14px 0 6px}
 .compare h3{font-size:14px;margin:0 0 8px;color:var(--muted);font-weight:650}.compare img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line)}
@@ -562,30 +655,56 @@ def style_page(styles, base, out_dir, title, chosen=None, how=None, crumbs=""):
     return p
 
 
-def design_page(designs, base, out_dir, title, chosen=None, note=None, crumbs=""):
-    """The design pick: three designs of the real first screen at phone and desktop size (and the play frame for a game)."""
+def split_design_choice(choice, designs):
+    """A design choice: "a" (the design with its first icon) or "a:kite" (the design with that icon option). → (design, icon option or None)"""
+    did, _, iid = str(choice or designs.get("recommended") or "").partition(":")
+    d = next((x for x in designs.get("designs") or [] if x.get("id") == did.strip()), None)
+    if not d: raise ValueError(f"{choice!r} is not one of the designs {[x.get('id') for x in designs.get('designs') or []]}")
+    opts = d.get("icons") or []
+    ic = next((o for o in opts if o.get("id") == iid.strip()), None) if iid.strip() else (opts[0] if opts else None)
+    if iid.strip() and not ic: raise ValueError(f"design {did} has no icon option {iid!r} (its icons: {[o.get('id') for o in opts]})")
+    return d, ic
+
+
+def design_page(designs, base, out_dir, title, chosen=None, note=None, crumbs="", icon=None):
+    """The design pick: three designs of the real first screen, each with a plain name and its one-line idea, shown as a phone
+    really shows it (browser toolbars up), full screen, at desktop size, during play (a game), and with the app icon options
+    drawn from it: the look and the icon are chosen together."""
     e = html.escape
     rec = designs.get("recommended")
     secs = []
     for d in designs.get("designs") or []:
         L = look(d.get("style") or designs.get("style")) or {"name": d.get("style")}
         dd = os.path.join(out_dir, d["id"])
-        ph = os.path.relpath(_copy(_abs(base, d["phone"]), dd, "phone" + os.path.splitext(d["phone"])[1]), out_dir)
-        dk = os.path.relpath(_copy(_abs(base, d["desktop"]), dd, "desktop" + os.path.splitext(d["desktop"])[1]), out_dir)
-        pl = os.path.relpath(_copy(_abs(base, d["play"]), dd, "play" + os.path.splitext(d["play"])[1]), out_dir) if d.get("play") else None
+        cp = lambda k: os.path.relpath(_copy(_abs(base, d[k]), dd, k + os.path.splitext(d[k])[1]), out_dir) if d.get(k) else None
+        ph, br, dk, pl = cp("phone"), cp("browser"), cp("desktop"), cp("play")
         ty = d.get("type") or {}
         tags = ("<span class=tag>recommended</span>" if d["id"] == rec else "") + ("<span class=tag>picked</span>" if chosen == d["id"] else "")
+        icons = ""
+        if d.get("icons"):
+            cells = []
+            for o in d["icons"]:
+                rel = os.path.relpath(_copy(_abs(base, o["file"]), os.path.join(dd, "icons"), o["id"] + os.path.splitext(o["file"])[1]), out_dir)
+                mark = " <span class=tag>picked</span>" if chosen == d["id"] and icon == o["id"] else ""
+                cells.append(f"<figure class=icon><img src='{e(rel)}' alt='App icon {e(o['id'])} for design {e(d['id'])}' loading=lazy><img class=small src='{e(rel)}' alt=''>"
+                             f"<figcaption><b>{e(d['id'])}:{e(o['id'])}</b>{mark}<br>{e(o.get('idea') or '')}</figcaption></figure>")
+            icons = "<h3 class=sub>App icon, drawn from this design</h3><div class=icons>" + "".join(cells) + "</div>"
         secs.append(f"<section class='design' id='{e(d['id'])}'><h2>{e(d['id'].upper())} · {e(d.get('name') or '')} {tags}</h2>"
-                    f"<p>{e(d.get('idea') or '')}</p><p class=meta>Style: {e(L.get('name') or '')} · Composition: {e(d.get('composition') or '')}</p>"
-                    f"<p class=meta>Type: {e(str(ty.get('display') or ''))} / {e(str(ty.get('body') or ''))} · Flavour: {e(d.get('flavor') or '')} · {_swatches(d.get('palette'))}</p>"
-                    f"<div class=pair style='margin-top:12px'><figure><img src='{e(ph)}' alt='Design {e(d['id'])} at phone size' loading=lazy><figcaption>Phone 390×844</figcaption></figure>"
-                    f"<div style='display:grid;gap:14px'><figure><img src='{e(dk)}' alt='Design {e(d['id'])} at desktop size' loading=lazy><figcaption>Desktop 1440×900</figcaption></figure>"
-                    + (f"<figure><img src='{e(pl)}' alt='Design {e(d['id'])} during play' loading=lazy><figcaption>Play frame</figcaption></figure>" if pl else "")
-                    + "</div></div></section>")
-    status = (f"<p class=status><b>Picked:</b> design {e(chosen.upper())}" + (f". What they liked in the others: {e(note)}" if note else "") + "</p>") if chosen else \
-        f"<p class=status><b>Recommended:</b> design {e(str(rec).upper())}. {e(designs.get('reason') or '')}<br>Pick one, and say what you liked in the others. That is the approval: the build starts from it.</p>"
+                    f"<p class=idea>{e(d.get('idea') or '')}</p><p class=meta>Composition: {e(d.get('composition') or '')}</p>"
+                    f"<p class=meta>Type: {e(str(ty.get('display') or ''))} / {e(str(ty.get('body') or ''))} · Flavour: {e(d.get('flavor') or '')} · Style: {e(L.get('name') or '')} · {_swatches(d.get('palette'))}</p>"
+                    "<div class=frames>"
+                    + (f"<figure><img src='{e(br)}' alt='Design {e(d['id'])} in a phone browser' loading=lazy><figcaption>On a phone, as the browser shows it ({BROWSER[0]}×{BROWSER[1]})</figcaption></figure>" if br else "")
+                    + (f"<figure><img src='{e(ph)}' alt='Design {e(d['id'])} full screen on a phone' loading=lazy><figcaption>Full screen (390×844)</figcaption></figure>" if ph else "")
+                    + "<div style='display:grid;gap:14px'>"
+                    + (f"<figure><img src='{e(pl)}' alt='Design {e(d['id'])} during play' loading=lazy><figcaption>During play</figcaption></figure>" if pl else "")
+                    + (f"<figure><img src='{e(dk)}' alt='Design {e(d['id'])} at desktop size' loading=lazy><figcaption>Desktop 1440×900</figcaption></figure>" if dk else "")
+                    + f"</div></div>{icons}</section>")
+    has_icons = any(d.get("icons") for d in designs.get("designs") or [])
+    status = (f"<p class=status><b>Picked:</b> design {e(chosen.upper())}" + (f" with icon {e(icon)}" if icon else "") + (f". What they liked in the others: {e(note)}" if note else "") + "</p>") if chosen else \
+        (f"<p class=status><b>Recommended:</b> design {e(str(rec).upper())}. {e(designs.get('reason') or '')}<br>Pick one" + (" and its icon (for example “a:kite”)" if has_icons else "")
+         + ", and say what you liked in the others. That is the approval: the build starts from it.</p>")
     body = (f"{crumbs}<h1>{e(title)}: pick a design</h1><p class=lede>Three designs of the real first screen inside the chosen style. They differ in composition, "
-            f"type, palette and flavour.</p>{status}{''.join(secs)}")
+            f"type and palette, on the title and during play" + ("; each brings its own app icon" if has_icons else "") + f".</p>{status}{''.join(secs)}")
     p = os.path.join(out_dir, "index.html")
     with open(p, "w") as f: f.write(_page(f"{title} design pick", body, "Design pick: three designs of the first screen"))
     return p
@@ -605,17 +724,28 @@ def look_page(target, shots, out_dir, title, style=None, live_url=None, remainin
                 imgs.append(f"<figure><img src='{e(rel)}' alt='{e(s.get('name') or s['id'])} at {e(c['viewport'])}' loading=lazy><figcaption>{e(c['viewport'])}</figcaption></figure>")
             else:
                 imgs.append(f"<div class=notseen>Not seen at {e(c.get('viewport') or '?')}: {e(c.get('reason') or 'the shot could not be reached')}</div>")
+        for c in s.get("captures") or []:   # a moment's sequence: before → peak → after, on the phone
+            q = c.get("sequence") or {}
+            if c.get("reached") and c.get("viewport") == "phone" and all(q.get(k) and os.path.isfile(q[k]) for k in ("before", "peak", "after")):
+                fr = [os.path.relpath(_copy(q[k], os.path.join(out_dir, "shipped"), f"{s['id']}@phone.{k}.png"), out_dir) for k in ("before", "peak", "after")]
+                imgs.append("<div class=seq>" + "".join(f"<figure><img src='{e(f)}' alt='{e(s.get('name') or s['id'])}: {k}' loading=lazy><figcaption>{k}</figcaption></figure>"
+                                                         for f, k in zip(fr, ("before", "peak", "after"))) + "</div>")
         rows.append(f"<section class=design><h2>{e(s.get('name') or s['id'])}</h2><p class=meta>{e(s.get('kind') or '')}"
                     f"{' · moment ' + e(s['moment']) if s.get('moment') else ''}</p><div class=compare>{''.join(imgs)}</div></section>")
     hero = []
-    if tg.get("phone"):
+    first = tg.get("browser") or tg.get("phone")   # the frame drawn at the real phone browser size is the one a phone capture can match
+    if first:
         main = next((s for s in shots.get("shots") or [] if s.get("kind") in ("title", "screen")), None)
         cap = next((c for c in (main or {}).get("captures") or [] if c.get("reached") and c.get("viewport") in ("phone", "iphone13", "iphone17")), None)
         ship = (os.path.relpath(os.path.join(out_dir, "shipped", f"{main['id']}@{cap['viewport']}.png"), out_dir) if cap else None)
-        hero.append("<div class=compare><div><h3>Chosen frame (phone, as designed)</h3><img src='" + e(tg["phone"]) + "' alt='The chosen design at phone size'></div><div><h3>Shipped (phone, as captured: the browser's own toolbars take their share of the height)</h3>"
+        note = "" if tg.get("browser") else " (drawn full screen: the browser's toolbars take their share of the shipped height)"
+        hero.append("<div class=compare><div><h3>Chosen frame, on a phone" + note + "</h3><img src='" + e(first) + "' alt='The chosen design at phone size'></div><div><h3>Shipped, on a phone</h3>"
                     + (f"<img src='{e(ship)}' alt='The shipped first screen at phone size'>" if ship else "<div class=notseen>The first screen was not captured</div>") + "</div></div>")
-    if tg.get("desktop") or tg.get("play"):
-        hero.append("<div class=compare>" + "".join(f"<div><h3>Chosen {k}</h3><img src='{e(v)}' alt='The chosen {e(k)} frame'></div>" for k, v in tg.items() if k != "phone") + "</div>")
+    rest = {k: v for k, v in tg.items() if k not in ("phone", "browser") or (k == "phone" and tg.get("browser"))}
+    labels = {"phone": "full screen", "desktop": "desktop", "play": "play frame", "icon": "app icon"}
+    if rest:
+        hero.append("<div class=compare>" + "".join(f"<div><h3>Chosen {labels.get(k, k)}</h3><img src='{e(v)}' alt='The chosen {e(k)} frame'" + (" style='max-width:160px;border-radius:22%'" if k == "icon" else "") + "></div>"
+                                                    for k, v in rest.items()) + "</div>")
     rem = ""
     if remaining:
         rem = ("<h2 style='margin-top:30px'>Still open after the review rounds</h2><ul class=gaps>"
@@ -650,8 +780,8 @@ def valid_choice(result, choice):
     kind = (result or {}).get("approval")
     if kind == "style":
         parse_choice(choice, result.get("styles") or {})
-    elif kind == "design" and choice is not None and choice not in [d for d in result.get("options") or []]:
-        raise ValueError(f"{choice!r} is not one of the designs {result.get('options')}")
+    elif kind == "design" and choice is not None and choice not in (result.get("options") or []):
+        raise ValueError(f"{choice!r} is not one of {result.get('options')}")
 
 
 def save_target(project, art_rel, design, base, meta):
@@ -659,7 +789,8 @@ def save_target(project, art_rel, design, base, meta):
     never silently overwritten. → (paths, replaced)"""
     tdir = os.path.join(project, art_rel, "target")
     os.makedirs(tdir, exist_ok=True)
-    files = {k: _abs(base, design[k]) for k in ("phone", "desktop", "play") if design.get(k)}
+    files = {k: _abs(base, design[k]) for k in ("phone", "browser", "desktop", "play") if design.get(k)}
+    if meta.get("icon_file"): files["icon"] = _abs(base, meta.pop("icon_file"))
     new = {f"{k}{os.path.splitext(v)[1].lower()}": v for k, v in files.items()}
     replaced = []
     old = [f for f in os.listdir(tdir) if os.path.isfile(os.path.join(tdir, f))]
@@ -678,7 +809,7 @@ def save_target(project, art_rel, design, base, meta):
 
 
 # ---------------------------------------------------------------- the review pack and its rules
-def review_pack(project, shots_report, out_dir, target=None, style_image=None, refs=None, moments=None, direction=None):
+def review_pack(project, shots_report, out_dir, target=None, style_image=None, refs=None, moments=None, direction=None, rnd=0, previous=None):
     """Index the evidence for the visual review: the chosen frame, the style sample, the references and every reached shot,
     each with an id and a SHA-256. Shots that were not reached are listed as not seen and are not citable."""
     items, not_seen = [], []
@@ -689,9 +820,21 @@ def review_pack(project, shots_report, out_dir, target=None, style_image=None, r
     for r in refs or []: add(f"reference:{r['file']}", "reference", os.path.join(project, r["file"]), note=r.get("note"))
     for s in (shots_report or {}).get("shots") or []:
         for c in s.get("captures") or []:
-            if c.get("reached"): add(f"shot:{s['id']}@{c['viewport']}", "screenshot", c.get("image"), shot=s["id"], moment=s.get("moment"), shot_kind=s.get("kind"))
+            if c.get("reached"):
+                add(f"shot:{s['id']}@{c['viewport']}", "screenshot", c.get("image"), shot=s["id"], moment=s.get("moment"), shot_kind=s.get("kind"), viewport=c["viewport"])
+                for part in ("before", "after"):   # a moment's sequence: before, peak (the shot itself), after
+                    fp = (c.get("sequence") or {}).get(part)
+                    if fp: add(f"shot:{s['id']}@{c['viewport']}#{part}", "screenshot", fp, shot=s["id"], moment=s.get("moment"), shot_kind=s.get("kind"), viewport=c["viewport"], frame=part)
             else: not_seen.append({"shot": s["id"], "viewport": c.get("viewport"), "reason": c.get("reason")})
-    K = {"schema": "gitcraft-visual-pack/1", "project": project, "created": _now(), "items": items, "not_seen": not_seen,
+    by = {i["id"]: i["path"] for i in items}
+    same = []   # the instant of failing must be its own picture: a fail shot that IS the results screen shows nothing of the fail
+    for vp in sorted({i.get("viewport") for i in items if i.get("shot_kind") == "fail"}):
+        for f in [i for i in items if i.get("shot_kind") == "fail" and i.get("viewport") == vp and not i.get("frame")]:
+            for r in [i for i in items if i.get("shot_kind") == "results" and i.get("viewport") == vp and not i.get("frame")]:
+                v = same_picture(f["path"], r["path"])
+                if f["sha256"] == r["sha256"] or (v is not None and v >= 0.9): same.append({"fail": f["id"], "results": r["id"], "layout_correlation": v})
+    K = {"schema": "gitcraft-visual-pack/2", "project": project, "created": _now(), "items": items, "not_seen": not_seen, "round": int(rnd or 0),
+         "previous_gaps": [{k: g.get(k) for k in ("id", "shot", "against", "gap", "fix")} for g in previous or []], "fail_same_as_results": same,
          "moments": moments or [], "style": ((direction or {}).get("art") or {}).get("style"), "concept": ((direction or {}).get("art") or {}).get("concept"),
          "fingerprint": hashlib.sha256(json.dumps(sorted(i["sha256"] for i in items)).encode()).hexdigest()[:16]}
     os.makedirs(out_dir, exist_ok=True)
@@ -701,19 +844,63 @@ def review_pack(project, shots_report, out_dir, target=None, style_image=None, r
     return K
 
 
+CHECKS = {"text_readable": "every piece of text is readable where it sits; text on textured, hatched or busy ground has the contrast or the backing it needs",
+          "geometry_deliberate": "nothing is rotated, clipped, cut off or tiny unless the style gives a reason (name the reason if something is)",
+          "player_visible": "the thing the player controls (or the main content) is never hidden by the HUD, a panel or a backing",
+          "credits_placed": "credits and bylines sit somewhere deliberate (a footer, a corner, the pause screen), never floating under a control"}
+
+
+def shots_in(K):
+    """The reached shots of a pack, by shot id → its item ids (every viewport, every frame of a sequence)."""
+    out = {}
+    for i in K.get("items") or []:
+        if i.get("kind") == "screenshot" and i.get("shot"): out.setdefault(i["shot"], []).append(i["id"])
+    return out
+
+
+def moment_sequences(K):
+    """moment id → [[before, peak, after] per viewport] for the moments whose sequence was captured."""
+    out = {}
+    ids = {i["id"]: i for i in K.get("items") or []}
+    for i in K.get("items") or []:
+        if i.get("moment") and not i.get("frame") and f"{i['id']}#before" in ids and f"{i['id']}#after" in ids:
+            out.setdefault(i["moment"], []).append([f"{i['id']}#before", i["id"], f"{i['id']}#after"])
+    return out
+
+
 def review_brief(K):
-    L = ["# Visual review brief", "", "Compare the built product with what the person chose. Advisory judgement: no score. Its gaps become work orders "
+    L = ["# Visual review brief" + (f" (round {K.get('round')})" if K.get("round") else ""), "",
+         "Compare the built product with what the person chose. Advisory judgement: no score. Its gaps become work orders "
          f"(at most {ROUNDS} rounds); what remains is listed for the person with the screenshots.", "",
          f"Style: {json.dumps(K.get('style'))}", f"Concept: {K.get('concept')}", ""]
     L += ["## What was chosen (open these first)", ""] + [f"- `{i['id']}` — {i['path']}" for i in K["items"] if i["kind"] in ("target", "style", "reference")]
-    L += ["", "## The shipped shots (open each one you cite)", ""] + [f"- `{i['id']}` ({i.get('shot_kind')}{', moment ' + i['moment'] if i.get('moment') else ''}) — {i['path']}"
-                                                                      for i in K["items"] if i["kind"] == "screenshot"]
+    L += ["", "## The shipped shots (open every one: each must be in coverage.viewed)", ""] + [
+        f"- `{i['id']}` ({i.get('shot_kind')}{', moment ' + i['moment'] if i.get('moment') else ''}) — {i['path']}" for i in K["items"] if i["kind"] == "screenshot"]
     if K["not_seen"]: L += ["", "## Not seen (never judge these)", ""] + [f"- {n['shot']} @ {n['viewport']}: {n['reason']}" for n in K["not_seen"]]
-    if K["moments"]: L += ["", "## Signature moments", ""] + [f"- `moment:{m.get('id')}` {m.get('name')}: {m.get('what')}" for m in K["moments"]]
+    L += ["", "## The bar: answer these four checks for EVERY shot, every round (`checks`)", ""] + [f"- `{k}`: {v}" for k, v in CHECKS.items()]
+    L += ["", "Look at the phone captures at full size. A check that fails is a gap (with the fix); `ok: true` needs a note saying what you looked at."]
+    seqs = moment_sequences(K)
+    if K["moments"]:
+        L += ["", "## Signature moments: judged as events, not stills (`moments`)", "",
+              "Each moment was captured as before → peak → after. Open all three at phone size and answer: does it read as an EVENT (something visibly happens, at a size "
+              "a thumb-holding person notices)? A small label appearing is not a moment. If it does not land, that is a gap against `moment:<id>` with what would make it land.", ""]
+        L += [f"- `moment:{m.get('id')}` {m.get('name')}: {m.get('what')} — frames: " + ("; ".join(" → ".join(f"`{x}`" for x in t) for t in seqs.get(m.get("id"), [])) or "NOT SEEN (do not judge)")
+              for m in K["moments"]]
+    if K.get("fail_same_as_results"):
+        L += ["", "## The fail shot is the results screen", "", "The fail capture shows the same picture as the results capture: the instant of failing is not visible. That is a gap on the fail shot."]
+    if K.get("previous_gaps"):
+        L += ["", "## After the fixes: every earlier gap, and anything the fixes broke (`previous`)", "",
+              "Every shot was shot again. Say for each earlier gap whether it is closed, and look at every shot for NEW gaps the fixes caused.", ""]
+        L += [f"- `{g['id']}` ({g.get('shot')} vs {g.get('against')}): {g.get('gap')}" for g in K["previous_gaps"]]
+    ex_shot = next(iter(shots_in(K)), "title")
     L += ["", "## Schema", "", "```json", json.dumps({
-        "reviewer": "Claude Code session (model judgement)", "coverage": {"viewed": ["target:phone", "shot:title@phone"], "not_seen": ["fail@desktop"]},
-        "summary": "an assessment against the chosen frame, the style and the moments", "matches": [{"against": "target", "claim": "…", "evidence": ["shot:title@phone", "target:phone"], "basis": "observed_render"}],
-        "gaps": [{"id": "g1", "shot": "title", "against": "target", "gap": "…", "fix": "…", "evidence": ["shot:title@phone", "target:phone"], "basis": "observed_render", "severity": "major"}]}, indent=1), "```", ""]
+        "reviewer": "Claude Code session (model judgement)", "coverage": {"viewed": ["target:phone", f"shot:{ex_shot}@phone"], "not_seen": ["fail@desktop"]},
+        "summary": "an assessment against the chosen frame, the style and the moments",
+        "checks": [{"shot": ex_shot, **{k: {"ok": True, "note": "what you looked at"} for k in CHECKS}}],
+        "moments": [{"id": "first-win", "reads_as_event": False, "why": "what happens across the three frames, and why it does or does not land", "evidence": ["shot:x@phone#before", "shot:x@phone", "shot:x@phone#after"]}],
+        "previous": [{"id": "g1", "closed": True, "note": "what the new shot shows"}],
+        "matches": [{"against": "target", "claim": "…", "evidence": [f"shot:{ex_shot}@phone", "target:phone"], "basis": "observed_render"}],
+        "gaps": [{"id": "g1", "shot": ex_shot, "against": "target", "gap": "…", "fix": "…", "evidence": [f"shot:{ex_shot}@phone", "target:phone"], "basis": "observed_render", "severity": "major"}]}, indent=1), "```", ""]
     return "\n".join(L)
 
 
@@ -749,8 +936,8 @@ def review_errors(R, K):
     for n, c in enumerate(R.get("matches") or []):
         if not AGAINST.match(str(c.get("against") or "")): E.append(f"matches[{n}]: against is target, style, moment:<id> or reference:<file>")
         claim(f"matches[{n}]", c, ("claim",))
-    gids = set()
-    for n, g in enumerate(R.get("gaps") or []):
+    gids, gaps = set(), [g for g in R.get("gaps") or [] if isinstance(g, dict)]
+    for n, g in enumerate(gaps):
         w = f"gaps[{n}]"
         if not g.get("id") or g["id"] in gids: E.append(f"{w}: a unique id")
         gids.add(g.get("id"))
@@ -762,6 +949,42 @@ def review_errors(R, K):
         if g.get("severity") not in ("major", "minor"): E.append(f"{w}: severity major or minor")
         if g.get("basis") != "observed_render": E.append(f"{w}: a visual gap is something seen in a shot (basis observed_render)")
         claim(w, g, ("gap",))
+    # ---- the bar: four checks on every reached shot, every round; every frame of every shot opened
+    reached = shots_in(K)
+    for sid, items in reached.items():
+        miss = [x for x in items if x not in viewed]
+        if miss: E.append(f"coverage.viewed: shot {sid} has captures that were not opened ({', '.join(miss[:4])}); every shot is looked at every round")
+    C = {c.get("shot"): c for c in R.get("checks") or [] if isinstance(c, dict)}
+    for sid in reached:
+        c = C.get(sid)
+        if not c: E.append(f"checks: shot {sid} has no entry (answer {', '.join(CHECKS)} for every shot)"); continue
+        for k in CHECKS:
+            a = c.get(k)
+            if not isinstance(a, dict) or not isinstance(a.get("ok"), bool) or not _said(a.get("note"), 8): E.append(f"checks[{sid}].{k}: {{ok: true|false, note: what you saw}}"); continue
+            if not a["ok"] and not any(g.get("shot") == sid for g in gaps): E.append(f"checks[{sid}].{k} failed, but no gap names shot {sid}: a failed check is a gap with its fix")
+    for sid in C:
+        if sid not in reached: E.append(f"checks: shot {sid} was not seen; it cannot be checked")
+    # ---- moments are judged as events, from their sequence
+    seqs = moment_sequences(K)
+    M = {m.get("id"): m for m in R.get("moments") or [] if isinstance(m, dict)}
+    for mid, frames in seqs.items():
+        m = M.get(mid)
+        if not m or not isinstance(m.get("reads_as_event"), bool) or not _said(m.get("why"), 20): E.append(f"moments: say whether moment {mid} reads as an event at phone size, and why (reads_as_event, why)"); continue
+        ev = set(m.get("evidence") or [])
+        if not any(set(t) <= ev and set(t) <= viewed for t in frames): E.append(f"moments[{mid}]: cite and open its whole sequence (before, peak, after), e.g. {frames[0]}")
+        if not m["reads_as_event"] and not any(g.get("against") == f"moment:{mid}" for g in gaps): E.append(f"moments[{mid}] does not read as an event, but no gap is against moment:{mid}: a moment that does not land is a work order")
+        fm = FEEL.search(str(m.get("why") or ""))
+        if fm: E.append(f"moments[{mid}].why: '{fm.group(0)}' is a playtest hypothesis; say what is visible in the frames")
+    for mid in M:
+        if mid not in seqs: E.append(f"moments: {mid} has no captured sequence; it was not seen and cannot be judged")
+    if K.get("fail_same_as_results") and not any(g.get("shot") in {ids[x["fail"]].get("shot") for x in K["fail_same_as_results"] if x["fail"] in ids} for g in gaps):
+        E.append("the fail shot shows the same picture as the results screen: that is a gap on the fail shot (the instant of failing must be visible)")
+    # ---- after a round of fixes: every earlier gap answered; a gap still open is a gap again
+    P = {x.get("id"): x for x in R.get("previous") or [] if isinstance(x, dict)}
+    for g in K.get("previous_gaps") or []:
+        a = P.get(g["id"])
+        if not a or not isinstance(a.get("closed"), bool) or not _said(a.get("note"), 8): E.append(f"previous: say whether earlier gap {g['id']} is closed in the new shots ({{id, closed, note}})"); continue
+        if not a["closed"] and not any(x.get("shot") == g.get("shot") for x in gaps): E.append(f"previous[{g['id']}] is still open, but no gap names shot {g.get('shot')}")
     return E
 
 

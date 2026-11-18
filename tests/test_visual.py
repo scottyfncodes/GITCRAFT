@@ -30,12 +30,14 @@ def check(label, cond, detail=""):
     fails += 0 if cond else 1
 
 
-def png(path, w, h, rgb, stripe=None):
+def png(path, w, h, rgb, stripe=None, block=None):
+    """A flat picture; `block` (x0, y0, x1, y1 as fractions) paints one dark mass, so two pictures can differ in layout, not only colour."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     px = bytearray()
     for y in range(h):
         for x_ in range(w):
             c = stripe if stripe and (x_ // 20 + y // 20) % 2 else rgb
+            if block and block[0] <= x_ / w < block[2] and block[1] <= y / h < block[3]: c = tuple(255 - v for v in rgb)
             px += bytes(c) + b"\xff"
     icons.encode(path, w, h, px)
     return path
@@ -95,6 +97,17 @@ p2, _ = plan("Make a tiny one-button game called Kite Line", version=2)
 check("plan v2: unchanged (no visual task; the direction keeps its v2 gate)", not any(k.startswith(("design.style", "design.design", "capture.", "review.", "release.look")) for k in p2["tasks"])
       and p2["tasks"]["design.direction"]["work_order"]["expected"][0]["validate"] == "direction")
 check("engine: a new production is plan v3", planner.PLAN_VERSION == 3)
+pi, _ = plan("Build a mobile-first tide timetable web app called Tidepool", icon={"required": True, "mode": "new"})
+check("app icon: chosen on the design pick page with the look (no icon.concepts / icon.select; icon.master follows the design pick; still two picks)",
+      "icon.concepts" not in pi["tasks"] and "icon.select" not in pi["tasks"] and pi["tasks"]["icon.master"]["depends_on"] == ["design.design_pick"]
+      and pi["tasks"]["design.design_pick"]["params"].get("icons") and "icon options FROM each design" in json.dumps(pi["tasks"]["design.designs"]["work_order"])
+      and [k for k, t in pi["tasks"].items() if t.get("action") in ("style_pick", "design_pick", "icon_select")] == ["design.style_pick", "design.design_pick"], sorted(pi["tasks"]))
+rf = os.path.join(ws, "refproj"); os.makedirs(rf); src = png(os.path.join(ws, "pasted", "screenshot.png"), 60, 40, (10, 120, 200))
+r1_ = visual.add_reference(rf, src, "pasted in chat: the blue I like"); r2_ = visual.add_reference(rf, src)
+other = png(os.path.join(ws, "pasted2", "screenshot.png"), 60, 40, (200, 20, 20)); r3_ = visual.add_reference(rf, other)
+check("references: a pasted image is saved into the project's references folder with its note; the same picture once; another picture never overwrites it",
+      r1_ == r2_ == "art-direction/references/screenshot.png" and r3_ == "art-direction/references/screenshot-2.png"
+      and {r["file"]: r["note"] for r in visual.references(rf)} == {r1_: "pasted in chat: the blue I like", r3_: None}, (r1_, r2_, r3_))
 
 # ---------------------------------------------------------------- 3. validators
 vd = os.path.join(ws, "val"); os.makedirs(vd)
@@ -125,14 +138,17 @@ def design(i, style, **over):
          "type": {"display": ["Outfit", "Barlow Condensed", "Fraunces"][i], "body": "Overpass"},
          "palette": [{"background": "#f6e7c8", "surface": "#fff8ea", "primary": "#e4572e", "accent": "#2e86ab", "text": "#20323f"},
                      {"background": "#0f2a3a", "surface": "#173b50", "primary": "#ffd166", "accent": "#06d6a0", "text": "#f1f7fa"},
-                     {"background": "#2b1d3a", "surface": "#3c2a50", "primary": "#ff9f80", "accent": "#9ad1d4", "text": "#fbeee6"}][i],
+                     {"background": "#f4f1ea", "surface": "#ffffff", "primary": "#b3261e", "accent": "#1f6f5c", "text": "#22201c"}][i],
          "flavor": ["loud festival bunting", "calm instrument precision", "quiet evening nostalgia"][i],
-         "html": f"{'abc'[i]}/index.html", "phone": f"{'abc'[i]}/phone.png", "desktop": f"{'abc'[i]}/desktop.png", "play": f"{'abc'[i]}/play.png"}
+         "html": f"{'abc'[i]}/index.html", "browser": f"{'abc'[i]}/browser.png", "phone": f"{'abc'[i]}/phone.png", "desktop": f"{'abc'[i]}/desktop.png", "play": f"{'abc'[i]}/play.png"}
     d.update(over); return d
-def write_designs(base, D, colours=((246, 231, 200), (15, 42, 58), (230, 120, 170))):
+BLOCKS = ((0.05, 0.1, 0.6, 0.4), (0.3, 0.55, 0.95, 0.9), (0.0, 0.0, 1.0, 0.18))   # three different compositions: where each picture's mass sits
+def write_designs(base, D, colours=((246, 231, 200), (15, 42, 58), (230, 120, 170)), blocks=BLOCKS, play_blocks=BLOCKS):
     for i, d in enumerate(D["designs"]):
         os.makedirs(os.path.join(base, d["id"]), exist_ok=True); open(os.path.join(base, d["html"]), "w").write("<!doctype html><title>x</title>")
-        png(os.path.join(base, d["phone"]), 96, 200, colours[i % 3]); png(os.path.join(base, d["desktop"]), 200, 125, colours[i % 3]); png(os.path.join(base, d["play"]), 200, 112, colours[i % 3])
+        png(os.path.join(base, d["phone"]), 120, 260, colours[i % 3], block=blocks[i % 3]); png(os.path.join(base, d["browser"]), 195, 332, colours[i % 3], block=blocks[i % 3])
+        png(os.path.join(base, d["desktop"]), 200, 125, colours[i % 3], block=blocks[i % 3]); png(os.path.join(base, d["play"]), 240, 135, colours[i % 3], block=play_blocks[i % 3])
+        for o in d.get("icons") or []: png(os.path.join(base, o["file"]), 512, 512, colours[i % 3], block=(0.2, 0.2, 0.5 + 0.1 * i, 0.8))
     json.dump(D, open(os.path.join(base, "designs.json"), "w"))
     return os.path.join(base, "designs.json")
 dd = os.path.join(ws, "designs-ok"); D3 = {"product": "game", "style": "flat-geometric", "recommended": "a", "reason": "the poster reads at thumbnail size on a phone",
@@ -144,7 +160,32 @@ for d in Dc["designs"]: d.update(composition=D3["designs"][0]["composition"], ty
 check("designs: colour swaps of one design refused (they must differ in composition, type and flavour too)", not ok(visual.validate_designs(write_designs(dc, Dc), dc)))
 ds = os.path.join(ws, "designs-same")
 check("designs: three identical pictures refused, whatever their notes say",
-      not ok(visual.validate_designs(write_designs(ds, copy.deepcopy(D3), colours=((200, 200, 200),) * 3), ds)))
+      not ok(visual.validate_designs(write_designs(ds, copy.deepcopy(D3), colours=((200, 200, 200),) * 3, blocks=(BLOCKS[0],) * 3, play_blocks=(BLOCKS[0],) * 3), ds)))
+dw = os.path.join(ws, "designs-colourway")
+rw = visual.validate_designs(write_designs(dw, copy.deepcopy(D3), blocks=(BLOCKS[0],) * 3, play_blocks=(BLOCKS[0],) * 3), dw)
+check("designs: one layout in three colourways refused: at 120 px in grayscale the titles (and the play frames) read as one picture",
+      [c["ok"] for c in rw if "no two titles" in c["name"]] == [False] and [c["ok"] for c in rw if "no two play frames" in c["name"]] == [False], [c for c in rw if not c["ok"]])
+dpf = os.path.join(ws, "designs-playframe")
+rpf = visual.validate_designs(write_designs(dpf, copy.deepcopy(D3), play_blocks=(BLOCKS[1],) * 3), dpf)
+check("designs: different titles over one play frame refused (the play frames must differ too, not only their background)",
+      [c["ok"] for c in rpf if "no two titles" in c["name"]] == [True] and [c["ok"] for c in rpf if "no two play frames" in c["name"]] == [False])
+check("same-picture: a light and a dark colourway of one layout correlate (the measure ignores colour); different layouts do not",
+      visual.same_picture(os.path.join(dw, "a", "phone.png"), os.path.join(dw, "b", "phone.png")) >= visual.SAME_PICTURE
+      and visual.same_picture(os.path.join(dd, "a", "phone.png"), os.path.join(dd, "b", "phone.png")) < visual.SAME_PICTURE)
+dty = os.path.join(ws, "designs-type"); Dty = copy.deepcopy(D3); Dty["designs"][1]["type"] = Dty["designs"][0]["type"]
+check("designs: two designs in one typeface refused (composition AND type AND palette must each differ)", not ok(visual.validate_designs(write_designs(dty, Dty), dty)))
+dnb = os.path.join(ws, "designs-nobrowser"); Dnb = copy.deepcopy(D3); write_designs(dnb, Dnb); os.remove(os.path.join(dnb, "a", "browser.png"))
+check("designs: every design is also drawn at the real phone browser size (390x664)", not ok(visual.validate_designs(os.path.join(dnb, "designs.json"), dnb)))
+dic = os.path.join(ws, "designs-icons"); Dic = copy.deepcopy(D3); Dic["icons_required"] = True
+check("designs: when the product needs an app icon, a design without icon options is refused", not ok(visual.validate_designs(write_designs(dic, Dic), dic)))
+for d in Dic["designs"]: d["icons"] = [{"id": "kite", "file": f"{d['id']}/icon-kite.png", "idea": "the kite as a diamond"}]
+check("designs: each design brings its own icon options (square, 512 px or more): accepted", ok(visual.validate_designs(write_designs(dic, Dic), dic)),
+      [c for c in visual.validate_designs(os.path.join(dic, "designs.json"), dic) if not c["ok"]])
+check("design choice: 'a' takes the design with its first icon, 'b:kite' names the icon, an unknown icon is refused",
+      visual.split_design_choice("a", Dic)[1]["id"] == "kite" and visual.split_design_choice("b:kite", Dic)[0]["id"] == "b" and visual.split_design_choice("c", D3)[1] is None)
+try: visual.split_design_choice("a:moon", Dic); bad_icon = False
+except ValueError: bad_icon = True
+check("design choice: an icon the design does not offer is refused", bad_icon)
 json.dump({"styles": ["flat-geometric", "pixel-art"], "how": "compare"}, open(os.path.join(dd, "style_selection.json"), "w"))
 check("designs: when two styles are compared, two designs in each are required", not ok(visual.validate_designs(os.path.join(dd, "designs.json"), dd)))
 os.remove(os.path.join(dd, "style_selection.json"))
@@ -152,7 +193,7 @@ SH = {"product": "game", "shots": [
     {"id": "title", "name": "Title, fully loaded", "kind": "title", "steps": [], "wait_for": {"selector": "#title[data-ready]"}},
     {"id": "play", "name": "Mid-play", "kind": "play", "steps": [{"press": "Space"}], "wait_for": {"js": "window.__game.state === 'playing' && window.__game.time > 0.3"}},
     {"id": "first-ribbon", "name": "The first ribbon", "kind": "moment", "moment": "first-ribbon", "steps": [{"press": "Space"}], "wait_for": {"js": "window.__game.score >= 1"}},
-    {"id": "fail", "name": "Grounded", "kind": "fail", "steps": [{"press": "Space"}], "wait_for": {"js": "window.__game.state === 'over'"}},
+    {"id": "fail", "name": "Grounded", "kind": "fail", "steps": [{"press": "Space"}], "wait_for": {"js": "window.__game.state === 'failing'"}, "settle_ms": 50},
     {"id": "results", "name": "Results", "kind": "results", "steps": [{"press": "Space"}], "wait_for": {"selector": "#results"}},
     {"id": "title-reveal", "name": "The title reveal", "kind": "moment", "moment": "title-reveal", "steps": [], "wait_for": {"selector": "#title[data-ready]"}}]}
 sp_ = os.path.join(vd, "shots.json"); json.dump(SH, open(sp_, "w"))
@@ -161,11 +202,28 @@ bad = copy.deepcopy(SH); bad["shots"][1]["wait_for"] = {}; bad["shots"][1]["step
 check("shots: a fixed delay instead of a wait for real content refused", not ok(visual.validate_shots(os.path.join(vd, "sh2.json"))))
 bad = copy.deepcopy(SH); bad["shots"] = [s for s in bad["shots"] if s["kind"] != "fail"]; json.dump(bad, open(os.path.join(vd, "sh3.json"), "w"))
 check("shots: a game's list without a fail shot refused", not ok(visual.validate_shots(os.path.join(vd, "sh3.json"))))
+bad = copy.deepcopy(SH); next(s for s in bad["shots"] if s["kind"] == "fail")["wait_for"] = next(s for s in bad["shots"] if s["kind"] == "results")["wait_for"]
+json.dump(bad, open(os.path.join(vd, "sh4.json"), "w"))
+check("shots: a fail shot that waits for the results screen refused (the instant of failing is its own shot)", not ok(visual.validate_shots(os.path.join(vd, "sh4.json"))))
 
 # review rules
 K = {"items": [{"id": "target:phone", "kind": "target", "path": "x", "sha256": "1"}, {"id": "shot:title@phone", "kind": "screenshot", "path": "y", "sha256": "2", "shot": "title"}],
      "not_seen": [{"shot": "results", "viewport": "phone", "reason": "timeout"}]}
+def full_review(K, gaps=(), **over):
+    """A review that meets the bar for this pack: every capture opened, the four checks on every shot, every moment judged from its
+    sequence, every earlier gap answered. A gap marks its shot's text check as failed."""
+    shots = visual.shots_in(K); seqs = visual.moment_sequences(K)
+    R = {"reviewer": "test", "coverage": {"viewed": [i["id"] for i in K["items"] if i["kind"] in ("screenshot", "target", "style", "reference")]},
+         "summary": "an assessment of every shot against the chosen frame, the style and the moments",
+         "checks": [{"shot": sid, **{k: {"ok": not (k == "text_readable" and any(g["shot"] == sid for g in gaps)), "note": "looked at the phone capture at full size"} for k in visual.CHECKS}} for sid in shots],
+         "moments": [{"id": m, "reads_as_event": True, "why": "the frame changes visibly between before, peak and after", "evidence": f[0]} for m, f in seqs.items()],
+         "previous": [{"id": g["id"], "closed": True, "note": "the new shot shows it fixed"} for g in K.get("previous_gaps") or []],
+         "matches": [], "gaps": [dict(g, evidence=[shots[g["shot"]][0]], basis="observed_render") for g in gaps]}
+    R.update(over); return R
+GAP = {"id": "g1", "shot": "title", "against": "target", "gap": "the title face is the system font, not Outfit", "fix": "load the Outfit file and set it on h1", "severity": "major"}
+CK = {k: {"ok": True, "note": "looked at the phone capture"} for k in visual.CHECKS}
 good = {"reviewer": "test", "coverage": {"viewed": ["shot:title@phone", "target:phone"]}, "summary": "an assessment of the title against the chosen frame",
+        "checks": [{"shot": "title", **dict(CK, text_readable={"ok": False, "note": "the title face is a fallback"})}],
         "matches": [{"against": "target", "claim": "the title keeps the stacked composition", "evidence": ["shot:title@phone", "target:phone"], "basis": "observed_render"}],
         "gaps": [{"id": "g1", "shot": "title", "against": "target", "gap": "the title face is the system font, not Outfit", "fix": "load the Outfit file and set it on h1",
                   "evidence": ["shot:title@phone"], "basis": "observed_render", "severity": "major"}]}
@@ -180,6 +238,31 @@ b = copy.deepcopy(good); b["matches"][0]["claim"] = "the title screen is fun and
 check("review: fun / engaging is a playtest hypothesis, never an observation", any("playtest hypothesis" in e for e in visual.review_errors(b, K)))
 b = copy.deepcopy(good); b["summary"] = "verdict: it matches"
 check("review: 'assessment', never 'verdict'", any("verdict" in e for e in visual.review_errors(b, K)))
+b = copy.deepcopy(good); b["checks"] = []
+check("review bar: a shot without its four checks is refused (every shot, every round)", any("checks: shot title has no entry" in e for e in visual.review_errors(b, K)))
+b = copy.deepcopy(good); b["gaps"] = []
+check("review bar: a failed check with no gap on that shot is refused (a failed check is a work order)", any("failed, but no gap names shot title" in e for e in visual.review_errors(b, K)))
+KM = {"items": [{"id": f"shot:win@phone{f}", "kind": "screenshot", "path": "p", "sha256": str(n), "shot": "win", "moment": "first-win", "viewport": "phone", **({"frame": f[1:]} if f else {})}
+                for n, f in enumerate(("#before", "", "#after"))], "not_seen": [], "moments": [{"id": "first-win", "name": "First win", "what": "the board clears"}],
+      "previous_gaps": [{"id": "old1", "shot": "win", "against": "style", "gap": "the label was tiny", "fix": "make it larger"}]}
+rm = full_review(KM)
+check("moments: a moment judged from its whole sequence (before, peak, after), with every earlier gap answered: valid", not visual.review_errors(rm, KM), visual.review_errors(rm, KM))
+b = copy.deepcopy(rm); b["moments"][0]["evidence"] = ["shot:win@phone"]
+check("moments: judged from one still is refused (the sequence must be cited and opened)", any("whole sequence" in e for e in visual.review_errors(b, KM)))
+b = copy.deepcopy(rm); b["moments"][0]["reads_as_event"] = False
+check("moments: a moment that does not read as an event must become a gap against it (a work order)", any("no gap is against moment:first-win" in e for e in visual.review_errors(b, KM)))
+b = copy.deepcopy(rm); b["moments"] = []
+check("moments: every captured moment must be answered", any("reads as an event" in e for e in visual.review_errors(b, KM)))
+b = copy.deepcopy(rm); b["previous"] = []
+check("after fixes: every earlier gap must be answered (closed or not)", any("earlier gap old1" in e for e in visual.review_errors(b, KM)))
+b = copy.deepcopy(rm); b["previous"][0]["closed"] = False
+check("after fixes: an earlier gap still open must be a gap again", any("still open" in e for e in visual.review_errors(b, KM)))
+b = copy.deepcopy(rm); b["coverage"]["viewed"].remove("shot:win@phone#after")
+check("review bar: every capture of every shot is opened every round", any("were not opened" in e for e in visual.review_errors(b, KM)))
+KF = {"items": [{"id": "shot:fail@phone", "kind": "screenshot", "path": "p", "sha256": "1", "shot": "fail", "shot_kind": "fail", "viewport": "phone"}], "not_seen": [],
+      "fail_same_as_results": [{"fail": "shot:fail@phone", "results": "shot:results@phone"}]}
+check("fail shot: a capture that is the results screen must be raised as a gap", any("instant of failing" in e for e in visual.review_errors(full_review(KF), KF))
+      and not visual.review_errors(full_review(KF, gaps=[dict(GAP, shot="fail")]), KF))
 
 # ---------------------------------------------------------------- 4. the engine, end to end
 proj = os.path.join(ws, "kite-line")
@@ -227,7 +310,9 @@ dp = P["tasks"]["design.design_pick"]
 check("design pick: waits for a person; the build has not started", dp["state"] == NEEDS_APPROVAL and P["tasks"]["build"]["state"] == PENDING and P["tasks"]["design.direction"]["state"] == PENDING,
       {k: P["tasks"][k]["state"] for k in ("design.design_pick", "design.direction", "build")})
 dpage = open(dp["result"]["sheet"]).read()
-check("design pick page: each design at phone and desktop size, with its play frame", dpage.count("class='design'") == 3 and dpage.count("Phone 390") == 3 and dpage.count("Play frame") == 3)
+check("design pick page: each design with its plain name and idea, as a phone browser shows it (390×664), full screen, at desktop size and during play",
+      dpage.count("class='design'") == 3 and dpage.count("as the browser shows it (390×664)") == 3 and dpage.count("During play") == 3 and dpage.count("class=idea") == 3
+      and "a kite festival poster pasted on a pier wall" in dpage and "Design 0" in dpage)
 st = engine.approve(pid, "design.design_pick", True, note="I liked the bunting colours of A", choice="b")
 st = engine.run(pid)
 P = store.load(pid)
@@ -285,7 +370,15 @@ K = json.load(open(pack))
 check("pack: the chosen frame, the style sample, the reference and every reached shot, each hashed", {"target:phone", "style:sample", "reference:art-direction/references/festival.png", "shot:title@phone"} <= {i["id"] for i in K["items"]}
       and all(len(i["sha256"]) == 64 for i in K["items"]), [i["id"] for i in K["items"]])
 od = store.task_dir(P, "review.creative")
-r0 = dict(copy.deepcopy(good), pack=pack); r0["coverage"]["viewed"] = ["shot:title@phone", "target:phone"]
+check("pack: each signature moment was captured as a sequence (before, peak, after), on phone and desktop",
+      sorted(visual.moment_sequences(K)) == ["first-ribbon", "title-reveal"] and all(len(v) == 2 for v in visual.moment_sequences(K).values())
+      and all(os.path.isfile(next(i["path"] for i in K["items"] if i["id"] == f)) for t in visual.moment_sequences(K).values() for f in t[0]), visual.moment_sequences(K))
+check("pack: the fail shot is the instant of failing, a different picture from the results screen", K["fail_same_as_results"] == [], K["fail_same_as_results"])
+lazy = dict(copy.deepcopy(good), pack=pack); json.dump(lazy, open(os.path.join(od, "review.json"), "w"))
+st = engine.submit(pid, "review.creative", files=[os.path.join(od, "review.json")])
+check("review bar: a review that looked at one shot is refused; the work order stays owed", not st["submission"]["accepted"]
+      and "checks: shot" in json.dumps(st["submission"]["checks"]) and "reads as an event" in json.dumps(st["submission"]["checks"]), st["submission"]["checks"])
+r0 = dict(full_review(K, gaps=[GAP]), pack=pack)
 json.dump(r0, open(os.path.join(od, "review.json"), "w"))
 st = engine.submit(pid, "review.creative", files=[os.path.join(od, "review.json")], run_after=True)
 P = store.load(pid)
@@ -302,7 +395,10 @@ check("round 1: a fresh capture and a fresh review after the fix", P["tasks"]["c
       {k: (P["tasks"][k]["state"], P["tasks"][k].get("error")) for k in ("capture.shots.r1", "review.pack.r1", "review.creative.r1")})
 pack1 = next(o["path"] for o in P["tasks"]["review.pack.r1"]["outputs"] if o["role"] == "pack")
 od = store.task_dir(P, "review.creative.r1")
-r1 = dict(copy.deepcopy(good), pack=pack1, gaps=[], summary="an assessment after round 1: the title now carries the chosen face")
+K1 = json.load(open(pack1))
+check("round 1 pack: every shot was shot again, and the earlier gap is listed to be answered", K1["round"] == 1 and [g["id"] for g in K1["previous_gaps"]] == ["g1"]
+      and len(visual.shots_in(K1)) == len(visual.shots_in(K)), (K1["round"], K1["previous_gaps"]))
+r1 = dict(full_review(K1), pack=pack1, summary="an assessment after round 1: the title now carries the chosen face")
 json.dump(r1, open(os.path.join(od, "review.json"), "w"))
 st = engine.submit(pid, "review.creative.r1", files=[os.path.join(od, "review.json")], run_after=True)
 P = store.load(pid)

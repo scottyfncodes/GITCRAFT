@@ -43,8 +43,8 @@
    },
    {
     "id": "first-ribbon",
-    "name": "First ribbon",
-    "what": "The first ribbon is always on the glide line; catching it ties a yellow bow to the tail and scribbles 'first ribbon!' in the margin with a highlighter swipe",
+    "name": "First ribbon: the page celebrates",
+    "what": "Catching the first ribbon stops the page for a beat: pen rays burst from the kite, a highlighter swipe crosses the whole screen with 'first ribbon!' lettered over it, the new bow pops onto the tail at three times its size and the count is circled in red pen; play runs slow while it happens",
     "why": "the first reward lands within two seconds and teaches what to chase"
    },
    {
@@ -80,7 +80,10 @@
    "max_down_px_s": 430,
    "hit_stop_ms": 110,
    "invulnerable_ms": 1100,
-   "boil_ms": 125
+   "boil_ms": 125,
+   "moment_stop_ms": 160,
+   "moment_ms": 1500,
+   "fail_beat_ms": 700
   },
   "feedback": [
    {
@@ -97,7 +100,7 @@
    },
    {
     "event": "ground",
-    "response": "the run ends: the page turns to night and the flight is drawn"
+    "response": "the kite digs in nose-down with a red impact burst and 'thud!' for 0.7 s, then the page turns to night and the flight is drawn"
    },
    {
     "event": "first ribbon",

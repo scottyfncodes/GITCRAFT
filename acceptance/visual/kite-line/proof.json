@@ -1,7 +1,7 @@
 {
  "title": "Kite Line",
- "about": "A tiny original one-button game run through the whole picture-first path by the real Production Director: seven styles, a pick, three designs, a pick, three signature moments, a shot list, two automatic review rounds, then QA and release (READY).",
- "production": "20261118T044353Z-kite-line-1a0d",
+ "about": "A tiny original one-button game run through the whole picture-first path by the real Production Director: seven styles, a pick, three designs each with its app icon, one pick for look and icon, three signature moments captured as sequences, a shot list, two automatic review rounds at the raised bar, then QA and release (READY).",
+ "production": "20261118T055651Z-kite-line-f44d",
  "plan_version": 3,
  "status": "passed",
  "verdict": "READY",
@@ -14,9 +14,9 @@
   "recommended": "notebook",
   "wildcard": "terminal",
   "images": {
-   "notebook": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/design.styles/styles/notebook/game.png"
+   "notebook": "/home/user/gitcraft-out/production/20261118T055651Z-kite-line-f44d/tasks/design.styles/styles/notebook/game.png"
   },
-  "scene": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/design.styles/scene.json",
+  "scene": "/home/user/gitcraft-out/production/20261118T055651Z-kite-line-f44d/tasks/design.styles/scene.json",
   "references": [],
   "approved_by": "a person (production_approve)"
  },
@@ -24,8 +24,9 @@
   "design": "a",
   "style": "notebook",
   "look_name": "Notebook Sketch",
-  "liked_in_others": "acceptance stand-in for the person: A. I liked the dark night page of C; use it for the end of a flight",
-  "approved_by": "a person (production_approve)"
+  "liked_in_others": "acceptance stand-in for the person: A with the kite icon. I liked the dark night page of C; use it for the end of a flight",
+  "approved_by": "a person (production_approve)",
+  "icon": "kite"
  },
  "moments": [
   "build.moment.title-reveal",
@@ -39,11 +40,9 @@
  "review_gaps": [
   3,
   1,
-  1
+  0
  ],
- "remaining": [
-  "star-on-heading"
- ],
+ "remaining": [],
  "tasks": {
   "foundation.scaffold": "passed",
   "design.styles": "passed",
@@ -55,7 +54,11 @@
   "build.moment.title-reveal": "passed",
   "build.moment.first-ribbon": "passed",
   "build.moment.results": "passed",
+  "icon.master": "passed",
+  "icon.derivatives": "passed",
+  "integrate.icon.derivatives": "passed",
   "integrate.final": "passed",
+  "build.wire": "passed",
   "build": "passed",
   "capture.shots": "passed",
   "review.pack": "passed",
@@ -75,8 +78,13 @@
   "qa.playcraft": "passed",
   "qa.pixelcraft": "passed",
   "qa.designcraft": "passed",
+  "qa.icons": "passed",
+  "fix.qa.icons.r1": "skipped",
+  "qa.icons.r1": "skipped",
   "qa.attribution": "passed",
   "qa.standards": "passed",
+  "qa.assets": "passed",
+  "qa.licences": "passed",
   "qa.request": "passed",
   "release.regression": "passed",
   "release.report": "passed",

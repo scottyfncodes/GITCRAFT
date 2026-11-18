@@ -61,11 +61,20 @@ It works out the rest; the person never needs to know these tools.
   do `design.styles` (six to eight atlas looks rendered as THIS product's key scene, `production/kit/atlas/render.mjs`), then
   show the person the style pick page (an iPad-friendly page, never a local path: publish it or attach the images) and record
   their choice with `production_approve {task: "design.style_pick", choice}` (one look, two as "a,b", or "surprise"). Then
-  `design.designs` (three designs of the real first screen at phone and desktop size, plus a play frame for a game) and the
-  design pick the same way (`choice` + `note`: what they liked in the others): the build waits for it. Never pick for them,
+  `design.designs`: three designs of the real first screen, each with a plain name and a one-line idea, drawn at the real phone
+  browser size (390x664) as well as full screen and desktop, plus a play frame for a game and one to three app icon options drawn
+  from each design. Three colourways of one layout are one design: shrink each title and play frame to about 120 px in grayscale
+  (`python3 -m production same-picture a.png b.png`) and replace one of any two that read as the same picture before you show them.
+  Then the design pick the same way (`choice: "a:<icon>"` picks the look and its icon together, + `note`: what they liked in the
+  others): the build waits for it. Never pick for them,
   and never add a third visual question. A style named in the request skips the style pick; an existing identity with no new
-  look asked for skips both. After the build: each signature moment's work order, then `review.creative` (compare the captured
-  shot list with the chosen frame; open every image you cite; gaps become work orders, at most two rounds). End by giving the
+  look asked for skips both. **Pasted images:** when the person pastes or attaches images during a run, save them yourself with
+  `python3 -m production reference <project> <image> --note "<what they said>"` and tell them you did and where; if an image
+  reached you with no file to copy, say so and ask for the file. After the build: each signature moment's work order, then
+  `review.creative`: open every capture of every shot, every round; answer the four checks per shot (readable text on textured
+  ground; nothing rotated, clipped or tiny without a reason from the style; the player's thing never under the HUD; credits
+  somewhere deliberate); judge each moment from its before/peak/after frames as an event at phone size (a small label is not a
+  moment); after fixes, answer every earlier gap and look for new ones. Gaps become work orders, at most two rounds. End by giving the
   live link and the look page.
 - **Direction first.** A new game, app or site, and any redesign, gameplay or polish pass, starts with the `design.direction`
   work order: write `direction.json` for this product before any code (`docs/direction.md`): one idea the look comes from, a

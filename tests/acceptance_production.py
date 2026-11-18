@@ -166,9 +166,13 @@ def part_a(c):
     check("style pick: six looks rendered as this game's scene; the pick waits for a person", "design.style_pick" in tasks_in(st, "needs_approval"), st["counts"])
     call(c, "production_approve", {"production": pid, "task": "design.style_pick", "approved": True, "choice": "risograph", "note": "acceptance test: the person picks the recommendation"})
     st = call(c, "production_run", {"production": pid})
-    st = call(c, "production_submit", {"production": pid, "task": "design.designs", "files": agent.designs(wo_("design.designs")), "notes": "three title screens"})
-    check("design pick: three designs; the pick waits for a person and nothing is built", "design.design_pick" in tasks_in(st, "needs_approval") and load(pid)["tasks"]["build"]["state"] == "pending", st["counts"])
-    call(c, "production_approve", {"production": pid, "task": "design.design_pick", "approved": True, "choice": "a", "note": "acceptance test: A, with the calm of B"})
+    st = call(c, "production_submit", {"production": pid, "task": "design.designs", "files": agent.designs(wo_("design.designs"), env), "notes": "three title screens, each with its icon"})
+    check("design pick: three designs; the pick waits for a person and nothing is built", "design.design_pick" in tasks_in(st, "needs_approval") and load(pid)["tasks"]["build"]["state"] == "pending",
+          (st["counts"], load(pid)["tasks"]["design.designs"].get("reason")))
+    dsel = load(pid)["tasks"]["design.design_pick"]
+    check("design pick: the page shows the app icon options drawn from each design; look and icon are one choice (no separate icon approval in the plan)",
+          open(dsel["result"]["sheet"]).read().count("<figure class=icon>") == 3 and "a:lantern" in dsel["result"]["options"] and "icon.select" not in load(pid)["tasks"], dsel["result"].get("options"))
+    call(c, "production_approve", {"production": pid, "task": "design.design_pick", "approved": True, "choice": "a:lantern", "note": "acceptance test: A with the lantern icon, and the calm of B"})
     st = call(c, "production_run", {"production": pid})
     proj0 = load(pid)["spec"]["project"]["path"]
     check("design pick: the chosen frame is saved in the project as the target", os.path.isfile(os.path.join(proj0, "art-direction", "target", "phone.png")))
@@ -193,17 +197,8 @@ def part_a(c):
     files = agent.identity(order, env)
     check("agent: VectorCraft drew and exported the logo (SVG)", all(os.path.getsize(f) > 1000 for f in files if not f.endswith(".json")) and len(files) == 2)
     st = call(c, "production_submit", {"production": pid, "task": "foundation.identity", "files": files, "notes": "VectorCraft identity"})
-    check("identity accepted; the App Icon Studio asks for concepts", st["status"] == "awaiting_agent" and "icon.concepts" in tasks_in(st, "awaiting_agent"), st["counts"])
-    check("plan v2: the code build is issued beside the icon concepts, before any icon choice", "build" in tasks_in(st, "awaiting_agent")
-          and load(pid)["tasks"]["icon.select"]["state"] == "pending", tasks_in(st, "awaiting_agent"))
-    # ---- App Icon Studio: concepts (VectorCraft) → a person chooses → the master → the platform set
-    co = json.load(open(os.path.join(prod["store"], "tasks", "icon.concepts", "work_order.json")))
-    st = call(c, "production_submit", {"production": pid, "task": "icon.concepts", "files": agent.icon_concepts(co, env), "notes": "three VectorCraft concepts"})
-    check("icon: three concepts accepted; the choice waits for a person (never silently selected)", "icon.select" in tasks_in(st, "needs_approval"), st["counts"])
-    sel = load(pid)["tasks"]["icon.select"]
-    check("icon: the comparison sheet shows every concept", os.path.isfile(sel["result"]["sheet"]) and open(sel["result"]["sheet"]).read().count("<article>") == 3)
-    call(c, "production_approve", {"production": pid, "task": "icon.select", "approved": True, "choice": "lantern", "note": "acceptance test: the person picks the lantern"})
-    st = call(c, "production_run", {"production": pid})
+    check("identity accepted; the icon chosen with the design is the agent's next icon work (the 1024 master), beside the code build", st["status"] == "awaiting_agent"
+          and {"icon.master", "build"} <= set(tasks_in(st, "awaiting_agent")), tasks_in(st, "awaiting_agent"))
     mo = json.load(open(os.path.join(prod["store"], "tasks", "icon.master", "work_order.json")))
     st = call(c, "production_submit", {"production": pid, "task": "icon.master", "files": agent.icon_master(mo, env), "notes": "the approved lantern, 1024 master"})
     prod = load(pid)

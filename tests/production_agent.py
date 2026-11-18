@@ -127,7 +127,7 @@ def icon_concepts(order, env):
 def icon_master(order, env):
     """VectorCraft: the approved concept (selection.json in the hand-off) redrawn as the 1024 master."""
     out = order["out_dir"]
-    sel = next(json.load(open(o["path"])) for u in order["handoff"]["upstream"] for o in u["outputs"] if o["path"].endswith("selection.json"))
+    sel = next(json.load(open(o["path"])) for u in order["handoff"]["upstream"] for o in u["outputs"] if os.path.basename(o["path"]) == "selection.json")
     steps = [("run_command", {"command": "artboard.setProps", "params": {"index": 0, "width": 1024, "height": 1024, "name": "icon"}})] + _concept(sel["choice"], 0, 0) + [
         ("export", {"path": os.path.join(out, "icon-1024.png"), "format": "png", "artboard": 0, "scale": 1}),
         ("export", {"path": os.path.join(out, "icon.svg"), "format": "svg", "artboard": 0})]
@@ -371,38 +371,44 @@ def styles(order):
 
 DESIGNS = [("a", "Market poster", "a festival poster pasted on a market wall", "huge stacked title left, lantern bottom right", "Bricolage Grotesque", "#14122b", "#f2a541", "loud and warm"),
            ("b", "Lantern log", "a night-watch logbook page", "small header, the lantern path across the middle, button bottom right", "Space Mono", "#f3efe4", "#1f6f5c", "quiet and methodical"),
-           ("c", "Ink sign", "an enamel shop sign over dark water", "centred badge with the title inside, everything symmetrical", "Alfa Slab One", "#0e2a3b", "#f4d35e", "solid and old-fashioned")]
+           ("c", "Ink sign", "an enamel shop sign on a whitewashed wall", "centred badge with the title inside, everything symmetrical", "Alfa Slab One", "#f4e9d8", "#b3261e", "solid and old-fashioned")]
 
 
-def designs(order):
-    """design.designs: three title screens that differ in composition, type, palette and flavour, rendered at phone and desktop size."""
+def designs(order, env):
+    """design.designs: three title screens that differ in composition, type and palette (their renders are different pictures at 120 px in
+    grayscale), drawn as a phone browser shows them, full screen and at desktop size, each with an app icon option drawn by VectorCraft."""
     import subprocess
     out = order["out_dir"]; X = []
+    icon_concepts({"out_dir": out}, env)   # lantern.png, flame.png, wave.png (+ SVG): one icon option per design
+    icon_ids = list(IDEAS)
+    LAYOUT = ["place-content:start start;padding:10vh 6vw", "place-content:end end;padding:8vh 8vw;text-align:right", "place-content:center;text-align:center"]
+    EXTRA = ["", "<div style='position:fixed;left:0;top:0;width:100%;height:34vh;background:{p}'></div>", "<div style='position:fixed;inset:auto 0 0 0;height:18vh;background:{p}'></div>"]
     for i, (did, name, idea, comp, face, bg, prim, flav) in enumerate(DESIGNS):
         d = os.path.join(out, did); os.makedirs(os.path.join(d, "fonts"), exist_ok=True)
         f = next(x for x in os.listdir(os.path.join(ATLAS, "fonts")) if x.startswith(face.lower().replace(" ", "-")))
         shutil.copyfile(os.path.join(ATLAS, "fonts", f), os.path.join(d, "fonts", f))
-        txt = "#f5f0e6" if i != 1 else "#1d1d1b"
-        align = ["start", "start", "center"][i]
+        txt = "#f5f0e6" if i == 0 else "#1d1d1b"
         open(os.path.join(d, "index.html"), "w").write(f"""<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>Lantern Drift</title><style>@font-face{{font-family:D;src:url(fonts/{f})}}html,body{{margin:0;height:100%;background:{bg};color:{txt};font-family:D}}
-main{{height:100%;display:grid;place-content:center {align};padding:24px;gap:18px;text-align:{['left', 'left', 'center'][i]}}}h1{{margin:0;font-size:{[17, 9, 12][i]}vw;line-height:.9;color:{prim}}}
-button{{font:inherit;font-size:20px;min-height:52px;padding:0 24px;border:3px solid {prim};background:none;color:{txt}}}</style></head>
-<body><main><h1>Lantern<br>Drift</h1><p>{idea}</p><button>Light the lantern</button></main></body></html>""")
+main{{position:relative;height:100%;box-sizing:border-box;display:grid;{LAYOUT[i]};gap:18px}}h1{{margin:0;font-size:{[19, 8, 12][i]}vw;line-height:.9;color:{prim if i != 1 else txt}}}
+button{{font:inherit;font-size:20px;min-height:52px;padding:0 24px;border:3px solid {prim};background:none;color:{txt};justify-self:{['start', 'end', 'center'][i]}}}</style></head>
+<body>{EXTRA[i].format(p=prim)}<main><h1>Lantern<br>Drift</h1><p>{idea}</p><button>Light the lantern</button></main></body></html>""")
         subprocess.run(["node", os.path.join(ATLAS, "shoot.mjs"), os.path.join(d, "index.html"), d, "--play"], check=True, capture_output=True, timeout=300)
         X.append({"id": did, "style": "risograph", "name": name, "idea": idea, "composition": comp, "type": {"display": face, "body": face},
                   "palette": {"background": bg, "surface": bg, "primary": prim, "accent": ["#3fc1c9", "#f28c28", "#e4572e"][i], "text": txt}, "flavor": flav,
-                  "html": f"{did}/index.html", "phone": f"{did}/phone.png", "desktop": f"{did}/desktop.png", "play": f"{did}/play.png"})
+                  "html": f"{did}/index.html", "browser": f"{did}/browser.png", "phone": f"{did}/phone.png", "desktop": f"{did}/desktop.png", "play": f"{did}/play.png",
+                  "icons": [{"id": icon_ids[i], "file": f"{icon_ids[i]}.png", "idea": IDEAS[icon_ids[i]]}]})
     p = os.path.join(out, "designs.json")
-    json.dump({"product": "game", "style": "risograph", "recommended": "a", "reason": "the poster puts the title where a market crowd would see it first", "designs": X}, open(p, "w"), indent=1)
+    json.dump({"product": "game", "style": "risograph", "icons_required": True, "recommended": "a", "reason": "the poster puts the title where a market crowd would see it first", "designs": X},
+              open(p, "w"), indent=1)
     return [p]
 
 
 LANTERN_SHOTS = {"version": 1, "product": "game", "shots": [
     {"id": "title", "name": "Title", "kind": "title", "steps": [], "wait_for": {"js": "typeof S !== 'undefined' && S.state === 'title' && document.getElementById('game').width > 0"}},
     {"id": "play", "name": "Mid-play", "kind": "play", "moment": "first-ember", "steps": [{"press": "Space"}], "wait_for": {"js": "S.state === 'play' && S.t > 0.5"}},
-    {"id": "fail", "name": "The lantern went out", "kind": "fail", "moment": "lantern-out", "steps": [{"press": "Space"}, {"wait": 400}, {"eval": "hurt(); hurt(); hurt();"}], "wait_for": {"js": "S.state === 'over'"}},
-    {"id": "results", "name": "Results", "kind": "results", "steps": [{"press": "Space"}, {"wait": 400}, {"eval": "hurt(); hurt(); hurt();"}], "wait_for": {"js": "S.state === 'over'"}}]}
+    {"id": "fail", "name": "The hit that leaves one flicker of flame", "kind": "fail", "steps": [{"press": "Space"}, {"wait": 400}, {"eval": "hurt(); hurt();"}], "wait_for": {"js": "S.state === 'play' && pl.hp === 1"}, "settle_ms": 30},
+    {"id": "results", "name": "The lantern went out", "kind": "results", "moment": "lantern-out", "sequence": {"after_ms": 300}, "steps": [{"press": "Space"}, {"wait": 400}, {"eval": "hurt(); hurt(); hurt();"}], "wait_for": {"js": "S.state === 'over'"}}]}
 
 
 def visual_direction(order, project):
@@ -419,12 +425,20 @@ def visual_direction(order, project):
 
 
 def review(order, pack, gaps=()):
-    """review.creative: the stand-in reviewer cites what it opened; gaps (if any) become work orders."""
+    """review.creative: the stand-in reviewer opens every capture, answers the four checks for every shot and judges each moment from
+    its sequence; gaps (if any) become work orders."""
+    sys.path.insert(0, REPO)
+    from production import visual
     K = json.load(open(pack))
-    shots = [i["id"] for i in K["items"] if i["kind"] == "screenshot"]
-    R = {"reviewer": "acceptance stand-in", "pack": pack, "coverage": {"viewed": shots + ["target:phone"], "not_seen": [n["shot"] for n in K["not_seen"]]},
+    shots, seqs = visual.shots_in(K), visual.moment_sequences(K)
+    first = next(iter(shots.values()))[0]
+    R = {"reviewer": "acceptance stand-in", "pack": pack, "coverage": {"viewed": [i["id"] for i in K["items"] if i["kind"] in ("screenshot", "target", "style", "reference")],
+                                                                      "not_seen": [n["shot"] for n in K["not_seen"]]},
          "summary": "an assessment of the built screens against the chosen poster design and the risograph look",
-         "matches": [{"against": "target", "claim": "the title is the first thing on the screen, as in the chosen frame", "evidence": [shots[0], "target:phone"], "basis": "observed_render"}],
-         "gaps": [dict(g, evidence=[shots[0]], basis="observed_render") for g in gaps]}
+         "checks": [{"shot": sid, **{k: {"ok": not any(g["shot"] == sid for g in gaps), "note": "looked at the phone and desktop captures at full size"} for k in visual.CHECKS}} for sid in shots],
+         "moments": [{"id": m, "reads_as_event": True, "why": "the frame changes visibly between before, peak and after", "evidence": f[0]} for m, f in seqs.items()],
+         "previous": [{"id": g["id"], "closed": True, "note": "the new shot shows it fixed"} for g in K.get("previous_gaps") or []],
+         "matches": [{"against": "target", "claim": "the title is the first thing on the screen, as in the chosen frame", "evidence": [first, "target:phone"], "basis": "observed_render"}],
+         "gaps": [dict(g, evidence=[shots[g["shot"]][0]], basis="observed_render") for g in gaps]}
     p = os.path.join(order["out_dir"], "review.json"); json.dump(R, open(p, "w"), indent=1)
     return [p]
