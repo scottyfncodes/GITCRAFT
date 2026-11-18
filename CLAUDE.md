@@ -158,7 +158,7 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   writes to or runs an assessed game, never labels an inferred judgement as observed play; never rewrite runs in `history/designcraft/` (`docs/designcraft.md`).
 - `tests/test_lifecycle.py` must pass after any change under `production/` (the lifecycle, Recon, the Decision Room and blueprint,
   revisions, the App Icon Studio, HaveAnApp attribution, engineering standards); never let `run` build without an approved blueprint,
-  never select an icon without a person's choice, and never set the HaveAnApp URL to an address that has not been verified
+  never select an icon without a person's choice (in plan v3 that choice is made on the design pick page), and never set the HaveAnApp URL to an address that has not been verified
   (`production/kit/haveanapp/attribution.json`). Standards: docs/app-standards.md.
 - `tests/test_entry.py` must pass after any change to `production/entry.py`, `maturity.py`, the existing-project paths of the
   planner/intake/lifecycle, or the "Run GITCRAFT" wording in `global/`; Discovery stays read-only, and an existing project never gets
@@ -251,8 +251,13 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   plan v3 graph (`planner._visual_v3`), the visual builtins (`style_pick`, `design_pick`, `visual_moments`, `visual_pack`, `visual_gaps`,
   `visual_look`), `engine._expand`, the shot list (`studio/core/shots.py`, `studio/core/web/shots.mjs`, TestCraft `shots`, PIXELCRAFT and
   PLAYCRAFT `shots`) or `acceptance/visual/` (docs/visual-direction.md). The person makes exactly two visual picks (style, design) and the
-  build waits for the design pick; a pick is never made silently; the atlas is a menu, never a house style; a shot that was not reached is
-  never judged or cited; the automatic visual review runs in every production with an art direction and its gaps become work orders (at most
+  build waits for the design pick; the app icon is chosen on the design pick page with the look (never a third approval, never chosen
+  silently); three designs differ in composition AND type AND palette and no two titles or play frames read as the same picture at 120 px
+  in grayscale (`visual.same_picture`; never loosen `SAME_PICTURE` to let a set through); every design is also drawn at the real phone
+  browser size (390x664); a pick is never made silently; the atlas is a menu, never a house style; a shot that was not reached is
+  never judged or cited; a signature moment is captured and judged as a sequence (before, peak, after), and one that does not read as an
+  event is a work order; the fail shot is the instant of failing, never the results screen; the review answers its four checks for every
+  shot every round, and after fixes answers every earlier gap; the automatic visual review runs in every production with an art direction and its gaps become work orders (at most
   two rounds, then listed for the person with the screenshots), but no visual task ever carries a criterion, a release gate or a score, and
   no existing score's method changes; v1 and v2 records keep their graphs.
 - `tests/test_creative.py` must pass after any change to `production/creative.py`, `production/vision.py`, the Creative Review parts of

@@ -54,9 +54,9 @@ def main(pid, name, about):
                       chosen=sp["styles"], how=sp["how"], crumbs=crumbs(2))
     dp = P["tasks"]["design.design_pick"]["result"]["selection"]
     dj = next(o["path"] for o in P["tasks"]["design.designs"]["outputs"] if o["path"].endswith("designs.json"))
-    visual.design_page(json.load(open(dj)), os.path.dirname(dj), os.path.join(dest, "design-pick"), title, chosen=dp["design"], note=dp.get("liked_in_others"), crumbs=crumbs(2))
+    visual.design_page(json.load(open(dj)), os.path.dirname(dj), os.path.join(dest, "design-pick"), title, chosen=dp["design"], note=dp.get("liked_in_others"), crumbs=crumbs(2), icon=(dp.get("icon") or {}).get("choice"))
     tdir = os.path.join(proj, visual.art_dir(proj), "target")
-    target = {k: os.path.join(tdir, f) for f in os.listdir(tdir) for k in ("phone", "desktop", "play") if f.startswith(k + ".")}
+    target = {k: os.path.join(tdir, f) for f in os.listdir(tdir) for k in ("phone", "browser", "desktop", "play", "icon") if f.startswith(k + ".")}
     rep = json.load(open(out(P, "release.shots", "shots_report")))
     G = json.load(open(out(P, "review.gaps", "visual_gaps")))
     visual.look_page(target, rep, os.path.join(dest, "look"), title, style=dp.get("look_name"), live_url="../game/",
@@ -68,9 +68,9 @@ def main(pid, name, about):
     gd = os.path.join(dest, "game")
     if os.path.isdir(gd): shutil.rmtree(gd)
     for d, ds, fs in os.walk(proj):
-        ds[:] = [x for x in ds if x not in ("assets", "art-direction", "tests", ".git", "node_modules")]
+        ds[:] = [x for x in ds if x not in ("art-direction", "tests", ".git", "node_modules", "native-icons")]
         for f in fs:
-            if f.endswith(GAME_FILES) and f != "gitcraft.assets.json":
+            if f.endswith(GAME_FILES + (".ico",)) and f != "gitcraft.assets.json" and not f.endswith(".license.json") and f != "icon-1024.png":
                 rel = os.path.relpath(os.path.join(d, f), proj); os.makedirs(os.path.dirname(os.path.join(gd, rel)), exist_ok=True)
                 shutil.copyfile(os.path.join(d, f), os.path.join(gd, rel))
     for page in ("style-pick", "design-pick", "look", "open-gaps"):   # published copies at screen size (webp); the production keeps the originals
@@ -83,7 +83,7 @@ def main(pid, name, about):
     rounds = sorted(k for k in P["tasks"] if k.startswith("fix.visual.r"))
     reviews = [eff(P, k) for k in P["order"] if k.startswith("review.creative")]
     record = {"title": title, "about": about, "production": P["id"], "plan_version": P["plan_version"], "status": P.get("status"),
-              "verdict": (P.get("verdict") or {}).get("verdict"), "style": sp, "design": {k: dp[k] for k in ("design", "style", "look_name", "liked_in_others", "approved_by")},
+              "verdict": (P.get("verdict") or {}).get("verdict"), "style": sp, "design": {**{k: dp[k] for k in ("design", "style", "look_name", "liked_in_others", "approved_by")}, "icon": (dp.get("icon") or {}).get("choice")},
               "moments": [k for k in P["order"] if P["tasks"][k].get("moment")], "visual_rounds": rounds,
               "review_gaps": [len(json.load(open(next(o["path"] for o in r["outputs"] if o["role"] == "review"))).get("gaps") or []) for r in reviews],
               "remaining": [g["id"] for g in G["gaps"]] if G.get("round", 0) >= visual.ROUNDS else [],

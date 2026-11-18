@@ -110,7 +110,7 @@ S["review"] = entry.start("Run GITCRAFT: review this game", game)
 P = {k: store.load(v["production"]) for k, v in S.items() if v.get("production")}
 check("discovery is read-only on every existing project (byte-identical; no folders made)", all(engine.fingerprint(p) == fps[n] for n, p in
       (("partial", partial), ("nearly", nearly), ("finished", finished), ("game", game))))
-check("new idea → New Build (icon studio and attribution planned)", S["new"]["routing"]["workflow"] == "build" and "icon.concepts" in P["new"]["tasks"] and "qa.attribution" in P["new"]["tasks"])
+check("new idea → New Build (icon studio and attribution planned)", S["new"]["routing"]["workflow"] == "build" and "icon.master" in P["new"]["tasks"] and "qa.icons" in P["new"]["tasks"] and "qa.attribution" in P["new"]["tasks"])
 check("partial → continue; nearly → complete; finished + request → update; game → update", S["partial"]["routing"]["workflow"] == "continue"
       and S["nearly"]["routing"]["workflow"] == "complete" and S["finished"]["routing"]["workflow"] == "update" and S["game"]["routing"]["workflow"] == "update",
       {k: v.get("routing", {}).get("workflow") for k, v in S.items()})

@@ -30,6 +30,10 @@ generator: VectorCraft and PhotoCraft draw it, and the Production Director measu
    - `production_approve {task: "icon.select", approved: true, choice: "<id>"}` records the choice in `selection.json`.
    - Declining with a note sends `icon.concepts` back with the feedback.
    - An icon is never chosen silently.
+   - **Plan v3 with a design pick** (a new product, a redesign, a new look): steps 3 and 4 happen on the design pick page instead.
+     Each of the three designs brings one to three icon options drawn from it, shown at 96 and 32 px beside the design, and the person
+     picks the look and the icon in one choice (`production_approve {task: "design.design_pick", choice: "a:<icon id>"}`), which writes
+     the same `selection.json`. Still the person's choice, and no separate icon approval (docs/visual-direction.md).
 5. **`icon.master`** (agent): the approved concept, refined into a full-bleed 1024 × 1024 `icon-1024.png` and `icon.svg`.
    The master is validated at exactly 1024.
 6. **`icon.derivatives`** (built-in, standard-library PNG/ICO codec):

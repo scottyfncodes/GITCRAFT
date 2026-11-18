@@ -461,6 +461,12 @@ def _visual_v3(spec, tasks, decisions):
         pre.append(T("design.design_pick", "A person picks the design: the approval the build starts from", "design", "builtin", action="design_pick",
                      params={"art_dir": art}, deps=["design.designs", "design.style_pick"]))
         direct["depends_on"] = direct["depends_on"] + ["design.design_pick"]
+        if "icon.concepts" in ids and "icon.select" in ids:   # the app icon is chosen WITH the design (one page, one pick): no separate icon approval
+            for gone in ("icon.concepts", "icon.select"): tasks.remove(ids.pop(gone))
+            ids["icon.master"]["depends_on"] = ["design.design_pick"]
+            ids["icon.master"]["work_order"]["brief"] = "Refine the approved icon (selection.json in the hand-off: chosen with the design) into the final master icon."
+            pre[-1]["params"]["icons"] = True
+            decisions.append("app icon: its options are drawn from each design and chosen on the design pick page (still the person's choice; still two picks in total)")
     direct["visual"] = "direction"
     wo = direct["work_order"]
     wo["instructions"] = [x for x in wo["instructions"] if not x.startswith("Use the ui-design skill's Explore")] + visual.direction_lines(spec, vs)

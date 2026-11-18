@@ -60,8 +60,19 @@ def main(argv=None):
     cr.add_argument("action", choices=["pack", "submit", "show"]); cr.add_argument("target", help="pack/show: the project; submit: the pack.json")
     cr.add_argument("--capture", action="append", default=[], help="a PLAYCRAFT or PIXELCRAFT output folder (repeatable)"); cr.add_argument("--review", help="submit: the review JSON file")
     pu = sp.add_parser("publish-reports", help="build the /reports/ site from an archive"); pu.add_argument("archive", nargs="?"); pu.add_argument("dist")
+    rf = sp.add_parser("reference", help="save a reference image (a pasted screenshot, a mood image) into the project's references folder")
+    rf.add_argument("project"); rf.add_argument("images", nargs="+"); rf.add_argument("--note")
+    sm = sp.add_parser("same-picture", help="do two frames read as the same picture at 120 px in grayscale?"); sm.add_argument("a"); sm.add_argument("b")
     o = ap.parse_args(argv)
-    if o.cmd == "plan":
+    if o.cmd == "reference":
+        from . import visual
+        out = {"saved": [visual.add_reference(o.project, i, o.note) for i in o.images], "folder": os.path.join(o.project, visual.art_dir(o.project), "references"),
+               "tell_the_person": "say that each image was saved as a reference, and where"}
+    elif o.cmd == "same-picture":
+        from . import visual
+        v = visual.same_picture(o.a, o.b)
+        out = {"layout_correlation": v, "same_picture": v is not None and v >= visual.SAME_PICTURE, "threshold": visual.SAME_PICTURE}
+    elif o.cmd == "plan":
         pr = engine.plan(o.prompt, o.project, json.loads(o.overrides) if o.overrides else None, recon=o.recon)
         out = pr if "recon_order" in pr else plan_summary(pr)
     elif o.cmd == "start":

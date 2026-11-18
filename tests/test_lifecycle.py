@@ -241,12 +241,13 @@ if executors.studio_python():
     pr = engine.plan("Build a mobile-first tide timetable web app called Tidepool for my family, with an original visual identity", proj,
                      {"quality": {"pixelcraft": False}})   # PIXELCRAFT is covered by acceptance_production.py; TestCraft smoke runs here
     room = {d["id"] for d in pr["decision_room"]}
-    check("app: planned with the App Icon Studio chain and the three standards checks", {"icon.concepts", "icon.select", "icon.master", "icon.derivatives", "qa.icons",
-          "qa.attribution", "qa.standards"} <= set(pr["tasks"]) and "app_icon" in room, sorted(pr["tasks"]))
+    check("app: planned with the App Icon Studio (its options chosen on the design pick page in plan v3) and the three standards checks", {"design.design_pick", "icon.master",
+          "icon.derivatives", "qa.icons", "qa.attribution", "qa.standards"} <= set(pr["tasks"]) and "icon.select" not in pr["tasks"] and "app_icon" in room, sorted(pr["tasks"]))
     check("plan v3: a new app's first stop is the style shortlist, before the direction, the identity or any code (tests/test_visual.py drives the picks)",
           store.load(pr["id"]).get("plan_version") == 3 and pr["tasks"]["design.direction"]["depends_on"][-1] == "design.design_pick")
     # the rest of this flow is the v2 contract, which v2 records keep: re-plan this record as v2 before it is approved
     P2 = store.load(pr["id"]); P2["plan_version"] = 2; engine._discover_and_plan(P2); store.save(P2)
+    check("a v2 record keeps the separate icon approval (icon.concepts → icon.select)", {"icon.concepts", "icon.select"} <= set(P2["tasks"]))
     engine.decide(pr["id"], approve=True)
     st = engine.run(pr["id"])
     waiting = [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"]

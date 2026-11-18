@@ -1,7 +1,8 @@
 // The shot list runner: reach each named shot of a product and capture it, only once real content is on screen.
 //   node shots.mjs request.json
 // request: { root | url, entry, out_dir, viewports: [{name, width, height, mobile?, device?}], shots: [...], timeout_ms?, _result }
-// A shot: { id, name, kind, path?, steps: [...], wait_for: {selector?, text?, js?, timeout_ms?}, viewports? }
+// A shot: { id, name, kind, moment?, sequence?: {before?: {selector|text|js}, after_ms?}, path?, steps: [...], wait_for: {selector?, text?, js?, timeout_ms?}, viewports? }
+// A shot with `moment` (or `sequence`) is captured as three frames: <id>@<vp>.before.png, <id>@<vp>.png (the peak) and <id>@<vp>.after.png.
 // Steps (the PIXELCRAFT journey vocabulary, plus keys and eval for games):
 //   {click|tap: 'label'} {selector: 'css'} {fill: {selector|label, value}} {press: 'Space'} {hold: {key, ms}} {goto: '/x'} {back: true}
 //   {wait: ms} {expect: 'text'} {eval: 'js'} {settle_ms}
@@ -74,10 +75,22 @@ try {
         try { await page.waitForLoadState('load', { timeout: 15000 }); } catch {}
         await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
         for (const st of shot.steps || []) { await act(page, st, touch); C.steps++; }
+        // a signature moment is an event, not a still: before (the instant its steps end, or once sequence.before holds), peak (wait_for), after
+        const seq = shot.sequence || (shot.moment ? {} : null);
+        let before = null;
+        if (seq) {
+          if (seq.before) await waitFor(page, seq.before);
+          before = path.join(req.out_dir, `${shot.id}@${vp.name}.before.png`); await page.screenshot({ path: before });
+        }
         await waitFor(page, shot.wait_for || {});
         await page.waitForTimeout(shot.settle_ms ?? 250);   // one more frame of paint after the condition holds
         C.image = path.join(req.out_dir, `${shot.id}@${vp.name}.png`);
         await page.screenshot({ path: C.image });
+        if (seq) {
+          await page.waitForTimeout(Math.min(seq.after_ms ?? 900, 10000));
+          const after = path.join(req.out_dir, `${shot.id}@${vp.name}.after.png`); await page.screenshot({ path: after });
+          C.sequence = { before, peak: C.image, after };
+        }
         C.reached = true;
       } catch (e) {
         C.reason = String(e && e.message || e).split('\n')[0].slice(0, 240);

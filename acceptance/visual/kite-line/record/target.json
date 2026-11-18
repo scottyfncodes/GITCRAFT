@@ -2,11 +2,13 @@
  "style": "notebook",
  "look_name": "Notebook Sketch",
  "style_how": "picked",
- "liked_in_others": "acceptance stand-in for the person: A. I liked the dark night page of C; use it for the end of a flight",
+ "liked_in_others": "acceptance stand-in for the person: A with the kite icon. I liked the dark night page of C; use it for the end of a flight",
  "approved_by": "a person (production_approve)",
+ "icon": "kite",
+ "icon_idea": "the red hatched kite on ruled paper, a yellow bow on its tail",
  "design": "a",
  "name": "Margin doodle",
- "idea": "The back page of a school exercise book where someone has lettered KITE LINE and drawn a kite flying off it.",
+ "idea": "The back page of a school book: the title lettered big in pen and a kite flying off it.",
  "palette": {
   "background": "#fbf8ef",
   "surface": "#fffdf6",
@@ -18,12 +20,14 @@
   "display": "Caveat",
   "body": "Patrick Hand"
  },
- "composition": "huge hand-lettered wordmark stacked on the left, tilted, the kite tied to it flying to the top right; the button circled in pen underneath",
- "flavor": "cheeky, personal, scribbled in a lesson",
+ "composition": "huge tilted hand-lettered wordmark stacked on the left with a highlighter under Line; the kite on its string climbs the right edge from a stick figure on a hatched hill",
+ "flavor": "cheeky, personal, scribbled during a lesson",
  "files": {
   "phone": "art-direction/target/phone.png",
+  "browser": "art-direction/target/browser.png",
   "desktop": "art-direction/target/desktop.png",
-  "play": "art-direction/target/play.png"
+  "play": "art-direction/target/play.png",
+  "icon": "art-direction/target/icon.png"
  },
- "saved": "2026-11-18T04:45:36+00:00"
+ "saved": "2026-11-18T05:59:24+00:00"
 }

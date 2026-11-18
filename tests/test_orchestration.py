@@ -247,14 +247,25 @@ P = store.load(pr.get("id") or pr.get("production"))
 check("engine: a new production is plan_version 3 (v2's graph plus the visual stage)", P["plan_version"] == 3 and "build.wire" in P["tasks"] and "design.design_pick" in P["tasks"])
 legacy = store.load(P["id"]); legacy.pop("plan_version"); engine._discover_and_plan(legacy)
 check("engine: a record without plan_version (v1) is re-planned as v1, never silently converted", "integrate.assets" in legacy["tasks"] and "build.wire" not in legacy["tasks"])
-for tid in ("foundation.scaffold", "design.styles", "design.style_pick", "design.designs", "design.design_pick", "design.direction", "design.moments", "foundation.identity"):
-    engine._set(P, P["tasks"][tid], PASSED)
-engine._set(P, P["tasks"]["icon.concepts"], PASSED); engine._set(P, P["tasks"]["icon.select"], NEEDS_APPROVAL, reason="a person chooses")
-ready = [t["id"] for t in engine._ready_tasks(P)]
-check("scheduling: the code build is ready while the icon choice waits for a person; unrelated assets run too",
+# plan v2 records (kept as they are): the icon choice is its own approval, off the code path
+P2 = store.load(P["id"]); P2["plan_version"] = 2; engine._discover_and_plan(P2)
+for tid in ("foundation.scaffold", "design.direction", "foundation.identity"): engine._set(P2, P2["tasks"][tid], PASSED)
+engine._set(P2, P2["tasks"]["icon.concepts"], PASSED); engine._set(P2, P2["tasks"]["icon.select"], NEEDS_APPROVAL, reason="a person chooses")
+ready = [t["id"] for t in engine._ready_tasks(P2)]
+check("scheduling (v2 record): the code build is ready while the icon choice waits for a person; unrelated assets run too",
       "build" in ready and any(t.startswith("audio.") for t in ready) and "icon.master" not in ready, ready)
-check("scheduling: a person's wait is not a failure (nothing downstream of icon.select is blocked)", P["tasks"]["icon.master"]["state"] == PENDING
-      and not any(t["state"] == BLOCKED for t in P["tasks"].values()))
+check("scheduling (v2 record): a person's wait is not a failure (nothing downstream of icon.select is blocked)", P2["tasks"]["icon.master"]["state"] == PENDING
+      and not any(t["state"] == BLOCKED for t in P2["tasks"].values()))
+# plan v3: the look and the icon are one pick, before the build; assets never wait for it
+for tid in ("foundation.scaffold", "design.styles", "design.style_pick", "design.designs"): engine._set(P, P["tasks"][tid], PASSED)
+engine._set(P, P["tasks"]["design.design_pick"], NEEDS_APPROVAL, reason="a person picks the design and its icon")
+ready = [t["id"] for t in engine._ready_tasks(P)]
+check("scheduling (v3): while the design pick waits for a person the build and the icon master wait too, unrelated assets run, and nothing is blocked",
+      "build" not in ready and "icon.master" not in ready and any(t.startswith("audio.") for t in ready) and not any(t["state"] == BLOCKED for t in P["tasks"].values())
+      and "icon.select" not in P["tasks"], ready)
+for tid in ("design.design_pick", "design.direction", "design.moments", "foundation.identity"): engine._set(P, P["tasks"][tid], PASSED)
+ready = [t["id"] for t in engine._ready_tasks(P)]
+check("scheduling (v3): once the design and its icon are picked, the code build and the icon master are issued side by side", {"build", "icon.master"} <= set(ready), ready)
 # consolidated replace_assets: presented only when the overwrite set is complete
 ship = [t for t in P["order"] if P["tasks"][t].get("ship")]
 hold = ship[-1]   # one asset still being produced

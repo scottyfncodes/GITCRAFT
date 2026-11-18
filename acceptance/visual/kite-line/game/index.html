@@ -3,23 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fbf8ef">
 <meta name="author" content="HaveAnApp">
 <meta name="description" content="Kite Line by HaveAnApp: hold to climb, let go to glide.">
 <title>Kite Line</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="icon" href="assets/icons/favicon.ico" sizes="48x48">
+<link rel="icon" href="assets/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#fbf8ef">
+<meta name="apple-mobile-web-app-title" content="Kite Line">
 </head>
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
 
 <section id="title" class="screen" aria-label="Kite Line">
-  <p class="plan">Flight plan <span>No. 07</span></p>
+  <p class="byline haveanapp-byline" data-haveanapp>Kite Line <a class="haveanapp-byline__by" href="https://haveanapp.com" rel="noopener" target="_blank">by HaveAnApp</a></p>
+  <p class="plan">Flight log <span>No. 07</span></p>
   <h1 id="wordmark"><span class="w1">Kite</span> <span class="w2">Line</span></h1>
   <p class="tag">one string, one thumb</p>
   <button id="fly" class="fly" type="button"><span>Hold to fly</span></button>
   <p class="best" id="bestNote">best: <b id="bestTitle">0</b> ribbons</p>
-  <p class="haveanapp-byline" data-haveanapp>Kite Line <a class="haveanapp-byline__by" href="https://haveanapp.com" rel="noopener" target="_blank">by HaveAnApp</a></p>
 </section>
 
 <header id="hud" class="hud" hidden>
@@ -31,8 +36,8 @@
 
 <section id="paused" class="screen sheet" hidden aria-label="Paused">
   <h2>Holding the string</h2>
-  <p class="haveanapp-byline" data-haveanapp>Kite Line <a class="haveanapp-byline__by" href="https://haveanapp.com" rel="noopener" target="_blank">by HaveAnApp</a></p>
   <button id="resume" class="fly" type="button"><span>Keep flying</span></button>
+  <p class="byline haveanapp-byline" data-haveanapp>Kite Line <a class="haveanapp-byline__by" href="https://haveanapp.com" rel="noopener" target="_blank">by HaveAnApp</a></p>
 </section>
 
 <section id="over" class="screen sheet" hidden aria-label="Results">
@@ -43,7 +48,7 @@
   <button id="again" class="fly" type="button"><span>Fly again</span></button>
 </section>
 
-<p id="hint" class="hint" hidden>hold to climb · let go to glide</p>
+<p id="hint" class="hint" hidden><span>hold to climb · let go to glide</span></p>
 <script src="game.js"></script>
 </body>
 </html>

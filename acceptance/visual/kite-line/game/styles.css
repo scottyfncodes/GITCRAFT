@@ -1,28 +1,26 @@
-/* KITE LINE: a kite drawn in someone's notebook. Three themes were designed for the design pick (a: margin doodle,
-   b: flight plan, c: night sketchbook); data-theme on <html> selects one. Tokens first; nothing below uses a raw colour. */
+/* KITE LINE. Three designs were drawn for the design pick; data-theme on <html> selects one:
+   a  Margin doodle     the back page of a school book: ruled paper, ballpoint, one highlighter (Caveat / Patrick Hand)
+   b  Logbook cover     a green cloth logbook with a typed label; play is the flight plotted as a chart (Alfa Slab One / Space Mono)
+   c  Night sketchbook  chalk on black paper, the kite as the whole page (Space Mono caps)
+   Tokens first; nothing below uses a raw colour except the night results page, which is its own paper. */
 @font-face { font-family: 'Caveat'; font-weight: 400; src: url('fonts/caveat-latin-400-normal.woff2') format('woff2'); font-display: block; }
 @font-face { font-family: 'Caveat'; font-weight: 700; src: url('fonts/caveat-latin-700-normal.woff2') format('woff2'); font-display: block; }
 @font-face { font-family: 'Patrick Hand'; font-weight: 400; src: url('fonts/patrick-hand-latin-400-normal.woff2') format('woff2'); font-display: block; }
 @font-face { font-family: 'Space Mono'; font-weight: 400; src: url('fonts/space-mono-latin-400-normal.woff2') format('woff2'); font-display: block; }
 @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('fonts/space-mono-latin-700-normal.woff2') format('woff2'); font-display: block; }
+@font-face { font-family: 'Alfa Slab One'; font-weight: 400; src: url('fonts/alfa-slab-one-latin-400-normal.woff2') format('woff2'); font-display: block; }
 
 :root {
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
-  --ease: cubic-bezier(.2, .7, .2, 1); --t-fast: 160ms; --t-slow: 900ms;
+  --ease: cubic-bezier(.2, .7, .2, 1); --t-fast: 160ms;
   --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
 }
-html[data-theme="a"] {   /* margin doodle: lined paper, ballpoint, one highlighter */
-  --paper: #fbf8ef; --surface: #fffdf6; --ink: #22252b; --pen: #2346a8; --mark: #ffd23f; --kite: #e0483a; --rule: #b9cde8; --margin: #e58f8f; --muted: #5d6170;
-  --display: 'Caveat', cursive; --body: 'Patrick Hand', 'Caveat', cursive; --num: 'Caveat', cursive;
-}
-html[data-theme="b"] {   /* flight plan: graph paper, green drafting ink, one orange */
-  --paper: #f3f6ef; --surface: #ffffff; --ink: #23302b; --pen: #1f6f5c; --mark: #f28c28; --kite: #f28c28; --rule: #c6dccd; --margin: #c6dccd; --muted: #4f5d56;
-  --display: 'Patrick Hand', cursive; --body: 'Patrick Hand', cursive; --num: 'Space Mono', monospace;
-}
-html[data-theme="c"] {   /* night sketchbook: black paper, chalk pencil, a lamp-yellow */
-  --paper: #1f232b; --surface: #2a2f39; --ink: #f1ede4; --pen: #f1ede4; --mark: #f5c04a; --kite: #ff6b5e; --rule: #2c313b; --margin: #2c313b; --muted: #b7b2a8;
-  --display: 'Space Mono', monospace; --body: 'Space Mono', monospace; --num: 'Space Mono', monospace;
-}
+html[data-theme="a"] { --paper: #fbf8ef; --surface: #fffdf6; --ink: #22252b; --pen: #2346a8; --mark: #ffd23f; --kite: #e0483a; --rule: #b9cde8; --margin: #e58f8f; --muted: #555a69;
+  --display: 'Caveat', cursive; --body: 'Patrick Hand', 'Caveat', cursive; --num: 'Caveat', cursive; }
+html[data-theme="b"] { --paper: #f4f0e3; --surface: #fffaf0; --ink: #1d2a25; --pen: #1f5c4a; --mark: #f28c28; --kite: #f28c28; --rule: #cfd8c4; --margin: #cfd8c4; --muted: #4c5a52;
+  --display: 'Alfa Slab One', serif; --body: 'Space Mono', monospace; --num: 'Space Mono', monospace; }
+html[data-theme="c"] { --paper: #1f232b; --surface: #2a2f39; --ink: #f1ede4; --pen: #f1ede4; --mark: #f5c04a; --kite: #ff6b5e; --rule: #2c313b; --margin: #2c313b; --muted: #b7b2a8;
+  --display: 'Space Mono', monospace; --body: 'Space Mono', monospace; --num: 'Space Mono', monospace; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); font: 18px/1.35 var(--body);
@@ -32,88 +30,104 @@ canvas#sky { position: fixed; inset: 0; width: 100vw; height: 100dvh; display: b
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 button:focus-visible { outline: 3px solid var(--mark); outline-offset: 4px; border-radius: 12px; }
 
-/* ---------------------------------------------------------------- screens */
 .screen { position: fixed; inset: 0; padding: calc(var(--space-6) + var(--safe-t)) var(--space-5) calc(var(--space-6) + var(--safe-b)); }
 .fly { position: relative; min-height: 56px; min-width: 200px; padding: 0 var(--space-5); font: 400 28px/1 var(--display); color: var(--pen); }
 .fly::before { content: ''; position: absolute; inset: 2px -6px; border: 2.5px solid currentColor; border-radius: 48% 52% 46% 54% / 58% 44% 56% 42%; transform: rotate(-2deg); transition: transform var(--t-fast) var(--ease); }
 .fly:active::before { transform: rotate(-2deg) scale(.96); }
 .fly span { position: relative; }
-.plan { margin: 0; font: 400 20px/1.2 var(--body); color: var(--muted); }
-.plan span { color: var(--pen); }
-.tag { margin: 0; font: 400 24px/1.2 'Caveat', cursive; color: var(--muted); }
-.best { margin: 0; font: 400 20px/1.2 var(--body); color: var(--muted); }
-.best b { font: 700 26px var(--num); color: var(--pen); }
+.plan, .tag, .best { margin: 0; color: var(--muted); }
+.plan { font: 400 20px/1.2 var(--body); } .plan span { color: var(--pen); }
+.tag { font: 400 24px/1.2 var(--body); }
+.best { font: 400 20px/1.2 var(--body); } .best b { font: 700 24px var(--num); color: var(--pen); }
+/* the maker's line: written where a name goes on a page, never floating under a control */
+.byline { margin: 0; font: 400 15px/1.2 var(--body); color: var(--muted); letter-spacing: .02em; }
+.haveanapp-byline__by { color: inherit; text-decoration: none; display: inline-block; min-height: 24px; padding: 4px 2px; pointer-events: auto; }
+.haveanapp-byline__by:hover, .haveanapp-byline__by:focus-visible { text-decoration: underline; }
+#title .byline { position: absolute; top: calc(var(--space-4) + var(--safe-t)); right: var(--space-5); }
 
-/* title A: big hand-lettered wordmark stacked left, the kite flies off its corner (drawn on the canvas) */
-html[data-theme="a"] #title { display: grid; align-content: center; justify-items: start; gap: var(--space-3); padding-left: calc(var(--space-7) + 8px); }
+/* ---- A · Margin doodle: the wordmark lettered big on the left, the kite flying off it */
+html[data-theme="a"] #title { display: grid; align-content: center; justify-items: start; gap: var(--space-3); padding-left: calc(var(--space-7) + 8px); padding-bottom: 22vh; }
 html[data-theme="a"] #title .plan { display: none; }
 html[data-theme="a"] #wordmark { margin: 0; font: 700 clamp(96px, 26vw, 220px)/.78 var(--display); color: var(--ink); transform: rotate(-4deg); transform-origin: 0 100%; }
 html[data-theme="a"] #wordmark span { display: block; }
 html[data-theme="a"] #wordmark .w2 { position: relative; margin-left: .35em; }
 html[data-theme="a"] #wordmark .w2::before { content: ''; position: absolute; left: -.1em; right: -.12em; top: .38em; height: .42em; background: var(--mark); opacity: .85; z-index: -1; transform: skewX(-12deg) rotate(1deg); border-radius: 3px; }
-html[data-theme="a"] .tag { margin-left: .4em; }
-html[data-theme="a"] .fly { margin-top: var(--space-5); }
-html[data-theme="a"] .best { position: fixed; left: 8px; bottom: calc(var(--space-5) + var(--safe-b)); width: 36px; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 18px; color: var(--margin); }
-html[data-theme="a"] .best b { font-size: 22px; color: var(--margin); }
+html[data-theme="a"] .tag { font-family: 'Caveat', cursive; margin-left: .4em; }
+html[data-theme="a"] .fly { margin-top: var(--space-4); }
+html[data-theme="a"] .best { margin-left: .5em; }
 
-/* title B: a notebook header, the flight path is the hero (canvas), the title set along the bottom */
-html[data-theme="b"] #title { display: grid; grid-template-rows: auto auto auto 1fr auto; align-content: start; gap: var(--space-2); }
-html[data-theme="b"] .plan { font-size: 22px; border-bottom: 2px solid var(--pen); padding-bottom: var(--space-2); max-width: 360px; }
-html[data-theme="b"] #wordmark { margin: var(--space-4) 0 0; font: 400 clamp(64px, 17vw, 132px)/.9 var(--display); color: var(--ink); letter-spacing: .02em; }
-html[data-theme="b"] #wordmark .w2 { color: var(--pen); }
-html[data-theme="b"] .tag { font-family: var(--body); font-size: 22px; }
-html[data-theme="b"] .fly { grid-row: 5; justify-self: end; color: var(--surface); background: var(--pen); border-radius: 6px; min-width: 180px; margin-bottom: 96px; }
+/* ---- B · Logbook cover: a cloth cover (canvas) with a typed label; no scene at all */
+html[data-theme="b"] #title { display: grid; grid-template-rows: auto auto auto 1fr auto auto; justify-items: center; text-align: center; padding: calc(11vh + var(--safe-t)) 13vw calc(var(--space-6) + var(--safe-b)); gap: var(--space-1); color: var(--ink); }
+html[data-theme="b"] #title .byline { position: static; grid-row: 6; color: #e9e2cc; }
+html[data-theme="b"] .plan { font: 700 13px/1 var(--body); letter-spacing: .24em; text-transform: uppercase; color: var(--pen); margin-top: var(--space-4); }
+html[data-theme="b"] .plan span { color: var(--ink); }
+html[data-theme="b"] #wordmark { margin: var(--space-2) 0 0; font: 400 clamp(40px, 12.5vw, 84px)/.95 var(--display); letter-spacing: .01em; text-transform: uppercase; color: var(--ink); }
+html[data-theme="b"] #wordmark span { display: block; } html[data-theme="b"] #wordmark .w2 { color: var(--pen); }
+html[data-theme="b"] .tag { font: 400 14px/1.3 var(--body); margin-top: var(--space-2); }
+html[data-theme="b"] .best { font: 400 13px/1.3 var(--body); margin-top: var(--space-1); } html[data-theme="b"] .best b { font: 700 14px var(--num); }
+html[data-theme="b"] .fly { grid-row: 5; align-self: end; min-width: 220px; font: 700 16px/1 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); background: var(--mark); border-radius: 4px; margin-bottom: var(--space-3); }
 html[data-theme="b"] .fly::before { display: none; }
-html[data-theme="b"] .fly::after { content: ' \2192'; }
-html[data-theme="b"] .best { position: fixed; right: var(--space-5); top: calc(var(--space-6) + var(--safe-t)); text-align: right; font-size: 18px; }
 
-/* title C: centred under the kite, typewritten caps, chalk circle button */
-html[data-theme="c"] #title { display: grid; align-content: end; justify-items: center; text-align: center; gap: var(--space-3); padding-bottom: calc(14vh + var(--safe-b)); }
-html[data-theme="c"] #title .plan { display: none; }
-html[data-theme="c"] #wordmark { margin: 0; font: 700 clamp(44px, 12vw, 96px)/1 var(--display); letter-spacing: .28em; margin-right: -.28em; text-transform: uppercase; }
+/* ---- C · Night sketchbook: the kite is the page (canvas); small typed caps at the bottom */
+html[data-theme="c"] #title { display: grid; align-content: end; justify-items: center; text-align: center; gap: var(--space-2); padding-bottom: calc(5vh + var(--safe-b)); }
+html[data-theme="c"] #title .plan, html[data-theme="c"] .best { display: none; }
+html[data-theme="c"] #title .byline { top: auto; right: auto; position: static; order: 9; font-size: 12px; }
+html[data-theme="c"] #wordmark { margin: 0; font: 700 clamp(22px, 6.4vw, 40px)/1 var(--display); letter-spacing: .5em; margin-right: -.5em; text-transform: uppercase; }
 html[data-theme="c"] #wordmark .w2 { color: var(--mark); }
-html[data-theme="c"] .tag { font-size: 26px; color: var(--muted); }
-html[data-theme="c"] .fly { color: var(--mark); font: 400 24px/1 'Caveat', cursive; margin-top: var(--space-3); }
-html[data-theme="c"] .best { font-size: 15px; }
-html[data-theme="c"] .best b { font-size: 20px; }
+html[data-theme="c"] .tag { font: 400 13px/1.3 var(--body); letter-spacing: .12em; }
+html[data-theme="c"] .fly { min-height: 48px; color: var(--mark); font: 700 15px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; }
+html[data-theme="c"] .fly::before { border-radius: 2px; border-width: 0 0 2px; inset: auto 20% 8px; transform: none; }
 
-/* ---------------------------------------------------------------- HUD */
-.hud { position: fixed; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: var(--space-4); padding: calc(var(--space-4) + var(--safe-t)) var(--space-4) 0 calc(var(--space-5) + 10px); pointer-events: none; }
-.count, .lives { background: var(--surface); box-shadow: 0 0 0 3px var(--surface); border-radius: 2px; transform: rotate(-1.2deg); }   /* correction tape: play never draws over the numbers */
-.count { display: grid; line-height: .9; padding: 4px 10px 6px; }
-.count .lbl { font: 400 17px var(--body); color: var(--muted); }
-.count b { font: 700 46px var(--num); color: var(--pen); }
-html[data-theme="b"] .count b, html[data-theme="c"] .count b { font-size: 36px; }
-.lives { display: flex; gap: 6px; margin-left: var(--space-2); align-self: end; padding: 6px 8px; transform: rotate(.8deg); }
+/* ---- HUD */
+.hud { position: fixed; left: 0; right: 0; top: 0; display: flex; align-items: flex-start; gap: var(--space-3); padding: calc(var(--space-3) + var(--safe-t)) var(--space-4) 0 calc(var(--space-7) + 12px); pointer-events: none; }
+.count { display: grid; line-height: .9; }
+.count .lbl { font: 400 16px var(--body); color: var(--muted); }
+.count b { font: 700 44px var(--num); color: var(--pen); }
+.lives { display: flex; gap: 6px; align-self: center; }
 .lives i { width: 16px; height: 16px; background: var(--kite); clip-path: polygon(50% 0, 100% 42%, 50% 100%, 0 42%); }
 .lives i.lost { background: var(--rule); }
-.pause + .pause, #mute + .pause { margin-left: 8px; }
-#mute { margin-left: auto; }
-#mute .off { display: none; } #mute[aria-pressed="true"] .on { display: none; } #mute[aria-pressed="true"] .off { display: inline; }
-.pause { margin-left: auto; width: 48px; height: 48px; display: grid; place-items: center; pointer-events: auto; color: var(--ink); border: 2px solid currentColor; border-radius: 46% 54% 50% 50%; }
-.pause svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.pause { width: 48px; height: 48px; display: grid; place-items: center; pointer-events: auto; color: var(--ink); background: var(--surface); border: 2px solid currentColor; border-radius: 46% 54% 50% 50%; }
+.pause svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+#mute { margin-left: auto; } #mute .off { display: none; } #mute[aria-pressed="true"] .on { display: none; } #mute[aria-pressed="true"] .off { display: inline; }
+/* A: the count and the lives sit on correction tape; the kite cannot fly above the tape's lower edge (game.js reads --ceiling) */
+html[data-theme="a"] { --ceiling: 96px; }
+html[data-theme="a"] .count, html[data-theme="a"] .lives { background: var(--surface); box-shadow: 0 0 0 4px var(--surface), 0 1px 0 4px rgba(0, 0, 0, .06); border-radius: 2px; }
+html[data-theme="a"] .count { padding: 2px 10px 4px; transform: rotate(-1.2deg); } html[data-theme="a"] .lives { padding: 6px 8px; transform: rotate(.8deg); }
+/* B: a solid header band, like the heading strip of a chart */
+html[data-theme="b"] { --ceiling: 64px; }
+html[data-theme="b"] .hud { align-items: center; height: calc(64px + var(--safe-t)); padding: var(--safe-t) var(--space-4) 0; background: var(--pen); }
+html[data-theme="b"] .count { grid-auto-flow: column; align-items: baseline; gap: var(--space-2); }
+html[data-theme="b"] .count .lbl { font: 700 12px var(--body); letter-spacing: .18em; text-transform: uppercase; color: #cfe1d8; }
+html[data-theme="b"] .count b { font: 700 30px var(--num); color: #fffaf0; }
+html[data-theme="b"] .lives i.lost { background: #3c7a66; }
+html[data-theme="b"] .pause { width: 44px; height: 44px; border-radius: 4px; background: var(--surface); }
+/* C: no top HUD: the count is the giant chalk numeral on the page (canvas); lives sit bottom-centre */
+html[data-theme="c"] { --ceiling: 40px; }
+html[data-theme="c"] .count { display: none; }
+html[data-theme="c"] .lives { position: fixed; left: 50%; bottom: calc(var(--space-5) + var(--safe-b)); transform: translateX(-50%); }
+html[data-theme="c"] .hud { padding-left: var(--space-4); }
+html[data-theme="c"] .pause { background: transparent; border-radius: 50%; }
 
-.hint { position: fixed; left: 0; right: 0; bottom: calc(var(--space-6) + var(--safe-b)); margin: 0; text-align: center; font: 400 24px 'Caveat', cursive; color: var(--muted); pointer-events: none; }
+/* the hint: written on a strip of tape so it reads on any ground */
+.hint { position: fixed; left: 0; right: 0; bottom: calc(var(--space-5) + var(--safe-b)); margin: 0; text-align: center; pointer-events: none; }
+.hint span { display: inline-block; padding: 6px 16px 8px; font: 400 22px/1.1 var(--body); color: var(--ink); background: var(--surface); box-shadow: 0 1px 0 rgba(0, 0, 0, .08); border-radius: 2px; transform: rotate(-1deg); }
+html[data-theme="b"] .hint span { font: 700 13px var(--body); letter-spacing: .1em; text-transform: uppercase; transform: none; }
+html[data-theme="c"] .hint { bottom: calc(var(--space-7) + 12px + var(--safe-b)); } html[data-theme="c"] .hint span { font: 400 13px var(--body); letter-spacing: .1em; background: transparent; color: var(--muted); box-shadow: none; transform: none; }
 
-/* ---------------------------------------------------------------- sheets: pause and results (the results page is night paper, from design C) */
-.sheet { display: grid; align-content: center; justify-items: center; text-align: center; gap: var(--space-3); background: color-mix(in srgb, var(--paper) 86%, transparent); }
-.sheet h2 { margin: 0; font: 700 clamp(48px, 13vw, 88px)/1 var(--display); }
-#over { background: transparent; color: #f1ede4; --pen: #f5c04a; --muted: #b7b2a8; }
-#over .plan { color: var(--muted); }
-#over { align-content: end; padding-bottom: calc(14vh + var(--safe-b)); }
-#over .result { margin: 0; font: 400 24px var(--body); }
-#over .result b { font: 700 92px/1 var(--num); color: #f5c04a; display: block; }
-#over .note { margin: 0; font: 400 24px 'Caveat', cursive; color: var(--muted); min-height: 1.2em; }
-#over .fly { color: #f5c04a; }
+/* ---- sheets: pause, and the results page (night paper, from the person's note on design C) */
+.sheet { display: grid; align-content: center; justify-items: center; text-align: center; gap: var(--space-3); background: color-mix(in srgb, var(--paper) 90%, transparent); }
+.sheet h2 { margin: 0; font: 700 clamp(44px, 12vw, 80px)/1 'Caveat', cursive; }
+#paused .byline { position: absolute; left: 0; right: 0; bottom: calc(var(--space-5) + var(--safe-b)); text-align: center; }
+#over { background: transparent; color: #f1ede4; --pen: #f5c04a; --muted: #b7b2a8; align-content: end; padding-bottom: calc(12vh + var(--safe-b)); }
+#over .plan { font: 400 20px/1.2 'Patrick Hand', cursive; color: #b7b2a8; }
+#over .result { margin: 0; font: 400 24px 'Patrick Hand', cursive; }
+#over .result b { font: 700 92px/1 'Caveat', cursive; color: #f5c04a; display: block; }
+#over .note { margin: 0; font: 400 24px 'Caveat', cursive; color: #b7b2a8; min-height: 1.2em; }
+#over .fly { color: #f5c04a; font: 400 28px/1 'Caveat', cursive; background: none; letter-spacing: 0; text-transform: none; }
+#over .fly::before { display: block; inset: 2px -6px; border: 2.5px solid currentColor; border-radius: 48% 52% 46% 54% / 58% 44% 56% 42%; transform: rotate(-2deg); }
 
 @media (prefers-reduced-motion: reduce) { .fly::before { transition: none; } }
 @media (min-width: 900px) {
   html[data-theme="a"] #title { padding-left: 14vw; }
-  html[data-theme="b"] #title { padding: calc(var(--space-7) + var(--safe-t)) 8vw var(--space-7); }
+  html[data-theme="b"] #title { padding-left: 34vw; padding-right: 34vw; }
 }
-
-/* HaveAnApp attribution (production/kit/haveanapp/byline.css), in the notebook's own hand */
-.haveanapp-byline { margin: var(--space-2) 0 0; font: 400 15px/1.2 var(--body); color: var(--muted); letter-spacing: .02em; }
-.haveanapp-byline__by { color: inherit; text-decoration: none; display: inline-block; min-height: 24px; padding: 4px 2px; pointer-events: auto; }
-.haveanapp-byline__by:hover, .haveanapp-byline__by:focus-visible { text-decoration: underline; }
-html[data-theme="a"] #title .haveanapp-byline { margin-left: .5em; }

@@ -36,7 +36,8 @@ Ideas can be saved and researched first (`production_idea`, `production_recon`).
 Every app gets an approved icon (App Icon Studio), the quiet "by HaveAnApp"
 credit and a proportionate engineering standard (docs/app-standards.md). New
 products, redesigns and new looks are picture-first: the person picks a style
-(atlas looks rendered as their product) and a design before anything is built,
+(atlas looks rendered as their product) and a design with its app icon before
+anything is built (save any image they paste as a reference and say so),
 and an automatic visual review holds the build to the chosen frame
 (docs/visual-direction.md). The Production Director picks the
 departments, orders and parallelises them, gates every result, turns failed

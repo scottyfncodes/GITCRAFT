@@ -8,10 +8,13 @@
  "shots": [
   {
    "id": "title",
-   "name": "Title, fully loaded (the kite has landed beside the wordmark)",
+   "name": "Title: the kite climbs off the hand and lands beside the wordmark",
    "kind": "title",
    "moment": "title-reveal",
    "steps": [],
+   "sequence": {
+    "after_ms": 600
+   },
    "wait_for": {
     "selector": "#title[data-ready]",
     "timeout_ms": 8000
@@ -19,51 +22,61 @@
   },
   {
    "id": "mid-play",
-   "name": "Mid-play, ribbons and the first gulls",
+   "name": "Mid-play, climbing after the first ribbons",
    "kind": "play",
    "steps": [
     {
      "press": "Space"
     },
     {
+     "wait": 2600
+    },
+    {
+     "hold": {
+      "key": "Space",
+      "ms": 330
+     }
+    },
+    {
+     "wait": 250
+    },
+    {
      "hold": {
       "key": "Space",
       "ms": 260
      }
-    },
-    {
-     "wait": 500
-    },
-    {
-     "hold": {
-      "key": "Space",
-      "ms": 220
-     }
     }
    ],
    "wait_for": {
-    "js": "window.__game.state === 'playing' && window.__game.time > 1.6",
+    "js": "window.__game.state === 'playing' && window.__game.time > 2.2",
     "timeout_ms": 8000
    }
   },
   {
    "id": "first-ribbon",
-   "name": "First ribbon: the bow and the margin note",
+   "name": "First ribbon: the page celebrates",
    "kind": "moment",
    "moment": "first-ribbon",
    "steps": [
     {
      "press": "Space"
+    },
+    {
+     "wait": 700
     }
    ],
+   "sequence": {
+    "after_ms": 1700
+   },
    "wait_for": {
-    "js": "window.__game.first_ribbon_at !== null && window.__game.note",
+    "js": "window.__game.first_ribbon_at !== null && !!window.__game.note",
     "timeout_ms": 8000
-   }
+   },
+   "settle_ms": 420
   },
   {
    "id": "fail",
-   "name": "Grounded: the moment the flight ends",
+   "name": "The instant of failing: the kite hits the ground",
    "kind": "fail",
    "steps": [
     {
@@ -71,10 +84,10 @@
     }
    ],
    "wait_for": {
-    "js": "window.__game.state === 'over'",
+    "js": "window.__game.state === 'failing'",
     "timeout_ms": 15000
    },
-   "settle_ms": 80
+   "settle_ms": 260
   },
   {
    "id": "results",
@@ -86,6 +99,13 @@
      "press": "Space"
     }
    ],
+   "sequence": {
+    "before": {
+     "js": "window.__game.state === 'failing'",
+     "timeout_ms": 15000
+    },
+    "after_ms": 300
+   },
    "wait_for": {
     "js": "window.__game.state === 'over' && window.__game.results_drawn === true",
     "timeout_ms": 18000

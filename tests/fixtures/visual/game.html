@@ -27,7 +27,9 @@ function start() {
     x.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--sky'); x.fillRect(0, 0, c.width, c.height);
     x.fillStyle = '#e4572e'; const ky = c.height * 0.3 + G.time * 60;
     x.beginPath(); x.moveTo(c.width / 2, ky - 30); x.lineTo(c.width / 2 + 22, ky); x.lineTo(c.width / 2, ky + 34); x.lineTo(c.width / 2 - 22, ky); x.fill();
-    if (G.time > 1.6) { G.state = 'over'; c.hidden = true; document.getElementById('score').textContent = G.score; document.getElementById('over').hidden = false; return; }
+    if (G.time > 1.6) {   // the instant of failing is its own frame (state 'failing', 500 ms), then the results screen
+      G.state = 'failing'; x.strokeStyle = '#20323f'; x.lineWidth = 8; x.beginPath(); x.moveTo(c.width / 2 - 40, ky - 40); x.lineTo(c.width / 2 + 40, ky + 40); x.moveTo(c.width / 2 + 40, ky - 40); x.lineTo(c.width / 2 - 40, ky + 40); x.stroke();
+      setTimeout(() => { G.state = 'over'; c.hidden = true; document.getElementById('score').textContent = G.score; document.getElementById('over').hidden = false; }, 500); return; }
     requestAnimationFrame(f);
   })(t0);
 }

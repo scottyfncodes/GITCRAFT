@@ -1,61 +1,221 @@
 {
  "reviewer": "Claude Code session (model judgement), acting as GITCRAFT's agent",
- "pack": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/review.pack.r1/pack.json",
+ "pack": "/home/user/gitcraft-out/production/20261118T055651Z-kite-line-f44d/tasks/review.pack.r1/pack.json",
  "coverage": {
   "viewed": [
+   "target:icon",
+   "target:phone",
+   "target:desktop",
+   "target:browser",
+   "target:play",
+   "style:sample",
    "shot:title@phone",
+   "shot:title@phone#before",
+   "shot:title@phone#after",
    "shot:title@desktop",
+   "shot:title@desktop#before",
+   "shot:title@desktop#after",
    "shot:mid-play@phone",
    "shot:mid-play@desktop",
    "shot:first-ribbon@phone",
+   "shot:first-ribbon@phone#before",
+   "shot:first-ribbon@phone#after",
    "shot:first-ribbon@desktop",
+   "shot:first-ribbon@desktop#before",
+   "shot:first-ribbon@desktop#after",
    "shot:fail@phone",
    "shot:fail@desktop",
    "shot:results@phone",
+   "shot:results@phone#before",
+   "shot:results@phone#after",
    "shot:results@desktop",
+   "shot:results@desktop#before",
+   "shot:results@desktop#after",
    "shot:paused@phone",
-   "shot:paused@desktop",
-   "target:phone",
-   "target:desktop",
-   "target:play",
-   "style:sample"
+   "shot:paused@desktop"
   ],
   "not_seen": []
  },
- "summary": "An assessment after round 1: the phone title now matches design A's clean text column, the results drawing sits above the log on phone and desktop, and the HUD is on correction tape. One small collision is left on the night page.",
- "matches": [
+ "summary": "An assessment after round 1, every shot shot again: the banner now sits inside the page and the pause sheet shows the maker's line with the hint gone; no new gap came from the fixes. The first-ribbon aftermath is still cut short.",
+ "checks": [
   {
-   "against": "target",
-   "claim": "the phone title reads like the chosen frame: wordmark, tagline, circled button and byline on clean paper, the string climbing the right side",
-   "evidence": [
-    "shot:title@phone",
-    "target:phone"
-   ],
-   "basis": "observed_render"
+   "shot": "title",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "the maker's line is top right, as the name line of the page"
+   }
   },
   {
-   "against": "moment:results",
-   "claim": "the whole flight is drawn as one chalk line above the log, with the ribbon circled and an X where it came down",
-   "evidence": [
-    "shot:results@phone",
-    "shot:results@desktop"
-   ],
-   "basis": "observed_render"
+   "shot": "mid-play",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "first-ribbon",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "the lettering now ends short of the right edge on the phone, inside the swipe"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "fail",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "results",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "no credit on this screen during play, or the maker's line sits in its deliberate place"
+   }
+  },
+  {
+   "shot": "paused",
+   "text_readable": {
+    "ok": true,
+    "note": "every label in the phone and desktop captures sits on plain paper or on a tape backing and reads at full size"
+   },
+   "geometry_deliberate": {
+    "ok": true,
+    "note": "nothing rotated, clipped or tiny beyond the hand-lettered tilt the notebook style gives the wordmark and tape"
+   },
+   "player_visible": {
+    "ok": true,
+    "note": "the kite is clear of the count, the lives and the buttons in both captures"
+   },
+   "credits_placed": {
+    "ok": true,
+    "note": "the hint is gone and 'Kite Line by HaveAnApp' sits alone at the bottom of the pause page"
+   }
   }
  ],
+ "moments": [
+  {
+   "id": "title-reveal",
+   "reads_as_event": true,
+   "why": "before: the kite is at the flyer's hand; peak: it has climbed the page to beside the wordmark; after: it holds there on its string",
+   "evidence": [
+    "shot:title@phone#before",
+    "shot:title@phone",
+    "shot:title@phone#after"
+   ]
+  },
+  {
+   "id": "first-ribbon",
+   "reads_as_event": true,
+   "why": "the peak still lands (full-width swipe, rays, circled count), but the after frame is again the results page: the kite reaches the ground about two seconds after the catch",
+   "evidence": [
+    "shot:first-ribbon@phone#before",
+    "shot:first-ribbon@phone",
+    "shot:first-ribbon@phone#after"
+   ]
+  },
+  {
+   "id": "results",
+   "reads_as_event": true,
+   "why": "before: the 'thud!' beat on the day page; peak and after: night paper with the whole flight drawn above the log",
+   "evidence": [
+    "shot:results@phone#before",
+    "shot:results@phone",
+    "shot:results@phone#after"
+   ]
+  }
+ ],
+ "previous": [
+  {
+   "id": "moment-cut-short",
+   "closed": false,
+   "note": "the after frame is still the results page"
+  },
+  {
+   "id": "banner-edge",
+   "closed": true,
+   "note": "the lettering ends inside the swipe with air on the right"
+  },
+  {
+   "id": "paused-hint",
+   "closed": true,
+   "note": "no hint on the pause page; the maker's line is visible at the bottom"
+  }
+ ],
+ "matches": [],
  "gaps": [
   {
-   "id": "stars-on-text",
-   "shot": "results",
-   "against": "moment:results",
-   "severity": "minor",
-   "basis": "observed_render",
+   "id": "moment-cut-short",
+   "shot": "first-ribbon",
+   "against": "moment:first-ribbon",
+   "severity": "major",
    "evidence": [
-    "shot:results@phone",
-    "shot:results@desktop"
+    "shot:first-ribbon@phone#after",
+    "shot:first-ribbon@phone"
    ],
-   "gap": "chalk stars on the night page land on top of 'Flight log' and the 'Grounded' heading, so the lettering looks smudged",
-   "fix": "keep the stars out of the text block: scatter them only outside the rectangle the results text occupies"
+   "gap": "the after frame, 2.1 s after the catch, is still the results page: easing the weight back was not enough because the kite is already sinking when it catches the ribbon",
+   "fix": "make the catch lift the kite (an upward kick at the first ribbon, like the ribbon's gust) so it rises through the celebration and the after frame shows play with the bow on the tail",
+   "basis": "observed_render"
   }
  ]
 }
