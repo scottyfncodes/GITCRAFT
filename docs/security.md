@@ -77,8 +77,11 @@ finished, that the environment requires reviewers, and that a GitHub *user* appr
 (no network, a private repository without `GITHUB_TOKEN`, no approval) is refused.
 
 What makes this independent is GitHub: the agent can start the workflow but not approve it, **provided** its GitHub
-credentials cannot review deployments and administrators cannot bypass the environment. Check both (the Claude GitHub
-App's permissions; Settings > Environments). Note also that the agent can still deploy directly with a connected
+credentials cannot review deployments and administrators cannot bypass the environment. GitHub records the approver's
+*account*; when that is the same account the agent works as (one person, one account), GitHub cannot tell the person
+from an agent using that account's token. The recorded evidence says so (`same_identity`, `prevent_self_review`,
+`warnings`). The strong set-up is a separate reviewer account (with its own 2FA) as the environment's only required
+reviewer, with **Prevent self-review** on: then no token the agent holds can approve. Note also that the agent can still deploy directly with a connected
 Vercel account or merge to a branch that deploys: GITCRAFT's approval stops GITCRAFT from treating its word as
 yours, and the platforms must stop the rest (restrict who can deploy production, require reviews on the production
 branch). GITCRAFT's own records are not a security boundary against code with shell access.
@@ -150,6 +153,8 @@ cleanly with 502 and `allowed-failed` in `net.jsonl`.
 ## Choosing the roots
 
 - `GITCRAFT_ROOT` is the primary folder. It defaults to the session's project folder (`$CLAUDE_PROJECT_DIR`, else the current folder); a session opened in `$HOME` itself (or `/`) gets `~/gitcraft-work` instead. Before November 2026 the local default was `$HOME`, which made `~/.claude`, `~/.ssh` and shell start-up files writable from inside the sandbox. Tools with a single native root flag (PhotoCraft) get this one.
+- **Every writable folder is checked**, not only the roots: a store variable (`GITCRAFT_3D_LIBRARY`, the asset catalogue,
+  histories...) pointing at `$HOME` or a control folder stops the tool from starting too.
 - **Refused roots.** `scripts/mcp.sh` does not start a tool whose roots include `/`, `$HOME` or a folder containing it, `~/.gitcraft` itself or its runtime, code, binaries, clone, logs, venvs or `allow-hosts`, or anything inside `~/.ssh`, `~/.claude`, `~/.config` and similar (`gitcraft3d/policy.py`). There is no override: Landlock cannot fence those files once their folder is writable. GITCRAFT's shared stores (`~/.gitcraft/productions`, `reports`, `3d-library`...) remain usable.
 - `GITCRAFT_ROOTS` is a colon-separated list of every authorized folder, e.g. one per repo. It defaults to `GITCRAFT_ROOT`. Narrow it to scope tools to specific repositories:
   `GITCRAFT_ROOTS=/home/user/TIDEBREAKERS:/home/user/GITCRAFT`.

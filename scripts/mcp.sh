@@ -123,6 +123,12 @@ writable=("${roots[@]}" "$state")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
 [[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
 [[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY" "$GITCRAFT_HOME/productions" "$GITCRAFT_HOME/reports")
+# Every folder granted for writing obeys the same rule as the roots (gitcraft3d/policy.py), not just GITCRAFT_ROOTS: a store
+# variable set to $HOME (GITCRAFT_3D_LIBRARY=~, ...) would otherwise reopen everything the root rule closes.
+if ! why="$(python3 -I "$repo/gitcraft3d/policy.py" check-roots "${writable[@]}")"; then
+  echo "gitcraft: $name not started: a writable folder is unsafe: $why. Point the GITCRAFT_* store variables at their own folders (docs/security.md)." >&2
+  exit 1
+fi
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).

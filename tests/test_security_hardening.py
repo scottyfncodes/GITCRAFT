@@ -178,7 +178,11 @@ check("roots: unsafe roots are refused (" + ", ".join(bad) + ")", all(policy.uns
 check("roots: project folders and GITCRAFT's shared stores stay allowed", not policy.unsafe_root(os.path.join(fh, "code", "app"), penv)
       and not policy.unsafe_root(os.path.join(fh, ".gitcraft", "productions"), penv) and not policy.unsafe_root(os.path.join(ws, "lab"), penv))
 mcp = os.path.join(REPO, "scripts", "mcp.sh")
+lab_ws = os.path.join(ws, "lab-ws"); os.makedirs(lab_ws)
 r = sh([mcp, "photocraft"], env=dict(os.environ, GITCRAFT_ROOT=os.path.expanduser("~"), GITCRAFT_ROOTS=os.path.expanduser("~")), input="", timeout=60)
+r2 = sh([mcp, "forgecraft"], env=dict(os.environ, GITCRAFT_ROOT=lab_ws, GITCRAFT_ROOTS=lab_ws, GITCRAFT_3D_LIBRARY=os.path.expanduser("~")), input="", timeout=60)
+check("roots: a store variable pointing at $HOME (GITCRAFT_3D_LIBRARY=~) is refused too: every writable folder is checked, not only the roots",
+      r2.returncode != 0 and "writable folder is unsafe" in r2.stderr, r2.stderr[-300:])
 check("roots: mcp.sh refuses to start a tool whose root is $HOME (fail closed, says why)", r.returncode != 0 and "not started" in r.stderr and "home folder" in r.stderr, r.stderr[-300:])
 lab = os.path.join(ws, "lab"); os.makedirs(lab)
 probe = ("import sys\nfor p in sys.argv[1:]:\n    try: open(p, 'w').write('x'); print(p, 'WROTE')\n    except Exception as e: print(p, type(e).__name__)\n")
@@ -306,6 +310,12 @@ url = sf.RUN_URL.format(repo=slug)
 ev = approvals.verify(url, pid, task, "deploy", repo=slug, fetch=sf.github(pid, task, slug))
 check("approvals: a run a GitHub user approved in the required-reviewer environment is accepted, with evidence",
       ev["approved_by"] == ["owner"] and ev["environment"] == "production" and ev["required_reviewers"] == ["owner"], ev)
+
+
+ev2 = approvals.verify(url, pid, task, "deploy", repo=slug, fetch=sf.github(pid, task, slug, trigger="scottyfncodes-agent", approver="person-reviewer", self_review=True))
+check("approvals: the evidence says whether the approval is independent of the account that started the run (same identity is flagged, never hidden)",
+      ev["same_identity"] is True and any("cannot tell a person from an agent" in w for w in ev["warnings"])
+      and ev2["same_identity"] is False and ev2["prevent_self_review"] is True and not ev2["warnings"], (ev, ev2))
 
 
 def refusal(**kw):

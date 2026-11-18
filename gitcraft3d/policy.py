@@ -32,6 +32,8 @@ HOME_CONTROL = (".ssh", ".gnupg", ".claude", ".config", ".aws", ".azure", ".kube
 # 3d-library/ and state/ are fine as roots: nothing outside the sandbox executes them)
 GITCRAFT_CONTROL = ("runtime", "runtimes", "bin", "repo", "src", "target", "logs", "meshcraft", "studio", "forgecraft",
                     "allow-hosts", "status.json")
+# exceptions inside those: ForgeCraft's model download cache (written by sandboxed tools, read only by sandboxed tools)
+GITCRAFT_STORES = ("forgecraft/hf-cache",)
 
 SNAP_FILE_MAX = 1 << 20       # a control file larger than this is watched by hash only (detected, not restorable)
 SNAP_TOTAL_MAX = 16 << 20
@@ -63,6 +65,8 @@ def unsafe_root(path, env=None):
         if _under(p, os.path.join(home, d)): return f"it is inside {os.path.join(home, d)} (credentials or tool configuration)"
     cfg = env.get("CLAUDE_CONFIG_DIR")
     if cfg and _under(p, _real(cfg)): return "it is inside Claude Code's configuration folder"
+    for d in GITCRAFT_STORES:   # caches inside a control folder that nothing outside the sandbox executes
+        if _under(p, os.path.join(gh, d)): return None
     for d in GITCRAFT_CONTROL:
         if _under(p, os.path.join(gh, d)): return f"it is inside GITCRAFT's {d} ({os.path.join(gh, d)}), which runs outside the sandbox or sets its policy"
     rt = os.path.join(gh, "runtime")

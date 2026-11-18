@@ -15,14 +15,15 @@ def add_origin(path, repo):
 
 
 def github(pid, task, repo, env="production", approved=True, user_type="User", reviewers=True, status="completed",
-           conclusion="success", title=None, workflow=".github/workflows/gitcraft-approval.yml", approval_env=None, fail=None):
+           conclusion="success", title=None, workflow=".github/workflows/gitcraft-approval.yml", approval_env=None, fail=None,
+           trigger="owner", approver="owner", self_review=False):
     run = {"id": 424242, "path": workflow, "display_title": title or f"GITCRAFT approval: {pid} {task}", "status": status,
-           "conclusion": conclusion, "head_sha": "a" * 40, "triggering_actor": {"login": "owner"}, "actor": {"login": "owner"}}
+           "conclusion": conclusion, "head_sha": "a" * 40, "triggering_actor": {"login": trigger}, "actor": {"login": trigger}}
     approvals = [{"state": "approved" if approved else "rejected", "comment": "ship it",
-                  "user": {"login": "owner" if user_type == "User" else "claude[bot]", "type": user_type},
+                  "user": {"login": approver if user_type == "User" else "claude[bot]", "type": user_type},
                   "environments": [{"name": approval_env or env}]}] if approved is not None else []
     envinfo = {"name": env, "can_admins_bypass": False,
-               "protection_rules": [{"type": "required_reviewers", "reviewers": [{"type": "User", "reviewer": {"login": "owner"}}]}] if reviewers else []}
+               "protection_rules": [{"type": "required_reviewers", "prevent_self_review": self_review, "reviewers": [{"type": "User", "reviewer": {"login": approver}}]}] if reviewers else []}
 
     def fetch(path, token=None):
         if fail == "network": raise OSError("no route to host")

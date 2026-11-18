@@ -112,12 +112,19 @@ def verify(run_url, pid, task_id, approval_kind, repo=None, fetch=None):
           and any((e or {}).get("name") == env for e in a.get("environments") or [])]
     if not ok:
         raise NotApproved(f"no GitHub user approved this run for the '{env}' environment")
+    warnings = []
     if envinfo.get("can_admins_bypass") is True:
-        bypass = "administrators may bypass this environment's protection (turn that off: Settings > Environments)"
-    else:
-        bypass = None
+        warnings.append("administrators may bypass this environment's protection (turn that off: Settings > Environments)")
+    approvers = sorted({(a.get("user") or {}).get("login") for a in ok})
+    trigger = (run.get("triggering_actor") or run.get("actor") or {}).get("login")
+    self_review = any(rule.get("prevent_self_review") for rule in rules if rule.get("type") == "required_reviewers")
+    same = trigger in approvers
+    if same:
+        warnings.append(f"the approver ({trigger}) is the account that started the run: GitHub cannot tell a person from an agent using that "
+                        "account's token, so this is independent only if the agent's GitHub credentials cannot review deployments. "
+                        "Use a separate reviewer account and turn on 'Prevent self-review' to make it independent")
     return {"run": run_url, "run_id": int(rid), "repository": slug, "environment": env, "head_sha": run.get("head_sha"),
-            "approved_by": sorted({(a.get("user") or {}).get("login") for a in ok}), "comments": [a.get("comment") for a in ok if a.get("comment")],
-            "triggered_by": (run.get("triggering_actor") or run.get("actor") or {}).get("login"),
+            "approved_by": approvers, "comments": [a.get("comment") for a in ok if a.get("comment")],
+            "triggered_by": trigger, "same_identity": same, "prevent_self_review": self_review,
             "required_reviewers": sorted({(r.get("reviewer") or {}).get("login") or (r.get("reviewer") or {}).get("slug") or "?" for r in reviewers}),
-            "warning": bypass, "verified_via": "GitHub REST API"}
+            "warnings": warnings, "verified_via": "GitHub REST API"}
