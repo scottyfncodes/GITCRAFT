@@ -572,3 +572,11 @@ person**; they are never counted as passed. Format, gate and a worked example: [
 - **The 2D ArtCraft tools can't be driven from inside the studiocraft sandbox**, so their work is a work order for Claude to run with those MCP tools. The returned files are validated.
 - **Deployment verification needs a check that ran against the live URL.** The default sandbox has no network, so in a default session a deployment is recorded as unverified rather than live.
 - **Scores carry the departments' own noise.** PLAYCRAFT reports its confidence and measured noise band; the gate compares the measured overall against the bar exactly.
+
+## Plan v3: visual direction, picture-first
+
+New productions are plan v3: the v2 graph plus the visual stage (production/visual.py). Before the direction: the style
+pick and the design pick (the build depends on the design pick, which saves the chosen frame in the project). After the
+build: each signature moment as its own work order, the shot list captured (TestCraft `shots`), an automatic visual review
+whose gaps become work orders (at most two rounds) before QA, and at the end the look page. All of it is advisory to the
+verdict: no criterion, gate or score changes. Records keep the plan version they were made with. docs/visual-direction.md.

@@ -1,0 +1,24 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width, initial-scale=1'><title>Kite Line open visual gaps</title><meta name=description content=''><style>:root{color-scheme:light dark;--bg:#f3f2ee;--fg:#1c1c1a;--muted:#62625c;--line:#d8d7d1;--card:#fff;--pick:#1c1c1a}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#151514;--fg:#ecebe6;--muted:#a3a29b;--line:#34332f;--card:#1f1f1d;--pick:#ecebe6}}
+:root[data-theme=dark]{--bg:#151514;--fg:#ecebe6;--muted:#a3a29b;--line:#34332f;--card:#1f1f1d;--pick:#ecebe6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1240px;margin:0 auto;padding:28px 16px 64px}
+h1{font-size:28px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}h2{font-size:19px;margin:0 0 4px}
+.lede{color:var(--muted);max-width:68ch;margin:0 0 22px}.meta{color:var(--muted);font-size:14px;margin:0}
+a{color:inherit}.crumbs{font-size:14px;color:var(--muted);margin-bottom:14px}.crumbs a{color:var(--muted)}
+.grid{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card img{display:block;width:100%;height:auto;background:#000}.card .body{padding:14px 16px 16px;display:grid;gap:8px}.card .body p{margin:0}
+.card.chosen{outline:3px solid var(--pick);outline-offset:3px}
+.tag{display:inline-block;font-size:12px;font-weight:650;padding:2px 8px;border:1px solid currentColor;border-radius:99px;margin-right:6px;vertical-align:2px;white-space:nowrap}
+.sw{display:inline-block;width:20px;height:20px;border-radius:5px;margin-right:4px;border:1px solid rgba(127,127,127,.35);vertical-align:-4px}
+.pair{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);align-items:start}
+.pair figure{margin:0}.pair img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.design{border-top:1px solid var(--line);padding:26px 0}.design:first-of-type{border-top:0}
+.compare{display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;margin:14px 0 6px}
+.compare h3{font-size:14px;margin:0 0 8px;color:var(--muted);font-weight:650}.compare img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line)}
+.notseen{display:grid;place-items:center;aspect-ratio:9/19;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px;padding:16px;text-align:center}
+.status{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 22px;background:var(--card)}
+ul.gaps{padding-left:18px}ul.gaps li{margin:0 0 8px}
+@media (max-width:700px){.pair,.compare{grid-template-columns:minmax(0,1fr)}h1{font-size:24px}}</style></head><body><main><h1>Still open after 2 review rounds</h1><p class=lede>Advisory: these never change a score, a release gate or the verdict. Each is shown with the screenshots it was seen in.</p><section class=design><h2>results vs moment:results (minor)</h2><p>on desktop one chalk star sits against the last letter of &#x27;Grounded&#x27;, just outside the text box the stars avoid</p><p class=meta>Suggested fix: measure the heading&#x27;s ink rather than its box, or widen the clear area around the heading to 40 px</p><div class=compare><figure><img src='shot_results@desktop.webp' alt='shot:results@desktop'><figcaption>shot:results@desktop</figcaption></figure></div></section></main></body></html>

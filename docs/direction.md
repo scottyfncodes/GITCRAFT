@@ -20,6 +20,11 @@ build depend on it, and the release hands its open questions to a person.
 
 There is no house style. Nothing in GITCRAFT names a palette, a typeface or a genre for you.
 
+**Plan v3: pictures first.** Before `design.direction`, a person picks a style (six to eight atlas looks rendered as this
+product's scene) and a design (three designs of the real first screen); the direction is written from the chosen design and
+also records `art.style`, `art.target`, `art.references`, `art.accept_tells` and `art.moments`, with a shot list in the
+project. The gate below still applies, plus those fields (docs/visual-direction.md). v2 records keep v2.
+
 ## The file
 
 ```json

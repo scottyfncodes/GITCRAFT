@@ -1,0 +1,60 @@
+{
+ "reviewer": "Claude Code session (model judgement), acting as GITCRAFT's agent",
+ "pack": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/review.pack.r2/pack.json",
+ "coverage": {
+  "viewed": [
+   "shot:title@phone",
+   "shot:title@desktop",
+   "shot:mid-play@phone",
+   "shot:mid-play@desktop",
+   "shot:first-ribbon@phone",
+   "shot:first-ribbon@desktop",
+   "shot:fail@phone",
+   "shot:fail@desktop",
+   "shot:results@phone",
+   "shot:results@desktop",
+   "shot:paused@phone",
+   "shot:paused@desktop",
+   "target:phone",
+   "target:desktop",
+   "target:play",
+   "style:sample"
+  ],
+  "not_seen": []
+ },
+ "summary": "An assessment after round 2: the night page is clean on the phone and the rest of the shot list still matches design A. On desktop one chalk star still touches the end of the 'Grounded' heading.",
+ "matches": [
+  {
+   "against": "moment:results",
+   "claim": "on the phone the stars keep off the log text and the flight line sits above it",
+   "evidence": [
+    "shot:results@phone"
+   ],
+   "basis": "observed_render"
+  },
+  {
+   "against": "target",
+   "claim": "the title and play screens are unchanged from round 1 and still match the chosen frame",
+   "evidence": [
+    "shot:title@phone",
+    "shot:mid-play@desktop",
+    "target:phone"
+   ],
+   "basis": "observed_render"
+  }
+ ],
+ "gaps": [
+  {
+   "id": "star-on-heading",
+   "shot": "results",
+   "against": "moment:results",
+   "severity": "minor",
+   "basis": "observed_render",
+   "evidence": [
+    "shot:results@desktop"
+   ],
+   "gap": "on desktop one chalk star sits against the last letter of 'Grounded', just outside the text box the stars avoid",
+   "fix": "measure the heading's ink rather than its box, or widen the clear area around the heading to 40 px"
+  }
+ ]
+}

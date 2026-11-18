@@ -503,6 +503,59 @@
     "qa report",
     "test report"
    ]
+  },
+  "shots": {
+   "summary": "Capture a product's shot list: every named shot (title, mid-play, moments, fail, results, main screens) reached by its scripted steps and captured only once real content is on screen; a shot never reached is reported not seen, with the reason, and is never offered as evidence.",
+   "requires": [
+    "numpy",
+    "pillow",
+    "browser"
+   ],
+   "params": {
+    "type": "object",
+    "required": [
+     "target",
+     "shots"
+    ],
+    "properties": {
+     "target": {
+      "type": "string",
+      "description": "the built folder (served as http://game.local/) or its HTML file; or a locally running app (http://localhost:<port>)"
+     },
+     "entry": {
+      "type": "string"
+     },
+     "shots": {
+      "type": "string",
+      "description": "the shot list (shots.json: {shots: [{id, name, kind, moment?, path?, steps, wait_for: {selector|text|js, timeout_ms?}, viewports?}]}; docs/visual-direction.md)"
+     },
+     "viewports": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "enum": [
+        "android",
+        "desktop",
+        "laptop",
+        "phone",
+        "phone_landscape",
+        "tablet"
+       ]
+      }
+     },
+     "name": {
+      "type": "string"
+     }
+    }
+   },
+   "keywords": [
+    "shot list",
+    "shots",
+    "capture screens",
+    "screenshots of the real product",
+    "moments",
+    "look page"
+   ]
   }
  },
  "examples": [

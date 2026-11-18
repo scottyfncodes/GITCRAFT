@@ -7,11 +7,11 @@ and an advisory PIXELCRAFT check instead of installing third-party design skills
 
 | Phase | Where | Loaded |
 |---|---|---|
-| Explore: 2–3 genuinely different directions, same real screen, side by side; a person chooses | `ui-design` skill, `references/explore.md`, `scripts/directions.py` (stdlib comparison page) | only when there is no direction to follow |
+| Explore: in a production (plan v3) it is the visual stage: the style pick (6–8 atlas looks as this product's scene), then the design pick (three designs of the real first screen); outside a production, 2–3 directions side by side | `production/visual.py` (docs/visual-direction.md); the style atlas (`production/kit/atlas`); `ui-design` `references/explore.md`, `scripts/directions.py` | in every production that builds or reshapes a product; otherwise when there is no direction to follow |
 | Build: tokens, type with a voice, layout, Mobile Safari rules, states, browser surfaces, refuse-by-default list | `references/craft.md`; motion in `references/motion.md`; games in `references/games.md` | only the phase's file |
 | Audit: the rendered app, measured | PIXELCRAFT (`pixelcraft_audit`), plus its **generic design tells** (advisory, unscored, `docs/pixelcraft.md`) | when run |
 | Refine: fix what was measured or seen, verify, stop | `ui-design` §5 + `pixelcraft_verify` | — |
-| Taste judgement against the vision | Creative Review (only when asked) | — |
+| Taste judgement against the vision | Creative Review: automatic in a production with an art direction (the shot list against the chosen frame; gaps become work orders, ≤ 2 rounds), and on request (`production_creative`) | — |
 
 The skill is installed globally like the other GITCRAFT skills (`global/skills/ui-design/` → `~/.claude/skills/ui-design/`
 by `scripts/install-global.sh`), so it works in every project. Always-loaded cost: its one-line description and a

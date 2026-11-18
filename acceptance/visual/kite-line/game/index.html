@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-theme="a">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf8ef">
+<meta name="author" content="HaveAnApp">
+<meta name="description" content="Kite Line by HaveAnApp: hold to climb, let go to glide.">
+<title>Kite Line</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<section id="title" class="screen" aria-label="Kite Line">
+  <p class="plan">Flight plan <span>No. 07</span></p>
+  <h1 id="wordmark"><span class="w1">Kite</span> <span class="w2">Line</span></h1>
+  <p class="tag">one string, one thumb</p>
+  <button id="fly" class="fly" type="button"><span>Hold to fly</span></button>
+  <p class="best" id="bestNote">best: <b id="bestTitle">0</b> ribbons</p>
+  <p class="haveanapp-byline" data-haveanapp>Kite Line <a class="haveanapp-byline__by" href="https://haveanapp.com" rel="noopener" target="_blank">by HaveAnApp</a></p>
+</section>
+
+<header id="hud" class="hud" hidden>
+  <div class="count"><span class="lbl">ribbons</span><b id="score">0</b></div>
+  <div class="lives" id="lives" aria-label="lives"></div>
+  <button id="mute" class="pause" type="button" aria-label="Sound on" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16 9c1.5 1.6 1.5 4.4 0 6M19 6.5c3 3 3 8 0 11"/><path class="off" d="M16 9l5 6M21 9l-5 6"/></svg></button>
+  <button id="pause" class="pause" type="button" aria-label="Pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
+</header>
+
+<section id="paused" class="screen sheet" hidden aria-label="Paused">
+  <h2>Holding the string</h2>
+  <p class="haveanapp-byline" data-haveanapp>Kite Line <a class="haveanapp-byline__by" href="https://haveanapp.com" rel="noopener" target="_blank">by HaveAnApp</a></p>
+  <button id="resume" class="fly" type="button"><span>Keep flying</span></button>
+</section>
+
+<section id="over" class="screen sheet" hidden aria-label="Results">
+  <p class="plan">Flight log</p>
+  <h2 id="overTitle">Grounded</h2>
+  <p class="result"><b id="final">0</b> <span>ribbons</span></p>
+  <p class="note" id="overNote"></p>
+  <button id="again" class="fly" type="button"><span>Fly again</span></button>
+</section>
+
+<p id="hint" class="hint" hidden>hold to climb · let go to glide</p>
+<script src="game.js"></script>
+</body>
+</html>

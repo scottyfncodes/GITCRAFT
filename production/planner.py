@@ -23,14 +23,21 @@ Plan versions (stored on the production record as `plan_version`; a revision kee
      The v2 graph is built from the v1 graph (_graph_v2), so v1 stays exactly what it was.
      v2 also decides before it builds: design.direction (production/direction.py) is the creative direction the build
      is held to, and a redesign, gameplay or polish pass of an existing project measures the project BEFORE the change
-     (baseline.pixelcraft / baseline.playcraft) so its QA is a before/after comparison, not an absolute score."""
+     (baseline.pixelcraft / baseline.playcraft) so its QA is a before/after comparison, not an absolute score.
+  3  v2 plus visual direction, picture-first (production/visual.py, docs/visual-direction.md): before the direction, the
+     style pick (six to eight atlas looks rendered as this product's scene; skipped when the request names a style) and
+     the design pick (three designs of the real first screen); the direction is written from the chosen design and the
+     chosen frame is the target. After the build: each signature moment as its own work order, the shot list captured,
+     and an automatic visual review whose gaps become work orders (at most visual.ROUNDS rounds) before QA; at the end,
+     the look page (the chosen frame beside the shipped shots). All of it is advisory to the verdict: no score, release
+     gate or criterion changes. An existing identity with no new look asked for skips both picks."""
 import copy, os, sys
 from . import REPO
 from . import discovery as _disc
 from . import direction as _direction
 
 STUDIO_DIR = os.path.join(REPO, "studio")
-PLAN_VERSION = 2   # new productions; records without plan_version are 1
+PLAN_VERSION = 3   # new productions; records without plan_version are 1 (v2 records keep v2)
 MANIFEST = "gitcraft.assets.json"   # the asset manifest in the project: owned by integration, never by the agent
 PREVIEW_ROLES = {"preview", "source", "manifest", "engine_screenshot", "blockout", "blockout_render", "ldtk_project", "render", "contact_sheet"}
 
@@ -360,6 +367,7 @@ def build(spec, disc, version=1):
               work_order={"approval": "deploy", "brief": "Deploy the verified release and prove the live URL serves it.",
                           "instructions": _deploy_instructions(spec), "expected": [], "requires": ["url", "evidence"]}))
     if version >= 2: _graph_v2(spec, tasks, decisions)
+    if version >= 3: _visual_v3(spec, tasks, decisions)
     rproblems = _skip_and_replace(spec, tasks, decisions)   # applied last, so any task (QA and release included) can be skipped or replaced
     plan = {"tasks": {t["id"]: t for t in tasks}, "order": [t["id"] for t in tasks], "decisions": decisions, "replacement_problems": rproblems,
             "plan_version": version}
@@ -427,6 +435,75 @@ def _graph_v2(spec, tasks, decisions):
     _layered_qa(spec, tasks, ids, ready, wires)
     decisions.append("plan v2: the code build starts after the foundation with placeholders; assets are integrated as they pass; build.wire wires them "
                      "and the approved icon in; QA measures the final wired build" + ("; the build uses a local data mock until backend.wire" if "backend.provision" in ids else ""))
+
+
+def _visual_v3(spec, tasks, decisions):
+    """Plan v3 (in place, after v2): the visual stage. Adds tasks and dependencies only; no criterion, gate or score changes."""
+    from . import visual
+    vs = visual.scope(spec)
+    ids = {t["id"]: t for t in tasks}
+    if not vs or "design.direction" not in ids: return
+    art = vs["art_dir"]
+    direct = ids["design.direction"]
+    pre = []
+    if vs["designs"]:
+        if vs["pick_style"]:
+            pre.append(T("design.styles", f"Style shortlist: {visual.SHORTLIST[0]}–{visual.SHORTLIST[1]} atlas looks rendered as this product's key scene", "design", "agent",
+                         deps=["foundation.scaffold"], work_order=visual.styles_work_order(spec, vs)))
+            pre[-1]["visual"] = "styles"
+            pre.append(T("design.style_pick", "A person picks the style (one, two to compare, or surprise me)", "design", "builtin", action="style_pick", deps=["design.styles"]))
+        else:
+            pre.append(T("design.style_pick", f"Style named in the request: {vs['named']['name']} (no style pick)", "design", "builtin", action="style_pick",
+                         params={"named": vs["named"]}, deps=["foundation.scaffold"]))
+        pre.append(T("design.designs", "Three designs of the real first screen, in the chosen style", "design", "agent", deps=["design.style_pick"],
+                     work_order=visual.designs_work_order(spec, vs)))
+        pre[-1]["visual"] = "designs"
+        pre.append(T("design.design_pick", "A person picks the design: the approval the build starts from", "design", "builtin", action="design_pick",
+                     params={"art_dir": art}, deps=["design.designs", "design.style_pick"]))
+        direct["depends_on"] = direct["depends_on"] + ["design.design_pick"]
+    direct["visual"] = "direction"
+    wo = direct["work_order"]
+    wo["instructions"] = [x for x in wo["instructions"] if not x.startswith("Use the ui-design skill's Explore")] + visual.direction_lines(spec, vs)
+    wo["expected"] = [dict(e, validate="direction_visual") if e.get("validate") == "direction" else e for e in wo["expected"]] + visual.direction_expected(vs)
+    i = tasks.index(direct); tasks[i:i] = pre
+    ready = next((d for d in (ids.get("qa.smoke") or {}).get("depends_on", []) if d != "integrate.final"), "build")
+    moments = T("design.moments", "Signature moments: each its own work order and its own shot", "design", "builtin", action="visual_moments",
+                params={"after": [ready], "feeds": ["capture.shots"]}, deps=["design.direction"])
+    tasks.insert(tasks.index(direct) + 1, moments)
+    b = ids.get("build")
+    if b: b["depends_on"] = b["depends_on"] + [t["id"] for t in pre + [moments] if t["id"] not in b["depends_on"]]
+    cap = {"target": "$target", "shots": f"$project/{art}/shots.json", "viewports": ["phone", "desktop"]}
+    pack_deps = ["design.direction"] + (["design.style_pick"] if vs["designs"] else [])
+    post = [T("capture.shots", "Shot list: every named shot of the build, captured once real content is on screen", "review", "studio", department="testcraft",
+              action="shots", params=dict(cap, name="shots"), deps=[ready, "design.moments"], resources=["browser"], advisory=True),
+            T("review.pack", "Visual review evidence: the chosen frame, the style, references, moments and every reached shot", "review", "builtin", action="visual_pack",
+              params={"art_dir": art}, deps=["capture.shots"] + pack_deps, advisory=True),
+            T("review.creative", "Visual review: the build against the chosen frame, style, references and moments (advisory, no score)", "review", "agent",
+              deps=["review.pack"], work_order=visual.review_work_order(spec, 0), advisory=True),
+            T("review.gaps", f"Visual gaps → work orders (at most {visual.ROUNDS} rounds), then listed for the person", "review", "builtin", action="visual_gaps",
+              params={"round": 0, "art_dir": art, "capture": cap, "pack_deps": pack_deps}, deps=["review.creative"], advisory=True)]
+    first_qa = next((t for t in tasks if t["stage"] == "qa"), None)
+    at = tasks.index(first_qa) if first_qa else len(tasks)
+    tasks[at:at] = post
+    for t in tasks:   # QA measures the product after the visual rounds (the review never gates it: advisory steps settle either way)
+        if t["stage"] in ("qa", "release") and t["id"] != "release.deploy" and "review.gaps" not in t["depends_on"]:
+            t["depends_on"] = t["depends_on"] + ["review.gaps"]
+        if t["id"] == "qa.pixelcraft" and t.get("action") == "audit":
+            t["params"]["accept_tells"] = {"$from": "design.direction", "role": "direction", "json": "art.accept_tells", "default": [],
+                                           "extend": t["params"].get("accept_tells") or []}
+            t["params"]["shots"] = f"$project/{art}/shots.json"
+        if t["id"] == "qa.playcraft" and t.get("action") == "pass": t["params"]["shots"] = f"$project/{art}/shots.json"
+    deploy = "release.deploy" if any(t["id"] == "release.deploy" for t in tasks) else None
+    rs = T("release.shots", "The shipped screens: the shot list on the released build", "review", "studio", department="testcraft", action="shots",
+           params=dict(cap, name="shipped"), deps=["release.report"], resources=["browser"], advisory=True)
+    lk = T("release.look", "The look page: the chosen frame beside the shipped screens", "review", "builtin", action="visual_look", params={"art_dir": art},
+           deps=["release.shots", "review.gaps"], advisory=True)
+    if deploy: rs["settles"] = [deploy]; lk["settles"] = [deploy]
+    tasks += [rs, lk]
+    decisions.append("visual direction first (plan v3): " + {"pick": "style pick, then design pick", "named": f"the request names {(vs['named'] or {}).get('name')}: design pick only",
+                                                              "keep": "the established identity is kept: its current best screen is the target"}[vs["mode"]]
+                     + "; signature moments, a shot list, an automatic visual review (gaps → work orders, at most "
+                     + f"{visual.ROUNDS} rounds; advisory, never a score or gate) and the look page")
 
 
 def _layered_qa(spec, tasks, ids, ready, wires):

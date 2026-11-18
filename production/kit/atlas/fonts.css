@@ -1,0 +1,51 @@
+/* Atlas fonts: self-hosted OFL-1.1 faces from Fontsource (see fonts/NOTICE.md). */
+@font-face{font-family:'Alfa Slab One';font-weight:400;font-style:normal;font-display:block;src:url('fonts/alfa-slab-one-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Archivo Black';font-weight:400;font-style:normal;font-display:block;src:url('fonts/archivo-black-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Archivo';font-weight:400;font-style:normal;font-display:block;src:url('fonts/archivo-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Archivo';font-weight:700;font-style:normal;font-display:block;src:url('fonts/archivo-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Archivo';font-weight:900;font-style:normal;font-display:block;src:url('fonts/archivo-latin-900-normal.woff2') format('woff2')}
+@font-face{font-family:'Audiowide';font-weight:400;font-style:normal;font-display:block;src:url('fonts/audiowide-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Bangers';font-weight:400;font-style:normal;font-display:block;src:url('fonts/bangers-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-weight:400;font-style:normal;font-display:block;src:url('fonts/barlow-condensed-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-weight:600;font-style:normal;font-display:block;src:url('fonts/barlow-condensed-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-weight:800;font-style:normal;font-display:block;src:url('fonts/barlow-condensed-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:'Big Shoulders Display';font-weight:400;font-style:normal;font-display:block;src:url('fonts/big-shoulders-display-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Big Shoulders Display';font-weight:700;font-style:normal;font-display:block;src:url('fonts/big-shoulders-display-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Big Shoulders Display';font-weight:900;font-style:normal;font-display:block;src:url('fonts/big-shoulders-display-latin-900-normal.woff2') format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-weight:400;font-style:normal;font-display:block;src:url('fonts/bricolage-grotesque-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-weight:700;font-style:normal;font-display:block;src:url('fonts/bricolage-grotesque-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Bricolage Grotesque';font-weight:800;font-style:normal;font-display:block;src:url('fonts/bricolage-grotesque-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:400;font-style:normal;font-display:block;src:url('fonts/caveat-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Caveat';font-weight:700;font-style:normal;font-display:block;src:url('fonts/caveat-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Chakra Petch';font-weight:400;font-style:normal;font-display:block;src:url('fonts/chakra-petch-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Chakra Petch';font-weight:600;font-style:normal;font-display:block;src:url('fonts/chakra-petch-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Comic Neue';font-weight:400;font-style:normal;font-display:block;src:url('fonts/comic-neue-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Comic Neue';font-weight:700;font-style:normal;font-display:block;src:url('fonts/comic-neue-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Crimson Pro';font-weight:400;font-style:normal;font-display:block;src:url('fonts/crimson-pro-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Crimson Pro';font-weight:600;font-style:normal;font-display:block;src:url('fonts/crimson-pro-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Fraunces';font-weight:400;font-style:normal;font-display:block;src:url('fonts/fraunces-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Fraunces';font-weight:600;font-style:normal;font-display:block;src:url('fonts/fraunces-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Fraunces';font-weight:900;font-style:normal;font-display:block;src:url('fonts/fraunces-latin-900-normal.woff2') format('woff2')}
+@font-face{font-family:'Fredoka';font-weight:400;font-style:normal;font-display:block;src:url('fonts/fredoka-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Fredoka';font-weight:600;font-style:normal;font-display:block;src:url('fonts/fredoka-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Fredoka';font-weight:700;font-style:normal;font-display:block;src:url('fonts/fredoka-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:400;font-style:normal;font-display:block;src:url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-weight:600;font-style:normal;font-display:block;src:url('fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Lexend';font-weight:400;font-style:normal;font-display:block;src:url('fonts/lexend-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Lexend';font-weight:600;font-style:normal;font-display:block;src:url('fonts/lexend-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Lexend';font-weight:800;font-style:normal;font-display:block;src:url('fonts/lexend-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:'Newsreader';font-weight:400;font-style:normal;font-display:block;src:url('fonts/newsreader-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Newsreader';font-weight:600;font-style:normal;font-display:block;src:url('fonts/newsreader-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:400;font-style:normal;font-display:block;src:url('fonts/outfit-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:600;font-style:normal;font-display:block;src:url('fonts/outfit-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Outfit';font-weight:800;font-style:normal;font-display:block;src:url('fonts/outfit-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:'Overpass';font-weight:400;font-style:normal;font-display:block;src:url('fonts/overpass-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Overpass';font-weight:600;font-style:normal;font-display:block;src:url('fonts/overpass-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Overpass';font-weight:800;font-style:normal;font-display:block;src:url('fonts/overpass-latin-800-normal.woff2') format('woff2')}
+@font-face{font-family:'Patrick Hand';font-weight:400;font-style:normal;font-display:block;src:url('fonts/patrick-hand-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Pixelify Sans';font-weight:400;font-style:normal;font-display:block;src:url('fonts/pixelify-sans-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Pixelify Sans';font-weight:600;font-style:normal;font-display:block;src:url('fonts/pixelify-sans-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Press Start 2P';font-weight:400;font-style:normal;font-display:block;src:url('fonts/press-start-2p-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Space Mono';font-weight:400;font-style:normal;font-display:block;src:url('fonts/space-mono-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Space Mono';font-weight:700;font-style:normal;font-display:block;src:url('fonts/space-mono-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'VT323';font-weight:400;font-style:normal;font-display:block;src:url('fonts/vt323-latin-400-normal.woff2') format('woff2')}

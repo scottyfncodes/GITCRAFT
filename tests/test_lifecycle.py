@@ -243,10 +243,14 @@ if executors.studio_python():
     room = {d["id"] for d in pr["decision_room"]}
     check("app: planned with the App Icon Studio chain and the three standards checks", {"icon.concepts", "icon.select", "icon.master", "icon.derivatives", "qa.icons",
           "qa.attribution", "qa.standards"} <= set(pr["tasks"]) and "app_icon" in room, sorted(pr["tasks"]))
+    check("plan v3: a new app's first stop is the style shortlist, before the direction, the identity or any code (tests/test_visual.py drives the picks)",
+          store.load(pr["id"]).get("plan_version") == 3 and pr["tasks"]["design.direction"]["depends_on"][-1] == "design.design_pick")
+    # the rest of this flow is the v2 contract, which v2 records keep: re-plan this record as v2 before it is approved
+    P2 = store.load(pr["id"]); P2["plan_version"] = 2; engine._discover_and_plan(P2); store.save(P2)
     engine.decide(pr["id"], approve=True)
     st = engine.run(pr["id"])
     waiting = [t["id"] for t in st["tasks"] if t["state"] == "awaiting_agent"]
-    check("direction first: the run stops at the creative direction, before the identity or any code", waiting == ["design.direction"], st.get("refused") or waiting)
+    check("direction first (v2): the run stops at the creative direction, before the identity or any code", waiting == ["design.direction"], st.get("refused") or waiting)
     import production_agent
     dorder = json.load(open(os.path.join(pr["store"], "tasks", "design.direction", "work_order.json")))
     check("direction: an app's direction covers the look and the interaction (no gameplay section)", dorder["expected"][0]["keys"] == ["product", "done_when", "art", "interaction"], dorder["expected"])

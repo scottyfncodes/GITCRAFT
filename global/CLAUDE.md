@@ -34,7 +34,11 @@ follow the `produce` skill: pass the prompt verbatim to studiocraft
 approval of the blueprint (`production_decide`), then `production_run`.
 Ideas can be saved and researched first (`production_idea`, `production_recon`).
 Every app gets an approved icon (App Icon Studio), the quiet "by HaveAnApp"
-credit and a proportionate engineering standard (docs/app-standards.md). The Production Director picks the
+credit and a proportionate engineering standard (docs/app-standards.md). New
+products, redesigns and new looks are picture-first: the person picks a style
+(atlas looks rendered as their product) and a design before anything is built,
+and an automatic visual review holds the build to the chosen frame
+(docs/visual-direction.md). The Production Director picks the
 departments, orders and parallelises them, gates every result, turns failed
 gates into fix work orders and re-verifies, and writes the acceptance report.
 You do its work orders (code, wiring assets, the 2D tools) and submit them
@@ -86,7 +90,8 @@ tokens, Audit the rendered result with PIXELCRAFT (incl. its advisory generic-
 design tells), Refine what was found, then stop. The project's own art
 direction always wins; never replace an established identity unasked.
 
-"Run Creative Review" (only when the person asks for one): follow the
+"Run Creative Review" (when the person asks for one; productions with an art
+direction also review their own build automatically): follow the
 `creative-review` skill. An advisory, evidence-cited judgement of the rendered
 product against its vision (studiocraft `production_vision`, then
 `production_creative` pack → your review → submit), reusing existing PLAYCRAFT

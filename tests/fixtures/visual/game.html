@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kite Line</title>
+<style>
+:root{--sky:#f6e7c8;--ink:#20323f;--kite:#e4572e;--ribbon:#2e86ab}
+html,body{margin:0;height:100%;background:var(--sky);color:var(--ink);font:16px/1.4 ui-sans-serif,system-ui,sans-serif}
+#title,#over{position:fixed;inset:0;display:grid;place-content:center;gap:16px;text-align:center}
+h1{font-size:48px;margin:0;letter-spacing:.04em}
+button{min-height:48px;min-width:160px;font:600 18px ui-sans-serif,system-ui;border:0;border-radius:12px;background:var(--ink);color:var(--sky)}
+canvas{display:block;width:100vw;height:100vh}
+[hidden]{display:none!important}
+</style></head><body>
+<div id="title"><h1>KITE LINE</h1><button id="play">Fly</button></div>
+<canvas id="c" hidden></canvas>
+<div id="over" hidden><h1>Grounded</h1><p id="results">Ribbons: <b id="score">0</b></p><button id="again">Fly again</button></div>
+<script>
+// a deliberately tiny game for tests/test_visual.py: title → play (a ribbon at 0.6 s: the first-ribbon moment) → grounded at 1.6 s → results
+const G = window.__game = { state: 'title', score: 0, time: 0 };
+const c = document.getElementById('c'), x = c.getContext('2d');
+setTimeout(() => document.getElementById('title').dataset.ready = '1', 300);   // the title is "loading" for 300 ms
+function start() {
+  document.getElementById('title').hidden = true; document.getElementById('over').hidden = true; c.hidden = false;
+  c.width = innerWidth; c.height = innerHeight; G.state = 'playing'; G.score = 0; G.time = 0; const t0 = performance.now();
+  (function f(now) {
+    G.time = (now - t0) / 1000;
+    if (G.time > 0.6 && G.score === 0) G.score = 1;
+    x.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--sky'); x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = '#e4572e'; const ky = c.height * 0.3 + G.time * 60;
+    x.beginPath(); x.moveTo(c.width / 2, ky - 30); x.lineTo(c.width / 2 + 22, ky); x.lineTo(c.width / 2, ky + 34); x.lineTo(c.width / 2 - 22, ky); x.fill();
+    if (G.time > 1.6) { G.state = 'over'; c.hidden = true; document.getElementById('score').textContent = G.score; document.getElementById('over').hidden = false; return; }
+    requestAnimationFrame(f);
+  })(t0);
+}
+document.getElementById('play').onclick = start; document.getElementById('again').onclick = start;
+addEventListener('keydown', (e) => { if (e.code === 'Space' && G.state !== 'playing') start(); });
+</script>
+</body></html>

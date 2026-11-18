@@ -1,0 +1,61 @@
+{
+ "reviewer": "Claude Code session (model judgement), acting as GITCRAFT's agent",
+ "pack": "/home/user/gitcraft-out/production/20261118T044353Z-kite-line-1a0d/tasks/review.pack.r1/pack.json",
+ "coverage": {
+  "viewed": [
+   "shot:title@phone",
+   "shot:title@desktop",
+   "shot:mid-play@phone",
+   "shot:mid-play@desktop",
+   "shot:first-ribbon@phone",
+   "shot:first-ribbon@desktop",
+   "shot:fail@phone",
+   "shot:fail@desktop",
+   "shot:results@phone",
+   "shot:results@desktop",
+   "shot:paused@phone",
+   "shot:paused@desktop",
+   "target:phone",
+   "target:desktop",
+   "target:play",
+   "style:sample"
+  ],
+  "not_seen": []
+ },
+ "summary": "An assessment after round 1: the phone title now matches design A's clean text column, the results drawing sits above the log on phone and desktop, and the HUD is on correction tape. One small collision is left on the night page.",
+ "matches": [
+  {
+   "against": "target",
+   "claim": "the phone title reads like the chosen frame: wordmark, tagline, circled button and byline on clean paper, the string climbing the right side",
+   "evidence": [
+    "shot:title@phone",
+    "target:phone"
+   ],
+   "basis": "observed_render"
+  },
+  {
+   "against": "moment:results",
+   "claim": "the whole flight is drawn as one chalk line above the log, with the ribbon circled and an X where it came down",
+   "evidence": [
+    "shot:results@phone",
+    "shot:results@desktop"
+   ],
+   "basis": "observed_render"
+  }
+ ],
+ "gaps": [
+  {
+   "id": "stars-on-text",
+   "shot": "results",
+   "against": "moment:results",
+   "severity": "minor",
+   "basis": "observed_render",
+   "evidence": [
+    "shot:results@phone",
+    "shot:results@desktop"
+   ],
+   "gap": "chalk stars on the night page land on top of 'Flight log' and the 'Grounded' heading, so the lettering looks smudged",
+   "fix": "keep the stars out of the text block: scatter them only outside the rectangle the results text occupies"
+  }
+ ]
+}

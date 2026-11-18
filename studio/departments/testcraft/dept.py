@@ -340,3 +340,32 @@ def report(ctx, p):
 
 
 ACTIONS = {"smoke": smoke, "play": play, "perf": perf, "visual_diff": visual_diff, "assets": assets, "animation": animation, "unit": unit, "report": report}
+
+def shots(ctx, p):
+    """Capture the product's shot list (docs/visual-direction.md): each named shot reached by its scripted steps and captured
+    only once its wait_for holds (real content, not a loading state). A shot that is never reached is reported NOT SEEN with
+    the reason and is never offered as evidence; this capture judges nothing, so an unreached shot is information, not a failure."""
+    spec = json.load(open(ctx.need(p["shots"], "shot list")))
+    shots = [s for s in spec.get("shots") or [] if isinstance(s, dict) and s.get("id")]
+    if not shots: raise StudioError("the shot list has no shots", hint="write shots.json as {\"shots\": [{id, name, kind, steps, wait_for}]}")
+    if _is_url(p["target"]): where = {"url": _running(p["target"]), "entry": (p.get("entry") or "/")}
+    else:
+        root, entry = _target(ctx, p); where = {"root": root, "entry": entry}
+    ctx.used("playwright", "chromium")
+    names = p.get("viewports") or spec.get("viewports") or ["phone", "desktop"]
+    vps = [VIEWPORTS[v] if isinstance(v, str) else v for v in names]
+    res = runners.node("shots.mjs", {**where, "out_dir": ctx.out_dir, "viewports": vps, "shots": shots}, timeout=90 + len(shots) * len(vps) * 40)["shots"]
+    reached = [(s["id"], c["viewport"]) for s in res for c in s["captures"] if c.get("reached")]
+    unseen = [f"{s['id']}@{c['viewport']}: {c.get('reason')}" for s in res for c in s["captures"] if not c.get("reached")]
+    report = {"schema": "gitcraft-shots/1", "shot_list": os.path.abspath(p["shots"]), "target": p["target"], "viewports": [v["name"] for v in vps], "shots": res,
+              "reached": len(reached), "not_seen": unseen}
+    jp = ctx.path(f"{p.get('name') or 'shots'}_report.json"); json.dump(report, open(jp, "w"), indent=1)
+    outs = [{"path": jp, "role": "shots_report", "format": "json"}]
+    outs += [{"path": c["image"], "role": f"shot:{s['id']}@{c['viewport']}", "format": "png"} for s in res for c in s["captures"] if c.get("reached")]
+    sections = [{"title": f"{s['id']} ({s.get('kind')})", "data": [{k: c.get(k) for k in ("viewport", "reached", "reason", "ms")} for c in s["captures"]],
+                 "images": [c["image"] for c in s["captures"] if c.get("reached")]} for s in res]
+    checks = [{"name": "the shot list ran", "ok": True, "detail": f"{len(reached)} reached, {len(unseen)} not seen"}]
+    outs.append({"path": _report(ctx, "Shot list", sections, checks), "role": "report", "format": "html"})
+    if unseen: ctx.note("not seen (never judged): " + "; ".join(unseen[:8]))
+    return {"outputs": outs, "checks": checks, "reached": len(reached), "not_seen": unseen}
+ACTIONS["shots"] = shots

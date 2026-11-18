@@ -33,6 +33,11 @@ There is no GITCRAFT house style: every product gets its own.
 
 ## 2. Explore (only when there is no direction to follow)
 
+Inside a GITCRAFT production (plan v3) Explore is the production's visual stage, not this section: the style pick (atlas
+looks rendered as the product's scene) and the design pick (three designs of the real first screen), driven by the
+`design.styles` / `design.designs` work orders (docs/visual-direction.md). Use this section outside a production.
+
+
 Read `references/explore.md`. In short: 2–3 directions that are genuinely different (composition, type, colour,
 imagery or material: any two share at most one), each rooted in something concrete from the product's own world,
 each rendered as the same real screen at phone and desktop size, shown side by side on one page

@@ -7,7 +7,7 @@ PLAYCRAFT, PIXELCRAFT and DESIGNCRAFT. What is scripted is only the coding Claud
 
 The first build carries a deliberate defect (a missing script file → console/missing-file errors on load) so
 the QA gate fails for real; fix() repairs it so the re-verification passes on the modified files."""
-import json, os, sys
+import json, os, shutil, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
@@ -346,3 +346,85 @@ def fix(order):
     s = s.replace('<script src="js/missing-boot.js"></script>\n', "")
     open(p, "w").write(s)
     return ["index.html"]
+
+
+# ---------------------------------------------------------------- plan v3: the visual stage (production/visual.py)
+ATLAS = os.path.join(REPO, "production", "kit", "atlas")
+SHORTLIST = ["risograph", "linocut", "pixel-art", "neon-vector", "editorial-serif", "topographic"]
+
+
+def styles(order):
+    """design.styles: six atlas looks rendered (for real, by the atlas painters in Chromium) as Lantern Drift's key scene."""
+    import subprocess
+    out = order["out_dir"]
+    S = json.load(open(os.path.join(ATLAS, "scenes", "atlas.json")))
+    S["game"].update(title="Lantern Drift", mood="night", hud={"score": "07", "score_label": "EMBERS", "lives": 3, "best": "BEST 12", "pause": True})
+    json.dump(S, open(os.path.join(out, "scene.json"), "w"), indent=1)
+    subprocess.run(["node", os.path.join(ATLAS, "render.mjs"), os.path.join(out, "styles"), ",".join(SHORTLIST), "game", os.path.join(out, "scene.json")],
+                   check=True, capture_output=True, timeout=600)
+    D = {"product": "game", "scene": "scene.json", "recommended": "risograph", "reason": "warm ink on dark paper is lantern light: two plates, one glow, and it stays readable on a phone",
+         "wildcard": "topographic", "references": [],
+         "styles": [{"look": l, "image": f"styles/{l}/game.png", "why": f"{l}: a lantern carried through a flooded market, drawn this way, keeps the light the hero"} for l in SHORTLIST]}
+    p = os.path.join(out, "styles.json"); json.dump(D, open(p, "w"), indent=1)
+    return [p]
+
+
+DESIGNS = [("a", "Market poster", "a festival poster pasted on a market wall", "huge stacked title left, lantern bottom right", "Bricolage Grotesque", "#14122b", "#f2a541", "loud and warm"),
+           ("b", "Lantern log", "a night-watch logbook page", "small header, the lantern path across the middle, button bottom right", "Space Mono", "#f3efe4", "#1f6f5c", "quiet and methodical"),
+           ("c", "Ink sign", "an enamel shop sign over dark water", "centred badge with the title inside, everything symmetrical", "Alfa Slab One", "#0e2a3b", "#f4d35e", "solid and old-fashioned")]
+
+
+def designs(order):
+    """design.designs: three title screens that differ in composition, type, palette and flavour, rendered at phone and desktop size."""
+    import subprocess
+    out = order["out_dir"]; X = []
+    for i, (did, name, idea, comp, face, bg, prim, flav) in enumerate(DESIGNS):
+        d = os.path.join(out, did); os.makedirs(os.path.join(d, "fonts"), exist_ok=True)
+        f = next(x for x in os.listdir(os.path.join(ATLAS, "fonts")) if x.startswith(face.lower().replace(" ", "-")))
+        shutil.copyfile(os.path.join(ATLAS, "fonts", f), os.path.join(d, "fonts", f))
+        txt = "#f5f0e6" if i != 1 else "#1d1d1b"
+        align = ["start", "start", "center"][i]
+        open(os.path.join(d, "index.html"), "w").write(f"""<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Lantern Drift</title><style>@font-face{{font-family:D;src:url(fonts/{f})}}html,body{{margin:0;height:100%;background:{bg};color:{txt};font-family:D}}
+main{{height:100%;display:grid;place-content:center {align};padding:24px;gap:18px;text-align:{['left', 'left', 'center'][i]}}}h1{{margin:0;font-size:{[17, 9, 12][i]}vw;line-height:.9;color:{prim}}}
+button{{font:inherit;font-size:20px;min-height:52px;padding:0 24px;border:3px solid {prim};background:none;color:{txt}}}</style></head>
+<body><main><h1>Lantern<br>Drift</h1><p>{idea}</p><button>Light the lantern</button></main></body></html>""")
+        subprocess.run(["node", os.path.join(ATLAS, "shoot.mjs"), os.path.join(d, "index.html"), d, "--play"], check=True, capture_output=True, timeout=300)
+        X.append({"id": did, "style": "risograph", "name": name, "idea": idea, "composition": comp, "type": {"display": face, "body": face},
+                  "palette": {"background": bg, "surface": bg, "primary": prim, "accent": ["#3fc1c9", "#f28c28", "#e4572e"][i], "text": txt}, "flavor": flav,
+                  "html": f"{did}/index.html", "phone": f"{did}/phone.png", "desktop": f"{did}/desktop.png", "play": f"{did}/play.png"})
+    p = os.path.join(out, "designs.json")
+    json.dump({"product": "game", "style": "risograph", "recommended": "a", "reason": "the poster puts the title where a market crowd would see it first", "designs": X}, open(p, "w"), indent=1)
+    return [p]
+
+
+LANTERN_SHOTS = {"version": 1, "product": "game", "shots": [
+    {"id": "title", "name": "Title", "kind": "title", "steps": [], "wait_for": {"js": "typeof S !== 'undefined' && S.state === 'title' && document.getElementById('game').width > 0"}},
+    {"id": "play", "name": "Mid-play", "kind": "play", "moment": "first-ember", "steps": [{"press": "Space"}], "wait_for": {"js": "S.state === 'play' && S.t > 0.5"}},
+    {"id": "fail", "name": "The lantern went out", "kind": "fail", "moment": "lantern-out", "steps": [{"press": "Space"}, {"wait": 400}, {"eval": "hurt(); hurt(); hurt();"}], "wait_for": {"js": "S.state === 'over'"}},
+    {"id": "results", "name": "Results", "kind": "results", "steps": [{"press": "Space"}, {"wait": 400}, {"eval": "hurt(); hurt(); hurt();"}], "wait_for": {"js": "S.state === 'over'"}}]}
+
+
+def visual_direction(order, project):
+    """design.direction (plan v3): the direction written from the chosen design, plus the shot list in the project."""
+    D = json.load(open(direction(order)[0]))
+    D["art"].update(style={"look": "risograph", "name": "Risograph Print", "design": "a", "from": "picked"}, target="art-direction/target/phone.png", references=[], accept_tells=[],
+                    moments=[{"id": "first-ember", "name": "First ember", "what": "the first ember lands in the lantern and its flame grows a size", "why": "the first reward"},
+                             {"id": "lantern-out", "name": "The lantern goes out", "what": "the flame shrinks to a wick and the screen goes dark around it", "why": "a fair, readable end"}],
+                    shots="art-direction/shots.json")
+    p = os.path.join(order["out_dir"], "direction.json"); json.dump(D, open(p, "w"), indent=1)
+    os.makedirs(os.path.join(project, "art-direction"), exist_ok=True)
+    json.dump(LANTERN_SHOTS, open(os.path.join(project, "art-direction", "shots.json"), "w"), indent=1)
+    return [p]
+
+
+def review(order, pack, gaps=()):
+    """review.creative: the stand-in reviewer cites what it opened; gaps (if any) become work orders."""
+    K = json.load(open(pack))
+    shots = [i["id"] for i in K["items"] if i["kind"] == "screenshot"]
+    R = {"reviewer": "acceptance stand-in", "pack": pack, "coverage": {"viewed": shots + ["target:phone"], "not_seen": [n["shot"] for n in K["not_seen"]]},
+         "summary": "an assessment of the built screens against the chosen poster design and the risograph look",
+         "matches": [{"against": "target", "claim": "the title is the first thing on the screen, as in the chosen frame", "evidence": [shots[0], "target:phone"], "basis": "observed_render"}],
+         "gaps": [dict(g, evidence=[shots[0]], basis="observed_render") for g in gaps]}
+    p = os.path.join(order["out_dir"], "review.json"); json.dump(R, open(p, "w"), indent=1)
+    return [p]

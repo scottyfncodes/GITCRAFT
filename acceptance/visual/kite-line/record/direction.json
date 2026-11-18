@@ -1,0 +1,134 @@
+{
+ "product": {
+  "promise": "A thirty-second kite flight you steer with one thumb, drawn like a doodle in the back of a school book",
+  "audience": "anyone with a phone and a spare minute: kids at the back of a bus, adults in a queue",
+  "context": "one-handed on a phone, often with the sound off, in short bursts; also on a desktop with Space"
+ },
+ "art": {
+  "concept": "The back page of an exercise book where someone has lettered KITE LINE and drawn a kite flying off the word: ballpoint, pencil and one yellow highlighter",
+  "palette": {
+   "background": "#fbf8ef",
+   "surface": "#fffdf6",
+   "primary": "#2346a8",
+   "accent": "#ffd23f",
+   "text": "#22252b"
+  },
+  "type": {
+   "display": "Caveat (hand lettering, 700 for the wordmark)",
+   "body": "Patrick Hand",
+   "why": "both look written by the same hand that drew the kite; Caveat for what is lettered big, Patrick Hand for what must read small"
+  },
+  "shape": "every line drawn twice in pen, slightly off; scribble hatching instead of fills; the kite a diamond with spars; ribbons as bows; no rounded UI boxes",
+  "motion": "the strokes boil eight times a second; the kite tilts with its speed; the tail swings; nothing slides or fades like an app; the title kite climbs off the hand in 0.9 s",
+  "avoid": [
+   "clean vector app chrome (rounded cards, drop shadows, gradients)",
+   "any digital font for game text",
+   "more than one bright colour on the page besides the kite's red"
+  ],
+  "style": {
+   "look": "notebook",
+   "name": "Notebook Sketch",
+   "design": "a",
+   "from": "picked"
+  },
+  "target": "art-direction/target/phone.png",
+  "references": [],
+  "accept_tells": [],
+  "moments": [
+   {
+    "id": "title-reveal",
+    "name": "The kite climbs off the title",
+    "what": "On the title, the kite climbs from the flyer's hand to its place beside the wordmark while the string unspools; the title is ready only when it lands",
+    "why": "it is the whole game in one gesture before the first touch"
+   },
+   {
+    "id": "first-ribbon",
+    "name": "First ribbon",
+    "what": "The first ribbon is always on the glide line; catching it ties a yellow bow to the tail and scribbles 'first ribbon!' in the margin with a highlighter swipe",
+    "why": "the first reward lands within two seconds and teaches what to chase"
+   },
+   {
+    "id": "results",
+    "name": "The flight log at night",
+    "what": "When the kite comes down, the page turns to night paper (the person liked design C's night page) and the whole flight is drawn as one chalk line with every ribbon circled in yellow",
+    "why": "every run ends as a drawing of itself, worth a screenshot"
+   }
+  ],
+  "shots": "art-direction/shots.json"
+ },
+ "play": {
+  "pillars": [
+   "one thumb, one string",
+   "the wind is readable",
+   "every run is a drawing worth keeping"
+  ],
+  "loop": {
+   "verb": "hold to climb, let go to glide",
+   "challenge": "gulls and gusts that arrive faster as the scroll speeds up",
+   "feedback": "the kite tilts with speed, bows tie onto the tail, the page shakes on a hit",
+   "reward": "ribbons and a best line",
+   "seconds": 12
+  },
+  "controls": {
+   "desktop": "hold Space (or the mouse) to climb, release to glide; P to pause",
+   "touch": "hold anywhere to climb, release to glide; pause button top right"
+  },
+  "feel": {
+   "lift_px_s2": 1350,
+   "gravity_px_s2": 780,
+   "max_up_px_s": 360,
+   "max_down_px_s": 430,
+   "hit_stop_ms": 110,
+   "invulnerable_ms": 1100,
+   "boil_ms": 125
+  },
+  "feedback": [
+   {
+    "event": "hold",
+    "response": "the kite tilts nose-up and climbs; the string tightens"
+   },
+   {
+    "event": "ribbon",
+    "response": "a bow ties onto the tail and the count bumps"
+   },
+   {
+    "event": "gull hit",
+    "response": "110 ms freeze, page shake, one kite life greys out, the kite blinks"
+   },
+   {
+    "event": "ground",
+    "response": "the run ends: the page turns to night and the flight is drawn"
+   },
+   {
+    "event": "first ribbon",
+    "response": "'first ribbon!' is scribbled in the margin with a highlighter swipe"
+   }
+  ],
+  "curve": [
+   {
+    "at_seconds": 0,
+    "introduces": "ribbons only, and a gentle first flight until the first ribbon"
+   },
+   {
+    "at_seconds": 9,
+    "introduces": "gulls crossing the ribbon line"
+   },
+   {
+    "at_seconds": 22,
+    "introduces": "gusts that push the kite up or down"
+   }
+  ],
+  "fail": "the ground is always visible and the kite only falls when you let go; gulls are drawn a full screen ahead; retry is one tap",
+  "mastery": "threading between gulls while staying on the ribbon line, using gusts to climb without holding",
+  "playtest": [
+   "Did you start another flight without being asked?",
+   "Could you tell why each flight ended?",
+   "Did holding and releasing feel like holding a real string?"
+  ]
+ },
+ "done_when": [
+  "a first-time player catches a ribbon within three seconds",
+  "every run ends on the night page with the whole flight drawn",
+  "a screenshot of any moment reads as a notebook drawing, not an app"
+ ]
+}

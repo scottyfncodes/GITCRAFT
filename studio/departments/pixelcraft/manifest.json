@@ -288,6 +288,10 @@
       "type": "boolean",
       "default": true,
       "description": "read the rendered pages for generic design tells (advisory, unscored)"
+     },
+     "shots": {
+      "type": "string",
+      "description": "the product's shot list (shots.json, docs/visual-direction.md): its title, screen and results shots are the screens to audit (unless `screens` is given); a shot that cannot be reached is listed as not seen and is never audited"
      }
     }
    }

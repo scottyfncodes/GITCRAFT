@@ -154,6 +154,7 @@ def markdown(prod, release=False):
     if miss: L += ["## Optional, not delivered", "", "Made optional by a person in the Decision Room; the release does not wait for them, and they are never hidden:", ""] + \
                   [f"- {x['id']}: {'; '.join(map(str, x.get('why') or []))[:300]}" for x in miss] + [""]
     L += needs_a_person(prod)
+    L += visual_markdown(prod)
     from . import qa
     L += qa.markdown(prod)
     L += ["## Acceptance criteria", "", "| Criterion | Status | Evidence |", "|---|---|---|"]
@@ -229,3 +230,38 @@ def work_order_md(o):
     if ia: L += ["## Integrated assets (use every one)", ""] + [f"- `{a['dest_rel']}` — {a['role']} from `{a['task']}`" for a in ia] + [""]
     L += ["## Submit", "", f"`{o['submit']}`", ""]
     return "\n".join(L)
+
+
+def visual_markdown(prod):
+    """Plan v3: the visual direction as it stands: the two picks, the target, the moments, the review rounds and the look page.
+    Advisory: nothing here is a criterion, a score or part of the verdict."""
+    T = prod.get("tasks") or {}
+    if prod.get("plan_version", 1) < 3 or "design.direction" not in T or not any(k.startswith(("design.design_pick", "review.gaps", "release.look")) for k in T): return []
+    def eff(tid):
+        t = T[tid]; seen = set()
+        while t.get("superseded_by") and t["id"] not in seen: seen.add(t["id"]); t = T[t["superseded_by"]]
+        return t
+    def out(tid, role):
+        if tid not in T: return None
+        return next((o["path"] for o in eff(tid).get("outputs") or [] if o.get("role") == role), None)
+    L = ["## Visual direction (advisory)", ""]
+    sp = T.get("design.style_pick")
+    if sp:
+        sel = (sp.get("result") or {}).get("selection") or {}
+        L.append(f"- Style: **{', '.join(sel.get('styles') or []) or sp['state']}**" + (f" ({sel.get('how')})" if sel.get("how") else "")
+                 + (f" · pick page `{out('design.style_pick', 'style_page')}`" if out("design.style_pick", "style_page") else ""))
+    dp = T.get("design.design_pick")
+    if dp:
+        sel = (dp.get("result") or {}).get("selection") or {}
+        L.append(f"- Design: **{sel.get('design') or dp['state']}**" + (f" — liked in the others: {sel['liked_in_others']}" if sel.get("liked_in_others") else "")
+                 + (f" · pick page `{out('design.design_pick', 'design_page')}`" if out("design.design_pick", "design_page") else ""))
+        if sel.get("target"): L.append(f"- Target frame: `{(sel['target'] or {}).get('phone')}`")
+    ms = [t for t in T.values() if t.get("moment")]
+    if ms: L.append("- Signature moments: " + ", ".join(f"{t['id'].split('.')[-1]} ({t['state']})" for t in ms))
+    rounds = [k for k in T if k.startswith("fix.visual.r")]
+    if "review.gaps" in T:
+        g = eff("review.gaps"); res = g.get("result") or {}
+        L.append(f"- Visual review: {len(rounds)} fix round(s); " + (f"{len(res.get('remaining') or [])} gap(s) left for a person" if g["state"] == "passed" else g["state"]))
+    lk = out("release.look", "look_page")
+    L.append(f"- Look page (the chosen frame beside the shipped screens): `{lk}`" if lk else "- Look page: not made yet")
+    return L + [""]

@@ -15,15 +15,23 @@ python3 -m production creative submit <pack.json> --review <review.json>
 tests/test_creative.py
 ```
 
-The `creative-review` skill drives it. It runs **only when a person asks**: a Production Report reads the latest
-review and never starts one, and no GITCRAFT code calls a model.
+The `creative-review` skill drives it. A person-asked review (`production_creative`, stored in history/creative/) runs
+**only when a person asks**: a Production Report reads the latest review and never starts one, and no GITCRAFT code calls
+a model.
+
+**Since plan v3 there is a second, automatic form** (docs/visual-direction.md): in any production that has an art direction,
+the agent reviews the captured shot list against the chosen frame, the style, the references and the signature moments
+after the build, and its visible gaps become work orders, at most two rounds, after which what remains is listed for the
+person with the screenshots. This deliberately changes two rules for that form only: it runs without being asked, and it
+causes work. Every other rule below holds for both forms: no score, never a release gate, a criterion or the verdict, and
+"observed" needs a cited capture.
 
 ## How it stays separate from scores and gates
 
 | Rule | Enforced by |
 |---|---|
 | No score: no number, rating or points anywhere in a review | validator refuses score/rating/points keys; not in `scoring.RUBRICS`; not a department |
-| Not a gate: never changes an acceptance criterion or the Director's verdict, never becomes a work order | `report.py`, `engine.py` and `scoring.py` never read it; test compares the technical report with and without a review |
+| Not a gate: never changes an acceptance criterion or the Director's verdict | `report.py`, `engine.py` and `scoring.py` never read it; test compares the technical report with and without a review. The automatic in-production visual review (plan v3) does cause work, by design: its gaps become fix work orders (advisory tasks, at most two rounds); it still never touches a criterion, gate or verdict (tests/test_visual.py) |
 | Not in the plan: stays out of P0–P3 and the technical top three | it is read after the plan is built; same test |
 | Labelled: `observed_render`, `observed_interaction`, `source_analysis`, `hypothesis_playtest` | validator: "observed" needs a cited capture the reviewer listed as viewed; fun, engaging, satisfying, boring… only as a playtest hypothesis, each with how to test it |
 | No deltas or trends | reviews are never compared or charted |
@@ -40,7 +48,8 @@ anything that changes a mechanic, the identity, scope or audience.
 ## Evidence
 
 The pack only indexes what departments already produced: PLAYCRAFT play frames and probe metrics, PIXELCRAFT
-screenshots, and every department finding in the Production Report (so the review builds on them instead of
+screenshots, the product's shot list captures (TestCraft `shots`: only reached shots; a shot that was not reached is listed as
+not seen and cannot be cited), and every department finding in the Production Report (so the review builds on them instead of
 repeating them). Each item has an id and a SHA-256. Without captures a review can only be source-based. On submit,
 the cited images are copied into the review's folder so the citations stay checkable.
 
@@ -59,5 +68,5 @@ technical top three, scores, gates and verdict are unchanged.
 
 ## Deferred
 
-Fresh Eyes (an isolated second reviewer), new capture infrastructure, a Studio department wrapper and planted-flaw
-fixtures. They are worth adding only if this version proves useful.
+Fresh Eyes (an isolated second reviewer), a Studio department wrapper and planted-flaw fixtures. (Capture now has the
+shot list: docs/visual-direction.md.) They are worth adding only if this version proves useful.

@@ -435,11 +435,31 @@ def pass_(ctx, p):
     card = build_card(ctx, p, info, metrics, vps)
     plan = make_plan(card)
     card["baseline"] = {"git": _git_state(info["root"]), "target": p.get("target") or info["build"]["playable_dir"], "request": {k: v for k, v in p.items() if k in ("viewports", "keys", "start_steps", "play_seconds", "pointer", "pause_keys", "genres", "mobile", "hooks", "trials")}}
-    outs = _card_outputs(ctx, card, shots, plan) + [_write_json(ctx, "plan.json", plan)]
+    outs = _card_outputs(ctx, card, shots, plan) + [_write_json(ctx, "plan.json", plan)] + _shot_list(ctx, p, info)
     ctx.stage("plan", items=sum(len(s["items"]) for s in plan["stages"]))
     outs += _history_outputs(ctx, p, "pass", outs)
     return {"outputs": outs, "checks": _card_checks(card), "summary": _summary(card), "history": ctx.history, "plan": [f"{s['name']}: " + "; ".join(i["title"] for i in s["items"]) for s in plan["stages"]],
             "baseline": os.path.join(ctx.out_dir, "playcraft.json"), "next": "implement the plan in the game repo (branch, small commits), run its tests and build, then playcraft_verify with baseline=<this playcraft.json>"}
+
+
+def _shot_list(ctx, p, info):
+    """The product's shot list, captured beside the play frames (shots/): title, mid-play, each moment, fail, results, reached by
+    their scripted steps and captured only with real content on screen. Evidence for a person and the visual review; it never
+    enters the card, the scores or the plan. A shot that is never reached is listed as not seen."""
+    if not p.get("shots"): return []
+    from core import shots as SH
+    spec, shots = SH.load(ctx.need(p["shots"], "shot list"))
+    tgt = p.get("target") or info["build"]["playable_dir"]
+    if not tgt: ctx.note("shot list not captured: nothing playable"); return []
+    where = {"root": tgt if os.path.isdir(tgt) else os.path.dirname(tgt), "entry": "index.html" if os.path.isdir(tgt) else os.path.basename(tgt)}
+    vps = [{"name": "phone", "device": "iPhone 13"}, {"name": "desktop", "width": 1280, "height": 720}]
+    try: res = SH.capture(where, shots, vps, ctx.path("shots"))
+    except StudioError as e: ctx.note(f"shot list not captured: {e}"); return []
+    S = SH.summary(res)
+    if S["not_seen"]: ctx.note("shot list: not seen (never judged): " + "; ".join(f"{x['shot']}@{x['viewport']}" for x in S["not_seen"])[:400])
+    rep = {"schema": "gitcraft-shots/1", "shot_list": os.path.abspath(p["shots"]), "shots": res, **S}
+    return [_write_json(ctx, "shots_report.json", rep, role="shots_report")] + [{"path": c["image"], "role": f"shot:{s['id']}@{c['viewport']}", "format": "png"}
+                                                                             for s in res for c in s["captures"] if c.get("reached")]
 
 
 # ---------------------------------------------------------------- phases 6-7: verify and report
