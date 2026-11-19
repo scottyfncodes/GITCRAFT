@@ -53,6 +53,9 @@ elif [[ "$ref" =~ ^[0-9a-fA-F]{40}$ ]]; then
     || pin_fail "commit $pin is not on $reviewed of $repo_url: only reviewed, merged commits are installed"
   git -C "$dest" -c advice.detachedHead=false checkout -q --force --detach "$pin" || pin_fail "cannot check out $pin"
   git -C "$dest" clean -q -ffdx || pin_fail "cannot clean $dest"
+  # the commits-only fetch made the remote a partial clone: drop its filter so later fetches through it (install.sh's
+  # prebuilt `bin` branch, gitcraft-update) get file contents again; the commit itself is already checked out in full
+  git -C "$dest" config --unset remote.origin.partialclonefilter 2>/dev/null
   [[ "$(git -C "$dest" rev-parse HEAD)" == "$pin" && -z "$(git -C "$dest" status --porcelain)" ]] \
     || pin_fail "$dest is not exactly $pin after checkout"
   echo "gitcraft: pinned to $pin (verified on $reviewed of $repo_url)"
