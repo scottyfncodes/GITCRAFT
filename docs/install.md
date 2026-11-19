@@ -88,6 +88,29 @@ A modified or unpinned binary is never installed: `install.sh` refuses it before
 installed, and records `integrity: mismatch` in `~/.gitcraft/status.json`. Rolling back a release is the same pull
 request with the previous `scripts/bin.sha256` (its run must still have its artifacts; otherwise rebuild that commit).
 
+## Protecting main and bin
+
+Two rulesets, ready to import (Settings > Rules > Rulesets > New ruleset > Import a ruleset): `docs/rulesets/main.json`
+and `docs/rulesets/bin.json`. Nothing pushes `main` directly, so its ruleset never blocks publishing. `bin` is pushed by
+`publish-bin.yml` only; its ruleset blocks every update except a **deploy key**, which the workflow uses when the
+`BIN_DEPLOY_KEY` secret exists (without it, it falls back to the workflow token, which the ruleset would block). Do the
+steps in this order so a release is never stranded:
+
+1. **Key.** On your computer: `ssh-keygen -t ed25519 -N "" -C gitcraft-bin-publish -f gitcraft-bin`.
+2. **Deploy key.** Settings > Deploy keys > Add: paste `gitcraft-bin.pub`, tick **Allow write access**.
+3. **Environment.** Settings > Environments > New environment `release`; Deployment branches and tags: **Selected
+   branches: `main`**. Add the secret `BIN_DEPLOY_KEY` = the contents of `gitcraft-bin` (the private key). Delete the key
+   files from your computer afterwards; a lost key is replaced by adding a new one.
+4. **Rulesets.** Import `main.json` and `bin.json` (both Active).
+5. **Check.** Actions > *Publish ArtCraft CLIs* > Run workflow (on main). With `bin` already holding the pinned binaries
+   it changes nothing and reports "nothing to publish"; the next real release pushes with the deploy key.
+
+What they enforce: `main` changes only through a pull request whose **Tests** check is green, with no force-push or
+deletion (the review count is 0 because one person cannot approve their own pull request; an agent working with your
+account can still merge a green pull request, see docs/security.md). `bin` cannot be created, updated, force-pushed or
+deleted by anyone but the deploy key, which only `main`'s publish job can use. `api-catalog` (the API Discovery data) is
+left unprotected: it is data, and `/apis/` treats it as untrusted.
+
 ## Requirements
 
 - Linux x86_64 for the prebuilt ArtCraft binaries (source builds need Rust 1.95+ and crates.io).

@@ -28,6 +28,9 @@ jobs:
   publish:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    # BIN_DEPLOY_KEY lives here: create the environment with "Deployment branches: main only" (docs/install.md,
+    # "Protecting main and bin"). Without the secret the push falls back to the workflow token.
+    environment: release
     permissions:
       contents: write   # push the bin branch (never main)
       actions: read     # read the pinned build run and download its artifact
@@ -88,6 +91,8 @@ jobs:
       - name: Push to the bin branch
         if: steps.current.outputs.same != 'true'
         working-directory: bin
+        env:
+          BIN_DEPLOY_KEY: ${{ secrets.BIN_DEPLOY_KEY }}
         run: |
           cat *.manifest | sort > MANIFEST.txt
           cp ../pins.txt SHA256SUMS
@@ -100,5 +105,17 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -qm "Prebuilt CLIs from build run ${{ steps.current.outputs.run }} ($(date -u +%F))"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" bin
+          if [ -n "$BIN_DEPLOY_KEY" ]; then
+            # the deploy key is the one actor the bin ruleset lets through (bypass list: Deploy keys); GitHub's
+            # published ed25519 host key is pinned, so the push cannot be redirected
+            install -d -m 700 ~/.ssh
+            printf '%s\n' "$BIN_DEPLOY_KEY" > ~/.ssh/bin_deploy_key; chmod 600 ~/.ssh/bin_deploy_key
+            echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > ~/.ssh/known_hosts
+            GIT_SSH_COMMAND="ssh -i ~/.ssh/bin_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" \
+              git push -f "git@github.com:${{ github.repository }}.git" bin
+            rm -f ~/.ssh/bin_deploy_key
+          else
+            echo "::warning::BIN_DEPLOY_KEY is not set: pushing with the workflow token (fails once the bin ruleset is on)"
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" bin
+          fi
           { echo "Published build run ${{ steps.current.outputs.run }} to bin:"; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

@@ -41,7 +41,37 @@ check("departments: every Studio manifest, plus DESIGNCRAFT, the 3D Department a
       sorted(i for i in ids if i in manifests) == manifests and set(ids) - set(manifests) == {"designcraft", "3d", "production"} and len(ids) == len(set(ids)), ids)
 
 # ---------------------------------------------------------------- 2. history-only report: exactly what was recorded
-R = PR.generate("scottyfncodes--rockslide", save="none")
+# The committed SNOW PATROL history was recorded on 2026-11-04 and reported on 2026-11-09. This section checks what a report
+# makes of those records, so it reads them as of that report's date (the report's and PLAYCRAFT history's clocks are pinned
+# for this one report): with the real clock they turn Stale after STALE_DAYS
+# (14), and their findings correctly leave P0/P1, which made this section fail on its own once the calendar moved
+# (2026-11-19). The real-clock behaviour is checked right after, against the same records.
+import datetime as _dt, types as _types  # noqa: E402
+_AS_OF = _dt.datetime(2026, 11, 9, 13, 48, 52, tzinfo=_dt.timezone.utc)   # history/reports/scottyfncodes--rockslide/20261109T134852Z
+
+
+class _AsOf(_dt.datetime):
+    @classmethod
+    def now(cls, tz=None): return _AS_OF if tz else _AS_OF.replace(tzinfo=None)
+
+
+_clock = _types.SimpleNamespace(**{k: getattr(_dt, k) for k in dir(_dt) if not k.startswith("_")}); _clock.datetime = _AsOf
+_real_load, _real_dt = PR._load, PR.datetime
+
+
+def _load_as_of(path):   # the department modules the report loads (PLAYCRAFT's history keeps its own clock)
+    m = _real_load(path)
+    if hasattr(m, "datetime"): m.datetime = _clock
+    return m
+
+
+PR.datetime, PR._load = _clock, _load_as_of
+try:
+    R = PR.generate("scottyfncodes--rockslide", save="none")
+finally:
+    PR.datetime, PR._load = _real_dt, _real_load
+_real_age = PR._age
+R_now = PR.generate("scottyfncodes--rockslide", save="none")   # the same records, read today
 dd = {d["id"]: d for d in R["departments"]}
 idx = [json.loads(l) for l in open(os.path.join(REPO, "history", "designcraft", "index.jsonl")) if l.strip()]
 dc_latest = [x for x in idx if x["game"] == "scottyfncodes--rockslide"][-1]
@@ -116,6 +146,11 @@ check("every finding keeps an evidence level and a department", all(f["level"] i
 check("plan: P0–P3 only, numbered, each with its departments", R["actions"] and all(a["priority"] in ("P0", "P1", "P2", "P3") and a["departments"] for a in R["actions"])
       and [a["n"] for a in R["actions"]] == list(range(1, len(R["actions"]) + 1)))
 check("plan: measured major findings outrank inferred ones", all(a["priority"] in ("P0", "P1") for a in R["actions"] if a["level"] in ("verified", "observed") and "Text" in a["title"]))
+_old = _real_age("2026-11-04T23:46:23+00:00")
+check("plan: read today, the same measured findings are Stale once older than STALE_DAYS, and a stale finding is never P0/P1",
+      _old is None or _old <= PR.STALE_DAYS or all(a["priority"] not in ("P0", "P1") and a.get("stale") for a in R_now["actions"]
+                                                   if a["level"] in ("verified", "observed") and "Text" in a["title"]),
+      [(a["priority"], a.get("stale")) for a in R_now["actions"] if "Text" in a["title"]])
 check("plan: gaps (no data) are listed as actions, not as results", any(a["level"] == "unavailable" and "PIXELCRAFT" in a["title"] for a in R["actions"]))
 rc = R["reconciliation"]
 check("reconciliation: corroborated areas name ≥2 departments; conflicts compare the same category", all(len(c["departments"]) >= 2 for c in rc["corroborated"])

@@ -60,7 +60,8 @@ server (harmless content, never run) and checks each is refused or undone.
 - **Publishing needs a reviewed pin.** `build.yml` only builds and gates; `publish-bin.yml` replaces `bin` only when a
   change to `scripts/bin.sha256` lands on main, and only with the files of the successful main build that file names,
   each matching its checksum. Steps: docs/install.md, "Releases". The trust anchor is therefore the protected `main`
-  branch, not the `bin` branch. Protect `bin` too (a ruleset so only GitHub Actions can update it).
+  branch, not the `bin` branch. Protect `bin` too: `docs/rulesets/bin.json` lets only the publish job's deploy key update
+  it (docs/install.md, "Protecting main and bin").
 - **CI.** Every third-party action is pinned to a commit SHA (Dependabot proposes updates); Claude Code, uv, Playwright
   and the Rust toolchain are pinned to versions.
 

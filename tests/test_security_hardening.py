@@ -393,6 +393,14 @@ pbw = wf["publish-bin.yml"]
 check("ci: publishing runs only on main, from a change to scripts/bin.sha256, and checks the run and every checksum before pushing",
       'paths: ["scripts/bin.sha256"]' in pbw and "head_branch" in pbw and "sha256sum --check --strict" in pbw and pbw.index("sha256sum --check") < pbw.index("git push")
       and "github.ref == 'refs/heads/main'" in pbw)
+rs = {n: json.load(open(os.path.join(REPO, "docs", "rulesets", n + ".json"))) for n in ("main", "bin")}
+check("ci: the bin ruleset lets only a deploy key through, and publishing pushes with that deploy key when it is configured (GitHub's host key pinned)",
+      [a["actor_type"] for a in rs["bin"]["bypass_actors"]] == ["DeployKey"] and {r["type"] for r in rs["bin"]["rules"]} >= {"update", "deletion", "non_fast_forward"}
+      and "secrets.BIN_DEPLOY_KEY" in pbw and "environment: release" in pbw and "StrictHostKeyChecking=yes" in pbw
+      and "AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" in pbw)
+check("ci: the main ruleset needs a pull request with the Tests check green and has no bypass; no workflow pushes main",
+      not rs["main"]["bypass_actors"] and {r["type"] for r in rs["main"]["rules"]} >= {"pull_request", "required_status_checks", "non_fast_forward", "deletion"}
+      and not any(re.search(r"git push[^\n]*\bmain\b", t) for t in wf.values()))
 check("ci: workflows default to read-only tokens", all("permissions:\n  contents: read" in t or "permissions: {}" in t for t in wf.values()))
 check("ci: Dependabot keeps the pinned actions updatable", os.path.exists(os.path.join(REPO, ".github", "dependabot.yml")))
 gate = open(os.path.join(REPO, "scripts", "release-gate.sh")).read()
