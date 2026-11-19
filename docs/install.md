@@ -70,6 +70,38 @@ Every applied update is logged in `~/.gitcraft/logs/update.log`. Running servers
 version's automatic pull-and-run at session start: set `GITCRAFT_AUTO_UPDATE=0` in the environment to stay on it, and
 come forward again with `~/.gitcraft/gitcraft-update --to <commit> --yes`.
 
+## Pinning a cloud environment to a reviewed commit
+
+The usual setup line runs whatever `main` holds when a container starts. Two things decide what runs, and both have to
+be pinned to content someone reviewed:
+
+| What runs at container start | Mutable (today) | Pinned |
+|---|---|---|
+| the bootstrap, `setup-env.sh` | downloaded from `.../GITCRAFT/main/...` | downloaded from `.../GITCRAFT/<commit>/...` and checked against its SHA-256 before it runs |
+| the GITCRAFT it installs | the newest `main` | `GITCRAFT_REF=<the same commit>`: exactly that commit |
+
+`scripts/setup-pin.sh <commit> [GITCRAFT_*=value ...]` prints the line for a commit, after checking that the commit is on
+`main` and new enough to support pins (it changes nothing):
+
+```
+curl -fsSL -o /tmp/gitcraft-setup-env.sh https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/<commit>/scripts/setup-env.sh \
+  && echo "<sha256 of that setup-env.sh>  /tmp/gitcraft-setup-env.sh" | sha256sum --check --quiet - \
+  && GITCRAFT_REF=<commit> GITCRAFT_MESHCRAFT=later bash /tmp/gitcraft-setup-env.sh
+```
+
+It replaces the `curl ... | bash` line; the environment's other lines (Meshroom, mocap, ...) run from the pinned runtime.
+
+With a full 40-character commit, `setup-env.sh`:
+- fetches `main`'s commit graph and refuses the commit unless it is on `main` (only reviewed, merged commits install),
+- checks it out detached, verifies `HEAD` is exactly that commit, and removes any file that is not part of it,
+- on any failure installs nothing and exits 1 (the session still starts, without the GITCRAFT tools). An abbreviated SHA
+  is refused rather than guessed. Branches and tags (`GITCRAFT_REF=main`, a tag) install as before.
+
+**Upgrading** a pinned environment is a reviewed change to the pin: run `scripts/setup-pin.sh <new main commit>` and replace
+the line (new containers then install it). Within one container, `~/.gitcraft/gitcraft-update` still shows and applies a
+newer `main`, but the next container goes back to the pin. **Rolling back** is the same edit with the earlier commit
+(it must still be on `main`, which every merged commit is). Nothing updates by itself in either case.
+
 ## Releases of the prebuilt tools
 
 The seven ArtCraft CLIs are compiled from the upstream commits pinned in `scripts/tools.sh` (`gitcraft_upstream_sha`)
