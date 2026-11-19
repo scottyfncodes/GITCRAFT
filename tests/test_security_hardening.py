@@ -161,6 +161,101 @@ check("updates: the updater is kept at ~/.gitcraft/gitcraft-update, outside the 
 hk = open(os.path.join(REPO, "scripts", "session-start.sh")).read()
 check("updates: GITCRAFT_AUTO_UPDATE defaults to off", '${GITCRAFT_AUTO_UPDATE:-0}" == 1' in hk and '${GITCRAFT_AUTO_UPDATE:-1}' not in hk)
 
+# ================================================================ pinning a cloud install to a reviewed commit
+# the real scripts/setup-env.sh against a local stand-in for GitHub; the cloned repo's install.sh is a stub that records
+# which commit it ran from, so each case takes a second and "nothing was installed" is observable
+pgh = os.path.join(ws, "pin-gh.git"); git("init", "-q", "--bare", "-b", "main", pgh)
+git("config", "uploadpack.allowFilter", "true", cwd=pgh)        # partial fetches, as GitHub serves them
+pw = os.path.join(ws, "pin-work"); git("clone", "-q", pgh, pw)
+os.makedirs(os.path.join(pw, "scripts"))
+stub = '#!/usr/bin/env bash\nh="$(cd "$(dirname "$0")/.." && pwd)"; git -C "$h" rev-parse HEAD > "${GITCRAFT_HOME:-$HOME/.gitcraft}/installed-from"; echo stub-installed\n'
+open(os.path.join(pw, "scripts", "install.sh"), "w").write(stub); os.chmod(os.path.join(pw, "scripts", "install.sh"), 0o755)
+open(os.path.join(pw, "scripts", "doctor.sh"), "w").write("#!/bin/sh\n"); os.chmod(os.path.join(pw, "scripts", "doctor.sh"), 0o755)
+gc = ("-c", "user.name=t", "-c", "user.email=t@t")
+git("add", "-A", cwd=pw); git(*gc, "commit", "-qm", "reviewed 1", cwd=pw); C1 = git("rev-parse", "HEAD", cwd=pw)
+open(os.path.join(pw, "README"), "w").write("2\n"); git("add", "-A", cwd=pw); git(*gc, "commit", "-qm", "reviewed 2", cwd=pw); C2 = git("rev-parse", "HEAD", cwd=pw)
+git("tag", "v-test", C1, cwd=pw); git("push", "-q", "origin", "main", "v-test", cwd=pw)
+git("checkout", "-q", "--orphan", "bin", cwd=pw); git("rm", "-rqf", ".", cwd=pw)
+open(os.path.join(pw, "photocraft-cli.gz"), "wb").write(b"prebuilt"); git("add", "-A", cwd=pw); git(*gc, "commit", "-qm", "prebuilt", cwd=pw)
+git("push", "-q", "origin", "bin", cwd=pw); git("checkout", "-q", "main", cwd=pw)
+git("checkout", "-q", "-b", "unreviewed", cwd=pw); open(os.path.join(pw, "EVIL"), "w").write("x\n"); git("add", "-A", cwd=pw)
+git(*gc, "commit", "-qm", "not merged", cwd=pw); CX = git("rev-parse", "HEAD", cwd=pw); git("push", "-q", "origin", "unreviewed", cwd=pw)
+setup = open(os.path.join(REPO, "scripts", "setup-env.sh")).read()
+
+
+def pin_setup(home_dir, ref, **extra):
+    e = dict(os.environ, HOME=home_dir, GITCRAFT_REPO_URL="file://" + pgh, **extra)
+    for k in ("GITCRAFT_HOME", "GITCRAFT_REF"): e.pop(k, None)
+    if ref is not None: e["GITCRAFT_REF"] = ref
+    r = sh(["bash"], env=e, input=setup, timeout=120)
+    f = os.path.join(home_dir, ".gitcraft", "installed-from")
+    return r, (open(f).read().strip() if os.path.exists(f) else None)
+
+
+ph = os.path.join(ws, "pin-home")
+r, frm = pin_setup(ph, C1)
+check("pinning: GITCRAFT_REF=<full commit SHA> installs exactly that commit (detached, verified)", r.returncode == 0 and frm == C1
+      and f"pinned to {C1}" in r.stdout + r.stderr and git("rev-parse", "--abbrev-ref", "HEAD", cwd=os.path.join(ph, ".gitcraft", "repo")) == "HEAD", r.stdout[-300:] + r.stderr[-300:])
+pclone = os.path.join(ph, ".gitcraft", "repo")
+okbin = sh(["bash", "-c", 'git -C "$1" fetch -q --depth 1 origin bin && git -C "$1" archive FETCH_HEAD | tar -t', "_", pclone])
+check("pinning: the pinned clone can still fetch and unpack the prebuilt bin branch (install.sh's path; a commits-only filter must not stick)",
+      okbin.returncode == 0 and "photocraft-cli.gz" in okbin.stdout and not sh(["git", "-C", pclone, "config", "--get", "remote.origin.partialclonefilter"]).stdout.strip(),
+      okbin.stdout[-200:] + okbin.stderr[-300:])
+r, frm = pin_setup(ph, C2)
+check("pinning: re-running setup with a newer pin moves the existing clone to exactly that commit", r.returncode == 0 and frm == C2, r.stderr[-300:])
+r, frm = pin_setup(ph, C1)
+check("pinning: pinning back to the older commit (a rollback) works on the same clone", r.returncode == 0 and frm == C1, r.stderr[-300:])
+os.remove(os.path.join(ph, ".gitcraft", "installed-from"))
+open(os.path.join(ph, ".gitcraft", "repo", "scripts", "planted.sh"), "w").write("echo planted\n")
+r, frm = pin_setup(ph, C1)
+check("pinning: files that are not part of the commit are removed from the clone before anything runs",
+      frm == C1 and not os.path.exists(os.path.join(ph, ".gitcraft", "repo", "scripts", "planted.sh")), r.stderr[-300:])
+for label, ref in (("a commit that is not on main (pushed to another branch)", CX), ("a commit that does not exist", "0" * 40),
+                   ("an abbreviated commit SHA", C1[:12])):
+    fresh = os.path.join(ws, "pin-home-" + str(abs(hash(label)) % 10000))
+    r, frm = pin_setup(fresh, ref)
+    check(f"pinning: {label} is refused and nothing is installed (fail closed)", r.returncode != 0 and frm is None and "REFUSED" in r.stderr,
+          r.stdout[-200:] + r.stderr[-300:])
+os.remove(os.path.join(ph, ".gitcraft", "installed-from"))
+r, frm = pin_setup(ph, CX)
+check("pinning: an unreviewed commit is refused on an existing clone too (no fallback to the copy on disk)", r.returncode != 0 and frm is None and "REFUSED" in r.stderr, r.stderr[-300:])
+r, frm = pin_setup(os.path.join(ws, "pin-home-tag"), "v-test")
+check("pinning: a tag still installs as before", r.returncode == 0 and frm == C1, r.stderr[-300:])
+r, frm = pin_setup(os.path.join(ws, "pin-home-branch"), "main")
+check("pinning: a branch still installs as before", r.returncode == 0 and frm == C2, r.stderr[-300:])
+r, frm = pin_setup(os.path.join(ws, "pin-home-default"), None)
+check("pinning: no GITCRAFT_REF still installs the default branch", r.returncode == 0 and frm == C2, r.stderr[-300:])
+
+# setup-pin.sh prints the immutable line for a reviewed commit: the commit-addressed bootstrap, its SHA-256, and the pin
+pr_ = os.path.join(ws, "pin-checkout"); git("clone", "-q", pgh, pr_)
+git("config", "remote.origin.url", "https://github.com/pin-test/GITCRAFT", cwd=pr_)
+git("config", f"url.file://{pgh}.insteadOf", "https://github.com/pin-test/GITCRAFT", cwd=pr_)
+os.makedirs(os.path.join(pr_, "scripts"), exist_ok=True)
+shutil.copy(os.path.join(REPO, "scripts", "setup-pin.sh"), os.path.join(pr_, "scripts", "setup-pin.sh"))
+os.makedirs(os.path.join(pw, "scripts"), exist_ok=True)
+git("checkout", "-q", "main", cwd=pw)
+open(os.path.join(pw, "scripts", "setup-env.sh"), "w").write(subprocess.run(["git", "-C", REPO, "show", "d61cead34ae204629cf5ac81a2d60715e636adda:scripts/setup-env.sh"],
+                                                                          capture_output=True, text=True).stdout)   # main's setup-env.sh before pins
+git("add", "-A", cwd=pw); git(*gc, "commit", "-qm", "pre-pin setup", cwd=pw); COLD = git("rev-parse", "HEAD", cwd=pw)
+shutil.copy(os.path.join(REPO, "scripts", "setup-env.sh"), os.path.join(pw, "scripts", "setup-env.sh"))
+git("add", "-A", cwd=pw); git(*gc, "commit", "-qm", "pin-capable setup", cwd=pw); C3 = git("rev-parse", "HEAD", cwd=pw); git("push", "-q", "origin", "main", cwd=pw)
+helper = os.path.join(pr_, "scripts", "setup-pin.sh")
+r = sh([helper, C3, "GITCRAFT_MESHCRAFT=later"])
+boot_sum = hashlib.sha256(subprocess.run(["git", "-C", pw, "cat-file", "blob", f"{C3}:scripts/setup-env.sh"], capture_output=True).stdout).hexdigest()
+check("pinning: setup-pin.sh prints the bootstrap URL at the commit, its SHA-256 check, and GITCRAFT_REF set to the same commit",
+      r.returncode == 0 and f"/pin-test/GITCRAFT/{C3}/scripts/setup-env.sh" in r.stdout and f'"{boot_sum}  /tmp/gitcraft-setup-env.sh"' in r.stdout
+      and f"GITCRAFT_REF={C3} GITCRAFT_MESHCRAFT=later bash" in r.stdout and "sha256sum --check" in r.stdout, r.stdout + r.stderr[-300:])
+r = sh([helper, CX])
+check("pinning: setup-pin.sh refuses a commit that is not on main (even one it has to fetch first)", r.returncode != 0 and "not on" in r.stderr and not r.stdout, r.stderr[-300:])
+r = sh([helper, COLD])
+check("pinning: setup-pin.sh refuses a commit whose setup-env.sh cannot pin (it would install main again)", r.returncode != 0 and "predates commit pins" in r.stderr and not r.stdout, r.stderr[-300:])
+r = sh([helper, C1])
+check("pinning: setup-pin.sh refuses a commit with no setup-env.sh", r.returncode != 0 and "has no scripts/setup-env.sh" in r.stderr and not r.stdout, r.stderr[-300:])
+r = sh([helper, C3, "FOO=$(id)"])
+check("pinning: setup-pin.sh accepts only GITCRAFT_*=value extras (nothing else lands in the setup line)", r.returncode != 0 and not r.stdout, r.stderr[-200:])
+inst = open(os.path.join(REPO, "docs", "install.md")).read()
+check("pinning: docs/install.md documents pinning both the bootstrap and the installed revision", "## Pinning" in inst and "setup-pin.sh" in inst and "GITCRAFT_REF" in inst)
+
 # ================================================================ roots (F-05, F-16)
 spec = importlib.util.spec_from_file_location("policy", os.path.join(REPO, "gitcraft3d", "policy.py")); policy = importlib.util.module_from_spec(spec); spec.loader.exec_module(policy)
 fh = os.path.join(ws, "fakehome"); os.makedirs(os.path.join(fh, ".claude")); os.makedirs(os.path.join(fh, "code", "app"))

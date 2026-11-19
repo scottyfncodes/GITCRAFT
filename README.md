@@ -155,8 +155,8 @@ Before this, the two 3D servers were only registered once Blender was installed,
 *fetches* `~/.gitcraft/repo` in the background and, when `main` has moved, says so ("an update is available");
 nothing is checked out or run. A person applies it with `~/.gitcraft/gitcraft-update`, which lists the new
 commits and the security-relevant files they change and installs only with `--yes` (only commits on `main`;
-`--rollback --yes` goes back; `~/.gitcraft/logs/update.log`). For a fixed version in a cloud environment, put
-`GITCRAFT_REF=<tag or commit>` in front of `bash` in the setup line. `GITCRAFT_AUTO_UPDATE=1` restores the old
+`--rollback --yes` goes back; `~/.gitcraft/logs/update.log`). For a fixed version in a cloud environment, pin both the bootstrap and the
+installed commit with the line `scripts/setup-pin.sh <commit>` prints (docs/install.md, "Pinning a cloud environment"). `GITCRAFT_AUTO_UPDATE=1` restores the old
 unreviewed pull-and-run at session start (not recommended: docs/security.md, "Updates and binaries"). The hook
 also finishes a mocap install that stopped part-way.
 
