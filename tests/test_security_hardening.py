@@ -135,7 +135,7 @@ r = sh([hook, "--global"], env=uenv)
 time.sleep(1)
 check("updates: the session hook does not install or run new code from main by default",
       git("rev-parse", "HEAD", cwd=clone) == before and not os.path.exists(marker) and not os.path.exists(os.path.join(gh, "runtime")))
-check("updates: it says an update exists and how a person applies it", "update is available" in r.stdout and "update.sh" in r.stdout, r.stdout[-400:])
+check("updates: it says an update exists and how a person applies it", "update is available" in r.stdout and "gitcraft-update" in r.stdout, r.stdout[-400:])
 upd = os.path.join(clone, "scripts", "update.sh")
 r = sh([upd, "--repo", clone], env=uenv)
 check("updates: update.sh without --yes only shows the change (commits, changed security-relevant files)",
@@ -154,6 +154,10 @@ check("updates: update.sh --yes applies main (the explicit, logged path)", r.ret
 r = sh([upd, "--repo", clone, "--rollback", "--yes"], env=uenv, timeout=600)
 check("updates: --rollback returns to the commit before the last update", r.returncode == 0 and git("rev-parse", "HEAD", cwd=clone) == before,
       r.stdout[-500:] + r.stderr[-500:])
+gu = os.path.join(gh, "gitcraft-update")
+r = sh([gu, "--repo", clone], env=uenv)
+check("updates: the updater is kept at ~/.gitcraft/gitcraft-update, outside the clone and runtime, so it survives a rollback to a version without it",
+      os.access(gu, os.X_OK) and r.returncode == 3 and "Nothing was changed" in r.stdout, r.stdout[-300:] + r.stderr[-300:])
 hk = open(os.path.join(REPO, "scripts", "session-start.sh")).read()
 check("updates: GITCRAFT_AUTO_UPDATE defaults to off", '${GITCRAFT_AUTO_UPDATE:-0}" == 1' in hk and '${GITCRAFT_AUTO_UPDATE:-1}' not in hk)
 

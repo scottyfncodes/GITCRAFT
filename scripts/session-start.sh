@@ -11,13 +11,13 @@ mkdir -p "$GITCRAFT_LOG"
 
 # Updates (global hook only). By default nothing new is ever run: the hook fetches the clone setup-env.sh made
 # (~/.gitcraft/repo) in the background WITHOUT checking anything out, and says when main has moved. A person applies
-# an update with scripts/update.sh, which shows the commits and changed files first and installs only with --yes.
+# an update with ~/.gitcraft/gitcraft-update (scripts/update.sh), which shows the commits and changed files first and installs only with --yes.
 # GITCRAFT_AUTO_UPDATE=1 restores the old behaviour (pull, then run the new code unreviewed at session start); it is
 # off by default because a compromised main would otherwise execute in every session with the session's credentials.
 repo_clone="$GITCRAFT_HOME/repo"
 if ((global)) && [[ "${GITCRAFT_AUTO_UPDATE:-0}" != 1 && -d "$repo_clone/.git" ]]; then
   notice="$GITCRAFT_HOME/update-available"
-  if [[ -s "$notice" ]]; then echo "GITCRAFT: $(head -c 300 "$notice") Nothing was installed; a person can review and apply it with $repo_clone/scripts/update.sh"; fi
+  if [[ -s "$notice" ]]; then echo "GITCRAFT: $(head -c 300 "$notice") Nothing was installed; a person can review and apply it with $GITCRAFT_HOME/gitcraft-update"; fi
   setsid nohup bash -c '
     timeout 60 git -C "$1" fetch -q origin main 2>/dev/null || exit 0
     n=$(git -C "$1" rev-list --count HEAD..FETCH_HEAD 2>/dev/null || echo 0)

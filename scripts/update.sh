@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Update GITCRAFT deliberately: nothing new runs until a person has seen what changed and said yes.
+# Installed as ~/.gitcraft/gitcraft-update (by install-global.sh), which survives a rollback to an older GITCRAFT.
 #
 #   scripts/update.sh                  show what an update to origin/main would change (installs nothing)
 #   scripts/update.sh --yes            apply it: check out that commit, refresh the runtime, registration and

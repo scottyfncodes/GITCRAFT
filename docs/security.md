@@ -48,7 +48,7 @@ server (harmless content, never run) and checks each is refused or undone.
 ## Updates and binaries
 
 - **No unreviewed update runs.** The user-level SessionStart hook only fetches `~/.gitcraft/repo` and reports when
-  `main` has moved. `scripts/update.sh` shows the commits and the security-relevant files they change and installs only
+  `main` has moved. `~/.gitcraft/gitcraft-update` (`scripts/update.sh`) shows the commits and the security-relevant files they change and installs only
   with `--yes`, only a commit contained in `origin/main` (never a fork or unmerged branch); `--rollback --yes` returns
   to the previous commit. `GITCRAFT_AUTO_UPDATE=1` restores the old pull-and-run (not recommended: a compromised `main`
   would then run in every session, outside the sandbox, with the session's credentials).

@@ -153,7 +153,7 @@ Before this, the two 3D servers were only registered once Blender was installed,
 
 **Staying current, deliberately.** New code never runs on its own. At session start the user-level hook only
 *fetches* `~/.gitcraft/repo` in the background and, when `main` has moved, says so ("an update is available");
-nothing is checked out or run. A person applies it with `~/.gitcraft/repo/scripts/update.sh`, which lists the new
+nothing is checked out or run. A person applies it with `~/.gitcraft/gitcraft-update`, which lists the new
 commits and the security-relevant files they change and installs only with `--yes` (only commits on `main`;
 `--rollback --yes` goes back; `~/.gitcraft/logs/update.log`). For a fixed version in a cloud environment, put
 `GITCRAFT_REF=<tag or commit>` in front of `bash` in the setup line. `GITCRAFT_AUTO_UPDATE=1` restores the old

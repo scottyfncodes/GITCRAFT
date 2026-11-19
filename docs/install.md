@@ -48,12 +48,27 @@ packages installed inside it were lost on the next update. A developer checkout 
 scripts/install.sh            install anything missing (prebuilt from the `bin` branch, each checked against
                               scripts/bin.sha256 before it is unpacked; --source builds the pinned upstream commit)
 scripts/install.sh --update   refresh everything
-scripts/update.sh [--yes]     review, then apply, a GITCRAFT update from main (--to <commit>, --rollback)
+~/.gitcraft/gitcraft-update   review, then apply, a GITCRAFT update from main: --yes, --to <commit>, --rollback
+                              (a copy of scripts/update.sh outside the clone, so it survives any rollback)
 scripts/doctor.sh             what's installed, registered (from the runtime?), sandboxed and failing
 scripts/install-global.sh     refresh ~/.gitcraft/runtime, user-scope registration, ~/.claude/CLAUDE.md block and skill
 scripts/mcp.sh <tool>         start one server by hand (behind the guard and sandbox)
 tests/test_policy.py          end-to-end security check of every installed tool
 ```
+
+## Updating and rolling back
+
+| To | Run |
+|---|---|
+| see what an update would change | `~/.gitcraft/gitcraft-update` (changes nothing) |
+| apply the latest main | `~/.gitcraft/gitcraft-update --yes` |
+| go back to the version before the last update | `~/.gitcraft/gitcraft-update --rollback --yes` |
+| go to any commit on main (older or newer) | `~/.gitcraft/gitcraft-update --to <commit> --yes` |
+
+Every applied update is logged in `~/.gitcraft/logs/update.log`. Running servers keep their version; new sessions (or
+`/mcp`) use the new one. Rolling back to a GITCRAFT from before reviewed updates (before PR #92) brings back that
+version's automatic pull-and-run at session start: set `GITCRAFT_AUTO_UPDATE=0` in the environment to stay on it, and
+come forward again with `~/.gitcraft/gitcraft-update --to <commit> --yes`.
 
 ## Releases of the prebuilt tools
 
