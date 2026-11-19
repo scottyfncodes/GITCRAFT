@@ -28,6 +28,11 @@ claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 #    so servers already running keep the complete version they started with (scripts/install-runtime.sh)
 GITCRAFT_HOME="$GITCRAFT_HOME" "$here/install-runtime.sh" "$src" || exit 1
 
+# 1b) the updater, at a stable path outside the clone and the runtime: ~/.gitcraft/gitcraft-update. A rollback to a
+#     GITCRAFT older than the updater removes scripts/update.sh from both, and older code never deletes this copy, so
+#     the way forward again survives any rollback (docs/install.md, "Updating and rolling back")
+install -m 755 "$here/update.sh" "$GITCRAFT_HOME/gitcraft-update.tmp" && mv -f "$GITCRAFT_HOME/gitcraft-update.tmp" "$GITCRAFT_HOME/gitcraft-update"
+
 # 2) user-scope registration from the runtime
 "$runtime/scripts/register.sh"
 

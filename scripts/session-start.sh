@@ -9,13 +9,23 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$here/tools.sh"
 mkdir -p "$GITCRAFT_LOG"
 
-# Self-update (global hook only; GITCRAFT_AUTO_UPDATE=0 turns it off). Cloud environments cache the setup
-# script's result, so a new session can start from a GITCRAFT copy older than main. In the background: pull the
-# clone setup-env.sh made (~/.gitcraft/repo); when it moved, refresh the runtime and registration from it and run
-# this hook again from the new code (which then finishes anything the new version adds). Takes effect for the
-# servers from the next session; the current one keeps the code it started with.
+# Updates (global hook only). By default nothing new is ever run: the hook fetches the clone setup-env.sh made
+# (~/.gitcraft/repo) in the background WITHOUT checking anything out, and says when main has moved. A person applies
+# an update with ~/.gitcraft/gitcraft-update (scripts/update.sh), which shows the commits and changed files first and installs only with --yes.
+# GITCRAFT_AUTO_UPDATE=1 restores the old behaviour (pull, then run the new code unreviewed at session start); it is
+# off by default because a compromised main would otherwise execute in every session with the session's credentials.
 repo_clone="$GITCRAFT_HOME/repo"
-if ((global)) && [[ "${GITCRAFT_AUTO_UPDATE:-1}" != 0 && -z "${GITCRAFT_UPDATED:-}" && -d "$repo_clone/.git" ]]; then
+if ((global)) && [[ "${GITCRAFT_AUTO_UPDATE:-0}" != 1 && -d "$repo_clone/.git" ]]; then
+  notice="$GITCRAFT_HOME/update-available"
+  if [[ -s "$notice" ]]; then echo "GITCRAFT: $(head -c 300 "$notice") Nothing was installed; a person can review and apply it with $GITCRAFT_HOME/gitcraft-update"; fi
+  setsid nohup bash -c '
+    timeout 60 git -C "$1" fetch -q origin main 2>/dev/null || exit 0
+    n=$(git -C "$1" rev-list --count HEAD..FETCH_HEAD 2>/dev/null || echo 0)
+    if [[ "$n" -gt 0 ]]; then echo "an update is available: $n new commit(s) on main ($(git -C "$1" rev-parse --short HEAD) -> $(git -C "$1" rev-parse --short FETCH_HEAD))." > "$2"
+    else rm -f "$2"; fi
+  ' _ "$repo_clone" "$notice" >>"$GITCRAFT_LOG/update.log" 2>&1 < /dev/null &
+fi
+if ((global)) && [[ "${GITCRAFT_AUTO_UPDATE:-0}" == 1 && -z "${GITCRAFT_UPDATED:-}" && -d "$repo_clone/.git" ]]; then
   setsid nohup bash -c '
     before=$(git -C "$1" rev-parse HEAD 2>/dev/null)
     timeout 60 git -C "$1" pull -q --ff-only 2>/dev/null || exit 0

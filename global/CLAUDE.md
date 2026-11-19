@@ -44,7 +44,8 @@ departments, orders and parallelises them, gates every result, turns failed
 gates into fix work orders and re-verifies, and writes the acceptance report.
 You do its work orders (code, wiring assets, the 2D tools) and submit them
 with `production_submit`; report READY only when its report says READY, and
-leave approvals (deployment, replacing assets) to the person.
+leave approvals (deployment, replacing assets) to the person: deployment and
+infrastructure approvals are given by the person in GitHub, never by you.
 
 Before implementing creative, visual, design, game-development, 2D, 3D,
 modelling, animation, illustration, texture, rendering or asset-generation work

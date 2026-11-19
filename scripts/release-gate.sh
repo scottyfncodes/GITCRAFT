@@ -19,7 +19,7 @@
 #      when ANTHROPIC_API_KEY is set, i.e. a manual dispatch with claude_session ticked, see docs/costs.md.)
 #
 # GITCRAFT_GATE_SELFTEST=glibc|broken-binary injects a controlled fault into a staging copy (never into the
-# candidates) to prove the gate fails closed. Exit 0 only when every step passes.
+# candidates) to prove the gate fails closed. The gate's clone pins the candidates in its own scripts/bin.sha256 (local commit). Exit 0 only when every step passes.
 set -uo pipefail
 cand="$(cd "${1:?usage: release-gate.sh <candidate-dir> [workdir]}" && pwd)"
 work="${2:-$(mktemp -d "${TMPDIR:-/tmp}/gitcraft-gate-XXXX")}"; mkdir -p "$work"; work="$(cd "$work" && pwd)"
@@ -70,6 +70,12 @@ cat "$bin"/*.manifest | sort > "$bin/MANIFEST.txt"
 git -C "$bin" init -q -b bin && git -C "$bin" add -A \
   && git -C "$bin" -c user.name=release-gate -c user.email=release-gate@localhost commit -qm "release candidate" || fail "cannot stage the candidates"
 git -C "$clone" fetch -q "$bin" +bin:refs/heads/bin || fail "cannot create the local bin branch"
+# the throwaway clone pins THESE candidates (install.sh installs only binaries whose checksums scripts/bin.sha256 lists),
+# committed on its branch because the fresh install clones the committed branch; never pushed anywhere
+{ echo "# release gate: the candidates under test (local clone only)"
+  for entry in "${GITCRAFT_TOOLS[@]}"; do IFS=: read -r name _ pkg <<<"$entry"; (cd "$stage" && sha256sum "$pkg.gz"); done; } > "$clone/scripts/bin.sha256"
+git -C "$clone" -c user.name=release-gate -c user.email=release-gate@localhost commit -qam "release gate: pin the candidates under test" \
+  || fail "cannot pin the candidates in the gate's clone"
 echo "local bin branch $(git -C "$clone" rev-parse --short bin) in $clone (not pushed anywhere)"
 export GITCRAFT_BIN_REPO="$work/no-published-builds"   # the installer's fallback to the published builds goes nowhere
 command -v claude >/dev/null || fail "the claude CLI is not on PATH: the 'claude mcp list' checks would be skipped"

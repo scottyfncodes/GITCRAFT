@@ -44,6 +44,8 @@ def main(argv=None):
     sb = sp.add_parser("submit"); sb.add_argument("id"); sb.add_argument("task"); sb.add_argument("--files", nargs="*"); sb.add_argument("--notes")
     sb.add_argument("--url"); sb.add_argument("--evidence"); sb.add_argument("--license"); sb.add_argument("--run", action="store_true")
     a = sp.add_parser("approve"); a.add_argument("id"); a.add_argument("task"); a.add_argument("--decline", action="store_true"); a.add_argument("--note"); a.add_argument("--choice")
+    ae = sp.add_parser("approve-external", help="record a deployment/infrastructure approval a person gave in GitHub (verified via GitHub's API)")
+    ae.add_argument("id"); ae.add_argument("task"); ae.add_argument("--run", required=True, help="URL of the approved gitcraft-approval.yml run")
     rp = sp.add_parser("report"); rp.add_argument("id")
     sp.add_parser("list"); sp.add_parser("contracts")
     gr = sp.add_parser("project-report", help="Run GITCRAFT report: one report across every department (read-only)")
@@ -88,7 +90,7 @@ def main(argv=None):
         if o.submit:
             pr = store.load(o.id); t = pr["tasks"].get("release.deploy")
             if not t: out["submit"] = "this production has no deployment task"
-            elif t["state"] != "awaiting_agent": out["submit"] = f"release.deploy is {t['state']}, not waiting for the deployment (approve it first)"
+            elif t["state"] != "awaiting_agent": out["submit"] = f"release.deploy is {t['state']}, not waiting for the deployment (a deployment is approved in GitHub first: approve-external)"
             else: out["submit"] = engine.submit(o.id, "release.deploy", url=o.url, evidence=rec["record"], notes="verify-live")["submission"]
     elif o.cmd == "idea": pr = engine.idea(o.text, o.project); out = dict(engine.lifecycle_view(pr), brief=pr["brief"])
     elif o.cmd == "recon": out = engine.submit_recon(o.id, json.load(open(o.findings))) if o.findings else engine.start_recon(o.id, o.depth)
@@ -102,6 +104,7 @@ def main(argv=None):
     elif o.cmd == "status": out = engine.status(o.id)
     elif o.cmd == "submit": out = engine.submit(o.id, o.task, o.files, o.notes, o.url, o.evidence, o.license, run_after=o.run)
     elif o.cmd == "approve": out = engine.approve(o.id, o.task, approved=not o.decline, note=o.note, choice=o.choice)
+    elif o.cmd == "approve-external": out = engine.approve_external(o.id, o.task, o.run)
     elif o.cmd == "report": print(report.markdown(store.load(o.id))); return 0
     elif o.cmd == "list": out = store.list_all()
     elif o.cmd == "contracts": out = contracts.all_contracts()

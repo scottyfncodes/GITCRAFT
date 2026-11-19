@@ -141,7 +141,10 @@ It works out the rest; the person never needs to know these tools.
    For `icon.select`, show the person the comparison sheet (`concepts.html`: every concept at full size and at 180, 64 and 32 px,
    light and dark) and your recommendation. Approve with `choice` only when they've chosen; if they want changes, decline with their note
    and new concepts are requested. Never pick an icon silently.
-   Ask them; call `production_approve` only with their answer. A deployment counts as live only with
+   Ask them; call `production_approve` only with their answer. **Deployment and infrastructure** (`release.deploy`,
+   `backend.provision`) are different: you cannot approve them, and `production_approve` refuses. The task's reason says how:
+   start the project's `gitcraft-approval.yml` run, the person approves it in GitHub, then record it with
+   `python3 -m production approve-external <production> <task> --run <url>` (verified against GitHub). A deployment counts as live only with
    `evidence`: a passing check record that ran against the live URL. Without it, say "deployed, not verified".
 6. **Report** — `production_report {production}`: every criterion with its measured evidence and the verdict.
    Report exactly that: READY only when the report says READY. Give the person the project path, the

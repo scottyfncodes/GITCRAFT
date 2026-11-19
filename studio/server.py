@@ -136,7 +136,8 @@ PRODUCTION_TOOLS = [
      {"type": "object", "required": ["production", "task"], "properties": {"production": _PID, "task": {"type": "string"}, "files": {"type": "array", "items": {"type": "string"}, "description": "absolute paths of the files made or changed (inside the workspace)"},
       "notes": {"type": "string"}, "url": {"type": "string"}, "evidence": {"type": "string", "description": "deployment: a check record (.studio.json) that ran against the URL"},
       "license": {"type": "string"}, "continue": {"type": "boolean", "description": "run the production on after an accepted submission (default true)"}}}),
-    ("production_approve", "A person's decision on a task that needs approval (the app icon choice, deployment, replacing existing assets). Only call this when the person has said so. "
+    ("production_approve", "A person's decision on a task that needs approval (the app icon choice, the style and design picks, replacing existing assets). Only call this when the person has said so. "
+     "Deployment and infrastructure approvals are refused here (a decline is accepted): a person approves those in GitHub and `python3 -m production approve-external` verifies it. "
      "For icon.select pass choice (the concept id); declining it with a note asks for new concepts.",
      {"type": "object", "required": ["production", "task", "approved"], "properties": {"production": _PID, "task": {"type": "string"}, "approved": {"type": "boolean"},
       "note": {"type": "string"}, "choice": {"type": "string", "description": "icon.select: the approved concept id"}}}),

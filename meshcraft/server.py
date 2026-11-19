@@ -138,12 +138,85 @@ def engine_check(glb, out=None, clip=None, time=None, contract=None, material="g
     return json.loads(r.stdout)
 
 
-def run_script(path, blend=None, save=True, args=None):
-    """Assisted modelling: execute a workspace Python script inside Blender. The script sees
-    `bpy`, `kit` (MeshCraft modelling kit), `palette`, `args`. Contained by the sandbox."""
+# keys whose existing paths are outputs (a script may write there); any path in args that does not exist yet is an
+# output too. Everything else in args (inputs: a palette, a GLB to import, a scene) stays read-only for the script.
+OUTPUT_KEYS = {"out", "out_dir", "output", "outputs", "output_dir", "dest", "destination", "target", "export", "exports",
+               "export_dir", "save_to", "write_dirs"}
+
+
+def _script_write_dirs(blend, save, args, write_dirs):
+    """The folders a run_script may write: explicit write_dirs, the .blend's folder when it is saved, and the outputs
+    named in args. Each must be inside the roots and hold no repository control file (gitcraft3d/policy.py)."""
+    from gitcraft3d import policy
+    want = []
+    def consider(v, key):
+        if not isinstance(v, str) or not (v.startswith("/") or v.startswith("~/")) or "\n" in v: return
+        p = os.path.realpath(os.path.expanduser(v))
+        if not _inside(p): return
+        if os.path.isdir(p): (key in OUTPUT_KEYS) and want.append(p)
+        elif os.path.exists(p): (key in OUTPUT_KEYS) and want.append(os.path.dirname(p))
+        elif os.path.splitext(p)[1]: want.append(os.path.dirname(p))      # a file to be written: its folder
+        else: want.append(p)                                               # a folder to be made
+    def walk(o, key=None):
+        if isinstance(o, dict):
+            for k, v in o.items(): walk(v, str(k).lower())
+        elif isinstance(o, (list, tuple)):
+            for v in o: walk(v, key)
+        else: consider(o, key)
+    walk(args or {})
+    for d in write_dirs or []: want.append(os.path.realpath(os.path.expanduser(_need(d, write=True))))
+    if blend and save: want.append(os.path.dirname(os.path.realpath(blend)))
+    out = []
+    for d in dict.fromkeys(want):
+        why = policy.protected(d, ROOTS)
+        if why: raise PermissionError(f"run_script may not write {d}: {why}")
+        os.makedirs(d, exist_ok=True)
+        why = policy.dir_has_protected(d, ROOTS)
+        if why: raise PermissionError(f"run_script may not write {d}: {why}. Write to a dedicated output folder (args.out or write_dirs) instead")
+        out.append(d)
+    return out
+
+
+def run_script(path, blend=None, save=True, args=None, write_dirs=None):
+    """Assisted modelling: execute a workspace Python script inside Blender. The script sees `bpy`, `kit` (MeshCraft
+    modelling kit), `palette`, `args`. It runs in a child Blender process with one more Landlock layer: it can read
+    what MeshCraft can, but write only its declared outputs (_script_write_dirs), never the rest of the workspace."""
     _need(path)
-    if blend: core.open_blend(_need(blend))
-    g = {"bpy": bpy, "kit": kit, "args": args or {}, "Palette": Palette}
+    if blend: _need(blend)
+    dirs = _script_write_dirs(blend, save, args, write_dirs)
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="meshcraft_script_")
+    req = os.path.join(tmp, "request.json")
+    json.dump({"path": path, "blend": blend, "save": save, "args": args or {}, "write": dirs, "tmp": tmp}, open(req, "w"))
+    py = sys.executable if MODE[0] == "in-process" else deferred.blender_python()
+    if not py: raise RuntimeError(deferred.install_hint("MeshCraft"))
+    r = subprocess.run([py, os.path.abspath(__file__), "--script-child", req], stdin=subprocess.DEVNULL,
+                       capture_output=True, text=True, timeout=6 * 3600, env=dict(os.environ, TMPDIR=tmp))
+    lines = [l for l in (r.stdout or "").splitlines() if l.startswith('{"ok"')]
+    import shutil; shutil.rmtree(tmp, ignore_errors=True)
+    if not lines: raise RuntimeError(f"run_script gave no result (exit {r.returncode}): {(r.stderr or '')[-1500:]}")
+    out = json.loads(lines[-1])
+    if not out.get("ok"): raise RuntimeError(out.get("error", "failed") + "\n" + out.get("trace", ""))
+    res = out["result"]; res["writable"] = dirs
+    return res
+
+
+def _script_child(req_path):
+    """--script-child: narrow this process's writes, then run the script in-process (the old run_script body)."""
+    from gitcraft3d import landlock
+    req = json.load(open(req_path))
+    writable = list(req["write"]) + [req["tmp"], "/dev"]
+    try:
+        landlock.narrow_writes(writable)
+    except landlock.Unavailable:
+        if os.environ.get("GITCRAFT_SANDBOX") != "off":
+            raise PermissionError("run_script needs Landlock to confine the script's writes, and this kernel has none; "
+                                  "it is refused (set GITCRAFT_SANDBOX=off only on a machine where that risk is acceptable)")
+    _load()
+    if _import_error: raise RuntimeError("Blender failed to load: " + _import_error[0])
+    path, blend, save, args = req["path"], req.get("blend"), req.get("save", True), req.get("args") or {}
+    if blend: core.open_blend(blend)
+    g = {"bpy": bpy, "kit": kit, "args": args, "Palette": Palette}
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         runpy.run_path(path, init_globals=g, run_name="__meshcraft__")
@@ -315,9 +388,11 @@ TOOLS = {
                     S({"parts": ARR, "scene": STR, "motion": ARR, "contacts": ARR, "frame": {"type": "string", "enum": ["gltf", "blender"]},
                        "max_poses": NUM}),
                     lambda a: _audit(a)),
- "run_script": ("Assisted modelling: run a Python script from the workspace inside Blender (globals: bpy, kit, args, Palette), optionally against a .blend which is then saved. Runs inside the sandbox.",
-                S({"path": STR, "blend": STR, "save": BOOL, "args": OBJ}, ["path"]),
-                lambda a: run_script(a["path"], a.get("blend"), a.get("save", True), a.get("args"))),
+ "run_script": ("Assisted modelling: run a Python script from the workspace inside Blender (globals: bpy, kit, args, Palette), optionally against a .blend which is then saved. Runs in a child Blender that may write ONLY its outputs: the .blend's folder when saved, "
+                "paths in args that do not exist yet, existing paths under output keys (out, out_dir, output, dest, export...), and write_dirs. "
+                "A folder holding repository control files (.git, .claude, hooks) is refused: write to a dedicated output folder.",
+                S({"path": STR, "blend": STR, "save": BOOL, "args": OBJ, "write_dirs": STRS}, ["path"]),
+                lambda a: run_script(a["path"], a.get("blend"), a.get("save", True), a.get("args"), a.get("write_dirs"))),
  "inspect_file": ("Import a .glb/.gltf/.fbx/.obj/.blend and report objects, triangles, materials, clips and size (metres).", S({"path": STR}, ["path"]),
                   lambda a: core.inspect_file(_need(a["path"]))),
  "hardware_probe": ("What this machine can do for 3D: CPU, RAM, NVIDIA GPUs, free disk at the roots, sandbox/network, and each capability (Blender, texture bake, Blockbench, Mixamo, engine check, photogrammetry, image-to-3D) with the reason when unavailable. Answers without loading Blender.",
@@ -463,6 +538,14 @@ def private_stdio():
 
 
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--script-child":
+        try:
+            with contextlib.redirect_stdout(sys.stderr):
+                out = {"ok": True, "result": _script_child(sys.argv[2])}
+        except Exception as e:
+            out = {"ok": False, "error": f"{type(e).__name__}: {e}", "trace": traceback.format_exc(limit=4)[-1500:]}
+        sys.__stdout__.write("\n" + json.dumps(out, default=str) + "\n"); sys.__stdout__.flush()
+        return
     if len(sys.argv) > 2 and sys.argv[1] == "--call":
         raw = sys.argv[3] if len(sys.argv) > 3 else "{}"
         args = json.load(open(raw[1:])) if raw.startswith("@") else json.loads(raw)

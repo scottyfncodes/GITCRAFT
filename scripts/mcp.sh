@@ -43,6 +43,12 @@ fi
 
 IFS=: read -r -a roots <<<"$GITCRAFT_ROOTS"
 root="$GITCRAFT_ROOT"
+# Fail closed on a root that would make control files writable from inside the sandbox ($HOME, /, ~/.claude,
+# GITCRAFT's runtime ...): Landlock can only allow whole folders, so such a root cannot be fenced afterwards.
+if ! why="$(python3 -I "$repo/gitcraft3d/policy.py" check-roots "$root" "${roots[@]}")"; then
+  echo "gitcraft: $name not started: $why. Set GITCRAFT_ROOTS to your project folder(s) (docs/security.md, \"Choosing the roots\")." >&2
+  exit 1
+fi
 mkdir -p "$root" "$GITCRAFT_LOG"
 state="$GITCRAFT_STATE/$name"
 mkdir -p "$state/tmp" "$state/config" "$state/cache" "$state/data"
@@ -117,6 +123,12 @@ writable=("${roots[@]}" "$state")
 [[ "$name" == meshcraft ]] && writable+=("$GITCRAFT_3D_LIBRARY")
 [[ "$name" == forgecraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY")
 [[ "$name" == studiocraft ]] && writable+=("$GITCRAFT_3D_LIBRARY" "$FORGECRAFT_HOME/hf-cache" "$(dirname "$GITCRAFT_ASSET_CATALOG")" "$GITCRAFT_PLAYCRAFT_HISTORY" "$GITCRAFT_PIXELCRAFT_HISTORY" "$GITCRAFT_HOME/productions" "$GITCRAFT_HOME/reports")
+# Every folder granted for writing obeys the same rule as the roots (gitcraft3d/policy.py), not just GITCRAFT_ROOTS: a store
+# variable set to $HOME (GITCRAFT_3D_LIBRARY=~, ...) would otherwise reopen everything the root rule closes.
+if ! why="$(python3 -I "$repo/gitcraft3d/policy.py" check-roots "${writable[@]}")"; then
+  echo "gitcraft: $name not started: a writable folder is unsafe: $why. Point the GITCRAFT_* store variables at their own folders (docs/security.md)." >&2
+  exit 1
+fi
 # Landlock can only fence paths that exist when the sandbox starts (sandbox.py skips a missing one). The 3D servers
 # may start before Blender is installed, so create its folder now: the install fills it in later and the running
 # server can then read and run it (gitcraft3d/deferred.py).

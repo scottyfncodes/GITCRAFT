@@ -1,0 +1,14 @@
+# Trusted prebuilt ArtCraft CLIs: the SHA-256 of every <pkg>.gz that install.sh may install from the `bin` branch.
+# install.sh refuses a prebuilt whose checksum is not listed here (checked before it is decompressed or run), and
+# .github/workflows/publish-bin.yml publishes to `bin` only the release candidate whose files match this list exactly.
+#
+# Change it only by pull request: copy the `bin.sha256` artifact of a green "Build ArtCraft CLIs" run on main
+# (it names the run below), review it, merge. Merging publishes those exact binaries (docs/install.md, "Releases").
+# run: 43942046259
+c5bcd20f96628e6846c6530be2b15c61ee102a887bf3b3c900d2dd3d7ea24fff  designcraft-cli.gz
+97c7bfb319ad956177cb63bd66cc31d3d37d4c1c9dd695953ef5aaf556302798  effectcraft-cli.gz
+81213ae3ba39163ccb1da36bc66fa0ec0f8f389eab81f837d768fd19eea592f3  filmcraft-cli.gz
+f46cb876463c36b6ee51c037e0df716927f6aa7d79f0c9713ec66837da671221  lightcraft-cli.gz
+845082a6a9bc4637a16ccf8d01be891b21e5e2972c14ebc5d8860849eb23d5fe  pdfcraft-cli.gz
+eef771ae48558b802da1c63150ded0fbc63e4a3b4eff3882681dba0b6a52352d  photocraft-cli.gz
+214e02ad08e012069b3fac97a68e74636404c97808bf9117aaebf940b1aab800  vectorcraft-cli.gz

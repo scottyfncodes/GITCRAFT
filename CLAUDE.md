@@ -173,6 +173,15 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
   feature checks, backend/analytics/native decisions or the native icon sets; `verify-live` never records a deployment live
   without measuring this exact build at the URL, and never disables TLS verification.
 - `tests/test_hardening.py` must pass after any change to `scripts/guard.py` or `ui/server.py` (docs/tech-debt.md).
+- `tests/test_security_hardening.py` must pass after any change to `scripts/install.sh`, `scripts/update.sh`, `scripts/session-start.sh`,
+  `scripts/tools.sh` (roots, upstream pins), `scripts/bin.sha256`, `scripts/mcp.sh`, `scripts/guard.py`, `gitcraft3d/policy.py`, `gitcraft3d/landlock.py`,
+  MeshCraft's `run_script`, `production/approvals.py` or the approval paths of `production/engine.py`, or any workflow (docs/security.md):
+  no unreviewed update ever runs (the hook only fetches; `update.sh` needs `--yes` and a commit on main); a prebuilt is installed only when its
+  SHA-256 is pinned in `scripts/bin.sha256` (never a source build to cover a mismatch); `bin` is published only by `publish-bin.yml` from a pinned,
+  gated main build; no root may be `$HOME`, `/` or expose GITCRAFT's runtime or the home's config (no override); no tool writes a repository control
+  file (`.git/`, `.claude/`, hook scripts...: guard refusal + tripwire, run_script's write layer); deployment and infrastructure approvals come only
+  from a GitHub environment approval verified through the API, never from `production_approve`, the blueprint or the agent; every third-party action
+  stays pinned to a commit SHA.
 - `tests/test_evaluation.py` must pass after any change to change detection, the production store location, evaluation targets or
   verdicts (`production/artifacts.py`, `engine.py`, `report.py`, `planner.py` targets): evaluation output is never source, never lives
   in the evaluated project, every browser check measures one `$target`, and every run ends READY, NOT READY or INCOMPLETE (`docs/production.md`).
@@ -203,7 +212,8 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - Never commit model weights or Meshroom: they install into
   `~/.gitcraft/forgecraft` (`scripts/install-3d.sh`).
 - Don't commit binaries to `main`. The workflow owns the `bin` branch.
-- Release safety (`.github/workflows/build.yml`): the seven CLIs are published to `bin` only after `scripts/release-gate.sh`
+- Release safety (`.github/workflows/build.yml` builds and gates, `.github/workflows/publish-bin.yml` publishes, docs/install.md "Releases"):
+  `bin` changes only when a reviewed `scripts/bin.sha256` naming a green main build lands on main. The seven CLIs are published to `bin` only after `scripts/release-gate.sh`
   passes on exactly those binaries (all seven built, glibc ≤ 2.39, and a fresh install of them by `tests/test_global.sh` with
   every check passing and the installed binaries byte-identical to the candidates); only from `main`, and anything else leaves
   `bin` untouched. Never weaken the gate, carry an older binary into a release, or publish from a pull request. Prove a gate

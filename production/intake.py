@@ -197,7 +197,7 @@ def parse(prompt, project=None, overrides=None, existing=None):
     auth = {"write_project": True, "replace_assets": False, "deploy": False, "merge": False, "spend": False, "network": False}
     if feats["deploy"]:
         questions.append({"id": "deploy_target", "essential": False, "question": "Where should the release be deployed, and may it be deployed without a further check-in?",
-                          "default": "the release is prepared and verified locally; deployment waits for approval (production_approve)"})
+                          "default": "the release is prepared and verified locally; deployment waits for a person's approval in GitHub (production/approvals.py)"})
     if deliverable == "game" and not genres:
         questions.append({"id": "genre", "essential": False, "question": "What kind of game is it?", "default": "arcade"})
 
