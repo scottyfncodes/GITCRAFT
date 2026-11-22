@@ -144,6 +144,9 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - Tool list lives in `scripts/tools.sh`; the workflow matrix and
   `scripts/mcp.sh` need updating to match if you add one.
 - `tests/test_studio.py` must pass after any change under `studio/` (`--quick` skips the Blender actions).
+- `tests/test_asset_ownership.py` must pass after any change to AssetCraft's licence records or `license_report` (`studio/core/catalog.py`,
+  `studio/departments/assetcraft/`): a project's own declared artwork is never restricted by its own licence (proprietary included), a
+  third-party NC/ND/proprietary asset always is, and ownership is only ever declared (`"first_party": true` or LicenseRef-Project-Owned), never inferred.
 - `tests/test_playcraft_history.py` must pass after any change to `studio/departments/playcraft/history.py`, its `ui/` or the
   history actions; never rewrite or delete runs in `history/playcraft/` (the committed Game Quality History).
 - `tests/test_pixelcraft.py` must pass after any change under `studio/departments/pixelcraft/` (`--quick` for the short cycle);

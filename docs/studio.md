@@ -203,8 +203,10 @@ and safe integration. A curated set from the acceptance run is in `acceptance/st
 | `fxcraft-particles.js` | same as GITCRAFT | copied next to each emitter; may be shipped in games |
 
 Generated outputs are owned by the requesting project (recorded per run); retargeted motion and assembled
-edits keep the licences of their inputs. AssetCraft's `license_report` flags NC/ND/proprietary assets and
-copyleft/share-alike ones.
+edits keep the licences of their inputs. AssetCraft's `license_report` flags third-party NC/ND/proprietary
+assets and copyleft/share-alike ones. A project's own artwork is never restricted by its own licence: declared
+first-party (`"first_party": true` in its licence record, or `LicenseRef-Project-Owned`), it may stay proprietary
+and still pass. See docs/licensing.md, "Recording a project's own assets".
 
 ## Known limitations
 

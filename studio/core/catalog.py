@@ -9,7 +9,7 @@ A file whose bytes change gets a new version; the old row stays as history.
 Licences come from, in order: the department run that made the file, a `<file>.license.json`
 sidecar ({"license": "CC0-1.0", "attribution": "...", "source": "..."}), the 3D library record,
 or a scan's `default_license`; otherwise the asset is listed as `UNKNOWN` by license_report."""
-import datetime, json, os, re, sqlite3, subprocess
+import datetime, fnmatch, json, os, re, sqlite3, subprocess
 from . import GITCRAFT_HOME
 from . import validate as V
 
@@ -92,23 +92,56 @@ def thumbnail(path, sha, fmt):
         return None
 
 
-def _sidecar(path):
-    for s in (path + ".license.json", os.path.join(os.path.dirname(path), "LICENSE.assets.json")):
+def _sidecar(path, project=None):
+    """The licence record that declares this file, nearest first: `<file>.license.json`, then a `LICENSE.assets.json`
+    in the file's folder or any folder above it up to the project root. A folder record's keys are paths relative to
+    that folder (fnmatch patterns, so `public/icon*.png` or `*`), which lets a project declare files it ships from
+    `public/` without shipping the record. Returns {} when nothing declares the file."""
+    side = path + ".license.json"
+    if os.path.exists(side):
+        try: return json.load(open(side))
+        except (OSError, ValueError): pass
+    path = os.path.abspath(path)
+    top = os.path.abspath(project or project_of(path))
+    d = os.path.dirname(path)
+    while True:
+        s = os.path.join(d, "LICENSE.assets.json")
         if os.path.exists(s):
             try:
-                d = json.load(open(s))
-                if s.endswith("LICENSE.assets.json"): d = d.get(os.path.basename(path)) or d.get("*") or {}
-                return d
-            except Exception: pass
+                rec = json.load(open(s))
+                rel = os.path.relpath(path, d).replace(os.sep, "/")
+                hit = rec.get(rel) or next((v for k, v in rec.items() if k != "*" and fnmatch.fnmatchcase(rel, k)), None) or rec.get("*")
+                if isinstance(hit, dict): return hit
+            except (OSError, ValueError, AttributeError): pass
+        if d == top or not d.startswith(top + os.sep) or d == os.path.dirname(d): break
+        d = os.path.dirname(d)
     return {}
+
+
+# A licence that limits what the project may do with someone else's work. It is "restricted" only for third-party
+# assets: a project's own artwork may be proprietary (all rights reserved by its owner) and is still cleared to ship.
+RESTRICTED = re.compile(r"(?<![A-Za-z])(NC|ND)(?![A-Za-z])|NonCommercial|NoDerivatives|[Pp]roprietary|[Rr]esearch[- ]only|[Nn]on-commercial")
+# GITCRAFT's own id for files a project owns (written by production integration for its outputs).
+OWNED_LICENSES = {"LicenseRef-Project-Owned"}
+
+
+def first_party(row, declared=None):
+    """True when the project owns the asset: its licence is LicenseRef-Project-Owned, or its licence record (the
+    project's sidecar / LICENSE.assets.json, or the source recorded at registration) says "first_party": true.
+    Ownership is declared, never inferred from a file's location or name."""
+    if (row.get("license") or "") in OWNED_LICENSES: return True
+    if (declared or {}).get("first_party") is True: return True
+    src = row.get("source")
+    return isinstance(src, dict) and src.get("first_party") is True
 
 
 def register(path, license=None, attribution=None, source=None, tags=None, project=None):
     path = os.path.abspath(path); fmt = V.sniff(path)
     v = V.check(path); sha = _sha(path)
-    side = _sidecar(path)
+    side = _sidecar(path, project)
     license = license or side.get("license"); attribution = attribution or side.get("attribution")
     if side and not source: source = {"type": "sidecar", **{k: side[k] for k in side if k not in ("license", "attribution")}}
+    elif side.get("first_party") is True and isinstance(source, dict): source = dict(source, first_party=True)
     project = project or project_of(path)
     c = _db()
     with c:
@@ -263,14 +296,22 @@ def dependencies(path):
 
 def license_report(project=None):
     rows = [r for r in search(project=project, limit=100000) if r["exists"]]
-    by = {}
-    for r in rows: by.setdefault(r["license"] or "UNKNOWN", []).append(r["rel"] if project else r["path"])
-    # SPDX-style tokens only: "-NC", "-ND" (case-sensitive), or the spelled-out terms
-    restricted = {k: v for k, v in by.items() if re.search(r"(?<![A-Za-z])(NC|ND)(?![A-Za-z])|NonCommercial|NoDerivatives|[Pp]roprietary|[Rr]esearch[- ]only|[Nn]on-commercial", k)}
+    by, owned, third = {}, {}, {}
+    for r in rows:
+        # The project's committed licence record is read now, so a declaration added after a file was catalogued counts.
+        declared = _sidecar(r["path"], r.get("project")) or {}
+        lic = r["license"] if r["license"] not in (None, "", "UNKNOWN") else (declared.get("license") or "UNKNOWN")
+        key = r["rel"] if project else r["path"]
+        by.setdefault(lic, []).append(key)
+        if lic != "UNKNOWN": (owned if first_party(dict(r, license=lic), declared) else third).setdefault(lic, []).append(key)
+    # Restricted means third-party terms that limit use (non-commercial, no-derivatives, proprietary, research-only).
+    # The project's own artwork is never restricted by its own licence, proprietary included.
+    restricted = {k: v for k, v in third.items() if RESTRICTED.search(k)}
     copyleft = {k: v for k, v in by.items() if re.search(r"GPL|(?<![A-Za-z])MPL|(?<![A-Za-z])SA(?![A-Za-z])|ShareAlike", k)}
     attrib = sorted({(r["rel"] if project else r["path"], r["attribution"]) for r in rows if r.get("attribution")})
     return {"total": len(rows), "by_license": {k: len(v) for k, v in by.items()}, "unknown": by.get("UNKNOWN", []),
-            "restricted": restricted, "copyleft": copyleft, "attributions": [{"path": p, "attribution": a} for p, a in attrib]}
+            "restricted": restricted, "copyleft": copyleft, "first_party": owned,
+            "attributions": [{"path": p, "attribution": a} for p, a in attrib]}
 
 
 def verify(project=None):
