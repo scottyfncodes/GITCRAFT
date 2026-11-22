@@ -49,6 +49,9 @@ jobs:
       - name: Studio departments (quick)
         run: python3 tests/test_studio.py --quick
 
+      - name: Asset licences (first-party artwork vs restricted third-party assets)
+        run: python3 tests/test_asset_ownership.py
+
       - name: ForgeCraft (3D Department)
         run: python3 tests/test_forgecraft.py
 

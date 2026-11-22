@@ -27,6 +27,37 @@ CC-licensed texture), and the copyright status of procedurally or AI-generated o
 owner of the project that commissioned an asset decides its licence. AssetCraft's `license_report` lists anything
 without a recorded licence.
 
+## Recording a project's own assets
+
+AssetCraft's `license_report` (the production's licence gate) separates **who owns** an asset from **what its
+licence says**:
+
+- **Restricted** means third-party terms that limit what the project may do: non-commercial, no-derivatives,
+  proprietary or research-only. A restricted asset fails the gate.
+- **First-party** means the project owns the asset. Its licence is the owner's choice, including proprietary
+  (all rights reserved), and is never restricted. It is listed under "The project's own assets".
+
+Ownership is declared, never inferred from a file's name or folder. An asset is first-party when its licence id is
+`LicenseRef-Project-Owned` (what production integration writes for its own outputs), or its licence record says
+`"first_party": true` (the literal `true`). Records are read nearest first:
+
+1. `<file>.license.json` next to the file;
+2. `LICENSE.assets.json` in the file's folder or any folder above it, up to the project root. Keys are paths
+   relative to that folder, as fnmatch patterns (`icon.svg`, `public/icon*.png`, `*`).
+
+A web project can therefore declare what it ships from `public/` in one root record, without shipping the record:
+
+```json
+{
+  "public/icon*.png": {"license": "LicenseRef-Proprietary", "first_party": true, "owner": "Example Studio"},
+  "public/og.jpg":    {"license": "LicenseRef-Proprietary", "first_party": true, "owner": "Example Studio"}
+}
+```
+
+A nearer record wins, so a third-party file with its own sidecar stays third-party under a project-wide `"*"`
+record. Declare `first_party` only for work the project owns: it is the owner's statement, as a licence is.
+Declarations are read when the report runs, so a record added after the files were catalogued applies at once.
+
 ## 3. Asset audit (release, 10 November 2026)
 
 **Scope.** Every committed file with a media extension: AssetCraft's formats plus `jpg`, `tmj`, `tmx` and `ldtk`.
