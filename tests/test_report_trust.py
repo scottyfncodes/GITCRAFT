@@ -17,7 +17,7 @@
       doctor.sh reports the 3D servers
 
 Fast and offline: department calls are stand-ins that write exactly what the department writes."""
-import glob, hashlib, json, os, re, subprocess, sys, tempfile
+import datetime, glob, hashlib, json, os, re, subprocess, sys, tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO); sys.path.insert(0, os.path.join(REPO, "tests"))
@@ -185,7 +185,8 @@ check("4 · a record from another checkout says so", any("another checkout" in n
 ctx = {"project": {"head": HEAD, "path": game}, "head_at": PR._utc("2026-11-10T05:03:16+00:00"), "run_dir": os.path.join(WS, "rd")}
 check("4 · a record with a recorded commit: Stale (measured at <sha>, <date>) when the project moved on, current at HEAD",
       PR._rec_stale({"created": "2026-11-09T10:00:00+00:00", "measured": {"commit": "abc1234def"}}, ctx)["label"] == "Stale (measured at abc1234, 2026-11-09)"
-      and PR._rec_stale({"created": "2026-11-10T06:00:00+00:00", "measured": {"commit": HEAD}}, ctx) is None
+      # measured at HEAD, after its commit and within STALE_DAYS of today (a fixed date here went stale by age on 2026-11-25)
+      and PR._rec_stale({"created": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"), "measured": {"commit": HEAD}}, ctx) is None
       and PR._rec_stale({"created": "2026-11-01T00:00:00+00:00", "_path": os.path.join(WS, "rd", "x.studio.json")}, ctx) is None)
 sys.path.insert(0, os.path.join(REPO, "studio"))
 from core import contract  # noqa: E402
