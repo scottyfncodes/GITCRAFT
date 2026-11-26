@@ -134,10 +134,130 @@ under the session scratch folder. Nothing touches a production app, a deployment
 | SCRAP TIDE | Vite + TypeScript game, Python tools | 112 TS files and 26,066 lines, plus 71 Python tool files and 10,408 lines | Complex game: confirmed |
 | pownow | Vite + React app with an API and server | 213 TS/TSX files, 31,335 lines, 64 test files | **Not a small utility.** It is mid-sized. It is used as the lean-engineering control, as approved, but its results are not "small project" results |
 
-Pilot results are recorded in the sections below as each stage completes.
+**Method (all stages).** Each run is one fresh headless Claude Code session (`claude -p`, the same model, the same
+always-loaded GITCRAFT context except where the arm changes it) in its own throwaway copy. We record:
+- cost, input and output tokens (input includes cache reads);
+- tool calls, files read and wall time, from the session's own stream;
+- diffs from git;
+- tests from the project's own suite.
+
+Samples are small (one or two runs per cell), so differences under about 10% are within run-to-run noise.
 
 ### Lean engineering pilot
 
+pownow, two tasks, run in two interleaved rounds:
+- **Baseline:** the previous global block, without the standard.
+- **Lean:** the new block, with the standard.
+
+The tasks:
+- **Bug.** We seeded a regression in the shared `formatClock`: its negative-minute wrap was removed. It has 17 callers, and the
+  existing tests don't catch it. The prompt is a user-style report ("leave time shows -1:-30 AM").
+- **Small feature.** Show the total time away from home under "Home by" on the recommendation card.
+
+**Measured**
+
+| | Baseline (2 runs/task) | Lean (2 runs/task) | Change |
+|---|--:|--:|--:|
+| Cost, all four runs | $1.970 | $1.779 | −9.7% |
+| Bug: cost per run | $0.583, $0.527 | $0.509, $0.477 | −11% |
+| Feature: cost per run | $0.426, $0.433 | $0.385, $0.409 | −8% |
+| Tool calls | 63 | 55 | −13% |
+| Files read | 11 | 9 | |
+| Lines added (code + tests) | 123 | 110 | −11% |
+| Wall time | 658 s | 677 s | +3% |
+| Full suite (684–687 tests), `tsc` | all pass | all pass | |
+
+**Quality, from reading the diffs**
+- Both arms found the root cause in all four bug runs.
+- Both arms moved the wrap into one shared helper used by `formatClock`, `formatClockShort` and `formatWindowLabel`.
+- Both arms also found and fixed a second, real latent bug the seeded one exposed: the calendar export's `icsLocal` writes
+  a negative minute as a malformed time instead of the evening before.
+- Both arms added regression tests every time.
+- In round 1, the baseline also added a speculative wrap helper to the feature and exported a private function only to test
+  it. The lean runs did neither.
+- In round 2, the two arms' changes were nearly identical.
+
+**Reading.** The saving is consistent but modest: about 10% after overhead, below the 15% target. Part of it is the smaller
+always-loaded block, which every turn re-reads. The effect on behaviour is small and in the right direction, with no
+regressions or loss of quality. The standard stays: it was approved for adaptation, it costs less context than what it
+replaced, and it did no harm. Its own benefit beyond the context saving is **not proven** at this sample size. Per the
+staged plan, this stage stops here; more runs would only narrow the error bars.
+
+The first parallel run showed 2 UI-test timeouts in every copy, including unchanged code. Run one at a time, every suite
+passed. The timeouts came from four suites competing for CPU, not from the changes.
+
 ### Graphify pilot
 
+**Antlerboard's size justified the pilot.** It is above the threshold the audit estimated, about 300 source files or 50k
+lines: 539 TS/TSX files, 63k lines, Next.js + Prisma, with many modules in `src/lib`.
+
+**Graphify's own costs (measured)**
+- Install: pinned `graphifyy==0.9.120` into an isolated venv in 4 s, 163 MB. The installed package matches the audited
+  source commit; the only difference is one docs file.
+- Index: `graphify update .` (AST only, no AI model, no network extraction) took 16 s cold. It produced 5,895 nodes,
+  15,739 edges and 205 communities.
+- Output: 7.9 MB (`graph.json` 6.6 MB, `GRAPH_REPORT.md` 30 KB).
+- Coverage gaps: the 33 SQL migrations weren't indexed (that needs an extra dependency), and 3 pages were only partly parsed.
+- Re-index: 7.1 s after a one-file change, 2.4 s with no change.
+- Never done: no hooks, no `graphify install`, no committed graph (the output stayed git-excluded in the copy).
+
+**Three navigation questions, each in a fresh session per arm** (ground truth read from the code beforehand; facts graded
+automatically against it):
+1. The trade-accept path, from the request to the roster changes and notifications (8 facts).
+2. Cron authentication and the scheduled jobs (11 facts).
+3. How keeper cost is computed and where that math lives (8 facts).
+
+| Arm | Cost (3 questions) | Tool calls | Files read | Wall time | Facts correct |
+|---|--:|--:|--:|--:|--:|
+| Native (the repo as it is) | **$1.025** | 16 | 7 | 102 s | 26/27 |
+| Native + architecture map (37 lines in `CLAUDE.md`) | $1.086 | 21 | 8 | 119 s | 27/27 |
+| Graphify available, its own `CLAUDE.md` rule, no hooks | $1.064 | 20 | 10 | 108 s | 27/27 |
+| Graphify, prompt tells the model to query it first | $1.121 | 19 | 5 | 121 s | 25/27 |
+
+- **Unprompted, Graphify was never used:** 0 `graphify` calls in 3 sessions, despite the rule. The model greps instead. Only
+  the hooks we declined would change that.
+- **Told to use it, it made 9 `graphify` calls.** That cost 9% more than native and was slightly less accurate: it missed
+  the cron fail-closed rule and the skipped keeper seasons.
+- **The architecture map did not pay either.** Generating it once cost $1.23 and 181 s. Per question it cost 6% more than
+  native. On this evidence it never amortises.
+
+**Reading.** Antlerboard's code is well named and cohesive, so native search answers architecture questions accurately for
+about $0.34 each. There is no net saving to amortise. Any number of repeated uses multiplies a per-question cost that is
+already higher than native, while index upkeep and the graph's size add to it. Graphify, and the architecture map,
+**do not meet the adoption bar**. Per the staged plan, testing stops here. A large repository with poor naming or
+cross-language links might still behave differently; that is untested.
+
 ### Hallmark pilot
+
+**Stage 1: Hallmark's gates compared with `ui-design` and PIXELCRAFT (read).** Hallmark defines about 90 gates in
+`references/gates.md`. We compared each with three sources:
+- the `ui-design` craft floor, motion and games references;
+- PIXELCRAFT's measured checks (`docs/pixelcraft.md`);
+- PIXELCRAFT's generic-design tells (`tells.py`).
+
+- **Already covered (about 35).** Gradient text, violet gradients, glow as depth, side stripes, cards in cards, three equal
+  icon cards, eyebrows, default type, mono costume, `vh` vs `dvh`, horizontal scroll, 45–75 character measure, touch
+  targets, contrast, focus visible, reduced motion, animating layout properties, every control and view state, and emoji as
+  icons. PIXELCRAFT measures most of them.
+- **New and worth adapting (12).** They are concrete and checkable, and they don't impose a look, so they fit apps and games:
+  1. Content hidden at rest that only JavaScript reveals: `opacity: 0` reveals that ship a blank page when a script fails.
+  2. Fake success: a form or control that says "Sent", "Saved" or "Thanks" with no request behind it.
+  3. Invented metrics, testimonials, logo walls or counts. Some projects already say this in their own `CLAUDE.md`.
+  4. A focus ring that fades in instead of appearing instantly. Tooltip focus delay equal to hover delay.
+  5. Auto-rotating content with no pause on hover or focus, and no pause control.
+  6. Input states that break: the border width shifts between states, the focus ring is built from `border`, an input is
+     taller or shorter than the button beside it, or disabled is shown by opacity alone.
+  7. A button label or primary nav link that wraps at any width from 320 to 1920.
+  8. Two `position: sticky; top: 0` elements that slide under each other.
+  9. Text painted under another element (PIXELCRAFT checks covered controls, not covered text).
+  10. Image grid tracks on bare `1fr`, and display headings without `overflow-wrap` and `min-width: 0`: the causes of overflow
+      that PIXELCRAFT reports as outcomes.
+  11. A decorative `<svg>` or `<canvas>` with neither `aria-hidden` nor a label. Directly relevant to game canvases.
+  12. `loading="lazy"` on the largest image, and autoplaying video that isn't `muted`.
+- **Not adopted (about 40): they would push products toward one look.** These are house rules for marketing pages, and many
+  would fight our games' art direction:
+  - bans on tracked-caps labels, eyebrows in any form, middle-dot separators and bounce easing;
+  - "the named look" (cream paper, serif, terracotta);
+  - section gaps of at least 120 px, at most 80 words per screen, hero geometry and `h2` of at least 40 px;
+  - a CSS "stamp", and a build log that forbids repeating a layout;
+  - the theme catalogue and genre routing ("games, kids, fun" → "playful").
