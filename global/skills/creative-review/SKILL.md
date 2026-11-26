@@ -1,6 +1,6 @@
 ---
 name: creative-review
-description: Run a GITCRAFT Creative Review when the person explicitly asks for one (the automatic visual review inside a plan v3 production is driven by its own work orders, not this skill) ("Run Creative Review", "creative review of this game/app", "is this product actually good / distinctive / delivering its vision"). An advisory, evidence-cited judgement of the rendered product against its vision contract, with opportunities (including proposals beyond the vision), earned strengths and, for games, observed play vs source analysis vs playtest hypotheses. It never scores, never changes department scores, the overall score, release gates, the Director's verdict, P0–P3 or the technical plan, and is never run as part of a normal Production Report.
+description: Run a GITCRAFT Creative Review only when the person explicitly asks for one ("Run Creative Review", "creative review of this game/app", "is this product actually good / distinctive / delivering its vision"). An advisory, evidence-cited judgement of the rendered product against its vision: opportunities, earned strengths and, for games, observed play vs playtest hypotheses. It never scores and never changes a department score, gate, verdict or plan. (The automatic visual review inside a plan v3 production runs from its own work orders, not this skill.)
 ---
 
 # Creative Review
