@@ -261,3 +261,43 @@ cross-language links might still behave differently; that is untested.
   - section gaps of at least 120 px, at most 80 words per screen, hero geometry and `h2` of at least 40 px;
   - a CSS "stamp", and a build log that forbids repeating a layout;
   - the theme catalogue and genre routing ("games, kids, fun" → "playful").
+
+**Stage 2: limited comparison (measured).** One run per arm, each in a throwaway copy outside every repository:
+- **Arm A:** `ui-design`.
+- **Arm B:** `ui-design` + Hallmark, pinned at `04977e1` and installed per-project. Its image generation, hook and installer
+  scripts were removed, and no API key was set.
+
+We captured each result at iPhone 13 (390×844) with Playwright and measured its touch targets, small text, overflow and
+fonts.
+
+| Task | Arm | Cost | Wall time | Tool calls | Result |
+|---|---|--:|--:|--:|---|
+| pownow: new "How POW NOW decides" screen | A | $2.22 | 328 s | 58 | Complete. Built on the app's tokens and face (Archivo), follows the project's design guardrails, 44 px entry link, no overflow or tiny text, 688 tests pass |
+| | B | $2.96 (+33%) | 666 s (2×) | 92 | Complete. Very close in quality: sentence-case section heads, and it also covers the "can't call it" state. It moved the verdict thresholds into one table that the engine and the screen share (a sound refactor). It left a `.hallmark/log.json` in the repo. 687 tests pass |
+| SCRAP TIDE: polish the Settings sheet | A | $1.89 | 292 s | 46 | Complete. It stays in the game's world (stencil heads, hazard stripes, brass slider knobs). Whole-row 56 px switches, 44 px sliders, and a thumb-reachable Done button. Every setting is kept; 524 tests pass |
+| | B | $2.65+ | 1,117 s+ | 53 | **Did not finish:** the account's usage limit ended the run. The partial work builds and passes 524 tests and stays in the world (ship's-wheel knobs). It changed the game's tracked-caps "TAPE DECK" label to sentence case "Music tape", which is Hallmark's house rule acting against the game's identity |
+
+**Reading.** On the evidence we have, Hallmark:
+- costs a third more and takes two to three times as long per design task;
+- produces work about as good as `ui-design` alone, slightly more complete on the new app screen;
+- shows the homogenising pull we expected on the game, small but real;
+- adds bookkeeping files to the project.
+
+That is not "clearly improved quality" at an acceptable cost, so Hallmark itself **does not meet the adoption bar**. Its
+value is the twelve new checks listed above. These are concrete and look-neutral, and they belong in `ui-design`'s craft floor
+and, where measurable, as PIXELCRAFT checks. That adaptation needs separate approval. The second SCRAP TIDE run was cut short
+by the usage limit, so this stage rests on three complete runs and one partial run.
+
+## Outcome
+
+| Tool | Result | Recommendation |
+|---|---|---|
+| Ponytail | Adapted. The global standard is in place, and always-loaded context fell by 32% | Keep. Re-measure on real work later; its behavioural effect beyond context is modest (about 10% cheaper, n = 2) |
+| Graphify | Pilot stopped early: no net benefit on Antlerboard (+6% to +9% cost, no accuracy gain), and unused unless forced | **Reject.** Don't install it. Re-evaluate only for a large, poorly named or multi-language codebase |
+| Architecture map in `CLAUDE.md` | Measured alongside Graphify: no saving on these questions | Don't add maps by default |
+| Impeccable | Rejected at audit | — |
+| Hallmark | No clear gain over `ui-design`; +33% cost and 2× time; homogenising pull on a game | **Don't install.** Adapt its 12 look-neutral checks into `ui-design` and PIXELCRAFT (needs approval) |
+
+Pilot artefacts (copies, run streams, screenshots) stayed in the session's scratch space and `/home/user/hallmark-pilot`.
+No production app, deployment, infrastructure or global setting outside GITCRAFT's own managed block was changed, and no
+third-party tool was installed globally.
