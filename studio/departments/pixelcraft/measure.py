@@ -247,6 +247,16 @@ def layout(cap, C):
                explanation="Tapping the centre of this control hits a different element (often a fixed bar or floating button), so the control is hard or impossible to use.",
                recommendation="Reserve space for fixed/floating elements (padding-bottom on the scroll area equal to their height) or move the floating element.",
                occurrence=cap.where(e, covered_by=e["obs"]))
+    # text painted under another element (probe: what is really on top at the centre of the text, at rest)
+    tchk = [e for e in cap.els if e.get("tchk")]
+    tcov = [e for e in tchk if e.get("tcov")]
+    if tchk:
+        C.metric("layout", "layout.text_unobscured", "text not painted under other elements", 1 - len(tcov) / len(tchk), len(tchk), screen=cap.screen, viewport=cap.viewport)
+    for e in tcov[:5]:
+        C.find("layout.text_obscured", category="visual", area="layout", title="Text is painted under another element", severity="major", evidence="measured", cost=2,
+               explanation="At the centre of this text the topmost element is something else (an opaque box, an image or other text), so the words cannot be read where they are.",
+               recommendation="Give the text its own space (reserve room for the element on top, fix the stacking order or the overlap), or give it its own surface above the cover.",
+               occurrence=cap.where(e, covered_by=e["tcov"]))
     # use of space: desktop column that ignores the width; phone gutters that waste it
     content = [e for e in cap.els if (e.get("t") or e.get("media") or e.get("inter")) and not e.get("vr") and not e.get("inbar") and e["r"][2] > 0]
     if content and not cap.canvas_heavy:
@@ -558,6 +568,17 @@ def states(cap, C):
 
 
 def accessibility(cap, C):
+    # graphics (svg, canvas ≥ 24 px) marked decorative or named: WCAG 1.1.1, which axe checks only for role="img"
+    gfx = [e for e in cap.els if "gfx" in e]
+    if gfx:
+        unnamed = [e for e in gfx if not e["gfx"]]
+        C.metric("accessibility", "a11y.graphics_named", "graphics marked decorative or named", 1 - len(unnamed) / len(gfx), len(gfx), screen=cap.screen, viewport=cap.viewport)
+        for e in unnamed[:3]:
+            C.find("a11y.graphic_unnamed", category="usability", area="accessibility", title=f"A {e.get('media') or 'graphic'} has no text alternative and is not marked decorative",
+                   severity="minor", evidence="measured", cost=1,
+                   explanation="Screen readers either announce it without meaning or read its drawing internals. A game canvas, chart or illustration needs a name; pure decoration needs to be hidden.",
+                   recommendation='Decorative: aria-hidden="true". Meaningful: role="img" with aria-label (an svg can use <title>; a canvas can hold fallback text or be labelled).',
+                   occurrence=cap.where(e))
     ax = cap.raw.get("axe")
     if not ax or ax.get("error"): return
     w = {"critical": 0.3, "serious": 0.18, "moderate": 0.07, "minor": 0.02}

@@ -296,8 +296,72 @@ by the usage limit, so this stage rests on three complete runs and one partial r
 | Graphify | Pilot stopped early: no net benefit on Antlerboard (+6% to +9% cost, no accuracy gain), and unused unless forced | **Reject.** Don't install it. Re-evaluate only for a large, poorly named or multi-language codebase |
 | Architecture map in `CLAUDE.md` | Measured alongside Graphify: no saving on these questions | Don't add maps by default |
 | Impeccable | Rejected at audit | — |
-| Hallmark | No clear gain over `ui-design`; +33% cost and 2× time; homogenising pull on a game | **Don't install.** Adapt its 12 look-neutral checks into `ui-design` and PIXELCRAFT (needs approval) |
+| Hallmark | No clear gain over `ui-design`; +33% cost and 2× time; homogenising pull on a game | **Rejected.** 10 of its 12 look-neutral checks are adapted into `ui-design` (one in part), 2 of them also as measured PIXELCRAFT checks (below) |
 
-Pilot artefacts (copies, run streams, screenshots) stayed in the session's scratch space and `/home/user/hallmark-pilot`.
+Graphify, generated architecture maps and Hallmark stay rejected (confirmed 2026-11-27).
+
+The pilot copies, run streams and screenshots were deleted on 2026-11-27, after every finding above was recorded here.
 No production app, deployment, infrastructure or global setting outside GITCRAFT's own managed block was changed, and no
-third-party tool was installed globally.
+third-party tool was installed.
+
+## Hallmark's checks, integrated (2026-11-27)
+
+The 12 look-neutral checks from the Hallmark comparison were reviewed one by one. A check was adopted only when it is:
+- a defect in any product, whatever its style (a reliability, honesty or accessibility failure);
+- not already covered by `ui-design` or PIXELCRAFT.
+
+Nothing was adopted that prefers a look, a typeface, a convention or a default. The project's own art direction remains
+the highest creative authority. Hallmark itself is not installed, no dependency was added, and nothing was added to the
+always-loaded global instructions: the checks live in the on-demand skill references, which load only when UI is built,
+and in PIXELCRAFT, which runs only when called.
+
+| # | Check (Hallmark gate) | Decision | Where | Why |
+|---|---|---|---|---|
+| 1 | Content hidden at rest until a script reveals it (62) | **Adopted** | `ui-design` craft floor | A reliability defect: the screen ships blank when a script fails |
+| 2 | Fake success: "Sent" or "Saved" with no request behind it (70) | **Adopted** | `ui-design` craft floor | Honesty; independent of style |
+| 3 | Invented metrics, testimonials, logos or counts (46a) | **Adopted** | `ui-design` craft floor | Honesty. Some projects already ban it locally; now every UI build sees it |
+| 4 | Focus ring that fades in; tooltip delayed on focus (15, 17) | **Adopted** | `ui-design` accessibility | Keyboard accessibility. A rendered transition is not measured reliably, so it is not a PIXELCRAFT check |
+| 5 | Auto-moving content without pause (18) | **Adopted** | `ui-design` accessibility | WCAG 2.2.2 |
+| 6 | Input states that shift or rely on opacity (39a) | **Adopted in part** | `ui-design` craft floor | Constant border width (no layout shift) and disabled shown by more than opacity are defects. "An input as tall as the button beside it" was **rejected** as a layout preference |
+| 7 | Button or nav label wrapping at any width (49a) | **Rejected** | — | Whether a two-line label is wrong depends on the design; actual overflow and truncation are already measured |
+| 8 | Two sticky elements sliding under each other (56) | **Adopted** | `ui-design` craft floor | A layout bug in any style |
+| 9 | Text painted under another element (73) | **Adopted + measured** | `ui-design`; PIXELCRAFT `layout.text_unobscured` / `layout.text_obscured` | Objectively measurable: what is on top at the text's centre. PIXELCRAFT checked covered controls, not covered text |
+| 10 | Grid `minmax(0, 1fr)` and `overflow-wrap` on display heads (50) | **Rejected** | — | A CSS technique for an outcome (overflow) that PIXELCRAFT already measures; prescribing the technique adds nothing |
+| 11 | `<svg>`/`<canvas>` neither hidden nor named (33) | **Adopted + measured** | `ui-design` accessibility and games; PIXELCRAFT `a11y.graphics_named` / `a11y.graphic_unnamed` | WCAG 1.1.1. axe checks only `role="img"`, and has no canvas rule; game canvases are directly affected |
+| 12 | Lazy-loaded largest image; unmuted autoplay (28a) | **Adopted** | `ui-design` craft floor | Defects in any style. Not a PIXELCRAFT check: load performance belongs to TestCraft |
+
+**PIXELCRAFT measurement rules**
+
+The two checks are scored metrics with findings:
+- **Covered text:** `layout`, a major finding.
+- **Unnamed graphics:** `accessibility`, a minor finding.
+
+What doesn't count:
+- **Covered text** counts only an opaque cover (a box with a background, media, or other text) at the capture's own scroll
+  position. It excludes fixed or sticky chrome (as Hallmark's own rule does), an open dialog, a full-screen game canvas and
+  text that cannot be hit-tested (`pointer-events: none`).
+- **Graphics** counts only an `<svg>` or `<canvas>` of 24 px or more. It is named by `aria-label`/`aria-labelledby`, an svg
+  `<title>`, a canvas's fallback text, or a named link or button around it; `aria-hidden` and `role="presentation"` mark it
+  decorative.
+
+**Method change.** Because the measurement changed, the method moved from `pixelcraft-1.0` to `pixelcraft-1.1`. A 1.0
+baseline is re-audited rather than compared, and `history/pixelcraft/` is untouched.
+
+**Regression coverage** (`tests/test_pixelcraft.py`):
+- **Unit tests:** the metric values and the findings.
+- **A rendered fixture page** (`tests/fixtures/pixelcraft/covered_graphics`). It contains:
+  - text under an opaque box, which must be found and must name the cover;
+  - text under fixed chrome, which must not be found;
+  - a bare svg and a bare canvas, which must be found;
+  - aria-hidden, `<title>` and `aria-label` graphics and a named button's icon, which must not be.
+
+**Context footprint (measured).** The always-loaded context is unchanged by this integration (the global block and every skill description are untouched); see the table below. The
+on-demand cost when a UI build loads the references grew by 1,559 bytes (about 390 tokens, estimated at 4 bytes per
+token): `craft.md` went from 4,020 to 5,466 bytes and `games.md` from 2,553 to 2,666 bytes.
+
+| Always loaded in every session | Before the evaluation | Final |
+|---|--:|--:|
+| GITCRAFT block | 3,094 tokens | 1,763 tokens |
+| GITCRAFT skill descriptions | 1,599 tokens | 1,430 tokens |
+| **GITCRAFT total** | **4,693 tokens** | **3,193 tokens (−32%)** |
+| Whole one-turn session in an empty folder | 49,710 tokens | 48,207 tokens (after PR #95 it was 48,210, the same within run-to-run variation) |

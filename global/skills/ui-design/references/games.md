@@ -21,7 +21,8 @@ A game has two visual layers, and they are owned differently.
    not glow); numbers in tabular figures; the play area stays clear on phones (thumb zones bottom-left/right, nothing
    critical under the notch or home indicator); HUD scales with `dvh`/safe areas, not fixed pixels.
 5. **Touch first**: controls ≥ 44 px, spaced so a thumb does not hit two; pause reachable but not accidental; no
-   hover-only information.
+   hover-only information. The game canvas has a name (`role="img"` + `aria-label` saying what the game is), or fallback
+   text inside it.
 6. **Motion**: menus and HUD panels follow `motion.md`; game-feel motion belongs to the game and PLAYCRAFT.
 7. **Intentional "tells"**: glow, emoji or a single display face can be the game's identity (a neon arcade, an emoji
    puzzle). If the art direction chose it, pass it to PIXELCRAFT as `accept_tells` with the reason instead of removing it.

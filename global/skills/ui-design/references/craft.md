@@ -27,6 +27,8 @@ mobile-ergonomics lines are hard rules. Check each item on the rendered result, 
 - Align to a few edges; equal left and right margins on phones (16–24 px); no orphan elements floating mid-gutter.
 - Containers only where they add structure: a list does not need cards; a card never sits inside a card.
 - Real content at every breakpoint: long names, empty lists, 3-digit numbers, translated strings. Fix what overflows.
+- Nothing paints over text: no box, image or other text on top of words at rest (PIXELCRAFT measures it), and two sticky
+  elements never slide under each other (offset the second by the first one's height).
 
 ## Mobile Safari (hard rules)
 
@@ -44,6 +46,14 @@ mobile-ergonomics lines are hard rules. Check each item on the rendered result, 
 - The parts nobody draws still carry the design: focus rings, text selection, caret, scrollbars, link underline offset,
   placeholder colour, autofill, the browser's `theme-color`.
 - Copy in the product's own voice; buttons name their action ("Log a haul", not "Submit").
+- Honest states: success is shown only after the request behind it succeeded (no "Sent" or "Saved" with nothing sent),
+  and no invented numbers, testimonials, logos or counts; use the real figure, a placeholder the person fills, or nothing.
+- Content never depends on a script to become visible: an entrance that starts at `opacity: 0` ships a blank screen when
+  the script fails or is slow. Start visible, or scope the hidden start to a class the script adds.
+- Inputs keep their size across states: the border width stays constant (focus is an `outline` or a shadow, not a thicker
+  border), and disabled is shown by more than opacity alone (the cursor, the colour, `disabled`/`aria-disabled`).
+- Media: never lazy-load the largest image of the first screen; autoplaying video is `muted playsinline` (browsers block
+  it otherwise) and has a poster.
 
 ## Refuse by default (the brief can earn any of these back)
 
@@ -57,3 +67,7 @@ outside a world that chose them. PIXELCRAFT raises the measurable ones as tells.
 
 Contrast ≥ 4.5:1 for text, ≥ 3:1 for large text and UI boundaries; visible focus; labels on inputs; alt text; respects
 `prefers-reduced-motion` and `prefers-color-scheme` where the product supports both; nothing conveyed by colour alone.
+Focus rings appear instantly (no fade), and a tooltip opens on focus without the hover delay. Anything that moves or
+rotates on its own pauses on hover and focus, and has a visible pause when it runs past 5 seconds. Every `<svg>` and
+`<canvas>` is either `aria-hidden="true"` or named (`role="img"` + `aria-label`, an svg `<title>`, a canvas's fallback
+text); PIXELCRAFT measures it.

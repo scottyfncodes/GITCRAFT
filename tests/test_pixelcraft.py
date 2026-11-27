@@ -15,7 +15,7 @@ on the fixed app's corrected areas, the report has all ten sections, verify prov
 higher scores on the same metrics, screenshot diffs) and refuses a score that rose because coverage was lost, a
 running localhost app is opened (port allowance) and refused without it, history is append-only, the site page
 publishes, routing. Exit 1 on any failure."""
-import json, os, shutil, socket, subprocess, sys, tempfile, threading, time
+import json, os, re, shutil, socket, subprocess, sys, tempfile, threading, time
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(HERE)
 try:
     import numpy, PIL  # noqa: F401
@@ -90,6 +90,20 @@ els = [{"i": 0, "p": None, "tag": "p", "sel": "p", "r": [0, 0, 300, 40], "d": 2,
 caps, C = M.analyse({"captures": [{"screen": "s", "viewport": "iphone17", "dom": {"els": els, "vw": 402, "vh": 874, "sw": 402, "cw": 402}}], "screens": [], "journeys": []},
                     [{"name": "iphone17", "width": 402, "height": 874, "mobile": True}])
 check("measure: an inline text link is exempt from the 44-px target rule (WCAG 2.5.8)", "controls.small_target" not in C.findings, list(C.findings))
+# covered text and unnamed graphics (adapted from Hallmark's gates 73 and 33, docs/toolchain-evaluation.md)
+els = [{"i": 0, "p": None, "tag": "p", "sel": "p.under", "r": [20, 100, 300, 24], "d": 2, "t": "Moorings", "tl": 8, "fs": 16, "tchk": 1, "tcov": "div.cover"},
+       {"i": 1, "p": None, "tag": "p", "sel": "p.clear", "r": [20, 140, 300, 24], "d": 2, "t": "Charts", "tl": 6, "fs": 16, "tchk": 1},
+       {"i": 2, "p": None, "tag": "svg", "sel": "svg.bare", "r": [20, 200, 48, 48], "d": 2, "media": "svg", "gfx": 0},
+       {"i": 3, "p": None, "tag": "canvas", "sel": "canvas.named", "r": [80, 200, 96, 64], "d": 2, "media": "canvas", "gfx": 1}]
+caps, C = M.analyse({"captures": [{"screen": "s", "viewport": "iphone17", "dom": {"els": els, "vw": 402, "vh": 874, "sw": 402, "cw": 402}}], "screens": [], "journeys": []},
+                    [{"name": "iphone17", "width": 402, "height": 874, "mobile": True}])
+_m = {m["id"]: m["value"] for m in C.metrics}
+check("measure: covered text is a layout finding naming what covers it, and a measured metric (1 of 2 covered → 0.5)",
+      "layout.text_obscured" in C.findings and C.findings["layout.text_obscured"]["occurrences"][0]["measured"]["covered_by"] == "div.cover"
+      and _m.get("layout.text_unobscured") == 0.5, (list(C.findings), _m.get("layout.text_unobscured")))
+check("measure: an unnamed graphic is an accessibility finding; a named or decorative one is not (1 of 2 → 0.5)",
+      [o["selector"] for o in C.findings.get("a11y.graphic_unnamed", {}).get("occurrences", [])] == ["svg.bare"] and _m.get("a11y.graphics_named") == 0.5,
+      (C.findings.get("a11y.graphic_unnamed"), _m.get("a11y.graphics_named")))
 # tappable cards are not button variants: a list of mountain cards whose heights follow their text (POW NOW's All
 # mountains: 248 to 344 px) was counted as eight extra button styles and failed a redesign as a consistency regression
 _btn = lambda i, h, name, w=120: {"i": i, "p": None, "tag": "button", "sel": f"button.b{i}", "r": [20, 10 + i * 400, w, h], "d": 2, "inter": 1, "k": "button", "st": 1,
@@ -211,6 +225,18 @@ G0 = json.load(open(f"{ws}/tells_generic_out/audit.json")) if os.path.exists(f"{
 check("tells: accept_tells moves a chosen tell to 'accepted' and leaves every score unchanged",
       TA and {x["id"] for x in TA["tells"]["accepted"]} == {"glow_shadow", "default_type"} and "glow_shadow" not in {x["id"] for x in TA["tells"]["raised"]}
       and TA["overall"]["score"] == G0.get("overall", {}).get("score") and TA["replay"]["accept_tells"], (TA.get("tells", {}).get("accepted"), TA.get("overall"), G0.get("overall")))
+
+# ---------------------------------------------------------------- covered text and unnamed graphics, on a rendered page
+shutil.rmtree(os.path.join(ws, "covered_graphics"), ignore_errors=True); shutil.copytree(os.path.join(FIX, "covered_graphics"), os.path.join(ws, "covered_graphics"))
+ok, r = c.call("pixelcraft_audit", {"target": f"{ws}/covered_graphics", "viewports": ["iphone17", "iphone13", "desktop"], "record": False, "out_dir": f"{ws}/covered_graphics_out"}, timeout=900)
+CG = json.load(open(f"{ws}/covered_graphics_out/audit.json")) if ok and r.get("status") == "ok" else {}
+_occ = lambda fid: {o["selector"] for f in CG.get("findings", []) if f["id"] == fid for o in f["occurrences"]}
+check("rendered: text under an opaque box is found and names the cover; text under fixed chrome is not a finding",
+      any("p.under" in s for s in _occ("layout.text_obscured")) and not any("p.chrome" in s or "p.clear" in s for s in _occ("layout.text_obscured")), _occ("layout.text_obscured"))
+check("rendered: a bare svg and a bare canvas are unnamed graphics; aria-hidden, <title>, aria-label and a named button's icon are not",
+      {re.sub(r":nth-of-type\(\d+\)", "", s.split(" > ")[-1]) for s in _occ("a11y.graphic_unnamed")} == {"svg.bare", "canvas.bare"}, _occ("a11y.graphic_unnamed"))
+check("rendered: both checks are measured metrics under the current method", CG.get("method") == R.METHOD
+      and {"layout.text_unobscured", "a11y.graphics_named"} <= {m["id"] for m in CG.get("metrics", [])}, (CG.get("method"), sorted({m["id"] for m in CG.get("metrics", [])})[:40]))
 
 # ---------------------------------------------------------------- verify: the fixed app on a git repo
 if A:

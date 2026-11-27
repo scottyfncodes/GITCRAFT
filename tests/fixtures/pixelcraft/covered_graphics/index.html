@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harbour log</title>
+<style>
+  body { margin: 0; font: 16px/1.5 Georgia, serif; color: #1d2421; background: #f4efe6; }
+  header.bar { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #1d2421; color: #f4efe6; padding: 14px 20px; box-sizing: border-box; }
+  main { padding: 24px 20px 40px; }
+  p.chrome { position: absolute; top: 20px; left: 20px; margin: 0; }
+  .stack { position: relative; margin-top: 64px; }
+  p.under { margin: 0; }
+  div.cover { position: absolute; top: -6px; left: 0; width: 300px; height: 40px; background: #a2442c; }
+  .row { display: flex; gap: 16px; align-items: center; margin-top: 32px; }
+  button.close { width: 48px; height: 48px; border: 1px solid #1d2421; background: #f4efe6; border-radius: 6px; }
+</style>
+</head>
+<body>
+  <header class="bar">Harbour log</header>
+  <p class="chrome">Tide table under the fixed bar</p>
+  <main>
+    <div class="stack"><p class="under">Moorings are assigned at the harbour office</p><div class="cover"></div></div>
+    <p class="clear">Charts are updated every morning before the first ferry.</p>
+    <div class="row">
+      <svg class="bare" width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#2f6f62"/></svg>
+      <svg class="deco" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" fill="#d9c9a8"/></svg>
+      <svg class="titled" width="48" height="48" viewBox="0 0 48 48"><title>Anchor</title><path d="M24 4v40" stroke="#1d2421"/></svg>
+      <button class="close" aria-label="Close the log"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20" stroke="#1d2421"/></svg></button>
+    </div>
+    <div class="row">
+      <canvas class="bare" width="96" height="64"></canvas>
+      <canvas class="named" width="96" height="64" role="img" aria-label="Swell height for the week"></canvas>
+    </div>
+  </main>
+</body>
+</html>
