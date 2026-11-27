@@ -88,7 +88,7 @@ nothing is clicked) and disabled styles on one control per visual variant, and r
 | Area | Measured on the rendered page |
 |---|---|
 | Spacing and rhythm | spacing values on a 4-px scale, evenness of gaps between related siblings, text cramped against its box, unexplained empty bands |
-| Layout and composition | horizontal overflow (and the culprit element), truncated text, near-miss alignment (1-6 px off a shared edge), controls covered by other elements (re-checked after scrolling them to centre; an `aria-hidden` full-screen intro splash is waited out for up to 5 s first, and one that never leaves is reported), use of width (desktop phone-column, stretched controls), layout shift, nesting |
+| Layout and composition | horizontal overflow (and the culprit element), truncated text, near-miss alignment (1-6 px off a shared edge), controls covered by other elements (re-checked after scrolling them to centre; an `aria-hidden` full-screen intro splash is waited out for up to 5 s first, and one that never leaves is reported), text painted under another element at rest (an opaque box, media or other text on top; fixed/sticky chrome, an open dialog and a full-screen game canvas excepted), use of width (desktop phone-column, stretched controls), layout shift, nesting |
 | Typography and hierarchy | text under 12 px on phones, number of font sizes, heading/body ratio, inverted heading levels, line height and line length of paragraphs |
 | Buttons and controls | target size (44 px phones / 24 px WCAG floor; inline text links exempt; label hit areas count), neighbouring targets under 8 px apart (worse next to destructive actions), label/icon centring, equal heights in a row, competing primary actions |
 | Visual consistency | radii and fills of controls, font families |
@@ -96,7 +96,7 @@ nothing is clicked) and disabled styles on one control per visual variant, and r
 | Navigation and discoverability | taps to reach each screen, persistent navigation, current location marked, dead ends |
 | Mobile ergonomics | viewport meta, iOS input zoom (fields under 16 px), safe areas (fixed bars and their controls), thumb reach of main actions, fixed chrome height, toolbar shortening |
 | Feedback and interaction states | hover, pressed, disabled look-alikes, feedback after each journey tap (DOM mutation or navigation) and its time |
-| Accessibility | axe-core violations weighted by impact, focus visible on Tab, controls reachable by Tab, clickable non-controls |
+| Accessibility | axe-core violations weighted by impact, focus visible on Tab, controls reachable by Tab, clickable non-controls, graphics (`<svg>`, `<canvas>` ≥ 24 px) marked `aria-hidden` or named (axe checks only `role="img"`) |
 | Cross-screen / component / responsive / design system / state consistency | header and heading sizes across screens, primary button variants, number of button and input variants (a `<button>` over 96 px tall is a tappable content card, not a button variant), content parity and overflow across viewports, spacing grid, palette size, type scale, radii, hover/pressed/focus applied consistently |
 
 **Design principles.** Nothing rewards minimalism for its own sake: bold colour, large type, playful or dense
@@ -183,7 +183,8 @@ as 1 px overlapped; that counts as a gap of 0 and the group stays measured.
 - compares category scores **on the metrics measured in both runs only**, so a removed or weakened check can
   never raise a score; any metric the baseline had and the re-run lacks is listed as **coverage lost** and fails
   the run;
-- refuses to compare across methods (`METHOD` in `rubric.py`);
+- refuses to compare across methods (`METHOD` in `rubric.py`; `pixelcraft-1.1` added the covered-text and named-graphics
+  checks, so a 1.0 baseline is re-audited rather than compared);
 - lists resolved, persisting and new findings; new major/critical findings and metric drops over 15 points are
   **regressions** and fail the run;
 - diffs every screen × viewport screenshot (`diff/*.jpg`, changed pixels in red, % changed);

@@ -146,7 +146,39 @@ const SNAPSHOT = (opts) => {
         e.fs = px(cs.fontSize); e.fw = parseInt(cs.fontWeight) || 400; e.lh = cs.lineHeight === 'normal' ? +(px(cs.fontSize) * 1.2).toFixed(1) : px(cs.lineHeight);
         e.ff = cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(); e.col = rgba(cs.color); e.tt = cs.textTransform !== 'none' ? cs.textTransform : undefined;
       }
-      if (ot) { e.t = ot.slice(0, 80); e.tl = ot.length; e.trect = textRect(el); }
+      if (ot) {
+        e.t = ot.slice(0, 80); e.tl = ot.length; e.trect = textRect(el);
+        // text painted under another element, read at this scroll position: what is really on top at the centre of the
+        // text. Only an opaque cover counts (a box with a background, media, or other text); fixed/sticky chrome, an
+        // open dialog and a game's full-screen canvas are legitimate covers; pointer-events:none text cannot be hit-tested
+        if (e.trect && cs.pointerEvents !== 'none' && !el.closest('[aria-hidden="true"],[inert]')) {
+          const cx = e.trect[0] - sx + e.trect[2] / 2, cy = e.trect[1] - sy + e.trect[3] / 2;
+          if (cx >= 0 && cy >= 0 && cx < innerWidth && cy < innerHeight) {
+            e.tchk = 1;
+            const h = document.elementFromPoint(cx, cy);
+            if (h && h !== el && !el.contains(h) && !h.contains(el)) {
+              const hs = getComputedStyle(h), hb = h.getBoundingClientRect(), hbg = rgba(hs.backgroundColor);
+              const ht = h.tagName.toLowerCase();
+              const opaque = parseFloat(hs.opacity) >= 0.5 && ((hbg && hbg[3] > 0.5) || ['img', 'video', 'canvas', 'svg', 'picture', 'iframe'].includes(ht) || !!ownText(h));
+              let chrome = false; for (let x = h; x && x !== document.body; x = x.parentElement) { const p = getComputedStyle(x).position; if (p === 'fixed' || p === 'sticky') { chrome = true; break; } }
+              const modal = h.closest('dialog[open],[role=dialog],[role=alertdialog],[aria-modal="true"]') && !el.closest('dialog[open],[role=dialog],[role=alertdialog],[aria-modal="true"]');
+              const stage = ht === 'canvas' && hb.width * hb.height > 0.5 * innerWidth * innerHeight;
+              if (opaque && !chrome && !modal && !stage) e.tcov = sel(h).slice(0, 80);
+            }
+          }
+        }
+      }
+      // a graphic (svg, canvas) of icon size or more must be marked decorative or have a name (WCAG 1.1.1); axe checks only
+      // svgs that declare role="img", and no canvas. A named control around it names it
+      if ((tag === 'svg' || tag === 'canvas') && b.width >= 24 && b.height >= 24) {
+        const nm = (x) => (x.getAttribute('aria-label') || '').trim() || (x.getAttribute('aria-labelledby') || '').trim();
+        const role = el.getAttribute('role');
+        const inCtl = el.parentElement && el.parentElement.closest('a[href],button,[role=button],[role=link],label');
+        e.gfx = el.closest('[aria-hidden="true"]') || role === 'presentation' || role === 'none' || nm(el)
+          || (tag === 'svg' && [...el.children].some((c) => c.tagName.toLowerCase() === 'title' && c.textContent.trim()))
+          || (tag === 'canvas' && el.textContent.trim())
+          || (inCtl && (nm(inCtl) || inCtl.textContent.trim())) ? 1 : 0;
+      }
       if (bg && bg[3] > 0.05) e.bg = bg;
       e.ebg = effBg(el);
       const pad = [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map(px); if (pad.some((v) => v)) e.pad = pad;

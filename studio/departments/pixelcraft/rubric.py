@@ -8,7 +8,7 @@ and is reported in coverage, which (with the evidence mix) gives the confidence.
 METHOD is the version of the measurement + scoring: before/after comparisons are only made under the same method."""
 import math
 
-METHOD = "pixelcraft-1.0"
+METHOD = "pixelcraft-1.1"
 
 CATEGORIES = {
     "visual": {"title": "Visual Quality", "areas": {
