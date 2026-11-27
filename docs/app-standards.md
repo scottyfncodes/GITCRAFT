@@ -125,6 +125,19 @@ Only checks the profile requires can fail the gate.
 Mobile usability and accessibility are measured in the rendered app by PIXELCRAFT (axe-core, touch targets, safe areas).
 Load and frame rate are measured by TestCraft. `qa.standards` doesn't repeat them.
 
+**How code is written.** The profiles above set what a project must contain. How every change is written, in every
+project, is the engineering standard in the global instructions (`global/CLAUDE.md`, installed into
+`~/.claude/CLAUDE.md`):
+- reuse first;
+- prefer the dependencies already installed;
+- add no speculative abstractions;
+- check callers before changing shared logic, and fix root causes;
+- add regression tests;
+- never cut security, validation, error handling or accessibility.
+
+Simplicity applies to the implementation, never to the product's ambition, polish or personality. The standard was
+adapted from the principles of the third-party Ponytail skill, without installing it (`docs/toolchain-evaluation.md`).
+
 ## Starters
 
 A new, empty web project starts from a starter (`production/kit/starters`) instead of an empty folder:
