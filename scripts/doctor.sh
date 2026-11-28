@@ -170,7 +170,7 @@ if gitcraft_studio_ready; then
     ok) say "    voice model:    installed (Kokoro-82M)" ;;
     later) say "    voice model:    deferred (GITCRAFT_STUDIO_VOICE=later): the SessionStart hook installs it in the background" ;;
     pending) say "    voice model:    install didn't finish: the SessionStart hook retries it, or run scripts/install-studio.sh voice" ;;
-    failed) say "    voice model:    install failed (see $GITCRAFT_LOG/studio.log): scripts/install-studio.sh voice"; problems+=("studio voice model: install failed (see $GITCRAFT_LOG/studio.log)") ;;
+    failed) say "    voice model:    install failed (see $GITCRAFT_LOG/studio.log): the next session retries it, or run scripts/install-studio.sh voice"; problems+=("studio voice model: install failed (see $GITCRAFT_LOG/studio.log)") ;;
     off) say "    voice model:    off (GITCRAFT_STUDIO_VOICE=0)" ;;
   esac
   studio_json=$(GITCRAFT_STUDIO_HOME="$GITCRAFT_STUDIO_HOME" "$GITCRAFT_STUDIO_HOME/venv/bin/python" "$here/../studio/cli.py" --call studio_status '{}' 2>/dev/null)
@@ -225,4 +225,10 @@ if ((${#problems[@]})); then
   ((brief)) && printf 'GITCRAFT: %s\n' "${problems[@]}" || { echo; echo "Needs attention:"; printf '  - %s\n' "${problems[@]}"; }
   exit 1
 fi
-((brief)) && echo "GITCRAFT: all tools installed, registered and sandboxed." || { echo; echo "All good."; }
+# never "all tools" while something is deliberately not installed: an on-demand or skipped install is not a capability
+notes=""
+((off_note)) && notes+=" 3D is not installed (on demand: scripts/install-3d.sh)."
+case "$(last_state studiocraft-voice)" in later|pending) [[ -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]] || notes+=" The voice model is not installed yet (the SessionStart hook installs it)." ;; esac
+if ((brief)); then
+  if [[ -n "$notes" ]]; then echo "GITCRAFT: installed tools are registered and sandboxed.$notes"; else echo "GITCRAFT: all tools installed, registered and sandboxed."; fi
+else echo; echo "All good.${notes}"; fi

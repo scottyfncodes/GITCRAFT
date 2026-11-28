@@ -63,7 +63,8 @@ studio_voice=0
 if [[ "$GITCRAFT_STUDIO" == 1 ]]; then
   # any state but a deliberate off: cut off ("pending"), failed, never attempted, or a runtime removed since
   if [[ "$studio_last" != off ]] && ! gitcraft_studio_ready; then missing+=(studiocraft); fi
-  if [[ "$voice_last" == later || "$voice_last" == pending ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
+  # (failed too: the background download dies with a session that ends first, and setup now always leaves it to a session)
+  if [[ "$voice_last" == later || "$voice_last" == pending || "$voice_last" == failed ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
     [[ " ${missing[*]} " == *" studiocraft "* ]] || missing+=(studiocraft); studio_voice=1
   fi
 fi
