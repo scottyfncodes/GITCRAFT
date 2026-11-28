@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Queue a heavy optional install for the next session instead of running it in a cloud setup script.
+# (Prefer on demand: a session that needs a runtime installs it then. A queued job runs in every new container.)
 #
 #   scripts/install-later.sh install-3d.sh ai weights      TripoSR + PyTorch venv and weights (~8 min, ~5 GB)
 #   scripts/install-later.sh install-studio.sh music       ACE-Step 1.5 (large; does not fit a setup script's time limit)

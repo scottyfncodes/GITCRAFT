@@ -34,13 +34,13 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
     elif [[ "$(last_state "$name")" == off || "$(last_state "$name")" == later || ( "$GITCRAFT_MESHCRAFT" != 1 && ! -e "$GITCRAFT_HOME/meshcraft/venv" ) ]]; then
       # turned off on purpose: report it, don't count it as a problem (still registered unless =none: it waits for Blender)
       reg=$([[ " $registered " == *" $name "* ]] && echo yes || echo no)
-      say "$(printf '  %-13s %-10s %-11s %s' "$name" off "$reg" "not installed (GITCRAFT_MESHCRAFT=${GITCRAFT_MESHCRAFT}); waits for Blender")"; off_note=1; continue
+      say "$(printf '  %-13s %-10s %-11s %s' "$name" off "$reg" "on demand: scripts/install-3d.sh$([[ "$GITCRAFT_MESHCRAFT" == later || "$(last_state "$name")" == later ]] && echo " (or the SessionStart hook: GITCRAFT_MESHCRAFT=later)")")"; off_note=1; continue
     elif [[ -e "$GITCRAFT_HOME/meshcraft/venv" ]]; then
       inst=PARTIAL
       if [[ "$(last_state meshcraft)" == failed ]]; then
-        problems+=("$name: the Blender install failed (see $GITCRAFT_LOG/meshcraft.log; often no access to pypi.org or no matching Python). Fix that and run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0")
+        problems+=("$name: the Blender install failed (see $GITCRAFT_LOG/meshcraft.log; often no access to pypi.org or no matching Python). Fix that and run scripts/install-3d.sh")
       else   # status still "pending": the run stopped during the download
-        problems+=("$name: the Blender install didn't finish (often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
+        problems+=("$name: the Blender install didn't finish. Run scripts/install-3d.sh")
       fi
     else inst=NO; fi
   elif [[ "$name" == studiocraft ]]; then
@@ -143,10 +143,10 @@ done
 
 if ((off_note)); then
   say ""
-  say "  3D tools aren't installed. Run scripts/install.sh meshcraft forgecraft: the registered servers pick them up in the"
-  say "  running session (tools/list_changed). In a setup script with a time limit, use GITCRAFT_MESHCRAFT=later."
+  say "  3D is installed on demand. A session that needs it runs scripts/install-3d.sh: the registered servers pick the"
+  say "  tools up in the running session (tools/list_changed). Setup never downloads it."
 fi
-if gitcraft_mesh_ready; then
+if ((!brief)) && gitcraft_mesh_ready; then   # the full report only: --brief (setup, the session hook) never probes
   say ""
   say "  3D Department capabilities (meshcraft + forgecraft):"
   while IFS= read -r line; do say "    $line"; done < <(python3 - "$here/.." <<'PY'
@@ -170,7 +170,7 @@ if gitcraft_studio_ready; then
     ok) say "    voice model:    installed (Kokoro-82M)" ;;
     later) say "    voice model:    deferred (GITCRAFT_STUDIO_VOICE=later): the SessionStart hook installs it in the background" ;;
     pending) say "    voice model:    install didn't finish: the SessionStart hook retries it, or run scripts/install-studio.sh voice" ;;
-    failed) say "    voice model:    install failed (see $GITCRAFT_LOG/studio.log): scripts/install-studio.sh voice"; problems+=("studio voice model: install failed (see $GITCRAFT_LOG/studio.log)") ;;
+    failed) say "    voice model:    install failed (see $GITCRAFT_LOG/studio.log): the next session retries it, or run scripts/install-studio.sh voice"; problems+=("studio voice model: install failed (see $GITCRAFT_LOG/studio.log)") ;;
     off) say "    voice model:    off (GITCRAFT_STUDIO_VOICE=0)" ;;
   esac
   studio_json=$(GITCRAFT_STUDIO_HOME="$GITCRAFT_STUDIO_HOME" "$GITCRAFT_STUDIO_HOME/venv/bin/python" "$here/../studio/cli.py" --call studio_status '{}' 2>/dev/null)
@@ -225,4 +225,10 @@ if ((${#problems[@]})); then
   ((brief)) && printf 'GITCRAFT: %s\n' "${problems[@]}" || { echo; echo "Needs attention:"; printf '  - %s\n' "${problems[@]}"; }
   exit 1
 fi
-((brief)) && echo "GITCRAFT: all tools installed, registered and sandboxed." || { echo; echo "All good."; }
+# never "all tools" while something is deliberately not installed: an on-demand or skipped install is not a capability
+notes=""
+((off_note)) && notes+=" 3D is not installed (on demand: scripts/install-3d.sh)."
+case "$(last_state studiocraft-voice)" in later|pending) [[ -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]] || notes+=" The voice model is not installed yet (the SessionStart hook installs it)." ;; esac
+if ((brief)); then
+  if [[ -n "$notes" ]]; then echo "GITCRAFT: installed tools are registered and sandboxed.$notes"; else echo "GITCRAFT: all tools installed, registered and sandboxed."; fi
+else echo; echo "All good.${notes}"; fi

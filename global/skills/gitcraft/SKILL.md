@@ -89,6 +89,11 @@ Every hand-off's SHA-256 is logged in `~/.gitcraft/logs/audit.jsonl`.
 - Not installed: `curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash`, then a new session.
 - A `GITCRAFT policy:` refusal means the path is outside the workspace: copy the
   input into the project rather than widening the roots.
+- 3D is installed on demand (setup never downloads it). When the work needs 3D
+  and meshcraft/forgecraft list only a status tool, run
+  `~/.gitcraft/runtime/scripts/install-3d.sh` (Blender, a few minutes): their
+  tools appear in the running session. Add `meshroom` (photogrammetry) or
+  `ai weights` (TripoSR) only when the task needs them.
 - A 3D job `blocked` means no installed tool can honour it: report the reason
   and alternatives. Never substitute a 2D image for a 3D model.
 - A studiocraft action `blocked` names the missing runtime and its install

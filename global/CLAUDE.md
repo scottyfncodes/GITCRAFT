@@ -66,6 +66,11 @@ Project isolation:
 - GITCRAFT tools are sandboxed to the workspace and have no network. Never pass
   one project's secrets, env files or private paths to work for another.
 
+3D is installed on demand, never by setup: when the work needs 3D and meshcraft or
+forgecraft lists only its status tool, run `~/.gitcraft/runtime/scripts/install-3d.sh`
+(Blender, a few minutes) and carry on when their tools appear; add `meshroom` or
+`ai weights` only when the task needs photogrammetry or image-to-3D.
+
 If a `*craft` tool is missing, run `~/.gitcraft/runtime/scripts/doctor.sh`, then
 `/mcp`; if it isn't installed at all, run the setup script
 (`curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash`).

@@ -8,13 +8,16 @@
 #    must survive, and a separate git project (sibling folder) with its own palette, an existing
 #    asset and a project-scope .mcp.json that must keep working.
 # 2. Runs the one-step setup script exactly as an environment's setup script does
-#    (`curl … | bash`, here `bash < setup-env.sh`), cloning this checkout's committed branch.
+#    (`curl … | bash`, here `bash < setup-env.sh`), cloning this checkout's committed branch. Setup is fast and
+#    installs no 3D component; a later setup-script line asking for a large runtime is skipped with one line.
+# 2b. A session starts (the user-level hook) and installs 3D on demand, as a session that needs 3D does:
+#    scripts/install-3d.sh. The capability summary is one line, printed once.
 # 3. From the other project: `claude mcp list` (the real CLI), then every server started with the
 #    registered command, and real work through four tools with hand-offs (global_project_check.py).
 #    With GITCRAFT_TEST_ASK_CLAUDE=1 (default when the CLI can answer) also asks a headless
 #    Claude Code session in that project what it can see.
 # 4. Re-runs setup (idempotent: one instruction block, user text kept) and doctor.
-# Exit 1 on any failure. Downloads the prebuilt tools (~400 MB) unless they are cached.
+# Exit 1 on any failure. Downloads the prebuilt tools and, in step 2b, Blender (~400 MB) unless they are cached.
 set -uo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 work="${1:-$(mktemp -d "${TMPDIR:-/tmp}/gitcraft-global-XXXX")}"
@@ -49,8 +52,26 @@ check "fresh environment: no GITCRAFT install, no MCP servers" '[[ ! -e "$HOME/.
 check "the project contains no GITCRAFT code" '! grep -rqs -e mcp.sh -e gitcraft --exclude-dir=.git "$proj"'
 
 # --- 2. the setup script, as an environment setup script runs it
-GITCRAFT_REPO_URL="$repo" GITCRAFT_REF="$branch" bash < "$repo/scripts/setup-env.sh" > "$work/setup.out" 2>&1; rc=$?
+# (run from inside a Claude Code session, this test must still look like a setup script: no session variables)
+setup_env=(env -u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u GITCRAFT_SETUP -u GITCRAFT_MESHCRAFT GITCRAFT_REPO_URL="$repo" GITCRAFT_REF="$branch")
+t0=$SECONDS
+"${setup_env[@]}" bash < "$repo/scripts/setup-env.sh" > "$work/setup.out" 2>&1; rc=$?
+setup_s=$((SECONDS - t0))
 check "setup-env.sh (piped to bash) exits 0" '[[ $rc -eq 0 ]]'
+gc="$HOME/.gitcraft"
+state() { python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["tools"].get(sys.argv[2],{}).get("state",""))' "$gc/status.json" "$1" 2>/dev/null; }
+no_3d() { [[ ! -e "$gc/meshcraft/venv" && ! -e "$gc/forgecraft/ai-venv" && ! -e "$gc/forgecraft/TripoSR" && ! -e "$gc/forgecraft/dl" ]] && ! compgen -G "$gc/forgecraft/Meshroom-*" >/dev/null; }
+check "setup finishes fast: ${setup_s}s (limit ${GITCRAFT_TEST_SETUP_LIMIT:-120}s; a Blender or Meshroom download alone takes longer)" '((setup_s < ${GITCRAFT_TEST_SETUP_LIMIT:-120}))'
+check "setup installs no 3D component (no Blender, Meshroom, TripoSR or Hunyuan3D): 3D is on demand" 'no_3d && [[ "$(state meshcraft)" == off && "$(state forgecraft)" == off ]]'
+check "setup runs no 3D capability probe and prints no capability report" '[[ ! -e "$gc/forgecraft/probe.json" ]] && ! grep -qiE "gitcraft-3d:|capabilit" "$work/setup.out"'
+check "setup still installs the seven tools and the Studio core" \
+  '[[ $(ls "$gc/bin" | grep -c -- "-cli$") -eq 7 && "$(state studiocraft)" == ok ]]'
+# a setup script's own extra lines (the ones that used to time setup out) are held to the same limit until a session starts
+env -u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u GITCRAFT_SETUP "$gc/runtime/scripts/install-3d.sh" core meshroom ai weights > "$work/setup-extra.out" 2>&1 < /dev/null; rc=$?
+env -u CLAUDECODE -u CLAUDE_CODE_SESSION_ID -u GITCRAFT_SETUP "$gc/runtime/scripts/install-studio.sh" mocap music >> "$work/setup-extra.out" 2>&1 < /dev/null; rc2=$?
+check "setup-script lines for Blender, Meshroom, the AI runtimes, weights, mocap and music: each skipped with one line, exit 0, nothing downloaded" \
+  '[[ $rc -eq 0 && $rc2 -eq 0 && $(grep -c "setup skipped" "$work/setup-extra.out") -eq 6 && $(wc -l < "$work/setup-extra.out") -eq 6 ]] && no_3d && [[ ! -e "$gc/studio/mocap-venv" && ! -e "$gc/studio/ace-step" ]]'
+check "every skipped download is in the log" '[[ $(grep -c "setup skipped" "$gc/logs/setup-skipped.log") -ge 6 ]]'
 check "runtime installed in ~/.gitcraft/runtime from the setup clone, not from the checkout" \
   '[[ -x "$HOME/.gitcraft/runtime/scripts/mcp.sh" ]] && grep -q "$HOME/.gitcraft/repo" "$HOME/.gitcraft/runtime/.gitcraft-source"'
 check "nothing in the user config points at the GITCRAFT checkout" '! grep -qs "$repo" "$HOME/.claude.json" "$HOME/.claude/CLAUDE.md"'
@@ -64,6 +85,22 @@ check "ui-design skill installed at user level, with its phase references and th
 check "'Run GITCRAFT' is routed in every project: instructions and the produce skill name production_start" \
   'grep -q "Run GITCRAFT" "$HOME/.claude/CLAUDE.md" && grep -q "production_start" "$HOME/.claude/CLAUDE.md" && grep -q "^description:.*Run GITCRAFT" "$HOME/.claude/skills/produce/SKILL.md"'
 check "the runtime the servers start from has the universal entry point" '[[ -f "$HOME/.gitcraft/runtime/production/entry.py" ]]'
+
+# --- 2b. a session starts, and installs 3D itself because its work needs it
+voice_was="$(state studiocraft-voice)"
+(cd "$proj" && CLAUDECODE=1 "$gc/runtime/scripts/session-start.sh" --global) > "$work/session-start.out" 2>&1
+check "session start ends the setup phase and does not start a Blender build" '[[ ! -e "$gc/setup-phase" ]] && ! grep -q "meshcraft" "$work/session-start.out"'
+(cd "$proj" && CLAUDECODE=1 "$gc/runtime/scripts/install-3d.sh") > "$work/install-3d.out" 2>&1; rc=$?
+check "in the session, install-3d.sh installs MeshCraft and ForgeCraft (exit 0, Blender in, both recorded ok)" \
+  '[[ $rc -eq 0 && -x "$gc/meshcraft/venv/bin/python" && "$(state meshcraft)" == ok && "$(state forgecraft)" == ok ]]'
+check "the capability summary is one line" '[[ $(grep -c "^gitcraft-3d: ready: " "$work/install-3d.out") -eq 1 ]] && grep -q "^gitcraft-3d: ready: .*blender" "$work/install-3d.out"'
+(cd "$proj" && CLAUDECODE=1 "$gc/runtime/scripts/install-3d.sh") > "$work/install-3d-again.out" 2>&1
+check "and it is printed once: a second run says nothing new" '! grep -q "^gitcraft-3d: ready: " "$work/install-3d-again.out"'
+if [[ "$voice_was" == later ]]; then
+  for _ in $(seq 60); do [[ "$(state studiocraft-voice)" == ok ]] && break; sleep 2; done
+  check "the voice model setup left out (over the limit) was installed by the session hook in the background" \
+    '[[ "$(state studiocraft-voice)" == ok && -f "$gc/studio/models/kokoro/voices-v1.0.bin" ]]'
+fi
 
 # --- 3. from the other project
 if command -v claude >/dev/null; then
@@ -91,7 +128,8 @@ if [[ "${GITCRAFT_TEST_ASK_CLAUDE:-1}" == 1 ]] && command -v claude >/dev/null; 
 fi
 
 # --- 4. idempotent re-run + doctor
-GITCRAFT_REPO_URL="$repo" GITCRAFT_REF="$branch" bash < "$repo/scripts/setup-env.sh" > "$work/setup2.out" 2>&1
+"${setup_env[@]}" bash < "$repo/scripts/setup-env.sh" > "$work/setup2.out" 2>&1
+check "re-running setup keeps the installed 3D tools (still ok, nothing downloaded again)" '[[ "$(state meshcraft)" == ok ]] && ! grep -q "installing meshcraft" "$work/setup2.out"'
 check "re-running setup keeps exactly one instruction block" '[[ $(grep -c "GITCRAFT:BEGIN" "$HOME/.claude/CLAUDE.md") -eq 1 ]]'
 "$HOME/.gitcraft/runtime/scripts/doctor.sh" > "$work/doctor.out" 2>&1
 check "doctor: registration all from the runtime, instructions and skill present" \

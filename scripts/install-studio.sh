@@ -17,6 +17,7 @@
 # Blender-based departments (animcraft, cinematiccraft, worldcraft sky, fxcraft destruction) use
 # MeshCraft's Blender (scripts/install.sh meshcraft); they report `blocked` with that command until it exists.
 # FFmpeg and Playwright/Chromium are system tools: departments that need them report what is missing.
+# During setup (scripts/tools.sh, "Setup guard") only core is small enough to run: the others are skipped with one line.
 set -uo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(dirname "$here")"
@@ -56,7 +57,9 @@ core() {
 KOKORO_URL="https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
 KOKORO_FILES=("kokoro-v1.0.int8.onnx:6e742170d309016e5891a994e1ce1559c702a2ccd0075e67ef7157974f6406cb"
               "voices-v1.0.bin:bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d")
+voice_ready() { [[ -f "$SH/models/kokoro/voices-v1.0.bin" && -f "$SH/models/kokoro/kokoro-v1.0.int8.onnx" ]]; }
 voice() {
+  voice_ready || gitcraft_setup_allows "the Studio voice model" 130 "in a session: ~/.gitcraft/runtime/scripts/install-studio.sh voice" || return 0
   echo "gitcraft-studio: voice venv (kokoro-onnx, onnxruntime) → $SH/voice-venv"
   mkvenv "$SH/voice-venv" "$repo/studio/requirements-voice.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: voice venv FAILED or timed out after ${STEP_LIMIT}s (see $log)" >&2; return 1; }
   mkdir -p "$SH/models/kokoro"
@@ -64,7 +67,7 @@ voice() {
     f=${e%%:*}; sum=${e##*:}; dst="$SH/models/kokoro/$f"
     if [[ -f "$dst" ]] && echo "$sum  $dst" | sha256sum -c --quiet 2>/dev/null; then continue; fi
     echo "gitcraft-studio: downloading $f"
-    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" -o "$dst.part" "$KOKORO_URL/$f" || { echo "gitcraft-studio: download of $f failed (GitHub release blocked?)" >&2; rm -f "$dst.part"; return 1; }
+    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" $(gitcraft_curl_cap) -o "$dst.part" "$KOKORO_URL/$f" || { echo "gitcraft-studio: download of $f failed (GitHub release blocked?)" >&2; rm -f "$dst.part"; return 1; }
     echo "$sum  $dst.part" | sha256sum -c --quiet || { echo "gitcraft-studio: $f checksum mismatch; not installed" >&2; rm -f "$dst.part"; return 1; }
     mv "$dst.part" "$dst"
   done
@@ -75,6 +78,7 @@ MP_URL="https://storage.googleapis.com/mediapipe-models/pose_landmarker"
 MP_FILES=("full:5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1"
           "heavy:64437af838a65d18e5ba7a0d39b465540069bc8aae8308de3e318aad31fcbc7b")
 mocap() {
+  ls "$SH"/models/mediapipe/pose_landmarker_full.task >/dev/null 2>&1 || gitcraft_setup_allows "AnimCraft mocap (MediaPipe)" 440 "in a session: ~/.gitcraft/runtime/scripts/install-studio.sh mocap" || return 0
   echo "gitcraft-studio: mocap venv (mediapipe) → $SH/mocap-venv"
   mkvenv "$SH/mocap-venv" "$repo/studio/requirements-mocap.txt" >>"$log" 2>&1 || { echo "gitcraft-studio: mocap venv FAILED or timed out after ${STEP_LIMIT}s (see $log)" >&2; return 1; }
   if ! ldconfig -p 2>/dev/null | grep -q 'libEGL.so.1'; then
@@ -93,7 +97,7 @@ mocap() {
     m=${e%%:*}; sum=${e##*:}; dst="$SH/models/mediapipe/pose_landmarker_$m.task"
     if [[ -f "$dst" ]] && echo "$sum  $dst" | sha256sum -c --quiet 2>/dev/null; then continue; fi
     echo "gitcraft-studio: downloading pose_landmarker_$m.task"
-    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" -o "$dst.part" "$MP_URL/pose_landmarker_$m/float16/1/pose_landmarker_$m.task" || { echo "gitcraft-studio: download of pose_landmarker_$m failed" >&2; rm -f "$dst.part"; return 1; }
+    curl -fsSL --retry 3 --max-time "$STEP_LIMIT" $(gitcraft_curl_cap) -o "$dst.part" "$MP_URL/pose_landmarker_$m/float16/1/pose_landmarker_$m.task" || { echo "gitcraft-studio: download of pose_landmarker_$m failed" >&2; rm -f "$dst.part"; return 1; }
     echo "$sum  $dst.part" | sha256sum -c --quiet || { echo "gitcraft-studio: pose_landmarker_$m checksum mismatch; not installed" >&2; rm -f "$dst.part"; return 1; }
     mv "$dst.part" "$dst"
   done
@@ -113,6 +117,7 @@ need_hf() {
   return 1
 }
 music() {
+  gitcraft_setup_allows "ACE-Step music (PyTorch + weights)" 10000 "in a session: ~/.gitcraft/runtime/scripts/install-studio.sh music" || return 0
   command -v uv >/dev/null || { echo "gitcraft-studio: music needs uv (pip install uv)" >&2; return 1; }
   need_hf ACE-Step/Ace-Step1.5 || return 1
   echo "gitcraft-studio: ACE-Step 1.5 $ACE_TAG → $SH/ace-step (PyTorch + ~6 GB of weights: this takes a while)"
@@ -144,6 +149,7 @@ _sync_model_code_files("acestep-v15-turbo", "checkpoints")') >>"$log" 2>&1 ||
 }
 UNIRIG_REPO="https://github.com/VAST-AI-Research/UniRig"; UNIRIG_REF="6793c6640ff01c8fb389f3993434124bb43d2933"
 unirig() {
+  gitcraft_setup_allows "UniRig (CUDA PyTorch + checkpoint)" 8000 "in a session: ~/.gitcraft/runtime/scripts/install-studio.sh unirig" || return 0
   command -v nvidia-smi >/dev/null && nvidia-smi -L >/dev/null 2>&1 || { echo "gitcraft-studio: UniRig needs an NVIDIA GPU (≥ 8 GB VRAM); not installed. animcraft_autorig works on CPU." >&2; return 1; }
   need_hf VAST-AI/UniRig || return 1
   echo "gitcraft-studio: UniRig @ ${UNIRIG_REF:0:7} → $SH/unirig"

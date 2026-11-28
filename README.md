@@ -69,7 +69,7 @@ ForgeCraft orchestrates the 3D Department. It routes each request to the best av
 
 - Docs: [docs/3d-department.md](docs/3d-department.md) (architecture, ownership matrix, pipeline); [docs/3d-licensing.md](docs/3d-licensing.md) (dependency and licensing audit); [docs/3d-consolidation.md](docs/3d-consolidation.md) (consolidation report).
 - The TIDEBREAKERS 3D package is in `acceptance/tidebreakers-3d/`.
-- ForgeCraft uses MeshCraft's Blender. `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
+- 3D is installed on demand, never by setup: a session that needs it runs `scripts/install-3d.sh` (MeshCraft's Blender, shared with ForgeCraft); `scripts/install-3d.sh [meshroom|ai|all]` adds photogrammetry and the AI runtimes.
 
 ## Studio departments: StudioCraft
 
@@ -121,35 +121,52 @@ unknowns (pricing, limits, reliability, licence) are kept apart, and there are n
 
 ### Fresh cloud environment (recommended)
 
-Paste this one line into the environment's **Setup script** (cloud environment menu in the session's title bar ▸ Edit ▸ Setup script):
+Paste this one line into the environment's **Setup script** (cloud environment menu in the session's title bar ▸ Edit ▸ Setup script). It is the whole script: nothing else belongs after it.
 
 ```
 curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
 ```
 
-Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all ten servers connected** and the GITCRAFT instructions loaded. Nothing has to be attached. It takes a few minutes on a new container (the tools are ~400 MB prebuilt; MeshCraft's Blender is another ~400 MB).
+Every new container in that environment runs it before Claude Code starts, so **every session, in any repo (or none), starts with all ten servers connected** and the GITCRAFT instructions loaded. Nothing has to be attached.
 
-**3D tools and setup-script time limits.** Blender is the slow part. With `GITCRAFT_MESHCRAFT=later` (`GITCRAFT_MESHCRAFT=later bash` in the line above), setup registers MeshCraft and ForgeCraft at once and leaves the Blender download to a user-level SessionStart hook (in `~/.claude/settings.json`, installed by setup), which builds it in the background at the start of the first session, in whatever project that session opens. `GITCRAFT_GLOBAL_HOOK=0` leaves that hook out. The servers connect at session start either way. Until Blender lands, each lists a single status tool. When the install finishes, they announce their full tool lists (`tools/list_changed`) and the running session picks them up, with no `/mcp`. The same happens when you run `scripts/install.sh meshcraft forgecraft` during a session.
+**Setup always finishes fast.** A setup script that runs past its time limit is stopped mid-step (exit code -1) and everything after that step never runs, so setup is kept small on purpose. Measured on a new container with cold caches: **about 30 seconds** (28–33 s over three runs) (`python3 tests/test_setup_guard.py --timed` fails above 60).
+
+| During setup | |
+|---|---|
+| Installed | the seven ArtCraft tools (prebuilt, checksum-pinned, 17–40 MB each: one 204 MB fetch, about 8 s), the Studio core runtime, the runtime copy, registration of all ten servers, the instructions, skills and session hook |
+| Never installed | any 3D component: Blender (MeshCraft, ForgeCraft), Meshroom, TripoSR, Hunyuan3D. No 3D capability probe or report runs |
+| Size guard | nothing over ~100 MB is downloaded (`GITCRAFT_SETUP_MAX_MB`). A step over the limit is skipped with one line (`gitcraft: setup skipped …`, also in `~/.gitcraft/logs/setup-skipped.log`) and setup carries on |
+| Left to the first session | the Studio voice model (~130 MB): the session hook installs it in the background, and `audiocraft_voice` sees it on its next call |
+
+The guard also covers lines a setup script runs *after* this one (for example an old `install-3d.sh meshroom` or `install-studio.sh music`): until the first session starts they print their one line and exit 0 instead of downloading. `GITCRAFT_SETUP=0` in front of a command turns the guard off for it.
+
+**3D is on demand.** MeshCraft and ForgeCraft are registered by setup and connect in every session, each listing one status tool. A session whose work needs 3D installs it itself, when it needs it (the global instructions tell Claude to):
+
+```
+~/.gitcraft/runtime/scripts/install-3d.sh             # Blender for MeshCraft + ForgeCraft (~400 MB, a few minutes)
+~/.gitcraft/runtime/scripts/install-3d.sh meshroom    # + photogrammetry (~1.2 GB), only when a task needs it
+~/.gitcraft/runtime/scripts/install-3d.sh ai weights  # + TripoSR / Hunyuan3D runtimes and weights, only when a task needs them
+```
+
+When the install finishes, the two servers announce their full tool lists (`tools/list_changed`) and the running session picks them up, with no `/mcp`. It prints a one-line capability summary once (`gitcraft-3d: ready: …`); the full table is in `doctor.sh`. A container is new each time, so a session that never touches 3D never pays for it.
 
 | `GITCRAFT_MESHCRAFT` | Blender installed | 3D servers registered |
 |---|---|---|
-| `1` (default) | during setup | yes |
-| `later` | in the background when a session starts | yes |
-| `0` | not until you run `scripts/install.sh meshcraft forgecraft` | yes (they wait for the install) |
+| `0` (default) | on demand: `scripts/install-3d.sh` in the session that needs it | yes (they wait for the install) |
+| `later` | in the background when a session starts (`GITCRAFT_GLOBAL_HOOK=0` leaves the hook out) | yes |
+| `1` | with `scripts/install.sh` (CI, a workstation); skipped by the size guard inside a setup script | yes |
 | `none` | no | no |
 
-Before this, the two 3D servers were only registered once Blender was installed, and the launcher refused to start them before then. Claude Code reads MCP servers when a session starts, so a session that began first never got them: not after `install.sh`, not after the background build. `tests/test_mcp_deferred_session.py` proves the fix with real Claude Code sessions:
-- a session that starts without Blender connects both servers;
-- the same session gains MeshCraft's tools when Blender lands mid-session, and runs a Blender tool;
-- a fresh session runs everything in-process.
+`tests/test_mcp_deferred_session.py` proves the hand-over with real Claude Code sessions: a session that starts without Blender connects both servers, gains MeshCraft's tools when Blender lands mid-session and runs a Blender tool, and a fresh session runs everything in-process. `tests/test_global.sh` runs the whole path in a fresh HOME: fast setup with no 3D, then the on-demand install, then real 3D work from another project.
 
-**Studio departments in setup.** StudioCraft installs after the seven 2D tools are registered, so a slow or cut-off Studio install never leaves them out; it is registered as soon as its core runtime is in, and the user-level SessionStart hook finishes an interrupted Studio install (or a deferred voice model) in the background at the next session. Measured fresh setups with cold caches and `GITCRAFT_MESHCRAFT=0`: 18–25 s without Studio, 30–33 s with Studio and the voice model deferred, about 38 s with everything. Each Studio download step has a time limit (`GITCRAFT_STUDIO_STEP_TIMEOUT`, default 120 s), since one run lost 5.5 minutes to a stalled pip download; a step that hits it is retried by the hook and doesn't fail the setup.
+**Studio departments in setup.** StudioCraft installs after the seven 2D tools are registered, so a slow or cut-off Studio install never leaves them out; the user-level SessionStart hook finishes an interrupted Studio install and the voice model in the background at the next session. Each Studio download step has a time limit (`GITCRAFT_STUDIO_STEP_TIMEOUT`, default 120 s), since one run lost 5.5 minutes to a stalled pip download; a step that hits it is retried by the hook and doesn't fail the setup.
 
 | Variable | Effect |
 |---|---|
 | `GITCRAFT_STUDIO=0` | no Studio departments |
-| `GITCRAFT_STUDIO_VOICE=later` | voice model (~115 MB + onnxruntime) installed in the background at the first session; `audiocraft_voice` sees it on its next call |
 | `GITCRAFT_STUDIO_VOICE=0` | no voice model (`audiocraft_voice` reports blocked) |
+
+Other large runtimes are on demand in the same way, in the session that needs them: `install-studio.sh mocap` (`animcraft_mocap`, ~440 MB), `install-studio.sh music` (ACE-Step, ~10 GB). An action that needs one reports `blocked` with the command.
 
 **Staying current, deliberately.** New code never runs on its own. At session start the user-level hook only
 *fetches* `~/.gitcraft/repo` in the background and, when `main` has moved, says so ("an update is available");
@@ -160,13 +177,6 @@ installed commit with the line `scripts/setup-pin.sh <commit>` prints (docs/inst
 unreviewed pull-and-run at session start (not recommended: docs/security.md, "Updates and binaries"). The hook
 also finishes a mocap install that stopped part-way.
 
-Motion capture (`animcraft_mocap`, ~440 MB) is not part of the default setup. To have it in every session, add a
-second line to the setup script; `|| true` keeps a failed download from stopping the session:
-
-```
-~/.gitcraft/runtime/scripts/install-studio.sh mocap || true
-```
-
 ### Workstation
 
 Run the same line once in a terminal. `~/.claude.json` and `~/.claude/` persist, so every later session in every project inherits it; run it again to update. Requirements: Linux x86_64 (prebuilt binaries), Python 3 (3.11/3.13 for MeshCraft), Node/npm (optional, for the 3D engine check), Linux 5.13+ for the kernel sandbox.
@@ -176,7 +186,7 @@ Run the same line once in a terminal. `~/.claude.json` and `~/.claude/` persist,
 | Piece | Where | Purpose |
 |---|---|---|
 | GITCRAFT clone | `~/.gitcraft/repo` | Source the setup installs from (`GITCRAFT_REF=<branch>` for another branch, `GITCRAFT_REPO_URL` for a fork) |
-| Tool binaries, Blender venv | `~/.gitcraft/bin`, `~/.gitcraft/meshcraft` | The ten servers |
+| Tool binaries, Studio runtime | `~/.gitcraft/bin`, `~/.gitcraft/studio` | The servers setup installs (Blender goes to `~/.gitcraft/meshcraft` when a session installs 3D) |
 | **Runtime** | `~/.gitcraft/runtime` | Copy of the launcher, guard, sandbox and tool code. The servers start from here, never from a checkout, so they work when no GITCRAFT checkout exists |
 | **MCP registration** | `~/.claude.json` → `mcpServers` (user scope) | Claude Code connects user-scope servers in **every** project. Each entry runs `~/.gitcraft/runtime/scripts/mcp.sh <tool>` |
 | **Global instructions** | a managed block in `~/.claude/CLAUDE.md` | Loaded in every project: consider GITCRAFT for creative work, pick tools that fit, hand files between them, integrate into the current project, validate, keep projects isolated. Your own text in that file is kept |
@@ -207,6 +217,8 @@ In a session, `/mcp` lists the servers; asking Claude "which GITCRAFT tools and 
 | `GITCRAFT policy:` refusal | The file is outside the workspace: copy it into the project rather than widening `GITCRAFT_ROOTS` |
 | LightCraft says its library is open elsewhere | Another session holds the shared library; the launcher now gives this project its own (`~/.gitcraft/lightcraft-libraries/`). Set `GITCRAFT_LIGHTCRAFT_LIBRARY` to choose one |
 | Don't want the global instructions | `GITCRAFT_GLOBAL_INSTRUCTIONS=0` when running the setup, and delete the GITCRAFT block from `~/.claude/CLAUDE.md` and `~/.claude/skills/gitcraft` |
+| Setup script timed out (exit code -1) | Something large ran inside it. Replace the whole script with the one line above: it never downloads 3D or anything over ~100 MB, and finishes in about half a minute |
+| MeshCraft or ForgeCraft lists only a status tool | 3D is on demand: `~/.gitcraft/runtime/scripts/install-3d.sh` in that session |
 | Setup script failed when the container was built | Its output is in `~/.gitcraft/logs/install.log`; fix the cause and edit the environment's Setup script. New sessions run the fixed script |
 
 ## Security

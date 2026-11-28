@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Print the immutable setup line for a cloud environment pinned to one reviewed GITCRAFT commit.
 #
-#   scripts/setup-pin.sh <full commit SHA> [VAR=value ...]     e.g. scripts/setup-pin.sh 1a2b...  GITCRAFT_MESHCRAFT=later
+#   scripts/setup-pin.sh <full commit SHA> [VAR=value ...]     e.g. scripts/setup-pin.sh 1a2b...  GITCRAFT_STUDIO_VOICE=0
 #
 # Both halves are pinned to that commit, so nothing that runs at container start can change after review:
 #   1. the bootstrap (setup-env.sh) is downloaded from the commit-addressed URL and checked against its SHA-256

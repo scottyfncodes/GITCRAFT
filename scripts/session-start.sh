@@ -8,6 +8,7 @@ global=0; [[ "${1:-}" == --global ]] && global=1
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$here/tools.sh"
 mkdir -p "$GITCRAFT_LOG"
+rm -f "$GITCRAFT_HOME/setup-phase"   # a session has started: setup is over, so its download limit no longer applies (tools.sh)
 
 # Updates (global hook only). By default nothing new is ever run: the hook fetches the clone setup-env.sh made
 # (~/.gitcraft/repo) in the background WITHOUT checking anything out, and says when main has moved. A person applies
@@ -41,7 +42,8 @@ for entry in "${GITCRAFT_TOOLS[@]}"; do
   IFS=: read -r name _ pkg <<<"$entry"
   [[ -x "$GITCRAFT_BIN/$pkg" ]] || missing+=("$name")
 done
-# 3D: finish a Blender install the setup deferred (GITCRAFT_MESHCRAFT=later) or that was cut off (still "pending").
+# 3D is on demand (scripts/install-3d.sh): nothing is built here unless a person chose GITCRAFT_MESHCRAFT=later, or an
+# install that was started was cut off (still "pending").
 # The servers are already registered and pick the tools up as soon as it lands (gitcraft3d/deferred.py).
 mesh_last=$(python3 -c 'import json,os,sys;print(json.load(open(os.path.join(sys.argv[1],"status.json"))).get("tools",{}).get("meshcraft",{}).get("state",""))' "$GITCRAFT_HOME" 2>/dev/null)
 if [[ "$GITCRAFT_MESHCRAFT" != none && ( "$mesh_last" == later || "$mesh_last" == pending ) ]] && ! gitcraft_mesh_ready; then
@@ -61,7 +63,8 @@ studio_voice=0
 if [[ "$GITCRAFT_STUDIO" == 1 ]]; then
   # any state but a deliberate off: cut off ("pending"), failed, never attempted, or a runtime removed since
   if [[ "$studio_last" != off ]] && ! gitcraft_studio_ready; then missing+=(studiocraft); fi
-  if [[ "$voice_last" == later || "$voice_last" == pending ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
+  # (failed too: the background download dies with a session that ends first, and setup now always leaves it to a session)
+  if [[ "$voice_last" == later || "$voice_last" == pending || "$voice_last" == failed ]] && [[ ! -f "$GITCRAFT_STUDIO_HOME/models/kokoro/voices-v1.0.bin" ]]; then
     [[ " ${missing[*]} " == *" studiocraft "* ]] || missing+=(studiocraft); studio_voice=1
   fi
 fi
@@ -110,4 +113,6 @@ else
   fi
   echo "GITCRAFT: building ${missing[*]} in the background (log: $GITCRAFT_LOG/install.log)."
 fi
-echo "GITCRAFT: MeshCraft and ForgeCraft announce their tools when their build finishes; StudioCraft announces its department tools when its runtime lands, and picks up a deferred voice model on its next call; other tools need /mcp."
+if [[ " ${missing[*]} " == *" meshcraft "* ]]; then echo "GITCRAFT: MeshCraft and ForgeCraft announce their tools when their build finishes."; fi
+if [[ " ${missing[*]} " == *" studiocraft "* ]]; then echo "GITCRAFT: StudioCraft announces its department tools when its runtime lands, and picks up the voice model on its next call."; fi
+for m in "${missing[@]}"; do case "$m" in meshcraft|forgecraft|studiocraft) ;; *) echo "GITCRAFT: the other tools need /mcp once they are built."; break ;; esac; done

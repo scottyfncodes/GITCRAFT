@@ -45,12 +45,13 @@ gitcraft_expected_sha256() {
 #               levelcraft, cinematiccraft, testcraft, assetcraft, playcraft — one MCP server; runtimes in ~/.gitcraft/studio
 #               (needs no Blender; its Blender actions use MeshCraft's and report `blocked` without it)
 GITCRAFT_EXTRA_TOOLS=(meshcraft:meshcraft:meshcraft forgecraft:forgecraft:forgecraft studiocraft:studio:studiocraft)
-# 3D tools (MeshCraft's Blender is a ~400 MB download):
-#   1      install now (default)
-#   later  register now, build Blender in the background when a session starts (for setup scripts with a time limit)
-#   0      don't install; still registered, so `scripts/install.sh meshcraft forgecraft` works in a running session
+# 3D tools (MeshCraft's Blender is a ~400 MB download). On demand by default: a session that needs 3D installs it
+# itself with scripts/install-3d.sh (the registered servers then announce their tools, no /mcp).
+#   0      on demand (default): registered, nothing downloaded until install-3d.sh (or install.sh meshcraft forgecraft)
+#   later  register now, build Blender in the background when a session starts
+#   1      install with everything else (never inside a setup script: the setup guard below skips it there)
 #   none   no 3D tools at all (not registered)
-GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-1}"
+GITCRAFT_MESHCRAFT="${GITCRAFT_MESHCRAFT:-0}"
 # Studio departments (studiocraft): 1 installs the core runtime (venv + Node packages, ~250 MB), 0 skips it.
 GITCRAFT_STUDIO="${GITCRAFT_STUDIO:-1}"
 # Studio voice runtime (Kokoro model ~115 MB + onnxruntime): 1 install now, later = in the background when a
@@ -65,6 +66,29 @@ GITCRAFT_LOG="$GITCRAFT_HOME/logs"
 GITCRAFT_STATE="$GITCRAFT_HOME/state"   # per-tool config/cache/tmp, writable inside the sandbox
 GITCRAFT_STUDIO_HOME="${GITCRAFT_STUDIO_HOME:-$GITCRAFT_HOME/studio}"         # studio venvs, voice models, Node runtime
 GITCRAFT_ASSET_CATALOG="${GITCRAFT_ASSET_CATALOG:-$GITCRAFT_HOME/assetcraft/catalog.sqlite}"   # AssetCraft catalogue (all projects)
+
+# Setup guard. A cloud environment's setup script has a time limit, and a run cut off mid-download leaves every later
+# step undone. So during setup nothing over GITCRAFT_SETUP_MAX_MB (100) is downloaded: the step is skipped with one
+# line saying how a session gets it. "During setup" is GITCRAFT_SETUP=1 (setup-env.sh exports it), or the time between
+# setup-env.sh and the first session: $GITCRAFT_HOME/setup-phase, which setup-env.sh writes and the SessionStart hook
+# removes. That catches install lines a setup script runs after setup-env.sh. The marker counts for an hour, and never
+# inside a Claude Code session or at a terminal, where an install was asked for. GITCRAFT_SETUP=0 turns the guard off.
+GITCRAFT_SETUP_MAX_MB="${GITCRAFT_SETUP_MAX_MB:-100}"
+gitcraft_in_setup() {
+  case "${GITCRAFT_SETUP:-}" in 1) return 0 ;; 0) return 1 ;; esac
+  [[ -z "${CLAUDECODE:-}${CLAUDE_CODE_SESSION_ID:-}" && ! -t 1 ]] || return 1
+  [[ -n "$(find "$GITCRAFT_HOME/setup-phase" -mmin -60 2>/dev/null)" ]]
+}
+# gitcraft_setup_allows <what> <approximate MB> <how a session gets it>: false, with one line printed and logged, when
+# this is setup and the download is over the limit. True everywhere else.
+gitcraft_setup_allows() {
+  gitcraft_in_setup && (( $2 > GITCRAFT_SETUP_MAX_MB )) || return 0
+  local note="gitcraft: setup skipped $1 (~$2 MB, over the $GITCRAFT_SETUP_MAX_MB MB setup limit): $3"
+  echo "$note"; mkdir -p "$GITCRAFT_LOG" && echo "$(date -u +%FT%TZ) $note" >> "$GITCRAFT_LOG/setup-skipped.log"
+  return 1
+}
+# The same limit on a direct download's real size, as curl arguments (empty outside setup): curl $(gitcraft_curl_cap) ...
+gitcraft_curl_cap() { if gitcraft_in_setup; then echo "--max-filesize $((GITCRAFT_SETUP_MAX_MB * 1024 * 1024))"; fi; }
 # PLAYCRAFT's Game Quality History (all games): outside the runtime, so upgrades never touch it; the committed
 # archive <GITCRAFT>/history/playcraft is imported into it automatically
 GITCRAFT_PLAYCRAFT_HISTORY="${GITCRAFT_PLAYCRAFT_HISTORY:-$GITCRAFT_HOME/playcraft/history}"

@@ -6,6 +6,9 @@
 #   scripts/install.sh --source        skip prebuilts, compile from source
 #   scripts/install.sh photocraft ...  only these tools
 #
+# Installs the seven ArtCraft tools and the Studio departments. The 3D tools (MeshCraft, ForgeCraft: Blender, ~400 MB)
+# are registered but downloaded on demand: scripts/install-3d.sh, or GITCRAFT_MESHCRAFT=1 here (scripts/tools.sh).
+#
 # Prebuilts come from this repo's `bin` branch, which the "Build ArtCraft CLIs"
 # GitHub Action keeps up to date. Compiling from source needs Rust 1.95+,
 # access to crates.io, and a lot of patience.
@@ -20,7 +23,7 @@ for a in "$@"; do
   case "$a" in
     --update) update=1 ;;
     --source) source_only=1 ;;
-    -h|--help) sed -n 2,12p "$0"; exit 0 ;;
+    -h|--help) sed -n 2,15p "$0"; exit 0 ;;
     *) want+=("$a") ;;
   esac
 done
@@ -155,11 +158,27 @@ elif ((want_studio)); then
     later) voice_present && [[ $update -eq 0 ]] && voice_state=ok || voice_state=later ;;   # the SessionStart hook installs it
     *) voice_present && [[ $update -eq 0 ]] && voice_state=ok || voice_state=pending ;;
   esac
+  if [[ $voice_state == pending ]] && ! gitcraft_setup_allows "the Studio voice model" 130 "the first session installs it in the background"; then
+    voice_state=later
+  fi
 fi
-want_mesh=1; ((${#want[@]})) && [[ ! " ${want[*]} " =~ " meshcraft " && ! " ${want[*]} " =~ " forgecraft " ]] && want_mesh=0   # forgecraft needs MeshCraft's Blender
-if [[ "$GITCRAFT_MESHCRAFT" == later ]]; then mesh_state=later forge_state=later   # the SessionStart hook builds it
-elif [[ "$GITCRAFT_MESHCRAFT" != 1 ]]; then mesh_state=off forge_state=off
-elif ((want_mesh)); then mesh_state=pending forge_state=pending; fi
+# 3D is on demand: installed when GITCRAFT_MESHCRAFT=1 or when meshcraft/forgecraft is named (scripts/install-3d.sh
+# does that), and kept current once it is installed. Never during setup: Blender is over the setup guard's limit.
+want_mesh=1 mesh_mode="$GITCRAFT_MESHCRAFT"
+if ((${#want[@]})); then
+  if [[ " ${want[*]} " =~ " meshcraft " || " ${want[*]} " =~ " forgecraft " ]]; then   # forgecraft needs MeshCraft's Blender
+    [[ $mesh_mode == none ]] || mesh_mode=1
+  else want_mesh=0; fi
+fi
+[[ $mesh_mode == 0 ]] && gitcraft_mesh_ready && mesh_mode=1
+if ((want_mesh)) && [[ $mesh_mode == 1 ]] && { ! gitcraft_mesh_ready || ((update)); } &&
+   ! gitcraft_setup_allows "MeshCraft and ForgeCraft (Blender)" 400 "a session that needs 3D runs ~/.gitcraft/runtime/scripts/install-3d.sh"; then
+  mesh_mode=0
+fi
+if ((want_mesh == 0)); then :
+elif [[ $mesh_mode == later ]]; then mesh_state=later forge_state=later   # the SessionStart hook builds it
+elif [[ $mesh_mode != 1 ]]; then mesh_state=off forge_state=off
+else mesh_state=pending forge_state=pending; fi
 "$here/install-global.sh"   # runtime copy in ~/.gitcraft/runtime, user-scope registration, global instructions
 write_status
 
@@ -180,7 +199,7 @@ if [[ $studio_state == pending ]]; then
     if "$here/install-studio.sh" voice; then voice_state=ok
     else voice_state=failed; echo "gitcraft: studio voice runtime not installed; audiocraft_voice will report blocked (scripts/install-studio.sh voice)" >&2; fi
     write_status
-  elif [[ $voice_state == later ]]; then
+  elif [[ $voice_state == later && $GITCRAFT_STUDIO_VOICE == later ]]; then
     echo "gitcraft: studio voice model deferred (GITCRAFT_STUDIO_VOICE=later): the SessionStart hook installs it in the background"
   fi
 fi
@@ -188,7 +207,7 @@ fi
 # 3) MeshCraft: Blender as a Python module (bpy from PyPI) in its own venv,
 #    plus the Node packages its engine check uses. No compiled GitHub artifact needed.
 [[ $mesh_state == pending ]] && mesh_state=skipped
-if [[ "$GITCRAFT_MESHCRAFT" == 1 && $want_mesh == 1 ]]; then
+if [[ $mesh_mode == 1 && $want_mesh == 1 ]]; then
   venv="$GITCRAFT_HOME/meshcraft/venv"
   if [[ -x "$venv/bin/python" && $update -eq 0 ]] && "$venv/bin/python" -c "import bpy" 2>/dev/null; then
     echo "gitcraft: meshcraft already installed"; mesh_state=ok

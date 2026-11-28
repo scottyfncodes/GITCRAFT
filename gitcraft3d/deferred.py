@@ -1,8 +1,8 @@
 """Deferred 3D: MeshCraft and ForgeCraft are registered with Claude Code before Blender is installed.
 
 Claude Code reads its MCP servers once, when a session starts. Blender (bpy, ~400 MB) is often not there yet:
-- a setup script skipped it (GITCRAFT_MESHCRAFT=0) or ran out of time during the download;
-- `scripts/install.sh meshcraft` is run during a session;
+- 3D is installed on demand: setup never downloads it (scripts/tools.sh, GITCRAFT_MESHCRAFT);
+- `scripts/install-3d.sh` is run during a session that needs 3D;
 - the SessionStart hook is still building it in the background.
 
 If the servers were only registered once Blender was in, such a session could never use them, even after the
@@ -35,8 +35,8 @@ def ready():
 
 
 def install_hint(server):
-    return (f"{server}'s Blender (bpy, ~400 MB) isn't installed yet, so only this status tool is listed. "
-            "Install it with `~/.gitcraft/runtime/scripts/install.sh meshcraft forgecraft` (a few minutes; log: "
+    return (f"{server}'s Blender (bpy, ~400 MB) isn't installed yet, so only this status tool is listed. 3D is "
+            "installed on demand: when the task needs it, run `~/.gitcraft/runtime/scripts/install-3d.sh` (a few minutes; log: "
             f"{LOG}). When it finishes, this server announces its full tool list (tools/list_changed); "
             "this session sees the tools without /mcp.")
 

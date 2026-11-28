@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Install the 3D Department's orchestrator runtimes (ForgeCraft: Meshroom, AI venv, weights) into
-# ~/.gitcraft/forgecraft. Blender and the engine check are MeshCraft's (scripts/install.sh meshcraft).
+# Install the 3D Department, on demand. Nothing here is part of the default install or of a setup script: a session
+# that needs 3D runs this itself, and the registered MeshCraft and ForgeCraft servers announce their tools when it
+# finishes (no /mcp). Blender and the engine check are MeshCraft's; Meshroom, the AI venv and weights go to
+# ~/.gitcraft/forgecraft.
 #
-#   scripts/install-3d.sh                 core: makes sure MeshCraft (Blender bpy 5.2, engine check) is installed
+#   scripts/install-3d.sh                 core: MeshCraft + ForgeCraft (Blender bpy 5.2 ~400 MB, engine check; a few minutes)
 #   scripts/install-3d.sh meshroom        + Meshroom 2023.3 / AliceVision (GitHub release, ~1.2 GB download, 2.1 GB on disk)
 #   scripts/install-3d.sh ai              + TripoSR code, PyTorch and Hunyuan3D-2 client libraries in a separate venv (~5 GB)
 #   scripts/install-3d.sh all
@@ -10,6 +12,9 @@
 # Nothing large is committed to git: every runtime and every model weight is downloaded
 # here, into ~/.gitcraft. Model weights (TripoSR ~1.7 GB, Hunyuan3D 5–20 GB) are fetched
 # from Hugging Face on first use, or pre-seeded with `scripts/install-3d.sh weights`.
+#
+# During setup (scripts/tools.sh, "Setup guard") every component here is over the download limit: it is skipped with
+# one line and the script exits 0. The capability summary is one line, printed when it changes, never during setup.
 set -uo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(dirname "$here")"
@@ -21,11 +26,17 @@ want=("${@:-core}")
 [[ " ${want[*]} " == *" all "* ]] && want=(core meshroom ai)
 fail=0
 
+later="a session that needs it runs ~/.gitcraft/runtime/scripts/install-3d.sh"
 core() {
   # Blender: ForgeCraft uses MeshCraft's bpy venv, installed by scripts/install.sh meshcraft.
   if ! [[ -x "$GITCRAFT_HOME/meshcraft/venv/bin/python" ]] || ! "$GITCRAFT_HOME/meshcraft/venv/bin/python" -c "import bpy" 2>/dev/null; then
-    echo "gitcraft-3d: MeshCraft's Blender is missing; installing it via scripts/install.sh meshcraft"
-    GITCRAFT_MESHCRAFT=1 "$here/install.sh" meshcraft || { echo "gitcraft-3d: Blender (meshcraft) install failed" >&2; return 1; }
+    gitcraft_setup_allows "MeshCraft and ForgeCraft (Blender)" 400 "$later" || return 0
+    echo "gitcraft-3d: installing MeshCraft's Blender (scripts/install.sh meshcraft forgecraft)"
+    # install.sh records both tools, registers them and comes back here for ForgeCraft once Blender is in. One install
+    # at a time: it waits for a background install the SessionStart hook may have started (the same lock), so the two
+    # never download Blender twice or overwrite each other's status record.
+    local lock=(); command -v flock >/dev/null && lock=(flock "$GITCRAFT_HOME/install.lock")
+    GITCRAFT_MESHCRAFT=1 ${lock[@]+"${lock[@]}"} "$here/install.sh" meshcraft forgecraft; return
   fi
   echo "gitcraft-3d: Blender $("$GITCRAFT_HOME/meshcraft/venv/bin/python" -c 'import bpy;print(bpy.app.version_string)' 2>/dev/null | tail -1) (shared with MeshCraft)"
   # the engine check (three@0.170 + Khronos validator) is MeshCraft's: installed with it by install.sh
@@ -35,15 +46,17 @@ core() {
 
 meshroom() {
   if ls "$MC"/Meshroom-*/meshroom_batch >/dev/null 2>&1; then echo "gitcraft-3d: Meshroom already installed"; return 0; fi
+  gitcraft_setup_allows "Meshroom (photogrammetry)" 1200 "$later meshroom" || return 0
   local url="https://github.com/alicevision/Meshroom/releases/download/v$MESHROOM_VERSION/Meshroom-$MESHROOM_VERSION-linux.tar.gz"
   echo "gitcraft-3d: downloading Meshroom $MESHROOM_VERSION (~1.2 GB)"
   mkdir -p "$MC/dl"
-  curl -fL --retry 3 -o "$MC/dl/meshroom.tar.gz" "$url" && tar -xzf "$MC/dl/meshroom.tar.gz" -C "$MC" && rm -f "$MC/dl/meshroom.tar.gz" \
+  curl -fL --retry 3 $(gitcraft_curl_cap) -o "$MC/dl/meshroom.tar.gz" "$url" && tar -xzf "$MC/dl/meshroom.tar.gz" -C "$MC" && rm -f "$MC/dl/meshroom.tar.gz" \
     || { echo "gitcraft-3d: Meshroom download/extract failed ($url)" >&2; return 1; }
   echo "gitcraft-3d: Meshroom ready ($(ls -d "$MC"/Meshroom-*))"
 }
 
 ai() {
+  [[ -x "$MC/ai-venv/bin/python" && -d "$MC/TripoSR/.git" ]] || gitcraft_setup_allows "the 3D AI runtimes (PyTorch, TripoSR, Hunyuan3D)" 5000 "$later ai" || return 0
   [[ -d "$MC/TripoSR/.git" ]] || git clone -q --depth 1 https://github.com/VAST-AI-Research/TripoSR "$MC/TripoSR" || return 1
   [[ -x "$MC/ai-venv/bin/python" ]] || python3 -m venv "$MC/ai-venv" || return 1
   # No NVIDIA GPU: the CPU build of PyTorch (~200 MB) instead of the default CUDA build (~4 GB of GPU libraries
@@ -70,6 +83,7 @@ ai() {
 }
 
 weights() {
+  gitcraft_setup_allows "the 3D model weights (TripoSR, DINO, u2net)" 1900 "$later weights" || return 0
   HF_HOME="$MC/hf-cache" "$MC/ai-venv/bin/python" - <<'PY'
 from huggingface_hub import snapshot_download
 for repo in ("stabilityai/TripoSR", "facebook/dino-vitb16"):   # TripoSR loads the DINO ViT-B/16 encoder (Apache-2.0)
@@ -83,10 +97,18 @@ for w in "${want[@]}"; do
   case "$w" in core|meshroom|ai|weights) "$w" || fail=1 ;; *) echo "unknown component $w" >&2; fail=1 ;; esac
 done
 "$here/register.sh" >/dev/null 2>&1
-python3 "$repo/gitcraft3d/hardware.py" > "$MC/probe.json" 2>/dev/null && python3 - "$MC/probe.json" <<'PY'
+# What this machine can do in 3D now: saved for the tools ($MC/probe.json), and said in one line when it differs from
+# the last line shown. Never during setup: nothing is probed or reported there (scripts/doctor.sh has the full table).
+if ! gitcraft_in_setup && python3 "$repo/gitcraft3d/hardware.py" > "$MC/probe.json.tmp" 2>/dev/null && mv -f "$MC/probe.json.tmp" "$MC/probe.json"; then
+  line="$(python3 - "$MC/probe.json" <<'PY'
 import json, sys
-d = json.load(open(sys.argv[1]))
-for k, v in d["backends"].items():
-    print(f"  {k:11s} {'available' if v.get('available') else 'unavailable'}  {v.get('version') or v.get('mode') or v.get('reason') or ''}"[:160])
+b = json.load(open(sys.argv[1]))["backends"]
+on = [k + (" " + str(v["version"]) if v.get("version") else "") for k, v in b.items() if v.get("available")]
+off = [k for k, v in b.items() if not v.get("available")]
+print("gitcraft-3d: ready: " + (", ".join(on) or "nothing yet") + (" | not installed or unavailable: " + ", ".join(off) if off else ""))
 PY
+)"
+  if [[ -n "$line" && "$line" != "$(cat "$MC/capabilities.shown" 2>/dev/null)" ]]; then echo "$line"; echo "$line" > "$MC/capabilities.shown"; fi
+fi
+rm -f "$MC/probe.json.tmp"
 exit $fail

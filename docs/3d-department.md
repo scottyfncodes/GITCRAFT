@@ -125,7 +125,8 @@ There is no live mode: it was removed for security (it ran jobs outside the guar
 ## 6. Operating the department
 
 ```bash
-scripts/install.sh meshcraft forgecraft  # Blender (bpy) + engine check, ForgeCraft; the setup script / SessionStart hook do this
+scripts/install-3d.sh                    # Blender (bpy) + engine check, ForgeCraft. On demand: a session that needs 3D runs
+                                         # this itself; setup never downloads it (docs/install.md)
 scripts/install-3d.sh meshroom           # + photogrammetry (~2 GB)
 scripts/install-3d.sh ai                 # + TripoSR / Hunyuan3D runtimes (useful with an NVIDIA GPU or network)
 scripts/doctor.sh                        # every 3D backend, why any is unavailable, the library path

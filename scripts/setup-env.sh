@@ -10,11 +10,16 @@
 # Workstation: run the same line once; ~/.claude.json and ~/.claude persist, so every later
 # session in every project inherits it. Re-run it to update.
 #
-# What it does: clones GITCRAFT to ~/.gitcraft/repo, installs the seven ArtCraft tools
-# (prebuilt), the Studio departments (StudioCraft), MeshCraft (Blender bpy) and ForgeCraft, copies the
-# launcher and tool code to ~/.gitcraft/runtime, registers all ten MCP servers at user scope from that runtime,
-# installs the GITCRAFT instruction block in ~/.claude/CLAUDE.md and the `gitcraft` skill,
-# then prints a health check.
+# What it does: clones GITCRAFT to ~/.gitcraft/repo, installs the seven ArtCraft tools (prebuilt) and the Studio
+# departments (StudioCraft), copies the launcher and tool code to ~/.gitcraft/runtime, registers all ten MCP servers
+# at user scope from that runtime, installs the GITCRAFT instruction block in ~/.claude/CLAUDE.md and the skills, then
+# prints a one-line health check. About half a minute on a new container.
+#
+# What it never does: download anything over ~100 MB (GITCRAFT_SETUP_MAX_MB), so it cannot run a setup script into its
+# time limit. The 3D tools (MeshCraft, ForgeCraft: Blender, Meshroom, TripoSR, Hunyuan3D) are registered and installed
+# on demand: a session that needs 3D runs ~/.gitcraft/runtime/scripts/install-3d.sh itself. Until the first session
+# starts, install lines that follow this one in a setup script are held to the same limit (each prints one line and
+# is skipped), and no 3D capability probe or report runs.
 #
 #   GITCRAFT_REF=<branch|tag>         install that ref instead of the default branch
 #   GITCRAFT_REF=<full commit SHA>    install exactly that commit, which must be on the repository's main (reviewed):
@@ -22,9 +27,9 @@
 #                                     failure stops the setup (nothing is installed). docs/install.md, "Pinning"
 #   GITCRAFT_REPO_URL=<url|path>      install from a fork or local clone
 #   GITCRAFT_GLOBAL_INSTRUCTIONS=0    skip the CLAUDE.md block and the skill
-#   GITCRAFT_MESHCRAFT=0              skip the 3D tools (Blender is ~400 MB)
+#   GITCRAFT_MESHCRAFT=later|none     3D: build Blender in the background at the first session / not registered at all
 #   GITCRAFT_STUDIO=0                 skip the Studio departments
-#   GITCRAFT_STUDIO_VOICE=later|0     voice model in the background at the first session / not at all
+#   GITCRAFT_STUDIO_VOICE=0           no voice model (default: installed in the background at the first session)
 #   extra arguments go to install.sh  (e.g. --update, or tool names)
 set -uo pipefail
 repo_url="${GITCRAFT_REPO_URL:-https://github.com/scottyfncodes/GITCRAFT}"
@@ -33,6 +38,7 @@ dest="$home/repo"
 ref="${GITCRAFT_REF:-}"
 reviewed="${GITCRAFT_REVIEWED_BRANCH:-main}"   # a pinned commit must be contained in this branch of the repository
 mkdir -p "$home/logs"
+export GITCRAFT_SETUP="${GITCRAFT_SETUP:-1}"   # the setup guard (scripts/tools.sh): nothing over the size limit is downloaded
 pin_fail() { echo "gitcraft: pinned install REFUSED: $*. Nothing was installed." >&2; exit 1; }
 if [[ "$ref" =~ ^[0-9a-fA-F]{7,39}$ ]]; then
   pin_fail "GITCRAFT_REF=$ref looks like an abbreviated commit; pin the full 40-character commit SHA"
@@ -67,5 +73,7 @@ else
 fi
 "$dest/scripts/install.sh" "$@" 2>&1 | tee "$home/logs/install.log"
 status=${PIPESTATUS[0]}
-"$home/runtime/scripts/doctor.sh" --brief 2>/dev/null || "$dest/scripts/doctor.sh" --brief || true
+date -u +%FT%TZ > "$home/setup-phase"   # later lines of a setup script stay under the guard until the first session
+doctor="$home/runtime/scripts/doctor.sh"; [[ -x "$doctor" ]] || doctor="$dest/scripts/doctor.sh"
+"$doctor" --brief || true   # one line per problem; it exits 1 when it finds any, which is not a failed setup
 exit "$status"

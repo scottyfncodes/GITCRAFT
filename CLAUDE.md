@@ -6,7 +6,8 @@ This repo gives Claude Code seven creative tools from the ArtCraft suite
 Meshroom, TripoSR and Hunyuan3D, then engine-checks, records and hands off) and
 MeshCraft (the specialist: headless Blender for every modelling, cleanup, bake,
 rig, export and validation step), each running as a headless MCP server. When this repo is
-attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin`;
+attached to a session, a SessionStart hook installs them into `~/.gitcraft/bin` (the 3D tools are registered but
+installed on demand: a session that needs 3D runs `scripts/install-3d.sh`; setup never downloads them);
 `scripts/install-global.sh` (run by install.sh, the hook and `scripts/setup-env.sh`)
 copies the launcher and tool code to `~/.gitcraft/runtime`, registers every
 server at user scope from there, and installs a GITCRAFT block in
@@ -64,6 +65,8 @@ project without this repo attached. Sources: `global/`.
 
 ## 3D Department (ForgeCraft)
 
+- Not installed by setup: when a task needs 3D and the servers list only a status tool, run `scripts/install-3d.sh`
+  (`~/.gitcraft/runtime/scripts/install-3d.sh` outside this repo); `meshroom` / `ai weights` only when the task needs them.
 - Call `hardware_probe` or `route` first. `generate` runs the whole pipeline
   and returns real files; `library_export` hands assets to other tools or a game
   repo. ForgeCraft orchestrates and MeshCraft does every Blender step (as a
@@ -138,6 +141,11 @@ so the guard and sandbox apply unchanged. See `docs/ui.md`.
 - `tests/test_long_calls.py` must pass after any change to `gitcraft3d/calls.py`, an MCP server's tools/call handling or a client
   that calls GITCRAFT tools (`tests/mcp_client.py`, `ui/server.py`): a call longer than the client's timeout (MCP_TOOL_TIMEOUT) is
   answered with a call_id and keeps running; `call_result` returns exactly what the tool returns inline, never a second answer.
+- `tests/test_setup_guard.py` must pass after any change to `scripts/install.sh`, `install-3d.sh`, `install-studio.sh`, `setup-env.sh`,
+  `session-start.sh`, `register.sh`, `doctor.sh` or the setup guard in `scripts/tools.sh` (`--timed` for a clean run of the real setup,
+  which must stay under a minute): setup installs no 3D component and runs no capability probe or report; 3D is on demand
+  (`scripts/install-3d.sh`, run by the session that needs it); during setup nothing over `GITCRAFT_SETUP_MAX_MB` is downloaded (one
+  line, exit 0, never a failed setup); never add a download to setup without a `gitcraft_setup_allows` size (docs/install.md).
 - `tests/test_global.sh` must pass after any change to install, registration,
   `global/` or the launcher (it installs into a fresh HOME and uses the tools
   from a separate project; it tests the committed branch).
