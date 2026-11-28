@@ -15,7 +15,7 @@ Claude Code. MCP clients connect to the registered MeshCraft and ForgeCraft serv
 hook runs the way Claude Code runs it, and the same server processes must list and run their full tools afterwards.
 Exit 1 on any failure. Downloads the prebuilt tools (~400 MB) and Blender (~400 MB).
 """
-import argparse, json, os, queue, shutil, subprocess, sys, tempfile, threading, time
+import argparse, glob, json, os, queue, shutil, subprocess, sys, tempfile, threading, time
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--work", default=None)
@@ -156,7 +156,7 @@ else:
     r = reg.get("studiocraft", {})
     sc = Client([r.get("command", "")] + r.get("args", []), env=dict(env, **r.get("env", {})), cwd=proj)
     ok, sst = sc.call("studio_status"); sc.close()
-    check("studiocraft is registered and its studio_status runs from the other project", ok and len((sst or {}).get("departments", [])) == 9,
+    check("studiocraft is registered and its studio_status runs from the other project", ok and len((sst or {}).get("departments", [])) == len(glob.glob(os.path.join(repo, "studio", "departments", "*", "manifest.json"))),
           str(sst)[:200])
 
 # 3) wait for the build; time it

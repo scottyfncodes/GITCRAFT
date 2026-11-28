@@ -6,7 +6,7 @@ It is started by `scripts/mcp.sh meshcraft` like every other GITCRAFT tool, so i
 
 ## Install
 
-`scripts/install.sh` (or `scripts/setup-env.sh`) installs it automatically:
+`scripts/install-3d.sh` installs it, in the session that needs 3D (setup registers MeshCraft but never downloads Blender):
 
 | Dependency | How it's installed | Notes |
 |---|---|---|
@@ -15,7 +15,7 @@ It is started by `scripts/mcp.sh meshcraft` like every other GITCRAFT tool, so i
 | three@0.170.0, gltf-validator | `scripts/install.sh meshcraft` (into `~/.gitcraft/meshcraft/engine_check`), or `npm ci` in `meshcraft/engine_check` | optional: engine check + Khronos validator |
 | Chromium + Playwright | pre-installed in Claude Code cloud containers | optional: engine check |
 
-`GITCRAFT_MESHCRAFT` chooses when Blender is installed: `1` (default) during setup; `later` in the background at session start; `0` when you run `scripts/install.sh meshcraft`; `none` never. With every value but `none`, MeshCraft is registered with Claude Code right away. `scripts/doctor.sh` shows its state.
+Blender is installed on demand: a session that needs 3D runs `scripts/install-3d.sh` (setup never downloads it). `GITCRAFT_MESHCRAFT` can change that: `0` (default) on demand; `later` in the background at session start; `1` with `scripts/install.sh` (never inside a setup script); `none` never. With every value but `none`, MeshCraft is registered with Claude Code right away. `scripts/doctor.sh` shows its state.
 
 **Starting before Blender is installed** (`gitcraft3d/deferred.py`). Claude Code reads MCP servers when a session starts, so MeshCraft must already be registered and running when Blender arrives later.
 - **Before Blender exists:** `scripts/mcp.sh` starts the server on the system Python. It answers the handshake and lists only `meshcraft_status`, which says how to install.

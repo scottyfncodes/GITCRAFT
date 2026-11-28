@@ -32,7 +32,11 @@ jobs:
       - name: Install GITCRAFT (2D tools, Studio core, MeshCraft + ForgeCraft)
         env:
           GITCRAFT_STUDIO_VOICE: "0"               # the voice model is exercised by tests/test_studio.py locally
+          GITCRAFT_MESHCRAFT: "1"                  # 3D is on demand by default; these suites need Blender
         run: scripts/install.sh
+
+      - name: Setup guard (3D on demand, nothing over the size limit during setup, capability summary once)
+        run: python3 tests/test_setup_guard.py
 
       - name: Doctor
         run: scripts/doctor.sh || true

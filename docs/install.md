@@ -8,26 +8,50 @@ Put this in the cloud environment's **setup script** (environment settings ▸ S
 curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | bash
 ```
 
-It clones GITCRAFT to `~/.gitcraft/repo`, installs every tool, copies the launcher and tool code to `~/.gitcraft/runtime`, registers all ten servers at user scope from that runtime, installs the GITCRAFT block in `~/.claude/CLAUDE.md` and the `gitcraft` skill (`scripts/install-global.sh`), installs a user-level SessionStart hook in `~/.claude/settings.json` that finishes anything setup deferred (`GITCRAFT_MESHCRAFT=later`) or didn't finish, in the background, in any project (`GITCRAFT_GLOBAL_HOOK=0` skips it), and prints `doctor.sh --brief`. Because this happens before Claude Code starts, the tools connect in the first turn of every session, **whichever repos are attached, including none**. See the README's "Use GITCRAFT in every project" for what each piece does, verification and troubleshooting; `tests/test_global.sh` proves it from a separate project in a fresh HOME.
+It is the whole setup script: nothing else belongs after it. It clones GITCRAFT to `~/.gitcraft/repo`, installs the seven ArtCraft tools and the Studio core runtime, copies the launcher and tool code to `~/.gitcraft/runtime`, registers all ten servers at user scope from that runtime, installs the GITCRAFT block in `~/.claude/CLAUDE.md` and the skills (`scripts/install-global.sh`), installs a user-level SessionStart hook in `~/.claude/settings.json` (`GITCRAFT_GLOBAL_HOOK=0` skips it), and prints `doctor.sh --brief`. Because this happens before Claude Code starts, the tools connect in the first turn of every session, **whichever repos are attached, including none**. See the README's "Use GITCRAFT in every project" for what each piece does, verification and troubleshooting; `tests/test_global.sh` proves it from a separate project in a fresh HOME.
 
-### Heavy optional runtimes: keep the setup script inside its time limit
+### Setup always finishes fast
 
-A cloud setup script that runs past its time limit is stopped mid-step, and everything after that step never runs.
-One fresh container was stopped about 17 minutes in, during the ACE-Step install. Put quick, important steps in the
-script and queue the slow optional ones for the session with `scripts/install-later.sh`:
+A cloud setup script that runs past its time limit is stopped mid-step (exit code -1), and everything after that step
+never runs. Setup is therefore kept small, and it stays small whatever else a setup script asks for:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/main/scripts/setup-env.sh | GITCRAFT_MESHCRAFT=later bash
-~/.gitcraft/runtime/scripts/install-3d.sh meshroom || true                    # ~3 min: early, so it always lands
-~/.gitcraft/runtime/scripts/install-studio.sh mocap || true                   # ~1 min
-~/.gitcraft/runtime/scripts/install-later.sh install-3d.sh ai weights         # TripoSR (~8 min): queued
-~/.gitcraft/runtime/scripts/install-later.sh install-studio.sh music          # ACE-Step (very large): queued
-```
+- **No 3D in setup.** `scripts/install.sh` (what `setup-env.sh` runs) installs no 3D component: no Blender (MeshCraft,
+  ForgeCraft), Meshroom, TripoSR or Hunyuan3D, and it runs no 3D capability probe or report. The two 3D servers are
+  registered and wait.
+- **3D on demand.** A session whose work needs 3D runs `~/.gitcraft/runtime/scripts/install-3d.sh` itself (Blender,
+  ~400 MB, a few minutes); `install-3d.sh meshroom` and `install-3d.sh ai weights` add photogrammetry and the AI
+  runtimes only when a task needs them. The servers announce their tools when the install finishes. The global
+  instructions and the `meshcraft_status` / `forgecraft_status` tools tell Claude the command.
+- **A size guard.** During setup nothing over `GITCRAFT_SETUP_MAX_MB` (100) is downloaded. A step over the limit prints
+  one line, `gitcraft: setup skipped <what> (~N MB, over the 100 MB setup limit): <how a session gets it>`, records it
+  in `~/.gitcraft/logs/setup-skipped.log`, and exits 0. Direct downloads also carry curl's `--max-filesize`, so the
+  limit holds on the real size, not only the declared one.
+- **What "during setup" means.** `GITCRAFT_SETUP=1`, which `setup-env.sh` exports, and the time between `setup-env.sh`
+  and the first session: `~/.gitcraft/setup-phase`, removed by the SessionStart hook. So a setup script that still has
+  lines such as `install-3d.sh meshroom` or `install-studio.sh music` after the setup line gets one skip line for each
+  instead of a timeout. The marker counts for an hour and never inside a Claude Code session or at a terminal.
+  `GITCRAFT_SETUP=0 <command>` turns the guard off for that command.
+- **The capability summary** is one line (`gitcraft-3d: ready: … | not installed or unavailable: …`), printed by
+  `install-3d.sh` when it changes, never during setup. `doctor.sh` (full, not `--brief`) has the table.
 
-The SessionStart hook runs the queue (`scripts/run-later.sh`) in the background inside the session, one job at a time
-and after any Blender build, so nothing is left running in a setup script that is about to be stopped. A job leaves
-the queue when it succeeds; a failed one is retried by the next sessions (at most 3 attempts). The log is
-`~/.gitcraft/logs/later.log`; `scripts/install-later.sh --list` shows the queue.
+| Component | Size | During setup | In a session |
+|---|---|---|---|
+| Seven ArtCraft tools | 17–40 MB each (one 204 MB fetch, ~8 s) | installed | |
+| Studio core (numpy, Pillow, three, Phaser, glTF-Validator) | ~60 MB | installed | |
+| Studio voice model | ~130 MB | skipped | the session hook, in the background |
+| Blender (MeshCraft + ForgeCraft) | ~400 MB | skipped | `install-3d.sh` |
+| Mocap (MediaPipe) | ~440 MB | skipped | `install-studio.sh mocap` |
+| Meshroom | ~1.2 GB | skipped | `install-3d.sh meshroom` |
+| TripoSR / Hunyuan3D runtimes, weights | ~5 GB, ~1.9 GB | skipped | `install-3d.sh ai weights` |
+| ACE-Step music | ~10 GB | skipped | `install-studio.sh music` |
+
+`python3 tests/test_setup_guard.py` checks all of this offline; `--timed` adds a clean run of the real setup (fresh
+HOME, cold caches), which must finish in under a minute: about 30 seconds measured (28–33 s over three runs).
+
+`scripts/install-later.sh install-3d.sh ai weights` still queues a large install for the SessionStart hook, which runs
+it in the background inside the session (`scripts/run-later.sh`: one job at a time, at most 3 attempts, log in
+`~/.gitcraft/logs/later.log`). Prefer installing on demand: a queued job runs in every new container whether the
+session needs it or not.
 
 MeshCraft's engine check packages (three@0.170, gltf-validator) are installed into
 `~/.gitcraft/meshcraft/engine_check`, not into the runtime: each runtime update is a fresh copy of a checkout, and
@@ -86,10 +110,10 @@ be pinned to content someone reviewed:
 ```
 curl -fsSL -o /tmp/gitcraft-setup-env.sh https://raw.githubusercontent.com/scottyfncodes/GITCRAFT/<commit>/scripts/setup-env.sh \
   && echo "<sha256 of that setup-env.sh>  /tmp/gitcraft-setup-env.sh" | sha256sum --check --quiet - \
-  && GITCRAFT_REF=<commit> GITCRAFT_MESHCRAFT=later bash /tmp/gitcraft-setup-env.sh
+  && GITCRAFT_REF=<commit> bash /tmp/gitcraft-setup-env.sh
 ```
 
-It replaces the `curl ... | bash` line; the environment's other lines (Meshroom, mocap, ...) run from the pinned runtime.
+It is the whole setup script, in place of the `curl ... | bash` line: nothing else belongs after it (large runtimes are installed on demand, in the session that needs them).
 
 With a full 40-character commit, `setup-env.sh`:
 - fetches `main`'s commit graph and refuses the commit unless it is on `main` (only reviewed, merged commits install),

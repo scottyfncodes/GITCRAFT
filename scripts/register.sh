@@ -4,9 +4,11 @@
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$here/tools.sh"
 
-if ! command -v claude >/dev/null; then
+if ! command -v claude >/dev/null || [[ "${GITCRAFT_SETUP:-}" == 1 && -z "${CLAUDE_CONFIG_DIR:-}" ]]; then
   # Setup scripts can run before the CLI is on PATH: write the user-scope
   # entries straight into ~/.claude.json (the same place `claude mcp add -s user` writes).
+  # Setup (setup-env.sh, GITCRAFT_SETUP=1) always registers this way: no session is running yet, and the CLI takes
+  # over a second per call, three calls per server, twice per install.
   python3 - "$here" "$GITCRAFT_BIN" "$([[ "$GITCRAFT_MESHCRAFT" != none ]] && echo 1 || echo 0)" "$([[ "$GITCRAFT_STUDIO" != 0 ]] && echo 1 || echo 0)" "${GITCRAFT_TOOLS[@]}" "${GITCRAFT_EXTRA_TOOLS[@]}" <<'PY'
 import json, os, sys
 here, bindir, mesh_wanted, studio_wanted, tools = sys.argv[1], sys.argv[2], sys.argv[3] == "1", sys.argv[4] == "1", sys.argv[5:]

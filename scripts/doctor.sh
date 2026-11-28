@@ -34,13 +34,13 @@ for entry in "${GITCRAFT_TOOLS[@]}" ${GITCRAFT_EXTRA_TOOLS[@]+"${GITCRAFT_EXTRA_
     elif [[ "$(last_state "$name")" == off || "$(last_state "$name")" == later || ( "$GITCRAFT_MESHCRAFT" != 1 && ! -e "$GITCRAFT_HOME/meshcraft/venv" ) ]]; then
       # turned off on purpose: report it, don't count it as a problem (still registered unless =none: it waits for Blender)
       reg=$([[ " $registered " == *" $name "* ]] && echo yes || echo no)
-      say "$(printf '  %-13s %-10s %-11s %s' "$name" off "$reg" "not installed (GITCRAFT_MESHCRAFT=${GITCRAFT_MESHCRAFT}); waits for Blender")"; off_note=1; continue
+      say "$(printf '  %-13s %-10s %-11s %s' "$name" off "$reg" "on demand: scripts/install-3d.sh$([[ "$GITCRAFT_MESHCRAFT" == later || "$(last_state "$name")" == later ]] && echo " (or the SessionStart hook: GITCRAFT_MESHCRAFT=later)")")"; off_note=1; continue
     elif [[ -e "$GITCRAFT_HOME/meshcraft/venv" ]]; then
       inst=PARTIAL
       if [[ "$(last_state meshcraft)" == failed ]]; then
-        problems+=("$name: the Blender install failed (see $GITCRAFT_LOG/meshcraft.log; often no access to pypi.org or no matching Python). Fix that and run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0")
+        problems+=("$name: the Blender install failed (see $GITCRAFT_LOG/meshcraft.log; often no access to pypi.org or no matching Python). Fix that and run scripts/install-3d.sh")
       else   # status still "pending": the run stopped during the download
-        problems+=("$name: the Blender install didn't finish (often a setup script that ran out of time). Run scripts/install.sh meshcraft, or set GITCRAFT_MESHCRAFT=0 in the setup script")
+        problems+=("$name: the Blender install didn't finish. Run scripts/install-3d.sh")
       fi
     else inst=NO; fi
   elif [[ "$name" == studiocraft ]]; then
@@ -143,10 +143,10 @@ done
 
 if ((off_note)); then
   say ""
-  say "  3D tools aren't installed. Run scripts/install.sh meshcraft forgecraft: the registered servers pick them up in the"
-  say "  running session (tools/list_changed). In a setup script with a time limit, use GITCRAFT_MESHCRAFT=later."
+  say "  3D is installed on demand. A session that needs it runs scripts/install-3d.sh: the registered servers pick the"
+  say "  tools up in the running session (tools/list_changed). Setup never downloads it."
 fi
-if gitcraft_mesh_ready; then
+if ((!brief)) && gitcraft_mesh_ready; then   # the full report only: --brief (setup, the session hook) never probes
   say ""
   say "  3D Department capabilities (meshcraft + forgecraft):"
   while IFS= read -r line; do say "    $line"; done < <(python3 - "$here/.." <<'PY'
